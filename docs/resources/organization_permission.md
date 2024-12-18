@@ -3,22 +3,24 @@
 page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource.
+  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.
+Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_organization_permission" "example_permissions" {
+# Grant access to a specific project
+resource "aiven_organization_permission" "example_project_permissions" {
   organization_id = data.aiven_organization.main.id
   resource_id     = data.aiven_project.example_project.id
   resource_type   = "project"
   permissions {
-    # Grant the operator role and permission to read service logs to a user
+    # Grant a user the operator role and 
+    # permission to read service logs
     permissions = [
       "operator",
       "service:logs:read"
@@ -26,14 +28,45 @@ resource "aiven_organization_permission" "example_permissions" {
     principal_id   = "u123a456b7890c"
     principal_type = "user"
   }
-  # Grant write project integrations and read project networking permissions, and the developer role to a group
+  # Grant a group the write project integrations 
+  # permission and the developer role 
   permissions {
     permissions = [
       "project:integrations:write",
-      "project:networking:read",
       "developer"
     ]
     principal_id   = data.aiven_organization_user_group.example_group.group_id
+    principal_type = "user_group"
+  }
+}
+
+# Organization-level permissions
+resource "aiven_organization_permission" "example_org_permissions" {
+  organization_id = data.aiven_organization.main.id
+  resource_id     = data.aiven_organization.main.id
+  resource_type   = "organization"
+
+  # Grant a user permission to manage application 
+  # users and view all project audit logs
+  permissions {
+    permissions = [
+      "organization:app_users:write",
+      "project:audit_logs:read"
+    ]
+    principal_id   = "u123a456b7890c" 
+    principal_type = "user"
+  }
+
+  # Grant a group permission to manage users,
+  # groups, domains, and identity providers
+  permissions {
+    permissions = [
+      "organization:users:write",
+      "organization:groups:write",
+      "organization:domains:write",
+      "organization:idps:write"
+    ]
+    principal_id   = aiven_organization_user_group.example_group.group_id
     principal_type = "user_group"
   }
 }
