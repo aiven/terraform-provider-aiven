@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -22,6 +23,13 @@ import (
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
+
+func serviceIntegrationTypeChoices() []string {
+	// application_service_credential is not ready for use
+	return lo.Filter(service.IntegrationTypeChoices(), func(s string, _ int) bool {
+		return s != "application_service_credential"
+	})
+}
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
@@ -52,11 +60,11 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"integration_type": {
-			Description:  userconfig.Desc("Type of the service integration").PossibleValuesString(service.IntegrationTypeChoices()...).Build(),
+			Description:  userconfig.Desc("Type of the service integration").PossibleValuesString(serviceIntegrationTypeChoices()...).Build(),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(service.IntegrationTypeChoices(), false),
+			ValidateFunc: validation.StringInSlice(serviceIntegrationTypeChoices(), false),
 		},
 		"project": {
 			Description: "Project the integration belongs to.",
