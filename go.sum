@@ -10,8 +10,8 @@ github.com/aiven/aiven-go-client/v2 v2.33.0 h1:7hsM3/2lVog/P9ls/gLeba5feNVQjK8rI
 github.com/aiven/aiven-go-client/v2 v2.33.0/go.mod h1:qXBgER0dtjJa1V3l7kzpizuAGjFCkgahhHL5OpoM2ZM=
 github.com/aiven/go-api-schemas v1.106.0 h1:qncRsbiaGnU9JE9fmTFHclTCBem+t+6EPMXGXM35w2c=
 github.com/aiven/go-api-schemas v1.106.0/go.mod h1:z7dGvufm6If4gOdVr7dWTuFZmll9FOZr5Z5CSxGpebA=
-github.com/aiven/go-client-codegen v0.70.0 h1:i8DIbTxx4sZ7dUc4g2ILsJ7phvl1IEi8PfzblTDlWVA=
-github.com/aiven/go-client-codegen v0.70.0/go.mod h1:QKN/GgLMGWd6+gPEucXlZPi5vC3C6RpD3UeBRQOLI1Y=
+github.com/aiven/go-client-codegen v0.71.0 h1:SGiHrfbU8RiqVegQGV3BStnbIdFke+15lxadlPORqfI=
+github.com/aiven/go-client-codegen v0.71.0/go.mod h1:QKN/GgLMGWd6+gPEucXlZPi5vC3C6RpD3UeBRQOLI1Y=
 github.com/apparentlymart/go-textseg/v12 v12.0.0/go.mod h1:S/4uRK2UtaQttw1GenVJEynmyUenKwP++x/+DdGV/Ec=
 github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew1u1fNQOlOtuGxQY=
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
