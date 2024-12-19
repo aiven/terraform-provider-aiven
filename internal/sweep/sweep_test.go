@@ -50,6 +50,7 @@ func knownMissingSweepers() []string {
 		"aiven_kafka_native_acl",
 		"aiven_pg_database",
 		"aiven_kafka_user",
+		"aiven_kafka_quota",
 		"aiven_redis_user",
 		"aiven_valkey_user",
 		"aiven_opensearch_acl_config",

@@ -1,0 +1,1 @@
+terraform import aiven_kafka_quota.example_quota PROJECT/SERVICE_NAME
