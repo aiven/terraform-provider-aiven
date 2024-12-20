@@ -424,7 +424,7 @@ resource "aiven_account_team_project" "main" {
 ## Update `aiven_redis` resources after Valkey upgrade
 
 After you [upgrade from Aiven for Caching to Aiven for Valkey™](https://aiven.io/docs/products/caching/howto/upgrade-aiven-for-caching-to-valkey), update your
-Terraform configraution to use the `aiven_valkey` resource. Aiven for Caching can only be upgraded to Valkey using the Aiven Console or the Aiven API.
+Terraform configuration to use the `aiven_valkey` resource. Aiven for Caching can only be upgraded to Valkey using the Aiven Console or the Aiven API.
 
 The following steps show you how to update your Terraform files using this example file with an Aiven for Caching service:
 
