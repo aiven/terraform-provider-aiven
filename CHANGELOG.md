@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [4.31.1] - 2024-12-23
+
+- Validate whether the `aiven_project.billing_group` field has changed before calling admin API
+
 ## [4.31.0] - 2024-12-18
 
 - Add `alloydbomni` BETA resource and datasource
