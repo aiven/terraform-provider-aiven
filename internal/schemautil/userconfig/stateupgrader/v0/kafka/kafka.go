@@ -32,8 +32,8 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"access_cert": {
@@ -98,19 +98,19 @@ func ResourceKafka() *schema.Resource {
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
 			),
 			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(

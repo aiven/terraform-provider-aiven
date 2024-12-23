@@ -26,13 +26,13 @@ resource "aiven_mysql_user" "foo" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the MySQL User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The actual name of the MySQL User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `authentication` (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `authentication` (String) Authentication details. The possible values are `null`, `caching_sha2_password` and `mysql_native_password`.
 - `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -59,5 +59,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_mysql_user.foo project/service_name/username
+terraform import aiven_mysql_user.foo PROJECT/SERVICE_NAME/USERNAME
 ```

@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">=0.13"
   required_providers {
     aiven = {
       source  = "aiven/aiven"
@@ -26,18 +27,18 @@ resource "aiven_kafka" "kafka" {
 
 # Creating a service in a new project
 
-data "aiven_account" "test_account" {
-  name = var.aiven_account_name
+data "aiven_organization" "org" {
+  name = "YOUR_ORGANIZATION_NAME"
 }
 
 resource "aiven_project" "new_project" {
   project    = "new-project"
-  account_id = data.aiven_account.test_account.id # This is required for new marketplace projects
+  parent_id = data.aiven_organization.org.id # This is required for new marketplace projects
 }
 
-resource "aiven_elasticsearch" "elasticsearch" {
+resource "aiven_opensearch" "opensearch" {
   project      = data.aiven_project.existing_project.id
   cloud_name   = "google-europe-north1"
   plan         = "gcp-marketplace-startup-4"
-  service_name = "elasticsearch"
+  service_name = "opensearch"
 }

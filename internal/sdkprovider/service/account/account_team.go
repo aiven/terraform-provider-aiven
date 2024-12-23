@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -40,7 +41,7 @@ var aivenAccountTeamSchema = map[string]*schema.Schema{
 
 func ResourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account Team resource allows the creation and management of an Account Team.",
+		Description:   `Creates and manages a team.`,
 		CreateContext: resourceAccountTeamCreate,
 		ReadContext:   resourceAccountTeamRead,
 		UpdateContext: resourceAccountTeamUpdate,
@@ -51,6 +52,14 @@ func ResourceAccountTeam() *schema.Resource {
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenAccountTeamSchema,
+		DeprecationMessage: `
+This resource is deprecated. Use aiven_organization_user_group instead.
+
+You can't delete the Account Owners team. Deleting all other teams in your organization will disable the teams feature. You won't be able to create new teams or access your Account Owners team.
+
+On 2 December 2024 all teams will be deleted and the teams feature will be completely removed. View the
+migration guide for more information: https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups.
+`,
 	}
 }
 
@@ -135,7 +144,7 @@ func resourceAccountTeamDelete(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	err = client.AccountTeams.Delete(ctx, accountID, teamID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

@@ -1,5 +1,4 @@
 # Project
 resource "aiven_project" "project1" {
-  project = "project1"
-  card_id = var.aiven_card_id
+  project = "YOUR_ORG_NAME-project1"
 }

@@ -1,0 +1,1 @@
+terraform import aiven_organization_permission.operator ORGANIZATION_ID/ID

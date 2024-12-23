@@ -3,19 +3,19 @@
 page_title: "aiven_service_integration_endpoint Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.
+  Gets information about an integration endpoint.
 ---
 
 # aiven_service_integration_endpoint (Data Source)
 
-The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.
+Gets information about an integration endpoint.
 
 ## Example Usage
 
 ```terraform
-data "aiven_service_integration_endpoint" "myendpoint" {
-  project       = aiven_project.myproject.project
-  endpoint_name = "<ENDPOINT_NAME>"
+data "aiven_service_integration_endpoint" "example_datadog_endpoint" {
+  project       = aiven_project.example_project.project
+  endpoint_name = "Datadog endpoint"
 }
 ```
 
@@ -24,25 +24,49 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 
 ### Required
 
-- `endpoint_name` (String) Name of the service integration endpoint
-- `project` (String) Project the service integration endpoint belongs to
+- `endpoint_name` (String) Name of the service integration endpoint.
+- `project` (String) Project the service integration endpoint is in.
 
 ### Read-Only
 
-- `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
-- `endpoint_config` (Map of String) Integration endpoint specific backend configuration
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
-- `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
-- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
-- `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
-- `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
-- `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
-- `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
-- `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
+- `autoscaler_user_config` (List of Object) Autoscaler user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--autoscaler_user_config))
+- `datadog_user_config` (List of Object) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--datadog_user_config))
+- `endpoint_config` (Map of String) Backend configuration for the endpoint.
+- `endpoint_type` (String) The type of service integration endpoint. The possible values are `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_prometheus`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus` and `rsyslog`.
+- `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
+- `external_aws_s3_user_config` (List of Object) ExternalAwsS3 user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_s3_user_config))
+- `external_clickhouse_user_config` (List of Object) ExternalClickhouse user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_clickhouse_user_config))
+- `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
+- `external_google_cloud_bigquery` (List of Object) ExternalGoogleCloudBigquery user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_google_cloud_bigquery))
+- `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
+- `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_kafka_user_config))
+- `external_mysql_user_config` (List of Object) ExternalMysql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_mysql_user_config))
+- `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
+- `external_postgresql` (List of Object) ExternalPostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_postgresql))
+- `external_prometheus_user_config` (List of Object) ExternalPrometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_prometheus_user_config))
+- `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
-- `jolokia_user_config` (List of Object) Jolokia user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
-- `prometheus_user_config` (List of Object) Prometheus user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
-- `rsyslog_user_config` (List of Object) Rsyslog user configurable settings (see [below for nested schema](#nestedatt--rsyslog_user_config))
+- `jolokia_user_config` (List of Object) Jolokia user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--jolokia_user_config))
+- `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
+- `rsyslog_user_config` (List of Object) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--rsyslog_user_config))
+
+<a id="nestedatt--autoscaler_user_config"></a>
+### Nested Schema for `autoscaler_user_config`
+
+Read-Only:
+
+- `autoscaling` (List of Object) (see [below for nested schema](#nestedobjatt--autoscaler_user_config--autoscaling))
+
+<a id="nestedobjatt--autoscaler_user_config--autoscaling"></a>
+### Nested Schema for `autoscaler_user_config.autoscaling`
+
+Read-Only:
+
+- `cap_gb` (Number)
+- `type` (String)
+
+
 
 <a id="nestedatt--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`
@@ -52,6 +76,7 @@ Read-Only:
 - `datadog_api_key` (String)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
 - `disable_consumer_stats` (Boolean)
+- `extra_tags_prefix` (String)
 - `kafka_consumer_check_instances` (Number)
 - `kafka_consumer_stats_timeout` (Number)
 - `max_partition_contexts` (Number)
@@ -89,6 +114,27 @@ Read-Only:
 - `secret_key` (String)
 
 
+<a id="nestedatt--external_aws_s3_user_config"></a>
+### Nested Schema for `external_aws_s3_user_config`
+
+Read-Only:
+
+- `access_key_id` (String)
+- `secret_access_key` (String)
+- `url` (String)
+
+
+<a id="nestedatt--external_clickhouse_user_config"></a>
+### Nested Schema for `external_clickhouse_user_config`
+
+Read-Only:
+
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `username` (String)
+
+
 <a id="nestedatt--external_elasticsearch_logs_user_config"></a>
 ### Nested Schema for `external_elasticsearch_logs_user_config`
 
@@ -99,6 +145,15 @@ Read-Only:
 - `index_prefix` (String)
 - `timeout` (Number)
 - `url` (String)
+
+
+<a id="nestedatt--external_google_cloud_bigquery"></a>
+### Nested Schema for `external_google_cloud_bigquery`
+
+Read-Only:
+
+- `project_id` (String)
+- `service_account_credentials` (String)
 
 
 <a id="nestedatt--external_google_cloud_logging_user_config"></a>
@@ -127,6 +182,19 @@ Read-Only:
 - `ssl_endpoint_identification_algorithm` (String)
 
 
+<a id="nestedatt--external_mysql_user_config"></a>
+### Nested Schema for `external_mysql_user_config`
+
+Read-Only:
+
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `ssl_mode` (String)
+- `ssl_root_cert` (String)
+- `username` (String)
+
+
 <a id="nestedatt--external_opensearch_logs_user_config"></a>
 ### Nested Schema for `external_opensearch_logs_user_config`
 
@@ -137,6 +205,32 @@ Read-Only:
 - `index_prefix` (String)
 - `timeout` (Number)
 - `url` (String)
+
+
+<a id="nestedatt--external_postgresql"></a>
+### Nested Schema for `external_postgresql`
+
+Read-Only:
+
+- `default_database` (String)
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `ssl_client_certificate` (String)
+- `ssl_client_key` (String)
+- `ssl_mode` (String)
+- `ssl_root_cert` (String)
+- `username` (String)
+
+
+<a id="nestedatt--external_prometheus_user_config"></a>
+### Nested Schema for `external_prometheus_user_config`
+
+Read-Only:
+
+- `basic_auth_password` (String)
+- `basic_auth_username` (String)
+- `service_uri` (String)
 
 
 <a id="nestedatt--external_schema_registry_user_config"></a>
@@ -178,6 +272,7 @@ Read-Only:
 - `format` (String)
 - `key` (String)
 - `logline` (String)
+- `max_message_size` (Number)
 - `port` (Number)
 - `sd` (String)
 - `server` (String)

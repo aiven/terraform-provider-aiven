@@ -3,20 +3,20 @@
 page_title: "aiven_kafka_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka User data source provides information about the existing Aiven Kafka User.
+  Gets information about an Aiven for Apache Kafka® service user.
 ---
 
 # aiven_kafka_user (Data Source)
 
-The Kafka User data source provides information about the existing Aiven Kafka User.
+Gets information about an Aiven for Apache Kafka® service user.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_user" "user" {
-  service_name = "my-service"
-  project      = "my-project"
-  username     = "user1"
+data "aiven_kafka_user" "example_service_user" {
+  service_name = aiven_kafka.example_kafka.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-kafka-user"
 }
 ```
 
@@ -25,14 +25,14 @@ data "aiven_kafka_user" "user" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the Kafka User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Name of the Kafka service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user
-- `access_key` (String, Sensitive) Access certificate key for the user
+- `access_cert` (String, Sensitive) Access certificate for the user.
+- `access_key` (String, Sensitive) Access certificate key for the user.
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the Kafka User.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `password` (String, Sensitive) The Kafka service user's password.
+- `type` (String) User account type, such as primary or regular account.

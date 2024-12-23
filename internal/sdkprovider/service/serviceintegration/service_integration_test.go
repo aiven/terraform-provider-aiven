@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -455,7 +455,6 @@ resource "aiven_service_integration" "bar" {
     cluster_alias = "source"
   }
 }`
-
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
@@ -475,7 +474,7 @@ func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) erro
 		}
 
 		i, err := c.ServiceIntegrations.Get(ctx, projectName, integrationID)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return err
 		}
 		if i != nil {
@@ -689,4 +688,176 @@ func TestAccAivenServiceIntegration_clickhouse_postgres_user_config_creates(t *t
 			},
 		},
 	})
+}
+
+func testAccServiceIntegrationAutoscaler(prefix string, includeDiskSpace bool) string {
+	additionalDiskSpace := ""
+	if includeDiskSpace {
+		additionalDiskSpace = `additional_disk_space = "30GiB"`
+	}
+
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[1]q
+}
+
+resource "aiven_pg" "test_pg" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "google-europe-north1"
+  service_name = "%[2]s-pg"
+  plan         = "startup-4"
+  %[3]s
+}
+
+resource "aiven_service_integration_endpoint" "test_endpoint" {
+  project       = data.aiven_project.project.project
+  endpoint_name = "%[2]s-autoscaler"
+  endpoint_type = "autoscaler"
+
+  autoscaler_user_config {
+    autoscaling {
+      cap_gb = 200
+      type   = "autoscale_disk"
+    }
+  }
+}
+
+resource "aiven_service_integration" "test_autoscaler" {
+  project                 = data.aiven_project.project.project
+  integration_type        = "autoscaler"
+  source_service_name     = aiven_pg.test_pg.service_name
+  destination_endpoint_id = aiven_service_integration_endpoint.test_endpoint.id
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), prefix, additionalDiskSpace)
+}
+
+func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-acc-" + acctest.RandString(7)
+	resourceName := "aiven_service_integration.test_autoscaler"
+	endpointResourceName := "aiven_service_integration_endpoint.test_endpoint"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { /* Add necessary pre-checks here */ },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationAutoscaler(prefix, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "autoscaler"),
+					resource.TestCheckResourceAttr(resourceName, "project", project),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("%s-pg", prefix)),
+					resource.TestCheckResourceAttrSet(resourceName, "destination_endpoint_id"),
+					resource.TestCheckResourceAttr(endpointResourceName, "project", project),
+					resource.TestCheckResourceAttr(endpointResourceName, "endpoint_name", fmt.Sprintf("%s-autoscaler", prefix)),
+					resource.TestCheckResourceAttr(endpointResourceName, "endpoint_type", "autoscaler"),
+					resource.TestCheckResourceAttr(endpointResourceName, "autoscaler_user_config.0.autoscaling.0.cap_gb", "200"),
+				),
+			},
+			{
+				Config:      testAccServiceIntegrationAutoscaler(prefix, true),
+				ExpectError: regexp.MustCompile(schemautil.ErrAutoscalerConflict.Error()),
+			},
+		},
+	})
+}
+
+func TestAccAivenServiceIntegration_destination_service_name(t *testing.T) {
+	projectMetrics := os.Getenv("AIVEN_PROJECT_NAME")
+	projectServices := os.Getenv("AIVEN_PROJECT_NAME_SECONDARY")
+	if projectServices == "" {
+		t.Skip("AIVEN_PROJECT_NAME_SECONDARY is not set")
+	}
+
+	thanosToGrafanaName := "aiven_service_integration.thanos_to_grafana"
+	kafkaToThanosName := "aiven_service_integration.kafka_to_thanos"
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAivenServiceIntegrationDestinationServiceName(projectMetrics, projectServices),
+				Check: resource.ComposeTestCheckFunc(
+					// Same source and destination project names
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "integration_type", "dashboard"),
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "source_service_project", projectMetrics),
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "destination_service_project", projectMetrics),
+
+					// Different source and destination project names
+					resource.TestCheckResourceAttr(kafkaToThanosName, "integration_type", "metrics"),
+					resource.TestCheckResourceAttr(kafkaToThanosName, "source_service_project", projectServices),
+					resource.TestCheckResourceAttr(kafkaToThanosName, "destination_service_project", projectMetrics),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenServiceIntegrationDestinationServiceName(projectMetrics, projectService string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "metrics" {
+  project = %[1]q
+}
+
+data "aiven_project" "services" {
+  project = %[2]q
+}
+
+resource "aiven_grafana" "grafana" {
+  project                 = data.aiven_project.metrics.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "test-acc-grafana-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+
+  grafana_user_config {
+    alerting_enabled = true
+  }
+}
+
+resource "aiven_thanos" "thanos" {
+  project                 = data.aiven_project.metrics.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-thanos-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka" "kafka_service" {
+  project                 = data.aiven_project.services.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-kafka-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    schema_registry = true
+    kafka_rest      = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_service_integration" "thanos_to_grafana" {
+  project                     = data.aiven_project.metrics.project
+  integration_type            = "dashboard"
+  source_service_name         = aiven_grafana.grafana.service_name // project "metrics"
+  destination_service_name    = aiven_thanos.thanos.service_name   // project "metrics"
+  destination_service_project = aiven_thanos.thanos.project
+}
+
+resource "aiven_service_integration" "kafka_to_thanos" {
+  project                     = data.aiven_project.services.project
+  integration_type            = "metrics"
+  source_service_name         = aiven_kafka.kafka_service.service_name // project "services"
+  destination_service_name    = aiven_thanos.thanos.service_name       // project "metrics"
+  destination_service_project = aiven_thanos.thanos.project
+}
+	`, projectMetrics, projectService, acc.RandStr())
 }

@@ -1,1 +1,1 @@
-terraform import aiven_m3db.m3 project/service_name
+terraform import aiven_m3db.example_m3db PROJECT/SERVICE_NAME

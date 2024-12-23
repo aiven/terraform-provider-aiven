@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -25,21 +27,21 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 	"pool_mode": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		Default:      "transaction",
-		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
-		Description:  userconfig.Desc("The mode the pool operates in").DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
+		Default:      service.PoolModeTypeTransaction,
+		ValidateFunc: validation.StringInSlice(service.PoolModeTypeChoices(), false),
+		Description:  userconfig.Desc("The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes).").DefaultValue(service.PoolModeTypeTransaction).PossibleValuesString(service.PoolModeTypeChoices()...).Build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The name of the created pool.").ForceNew().Build(),
+		Description: userconfig.Desc("Name of the pool.").ForceNew().Build(),
 	},
 	"pool_size": {
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     10,
-		Description: userconfig.Desc("The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number.").DefaultValue(10).Build(),
+		Description: userconfig.Desc("The number of PostgreSQL server connections this pool can use at a time. This does not affect the number of incoming connections. Each pool can handle a minimum of 5000 client connections.").DefaultValue(10).Build(),
 	},
 	"username": {
 		Type:        schema.TypeString,
@@ -49,14 +51,14 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 	"connection_uri": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The URI for connecting to the pool",
+		Description: "The URI for connecting to the pool.",
 		Sensitive:   true,
 	},
 }
 
 func ResourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Connection Pool resource allows the creation and management of Aiven Connection Pools.",
+		Description:   "Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service.",
 		CreateContext: resourceConnectionPoolCreate,
 		ReadContext:   resourceConnectionPoolRead,
 		UpdateContext: resourceConnectionPoolUpdate,
@@ -154,7 +156,7 @@ func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	err = client.ConnectionPools.Delete(ctx, projectName, serviceName, poolName)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

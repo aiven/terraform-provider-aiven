@@ -2,21 +2,174 @@ package kafkatopic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"time"
+	"strconv"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/kafkatopicrepository"
 )
+
+const configField = "config"
+
+var (
+	errTopicAlreadyExists            = fmt.Errorf("topic conflict, already exists")
+	errLocalRetentionBytesOverflow   = fmt.Errorf("local_retention_bytes must not be more than retention_bytes value")
+	errLocalRetentionBytesDependency = fmt.Errorf("local_retention_bytes can't be set without retention_bytes")
+)
+
+var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
+	"cleanup_policy": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.CleanupPolicyTypeChoices(), false),
+		Description:  userconfig.Desc("cleanup.policy value").PossibleValuesString(kafkatopic.CleanupPolicyTypeChoices()...).Build(),
+	},
+	"compression_type": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.CompressionTypeChoices(), false),
+		Description:  userconfig.Desc("compression.type value").PossibleValuesString(kafkatopic.CompressionTypeChoices()...).Build(),
+	},
+	"delete_retention_ms": {
+		Type:        schema.TypeString,
+		Description: "delete.retention.ms value",
+		Optional:    true,
+	},
+	"file_delete_delay_ms": {
+		Type:        schema.TypeString,
+		Description: "file.delete.delay.ms value",
+		Optional:    true,
+	},
+	"flush_messages": {
+		Type:        schema.TypeString,
+		Description: "flush.messages value",
+		Optional:    true,
+	},
+	"flush_ms": {
+		Type:        schema.TypeString,
+		Description: "flush.ms value",
+		Optional:    true,
+	},
+	"index_interval_bytes": {
+		Type:        schema.TypeString,
+		Description: "index.interval.bytes value",
+		Optional:    true,
+	},
+	"max_compaction_lag_ms": {
+		Type:        schema.TypeString,
+		Description: "max.compaction.lag.ms value",
+		Optional:    true,
+	},
+	"max_message_bytes": {
+		Type:        schema.TypeString,
+		Description: "max.message.bytes value",
+		Optional:    true,
+	},
+	"message_downconversion_enable": {
+		Type:        schema.TypeBool,
+		Description: "message.downconversion.enable value",
+		Optional:    true,
+	},
+	"message_format_version": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
+		Description:  userconfig.Desc("message.format.version value").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
+	},
+	"message_timestamp_difference_max_ms": {
+		Type:        schema.TypeString,
+		Description: "message.timestamp.difference.max.ms value",
+		Optional:    true,
+	},
+	"message_timestamp_type": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.MessageTimestampTypeChoices(), false),
+		Description:  userconfig.Desc("message.timestamp.type value").PossibleValuesString(kafkatopic.MessageTimestampTypeChoices()...).Build(),
+	},
+	"min_cleanable_dirty_ratio": {
+		Type:        schema.TypeFloat,
+		Description: "min.cleanable.dirty.ratio value",
+		Optional:    true,
+	},
+	"min_compaction_lag_ms": {
+		Type:        schema.TypeString,
+		Description: "min.compaction.lag.ms value",
+		Optional:    true,
+	},
+	"min_insync_replicas": {
+		Type:        schema.TypeString,
+		Description: "min.insync.replicas value",
+		Optional:    true,
+	},
+	"preallocate": {
+		Type:        schema.TypeBool,
+		Description: "preallocate value",
+		Optional:    true,
+	},
+	"retention_bytes": {
+		Type:        schema.TypeString,
+		Description: "retention.bytes value",
+		Optional:    true,
+	},
+	"retention_ms": {
+		Type:        schema.TypeString,
+		Description: "retention.ms value",
+		Optional:    true,
+	},
+	"segment_bytes": {
+		Type:        schema.TypeString,
+		Description: "segment.bytes value",
+		Optional:    true,
+	},
+	"segment_index_bytes": {
+		Type:        schema.TypeString,
+		Description: "segment.index.bytes value",
+		Optional:    true,
+	},
+	"segment_jitter_ms": {
+		Type:        schema.TypeString,
+		Description: "segment.jitter.ms value",
+		Optional:    true,
+	},
+	"segment_ms": {
+		Type:        schema.TypeString,
+		Description: "segment.ms value",
+		Optional:    true,
+	},
+	"unclean_leader_election_enable": {
+		Type:        schema.TypeBool,
+		Description: "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
+		Optional:    true,
+		Deprecated:  "This field is deprecated and no longer functional.",
+	},
+	"remote_storage_enable": {
+		Type:        schema.TypeBool,
+		Description: "remote.storage.enable value",
+		Optional:    true,
+	},
+	"local_retention_bytes": {
+		Type:        schema.TypeString,
+		Description: "local.retention.bytes value",
+		Optional:    true,
+	},
+	"local_retention_ms": {
+		Type:        schema.TypeString,
+		Description: "local.retention.ms value",
+		Optional:    true,
+	},
+}
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -38,15 +191,25 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The replication factor for the topic.",
 	},
+	"topic_description": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The description of the topic",
+	},
+	"owner_user_group_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The ID of the user group that owns the topic. Assigning ownership to decentralize topic management is part of [Aiven for Apache Kafka® governance](https://aiven.io/docs/products/kafka/concepts/governance-overview).",
+	},
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.",
+		Description: "Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**",
 	},
 	"tag": {
 		Type:        schema.TypeSet,
-		Description: "Kafka Topic tag.",
+		Description: "Tags for the topic.",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -54,178 +217,32 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringLenBetween(1, 64),
-					Description:  userconfig.Desc("Topic tag key.").MaxLen(64).Build(),
+					Description:  userconfig.Desc("Tag key.").MaxLen(64).Build(),
 				},
 				"value": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ValidateFunc: validation.StringLenBetween(0, 256),
-					Description:  userconfig.Desc("Topic tag value.").MaxLen(256).Build(),
+					Description:  userconfig.Desc("Tag value.").MaxLen(256).Build(),
 				},
 			},
 		},
 	},
-	"config": {
+	configField: {
 		Type:             schema.TypeList,
-		Description:      "Kafka topic configuration",
+		Description:      "[Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics.",
 		Optional:         true,
 		MaxItems:         1,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"cleanup_policy": {
-					Type:             schema.TypeString,
-					Description:      "cleanup.policy value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"compression_type": {
-					Type:             schema.TypeString,
-					Description:      "compression.type value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"delete_retention_ms": {
-					Type:             schema.TypeString,
-					Description:      "delete.retention.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"file_delete_delay_ms": {
-					Type:             schema.TypeString,
-					Description:      "file.delete.delay.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"flush_messages": {
-					Type:             schema.TypeString,
-					Description:      "flush.messages value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"flush_ms": {
-					Type:             schema.TypeString,
-					Description:      "flush.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"index_interval_bytes": {
-					Type:             schema.TypeString,
-					Description:      "index.interval.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"max_compaction_lag_ms": {
-					Type:             schema.TypeString,
-					Description:      "max.compaction.lag.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"max_message_bytes": {
-					Type:             schema.TypeString,
-					Description:      "max.message.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_downconversion_enable": {
-					Type:             schema.TypeBool,
-					Description:      "message.downconversion.enable value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_format_version": {
-					Type:             schema.TypeString,
-					Description:      "message.format.version value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_timestamp_difference_max_ms": {
-					Type:             schema.TypeString,
-					Description:      "message.timestamp.difference.max.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_timestamp_type": {
-					Type:             schema.TypeString,
-					Description:      "message.timestamp.type value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_cleanable_dirty_ratio": {
-					Type:             schema.TypeFloat,
-					Description:      "min.cleanable.dirty.ratio value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_compaction_lag_ms": {
-					Type:             schema.TypeString,
-					Description:      "min.compaction.lag.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_insync_replicas": {
-					Type:             schema.TypeString,
-					Description:      "min.insync.replicas value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"preallocate": {
-					Type:             schema.TypeBool,
-					Description:      "preallocate value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"retention_bytes": {
-					Type:             schema.TypeString,
-					Description:      "retention.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"retention_ms": {
-					Type:             schema.TypeString,
-					Description:      "retention.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_bytes": {
-					Type:             schema.TypeString,
-					Description:      "segment.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_index_bytes": {
-					Type:             schema.TypeString,
-					Description:      "segment.index.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_jitter_ms": {
-					Type:             schema.TypeString,
-					Description:      "segment.jitter.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_ms": {
-					Type:             schema.TypeString,
-					Description:      "segment.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"unclean_leader_election_enable": {
-					Type:             schema.TypeBool,
-					Description:      "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-					Deprecated:       "This field is deprecated and no longer functional.",
-				},
-			},
+			Schema: aivenKafkaTopicConfigSchema,
 		},
 	},
 }
 
 func ResourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",
+		Description:   "Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).",
 		CreateContext: resourceKafkaTopicCreate,
 		ReadContext:   resourceKafkaTopicReadResource,
 		UpdateContext: resourceKafkaTopicUpdate,
@@ -237,7 +254,7 @@ func ResourceKafkaTopic() *schema.Resource {
 		Schema:         aivenKafkaTopicSchema,
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.KafkaTopic(),
-		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			oldPartitions, newPartitions := d.GetChange("partitions")
 
 			assertedOldPartitions, ok := oldPartitions.(int)
@@ -254,6 +271,47 @@ func ResourceKafkaTopic() *schema.Resource {
 				return errors.New("number of partitions cannot be decreased")
 			}
 
+			retentionBytes, rOk := d.GetOk("config.0.retention_bytes")
+			localRetentionBytes, lOk := d.GetOk("config.0.local_retention_bytes")
+
+			switch {
+			case lOk && !rOk:
+				return errLocalRetentionBytesDependency
+			case lOk && rOk:
+				r, err := strconv.ParseInt(retentionBytes.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				l, err := strconv.ParseInt(localRetentionBytes.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				if r < l {
+					return errLocalRetentionBytesOverflow
+				}
+			}
+
+			// Validates topic conflict for new topics
+			if d.Id() != "" {
+				return nil
+			}
+
+			// A new topic
+			client := m.(*aiven.Client)
+			project := d.Get("project").(string)
+			serviceName := d.Get("service_name").(string)
+			topicName := d.Get("topic_name").(string)
+			exists, err := kafkatopicrepository.New(client.KafkaTopics).Exists(ctx, project, serviceName, topicName)
+			if err != nil {
+				return err
+			}
+
+			if exists {
+				return fmt.Errorf("%w: %q", errTopicAlreadyExists, topicName)
+			}
+
 			return nil
 		},
 	}
@@ -265,35 +323,37 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
-	client := m.(*aiven.Client)
+	topicDescription := d.Get("topic_description").(string)
+	ownerUserGroupID := d.Get("owner_user_group_id").(string)
 
-	// aiven.KafkaTopics.Create() function may return 501 on create
-	// Second call might say that topic already exists
-	// So to be sure, better check it before create
-	if isTopicExists(ctx, client, project, serviceName, topicName) {
-		return diag.Errorf("Topic conflict, already exists: %s", topicName)
+	config, err := getKafkaTopicConfig(d)
+	if err != nil {
+		return diag.Errorf("config to json error: %s", err)
 	}
 
 	createRequest := aiven.CreateKafkaTopicRequest{
 		Partitions:  &partitions,
 		Replication: &replication,
 		TopicName:   topicName,
-		Config:      getKafkaTopicConfig(d),
+		Config:      config,
 		Tags:        getTags(d),
 	}
 
-	err := client.KafkaTopics.Create(
-		ctx,
-		project,
-		serviceName,
-		createRequest,
-	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if topicDescription != "" {
+		createRequest.TopicDescription = &topicDescription
+	}
+
+	if ownerUserGroupID != "" {
+		createRequest.OwnerUserGroupId = &ownerUserGroupID
+	}
+
+	client := m.(*aiven.Client)
+	err = kafkatopicrepository.New(client.KafkaTopics).Create(ctx, project, serviceName, createRequest)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
-	getTopicCache().AddToQueue(project, serviceName, topicName)
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field
@@ -302,57 +362,71 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
-	var tags []aiven.KafkaTopicTag
-	for _, tagD := range d.Get("tag").(*schema.Set).List() {
+	tagSet := d.Get("tag").(*schema.Set)
+	tags := make([]aiven.KafkaTopicTag, tagSet.Len())
+	for i, tagD := range tagSet.List() {
 		tagM := tagD.(map[string]interface{})
 		tag := aiven.KafkaTopicTag{
 			Key:   tagM["key"].(string),
 			Value: tagM["value"].(string),
 		}
 
-		tags = append(tags, tag)
+		tags[i] = tag
 	}
 
 	return tags
 }
 
-func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
-	if len(d.Get("config").([]interface{})) == 0 {
-		return aiven.KafkaTopicConfig{}
+// getKafkaTopicConfig converts schema.ResourceData into aiven.KafkaTopicConfig
+// Takes manifest values only
+func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error) {
+	configs := d.GetRawConfig().AsValueMap()[configField]
+	if configs.IsNull() || len(configs.AsValueSlice()) == 0 {
+		return aiven.KafkaTopicConfig{}, nil
 	}
 
-	if d.Get("config").([]interface{})[0] == nil {
-		return aiven.KafkaTopicConfig{}
+	config := make(map[string]any)
+	for k, v := range configs.AsValueSlice()[0].AsValueMap() {
+		if v.IsNull() {
+			continue
+		}
+
+		// Converts values to types that are expected by the API
+		kind := aivenKafkaTopicConfigSchema[k].Type
+		value := d.Get(fmt.Sprintf("%s.0.%s", configField, k))
+
+		// These are known types
+		switch kind {
+		case schema.TypeBool, schema.TypeInt, schema.TypeFloat:
+			config[k] = value
+			continue
+		}
+
+		// These are known string types.
+		// Add here new string fields
+		switch k {
+		case "cleanup_policy", "compression_type", "message_format_version", "message_timestamp_type":
+			config[k] = value
+			continue
+		}
+
+		// Legacy integer fields
+		var err error
+		config[k], err = strconv.ParseInt(value.(string), 10, 64)
+		if err != nil {
+			return aiven.KafkaTopicConfig{}, err
+		}
 	}
 
-	configRaw := d.Get("config").([]interface{})[0].(map[string]interface{})
-
-	return aiven.KafkaTopicConfig{
-		CleanupPolicy:                   configRaw["cleanup_policy"].(string),
-		CompressionType:                 configRaw["compression_type"].(string),
-		DeleteRetentionMs:               schemautil.ParseOptionalStringToInt64(configRaw["delete_retention_ms"]),
-		FileDeleteDelayMs:               schemautil.ParseOptionalStringToInt64(configRaw["file_delete_delay_ms"]),
-		FlushMessages:                   schemautil.ParseOptionalStringToInt64(configRaw["flush_messages"]),
-		FlushMs:                         schemautil.ParseOptionalStringToInt64(configRaw["flush_ms"]),
-		IndexIntervalBytes:              schemautil.ParseOptionalStringToInt64(configRaw["index_interval_bytes"]),
-		MaxCompactionLagMs:              schemautil.ParseOptionalStringToInt64(configRaw["max_compaction_lag_ms"]),
-		MaxMessageBytes:                 schemautil.ParseOptionalStringToInt64(configRaw["max_message_bytes"]),
-		MessageDownconversionEnable:     schemautil.OptionalBoolPointer(d, "config.0.message_downconversion_enable"),
-		MessageFormatVersion:            configRaw["message_format_version"].(string),
-		MessageTimestampDifferenceMaxMs: schemautil.ParseOptionalStringToInt64(configRaw["message_timestamp_difference_max_ms"]),
-		MessageTimestampType:            configRaw["message_timestamp_type"].(string),
-		MinCleanableDirtyRatio:          schemautil.OptionalFloatPointer(d, "config.0.min_cleanable_dirty_ratio"),
-		MinCompactionLagMs:              schemautil.ParseOptionalStringToInt64(configRaw["min_compaction_lag_ms"]),
-		MinInsyncReplicas:               schemautil.ParseOptionalStringToInt64(configRaw["min_insync_replicas"]),
-		Preallocate:                     schemautil.OptionalBoolPointer(d, "config.0.preallocate"),
-		RetentionBytes:                  schemautil.ParseOptionalStringToInt64(configRaw["retention_bytes"]),
-		RetentionMs:                     schemautil.ParseOptionalStringToInt64(configRaw["retention_ms"]),
-		SegmentBytes:                    schemautil.ParseOptionalStringToInt64(configRaw["segment_bytes"]),
-		SegmentIndexBytes:               schemautil.ParseOptionalStringToInt64(configRaw["segment_index_bytes"]),
-		SegmentJitterMs:                 schemautil.ParseOptionalStringToInt64(configRaw["segment_jitter_ms"]),
-		SegmentMs:                       schemautil.ParseOptionalStringToInt64(configRaw["segment_ms"]),
-		UncleanLeaderElectionEnable:     schemautil.OptionalBoolPointer(d, "config.0.unclean_leader_election_enable"),
+	// Converts to json and loads values to the struct
+	b, err := json.Marshal(config)
+	if err != nil {
+		return aiven.KafkaTopicConfig{}, err
 	}
+
+	var result aiven.KafkaTopicConfig
+	err = json.Unmarshal(b, &result)
+	return result, err
 }
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}, isResource bool) diag.Diagnostics {
@@ -361,10 +435,11 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	topic, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
+	client := m.(*aiven.Client)
+	topic, err := kafkatopicrepository.New(client.KafkaTopics).Read(ctx, project, serviceName, topicName)
 
 	// Topics are destroyed when kafka is off
-	// https://docs.aiven.io/docs/platform/concepts/service-power-cycle
+	// https://aiven.io/docs/platform/concepts/service-power-cycle
 	// So it's better to recreate them, than make user to clear the state manually
 	// Recreates missing topics:
 	// 1. if server returns 404
@@ -397,7 +472,12 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err := d.Set("replication", topic.Replication); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("config", flattenKafkaTopicConfig(topic)); err != nil {
+
+	config, err := FlattenKafkaTopicConfig(topic)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("config", config); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -407,6 +487,14 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	if err := d.Set("tag", flattenKafkaTopicTags(topic.Tags)); err != nil {
 		return diag.Errorf("error setting Kafka Topic Tags for resource %s: %s", d.Id(), err)
+	}
+
+	if err := d.Set("topic_description", topic.TopicDescription); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("owner_user_group_id", topic.OwnerUserGroupId); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -421,7 +509,7 @@ func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceDat
 }
 
 func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} {
-	var tags []map[string]interface{}
+	tags := make([]map[string]interface{}, 0, len(list))
 	for _, tagS := range list {
 		tags = append(tags, map[string]interface{}{
 			"key":   tagS.Key,
@@ -432,50 +520,43 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 	return tags
 }
 
-func getTopic(ctx context.Context, m interface{}, timeout time.Duration, project, serviceName, topicName string) (*aiven.KafkaTopic, error) {
-	client, ok := m.(*aiven.Client)
-	if !ok {
-		return nil, fmt.Errorf("invalid Aiven client")
-	}
-
-	w, err := newKafkaTopicAvailabilityWaiter(ctx, client, project, serviceName, topicName)
-	if err != nil {
-		return nil, err
-	}
-
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	topic, err := w.Conf(timeout).WaitForStateContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	kt, ok := topic.(aiven.KafkaTopic)
-	if !ok {
-		return nil, fmt.Errorf("can't cast value to aiven.KafkaTopic")
-	}
-	return &kt, nil
-}
-
 func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
 	partitions := d.Get("partitions").(int)
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.KafkaTopics.Update(
+	config, err := getKafkaTopicConfig(d)
+	if err != nil {
+		return diag.Errorf("config to json error: %s", err)
+	}
+
+	topicDescription := d.Get("topic_description").(string)
+	ownerUserGroupID := d.Get("owner_user_group_id").(string)
+
+	updateRequest := aiven.UpdateKafkaTopicRequest{
+		Partitions:  &partitions,
+		Replication: schemautil.OptionalIntPointer(d, "replication"),
+		Config:      config,
+		Tags:        getTags(d),
+	}
+
+	if topicDescription != "" {
+		updateRequest.TopicDescription = &topicDescription
+	}
+
+	if ownerUserGroupID != "" {
+		updateRequest.OwnerUserGroupId = &ownerUserGroupID
+	}
+
+	client := m.(*aiven.Client)
+	err = kafkatopicrepository.New(client.KafkaTopics).Update(
 		ctx,
 		projectName,
 		serviceName,
 		topicName,
-		aiven.UpdateKafkaTopicRequest{
-			Partitions:  &partitions,
-			Replication: schemautil.OptionalIntPointer(d, "replication"),
-			Config:      getKafkaTopicConfig(d),
-			Tags:        getTags(d),
-		},
+		updateRequest,
 	)
 	if err != nil {
 		return diag.FromErr(err)
@@ -485,8 +566,6 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -496,18 +575,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	waiter := TopicDeleteWaiter{
-		Context:     ctx,
-		Client:      client,
-		ProjectName: projectName,
-		ServiceName: serviceName,
-		TopicName:   topicName,
-	}
-
-	timeout := d.Timeout(schema.TimeoutDelete)
-
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
+	err = kafkatopicrepository.New(m.(*aiven.Client).KafkaTopics).Delete(ctx, projectName, serviceName, topicName)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Kafka Topic to be DELETED: %s", err)
 	}
@@ -515,71 +583,29 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
-	return []map[string]interface{}{
-		{
-			"cleanup_policy":                      schemautil.ToOptionalString(t.Config.CleanupPolicy.Value),
-			"compression_type":                    schemautil.ToOptionalString(t.Config.CompressionType.Value),
-			"delete_retention_ms":                 schemautil.ToOptionalString(t.Config.DeleteRetentionMs.Value),
-			"file_delete_delay_ms":                schemautil.ToOptionalString(t.Config.FileDeleteDelayMs.Value),
-			"flush_messages":                      schemautil.ToOptionalString(t.Config.FlushMessages.Value),
-			"flush_ms":                            schemautil.ToOptionalString(t.Config.FlushMs.Value),
-			"index_interval_bytes":                schemautil.ToOptionalString(t.Config.IndexIntervalBytes.Value),
-			"max_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MaxCompactionLagMs.Value),
-			"max_message_bytes":                   schemautil.ToOptionalString(t.Config.MaxMessageBytes.Value),
-			"message_downconversion_enable":       t.Config.MessageDownconversionEnable.Value,
-			"message_format_version":              schemautil.ToOptionalString(t.Config.MessageFormatVersion.Value),
-			"message_timestamp_difference_max_ms": schemautil.ToOptionalString(t.Config.MessageTimestampDifferenceMaxMs.Value),
-			"message_timestamp_type":              schemautil.ToOptionalString(t.Config.MessageTimestampType.Value),
-			"min_cleanable_dirty_ratio":           t.Config.MinCleanableDirtyRatio.Value,
-			"min_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MinCompactionLagMs.Value),
-			"min_insync_replicas":                 schemautil.ToOptionalString(t.Config.MinInsyncReplicas.Value),
-			"preallocate":                         t.Config.Preallocate.Value,
-			"retention_bytes":                     schemautil.ToOptionalString(t.Config.RetentionBytes.Value),
-			"retention_ms":                        schemautil.ToOptionalString(t.Config.RetentionMs.Value),
-			"segment_bytes":                       schemautil.ToOptionalString(t.Config.SegmentBytes.Value),
-			"segment_index_bytes":                 schemautil.ToOptionalString(t.Config.SegmentIndexBytes.Value),
-			"segment_jitter_ms":                   schemautil.ToOptionalString(t.Config.SegmentJitterMs.Value),
-			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
-		},
+func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, error) {
+	source := make(map[string]struct {
+		Value any `json:"value"`
+	})
+
+	data, err := json.Marshal(t.Config)
+	if err != nil {
+		return nil, err
 	}
-}
 
-// TopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
-type TopicDeleteWaiter struct {
-	Context     context.Context
-	Client      *aiven.Client
-	ProjectName string
-	ServiceName string
-	TopicName   string
-}
+	err = json.Unmarshal(data, &source)
+	if err != nil {
+		return nil, err
+	}
 
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		err := w.Client.KafkaTopics.Delete(w.Context, w.ProjectName, w.ServiceName, w.TopicName)
-		if err != nil {
-			if !aiven.IsNotFound(err) {
-				return nil, "REMOVING", nil
-			}
+	config := make(map[string]any)
+	for k, v := range source {
+		if aivenKafkaTopicConfigSchema[k].Type == schema.TypeString {
+			config[k] = schemautil.ToOptionalString(v.Value)
+		} else {
+			config[k] = v.Value
 		}
-
-		return aiven.KafkaTopic{}, "DELETED", nil
 	}
-}
 
-// Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *TopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
-
-	return &resource.StateChangeConf{
-		Pending:    []string{"REMOVING"},
-		Target:     []string{"DELETED"},
-		Refresh:    w.RefreshFunc(),
-		Delay:      1 * time.Second,
-		Timeout:    timeout,
-		MinTimeout: 1 * time.Second,
-	}
+	return []map[string]interface{}{config}, nil
 }

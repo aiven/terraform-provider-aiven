@@ -9,7 +9,7 @@ import (
 func DatasourceM3DB() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: "The M3 DB data source provides information about the existing Aiven M3 services.",
+		Description: "Gets information about an Aiven for M3DB service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenM3DBSchema(), "project", "service_name"),
 	}
 }

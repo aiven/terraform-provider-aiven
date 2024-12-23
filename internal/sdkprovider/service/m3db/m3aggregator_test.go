@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -24,6 +25,7 @@ func TestAccAiven_m3aggregator(t *testing.T) {
 				Config: testAccM3AggregatorResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3aggregator.common"),
+					testAccCheckAivenServiceM3AggregatorAttributes("data.aiven_m3aggregator.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-m3a-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -81,4 +83,21 @@ data "aiven_m3aggregator" "common" {
 
   depends_on = [aiven_m3aggregator.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}
+
+func testAccCheckAivenServiceM3AggregatorAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["m3aggregator.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["m3aggregator.0.aggregator_http_uri"] == "" {
+			return fmt.Errorf("expected to get correct aggregator_http_uri from Aiven")
+		}
+
+		return nil
+	}
 }

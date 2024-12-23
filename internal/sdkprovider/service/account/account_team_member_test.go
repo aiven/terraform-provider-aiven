@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +18,8 @@ import (
 )
 
 func TestAccAivenAccountTeamMember_basic(t *testing.T) {
+	t.Skip(accountTeamDeprecated)
+
 	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
 		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
 	}
@@ -87,7 +90,8 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 
 		r, err := c.Accounts.List(ctx)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 
@@ -98,7 +102,8 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 			if a.Id == accountID {
 				ri, err := c.AccountTeamInvites.List(ctx, accountID, teamID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var e aiven.Error
+					if errors.As(err, &e) && e.Status != 404 {
 						return err
 					}
 

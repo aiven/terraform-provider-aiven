@@ -2,40 +2,39 @@ package serviceintegration
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceServiceIntegrationEndpointRead,
-		Description: "The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema,
+		ReadContext: common.WithGenClient(datasourceServiceIntegrationEndpointRead),
+		Description: "Gets information about an integration endpoint.",
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema(),
 			"project", "endpoint_name"),
 	}
 }
 
-func datasourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	endpointName := d.Get("endpoint_name").(string)
 
-	endpoints, err := client.ServiceIntegrationEndpoints.List(ctx, projectName)
+	endpoints, err := client.ServiceIntegrationEndpointList(ctx, projectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	for _, endpoint := range endpoints {
 		if endpoint.EndpointName == endpointName {
-			d.SetId(schemautil.BuildResourceID(projectName, endpoint.EndpointID))
-			return resourceServiceIntegrationEndpointRead(ctx, d, m)
+			d.SetId(schemautil.BuildResourceID(projectName, endpoint.EndpointId))
+			return resourceServiceIntegrationEndpointRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("endpoint \"%s\" not found", endpointName)
+	return fmt.Errorf("endpoint \"%s\" not found", endpointName)
 }

@@ -1,1 +1,1 @@
-terraform import aiven_grafana.gr1 project/service_name
+terraform import aiven_grafana.example_grafana PROJECT/SERVICE_NAME

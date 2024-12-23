@@ -1,1 +1,1 @@
-terraform import aiven_pg_user.user project/service_name/username
+terraform import aiven_pg_user.example_user PROJECT/SERVICE_NAME/USERNAME

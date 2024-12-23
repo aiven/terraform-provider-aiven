@@ -2,16 +2,22 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/alloydbomni"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
@@ -28,13 +34,13 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
 // Provider returns terraform.ResourceProvider.
-//
-//goland:noinspection GoDeprecation
-func Provider(version string) *schema.Provider {
+func Provider(version string) (*schema.Provider, error) {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
@@ -72,6 +78,11 @@ func Provider(version string) *schema.Provider {
 			"aiven_pg_user":     pg.DatasourcePGUser(),
 			"aiven_pg_database": pg.DatasourcePGDatabase(),
 
+			// alloydbomni
+			"aiven_alloydbomni":          alloydbomni.DatasourceAlloyDBOmni(),
+			"aiven_alloydbomni_user":     alloydbomni.DatasourceAlloyDBOmniUser(),
+			"aiven_alloydbomni_database": alloydbomni.DatasourceAlloyDBOmniDatabase(),
+
 			// cassandra
 			"aiven_cassandra":      cassandra.DatasourceCassandra(),
 			"aiven_cassandra_user": cassandra.DatasourceCassandraUser(),
@@ -84,9 +95,11 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.DatasourceOrganizationalUnit(),
-			"aiven_organization_user":       organization.DatasourceOrganizationUser(),
-			"aiven_organization_user_group": organization.DatasourceOrganizationUserGroup(),
+			"aiven_organizational_unit":           organization.DatasourceOrganizationalUnit(),
+			"aiven_organization_user":             organization.DatasourceOrganizationUser(),
+			"aiven_organization_user_list":        organization.DatasourceOrganizationUserList(),
+			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
+			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -141,6 +154,16 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse":          clickhouse.DatasourceClickhouse(),
 			"aiven_clickhouse_database": clickhouse.DatasourceClickhouseDatabase(),
 			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
+
+			// dragonfly
+			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.DatasourceThanos(),
+
+			// valkey
+			"aiven_valkey":      valkey.DatasourceValkey(),
+			"aiven_valkey_user": valkey.DatasourceValkeyUser(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -169,6 +192,11 @@ func Provider(version string) *schema.Provider {
 			"aiven_pg_user":     pg.ResourcePGUser(),
 			"aiven_pg_database": pg.ResourcePGDatabase(),
 
+			// alloydbomni
+			"aiven_alloydbomni":          alloydbomni.ResourceAlloyDBOmni(),
+			"aiven_alloydbomni_user":     alloydbomni.ResourceAlloyDBOmniUser(),
+			"aiven_alloydbomni_database": alloydbomni.ResourceAlloyDBOmniDatabase(),
+
 			// cassandra
 			"aiven_cassandra":      cassandra.ResourceCassandra(),
 			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
@@ -181,9 +209,12 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.ResourceOrganizationalUnit(),
-			"aiven_organization_user":       organization.ResourceOrganizationUser(),
-			"aiven_organization_user_group": organization.ResourceOrganizationUserGroup(),
+			"aiven_organizational_unit":                 organization.ResourceOrganizationalUnit(),
+			"aiven_organization_user":                   organization.ResourceOrganizationUser(),
+			"aiven_organization_user_group":             organization.ResourceOrganizationUserGroup(),
+			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
+			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
+			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
@@ -228,6 +259,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_kafka":                        kafka.ResourceKafka(),
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
+			"aiven_kafka_native_acl":             kafka.ResourceKafkaNativeACL(),
 			"aiven_kafka_schema_registry_acl":    kafkaschema.ResourceKafkaSchemaRegistryACL(),
 			"aiven_kafka_topic":                  kafkatopic.ResourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
@@ -243,7 +275,50 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_user":     clickhouse.ResourceClickhouseUser(),
 			"aiven_clickhouse_role":     clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
+
+			// dragonfly
+			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.ResourceThanos(),
+
+			// valkey
+			"aiven_valkey":      valkey.ResourceValkey(),
+			"aiven_valkey_user": valkey.ResourceValkeyUser(),
 		},
+	}
+
+	// Adds "beta" warning to the description
+	betaResources := []string{
+		"aiven_alloydbomni",
+		"aiven_alloydbomni_user",
+		"aiven_alloydbomni_database",
+	}
+
+	betaDataSources := []string{
+		"aiven_alloydbomni",
+		"aiven_alloydbomni_user",
+		"aiven_alloydbomni_database",
+		"aiven_organization_user_list",
+	}
+
+	missing := append(
+		addBeta(p.ResourcesMap, betaResources...),
+		addBeta(p.DataSourcesMap, betaDataSources...)...,
+	)
+
+	// Marks sensitive fields recursively
+	err := validateSensitive(p.ResourcesMap, false)
+	if err != nil {
+		return nil, fmt.Errorf("resource map error: %w", err)
+	}
+	err = validateSensitive(p.DataSourcesMap, false)
+	if err != nil {
+		return nil, fmt.Errorf("datasource map error: %w", err)
+	}
+
+	if missing != nil {
+		return nil, fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", "))
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -252,7 +327,19 @@ func Provider(version string) *schema.Provider {
 			token = os.Getenv("AIVEN_TOKEN")
 		}
 
-		client, err := common.NewCustomAivenClient(token, p.TerraformVersion, version)
+		opts := []common.ClientOpt{
+			common.TokenOpt(token),
+			common.TFVersionOpt(p.TerraformVersion),
+			common.BuildVersionOpt(version),
+		}
+
+		client, err := common.NewAivenClient(opts...)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		// fixme: temporary solution, uses a singleton
+		err = common.CachedGenAivenClient(opts...)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
@@ -260,5 +347,60 @@ func Provider(version string) *schema.Provider {
 		return client, nil
 	}
 
-	return p
+	return p, nil
+}
+
+// addBeta adds resources as beta or removes them
+func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
+	isBeta := util.IsBeta()
+	for _, k := range keys {
+		v, ok := m[k]
+		if !ok {
+			missing = append(missing, k)
+			continue
+		}
+
+		if isBeta {
+			v.Description = userconfig.Desc(v.Description).AvailabilityType(userconfig.Beta).Build()
+		} else {
+			delete(m, k)
+		}
+	}
+	return missing
+}
+
+var errSensitiveField = fmt.Errorf("must mark `Sensitive: true`")
+
+// validateSensitive All attributes of sensitive blocks must be sensitive due to an issue in Terraform
+// https://github.com/hashicorp/terraform-plugin-sdk/issues/201
+func validateSensitive(m map[string]*schema.Resource, sensitive bool) error {
+	for k, v := range m {
+		err := validateSensitiveResource(v, sensitive)
+		if err != nil {
+			return fmt.Errorf("%w: %s: %w", errSensitiveField, k, err)
+		}
+	}
+	return nil
+}
+
+func validateSensitiveResource(r *schema.Resource, sensitive bool) error {
+	for k, parent := range r.Schema {
+		if sensitive && !parent.Sensitive {
+			return fmt.Errorf("schema %s", k)
+		}
+
+		switch child := parent.Elem.(type) {
+		case *schema.Resource:
+			err := validateSensitiveResource(child, parent.Sensitive)
+			if err != nil {
+				return err
+			}
+
+		case *schema.Schema:
+			if parent.Sensitive && !child.Sensitive {
+				return fmt.Errorf("element %s", k)
+			}
+		}
+	}
+	return nil
 }

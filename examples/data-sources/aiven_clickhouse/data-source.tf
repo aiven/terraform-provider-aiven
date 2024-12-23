@@ -1,4 +1,4 @@
-data "aiven_clickhouse" "clickhouse" {
-  project      = data.aiven_project.pr1.project
-  service_name = "<SERVICE_NAME>"
+data "aiven_clickhouse" "example_clickhouse" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-clickhouse-service"
 }

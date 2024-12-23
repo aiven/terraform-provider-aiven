@@ -2,50 +2,49 @@ package serviceintegration
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceServiceIntegrationRead,
-		Description: "The Service Integration data source provides information about the existing Aiven Service Integration.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationSchema,
+		ReadContext: common.WithGenClient(datasourceServiceIntegrationRead),
+		Description: "Gets information about an Aiven service integration.",
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationSchema(),
 			"project", "integration_type", "source_service_name", "destination_service_name"),
 	}
 }
 
-func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
 	sourceServiceName := d.Get("source_service_name").(string)
 	destinationServiceName := d.Get("destination_service_name").(string)
 
-	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
+	integrations, err := client.ServiceIntegrationList(ctx, projectName, sourceServiceName)
 	if err != nil {
-		return diag.Errorf("unable to list integrations for %s/%s: %s", projectName, sourceServiceName, err)
+		return fmt.Errorf("unable to list integrations for %s/%s: %w", projectName, sourceServiceName, err)
 	}
 
 	for _, i := range integrations {
-		if i.SourceService == nil || i.DestinationService == nil {
+		if i.SourceService == "" || i.DestService == nil {
 			continue
 		}
 
-		if i.IntegrationType == integrationType &&
-			*i.SourceService == sourceServiceName &&
-			*i.DestinationService == destinationServiceName {
+		if string(i.IntegrationType) == integrationType &&
+			i.SourceService == sourceServiceName &&
+			*i.DestService == destinationServiceName {
 
-			d.SetId(schemautil.BuildResourceID(projectName, i.ServiceIntegrationID))
-			return resourceServiceIntegrationRead(ctx, d, m)
+			d.SetId(schemautil.BuildResourceID(projectName, i.ServiceIntegrationId))
+			return resourceServiceIntegrationRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("common integration %s/%s/%s/%s not found",
+	return fmt.Errorf("common integration %s/%s/%s/%s not found",
 		projectName, integrationType, sourceServiceName, destinationServiceName)
 }

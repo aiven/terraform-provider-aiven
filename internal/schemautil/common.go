@@ -1,9 +1,10 @@
 package schemautil
 
 import (
-	"fmt"
+	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -14,7 +15,7 @@ import (
 func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
 		regexp.MustCompile(`^[-._*?A-Za-z0-9]+$`),
-		"Must consist of alpha-numeric characters, underscores, dashes, dots and glob characters '*' and '?'")
+		"Must consist of alpha-numeric characters, underscores, dashes, dots, and glob characters '*' and '?'")
 }
 
 //goland:noinspection GoDeprecation
@@ -30,7 +31,7 @@ var (
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "project name should be alphanumeric"),
-		Description:  userconfig.Desc("Identifies the project this resource belongs to.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The name of the project this resource belongs to.").ForceNew().Referenced().Build(),
 	}
 
 	CommonSchemaServiceNameReference = &schema.Schema{
@@ -38,25 +39,19 @@ var (
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "common name should be alphanumeric"),
-		Description:  userconfig.Desc("Specifies the name of the service that this resource belongs to.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The name of the service that this resource belongs to.").ForceNew().Referenced().Build(),
 	}
 )
 
-func StringSliceToInterfaceSlice(s []string) []interface{} {
-	res := make([]interface{}, len(s))
-	for i := range s {
-		res[i] = s[i]
-	}
-	return res
-}
-
 func SetTagsTerraformProperties(t map[string]string) []map[string]interface{} {
-	var tags []map[string]interface{}
+	tags := make([]map[string]interface{}, len(t))
+	var i int
 	for k, v := range t {
-		tags = append(tags, map[string]interface{}{
+		tags[i] = map[string]interface{}{
 			"key":   k,
 			"value": v,
-		})
+		}
+		i++
 	}
 
 	return tags
@@ -81,12 +76,16 @@ func PointerValueOrDefault[T comparable](v *T, d T) T {
 	return *v
 }
 
-func JoinQuoted[T string | int](elems []T, sep, quote string) (result string) {
-	for i, v := range elems {
-		if i != 0 {
-			result += sep
+// ComposeContexts composes multiple context (create, update, read or delete) functions into one.
+// So instead of chaining them, they can be composed
+func ComposeContexts(funcs ...func(context.Context, *schema.ResourceData, any) diag.Diagnostics) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
+	return func(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+		for _, f := range funcs {
+			err := f(ctx, d, m)
+			if err != nil {
+				return err
+			}
 		}
-		result = fmt.Sprintf("%s%s%v%s", result, quote, v, quote)
+		return nil
 	}
-	return result
 }

@@ -1,5 +1,5 @@
-data "aiven_m3db" "m3" {
-  project      = data.aiven_project.foo.project
-  service_name = "my-m3db"
+data "aiven_m3db" "example_m3db" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-m3db-service"
 }
 

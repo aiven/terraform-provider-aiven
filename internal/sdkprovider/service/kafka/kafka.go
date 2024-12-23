@@ -10,16 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
 
 func aivenKafkaSchema() map[string]*schema.Schema {
-	aivenKafkaSchema := schemautil.ServiceCommonSchema()
+	aivenKafkaSchema := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafka)
 	aivenKafkaSchema["karapace"] = &schema.Schema{
 		Type:             schema.TypeBool,
 		Optional:         true,
-		Description:      "Switch the service to use Karapace for schema registry and REST proxy",
+		Description:      "Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Deprecated:       "Usage of this field is discouraged.",
 	}
@@ -29,55 +28,68 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		ForceNew:         true,
 		Default:          true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Description:      "Create default wildcard Kafka ACL",
+		Description:      "Create a default wildcard Kafka ACL.",
 	}
 	aivenKafkaSchema[schemautil.ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Kafka server provided values",
+		Sensitive:   true,
+		Description: "Kafka server connection details.",
+		MaxItems:    1,
+		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Kafka server URIs.",
+					Optional:    true,
+					Sensitive:   true,
+					Elem: &schema.Schema{
+						Type:      schema.TypeString,
+						Sensitive: true,
+					},
+				},
 				"access_cert": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The Kafka client certificate",
+					Description: "The Kafka client certificate.",
 					Sensitive:   true,
 				},
 				"access_key": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The Kafka client certificate key",
+					Description: "The Kafka client certificate key.",
 					Sensitive:   true,
 				},
 				"connect_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The Kafka Connect URI, if any",
+					Description: "The Kafka Connect URI.",
 					Sensitive:   true,
 				},
 				"rest_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The Kafka REST URI, if any",
+					Description: "The Kafka REST URI.",
 					Sensitive:   true,
 				},
 				"schema_registry_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The Schema Registry URI, if any",
+					Description: "The Schema Registry URI.",
 					Sensitive:   true,
 				},
 			},
 		},
 	}
-	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = dist.ServiceTypeKafka()
 
 	return aivenKafkaSchema
 }
 
 func ResourceKafka() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka resource allows the creation and management of Aiven Kafka services.",
+		Description:   "Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.",
 		CreateContext: resourceKafkaCreate,
 		ReadContext:   resourceKafkaRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
@@ -89,28 +101,7 @@ func ResourceKafka() *schema.Resource {
 
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
-			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
-			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckUniqueTag,
-			),
-			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
-				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
-			),
-			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
-			),
+			schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeKafka),
 
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
 			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
@@ -216,7 +207,7 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 				"on Kafka v3.0. Please switch to Karapace, a drop-in open source replacement " +
 				"before proceeding with the upgrade. To do that use aiven_kafka.karapace=true " +
 				"that will switch the service to use Karapace for schema registry and REST proxy. " +
-				"For more information, please refer to our help article: https://help.aiven.io/en/articles/5651983",
+				"More information about Karpace is available in our documentation: https://aiven.io/docs/products/kafka/karapace",
 		})
 	}
 

@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafka"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -19,34 +21,39 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
-		Description:  userconfig.Desc("Kafka permission to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
+		ValidateFunc: validation.StringInSlice(kafka.PermissionTypeChoices(), false),
+		Description:  userconfig.Desc("Permissions to grant.").ForceNew().PossibleValuesString(kafka.PermissionTypeChoices()...).Build(),
 	},
 	"topic": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("Topic name pattern for the ACL entry.").ForceNew().Build(),
+		Description: userconfig.Desc("Topics that the permissions apply to.").ForceNew().Build(),
 	},
 	"username": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  userconfig.Desc("Username pattern for the ACL entry.").ForceNew().Build(),
+		Description:  userconfig.Desc("Usernames to grant permissions to.").ForceNew().Build(),
 	},
 
 	// computed
 	"acl_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Kafka ACL ID",
+		Description: "Kafka ACL ID.",
 	},
 }
 
 func ResourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Resource Kafka ACL resource allows the creation and management of ACLs for an Aiven Kafka service.",
+		Description: `
+Creates and manages Aiven [access control lists](https://aiven.io/docs/products/kafka/concepts/acl) (ACLs) for an Aiven for Apache Kafka® service. ACLs control access to Kafka topics, consumer groups,
+clusters, and Schema Registry.
+
+Aiven ACLs provide simplified topic-level control with basic permissions and wildcard support. For more advanced access control, you can use [Kafka-native ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_native_acl).
+`,
 		CreateContext: resourceKafkaACLCreate,
 		ReadContext:   resourceKafkaACLRead,
 		DeleteContext: resourceKafkaACLDelete,
@@ -114,7 +121,7 @@ func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	err = client.KafkaACLs.Delete(ctx, projectName, serviceName, aclID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

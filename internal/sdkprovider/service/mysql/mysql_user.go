@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -35,8 +36,8 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
-		Description:      userconfig.Desc("Authentication details.").PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
+		ValidateFunc:     validation.StringInSlice(service.AuthenticationTypeChoices(), false),
+		Description:      userconfig.Desc("Authentication details.").PossibleValuesString(service.AuthenticationTypeChoices()...).Build(),
 	},
 
 	// computed fields

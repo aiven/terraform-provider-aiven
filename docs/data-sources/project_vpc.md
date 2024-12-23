@@ -3,24 +3,19 @@
 page_title: "aiven_project_vpc Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Project VPC data source provides information about the existing Aiven Project VPC.
+  Gets information about the VPC for an Aiven project.
 ---
 
 # aiven_project_vpc (Data Source)
 
-The Project VPC data source provides information about the existing Aiven Project VPC.
+Gets information about the VPC for an Aiven project.
 
 ## Example Usage
 
 ```terraform
-data "aiven_project_vpc" "myvpc" {
-  project    = aiven_project.myproject.project
+data "aiven_project_vpc" "example_vpc" {
+  project    = data.aiven_project.example_project.project
   cloud_name = "google-europe-west1"
-}
-
-# Or
-data "aiven_project_vpc" "myvpc_id" {
-  vpc_id = aiven_project_vpc.vpc.id
 }
 ```
 
@@ -29,12 +24,12 @@ data "aiven_project_vpc" "myvpc_id" {
 
 ### Optional
 
-- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.
+- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
 - `project` (String) Identifies the project this resource belongs to.
-- `vpc_id` (String) ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.
+- `vpc_id` (String) The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `network_cidr` (String) Network address range used by the VPC like 192.168.0.0/24
-- `state` (String) State of the VPC. The possible values are `APPROVED`, `ACTIVE`, `DELETING` and `DELETED`.
+- `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
+- `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.

@@ -12,7 +12,7 @@ import (
 func DatasourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaTopicRead,
-		Description: "The Kafka Topic data source provides information about the existing Aiven Kafka Topic.",
+		Description: "Gets information about an Aiven for Apache Kafka® topic.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaTopicSchema,
 			"project", "service_name", "topic_name"),
 	}

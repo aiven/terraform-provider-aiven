@@ -10,7 +10,7 @@ Contributions are very welcome on terraform-provider-aiven. When contributing pl
 
 ### Local environment
 
-[Go](https://go.dev/doc/install) >=1.18 \
+[Go](https://go.dev/doc/install) >=1.22 \
 [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=1.2
 
 #### Alternative command to build/test inside a container
@@ -31,11 +31,15 @@ Run the tests with the command below:
 make test
 ```
 
+Acceptance tests interact with the real Aiven API and require an API token and existing project and organization on Aiven to create resources in. A non-default API URL can be used by setting the `AIVEN_WEB_URL` environment variable to e.g. `https://your.custom.api:443`.
+
 Run the acceptance tests with the commands below:
 
 ```bash
 export AIVEN_TOKEN="your-token"
 export AIVEN_PROJECT_NAME="your-project-name"
+export AIVEN_ORGANIZATION_NAME="your-existing-org-name"
+export AIVEN_ACCOUNT_NAME="$AIVEN_ORGANIZATION_NAME"
 
 # run all acceptance tests
 make test-acc

@@ -43,8 +43,8 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 	"peer_region": {
 		Optional:    true,
 		Type:        schema.TypeString,
-		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
-		Deprecated:  "This field is deprecated and will be removed in the next major release.",
+		ForceNew:    true,
+		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.",
 	},
 	"state": {
 		Computed:    true,

@@ -1,5 +1,3 @@
-//go:build sweep
-
 package serviceintegration
 
 import (
@@ -7,38 +5,37 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
 	ctx := context.Background()
 
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
-
-	resource.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
 		Name: "aiven_service_integration",
-		F:    sweepServiceIntegrations(ctx, client),
+		F:    sweepServiceIntegrations(ctx),
 	})
 
-	resource.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
 		Name: "aiven_service_integration_endpoint",
-		F:    sweepServiceIntegrationEndpoints(ctx, client),
+		F:    sweepServiceIntegrationEndpoints(ctx),
 	})
 }
 
-func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(region string) error {
-	return func(region string) error {
+func sweepServiceIntegrations(ctx context.Context) func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
 
 		services, err := client.Services.List(ctx, projectName)
-		if err != nil && !aiven.IsNotFound(err) {
-			return fmt.Errorf("error retrieving a list of service for a project `%s`: %s", projectName, err)
+		if common.IsCritical(err) {
+			return fmt.Errorf("error retrieving a list of service for a project `%s`: %w", projectName, err)
 		}
 
 		for _, service := range services {
@@ -48,21 +45,17 @@ func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(re
 
 			serviceIntegrations, err := client.ServiceIntegrations.List(ctx, projectName, service.Name)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %s", service.Name, err)
+				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %w", service.Name, err)
 			}
+
 			for _, serviceIntegration := range serviceIntegrations {
-				if err := client.ServiceIntegrations.Delete(
-					ctx,
-					projectName,
-					serviceIntegration.ServiceIntegrationID,
-				); err != nil {
-					if !aiven.IsNotFound(err) {
-						return fmt.Errorf(
-							"unable to delete service integration `%s`: %s",
-							serviceIntegration.ServiceIntegrationID,
-							err,
-						)
-					}
+				err = client.ServiceIntegrations.Delete(ctx, projectName, serviceIntegration.ServiceIntegrationID)
+				if common.IsCritical(err) {
+					return fmt.Errorf(
+						"unable to delete service integration `%s`: %w",
+						serviceIntegration.ServiceIntegrationID,
+						err,
+					)
 				}
 			}
 		}
@@ -71,9 +64,13 @@ func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(re
 	}
 }
 
-func sweepServiceIntegrationEndpoints(ctx context.Context, client *aiven.Client) func(region string) error {
-	return func(region string) error {
+func sweepServiceIntegrationEndpoints(ctx context.Context) func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
 
 		endpoints, err := client.ServiceIntegrationEndpoints.List(ctx, projectName)
 		if err != nil {
@@ -82,7 +79,7 @@ func sweepServiceIntegrationEndpoints(ctx context.Context, client *aiven.Client)
 
 		for _, endpoint := range endpoints {
 			err = client.ServiceIntegrationEndpoints.Delete(ctx, projectName, endpoint.EndpointID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return err
 			}
 		}

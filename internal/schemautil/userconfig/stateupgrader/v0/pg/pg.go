@@ -18,8 +18,8 @@ func aivenPGSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "PostgreSQL specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"replica_uri": {
@@ -89,19 +89,19 @@ func ResourcePG() *schema.Resource {
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypePG),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
 			),
 			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(

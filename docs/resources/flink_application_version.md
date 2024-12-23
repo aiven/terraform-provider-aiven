@@ -3,50 +3,56 @@
 page_title: "aiven_flink_application_version Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink Application Version resource allows the creation and management of Aiven Flink Application Versions.
+  Creates and manages an Aiven for Apache Flink® application version.
 ---
 
 # aiven_flink_application_version (Resource)
 
-The Flink Application Version resource allows the creation and management of Aiven Flink Application Versions.
+Creates and manages an Aiven for Apache Flink® application version.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_flink_application_version" "foo" {
-  project        = data.aiven_project.foo.project
-  service_name   = aiven_flink.foo.service_name
-  application_id = aiven_flink_application.foo.application_id
+resource "aiven_flink_application" "example_app" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
+  name         = "example-app"
+}
+
+resource "aiven_flink_application_version" "main" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_flink.example_flink.service_name
+  application_id = aiven_flink_application.example_app.application_id
   statement      = <<EOT
-   INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'"
+    INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'
   EOT
-  sinks {
+  sink {
     create_table   = <<EOT
-    "CREATE TABLE kafka_known_pizza (
+      CREATE TABLE kafka_known_pizza (
         shop STRING,
         name STRING
-    ) WITH (
+      ) WITH (
         'connector' = 'kafka',
         'properties.bootstrap.servers' = '',
         'scan.startup.mode' = 'earliest-offset',
-        'topic' = 'test_out',
+        'topic' = 'sink_topic',
         'value.format' = 'json'
-    )
-  EOT
+      )
+    EOT
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
-  sources {
+  source {
     create_table   = <<EOT
-    CREATE TABLE kafka_pizza (
+      CREATE TABLE kafka_pizza (
         shop STRING,
         name STRING
-    ) WITH (
+      ) WITH (
         'connector' = 'kafka',
         'properties.bootstrap.servers' = '',
         'scan.startup.mode' = 'earliest-offset',
-        'topic' = 'test',
+        'topic' = 'source_topic',
         'value.format' = 'json'
-    )
+      )
     EOT
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
@@ -58,37 +64,37 @@ resource "aiven_flink_application_version" "foo" {
 
 ### Required
 
-- `application_id` (String) Application ID
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `statement` (String) Job SQL statement
+- `application_id` (String) Application ID.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `statement` (String) Job SQL statement.
 
 ### Optional
 
-- `sink` (Block Set) Application sink (see [below for nested schema](#nestedblock--sink))
+- `sink` (Block Set) The sink table for the application. (see [below for nested schema](#nestedblock--sink))
 - `sinks` (Block Set, Deprecated) Application sinks (see [below for nested schema](#nestedblock--sinks))
-- `source` (Block Set) Application source (see [below for nested schema](#nestedblock--source))
+- `source` (Block Set) The source table for the application. (see [below for nested schema](#nestedblock--source))
 - `sources` (Block Set, Deprecated) Application sources (see [below for nested schema](#nestedblock--sources))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `application_version_id` (String) Application version ID
-- `created_at` (String) Application version creation time
-- `created_by` (String) Application version creator
+- `application_version_id` (String) Application version ID.
+- `created_at` (String) Application version creation time.
+- `created_by` (String) The user who created the application.
 - `id` (String) The ID of this resource.
-- `version` (Number) Application version number
+- `version` (Number) Application version number.
 
 <a id="nestedblock--sink"></a>
 ### Nested Schema for `sink`
 
 Required:
 
-- `create_table` (String) The CREATE TABLE statement
+- `create_table` (String) The [CREATE TABLE statement](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/table/sql/create/#create-table).
 
 Optional:
 
-- `integration_id` (String) The integration ID
+- `integration_id` (String) The ID of the service integration.
 
 
 <a id="nestedblock--sinks"></a>
@@ -108,11 +114,11 @@ Optional:
 
 Required:
 
-- `create_table` (String) The CREATE TABLE statement
+- `create_table` (String) The [CREATE TABLE statement](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/table/sql/create/#create-table).
 
 Optional:
 
-- `integration_id` (String) The integration ID
+- `integration_id` (String) TThe ID of the service integration.
 
 
 <a id="nestedblock--sources"></a>
@@ -143,5 +149,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application_version.v1 project/service/application_id/application_version_id
+terraform import aiven_flink_application_version.main PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID
 ```

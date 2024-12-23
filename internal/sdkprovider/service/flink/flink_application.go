@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -19,45 +20,45 @@ var aivenFlinkApplicationSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Application name",
+		Description: "The name of the application.",
 	},
 
 	// Computed fields.
 	"application_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application ID",
+		Description: "Application ID.",
 	},
 
 	"created_at": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application creation time",
+		Description: "Application creation time.",
 	},
 
 	"created_by": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application creator",
+		Description: "The user who created the application.",
 	},
 
 	"updated_at": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application update time",
+		Description: "When the application was updated.",
 	},
 
 	"updated_by": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application updater",
+		Description: "The user who updated the application.",
 	},
 }
 
 // ResourceFlinkApplication returns the Flink Application resource schema.
 func ResourceFlinkApplication() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink Application resource allows the creation and management of Aiven Flink Applications.",
+		Description:   "Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).",
 		ReadContext:   resourceFlinkApplicationRead,
 		CreateContext: resourceFlinkApplicationCreate,
 		UpdateContext: resourceFlinkApplicationUpdate,
@@ -166,7 +167,7 @@ func resourceFlinkApplicationDelete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	_, err = client.FlinkApplications.Delete(ctx, project, serviceName, ID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

@@ -5,11 +5,13 @@ import (
 	"strconv"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func DatasourceServiceComponent() *schema.Resource {
@@ -31,7 +33,7 @@ func DatasourceServiceComponent() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service component name",
-				ValidateFunc: validation.StringInSlice([]string{
+				ValidateFunc: validation.StringInSlice([]string{ // fixme: choices are missing from the schema
 					"cassandra",
 					"elasticsearch",
 					"grafana",
@@ -52,24 +54,16 @@ func DatasourceServiceComponent() *schema.Resource {
 				}, false),
 			},
 			"route": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Network access route",
-				ValidateFunc: validation.StringInSlice([]string{
-					"dynamic",
-					"public",
-					"private",
-					"privatelink",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(service.RouteTypeChoices(), false),
+				Description:  userconfig.Desc("Network access route").PossibleValuesString(service.RouteTypeChoices()...).Build(),
 			},
 			"kafka_authentication_method": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
-				ValidateFunc: validation.StringInSlice([]string{
-					"certificate",
-					"sasl",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(service.KafkaAuthenticationMethodTypeChoices(), false),
+				Description:  userconfig.Desc("Kafka authentication method. This is a value specific to the 'kafka' service component").PossibleValuesString(service.KafkaAuthenticationMethodTypeChoices()...).Build(),
 			},
 			"ssl": {
 				Type:     schema.TypeBool,
@@ -79,15 +73,11 @@ func DatasourceServiceComponent() *schema.Resource {
 					"disable encryption",
 			},
 			"usage": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "DNS usage name",
-				Default:     "primary",
-				ValidateFunc: validation.StringInSlice([]string{
-					"primary",
-					"replica",
-					"syncing",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "primary",
+				ValidateFunc: validation.StringInSlice(service.UsageTypeChoices(), false),
+				Description:  userconfig.Desc("DNS usage name").PossibleValuesString(service.UsageTypeChoices()...).Build(),
 			},
 			"host": {
 				Type:        schema.TypeString,

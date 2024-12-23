@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/opensearch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -32,8 +33,8 @@ var aivenOpenSearchACLRuleSchema = map[string]*schema.Schema{
 	"permission": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
-		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
+		ValidateFunc: validation.StringInSlice(opensearch.PermissionTypeChoices(), false),
+		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValuesString(opensearch.PermissionTypeChoices()...).Build(),
 	},
 }
 
@@ -53,7 +54,7 @@ func ResourceOpenSearchACLRule() *schema.Resource {
 	}
 }
 
-func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticSearchACLConfig, username, index string) (string, bool) {
+func resourceOpenSearchACLRuleGetPermissionFromACLResponse(cfg aiven.OpenSearchACLConfig, username, index string) (string, bool) {
 	for _, acl := range cfg.ACLs {
 		if acl.Username != username {
 			continue
@@ -75,11 +76,11 @@ func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
+	r, err := client.OpenSearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
-	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index)
+	permission, found := resourceOpenSearchACLRuleGetPermissionFromACLResponse(r.OpenSearchACLConfig, username, index)
 	if !found {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -103,10 +104,10 @@ func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiven.ElasticSearchACL {
-	return aiven.ElasticSearchACL{
+func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiven.OpenSearchACL {
+	return aiven.OpenSearchACL{
 		Username: username,
-		Rules: []aiven.ElasticsearchACLRule{
+		Rules: []aiven.OpenSearchACLRule{
 			{
 				Index:      index,
 				Permission: permission,
@@ -124,7 +125,7 @@ func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierUpdateACLRule(ctx, username, index, permission)
+	modifier := resourceOpenSearchACLModifierUpdateACLRule(ctx, username, index, permission)
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
@@ -144,7 +145,7 @@ func resourceOpenSearchACLRuleDelete(ctx context.Context, d *schema.ResourceData
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierDeleteACLRule(ctx, username, index, permission)
+	modifier := resourceOpenSearchACLModifierDeleteACLRule(ctx, username, index, permission)
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)

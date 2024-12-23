@@ -2,6 +2,7 @@ package connectionpool_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -197,7 +198,8 @@ func testAccCheckAivenConnectionPoolResourceDestroy(s *terraform.State) error {
 
 		pool, err := c.ConnectionPools.Get(ctx, projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}

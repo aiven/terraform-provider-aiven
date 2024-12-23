@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/vpc"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,16 +27,16 @@ func DatasourceProjectVPC() *schema.Resource {
 		},
 		"cloud_name": {
 			Type:          schema.TypeString,
-			Description:   "Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.",
+			Description:   "The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.",
 			Optional:      true,
 			ConflictsWith: []string{"vpc_id"},
 		},
 		"vpc_id": {
 			Type:          schema.TypeString,
-			Description:   "ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.",
+			Description:   "The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.",
 			Optional:      true,
 			ConflictsWith: []string{"project", "cloud_name"},
-			ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+			ValidateDiagFunc: func(i interface{}, _ cty.Path) diag.Diagnostics {
 				_, err := schemautil.SplitResourceID(i.(string), 2)
 				if err != nil {
 					return diag.Errorf("invalid vpc_id, should have the following format {project_name}/{project_vpc_id}: %s", err)
@@ -46,18 +47,18 @@ func DatasourceProjectVPC() *schema.Resource {
 		"network_cidr": {
 			Computed:    true,
 			Type:        schema.TypeString,
-			Description: "Network address range used by the VPC like 192.168.0.0/24",
+			Description: "Network address range used by the VPC. For example, `192.168.0.0/24`.",
 		},
 		"state": {
 			Computed:    true,
 			Type:        schema.TypeString,
-			Description: userconfig.Desc("State of the VPC.").PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
+			Description: userconfig.Desc("State of the VPC.").PossibleValuesString(vpc.VpcStateTypeChoices()...).Build(),
 		},
 	}
 
 	return &schema.Resource{
 		ReadContext: datasourceProjectVPCRead,
-		Description: "The Project VPC data source provides information about the existing Aiven Project VPC.",
+		Description: "Gets information about the VPC for an Aiven project.",
 		Schema:      aivenProjectVPCDataSourceSchema,
 	}
 }

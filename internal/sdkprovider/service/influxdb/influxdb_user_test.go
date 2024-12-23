@@ -2,6 +2,7 @@ package influxdb_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -56,7 +57,8 @@ func testAccCheckAivenInfluxDBUserResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}
@@ -164,6 +166,22 @@ func testAccCheckAivenServiceInfluxdbAttributes(n string) resource.TestCheckFunc
 
 		if a["influxdb_user_config.0.public_access.0.influxdb"] != "true" {
 			return fmt.Errorf("expected to get a correct public_access.influxdb from Aiven")
+		}
+
+		if a["influxdb.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["influxdb.0.username"] == "" {
+			return fmt.Errorf("expected to get correct username from Aiven")
+		}
+
+		if a["influxdb.0.password"] == "" {
+			return fmt.Errorf("expected to get correct password from Aiven")
+		}
+
+		if a["influxdb.0.database_name"] == "" {
+			return fmt.Errorf("expected to get correct database_name from Aiven")
 		}
 
 		return nil

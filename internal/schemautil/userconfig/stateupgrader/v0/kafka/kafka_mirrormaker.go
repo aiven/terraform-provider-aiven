@@ -17,6 +17,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka MirrorMaker 2 server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
@@ -38,15 +39,15 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(

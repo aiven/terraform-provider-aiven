@@ -1,5 +1,5 @@
-data "aiven_cassandra" "bar" {
-  project      = data.aiven_project.foo.project
-  service_name = "<SERVICE_NAME>"
+data "aiven_cassandra" "example_cassandra" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-cassandra-service"
 }
 

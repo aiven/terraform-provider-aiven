@@ -3,19 +3,19 @@
 page_title: "aiven_azure_privatelink Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.
+  Gets information about an Azure Private Link connection for an Aiven service.
 ---
 
 # aiven_azure_privatelink (Data Source)
 
-The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.
+Gets information about an Azure Private Link connection for an Aiven service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_azure_privatelink" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
+data "aiven_azure_privatelink" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
 }
 ```
 
@@ -24,14 +24,14 @@ data "aiven_azure_privatelink" "foo" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `azure_service_alias` (String) Azure Privatelink service alias
-- `azure_service_id` (String) Azure Privatelink service ID
+- `azure_service_alias` (String) The Azure Private Link service alias.
+- `azure_service_id` (String) The Azure Private Link service ID.
 - `id` (String) The ID of this resource.
-- `message` (String) Printable result of the Azure Privatelink request
-- `state` (String) Privatelink resource state
-- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs. Maximum length: `16`.
+- `message` (String) Printable result of the Azure Private Link request.
+- `state` (String) The state of the Private Link resource.
+- `user_subscription_ids` (Set of String) A list of allowed subscription IDs. Maximum length: `16`.

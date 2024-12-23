@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -16,7 +17,11 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
+const accountTeamDeprecated = "This resource is deprecated. Can't run tests"
+
 func TestAccAivenAccountTeam_basic(t *testing.T) {
+	t.Skip(accountTeamDeprecated)
+
 	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
 		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
 	}
@@ -79,7 +84,8 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 
 		r, err := c.Accounts.List(ctx)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 
@@ -90,7 +96,8 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 			if ac.Id == accountID {
 				rl, err := c.AccountTeams.List(ctx, accountID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var e aiven.Error
+					if errors.As(err, &e) && e.Status != 404 {
 						return err
 					}
 

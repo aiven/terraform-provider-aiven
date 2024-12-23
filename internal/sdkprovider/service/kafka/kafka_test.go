@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func TestAccAiven_kafka(t *testing.T) {
@@ -76,14 +76,14 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
-					func(state *terraform.State) error {
+					func(_ *terraform.State) error {
 						c := acc.GetTestAivenClient()
 
 						ctx := context.Background()
 
 						a, err := c.KafkaACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
-						if err != nil && !aiven.IsNotFound(err) {
-							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
+						if common.IsCritical(err) {
+							return fmt.Errorf("cannot get a list of kafka ACLs: %w", err)
 						}
 
 						if len(a) > 0 {
@@ -91,8 +91,8 @@ func TestAccAiven_kafka(t *testing.T) {
 						}
 
 						s, err := c.KafkaSchemaRegistryACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
-						if err != nil && !aiven.IsNotFound(err) {
-							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %s", err)
+						if common.IsCritical(err) {
+							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %w", err)
 						}
 
 						if len(s) > 0 {
@@ -323,6 +323,22 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
+		if a["kafka_user_config.0.ip_filter.0"] != "0.0.0.0/0" {
+			return fmt.Errorf("expected to get a correct ip_filter from Aiven")
+		}
+
+		if a["kafka.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get uris from Aiven")
+		}
+
+		if a["kafka.0.access_cert"] == "" {
+			return fmt.Errorf("expected to get an access_cert from Aiven")
+		}
+
+		if a["kafka.0.access_key"] == "" {
+			return fmt.Errorf("expected to get an access_key from Aiven")
+		}
+
 		if a["kafka.0.rest_uri"] == "" {
 			return fmt.Errorf("expected to get a rest_uri from Aiven")
 		}
@@ -331,19 +347,11 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a schema_registry_uri from Aiven")
 		}
 
-		if a["kafka.0.access_key"] == "" {
-			return fmt.Errorf("expected to get an access_key from Aiven")
-		}
-
-		if a["kafka.0.access_cert"] == "" {
-			return fmt.Errorf("expected to get an access_cert from Aiven")
-		}
-
 		return nil
 	}
 }
 
-func testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix string) string {
+func testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix string) string {
 	return fmt.Sprintf(`
 resource "aiven_kafka" "kafka" {
   project                 = "%s"
@@ -366,7 +374,7 @@ resource "aiven_kafka" "kafka" {
 `, project, prefix)
 }
 
-func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
+func TestAccAiven_kafka_user_config_kafka_omits_null_fields(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
@@ -376,13 +384,101 @@ func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix),
+				Config: testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms", "0"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccAiven_kafka_user_config_boolean_field_removed removed boolean field should not get "false"
+func TestAccAiven_kafka_user_config_boolean_field_removed(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	resourceName := "aiven_kafka.kafka"
+	withConfig := func(c string) string {
+		return fmt.Sprintf(`
+resource "aiven_kafka" "kafka" {
+  project      = "%s"
+  service_name = "%s-kafka"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-2"
+
+  %s
+}
+`, project, prefix, c)
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Creates kafka with a "true" value in the user config
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+				),
+			},
+			{
+				// Removes the config and expects nothing changed
+				Config: withConfig(``),
+				Check: resource.ComposeTestCheckFunc(
+					// The value remains true
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+				),
+			},
+			{
+				// Sets another field to test that parental "HasChange" doesn't affect sibling field.
+				// For instance, if a sibling is changed, it changes the parent.
+				// That breaks the logic of: d.HasChange(k) && d.HasChange(parentOfK)
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+	kafka_rest      = true
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "true"),
+				),
+			},
+			{
+				// Now schema_registry must remain calm, and not affected by kafka_rest
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+	kafka_rest      = false
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
+				),
+			},
+			{
+				// Field removal works too
+				Config: withConfig(`
+kafka_user_config {
+	kafka_rest      = false
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
+				),
+			},
+			{
+				// Removing the whole block acts as expected
+				Config: withConfig(``),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
 				),
 			},
 		},

@@ -1,3 +1,3 @@
-data "aiven_billing_group" "foo" {
-  name = "<BILLING_GROUP_NAME>"
+data "aiven_billing_group" "example_billing_group" {
+  name = "example-billing-group"
 }

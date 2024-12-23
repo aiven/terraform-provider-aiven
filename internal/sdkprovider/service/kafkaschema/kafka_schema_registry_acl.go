@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -19,8 +21,8 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice([]string{"schema_registry_read", "schema_registry_write"}, false),
-		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.PermissionTypeChoices(), false),
+		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValuesString(kafkaschemaregistry.PermissionTypeChoices()...).Build(),
 	},
 	"resource": {
 		Type:        schema.TypeString,
@@ -114,7 +116,7 @@ func resourceKafkaSchemaRegistryACLDelete(ctx context.Context, d *schema.Resourc
 	}
 
 	err = client.KafkaSchemaRegistryACLs.Delete(ctx, projectName, serviceName, aclID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

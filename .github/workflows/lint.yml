@@ -26,21 +26,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@v5
+      - uses: wagoid/commitlint-github-action@v6
       
   semgrep:
     runs-on: ubuntu-latest
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    container:
+      image: returntocorp/semgrep
     steps:
       - uses: actions/checkout@v4
-      - uses: returntocorp/semgrep-action@v1
+        with:
+          fetch-depth: 0
+      - run: semgrep ci --config auto --no-suppress-errors
 
   make_lint:
     runs-on: ubuntu-latest
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -51,9 +57,24 @@ jobs:
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
       - run: make docs
       - run: git diff --exit-code
+  
+  sweep_check:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+        
+    - run: make sweep-check

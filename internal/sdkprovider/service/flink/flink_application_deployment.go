@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -22,13 +21,13 @@ var aivenFlinkApplicationDeploymentSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: "Application ID",
+		Description: "Application ID.",
 	},
 	// Request fields.
 	"parallelism": {
 		Type:         schema.TypeInt,
 		Optional:     true,
-		Description:  "Flink Job parallelism",
+		Description:  "The number of parallel instances for the task.",
 		ValidateFunc: validation.IntBetween(1, 128),
 		ForceNew:     true,
 		Default:      1,
@@ -36,41 +35,40 @@ var aivenFlinkApplicationDeploymentSchema = map[string]*schema.Schema{
 	"restart_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: "Specifies whether a Flink Job is restarted in case it fails",
+		Description: "Restart a Flink job if it fails.",
 		ForceNew:    true,
 		Default:     true,
 	},
 	"starting_savepoint": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		Description:  "Job savepoint",
+		Description:  "The savepoint to deploy from.",
 		ValidateFunc: validation.StringLenBetween(1, 2048),
 		ForceNew:     true,
 	},
 	"version_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "ApplicationVersion ID",
+		Description: "Application version ID.",
 		ForceNew:    true,
 	},
 	// Computed fields.
 	"created_at": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application deployment creation time",
+		Description: "Application deployment creation time.",
 	},
 	"created_by": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application deployment creator",
+		Description: "The user who deployed the application.",
 	},
 }
 
 // ResourceFlinkApplicationDeployment returns the schema for the Flink Application Deployment resource.
 func ResourceFlinkApplicationDeployment() *schema.Resource {
 	return &schema.Resource{
-		Description: "The Flink Application Deployment resource allows the creation and management of Aiven Flink " +
-			"Application Deployments.",
+		Description:   "Creates and manages the deployment of an Aiven for Apache Flink® application.",
 		CreateContext: resourceFlinkApplicationDeploymentCreate,
 		ReadContext:   resourceFlinkApplicationDeploymentRead,
 		DeleteContext: resourceFlinkApplicationDeploymentDelete,
@@ -123,8 +121,6 @@ func resourceFlinkApplicationDeploymentCreate(
 }
 
 // resourceFlinkApplicationDeploymentDelete deletes an existing Flink Application Deployment resource.
-//
-//nolint:staticcheck // Ignore resource.StateChangeConf deprecation warning.
 func resourceFlinkApplicationDeploymentDelete(
 	ctx context.Context,
 	d *schema.ResourceData,
@@ -137,42 +133,30 @@ func resourceFlinkApplicationDeploymentDelete(
 		return diag.Errorf("cannot read Flink Application Deployment resource ID: %v", err)
 	}
 
-	_, err = client.FlinkApplicationDeployments.Cancel(ctx, project, serviceName, applicationID, deploymentID)
-	if err != nil {
-		return diag.Errorf("error cancelling Flink Application Deployment: %v", err)
-	}
-
-	//goland:noinspection GoDeprecation
-	conf := &resource.StateChangeConf{
-		Pending: []string{
-			"CANCELLING",
-		},
-		Target: []string{
-			"CANCELED",
-		},
-		Refresh: func() (interface{}, string, error) {
-			r, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
-			if err != nil {
-				return nil, "", err
+	// Flink Application Deployment has a quite complicated state machine
+	// https://api.aiven.io/doc/#tag/Service:_Flink/operation/ServiceFlinkDeleteApplicationDeployment
+	// Retries until succeeds or exceeds the timeout
+	for {
+		select {
+		case <-ctx.Done():
+			// The context itself already comes with delete timeout
+			return diag.Errorf("can't delete Flink Application Deployment: %s", ctx.Err())
+		case <-time.After(time.Second):
+			_, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
+			if aiven.IsNotFound(err) {
+				return nil
 			}
-			return r, r.Status, nil
-		},
-		Delay:      1 * time.Second,
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 1 * time.Second,
-	}
 
-	_, err = conf.WaitForStateContext(ctx)
-	if err != nil {
-		return diag.Errorf("error waiting for Flink Application Deployment to become canceled: %s", err)
-	}
+			// Must be canceled before deleted
+			_, err = client.FlinkApplicationDeployments.Cancel(ctx, project, serviceName, applicationID, deploymentID)
+			if err == nil {
+				continue
+			}
 
-	_, err = client.FlinkApplicationDeployments.Delete(ctx, project, serviceName, applicationID, deploymentID)
-	if err != nil {
-		return diag.Errorf("error deleting Flink Application Deployment: %v", err)
+			// Completely ignores all errors, until it gets 404 on GET request
+			_, _ = client.FlinkApplicationDeployments.Delete(ctx, project, serviceName, applicationID, deploymentID)
+		}
 	}
-
-	return nil
 }
 
 // resourceFlinkApplicationDeploymentRead reads an existing Flink Application Deployment resource.

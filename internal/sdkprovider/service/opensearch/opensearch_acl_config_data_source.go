@@ -24,7 +24,7 @@ func datasourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceDa
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	acl, err := client.ElasticsearchACLs.Get(ctx, projectName, serviceName)
+	acl, err := client.OpenSearchACLs.Get(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

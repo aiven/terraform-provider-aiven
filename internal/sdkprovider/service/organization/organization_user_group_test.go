@@ -2,6 +2,7 @@ package organization_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -59,9 +60,14 @@ data "aiven_organization_user_group" "bar" {
 }
 
 func testAccCheckAivenOrganizationUserGroupResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	var (
+		c, err = acc.GetTestGenAivenClient()
+		ctx    = context.Background()
+	)
 
-	ctx := context.Background()
+	if err != nil {
+		return fmt.Errorf("failed to instantiate GenAiven client: %w", err)
+	}
 
 	// loop through the resources in state, verifying each organization user group is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -74,9 +80,10 @@ func testAccCheckAivenOrganizationUserGroupResourceDestroy(s *terraform.State) e
 			return err
 		}
 
-		r, err := c.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
+		r, err := c.UserGroupGet(ctx, orgID, userGroupID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 

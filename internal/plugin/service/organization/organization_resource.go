@@ -73,10 +73,10 @@ func (r *organizationResource) TypeName() string {
 // Schema defines the schema for the organization resource.
 func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: "Creates and manages an organization in Aiven.",
+		Description: "Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Identifier of the organization.",
+				Description: "ID of the organization.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -87,7 +87,7 @@ func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequ
 				Required:    true,
 			},
 			"tenant_id": schema.StringAttribute{
-				Description: "Tenant identifier of the organization.",
+				Description: "Tenant ID of the organization.",
 				Computed:    true,
 			},
 			"create_time": schema.StringAttribute{
@@ -211,10 +211,9 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	_, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
+	if _, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
 		Name: plan.Name.ValueString(),
-	})
-	if err != nil {
+	}); err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
@@ -247,8 +246,7 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err = r.client.Accounts.Delete(ctx, normalizedID)
-	if err != nil {
+	if err = r.client.Accounts.Delete(ctx, normalizedID); err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return

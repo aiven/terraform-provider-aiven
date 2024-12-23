@@ -1,1 +1,1 @@
-terraform import aiven_cassandra.bar project/service_name
+terraform import aiven_cassandra.example_cassandra PROJECT/SERVICE_NAME

@@ -2,6 +2,7 @@ package project_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -58,16 +59,25 @@ func TestAccAivenProject_accounts(t *testing.T) {
 	resourceName := "aiven_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
+	config := testAccProjectResourceAccounts(rName)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenProjectResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectResourceAccounts(rName),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectAttributes("data.aiven_project.project", "account_id"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+				),
+			},
+			{
+				// Tests account_id (deprecated) -> parent_id migration
+				Config: regexp.MustCompile(`account_id\s+=`).ReplaceAllString(config, "parent_id ="),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "account_id"), // it is computed and should be set
+					resource.TestCheckResourceAttrSet(resourceName, "parent_id"),
 				),
 			},
 		},
@@ -255,8 +265,8 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 
 		p, err := c.Projects.Get(ctx, rs.Primary.ID)
 		if err != nil {
-			errStatus := err.(aiven.Error).Status
-			if errStatus != 404 && errStatus != 403 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
 		}

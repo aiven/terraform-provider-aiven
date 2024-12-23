@@ -3,19 +3,19 @@
 page_title: "aiven_cassandra Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Cassandra data source provides information about the existing Aiven Cassandra service.
+  Gets information about an Aiven for Apache Cassandra® service.
 ---
 
 # aiven_cassandra (Data Source)
 
-The Cassandra data source provides information about the existing Aiven Cassandra service.
+Gets information about an Aiven for Apache Cassandra® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_cassandra" "bar" {
-  project      = data.aiven_project.foo.project
-  service_name = "<SERVICE_NAME>"
+data "aiven_cassandra" "example_cassandra" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-cassandra-service"
 }
 ```
 
@@ -24,14 +24,14 @@ data "aiven_cassandra" "bar" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
 
-- `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `cassandra` (List of Object) Cassandra server provided values (see [below for nested schema](#nestedatt--cassandra))
-- `cassandra_user_config` (List of Object) Cassandra user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
+- `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
+- `cassandra` (List of Object, Sensitive) Values provided by the Cassandra server. (see [below for nested schema](#nestedatt--cassandra))
+- `cassandra_user_config` (List of Object) Cassandra user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--cassandra_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
@@ -42,10 +42,10 @@ data "aiven_cassandra" "bar" {
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_host` (String) The hostname of the service.
-- `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
+- `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
@@ -54,6 +54,7 @@ data "aiven_cassandra" "bar" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--cassandra"></a>
@@ -61,6 +62,7 @@ data "aiven_cassandra" "bar" {
 
 Read-Only:
 
+- `uris` (List of String)
 
 
 <a id="nestedatt--cassandra_user_config"></a>
@@ -73,13 +75,14 @@ Read-Only:
 - `backup_minute` (Number)
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
-- `ip_filter` (List of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter` (Set of String)
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String)
 - `migrate_sstableloader` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--public_access))
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `service_to_join_with` (String)
 - `static_ips` (Boolean)
@@ -92,6 +95,8 @@ Read-Only:
 - `batch_size_fail_threshold_in_kb` (Number)
 - `batch_size_warn_threshold_in_kb` (Number)
 - `datacenter` (String)
+- `read_request_timeout_in_ms` (Number)
+- `write_request_timeout_in_ms` (Number)
 
 
 <a id="nestedobjatt--cassandra_user_config--ip_filter_object"></a>
@@ -126,6 +131,7 @@ Read-Only:
 Read-Only:
 
 - `component` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
@@ -150,3 +156,11 @@ Read-Only:
 
 - `key` (String)
 - `value` (String)
+
+
+<a id="nestedatt--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Read-Only:
+
+- `email` (String)

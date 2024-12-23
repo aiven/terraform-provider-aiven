@@ -954,7 +954,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 
 		service, err := c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			return fmt.Errorf("cannot get service %s err: %s", serviceName, err)
+			return fmt.Errorf("cannot get service %s err: %w", serviceName, err)
 		}
 
 		if service.TerminationProtection == false {
@@ -985,7 +985,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 		)
 
 		if err != nil {
-			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %s", err)
+			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
 		}
 
 		return nil
@@ -1025,16 +1025,12 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct uri from Aiven")
 		}
 
-		if a["pg.0.dbname"] != "defaultdb" {
-			return fmt.Errorf("expected to get a correct dbname from Aiven")
+		if a["pg.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get uris from Aiven")
 		}
 
 		if a["pg.0.host"] == "" {
 			return fmt.Errorf("expected to get a correct host from Aiven")
-		}
-
-		if a["pg.0.password"] == "" {
-			return fmt.Errorf("expected to get a correct password from Aiven")
 		}
 
 		if a["pg.0.port"] == "" {
@@ -1049,10 +1045,102 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct user from Aiven")
 		}
 
+		if a["pg.0.password"] == "" {
+			return fmt.Errorf("expected to get a correct password from Aiven")
+		}
+
+		if a["pg.0.dbname"] != "defaultdb" {
+			return fmt.Errorf("expected to get a correct dbname from Aiven")
+		}
+
+		if a["pg.0.params.#"] == "" {
+			return fmt.Errorf("expected to get params from Aiven")
+		}
+
+		if a["pg.0.params.0.host"] == "" {
+			return fmt.Errorf("expected to get a correct host from Aiven")
+		}
+
+		if a["pg.0.params.0.port"] == "" {
+			return fmt.Errorf("expected to get a correct port from Aiven")
+		}
+
+		if a["pg.0.params.0.sslmode"] != "require" {
+			return fmt.Errorf("expected to get a correct sslmode from Aiven")
+		}
+
+		if a["pg.0.params.0.user"] != "avnadmin" {
+			return fmt.Errorf("expected to get a correct user from Aiven")
+		}
+
+		if a["pg.0.params.0.password"] == "" {
+			return fmt.Errorf("expected to get a correct password from Aiven")
+		}
+
+		if a["pg.0.params.0.database_name"] != "defaultdb" {
+			return fmt.Errorf("expected to get a correct database_name from Aiven")
+		}
+
 		if a["pg.0.max_connections"] != "100" && a["pg.0.max_connections"] != "200" {
 			return fmt.Errorf("expected to get a correct max_connections from Aiven")
 		}
 
 		return nil
 	}
+}
+
+func TestAccAivenServicePG_disaster_recovery(t *testing.T) {
+	t.Skip("the feature is disabled")
+	primaryName := "aiven_pg.primary"
+	secondaryName := "aiven_pg.secondary"
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	randStr := acc.RandStr()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPGServiceResourceDisasterRecovery(projectName, randStr),
+				Check: resource.ComposeTestCheckFunc(
+					acc.TestAccCheckAivenServiceCommonAttributes(primaryName),
+					acc.TestAccCheckAivenServiceCommonAttributes(secondaryName),
+					// One service integration should be created
+					resource.TestCheckResourceAttr(secondaryName, "service_integrations.#", "1"),
+					// Which is of type disaster_recovery
+					resource.TestCheckTypeSetElemNestedAttrs(secondaryName, "service_integrations.*", map[string]string{
+						"integration_type":    "disaster_recovery",
+						"source_service_name": "test-acc-primary-" + randStr,
+					}),
+				),
+			},
+		},
+	})
+}
+
+func testAccPGServiceResourceDisasterRecovery(project, randStr string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "primary" {
+  project                 = "%[1]s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-primary-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_pg" "secondary" {
+  project                 = aiven_pg.primary.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-secondary-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  service_integrations {
+    integration_type    = "disaster_recovery"
+    source_service_name = "test-acc-primary-%[2]s"
+  }
+}
+`, project, randStr)
 }

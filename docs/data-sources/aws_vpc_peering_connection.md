@@ -3,20 +3,27 @@
 page_title: "aiven_aws_vpc_peering_connection Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The AWS VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
+  Gets information about an AWS VPC peering connection.
 ---
 
 # aiven_aws_vpc_peering_connection (Data Source)
 
-The AWS VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
+Gets information about an AWS VPC peering connection.
 
 ## Example Usage
 
 ```terraform
-data "aiven_aws_vpc_peering_connection" "foo" {
-  vpc_id         = data.aiven_project_vpc.vpc.id
-  aws_account_id = "XXXXX"
-  aws_vpc_id     = "XXXXX"
+resource "aiven_project_vpc" "example_vpc" {
+  project      = data.aiven_project.example_project.project
+  cloud_name   = "google-europe-west1"
+  network_cidr = "192.168.1.0/24"
+}
+
+data "aiven_aws_vpc_peering_connection" "aws_to_aiven_peering" {
+  vpc_id         = aiven_project_vpc.example_vpc.id
+  aws_account_id = var.aws_id
+  aws_vpc_id     = "vpc-1a2b3c4d5e6f7g8h9"
+  aws_vpc_region = "aws-us-east-2"
 }
 ```
 
@@ -25,14 +32,14 @@ data "aiven_aws_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `aws_account_id` (String) AWS account ID. This property cannot be changed, doing so forces recreation of the resource.
-- `aws_vpc_id` (String) AWS VPC ID. This property cannot be changed, doing so forces recreation of the resource.
-- `aws_vpc_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
-- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `aws_account_id` (String) AWS account ID. Changing this property forces recreation of the resource.
+- `aws_vpc_id` (String) AWS VPC ID. Changing this property forces recreation of the resource.
+- `aws_vpc_region` (String) The AWS region of the peered VPC, if different from the Aiven VPC region. Changing this property forces recreation of the resource.
+- `vpc_id` (String) The ID of the Aiven VPC. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `aws_vpc_peering_connection_id` (String) AWS VPC peering connection ID
+- `aws_vpc_peering_connection_id` (String) The ID of the AWS VPC peering connection.
 - `id` (String) The ID of this resource.
-- `state` (String) State of the peering connection
-- `state_info` (Map of String) State-specific help or error information
+- `state` (String) The state of the peering connection.
+- `state_info` (Map of String) State-specific help or error information.

@@ -9,7 +9,7 @@ import (
 func DatasourceClickhouse() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: "The Clickhouse data source provides information about the existing Aiven Clickhouse service.",
+		Description: "Gets information about a ClickHouse service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(clickhouseSchema(), "project", "service_name"),
 	}
 }

@@ -21,7 +21,7 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: "Application ID",
+		Description: "Application ID.",
 	},
 	"sinks": {
 		Type:             schema.TypeSet,
@@ -52,7 +52,7 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeSet,
 		Optional:         true,
 		ForceNew:         true,
-		Description:      "Application sink",
+		Description:      "The sink table for the application.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		ConflictsWith:    []string{"sinks"},
 		Elem: &schema.Resource{
@@ -61,13 +61,13 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 					Type:        schema.TypeString,
 					Required:    true,
 					ForceNew:    true,
-					Description: "The CREATE TABLE statement",
+					Description: "The [CREATE TABLE statement](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/table/sql/create/#create-table).",
 				},
 				"integration_id": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
-					Description: "The integration ID",
+					Description: "The ID of the service integration.",
 				},
 			},
 		},
@@ -101,7 +101,7 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeSet,
 		Optional:         true,
 		ForceNew:         true,
-		Description:      "Application source",
+		Description:      "The source table for the application.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		ConflictsWith:    []string{"sources"},
 		Elem: &schema.Resource{
@@ -110,13 +110,13 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 					Type:        schema.TypeString,
 					Required:    true,
 					ForceNew:    true,
-					Description: "The CREATE TABLE statement",
+					Description: "The [CREATE TABLE statement](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/table/sql/create/#create-table).",
 				},
 				"integration_id": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
-					Description: "The integration ID",
+					Description: "TThe ID of the service integration.",
 				},
 			},
 		},
@@ -125,36 +125,36 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: "Job SQL statement",
+		Description: "Job SQL statement.",
 	},
 
 	// Computed fields.
 	"application_version_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application version ID",
+		Description: "Application version ID.",
 	},
 	"created_at": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application version creation time",
+		Description: "Application version creation time.",
 	},
 	"created_by": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application version creator",
+		Description: "The user who created the application.",
 	},
 	"version": {
 		Type:        schema.TypeInt,
 		Computed:    true,
-		Description: "Application version number",
+		Description: "Application version number.",
 	},
 }
 
 // ResourceFlinkApplicationVersion returns the Flink Application Version resource schema.
 func ResourceFlinkApplicationVersion() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink Application Version resource allows the creation and management of Aiven Flink Application Versions.",
+		Description:   "Creates and manages an Aiven for Apache Flink® application version.",
 		CreateContext: resourceFlinkApplicationVersionCreate,
 		ReadContext:   resourceFlinkApplicationVersionRead,
 		DeleteContext: resourceFlinkApplicationVersionDelete,
@@ -232,13 +232,13 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 
 // expandFlinkApplicationVersionSourcesOrSinks expands the sources or sinks from the Terraform schema to the Aiven API.
 func expandFlinkApplicationVersionSourcesOrSinks(sources []interface{}) []aiven.FlinkApplicationVersionRelation {
-	var result []aiven.FlinkApplicationVersionRelation
-	for _, source := range sources {
+	result := make([]aiven.FlinkApplicationVersionRelation, len(sources))
+	for i, source := range sources {
 		sourceMap := source.(map[string]interface{})
-		result = append(result, aiven.FlinkApplicationVersionRelation{
+		result[i] = aiven.FlinkApplicationVersionRelation{
 			CreateTable:   sourceMap["create_table"].(string),
 			IntegrationID: sourceMap["integration_id"].(string),
-		})
+		}
 	}
 
 	return result
@@ -325,12 +325,12 @@ func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.Resource
 
 // flattenFlinkApplicationVersionSourcesOrSinks is a helper function to flatten the sources and sinks fields.
 func flattenFlinkApplicationVersionSourcesOrSinks(sources []aiven.FlinkApplicationVersionRelation) []map[string]interface{} {
-	var result []map[string]interface{}
-	for _, source := range sources {
-		result = append(result, map[string]interface{}{
+	result := make([]map[string]interface{}, len(sources))
+	for i, source := range sources {
+		result[i] = map[string]interface{}{
 			"create_table":   source.CreateTable,
 			"integration_id": source.IntegrationID,
-		})
+		}
 	}
 
 	return result

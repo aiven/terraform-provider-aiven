@@ -24,10 +24,6 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			//{
-			//	Config:      testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName),
-			//	ExpectError: regexp.MustCompile("please try specifying 'kafka_authentication_method' to filter the results"),
-			//},
 			{
 				Config:      testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(rName),
 				ExpectError: regexp.MustCompile("cannot find component"),
@@ -56,7 +52,7 @@ func testAccServiceComponentAttributes(n, component, route string) resource.Test
 		a := r.Primary.Attributes
 
 		if a["project"] != os.Getenv("AIVEN_PROJECT_NAME") {
-			return fmt.Errorf("expected to get a corect project name from Aiven got: " + a["project"])
+			return fmt.Errorf("expected to get a corect project name from Aiven got: " + a["project"]) //nolint //fixme: remove when fixed https://github.com/anchore/syft/issues/3126
 		}
 
 		if a["component"] != component {
@@ -171,11 +167,13 @@ data "aiven_project" "foo" {
   project = "%s"
 }
 
-resource "aiven_kafka" "kafka" {
-  project      = data.aiven_project.foo.project
-  service_name = "test-acc-sr-%s"
-  cloud_name   = "google-europe-west3"
-  plan         = "startup-2"
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
 
   kafka_user_config {
     public_access {
@@ -183,13 +181,14 @@ resource "aiven_kafka" "kafka" {
     }
   }
 }
+
 data "aiven_service_component" "kafka" {
-  project                     = aiven_kafka.kafka.project
-  service_name                = aiven_kafka.kafka.service_name
+  project                     = aiven_kafka.bar.project
+  service_name                = aiven_kafka.bar.service_name
   component                   = "kafka"
   route                       = "dynamic"
   kafka_authentication_method = "sasl"
 
-  depends_on = [aiven_kafka.kafka]
+  depends_on = [aiven_kafka.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

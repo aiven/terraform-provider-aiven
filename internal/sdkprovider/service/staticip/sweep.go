@@ -1,5 +1,3 @@
-//go:build sweep
-
 package staticip
 
 import (
@@ -10,20 +8,16 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
 	ctx := context.Background()
 
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
-
-	resource.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
 		Name: "aiven_static_ip",
-		F:    sweepStaticIPs(ctx, client),
+		F:    sweepStaticIPs(ctx),
 		Dependencies: []string{
 			"aiven_cassandra",
 			"aiven_clickhouse",
@@ -44,9 +38,13 @@ func init() {
 
 }
 
-func sweepStaticIPs(ctx context.Context, client *aiven.Client) func(region string) error {
-	return func(region string) error {
+func sweepStaticIPs(ctx context.Context) func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
 
 		r, err := client.StaticIPs.List(ctx, projectName)
 		if err != nil {
@@ -60,7 +58,7 @@ func sweepStaticIPs(ctx context.Context, client *aiven.Client) func(region strin
 				aiven.DeleteStaticIPRequest{
 					StaticIPAddressID: ip.StaticIPAddressID,
 				})
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting staticip: %w", err)
 			}
 		}

@@ -3,23 +3,29 @@
 page_title: "aiven_azure_vpc_peering_connection Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Azure VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.
+  Creates and manages an Azure VPC peering connection with an Aiven VPC.
 ---
 
 # aiven_azure_vpc_peering_connection (Resource)
 
-The Azure VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.
+Creates and manages an Azure VPC peering connection with an Aiven VPC.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_azure_vpc_peering_connection" "foo" {
-  vpc_id                = data.aiven_project_vpc.vpc.id
-  azure_subscription_id = "xxxxxx"
-  peer_resource_group   = "my-pr1"
-  vnet_name             = "my-vnet1"
-  peer_azure_app_id     = "xxxxxx"
-  peer_azure_tenant_id  = "xxxxxx"
+resource "aiven_project_vpc" "example_vpc" {
+  project      = data.aiven_project.example_project.project
+  cloud_name   = "google-europe-west1"
+  network_cidr = "192.168.1.0/24"
+}
+
+resource "aiven_azure_vpc_peering_connection" "azure_to_aiven_peering" {
+  vpc_id                = aiven_project_vpc.example_vpc.id
+  azure_subscription_id = "00000000-0000-0000-0000-000000000000"
+  peer_resource_group   = "example-resource-group"
+  vnet_name             = "example-vnet"
+  peer_azure_app_id     = "00000000-0000-0000-0000-000000000000"
+  peer_azure_tenant_id  = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -28,12 +34,12 @@ resource "aiven_azure_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `azure_subscription_id` (String) Azure Subscription ID. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_resource_group` (String) Azure resource group name of the peered VPC. This property cannot be changed, doing so forces recreation of the resource.
-- `vnet_name` (String) Azure Network name. This property cannot be changed, doing so forces recreation of the resource.
-- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `azure_subscription_id` (String) The ID of the Azure subscription in UUID4 format. Changing this property forces recreation of the resource.
+- `peer_azure_app_id` (String) The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format. Changing this property forces recreation of the resource.
+- `peer_azure_tenant_id` (String) The Azure tenant ID in UUID4 format. Changing this property forces recreation of the resource.
+- `peer_resource_group` (String) The name of the Azure resource group associated with the VNet. Changing this property forces recreation of the resource.
+- `vnet_name` (String) The name of the Azure VNet. Changing this property forces recreation of the resource.
+- `vpc_id` (String) The ID of the Aiven VPC. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -42,9 +48,9 @@ resource "aiven_azure_vpc_peering_connection" "foo" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
+- `peering_connection_id` (String) The ID of the cloud provider for the peering connection.
 - `state` (String) State of the peering connection
-- `state_info` (Map of String) State-specific help or error information
+- `state_info` (Map of String) State-specific help or error information.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -62,5 +68,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_azure_vpc_peering_connection.foo project_name/vpc_id/azure_subscription_id/vnet_name
+terraform import aiven_azure_vpc_peering_connection.azure_to_aiven_peering PROJECT/VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME
 ```

@@ -3,20 +3,20 @@
 page_title: "aiven_clickhouse_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse User data source provides information about the existing Aiven Clickhouse User.
+  Gets information about a ClickHouse user.
 ---
 
 # aiven_clickhouse_user (Data Source)
 
-The Clickhouse User data source provides information about the existing Aiven Clickhouse User.
+Gets information about a ClickHouse user.
 
 ## Example Usage
 
 ```terraform
-data "aiven_clickhouse_user" "ch-user" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_clickhouse.myservice.service_name
-  username     = "<USERNAME>"
+data "aiven_clickhouse_user" "example_user" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  username     = "analyst"
 }
 ```
 
@@ -25,13 +25,13 @@ data "aiven_clickhouse_user" "ch-user" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the Clickhouse user. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The name of the ClickHouse user. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the clickhouse user.
-- `required` (Boolean) Indicates if a clickhouse user is required
-- `uuid` (String) UUID of the clickhouse user.
+- `password` (String, Sensitive) The password of the ClickHouse user.
+- `required` (Boolean) Indicates if a ClickHouse user is required.
+- `uuid` (String) UUID of the ClickHouse user.

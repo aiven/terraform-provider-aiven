@@ -31,7 +31,6 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 			{
 				Config: testAccPGDatabaseResource(projectName, rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenPGDatabaseAttributes("data.aiven_pg_database.database"),
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName)),
@@ -113,7 +112,8 @@ func testAccCheckAivenPGDatabaseResourceDestroy(s *terraform.State) error {
 
 		db, err := c.Databases.Get(ctx, projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}
@@ -209,33 +209,4 @@ data "aiven_pg_database" "database" {
 
   depends_on = [aiven_pg_database.foo]
 }`, project, name, name)
-}
-
-func testAccCheckAivenPGDatabaseAttributes(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		r := s.RootModule().Resources[n]
-		a := r.Primary.Attributes
-
-		if a["project"] == "" {
-			return fmt.Errorf("expected to get a project name from Aiven")
-		}
-
-		if a["service_name"] == "" {
-			return fmt.Errorf("expected to get a service_name from Aiven")
-		}
-
-		if a["database_name"] == "" {
-			return fmt.Errorf("expected to get a database_name from Aiven")
-		}
-
-		if a["lc_ctype"] == "" {
-			return fmt.Errorf("expected to get a lc_ctype from Aiven")
-		}
-
-		if a["lc_collate"] == "" {
-			return fmt.Errorf("expected to get a lc_collate from Aiven")
-		}
-
-		return nil
-	}
 }

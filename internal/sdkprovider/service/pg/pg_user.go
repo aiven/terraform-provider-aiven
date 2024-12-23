@@ -20,7 +20,7 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the PG User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The name of the service user for this service.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -28,37 +28,37 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the PG User (not applicable for all services).",
+		Description:      "The password of the service user.",
 	},
 	"pg_allow_replication": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: "Defines whether replication is allowed.",
+		Description: "Allows replication. For the default avnadmin user this attribute is required and is always `true`.",
 	},
 
 	// computed fields
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Type of the user account. Tells whether the user is the primary account or a regular account.",
+		Description: "The service user account type, either primary or regular.",
 	},
 	"access_cert": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Computed:    true,
-		Description: "Access certificate for the user",
+		Description: "The access certificate for the servie user.",
 	},
 	"access_key": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Computed:    true,
-		Description: "Access certificate key for the user",
+		Description: "The access certificate key for the service user.",
 	},
 }
 
 func ResourcePGUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The PG User resource allows the creation and management of Aiven PG Users.",
+		Description:   "Creates and manages an Aiven for PostgreSQL® service user.",
 		CreateContext: resourcePGUserCreate,
 		UpdateContext: resourcePGUserUpdate,
 		ReadContext:   resourcePGUserRead,
@@ -77,9 +77,20 @@ func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
+
+	// Validates that the service is an Pg service
+	pg, err := client.Services.Get(ctx, projectName, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if pg.Type != schemautil.ServiceTypePG {
+		return diag.Errorf("expected service type %q, got %q", schemautil.ServiceTypePG, pg.Type)
+	}
+
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
-	_, err := client.ServiceUsers.Create(
+	_, err = client.ServiceUsers.Create(
 		ctx,
 		projectName,
 		serviceName,

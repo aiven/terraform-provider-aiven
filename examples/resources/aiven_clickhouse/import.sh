@@ -1,1 +1,1 @@
-terraform import aiven_clickhouse.clickhouse project/service_name
+terraform import aiven_clickhouse.clickhouse PROJECT/SERVICE_NAME

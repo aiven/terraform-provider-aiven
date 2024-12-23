@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -24,7 +25,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The kafka connector name.").ForceNew().Build(),
+		Description: userconfig.Desc("The Kafka connector name.").ForceNew().Build(),
 	},
 	"config": {
 		Type:     schema.TypeMap,
@@ -32,7 +33,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
-		Description: "The Kafka Connector configuration parameters.",
+		Description: "The Kafka connector configuration parameters.",
 	},
 	"plugin_author": {
 		Type:        schema.TypeString,
@@ -62,7 +63,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 	"plugin_version": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The version of the kafka connector.",
+		Description: "The version of the Kafka connector.",
 	},
 	"task": {
 		Type:        schema.TypeSet,
@@ -77,7 +78,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 				},
 				"task": {
 					Type:        schema.TypeInt,
-					Description: "The task id of the task.",
+					Description: "The task ID of the task.",
 					Computed:    true,
 				},
 			},
@@ -87,7 +88,12 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 
 func ResourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka connectors resource allows the creation and management of Aiven Kafka connectors.",
+		Description: `
+Creates and manages Aiven for Apache Kafka® [connectors](https://aiven.io/docs/products/kafka/kafka-connect/concepts/list-of-connector-plugins).
+Source connectors let you import data from an external system into a Kafka topic. Sink connectors let you export data from a topic to an external system.
+
+You can use connectors with any Aiven for Apache Kafka® service that is integrated with an Aiven for Apache Kafka® Connect service.
+`,
 		CreateContext: resourceKafkaConnectorCreate,
 		ReadContext:   resourceKafkaConnectorRead,
 		UpdateContext: resourceKafkaTConnectorUpdate,
@@ -107,7 +113,7 @@ func ResourceKafkaConnector() *schema.Resource {
 
 // customizeDiffKafkaConnectorConfigName `config.name` should be equal to `connector_name`
 func customizeDiffKafkaConnectorConfigName() func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
-	return func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 		connectorName := diff.Get("connector_name").(string)
 		config := make(aiven.KafkaConnectorConfig)
 		for k, cS := range diff.Get("config").(map[string]interface{}) {
@@ -123,7 +129,7 @@ func customizeDiffKafkaConnectorConfigName() func(ctx context.Context, diff *sch
 
 // kafkaConnectorConfigNameShouldNotBeEmpty `config.name` should not be empty
 func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldValue interface{}, newValue interface{}, meta interface{}) bool {
-	return func(ctx context.Context, oldValue, newValue, meta interface{}) bool {
+	return func(_ context.Context, _, newValue, _ interface{}) bool {
 		for k, cS := range newValue.(map[string]interface{}) {
 			if k == "name" && cS.(string) != "" {
 				return true
@@ -134,28 +140,27 @@ func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldVal
 }
 
 func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{} {
-	var tasks []map[string]interface{}
+	tasks := make([]map[string]interface{}, len(r.Tasks))
 
-	for _, taskS := range r.Tasks {
+	for i, taskS := range r.Tasks {
 		task := map[string]interface{}{
 			"connector": taskS.Connector,
 			"task":      taskS.Task,
 		}
 
-		tasks = append(tasks, task)
+		tasks[i] = task
 	}
 
 	return tasks
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, connectorName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"IN_PROGRESS"},
 		Target:  []string{"OK"},
 		Refresh: func() (interface{}, string, error) {
@@ -171,9 +176,9 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 
 			return list, "OK", nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutRead),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	res, err := stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
@@ -229,6 +234,8 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
+const pollCreateTimeout = time.Minute * 2
+
 func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -239,18 +246,25 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 		config[k] = cS.(string)
 	}
 
-	// Sometimes this method returns 404: Not Found
-	// Since the aiven.Client has own retries for various scenarios
+	// Sometimes this method returns 404: Not Found for the given serviceName
+	// Since the aiven.Client has its own retries for various scenarios
 	// we retry here 404 only
-	err := retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, pollCreateTimeout, func() *retry.RetryError {
 		err := m.(*aiven.Client).KafkaConnectors.Create(ctx, project, serviceName, config)
-		if err != nil {
-			return &retry.RetryError{
-				Err:       err,
-				Retryable: aiven.IsNotFound(err), // retries 404 only
-			}
+		if err == nil {
+			return nil
 		}
-		return nil
+
+		var e aiven.Error
+		if errors.As(err, &e) && e.Status == 201 {
+			// 201: Created
+			return nil
+		}
+
+		return &retry.RetryError{
+			Err:       err,
+			Retryable: aiven.IsNotFound(err), // retries 404 only
+		}
 	})
 
 	if err != nil {
@@ -270,7 +284,7 @@ func resourceKafkaConnectorDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	err = m.(*aiven.Client).KafkaConnectors.Delete(ctx, project, service, name)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

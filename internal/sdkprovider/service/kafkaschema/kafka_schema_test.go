@@ -2,6 +2,7 @@ package kafkaschema_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -75,19 +76,21 @@ resource "aiven_kafka_schema" "schema" {
 
   schema = <<EOT
     {
-       "doc": "example",
-       "fields": [{
-           "default": 5,
-           "doc": "my test number",
-           "name": "test",
-           "namespace": "test",
-           "type": "int"
-       }],
-       "name": "example",
-       "namespace": "example",
-       "type": "record"
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
     }
-    EOT
+  EOT
 }
 `, project, serviceName, subjectName)
 }
@@ -164,6 +167,15 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
 				),
 			},
+			// Reverts changes and gets version=1
+			{
+				Config: testAccKafkaSchemaResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
+				),
+			},
 			{
 				Config:      testAccKafkaSchemaResourceInvalidUpdate(rName),
 				ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
@@ -190,7 +202,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
 
@@ -199,7 +212,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		schemaList, err := c.KafkaSubjectSchemas.List(ctx, projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
 
@@ -209,7 +223,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
 			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
 			if err != nil {
-				if err.(aiven.Error).Status == 404 {
+				var e aiven.Error
+				if errors.As(err, &e) && e.Status == 404 {
 					return nil
 				}
 
@@ -264,19 +279,19 @@ resource "aiven_kafka_schema" "foo" {
   schema_type  = "JSON"
 
   schema = <<EOT
-		{
-		"type": "object",
-		"title": "example",
-		"description": "example",
-		"properties": {
-		"test": {
-		"type": "integer",
-		"title": "my test number",
-		"default": 5
-		}
-		}
-		}
-		  EOT
+    {
+      "type": "object",
+      "title": "example",
+      "description": "example",
+      "properties": {
+        "test": {
+          "type": "integer",
+          "title": "my test number",
+          "default": 5
+        }
+      }
+    }
+  EOT
 }
 
 data "aiven_kafka_schema" "schema" {
@@ -294,13 +309,12 @@ resource "aiven_kafka_schema" "bar" {
   schema_type  = "PROTOBUF"
 
   schema = <<EOT
-syntax = "proto3";
+    syntax = "proto3";
 
-message Example {
-  int32 test = 5;
-}
-
-EOT
+    message Example {
+      int32 test = 5;
+    }
+  EOT
 }
 
 data "aiven_kafka_schema" "schema2" {
@@ -348,20 +362,22 @@ resource "aiven_kafka_schema" "foo" {
   subject_name = "kafka-schema-%s"
 
   schema = <<EOT
-		    {
-		      "doc": "example",
-		      "fields": [{
-		        "default": 5,
-		        "doc": "my test number",
-		        "name": "test",
-		        "namespace": "test",
-		        "type": "int"
-		      }],
-		      "name": "example",
-		      "namespace": "example",
-		      "type": "record"
-		    }
-		  EOT
+    {
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
+    }
+  EOT
 }
 
 data "aiven_kafka_schema" "schema" {
@@ -408,20 +424,22 @@ resource "aiven_kafka_schema" "foo" {
   subject_name = "kafka-schema-%s"
 
   schema = <<EOT
-		    {
-		      "doc": "example",
-		      "fields": [{
-		        "default": "foo",
-		        "doc": "my test string",
-		        "name": "test",
-		        "namespace": "test",
-		        "type": "string"
-		      }],
-		      "name": "example",
-		      "namespace": "example",
-		      "type": "record"
-		    }
-		  EOT
+    {
+      "doc": "example",
+      "fields": [
+        {
+          "default": "foo",
+          "doc": "my test string",
+          "name": "test",
+          "namespace": "test",
+          "type": "string"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
+    }
+  EOT
 }
 
 data "aiven_kafka_schema" "schema" {
@@ -468,26 +486,29 @@ resource "aiven_kafka_schema" "foo" {
   subject_name = "kafka-schema-%s"
 
   schema = <<EOT
-		    {
-		      "doc": "example",
-		      "fields": [{
-		        "default": 5,
-		        "doc": "my test number",
-		        "name": "test",
-		        "namespace": "test",
-		        "type": "int"
-		      },{
-		        "default": "str",
-		        "doc": "my test string",
-		        "name": "test_2",
-		        "namespace": "test",
-		        "type": "string"
-		      }],
-		      "name": "example",
-		      "namespace": "example",
-		      "type": "record"
-		    }
-		  EOT
+    {
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        },
+        {
+          "default": "str",
+          "doc": "my test string",
+          "name": "test_2",
+          "namespace": "test",
+          "type": "string"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
+    }
+  EOT
 }
 
 data "aiven_kafka_schema" "schema" {
@@ -526,4 +547,39 @@ func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+const invalidAvroSchemaConfig = `
+resource "aiven_kafka_schema" "foo" {
+  project      = "foo"
+  service_name = "bar"
+  subject_name = "baz"
+
+  schema = <<EOT
+    {
+	  "name": "foo",
+	  "type": "record",
+	  "fields": [
+		{
+		  "name": "foo",
+		  "type": "enum",
+		  "symbols": ["foo", "bar"]
+		}
+	  ]
+	}
+  EOT
+}`
+
+func TestAccAivenKafkaSchema_invalid_avro_schema(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      invalidAvroSchemaConfig,
+				ExpectError: regexp.MustCompile(`Error: schema validation error: avro: unknown type: enum`),
+			},
+		},
+	})
 }

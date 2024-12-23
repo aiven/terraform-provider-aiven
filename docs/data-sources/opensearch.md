@@ -24,12 +24,12 @@ data "aiven_opensearch" "os1" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
 
-- `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
@@ -40,12 +40,12 @@ data "aiven_opensearch" "os1" {
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `opensearch` (List of Object) OpenSearch server provided values (see [below for nested schema](#nestedatt--opensearch))
-- `opensearch_user_config` (List of Object) Opensearch user configurable settings (see [below for nested schema](#nestedatt--opensearch_user_config))
-- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `opensearch` (List of Object, Sensitive) OpenSearch server provided values (see [below for nested schema](#nestedatt--opensearch))
+- `opensearch_user_config` (List of Object) Opensearch user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--opensearch_user_config))
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_host` (String) The hostname of the service.
-- `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
+- `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
@@ -54,6 +54,7 @@ data "aiven_opensearch" "os1" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -62,6 +63,7 @@ data "aiven_opensearch" "os1" {
 Read-Only:
 
 - `component` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
@@ -75,7 +77,11 @@ Read-Only:
 
 Read-Only:
 
+- `kibana_uri` (String)
 - `opensearch_dashboards_uri` (String)
+- `password` (String)
+- `uris` (List of String)
+- `username` (String)
 
 
 <a id="nestedatt--opensearch_user_config"></a>
@@ -84,13 +90,16 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `azure_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--azure_migration))
 - `custom_domain` (String)
 - `disable_replication_factor_adjustment` (Boolean)
+- `gcs_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--gcs_migration))
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
+- `index_rollup` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_rollup))
 - `index_template` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_template))
-- `ip_filter` (List of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter` (Set of String)
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String)
 - `keep_index_refresh_interval` (Boolean)
 - `max_index_count` (Number)
 - `openid` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--openid))
@@ -102,9 +111,46 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String)
+- `s3_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--s3_migration))
 - `saml` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--saml))
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
+
+<a id="nestedobjatt--opensearch_user_config--azure_migration"></a>
+### Nested Schema for `opensearch_user_config.azure_migration`
+
+Read-Only:
+
+- `account` (String)
+- `base_path` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `container` (String)
+- `endpoint_suffix` (String)
+- `include_aliases` (Boolean)
+- `indices` (String)
+- `key` (String)
+- `restore_global_state` (Boolean)
+- `sas_token` (String)
+- `snapshot_name` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--gcs_migration"></a>
+### Nested Schema for `opensearch_user_config.gcs_migration`
+
+Read-Only:
+
+- `base_path` (String)
+- `bucket` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `credentials` (String)
+- `include_aliases` (Boolean)
+- `indices` (String)
+- `restore_global_state` (Boolean)
+- `snapshot_name` (String)
+
 
 <a id="nestedobjatt--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
@@ -114,6 +160,18 @@ Read-Only:
 - `max_index_count` (Number)
 - `pattern` (String)
 - `sorting_algorithm` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--index_rollup"></a>
+### Nested Schema for `opensearch_user_config.index_rollup`
+
+Read-Only:
+
+- `rollup_dashboards_enabled` (Boolean)
+- `rollup_enabled` (Boolean)
+- `rollup_search_backoff_count` (Number)
+- `rollup_search_backoff_millis` (Number)
+- `rollup_search_search_all_jobs` (Boolean)
 
 
 <a id="nestedobjatt--opensearch_user_config--index_template"></a>
@@ -161,24 +219,40 @@ Read-Only:
 
 - `action_auto_create_index_enabled` (Boolean)
 - `action_destructive_requires_name` (Boolean)
+- `auth_failure_listeners` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
+- `enable_security_audit` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)
 - `http_max_initial_line_length` (Number)
 - `indices_fielddata_cache_size` (Number)
 - `indices_memory_index_buffer_size` (Number)
+- `indices_memory_max_index_buffer_size` (Number)
+- `indices_memory_min_index_buffer_size` (Number)
 - `indices_queries_cache_size` (Number)
 - `indices_query_bool_max_clause_count` (Number)
 - `indices_recovery_max_bytes_per_sec` (Number)
 - `indices_recovery_max_concurrent_file_chunks` (Number)
+- `ism_enabled` (Boolean)
+- `ism_history_enabled` (Boolean)
+- `ism_history_max_age` (Number)
+- `ism_history_max_docs` (Number)
+- `ism_history_rollover_check_period` (Number)
+- `ism_history_rollover_retention_period` (Number)
+- `knn_memory_circuit_breaker_enabled` (Boolean)
+- `knn_memory_circuit_breaker_limit` (Number)
 - `override_main_response_version` (Boolean)
+- `plugins_alerting_filter_by_backend_roles` (Boolean)
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
+- `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
+- `search_insights_top_queries` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number)
+- `shard_indexing_pressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number)
 - `thread_pool_analyze_size` (Number)
 - `thread_pool_force_merge_size` (Number)
@@ -191,6 +265,181 @@ Read-Only:
 - `thread_pool_write_queue_size` (Number)
 - `thread_pool_write_size` (Number)
 
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners`
+
+Read-Only:
+
+- `internal_authentication_backend_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
+- `ip_rate_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.internal_authentication_backend_limiting`
+
+Read-Only:
+
+- `allowed_tries` (Number)
+- `authentication_backend` (String)
+- `block_expiry_seconds` (Number)
+- `max_blocked_clients` (Number)
+- `max_tracked_clients` (Number)
+- `time_window_seconds` (Number)
+- `type` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+
+Read-Only:
+
+- `allowed_tries` (Number)
+- `block_expiry_seconds` (Number)
+- `max_blocked_clients` (Number)
+- `max_tracked_clients` (Number)
+- `time_window_seconds` (Number)
+- `type` (String)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure`
+
+Read-Only:
+
+- `mode` (String)
+- `node_duress` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--node_duress))
+- `search_shard_task` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_shard_task))
+- `search_task` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_task))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--node_duress"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.node_duress`
+
+Read-Only:
+
+- `cpu_threshold` (Number)
+- `heap_threshold` (Number)
+- `num_successive_breaches` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_shard_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_shard_task`
+
+Read-Only:
+
+- `cancellation_burst` (Number)
+- `cancellation_rate` (Number)
+- `cancellation_ratio` (Number)
+- `cpu_time_millis_threshold` (Number)
+- `elapsed_time_millis_threshold` (Number)
+- `heap_moving_average_window_size` (Number)
+- `heap_percent_threshold` (Number)
+- `heap_variance` (Number)
+- `total_heap_percent_threshold` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_task`
+
+Read-Only:
+
+- `cancellation_burst` (Number)
+- `cancellation_rate` (Number)
+- `cancellation_ratio` (Number)
+- `cpu_time_millis_threshold` (Number)
+- `elapsed_time_millis_threshold` (Number)
+- `heap_moving_average_window_size` (Number)
+- `heap_percent_threshold` (Number)
+- `heap_variance` (Number)
+- `total_heap_percent_threshold` (Number)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries`
+
+Read-Only:
+
+- `cpu` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--cpu))
+- `latency` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--latency))
+- `memory` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--memory))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--cpu"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.cpu`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--latency"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.latency`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--memory"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.memory`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `enforced` (Boolean)
+- `operating_factor` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor))
+- `primary_parameter` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.operating_factor`
+
+Read-Only:
+
+- `lower` (Number)
+- `optimal` (Number)
+- `upper` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter`
+
+Read-Only:
+
+- `node` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node))
+- `shard` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.node`
+
+Read-Only:
+
+- `soft_limit` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.shard`
+
+Read-Only:
+
+- `min_limit` (Number)
+
+
+
+
 
 <a id="nestedobjatt--opensearch_user_config--opensearch_dashboards"></a>
 ### Nested Schema for `opensearch_user_config.opensearch_dashboards`
@@ -199,6 +448,7 @@ Read-Only:
 
 - `enabled` (Boolean)
 - `max_old_space_size` (Number)
+- `multiple_data_source_enabled` (Boolean)
 - `opensearch_request_timeout` (Number)
 
 
@@ -232,6 +482,26 @@ Read-Only:
 - `prometheus` (Boolean)
 
 
+<a id="nestedobjatt--opensearch_user_config--s3_migration"></a>
+### Nested Schema for `opensearch_user_config.s3_migration`
+
+Read-Only:
+
+- `access_key` (String)
+- `base_path` (String)
+- `bucket` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `endpoint` (String)
+- `include_aliases` (Boolean)
+- `indices` (String)
+- `region` (String)
+- `restore_global_state` (Boolean)
+- `secret_key` (String)
+- `server_side_encryption` (Boolean)
+- `snapshot_name` (String)
+
+
 <a id="nestedobjatt--opensearch_user_config--saml"></a>
 ### Nested Schema for `opensearch_user_config.saml`
 
@@ -263,3 +533,11 @@ Read-Only:
 
 - `key` (String)
 - `value` (String)
+
+
+<a id="nestedatt--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Read-Only:
+
+- `email` (String)

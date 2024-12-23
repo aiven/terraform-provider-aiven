@@ -1,15 +1,15 @@
-resource "aiven_kafka_connector" "kafka-os-con1" {
-  project        = aiven_project.kafka-con-project1.project
-  service_name   = aiven_kafka.kafka-service1.service_name
-  connector_name = "kafka-os-con1"
+resource "aiven_kafka_connector" "kafka-os-connector" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_kafka.example_kafka.service_name
+  connector_name = "kafka-opensearch-connector"
 
   config = {
-    "topics"              = aiven_kafka_topic.kafka-topic1.topic_name
-    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "name"                = "kafka-opensearch-connector" # Must be the same as the connector_name. 
+    "topics"              = aiven_kafka_topic.example_topic.topic_name
+    "connector.class"     = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
     "type.name"           = "os-connector"
-    "name"                = "kafka-os-con1"
-    "connection.url"      = aiven_elasticsearch.os-service1.service_uri
-    "connection.username" = aiven_opensearch.os-service1.service_username
-    "connection.password" = aiven_opensearch.os-service1.service_password
+    "connection.url"      = aiven_opensearch.example_os.service_uri
+    "connection.username" = aiven_opensearch.example_os.service_username
+    "connection.password" = aiven_opensearch.example_os.service_password
   }
 }

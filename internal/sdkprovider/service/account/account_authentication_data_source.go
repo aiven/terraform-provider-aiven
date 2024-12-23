@@ -16,6 +16,7 @@ func DatasourceAccountAuthentication() *schema.Resource {
 		Description: "The Account Authentication data source provides information about the existing Aiven Account Authentication.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenAccountAuthenticationSchema,
 			"account_id", "name"),
+		DeprecationMessage: "This resource is deprecated",
 	}
 }
 

@@ -1,0 +1,1 @@
+terraform import aiven_clickhouse_grant.example_grant PROJECT/SERVICE_NAME/ID

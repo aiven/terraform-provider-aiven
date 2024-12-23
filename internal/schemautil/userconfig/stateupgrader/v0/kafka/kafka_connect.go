@@ -17,6 +17,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka Connect server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
@@ -38,15 +39,15 @@ func ResourceKafkaConnect() *schema.Resource {
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaConnect),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(

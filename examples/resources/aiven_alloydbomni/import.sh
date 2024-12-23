@@ -1,0 +1,1 @@
+terraform import aiven_alloydbomni.example_alloydbomni PROJECT/SERVICE_NAME

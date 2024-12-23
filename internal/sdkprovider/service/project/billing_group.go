@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -15,25 +16,25 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Billing Group name",
+		Description: "Name of the billing group.",
 	},
 	"card_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Credit card id",
+		Description:      "Credit card ID.",
 	},
 	"vat_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "VAT id",
+		Description:      "The VAT identification number for your company.",
 	},
 	"account_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Account id",
+		Description:      "Account ID.",
 		Deprecated:       "Use parent_id instead. This field will be removed in the next major release.",
 	},
 	"parent_id": {
@@ -41,7 +42,7 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
 		Description: userconfig.Desc(
-			"An optional property to link a billing group to an already existing organization or account by using " +
+			"Link a billing group to an existing organization or account by using " +
 				"its ID.",
 		).Referenced().Build(),
 	},
@@ -49,69 +50,69 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Billing currency",
+		Description:      "Billing currency for the billing group. Supported currencies are: AUD, CAD, CHF, DKK, EUR, GBP, JPY, NOK, NZD, SEK, SGD, and USD.",
 	},
 	"billing_extra_text": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Billing extra text",
+		Description:      "Additional information to include on your invoice (for example, a reference number).",
 	},
 	"billing_emails": {
 		Type:             schema.TypeSet,
 		Elem:             &schema.Schema{Type: schema.TypeString},
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Billing contact emails",
+		Description:      "Email address of billing contacts. Invoices and other payment notifications are emailed to all billing contacts.",
 	},
 	"company": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Company name",
+		Description:      "Your company name.",
 	},
 	"address_lines": {
 		Type:             schema.TypeSet,
 		Elem:             &schema.Schema{Type: schema.TypeString},
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Address lines",
+		Description:      "Address lines 1 and 2. For example, street, PO box, or building.",
 	},
 	"country_code": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Country code",
+		Description:      "Two-letter country code.",
 	},
 	"city": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "City",
+		Description:      "City, district, suburb, town, or village.",
 	},
 	"zip_code": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Zip Code",
+		Description:      "Zip or postal code.",
 	},
 	"state": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "State",
+		Description:      "Address state.",
 	},
 	"copy_from_billing_group": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Description:      "ID of the billing group to copy from",
+		Description:      "ID of the billing group to copy the company name, address, currency, billing contacts, and extra text from.",
 	},
 }
 
 func ResourceBillingGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Billing Group resource allows the creation and management of Aiven Billing Groups and association with the Projects.",
+		Description:   "Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.",
 		CreateContext: resourceBillingGroupCreate,
 		ReadContext:   resourceBillingGroupRead,
 		UpdateContext: resourceBillingGroupUpdate,
@@ -179,14 +180,14 @@ func resourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if stateID, _ := d.GetOk("parent_id"); true {
+	if stateID, ok := d.GetOk("parent_id"); ok {
 		var accountID string
 
 		if bg.AccountId != nil {
 			accountID = *bg.AccountId
 		}
 
-		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+		idToSet, err := determineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
 			stateID.(string),
@@ -293,7 +294,7 @@ func resourceBillingGroupDelete(ctx context.Context, d *schema.ResourceData, m i
 	client := m.(*aiven.Client)
 
 	err := client.BillingGroup.Delete(ctx, d.Id())
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("cannot delete a billing group: %s", err)
 	}
 

@@ -11,7 +11,9 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
-    - uses: actions/setup-go@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
 
@@ -21,10 +23,10 @@ jobs:
         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
 
-    - uses: goreleaser/goreleaser-action@v5
+    - uses: goreleaser/goreleaser-action@v6
       with:
         version: latest
-        args: release --rm-dist
+        args: release --clean
       env:
         GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

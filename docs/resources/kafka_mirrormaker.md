@@ -36,22 +36,23 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 
 ### Required
 
-- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `service_integrations` (Block Set) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -61,9 +62,8 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- `disk_space_used` (String) Disk space that service is currently using
+- `disk_space_used` (String, Deprecated) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka_mirrormaker` (List of Object) Kafka MirrorMaker 2 server provided values (see [below for nested schema](#nestedatt--kafka_mirrormaker))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -77,11 +77,12 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--kafka_mirrormaker_user_config--ip_filter_object"></a>
@@ -89,11 +90,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
@@ -101,16 +102,20 @@ Optional:
 
 Optional:
 
+- `admin_timeout_ms` (Number) Timeout for administrative tasks, e.g. detecting new topics, loading of consumer group and offsets. Defaults to 60000 milliseconds (1 minute).
 - `emit_checkpoints_enabled` (Boolean) Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).
-- `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).
-- `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to 'true'.
+- `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute). Example: `60`.
+- `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes. Example: `.*`.
+- `groups_exclude` (String) Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes. Example: `console-consumer-.*,connect-.*,__.*`.
+- `offset_lag_max` (Number) How out-of-sync a remote partition can be before it is resynced. Example: `100`.
+- `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to `true`.
 - `refresh_groups_interval_seconds` (Number) Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
-- `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to 'true'.
+- `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to `true`.
 - `refresh_topics_interval_seconds` (Number) Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).
 - `sync_group_offsets_enabled` (Boolean) Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster.
-- `sync_group_offsets_interval_seconds` (Number) Frequency at which consumer group offsets are synced (default: 60, every minute).
+- `sync_group_offsets_interval_seconds` (Number) Frequency at which consumer group offsets are synced (default: 60, every minute). Example: `60`.
 - `sync_topic_configs_enabled` (Boolean) Whether to periodically configure remote topics to match their corresponding upstream topics.
-- `tasks_max_per_cpu` (Number) 'tasks.max' is set to this multiplied by the number of CPUs in the service. The default value is `1`.
+- `tasks_max_per_cpu` (Number) `tasks.max` is set to this multiplied by the number of CPUs in the service. Default: `1`.
 
 
 
@@ -119,7 +124,7 @@ Optional:
 
 Required:
 
-- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `integration_type` (String) Type of the service integration
 - `source_service_name` (String) Name of the source service
 
 
@@ -130,6 +135,14 @@ Required:
 
 - `key` (String) Service tag key
 - `value` (String) Service tag value
+
+
+<a id="nestedblock--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Required:
+
+- `email` (String) An email address to contact for technical issues
 
 
 <a id="nestedblock--timeouts"></a>
@@ -150,18 +163,13 @@ Optional:
 Read-Only:
 
 - `component` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--kafka_mirrormaker"></a>
-### Nested Schema for `kafka_mirrormaker`
-
-Read-Only:
 
 ## Import
 

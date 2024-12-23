@@ -1,5 +1,3 @@
-//go:build sweep
-
 package sweep
 
 import (
@@ -10,11 +8,17 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"golang.org/x/exp/maps"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 var sharedClient *aiven.Client
+var sweeperFuncs map[string]struct{}
+
+func init() {
+	sweeperFuncs = make(map[string]struct{})
+}
 
 // SharedClient returns a common Aiven Client setup needed for the sweeper
 func SharedClient() (*aiven.Client, error) {
@@ -37,13 +41,13 @@ func SharedClient() (*aiven.Client, error) {
 func SweepServices(ctx context.Context, t string) error {
 	client, err := SharedClient()
 	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
+		return fmt.Errorf("error getting client: %w", err)
 	}
 
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 	services, err := client.Services.List(ctx, projectName)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return fmt.Errorf("error retrieving a list of services for a project `%s`: %w", projectName, err)
 	}
 
@@ -70,13 +74,13 @@ func SweepServices(ctx context.Context, t string) error {
 			})
 
 			if err != nil {
-				return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %s", s.Name, err)
+				return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %w", s.Name, err)
 			}
 		}
 
 		if err := client.Services.Delete(ctx, projectName, s.Name); err != nil {
-			if err != nil && !aiven.IsNotFound(err) {
-				return fmt.Errorf("error destroying service %s during sweep: %s", s.Name, err)
+			if common.IsCritical(err) {
+				return fmt.Errorf("error destroying service %s during sweep: %w", s.Name, err)
 			}
 		}
 	}
@@ -84,7 +88,7 @@ func SweepServices(ctx context.Context, t string) error {
 }
 
 func AddServiceSweeper(t string) {
-	resource.AddTestSweepers("aiven_"+t, &resource.Sweeper{
+	AddTestSweepers("aiven_"+t, &resource.Sweeper{
 		Name: "aiven_" + t,
 		F: func(_ string) error {
 			return SweepServices(context.Background(), t)
@@ -100,4 +104,16 @@ func hasPrefixAny(s string, prefix ...string) bool {
 		}
 	}
 	return false
+}
+
+// AddTestSweepers adds a sweeper for a given resource name
+func AddTestSweepers(name string, s *resource.Sweeper) {
+	resource.AddTestSweepers(name, s)
+
+	sweeperFuncs[name] = struct{}{}
+}
+
+// GetTestSweepersResources returns a list of all resources that have sweepers
+func GetTestSweepersResources() []string {
+	return maps.Keys(sweeperFuncs)
 }

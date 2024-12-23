@@ -1,4 +1,4 @@
-// Package provider is the implementation of the Aiven provider.
+// Package plugin is the implementation of the Aiven provider.
 package plugin
 
 import (
@@ -13,7 +13,9 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -94,7 +96,11 @@ func (p *AivenProvider) Configure(
 		data.APIToken = types.StringValue(token)
 	}
 
-	client, err := common.NewCustomAivenClient(data.APIToken.String(), req.TerraformVersion, p.version)
+	client, err := common.NewAivenClient(
+		common.TokenOpt(data.APIToken.ValueString()),
+		common.TFVersionOpt(req.TerraformVersion),
+		common.BuildVersionOpt(p.version),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
 
@@ -108,16 +114,38 @@ func (p *AivenProvider) Configure(
 
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
+	// List of resources that are currently available in the provider.
+	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
+		organization.NewOrganizationUserGroupMembersResource,
+		organization.NewOrganizationGroupProjectResource,
 	}
+
+	// Add to a list of resources that are currently in beta.
+	if util.IsBeta() {
+		var betaResources []func() resource.Resource
+		resources = append(resources, betaResources...)
+	}
+
+	return resources
 }
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
+	// List of data sources that are currently available in the provider.
+	dataSources := []func() datasource.DataSource{
 		organization.NewOrganizationDataSource,
 	}
+
+	// Add to a list of data sources that are currently in beta.
+	if util.IsBeta() {
+		betaDataSources := []func() datasource.DataSource{
+			externalidentity.NewExternalIdentityDataSource,
+		}
+		dataSources = append(dataSources, betaDataSources...)
+	}
+
+	return dataSources
 }
 
 // New returns a new provider factory for the Aiven provider.

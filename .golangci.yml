@@ -16,6 +16,8 @@ linters:
     - unconvert
     - unused
     - stylecheck
+    - errorlint
+    - prealloc
 
 issues:
   exclude:

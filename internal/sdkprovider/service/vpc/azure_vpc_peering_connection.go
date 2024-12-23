@@ -2,13 +2,13 @@ package vpc
 
 import (
 	"context"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -18,26 +18,26 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The ID of the Aiven VPC.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"azure_subscription_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure Subscription ID.").ForceNew().Build(),
+		Description: userconfig.Desc("The ID of the Azure subscription in UUID4 format.").ForceNew().Build(),
 	},
 	"vnet_name": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure Network name.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the Azure VNet.").ForceNew().Build(),
 	},
 	"peer_resource_group": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure resource group name of the peered VPC.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the Azure resource group associated with the VNet.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
@@ -47,30 +47,30 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"peering_connection_id": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "Cloud provider identifier for the peering connection if available",
+		Description: "The ID of the cloud provider for the peering connection.",
 	},
 	"peer_azure_app_id": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.").ForceNew().Build(),
+		Description: userconfig.Desc("The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.").ForceNew().Build(),
 	},
 	"peer_azure_tenant_id": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure tenant id in UUID4 form.").ForceNew().Build(),
+		Description: userconfig.Desc("The Azure tenant ID in UUID4 format.").ForceNew().Build(),
 	},
 }
 
 func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
+		Description:   "Creates and manages an Azure VPC peering connection with an Aiven VPC.",
 		CreateContext: resourceAzureVPCPeeringConnectionCreate,
 		ReadContext:   resourceAzureVPCPeeringConnectionRead,
 		DeleteContext: resourceAzureVPCPeeringConnectionDelete,
@@ -83,7 +83,6 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
@@ -116,7 +115,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		vnetName,
 		&peerResourceGroup,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("error checking azure connection: %s", err)
 	}
 
@@ -139,7 +138,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		return diag.Errorf("Error waiting for VPC peering connection creation: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
@@ -164,9 +163,9 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	res, err := stateChangeConf.WaitForStateContext(ctx)
@@ -211,7 +210,6 @@ func resourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -229,11 +227,11 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		peerResourceGroup,
 		p.peerRegion,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("Error deleting VPC peering connection with resource group: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{
 			"ACTIVE",
 			"APPROVED",
@@ -263,9 +261,9 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for Azure Aiven VPC Peering Connection to be DELETED: %s", err)

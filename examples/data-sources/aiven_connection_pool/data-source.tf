@@ -1,6 +1,6 @@
-data "aiven_connection_pool" "mytestpool" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_pg.mypg.service_name
-  pool_name    = "mypool"
+data "aiven_connection_pool" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_pg.example_postgres.service_name
+  pool_name    = "example-pool"
 }
 

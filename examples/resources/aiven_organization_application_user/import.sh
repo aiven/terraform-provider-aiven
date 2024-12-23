@@ -1,0 +1,1 @@
+terraform import aiven_organization_application_user.example ORGANIZATION_ID/USER_ID

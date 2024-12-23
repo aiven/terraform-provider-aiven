@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">=0.13"
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -11,7 +12,7 @@ terraform {
   }
 }
 
-# Initialize provider
+# Initialize providers
 provider "aiven" {
   api_token = var.aiven_api_token
 }

@@ -9,54 +9,80 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  acceptance_tests:
+  setup_aiven_project_suffix:
     runs-on: ubuntu-latest
+    outputs:
+      project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - id: selproj
+        run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
+
+  acceptance_tests:
+    needs: setup_aiven_project_suffix
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       fail-fast: false
       matrix:
         pkg: [
-          kafka,
-          kafkatopic,
-          kafkaschema,
           account,
+          alloydbomni,
           cassandra,
           clickhouse,
           connectionpool,
+          dragonfly,
           flink,
-          pg,
           grafana,
           influxdb,
+          kafka,
+          kafkaschema,
+          kafkatopic,
           m3db,
           mysql,
           opensearch,
           organization,
+          pg,
           project,
           redis,
           servicecomponent,
-          staticip,
           serviceintegration,
-          vpc
+          staticip,
+          thanos,
+          valkey,
+          vpc,
         ]
 
     steps:
-      - uses: softprops/turnstyle@v1
+      - uses: softprops/turnstyle@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           same-branch-only: true
 
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -68,29 +94,31 @@ jobs:
       - run: make test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          AIVEN_PROJECT_NAME: >-
+            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-          PKG: ${{matrix.pkg}}
+          PKG: ${{ matrix.pkg }}
 
   sweep:
-    if: ${{ always() }}
-    needs: acceptance_tests
+    if: always()
+    needs: [acceptance_tests, setup_aiven_project_suffix]
     runs-on: ubuntu-latest
     steps:
-
-      - uses: softprops/turnstyle@v1
+      - uses: softprops/turnstyle@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           same-branch-only: true
 
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -99,7 +127,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - uses: nick-invision/retry@v2
+      - uses: nick-invision/retry@v3
         if: always()
         with:
           timeout_minutes: 15
@@ -107,6 +135,7 @@ jobs:
           command: make sweep
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          AIVEN_PROJECT_NAME: >-
+            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}

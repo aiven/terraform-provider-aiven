@@ -3,12 +3,19 @@
 page_title: "aiven_project_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Project User resource allows the creation and management of Aiven Project Users.
+  Creates and manages an Aiven project member.
+  This resource is deprecated. Use aiven_organization_permission and
+  migrate existing aiven_project_user resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources
+  to the new resource.
 ---
 
 # aiven_project_user (Resource)
 
-The Project User resource allows the creation and management of Aiven Project Users.
+Creates and manages an Aiven project member.
+
+**This resource is deprecated.** Use `aiven_organization_permission` and
+[migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
 
 ## Example Usage
 
@@ -25,9 +32,9 @@ resource "aiven_project_user" "mytestuser" {
 
 ### Required
 
-- `email` (String) Email address of the user. This property cannot be changed, doing so forces recreation of the resource.
-- `member_type` (String) Project membership type. The possible values are `admin`, `developer` and `operator`.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `email` (String) Email address of the user in lowercase. Changing this property forces recreation of the resource.
+- `member_type` (String) Project membership type. The possible values are `admin`, `developer`, `operator`, `organization:app_users:write`, `organization:audit_logs:read`, `organization:domains:write`, `organization:groups:write`, `organization:idps:write`, `organization:users:write`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `project:services:write`, `read_only`, `role:organization:admin`, `role:services:maintenance`, `role:services:recover`, `service:configuration:write`, `service:data:write`, `service:logs:read`, `service:secrets:read` and `service:users:write`.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -35,7 +42,7 @@ resource "aiven_project_user" "mytestuser" {
 
 ### Read-Only
 
-- `accepted` (Boolean) Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.
+- `accepted` (Boolean) Whether the user has accepted the request to join the project. Users get an invite and become project members after accepting the invite.
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
@@ -54,5 +61,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_project_user.mytestuser project/email
+terraform import aiven_project_user.mytestuser PROJECT/EMAIL
 ```

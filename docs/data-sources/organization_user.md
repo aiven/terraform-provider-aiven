@@ -17,12 +17,14 @@ The Organization User data source provides information about the existing Aiven 
 
 ### Required
 
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The unique organization ID.
+
+### Optional
+
+- `user_email` (String) This is a user email address
+- `user_id` (String) The unique organization user ID
 
 ### Read-Only
 
-- `accepted` (Boolean) This is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an organization.
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
-- `invited_by` (String) The email address of the user who sent an invitation to the user.

@@ -7,9 +7,10 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -47,7 +48,7 @@ var aivenStaticIPSchema = map[string]*schema.Schema{
 
 func ResourceStaticIP() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The aiven_static_ip resource allows the creation and deletion of static ips. Please not that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.",
+		Description:   "The aiven_static_ip resource allows the creation and deletion of static ips. Please note that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.",
 		CreateContext: resourceStaticIPCreate,
 		ReadContext:   resourceStaticIPRead,
 		DeleteContext: resourceStaticIPDelete,
@@ -88,6 +89,7 @@ func resourceStaticIPRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	return nil
 }
+
 func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -137,14 +139,13 @@ func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m inter
 		aiven.DeleteStaticIPRequest{
 			StaticIPAddressID: staticIPAddressID,
 		})
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("error deleting static IP (%s): %s", staticIPAddressID, err)
 	}
 
 	return nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
@@ -153,7 +154,7 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 		return err
 	}
 
-	conf := resource.StateChangeConf{
+	conf := retry.StateChangeConf{
 		Target:  []string{schemautil.StaticIPCreated},
 		Pending: []string{"waiting", schemautil.StaticIPCreating},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -172,10 +173,12 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 			log.Println("[DEBUG] static ip", staticIPAddressID, "not found in project")
 			return struct{}{}, "waiting", nil
 		},
+		Delay:      common.DefaultStateChangeDelay,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	if _, err := conf.WaitForStateContext(ctx); err != nil {
-		return fmt.Errorf("error waiting for static ip to be created: %s", err)
+		return fmt.Errorf("error waiting for static ip to be created: %w", err)
 	}
 
 	return nil
@@ -183,22 +186,22 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 
 func setStaticIPState(d *schema.ResourceData, project string, staticIP *aiven.StaticIP) error {
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("error setting static ips `project` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `project` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("cloud_name", staticIP.CloudName); err != nil {
-		return fmt.Errorf("error setting static ips `cloud_name` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `cloud_name` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("ip_address", staticIP.IPAddress); err != nil {
-		return fmt.Errorf("error setting static ips `ip_address` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `ip_address` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("service_name", staticIP.ServiceName); err != nil {
-		return fmt.Errorf("error setting static ips `service_name` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `service_name` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("state", staticIP.State); err != nil {
-		return fmt.Errorf("error setting static ips `state` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `state` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("static_ip_address_id", staticIP.StaticIPAddressID); err != nil {
-		return fmt.Errorf("error setting static ips `static_ip_address_id` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `static_ip_address_id` for resource %s: %w", d.Id(), err)
 	}
 	return nil
 }

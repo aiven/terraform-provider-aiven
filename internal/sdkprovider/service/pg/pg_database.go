@@ -14,11 +14,11 @@ import (
 const defaultLC = "en_US.UTF-8"
 
 // handleLcDefaults checks if the lc values have actually changed
-func handleLcDefaults(_, old, new string, _ *schema.ResourceData) bool {
+func handleLcDefaults(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	// NOTE! not all database resources return lc_* values even if
 	// they are set when the database is created; best we can do is
 	// to assume it was created using the default value.
-	return new == "" || (old == "" && new == defaultLC) || old == new
+	return newValue == "" || (oldValue == "" && newValue == defaultLC) || oldValue == newValue
 }
 
 var aivenPGDatabaseSchema = map[string]*schema.Schema{
@@ -50,13 +50,13 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: userconfig.Desc(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Description: userconfig.Desc(`Terraform client-side deletion protection, which prevents the database from being deleted by Terraform. It's recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
 	},
 }
 
 func ResourcePGDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The PG Database resource allows the creation and management of Aiven PostgreSQL Databases.",
+		Description:   "Creates and manages a database in an Aiven for PostgreSQL® service.",
 		CreateContext: resourcePGDatabaseCreate,
 		ReadContext:   resourcePGDatabaseRead,
 		DeleteContext: resourcePGDatabaseDelete,
@@ -153,7 +153,6 @@ func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, m int
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)

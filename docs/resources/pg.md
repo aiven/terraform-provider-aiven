@@ -3,21 +3,21 @@
 page_title: "aiven_pg Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG resource allows the creation and management of Aiven PostgreSQL services.
+  Creates and manages an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg (Resource)
 
-The PG resource allows the creation and management of Aiven PostgreSQL services.
+Creates and manages an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_pg" "pg" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_pg" "example_postgres" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "my-pg1"
+  service_name            = "example-postgres-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -29,7 +29,6 @@ resource "aiven_pg" "pg" {
   ])
 
   pg_user_config {
-    pg_version = 11
     static_ips = true
 
     public_access {
@@ -55,23 +54,24 @@ resource "aiven_pg" "pg" {
 
 ### Required
 
-- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `pg` (Block List, Max: 1) PostgreSQL specific server provided values (see [below for nested schema](#nestedblock--pg))
-- `pg_user_config` (Block List, Max: 1) Pg user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
+- `pg` (Block List, Max: 1) Values provided by the PostgreSQL server. (see [below for nested schema](#nestedblock--pg))
+- `pg_user_config` (Block List, Max: 1) Pg user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--pg_user_config))
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `service_integrations` (Block Set) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -81,7 +81,7 @@ resource "aiven_pg" "pg" {
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- `disk_space_used` (String) Disk space that service is currently using
+- `disk_space_used` (String, Deprecated) Disk space that service is currently using
 - `id` (String) The ID of this resource.
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
@@ -96,18 +96,36 @@ resource "aiven_pg" "pg" {
 
 Optional:
 
-- `uri` (String, Sensitive) PostgreSQL master connection URI
+- `standby_uris` (List of String, Sensitive) PostgreSQL standby connection URIs.
+- `syncing_uris` (List of String, Sensitive) PostgreSQL syncing connection URIs.
+- `uri` (String, Sensitive) PostgreSQL primary connection URI.
+- `uris` (List of String, Sensitive) PostgreSQL primary connection URIs.
 
 Read-Only:
 
-- `dbname` (String) Primary PostgreSQL database name
-- `host` (String) PostgreSQL master node host IP or name
-- `max_connections` (Number) Connection limit
-- `password` (String, Sensitive) PostgreSQL admin user password
-- `port` (Number) PostgreSQL port
-- `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica
-- `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
-- `user` (String) PostgreSQL admin user name
+- `bouncer` (String, Sensitive, Deprecated) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
+- `dbname` (String, Sensitive) Primary PostgreSQL database name.
+- `host` (String, Sensitive) PostgreSQL primary node host IP or name.
+- `max_connections` (Number, Sensitive) The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.
+- `params` (Block List) PostgreSQL connection parameters. (see [below for nested schema](#nestedblock--pg--params))
+- `password` (String, Sensitive) PostgreSQL admin user password.
+- `port` (Number, Sensitive) PostgreSQL port.
+- `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica.
+- `sslmode` (String, Sensitive) PostgreSQL SSL mode setting.
+- `user` (String, Sensitive) PostgreSQL admin user name.
+
+<a id="nestedblock--pg--params"></a>
+### Nested Schema for `pg.params`
+
+Read-Only:
+
+- `database_name` (String, Sensitive) Primary PostgreSQL database name.
+- `host` (String, Sensitive) PostgreSQL host IP or name.
+- `password` (String, Sensitive) PostgreSQL admin user password.
+- `port` (Number, Sensitive) PostgreSQL port.
+- `sslmode` (String, Sensitive) PostgreSQL SSL mode setting.
+- `user` (String, Sensitive) PostgreSQL admin user name.
+
 
 
 <a id="nestedblock--pg_user_config"></a>
@@ -117,44 +135,47 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `admin_password` (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
-- `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created.
-- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
-- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+- `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created. Example: `avnadmin`.
+- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
+- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `migration` (Block List, Max: 1) Migrate data from existing server. (see [below for nested schema](#nestedblock--pg_user_config--migration))
-- `pg` (Block List, Max: 1) postgresql.conf configuration values. (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- `pg_read_replica` (Boolean, Deprecated) Use read_replica service integration instead.
-- `pg_service_to_fork_from` (String, Deprecated) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
-- `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable. The default value is `false`.
-- `pg_version` (String) PostgreSQL major version.
-- `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings. (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
-- `pglookout` (Block List, Max: 1) PGLookout settings. (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--pg_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--pg_user_config--public_access))
-- `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
+- `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
+- `pg_qualstats` (Block List, Max: 1, Deprecated) System-wide settings for the pg_qualstats extension (see [below for nested schema](#nestedblock--pg_user_config--pg_qualstats))
+- `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
+- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.
+- `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.
+- `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, and newer. PostgreSQL major version.
+- `pgaudit` (Block List, Max: 1, Deprecated) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--pg_user_config--pgaudit))
+- `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
+- `pglookout` (Block List, Max: 1) System-wide settings for pglookout (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--pg_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--pg_user_config--public_access))
+- `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created. Example: `2019-01-01 23:34:45`.
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
+- `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. Example: `41.5`.
 - `static_ips` (Boolean) Use static public IP addresses.
-- `synchronous_replication` (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
-- `timescaledb` (Block List, Max: 1) TimescaleDB extension configuration values. (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
-- `variant` (String) Variant of the PostgreSQL service, may affect the features that are exposed by default.
-- `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).
+- `synchronous_replication` (String) Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.
+- `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
+- `variant` (String) Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
+- `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB). Example: `4`.
 
 <a id="nestedblock--pg_user_config--ip_filter_object"></a>
 ### Nested Schema for `pg_user_config.ip_filter_object`
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--pg_user_config--migration"></a>
@@ -162,17 +183,18 @@ Optional:
 
 Required:
 
-- `host` (String) Hostname or IP address of the server where to migrate data from.
-- `port` (Number) Port number of the server where to migrate data from.
+- `host` (String) Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.
+- `port` (Number) Port number of the server where to migrate data from. Example: `1234`.
 
 Optional:
 
-- `dbname` (String) Database name for bootstrapping the initial connection.
-- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).
-- `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
-- `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
-- `username` (String) User name for authentication with the server where to migrate data from.
+- `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
+- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
+- `ignore_roles` (String) Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
+- `username` (String) User name for authentication with the server where to migrate data from. Example: `myname`.
 
 
 <a id="nestedblock--pg_user_config--pg"></a>
@@ -181,25 +203,25 @@ Optional:
 Optional:
 
 - `autovacuum_analyze_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size).
-- `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.
-- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.
+- `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is 50 tuples.
+- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted. Example: `200000000`.
 - `autovacuum_max_workers` (Number) Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.
 - `autovacuum_naptime` (Number) Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute.
 - `autovacuum_vacuum_cost_delay` (Number) Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds.
 - `autovacuum_vacuum_cost_limit` (Number) Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.
 - `autovacuum_vacuum_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size).
 - `autovacuum_vacuum_threshold` (Number) Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples.
-- `bgwriter_delay` (Number) Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200.
-- `bgwriter_flush_after` (Number) Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback.
-- `bgwriter_lru_maxpages` (Number) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.
-- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.
-- `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.
-- `default_toast_compression` (String) Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
+- `bgwriter_delay` (Number) Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200. Example: `200`.
+- `bgwriter_flush_after` (Number) Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback. Example: `512`.
+- `bgwriter_lru_maxpages` (Number) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100. Example: `100`.
+- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0. Example: `2.0`.
+- `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition. Example: `1000`.
+- `default_toast_compression` (String) Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.
-- `log_error_verbosity` (String) Controls the amount of detail written in the server log for each message that is logged.
-- `log_line_prefix` (String) Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.
+- `log_error_verbosity` (String) Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
+- `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process.
@@ -216,19 +238,53 @@ Optional:
 - `max_standby_streaming_delay` (Number) Max standby streaming delay in milliseconds.
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support.
-- `pg_partman_bgw__dot__interval` (Number) Sets the time interval to run pg_partman's scheduled tasks.
-- `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks.
+- `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.
+- `pg_partman_bgw__dot__interval` (Number) Sets the time interval to run pg_partman's scheduled tasks. Example: `3600`.
+- `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring.
-- `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets .
-- `pg_stat_statements__dot__track` (String) Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
-- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
-- `timezone` (String) PostgreSQL service timezone.
-- `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session.
-- `track_commit_timestamp` (String) Record commit time of transactions.
-- `track_functions` (String) Enables tracking of function call counts and time used.
-- `track_io_timing` (String) Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
-- `wal_sender_timeout` (Number) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.
-- `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance.
+- `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets. Example: `10`.
+- `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
+- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited. Example: `5000000`.
+- `timezone` (String) PostgreSQL service timezone. Example: `Europe/Helsinki`.
+- `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session. Example: `1024`.
+- `track_commit_timestamp` (String) Enum: `off`, `on`. Record commit time of transactions.
+- `track_functions` (String) Enum: `all`, `none`, `pl`. Enables tracking of function call counts and time used.
+- `track_io_timing` (String) Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
+- `wal_sender_timeout` (Number) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout. Example: `60000`.
+- `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance. Example: `50`.
+
+
+<a id="nestedblock--pg_user_config--pg_qualstats"></a>
+### Nested Schema for `pg_user_config.pg_qualstats`
+
+Optional:
+
+- `enabled` (Boolean, Deprecated) Enable / Disable pg_qualstats. Default: `false`.
+- `min_err_estimate_num` (Number, Deprecated) Error estimation num threshold to save quals. Default: `0`.
+- `min_err_estimate_ratio` (Number, Deprecated) Error estimation ratio threshold to save quals. Default: `0`.
+- `track_constants` (Boolean, Deprecated) Enable / Disable pg_qualstats constants tracking. Default: `true`.
+- `track_pg_catalog` (Boolean, Deprecated) Track quals on system catalogs too. Default: `false`.
+
+
+<a id="nestedblock--pg_user_config--pgaudit"></a>
+### Nested Schema for `pg_user_config.pgaudit`
+
+Optional:
+
+- `feature_enabled` (Boolean, Deprecated) Enable pgaudit extension. When enabled, pgaudit extension will be automatically installed.Otherwise, extension will be uninstalled but auditing configurations will be preserved. Default: `false`.
+- `log` (List of String, Deprecated) Specifies which classes of statements will be logged by session audit logging.
+- `log_catalog` (Boolean, Deprecated) Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. Default: `true`.
+- `log_client` (Boolean, Deprecated) Specifies whether log messages will be visible to a client process such as psql. Default: `false`.
+- `log_level` (String, Deprecated) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. Default: `log`.
+- `log_max_string_length` (Number, Deprecated) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.
+- `log_nested_statements` (Boolean, Deprecated) This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. Default: `true`.
+- `log_parameter` (Boolean, Deprecated) Specifies that audit logging should include the parameters that were passed with the statement. Default: `false`.
+- `log_parameter_max_size` (Number, Deprecated) Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. Default: `0`.
+- `log_relation` (Boolean, Deprecated) Specifies whether session audit logging should create a separate log entry for each relation (TABLE, VIEW, etc.) referenced in a SELECT or DML statement. Default: `false`.
+- `log_rows` (Boolean, Deprecated) Specifies that audit logging should include the rows retrieved or affected by a statement. When enabled the rows field will be included after the parameter field. Default: `false`.
+- `log_statement` (Boolean, Deprecated) Specifies whether logging will include the statement text and parameters (if enabled). Default: `true`.
+- `log_statement_once` (Boolean, Deprecated) Specifies whether logging will include the statement text and parameters with the first log entry for a statement/substatement combination or with every entry. Default: `false`.
+- `role` (String, Deprecated) Specifies the master role to use for object audit logging.
 
 
 <a id="nestedblock--pg_user_config--pgbouncer"></a>
@@ -236,15 +292,16 @@ Optional:
 
 Optional:
 
-- `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds).
-- `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
-- `autodb_pool_mode` (String) PGBouncer pool mode.
-- `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
+- `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds). Default: `3600`.
+- `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited. Example: `0`.
+- `autodb_pool_mode` (String) Enum: `session`, `statement`, `transaction`. PGBouncer pool mode. Default: `transaction`.
+- `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. Default: `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
-- `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
-- `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).
-- `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds).
-- `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes.
+- `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.
+- `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. Default: `0`.
+- `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). Default: `600`.
+- `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds). Default: `3600`.
+- `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes. Default: `false`.
 
 
 <a id="nestedblock--pg_user_config--pglookout"></a>
@@ -252,7 +309,7 @@ Optional:
 
 Optional:
 
-- `max_failover_replication_time_lag` (Number) Number of seconds of master unavailability before triggering database failover to standby. The default value is `60`.
+- `max_failover_replication_time_lag` (Number) Number of seconds of master unavailability before triggering database failover to standby. Default: `60`.
 
 
 <a id="nestedblock--pg_user_config--private_access"></a>
@@ -290,7 +347,7 @@ Optional:
 
 Optional:
 
-- `max_background_workers` (Number) The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.
+- `max_background_workers` (Number) The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. Default: `16`.
 
 
 
@@ -299,7 +356,7 @@ Optional:
 
 Required:
 
-- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `integration_type` (String) Type of the service integration. The possible value is `read_replica`.
 - `source_service_name` (String) Name of the source service
 
 
@@ -310,6 +367,14 @@ Required:
 
 - `key` (String) Service tag key
 - `value` (String) Service tag value
+
+
+<a id="nestedblock--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Required:
+
+- `email` (String) An email address to contact for technical issues
 
 
 <a id="nestedblock--timeouts"></a>
@@ -330,6 +395,7 @@ Optional:
 Read-Only:
 
 - `component` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
@@ -342,5 +408,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_pg.pg project/service_name
+terraform import aiven_pg.example_postgres PROJECT/SERVICE_NAME
 ```

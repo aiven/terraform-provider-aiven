@@ -63,7 +63,10 @@ var aivenAccountSchema = map[string]*schema.Schema{
 
 func ResourceAccount() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account resource allows the creation and management of an Aiven Account.",
+		Description: `Creates and manages an Aiven account.
+		
+**This resource is deprecated.** Use ` + "`aiven_organization`" + ` instead.
+		`,
 		CreateContext: resourceAccountCreate,
 		ReadContext:   resourceAccountRead,
 		UpdateContext: resourceAccountUpdate,
@@ -75,7 +78,7 @@ func ResourceAccount() *schema.Resource {
 
 		Schema: aivenAccountSchema,
 
-		DeprecationMessage: "This resource will be removed in v5.0.0, use aiven_organization instead.",
+		DeprecationMessage: "This resource will be removed in v5.0.0. Use aiven_organization instead.",
 	}
 }
 

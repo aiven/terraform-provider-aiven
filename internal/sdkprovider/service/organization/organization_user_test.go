@@ -3,10 +3,10 @@ package organization_test
 import (
 	"context"
 	"fmt"
-	"log"
+	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -16,7 +16,6 @@ import (
 )
 
 func TestAccAivenOrganizationUser_basic(t *testing.T) {
-	resourceName := "aiven_organization_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -26,12 +25,8 @@ func TestAccAivenOrganizationUser_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationUserResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenOrganizationUserAttributes("data.aiven_organization_user.member"),
-					resource.TestCheckResourceAttr(
-						resourceName, "user_email", fmt.Sprintf("aleks+%s@aiven.io", rName),
-					),
-					resource.TestCheckResourceAttr(resourceName, "accepted", "false"),
+				ExpectError: regexp.MustCompile(
+					"creation of organization user is not supported anymore via Terraform.*",
 				),
 			},
 		},
@@ -58,9 +53,14 @@ data "aiven_organization_user" "member" {
 }
 
 func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	var (
+		c, err = acc.GetTestGenAivenClient()
+		ctx    = context.Background()
+	)
 
-	ctx := context.Background()
+	if err != nil {
+		return fmt.Errorf("error getting generated Aiven client: %w", err)
+	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_organization_user" {
@@ -72,26 +72,26 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 			return err
 		}
 
-		r, err := c.Organization.Get(ctx, organizationID)
+		resp, err := c.OrganizationGet(ctx, organizationID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return err
-			}
-
-			return nil
-		}
-
-		if r.ID == organizationID {
-			ri, err := c.OrganizationUserInvitations.List(ctx, organizationID)
-			if err != nil {
-				if err.(aiven.Error).Status != 404 {
-					return err
-				}
-
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
-			for _, i := range ri.Invitations {
+			return err
+		}
+
+		if resp.OrganizationId == organizationID {
+			respI, err := c.OrganizationUserInvitationsList(ctx, organizationID)
+			if err != nil {
+				if avngen.IsNotFound(err) {
+					return nil
+				}
+
+				return err
+			}
+
+			for _, i := range respI {
 				if i.UserEmail == userEmail {
 					return fmt.Errorf("organization user (%s) still exists", rs.Primary.ID)
 				}
@@ -100,35 +100,4 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 	}
 
 	return nil
-}
-
-func testAccCheckAivenOrganizationUserAttributes(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		r := s.RootModule().Resources[n]
-		a := r.Primary.Attributes
-
-		log.Printf("[DEBUG] organization user attributes %v", a)
-
-		if a["organization_id"] == "" {
-			return fmt.Errorf("expected to get an organization_id from Aiven")
-		}
-
-		if a["user_email"] == "" {
-			return fmt.Errorf("expected to get a user_email from Aiven")
-		}
-
-		if a["create_time"] == "" {
-			return fmt.Errorf("expected to get a create_time from Aiven")
-		}
-
-		if a["accepted"] != "false" {
-			return fmt.Errorf("expected to get a accepted from Aiven")
-		}
-
-		if a["invited_by"] == "" {
-			return fmt.Errorf("expected to get a invited_by from Aiven")
-		}
-
-		return nil
-	}
 }

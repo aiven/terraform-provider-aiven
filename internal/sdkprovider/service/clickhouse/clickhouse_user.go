@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -20,29 +21,29 @@ var aivenClickhouseUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the Clickhouse user.").ForceNew().Build(),
+		Description:  userconfig.Desc("The name of the ClickHouse user.").ForceNew().Build(),
 	},
 	"password": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Computed:    true,
-		Description: "The password of the clickhouse user.",
+		Description: "The password of the ClickHouse user.",
 	},
 	"uuid": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "UUID of the clickhouse user.",
+		Description: "UUID of the ClickHouse user.",
 	},
 	"required": {
 		Type:        schema.TypeBool,
 		Computed:    true,
-		Description: "Indicates if a clickhouse user is required",
+		Description: "Indicates if a ClickHouse user is required.",
 	},
 }
 
 func ResourceClickhouseUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Clickhouse User resource allows the creation and management of Aiven Clikhouse Users.",
+		Description:   "Creates and manages a ClickHouse user.",
 		CreateContext: resourceClickhouseUserCreate,
 		ReadContext:   resourceClickhouseUserRead,
 		DeleteContext: resourceClickhouseUserDelete,
@@ -121,7 +122,7 @@ func resourceClickhouseUserDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	err = client.ClickhouseUser.Delete(ctx, projectName, serviceName, uuid)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

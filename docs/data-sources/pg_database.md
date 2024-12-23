@@ -3,20 +3,20 @@
 page_title: "aiven_pg_database Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG Database data source provides information about the existing Aiven PostgreSQL Database.
+  Gets information about a database in an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg_database (Data Source)
 
-The PG Database data source provides information about the existing Aiven PostgreSQL Database.
+Gets information about a database in an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_pg_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_pg.mypg.service_name
-  database_name = "<DATABASE_NAME>"
+data "aiven_pg_database" "main" {
+  project       = data.aiven_project.example_project.project
+  service_name  = aiven_pg.example_postgres.service_name
+  database_name = "example-database"
 }
 ```
 
@@ -25,13 +25,13 @@ data "aiven_pg_database" "mydatabase" {
 
 ### Required
 
-- `database_name` (String) The name of the service database. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `database_name` (String) The name of the service database. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
-- `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+- `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
+- `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
+- `termination_protection` (Boolean) Terraform client-side deletion protection, which prevents the database from being deleted by Terraform. It's recommended to enable this for any production databases containing critical data. The default value is `false`.

@@ -116,40 +116,35 @@ output "sample_acl_id" {
   description = "Resource's Terraform identifier."
 }
 
-# InfluxDB service
-output "sampleinflux_id" {
-  value       = aiven_influxdb.sampleinflux.id
+# M3DB service
+output "samplem3db_id" {
+  value       = aiven_m3db.samplem3db.id
   description = "Resource's Terraform identifier."
 }
 
-output "sampleinflux_service_uri" {
-  value       = aiven_influxdb.sampleinflux.service_uri
+output "samplem3db_service_uri" {
+  value       = aiven_m3db.samplem3db.service_uri
   description = "URI for connecting to the service."
   sensitive   = true
 }
 
-output "sampleinflux_service_host" {
-  value       = aiven_influxdb.sampleinflux.service_host
+output "samplem3db_service_host" {
+  value       = aiven_m3db.samplem3db.service_host
   description = "The hostname of the service."
 }
 
-output "sampleinflux_service_port" {
-  value       = aiven_influxdb.sampleinflux.service_port
+output "samplem3db_service_port" {
+  value       = aiven_m3db.samplem3db.service_port
   description = "The port of the service."
 }
 
-output "sampleinflux_database_name" {
-  value       = aiven_influxdb.sampleinflux.influxdb[0].database_name
-  description = "Name of the default InfluxDB database."
-}
-
-output "sampleinflux_service_username" {
-  value       = aiven_influxdb.sampleinflux.service_username
+output "samplem3db_service_username" {
+  value       = aiven_m3db.samplem3db.service_username
   description = "Username used for connecting to the service."
 }
 
-output "sampleinflux_service_password" {
-  value       = aiven_influxdb.sampleinflux.service_password
+output "samplem3db_service_password" {
+  value       = aiven_m3db.samplem3db.service_password
   description = "Password used for connecting to the service."
   sensitive   = true
 }

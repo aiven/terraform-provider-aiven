@@ -5,9 +5,7 @@ resource "aiven_kafka_mirrormaker" "mm" {
   service_name = "mm"
 
   kafka_mirrormaker_user_config {
-    ip_filter = [
-      "0.0.0.0/0"
-    ]
+    ip_filter_string = ["0.0.0.0/0"]
 
     kafka_mirrormaker {
       refresh_groups_interval_seconds = 600
@@ -54,5 +52,14 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
     ".*[\\-\\.]internal",
     ".*\\.replica",
     "__.*"
+  ]
+
+  config_properties_exclude = [
+    "follower\\.replication\\.throttled\\.replicas",
+    "leader\\.replication\\.throttled\\.replicas",
+    "message\\.timestamp\\.difference\\.max\\.ms",
+    "message\\.timestamp\\.type",
+    "unclean\\.leader\\.election\\.enable",
+    "min\\.insync\\.replicas"
   ]
 }

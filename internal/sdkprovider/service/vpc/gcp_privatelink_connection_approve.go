@@ -7,9 +7,10 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -19,30 +20,29 @@ var aivenGCPPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 	"user_ip_address": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Privatelink connection user IP address",
+		Description: "The Private Service Connect connection user IP address.",
 	},
 
 	"privatelink_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection id",
+		Description: "Aiven internal ID for the private link connection.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection state",
+		Description: "The state of the connection.",
 	},
 	"psc_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection PSC connection id",
+		Description: "The Google Private Service Connect connection ID.",
 	},
 }
 
 func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
-		Description: "The GCP privatelink approve resource waits for an aiven privatelink connection on a " +
-			"service and approves it with associated endpoint IP",
+		Description:   "Approves a Google Private Service Connect connection to an Aiven service with an associated endpoint IP.",
 		CreateContext: resourceGCPPrivatelinkConnectionApprovalUpdate,
 		ReadContext:   resourceGCPPrivatelinkConnectionApprovalRead,
 		UpdateContext: resourceGCPPrivatelinkConnectionApprovalUpdate,
@@ -56,7 +56,6 @@ func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForGCPConnectionState(
 	ctx context.Context,
 	client *aiven.Client,
@@ -65,8 +64,8 @@ func waitForGCPConnectionState(
 	t time.Duration,
 	pending []string,
 	target []string,
-) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: pending,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
@@ -92,9 +91,9 @@ func waitForGCPConnectionState(
 
 			return plConnection, plConnection.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    t,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }
 
@@ -116,9 +115,13 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	if d.IsNewResource() {
+		timeout = d.Timeout(schema.TimeoutCreate)
+	}
+
 	_, err = waitForGCPConnectionState(
-		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
+		ctx, client, project, serviceName, timeout, pending, target,
 	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
@@ -156,9 +159,8 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 	pending = []string{"user-approved"}
 	target = []string{"connected", "active"}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForGCPConnectionState(
-		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
+		ctx, client, project, serviceName, timeout, pending, target,
 	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)

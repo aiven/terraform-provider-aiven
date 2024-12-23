@@ -3,19 +3,19 @@
 page_title: "aiven_aws_privatelink Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.
+  Creates and manages an AWS PrivateLink for Aiven services https://aiven.io/docs/platform/howto/use-aws-privatelinks in a VPC.
 ---
 
 # aiven_aws_privatelink (Resource)
 
-The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.
+Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_aws_privatelink" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
+resource "aiven_aws_privatelink" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
 
   principals = [
     "arn:aws:iam::012345678901:user/mwf"
@@ -28,9 +28,9 @@ resource "aiven_aws_privatelink" "foo" {
 
 ### Required
 
-- `principals` (Set of String) List of allowed principals
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `principals` (Set of String) List of the ARNs of the AWS accounts or IAM users allowed to connect to the VPC endpoint.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -38,8 +38,8 @@ resource "aiven_aws_privatelink" "foo" {
 
 ### Read-Only
 
-- `aws_service_id` (String) AWS service ID
-- `aws_service_name` (String) AWS service name
+- `aws_service_id` (String) AWS service ID.
+- `aws_service_name` (String) AWS service name.
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
@@ -58,5 +58,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_aws_privatelink.foo project/service_name
+terraform import aiven_aws_privatelink.main PROJECT/SERVICE_NAME
 ```

@@ -6,17 +6,19 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
   schema = <<EOT
     {
-       "doc": "example",
-       "fields": [{
-           "default": 5,
-           "doc": "my test number",
-           "name": "test",
-           "namespace": "test",
-           "type": "int"
-       }],
-       "name": "example",
-       "namespace": "example",
-       "type": "record"
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
     }
-    EOT
+  EOT
 }

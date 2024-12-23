@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -94,7 +96,7 @@ func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

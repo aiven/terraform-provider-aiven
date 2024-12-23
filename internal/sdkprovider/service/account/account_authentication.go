@@ -5,10 +5,12 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/accountauthentication"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -27,8 +29,8 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 	"type": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
-		Description:  userconfig.Desc("The account authentication type.").PossibleValues("internal", "saml").Build(),
+		ValidateFunc: validation.StringInSlice(accountauthentication.AuthenticationMethodTypeChoices(), false),
+		Description:  userconfig.Desc("The account authentication type.").PossibleValuesString(accountauthentication.AuthenticationMethodTypeChoices()...).Build(),
 	},
 	"enabled": {
 		Type:        schema.TypeBool,
@@ -143,7 +145,7 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 
 func ResourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account Authentication resource allows the creation and management of an Aiven Account Authentications.",
+		Description:   "Creates and manages an authentication method.",
 		CreateContext: resourceAccountAuthenticationCreate,
 		ReadContext:   resourceAccountAuthenticationRead,
 		UpdateContext: resourceAccountAuthenticationUpdate,
@@ -153,40 +155,13 @@ func ResourceAccountAuthentication() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenAccountAuthenticationSchema,
+		Schema:             aivenAccountAuthenticationSchema,
+		DeprecationMessage: "This resource is deprecated. Use the Aiven Console instead. View the documentation for more information: https://aiven.io/docs/platform/howto/saml/add-identity-providers",
 	}
 }
 
-func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	accountID := d.Get("account_id").(string)
-	r, err := client.AccountAuthentications.Create(
-		ctx,
-		accountID,
-		aiven.AccountAuthenticationMethodCreate{
-			AuthenticationMethodName: d.Get("name").(string),
-			AuthenticationMethodType: d.Get("type").(string),
-			AutoJoinTeamID:           d.Get("auto_join_team_id").(string),
-			SAMLCertificate:          strings.TrimSpace(d.Get("saml_certificate").(string)),
-			SAMLDigestAlgorithm:      d.Get("saml_digest_algorithm").(string),
-			SAMLEntityID:             d.Get("saml_entity_id").(string),
-			SAMLFieldMapping:         readSAMLFieldMappingFromSchema(d),
-			SAMLIdpLoginAllowed:      d.Get("saml_idp_login_allowed").(bool),
-			SAMLIdpURL:               d.Get("saml_idp_url").(string),
-			SAMLSignatureAlgorithm:   d.Get("saml_signature_algorithm").(string),
-			SAMLVariant:              d.Get("saml_variant").(string),
-		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(schemautil.BuildResourceID(
-		accountID,
-		r.AuthenticationMethod.AuthenticationMethodID))
-
-	return resourceAccountAuthenticationRead(ctx, d, m)
+func resourceAccountAuthenticationCreate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	return diag.Errorf("creating account authentication is unsupported")
 }
 
 func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -314,7 +289,7 @@ func resourceAccountAuthenticationDelete(ctx context.Context, d *schema.Resource
 	}
 
 	err = client.AccountAuthentications.Delete(ctx, accountID, teamID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

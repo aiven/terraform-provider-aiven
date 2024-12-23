@@ -3,15 +3,16 @@ package kafka
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceMirrorMakerReplicationFlowTopic() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceMirrorMakerReplicationFlowRead,
+		ReadContext: common.WithGenClient(datasourceMirrorMakerReplicationFlowRead),
 		Description: "The MirrorMaker 2 Replication Flow data source provides information about the existing MirrorMaker 2 Replication Flow on Aiven Cloud.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
 			aivenMirrorMakerReplicationFlowSchema,
@@ -19,7 +20,7 @@ func DatasourceMirrorMakerReplicationFlowTopic() *schema.Resource {
 	}
 }
 
-func datasourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	sourceCluster := d.Get("source_cluster").(string)
@@ -27,5 +28,5 @@ func datasourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Res
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, sourceCluster, targetCluster))
 
-	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
+	return resourceMirrorMakerReplicationFlowRead(ctx, d, client)
 }

@@ -3,20 +3,20 @@
 page_title: "aiven_kafka_topic Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Topic data source provides information about the existing Aiven Kafka Topic.
+  Gets information about an Aiven for Apache Kafka® topic.
 ---
 
 # aiven_kafka_topic (Data Source)
 
-The Kafka Topic data source provides information about the existing Aiven Kafka Topic.
+Gets information about an Aiven for Apache Kafka® topic.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_topic" "mytesttopic" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_kafka.myservice.service_name
-  topic_name   = "<TOPIC_NAME>"
+data "aiven_kafka_topic" "example_topic" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
+  topic_name   = "example-topic"
 }
 ```
 
@@ -25,18 +25,20 @@ data "aiven_kafka_topic" "mytesttopic" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `topic_name` (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `topic_name` (String) The name of the topic. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `config` (List of Object) Kafka topic configuration (see [below for nested schema](#nestedatt--config))
+- `config` (List of Object) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedatt--config))
 - `id` (String) The ID of this resource.
+- `owner_user_group_id` (String) The ID of the user group that owns the topic. Assigning ownership to decentralize topic management is part of [Aiven for Apache Kafka® governance](https://aiven.io/docs/products/kafka/concepts/governance-overview).
 - `partitions` (Number) The number of partitions to create in the topic.
 - `replication` (Number) The replication factor for the topic.
-- `tag` (Set of Object) Kafka Topic tag. (see [below for nested schema](#nestedatt--tag))
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `tag` (Set of Object) Tags for the topic. (see [below for nested schema](#nestedatt--tag))
+- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
+- `topic_description` (String) The description of the topic
 
 <a id="nestedatt--config"></a>
 ### Nested Schema for `config`
@@ -50,6 +52,8 @@ Read-Only:
 - `flush_messages` (String)
 - `flush_ms` (String)
 - `index_interval_bytes` (String)
+- `local_retention_bytes` (String)
+- `local_retention_ms` (String)
 - `max_compaction_lag_ms` (String)
 - `max_message_bytes` (String)
 - `message_downconversion_enable` (Boolean)
@@ -60,6 +64,7 @@ Read-Only:
 - `min_compaction_lag_ms` (String)
 - `min_insync_replicas` (String)
 - `preallocate` (Boolean)
+- `remote_storage_enable` (Boolean)
 - `retention_bytes` (String)
 - `retention_ms` (String)
 - `segment_bytes` (String)

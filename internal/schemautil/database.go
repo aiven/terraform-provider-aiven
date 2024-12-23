@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 // DatabaseDeleteWaiter is used to wait for Database to be deleted.
@@ -17,12 +19,11 @@ type DatabaseDeleteWaiter struct {
 	Database    string
 }
 
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+// RefreshFunc will call the Aiven client and refresh its state.
+func (w *DatabaseDeleteWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.Databases.Delete(w.Context, w.ProjectName, w.ServiceName, w.Database)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return nil, "REMOVING", nil
 		}
 
@@ -31,14 +32,13 @@ func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending:    []string{"REMOVING"},
 		Target:     []string{"DELETED"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      5 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    timeout,
-		MinTimeout: 5 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }

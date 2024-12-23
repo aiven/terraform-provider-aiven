@@ -1,0 +1,1 @@
+terraform import aiven_flink_application_deployment.main PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID/DEPLOYMENT_ID

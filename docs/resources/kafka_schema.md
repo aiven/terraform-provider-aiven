@@ -21,19 +21,21 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
   schema = <<EOT
     {
-       "doc": "example",
-       "fields": [{
-           "default": 5,
-           "doc": "my test number",
-           "name": "test",
-           "namespace": "test",
-           "type": "int"
-       }],
-       "name": "example",
-       "namespace": "example",
-       "type": "record"
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
     }
-    EOT
+  EOT
 }
 ```
 
@@ -42,15 +44,15 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `schema` (String) Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema, depending on the schema type.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `subject_name` (String) The Kafka Schema Subject name. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `subject_name` (String) The Kafka Schema Subject name. Changing this property forces recreation of the resource.
 
 ### Optional
 
 - `compatibility_level` (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
-- `schema_type` (String) Kafka Schema configuration type. Defaults to AVRO. Possible values are AVRO, JSON, and PROTOBUF.
+- `schema_type` (String) Kafka Schema configuration type. Defaults to AVRO. The possible values are `AVRO`, `JSON` and `PROTOBUF`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

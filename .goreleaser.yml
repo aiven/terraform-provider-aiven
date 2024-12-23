@@ -1,3 +1,6 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/goreleaser/goreleaser/v2.3.2/www/docs/static/schema.json
+version: 2
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -5,7 +8,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - '-s -w -X github.com/aiven/terraform-provider-aiven/main.version={{.Version}}'
+      - '-s -w -X main.version={{.Version}}'
     goos:
       - freebsd
       - windows
@@ -39,4 +42,4 @@ signs:
 release:
   draft: true
 changelog:
-  skip: true
+  disable: true

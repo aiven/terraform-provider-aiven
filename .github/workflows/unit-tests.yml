@@ -25,7 +25,9 @@ jobs:
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-go@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
     - run: make test-unit

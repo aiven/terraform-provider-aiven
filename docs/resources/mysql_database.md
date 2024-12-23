@@ -25,9 +25,9 @@ resource "aiven_mysql_database" "mydatabase" {
 
 ### Required
 
-- `database_name` (String) The name of the service database. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `database_name` (String) The name of the service database. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -54,5 +54,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_mysql_database.mydatabase project/service_name/database_name
+terraform import aiven_mysql_database.mydatabase PROJECT/SERVICE_NAME/DATABASE_NAME
 ```

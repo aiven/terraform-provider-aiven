@@ -3,18 +3,18 @@
 page_title: "aiven_project Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Project data source provides information about the existing Aiven Project.
+  Gets information about an Aiven project.
 ---
 
 # aiven_project (Data Source)
 
-The Project data source provides information about the existing Aiven Project.
+Gets information about an Aiven project.
 
 ## Example Usage
 
 ```terraform
-data "aiven_project" "myproject" {
-  project = "<PROJECT_NAME>"
+data "aiven_project" "example_project" {
+  project = "example-project"
 }
 ```
 
@@ -23,23 +23,23 @@ data "aiven_project" "myproject" {
 
 ### Required
 
-- `project` (String) Defines the name of the project. Name must be globally unique (between all Aiven customers) and cannot be changed later without destroying and re-creating the project, including all sub-resources.
+- `project` (String) The name of the project. Names must be globally unique among all Aiven customers and cannot be changed later without destroying and re-creating the project, including all sub-resources.
 
 ### Read-Only
 
-- `account_id` (String) An optional property to link a project to an already existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
+- `account_id` (String) Link a project to an existing account using its account ID. This field is deprecated. Use `parent_id` instead. To set up proper dependencies please refer to this variable as a reference.
 - `add_account_owners_admin_access` (Boolean) If parent_id is set, grant account owner team admin access to the new project. The default value is `true`.
-- `available_credits` (String) The amount of platform credits available to the project. This could be your free trial or other promotional credits.
-- `billing_group` (String) The id of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
-- `ca_cert` (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
-- `copy_from_project` (String) is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
-- `default_cloud` (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
-- `estimated_balance` (String) The current accumulated bill for this project in the current billing period.
+- `available_credits` (String) The number of trial or promotional credits remaining for this project.
+- `billing_group` (String) The ID of the billing group this project is assigned to. To set up proper dependencies please refer to this variable as a reference.
+- `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
+- `copy_from_project` (String) The name of the project to copy billing information, technical contacts, and some other project attributes from. This is most useful to set up the same billing method when you use bank transfers to pay invoices for other projects. You can only do this when creating a project. You can't set the billing over the API for an existing. To set up proper dependencies please refer to this variable as a reference.
+- `default_cloud` (String) Default cloud provider and region where services are hosted. This can be changed after the project is created and will not affect existing services.
+- `estimated_balance` (String) The monthly running estimate for this project for the current billing period.
 - `id` (String) The ID of this resource.
-- `parent_id` (String) An optional property to link a project to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `payment_method` (String) The method of invoicing used for payments for this project, e.g. `card`.
+- `parent_id` (String) Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `payment_method` (String) The payment type used for this project. For example,`card`.
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))
-- `technical_emails` (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
+- `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.
 - `use_source_project_billing_group` (Boolean) Use the same billing group that is used in source project.
 
 <a id="nestedatt--tag"></a>

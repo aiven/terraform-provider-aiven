@@ -16,7 +16,7 @@ var aivenM3DBUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the M3DB User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("Name of the M3DB service user.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -24,20 +24,20 @@ var aivenM3DBUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the M3DB User.",
+		Description:      "The M3DB service user's password.",
 	},
 
 	// computed fields
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Type of the user account. Tells whether the user is the primary account or a regular account.",
+		Description: "User account type, such as primary or regular account.",
 	},
 }
 
 func ResourceM3DBUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The M3DB User resource allows the creation and management of Aiven M3DB Users.",
+		Description:   "Creates and manages an Aiven for M3DB service user.",
 		CreateContext: schemautil.ResourceServiceUserCreate,
 		UpdateContext: schemautil.ResourceServiceUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,

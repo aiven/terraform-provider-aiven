@@ -2,12 +2,15 @@ package project
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -15,26 +18,32 @@ import (
 var aivenProjectUserSchema = map[string]*schema.Schema{
 	"project": schemautil.CommonSchemaProjectReference,
 	"email": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: userconfig.Desc("Email address of the user.").ForceNew().Build(),
+		ForceNew:     true,
+		Required:     true,
+		Type:         schema.TypeString,
+		Description:  userconfig.Desc("Email address of the user in lowercase.").ForceNew().Build(),
+		ValidateFunc: schemautil.ValidateEmailAddress,
 	},
 	"member_type": {
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
+		Description: userconfig.Desc("Project membership type.").PossibleValuesString(account.MemberTypeChoices()...).Build(),
 	},
 	"accepted": {
 		Computed:    true,
 		Type:        schema.TypeBool,
-		Description: "Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.",
+		Description: "Whether the user has accepted the request to join the project. Users get an invite and become project members after accepting the invite.",
 	},
 }
 
 func ResourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Project User resource allows the creation and management of Aiven Project Users.",
+		Description: `Creates and manages an Aiven project member.
+
+**This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
+[migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
+		`,
 		CreateContext: resourceProjectUserCreate,
 		ReadContext:   resourceProjectUserRead,
 		UpdateContext: resourceProjectUserUpdate,
@@ -44,13 +53,15 @@ func ResourceProjectUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenProjectUserSchema,
+		Schema:             aivenProjectUserSchema,
+		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
 	}
 }
 
 // isProjectUserAlreadyInvited return true if user already been invited to the project
 func isProjectUserAlreadyInvited(err error) bool {
-	if e, ok := err.(aiven.Error); ok {
+	var e aiven.Error
+	if errors.As(err, &e) {
 		if strings.Contains(e.Message, "already been invited to this project") && e.Status == 409 {
 			return true
 		}
@@ -163,9 +174,10 @@ func resourceProjectUserDelete(ctx context.Context, d *schema.ResourceData, m in
 	if user != nil {
 		err := client.ProjectUsers.DeleteUser(ctx, projectName, email)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 ||
-				!strings.Contains(err.(aiven.Error).Message, "User does not exist") ||
-				!strings.Contains(err.(aiven.Error).Message, "User not found") {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 ||
+				!strings.Contains(e.Message, "User does not exist") ||
+				!strings.Contains(e.Message, "User not found") {
 
 				return diag.FromErr(err)
 			}
@@ -175,7 +187,7 @@ func resourceProjectUserDelete(ctx context.Context, d *schema.ResourceData, m in
 	// delete invitation if exists
 	if invitation != nil {
 		err := client.ProjectUsers.DeleteInvitation(ctx, projectName, email)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return diag.FromErr(err)
 		}
 	}

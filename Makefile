@@ -1,4 +1,4 @@
-.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs
+.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs ci-selproj
 
 #################################################
 # Global
@@ -29,6 +29,12 @@ TERRAFMT := $(TOOLS_BIN_DIR)/terrafmt
 
 $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/terrafmt github.com/katbyte/terrafmt
+
+
+SELPROJ := $(TOOLS_BIN_DIR)/selproj
+
+$(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/go-utils/selproj
 
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
@@ -88,7 +94,7 @@ ACC_TEST_TIMEOUT ?= 180m
 ACC_TEST_PARALLELISM ?= 10
 
 test-acc:
-	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
+	TF_ACC=1 PROVIDER_AIVEN_ENABLE_BETA=1 $(GO) test ./$(PKG_PATH)/... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
 
@@ -112,7 +118,13 @@ lint-test: $(TERRAFMT)
 
 
 lint-docs: $(TFPLUGINDOCS)
-	$(TFPLUGINDOCS) validate
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate --rendered-website-dir tmp
+	mv tmp/data-sources/influxdb*.md docs/data-sources/
+	mv tmp/resources/influxdb*.md docs/resources/
+	rm -rf tmp
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) validate --provider-name aiven
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
 
 #################################################
 # Format
@@ -128,8 +140,11 @@ fmt-test: $(TERRAFMT)
 # macOS requires to install GNU sed first. Use `brew install gnu-sed` to install it.
 # It has to be added to PATH as `sed` command, to replace default BSD sed.
 # See `brew info gnu-sed` for more details on how to add it to PATH.
+# /^import ($$/: starts with "import ("
+# /^)/: ends with ")"
+# /^[[:space:]]*$$/: empty lines
 fmt-imports:
-	find . -type f -name '*.go' -exec sed -zi 's/"\n\+\t"/"\n"/g' {} +
+	find . -type f -name '*.go' -exec sed -i '/^import ($$/,/^)/ {/^[[:space:]]*$$/d}' {} +
 	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
 #################################################
@@ -151,7 +166,10 @@ SWEEP ?= global
 
 sweep:
 	@echo 'WARNING: This will destroy infrastructure. Use only in development accounts.'
-	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+	TF_SWEEP=1 $(GO) test ./internal/sweep -v -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+
+sweep-check:
+	$(GO) test ./internal/sweep -v -run TestCheckSweepers
 
 #################################################
 # Generate
@@ -159,10 +177,34 @@ sweep:
 
 generate: gen-go docs
 
-
 gen-go:
-	go generate ./...
-
+	go generate ./...;
+	$(MAKE) fmt-imports
 
 docs: $(TFPLUGINDOCS)
-	$(TFPLUGINDOCS) generate
+	rm -f docs/.DS_Store
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
+
+OLD_SCHEMA ?= .oldSchema.json
+CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
+dump-schemas:
+	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
+
+diff-schemas:
+	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
+	rm $(OLD_SCHEMA)
+
+load-schemas:
+	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
+	go mod tidy
+
+update-schemas: dump-schemas load-schemas generate diff-schemas
+
+#################################################
+# CI
+#################################################
+
+ci-selproj: $(SELPROJ)
+	$(SELPROJ)

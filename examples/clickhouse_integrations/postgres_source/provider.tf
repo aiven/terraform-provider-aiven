@@ -2,6 +2,7 @@
 // The only configuration option needed is the API token
 
 terraform {
+  required_version = ">=0.13"
   required_providers {
     aiven = {
       source  = "aiven/aiven"

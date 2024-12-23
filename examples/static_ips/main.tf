@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">=0.13"
   required_providers {
     aiven = {
       source  = "aiven/aiven"
@@ -21,7 +22,6 @@ provider "aiven" {
 
 resource "aiven_project" "project" {
   project = "static-ips-project"
-  card_id = var.aiven_card_id
 }
 
 resource "aiven_static_ip" "ips" {

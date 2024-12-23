@@ -105,7 +105,8 @@ func testAccCheckAivenMySQLDatabaseResourceDestroy(s *terraform.State) error {
 
 		db, err := c.Databases.Get(ctx, projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}

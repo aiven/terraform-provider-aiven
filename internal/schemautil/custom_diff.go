@@ -2,30 +2,67 @@ package schemautil
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/exp/slices"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
-func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return len(new.([]interface{})) != 0
+func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
+	return customdiff.Sequence(
+		SetServiceTypeIfEmpty(serviceType),
+		CustomizeDiffDisallowMultipleManyToOneKeys,
+		customdiff.IfValueChange("tag",
+			ShouldNotBeEmpty,
+			CustomizeDiffCheckUniqueTag,
+		),
+		customdiff.IfValueChange("disk_space",
+			ShouldNotBeEmpty,
+			CustomizeDiffCheckDiskSpace,
+		),
+		customdiff.IfValueChange("additional_disk_space",
+			ShouldNotBeEmpty,
+			customdiff.Sequence(
+				CustomizeDiffCheckDiskSpace,
+				CustomizeDiffAdditionalDiskSpace,
+			),
+		),
+		customdiff.IfValueChange("service_integrations",
+			ShouldNotBeEmpty,
+			CustomizeDiffServiceIntegrationAfterCreation,
+		),
+		customdiff.Sequence(
+			CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+			CustomizeDiffCheckStaticIPDisassociation,
+		),
+	)
 }
 
-func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return new.(string) != ""
-}
-
-func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return len(new.(*schema.Set).List()) != 0
+func ShouldNotBeEmpty(_ context.Context, _, newValue, _ interface{}) bool {
+	switch t := newValue.(type) {
+	case string:
+		return t != ""
+	case []interface{}:
+		return len(t) != 0
+	case *schema.Set:
+		return t.Len() != 0
+	default:
+		panic(fmt.Sprintf("unexpected type: %T", t))
+	}
 }
 
 func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
+	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").(*schema.Set).List()) != 0 {
 		return fmt.Errorf("service_integrations field can only be set during creation of a service")
 	}
 	return nil
@@ -60,14 +97,9 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 
-	var requestedDiskSpaceMB int
-
-	if ds, ok := d.GetOk("disk_space"); ok {
-		requestedDiskSpaceMB = ConvertToDiskSpaceMB(ds.(string))
-	} else {
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			requestedDiskSpaceMB = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-		}
+	requestedDiskSpaceMB, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+	if err != nil {
+		return err
 	}
 
 	if requestedDiskSpaceMB == 0 {
@@ -103,7 +135,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	}
 	if servicePlanParams.DiskSizeMBStep != 0 {
 		if (requestedDiskSpaceMB-servicePlanParams.DiskSizeMBDefault)%servicePlanParams.DiskSizeMBStep != 0 {
-			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep)
+			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'. Got: '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep, humanReadableRequestedDiskSpace)
 		}
 	}
 	return nil
@@ -174,7 +206,6 @@ func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.Res
 				return err
 			}
 		}
-
 	}
 
 	return nil
@@ -230,4 +261,62 @@ func checkForMultipleValues(v cty.Value) error {
 	}
 
 	return nil
+}
+
+var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, additional_disk_space cannot be set")
+
+// CustomizeDiffAdditionalDiskSpace
+// 1. checks that additional_disk_space is not set if autoscaler is enabled
+// 2. outputs a diff for a computed field, which otherwise would be suppressed when removed
+func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
+
+	s, err := client.ServiceGet(ctx, diff.Get("project").(string), diff.Get("service_name").(string))
+	if avngen.IsNotFound(err) {
+		// The service does not exist, so we cannot check if autoscaler is enabled
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	isAutoscalerEnabled := false
+	for _, i := range s.ServiceIntegrations {
+		if i.IntegrationType == service.IntegrationTypeAutoscaler {
+			isAutoscalerEnabled = true
+			break
+		}
+	}
+
+	k := "additional_disk_space"
+
+	// There are three possible sources of additional_disk_space value:
+	// 1. It is explicitly set in config file
+	// 2. Computed: disk_space - plan.disk_space = additional_disk_space
+	// 3. Computed: autoscaler is enabled, so additional_disk_space is managed by the autoscaler
+	if HasConfigValue(diff, k) || HasConfigValue(diff, "disk_space") {
+		if isAutoscalerEnabled {
+			// Autoscaler is enabled, so we cannot set additional_disk_space
+			return ErrAutoscalerConflict
+		}
+
+		// It is in the config file, lets TF handle it
+		return nil
+	}
+
+	if isAutoscalerEnabled {
+		// If the autoscaler is enabled, we don't need to manage the field,
+		// it will change its value automatically
+		return nil
+	}
+
+	// It is not set but has a value (ShouldNotBeEmpty proves it has).
+	// That means the value is being removed.
+	// We must output a diff for the computed field,
+	// which otherwise will be suppressed by TF
+	return diff.SetNew(k, "0B")
 }

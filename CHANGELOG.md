@@ -6,9 +6,323 @@ nav_order: 1
 
 # Changelog
 
-## [X.Y.Z] - YYYY-MM-DD
+<!-- Always keep the following header in place: -->
+<!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [4.31.1] - 2024-12-23
+
+- Validate whether the `aiven_project.billing_group` field has changed before calling admin API
+
+## [4.31.0] - 2024-12-18
+
+- Add `alloydbomni` BETA resource and datasource
+- Add `aiven_alloydbomni_user` BETA resource and datasource
+- Add `aiven_alloydbomni_database` BETA resource and datasource
+- Fix `terraform plan`: new resources don't display zero values for user configuration options
+- Add `aiven_service_integration` resource and datasource field `destination_service_project`: Destination service project name
+- Add `aiven_service_integration` resource and datasource field `source_service_project`: Source service project name
+- Change `aiven_account_team_project` resource and datasource field `team_type` (enum): remove
+  `organization:billing:read`, `organization:billing:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
+- Add `aiven_alloydbomni` resource and datasource field `alloydbomni_user_config.pg.password_encryption` (enum)
+- Change `aiven_flink` resource and datasource field `flink_user_config.flink_version` (enum): add `1.20`
+- Add `aiven_opensearch` resource and datasource field
+  `opensearch_user_config.opensearch_dashboards.multiple_data_source_enabled`: Enable or disable multiple data sources
+  in OpenSearch Dashboards
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): remove
+  `organization:billing:read`, `organization:billing:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
+- Add `aiven_pg` resource and datasource field `pg_user_config.pg.password_encryption` (enum)
+- Change `aiven_pg` resource and datasource field `pg_user_config.additional_backup_regions`: remove deprecation
+- Change `aiven_pg` resource and datasource field `pg_user_config.pg_version` (enum): add `17`
+- Change `aiven_project_user` resource and datasource field `member_type` (enum): remove `organization:billing:read`,
+  `organization:billing:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
+
+## [4.30.0] - 2024-12-05
+
+- Add `aiven_kafka_native_acl` resource
+- Add `aiven_opensearch` resource field `opensearch_user_config.opensearch.search_insights_top_queries`
+- Add `aiven_thanos` resource field `thanos_user_config.private_access`: Allow access to selected service ports from
+  private networks
+- Add `aiven_thanos` resource field `thanos_user_config.privatelink_access`: Allow access to selected service components
+  through Privatelink
+- Add `aiven_opensearch` datasource field `opensearch_user_config.opensearch.search_insights_top_queries`
+- Add `aiven_thanos` datasource field `thanos_user_config.private_access`: Allow access to selected service ports from
+  private networks
+- Add `aiven_thanos` datasource field `thanos_user_config.privatelink_access`: Allow access to selected service components
+  through Privatelink
+- Add `aiven_service_integration_endpoint` resource field `datadog_user_config.extra_tags_prefix`: Extra tags prefix.
+  Defaults to aiven.
+- Add `aiven_service_integration_endpoint` datasource field `datadog_user_config.extra_tags_prefix`: Extra tags prefix.
+  Defaults to aiven.
+- Add `exactly_once_delivery_enabled` field to `aiven_mirrormaker_replication_flow`: Whether to enable exactly-once message delivery for Mirrormaker replication flow
+
+## [4.29.0] - 2024-11-14
+
+- Add support for `autoscaler` service integration
+- Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases
+  alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases
+  alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation
+- Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation
+- Add `aiven_influxdb` resource field `influxdb_user_config.private_access.user_backup`: Allow clients to connect
+  to user_backup with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_influxdb` resource field `influxdb_user_config.privatelink_access.user_backup`: Enable user_backup.
+- Add `aiven_influxdb` resource field `influxdb_user_config.public_access.user_backup`: Allow clients to connect
+  to user_backup from the public internet for service nodes that are in a project VPC or another type of private network.
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` resource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` resource field `thanos_user_config.store`: ThanosStore.
+- Add `aiven_influxdb` datasource field `influxdb_user_config.private_access.user_backup`: Allow clients to connect
+  to user_backup with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_influxdb` datasource field `influxdb_user_config.privatelink_access.user_backup`: Enable user_backup.
+- Add `aiven_influxdb` datasource field `influxdb_user_config.public_access.user_backup`: Allow clients to connect
+  to user_backup from the public internet for service nodes that are in a project VPC or another type of private network.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` datasource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` datasource field `thanos_user_config.store`: ThanosStore.
+- Change `aiven_account_team_project` resource field `team_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_opensearch` resource field `opensearch_user_config.azure_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` resource field `opensearch_user_config.s3_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_organization_permission` resource field `permissions.permissions`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_organization_permission` resource field `resource_type`: add `organization_unit`, `organization`
+- Change `aiven_project_user` resource field `member_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_account_team_project` datasource field `team_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_project_user` datasource field `member_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+
+## [4.28.0] - 2024-10-21
+
+- Fix `aiven_project`: can't migrate from `account_id` (deprecated) to `parent_id`
+- Add `aiven_organization_user_list` beta resource
+- Run client-side validation for `aiven_kafka_schema` AVRO type schema
+
+## [4.27.0] - 2024-10-09
+
+- Remove `aiven_thanos` from beta resources
+- Removes `receiver_ingesting_remote_write_uri` and `store_uri` Thanos connection info fields
+- Adds `stringtype` to `flink_external_postgresql_user_config` service integration
+- Fix `terraform import` for services with additional disk space or read replica service integration
+
+## [4.26.0] - 2024-09-25
+
+- Remove `aiven_valkey` from beta resources
+- Remove `aiven_valkey_user` from beta resources
+- Adds`aiven_organization_permission` example
+- Add capability to map external service user with internal aiven user with external_identity data source
+
+## [4.25.0] - 2024-09-17
+
+- Fix `aiven_kafka_connector`: increase create polling timeout
+- Add experimental `aiven_organization_permission` resource
+- Add `prefix_path_depth` to `kafka_user_config.kafka_connect_secret_providers.vault`
+- Add `backup_hour` and `backup_minute` to `redis_user_config` and `valkey_user_config`
+- Add user configuration options for `external_s3`, `external_clickhouse` and `external_mysql` integration endpoint types
+- Use `ServiceGet` from the code-generated client
+- Use the code-generated client to manage `aiven_service_integration` and `aiven_service_integration_endpoint`
+- Use Go 1.23
+- Add capability to set description and owner group per `aiven_kafka_topic`
+
+## [4.24.0] - 2024-08-21
+
+- Recursively mark attributes of sensitive blocks as sensitive due to an [issue in Terraform](https://github.com/hashicorp/terraform-plugin-sdk/issues/201)
+
+## [4.23.0] - 2024-08-19
+
+- Use enum choices from [code-generated client](https://github.com/aiven/go-client-codegen)
+- Add missing enum choices to resource descriptions: `aiven_project_user` and `aiven_mysql_user`
+- Mark more `aiven_grafana`, `aiven_opensearch` and `aiven_service_integration_endpoint` sensitive fields
+
+## [4.22.0] - 2024-08-02
+
+- Show "create" plan for missing `aiven_kafka_schema`
+- Update to the latest user configuration settings [b4f7493](https://github.com/aiven/terraform-provider-aiven/commit/b4f7493fd642dfd5eb96ba3768a5d1fbebd8af78)
+
+## [4.21.0] - 2024-07-23
+
+- Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
+- Add `aiven_valkey` resource as a beta resource
+- Add `aiven_valkey_user` resource as a beta resource
+- Temporarily remove the `aiven_project_user` deprecation until we find a suitable alternative.
+
+## [4.20.0] - 2024-06-26
+
+- Mark several sensitive user config fields as "sensitive"
+- Fix aiven-go-client dependency version
+- Fix `aiven_organization_user_group` resource - `name` field is required
+- Use `TypeSet` for `config_properties_exclude`
+
+## [4.19.1] - 2024-05-05
+
+- Add `config_properties_exclude` attribute to `aiven_mirrormaker_replication_flow` resource
+
+## [4.19.0] - 2024-05-28
+
+- Add `is_super_admin` flag to `aiven_organization_application_user` resource
+- Add `aiven_mirrormaker_replication_flow` replication factor
+- Remove `aiven_mirrormaker_replication_flow` global mutex, the backend has been fixed
+- Remove service version validation to allow running new service versions without the provider upgrade
+- Fix `aiven_organization_application_user_token` crashes with empty optional fields
+- Fix `ip_filter` conversion issue
+
+## [4.18.0] - 2024-05-22
+
+- Fix `ip_filter`, `ip_filter_string`, and `ip_filter_object` crash when receive an unexpected type
+- Add missing connection info fields to various service types
+
+## [4.17.0] - 2024-05-07
+
+- Fix `aiven_kafka_connector` fails to create resource with 201 error
+- Remove the beta flag from `aiven_organization_application_user` and `aiven_organization_application_user_token` resources
+- Fix incorrect token string used in Plugin Framework version of the provider
+
+## [4.16.0] - 2024-04-30
+
+- Fix incorrect timeout values used in certain cases
+- Fix sending `aiven_kafka_topic` config default values
+- Fix sending `false` values in `aiven_kafka_topic` config
+- Fix `aiven_pg` user config fields with `__dot__` substring in name
+- Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
+- Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
+- Remove redundant service connection info fields
+- Add Thanos resource (`aiven_thanos`) to allow for the creation and management of Thanos services (currently available as beta)
+
+## [4.15.0] - 2024-03-21
+
+- Add Dragonfly resource (`aiven_dragonfly`) to allow for the creation and management of Dragonfly services
+- Use new user config generator to generate service integration and service integration endpoint configs
+- Fix `aiven_kafka_schema` version update
+- Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
+  `prometheus_user_config` service integration configs
+- Fix `aiven_kafka_schema` Protobuf normalization
+- Fix `aiven_service_integration_endpoint` for `external_postgresql` type
+- Add `AIVEN_ALLOW_IP_FILTER_PURGE` environment variable to allow purging of IP filters. This is a safety feature to
+  prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
+  environment variable to any value before running Terraform commands.
+- Use `TypeSet` for `ip_filter_object`
+- Fix incorrect behavior of `aiven_mirrormaker_replication_flow` schema fields:
+  - `sync_group_offsets_enabled`
+  - `sync_group_offsets_interval_seconds`
+  - `emit_backward_heartbeats_enabled`
+  - `offset_syncs_topic_location`
+  - `replication_policy_class`
+- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources
+
+## [4.14.0] - 2024-02-20
+
+- Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`
+- Fix `aiven_kafka_schema` JSON object diff suppress function
+- Use new user config generator to generate service configs
+- Use `TypeSet` for `ip_filter`, `ip_filter_string` fields
+- Fix `aiven_organization_user_group` resource - `description` field is required
+- Use golang 1.22
+- Output explicitly `termination_protection = true -> false` when service property is removed
+- Fix `aiven_flink_application_deployment` deletion
+
+## [4.13.3] - 2024-01-29
+
+- Update example code in flink_application_version docs to be valid and not use deprecated schema members
+- Fix `aiven_organization_user_group_member` deletion
+
+## [4.13.2] - 2024-01-25
+
+- Fix `aiven_organization_group_member` fill model
+- Add `aiven_flink` service deletiong check
+
+## [4.13.1] - 2024-01-19
+
+- Fix `aiven_organization_user` datasource get method
+
+## [4.13.0] - 2024-01-12
+
+- Add organization application users support
+- Add organization application user tokens support
+- Configure "insufficient broker" error retries timeout
+- Enable `local_retention_*` fields in `aiven_kafka_topic` resource
+- Validate that `local_retention_bytes` is not bigger than `retention_bytes`
+
+## [4.12.1] - 2024-01-05
+
+- Temporarily disable `local_retention_*` fields in `aiven_kafka_topic` resource
+
+## [4.12.0] - 2024-01-03
+
+- Fix insufficient brokers error when create kafka topic
+- Tiered storage support for `aiven_kafka_topic` resource
+
+## [4.11.0] - 2024-01-02
+
+- Add support for `aiven_organization_group_project`. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.
+- Deprecating `aiven_organization_user` resource and update data source logic that will be used instead of the corresponding resource
+
+## [4.10.0] - 2023-12-27
+
+- Deprecating `project_user`, `account_team` and `account_team_member` resources
+- Deprecate `account_authentication` resource. Resource creation is removed, while other operations are still possible.
 - Fix unmarshalling empty userconfig crash
+- Never skip basic auth username/password in service integrations user config options when sending them to the API
+- Add `emit_backward_heartbeats_enabled` field support in Mirrormaker replication flow
+- Add validation for email fields in `account_team_member`, `organization_user` and `project_user` resources to check
+  if email is lowercase and valid
+- Add `connection_uri` field to components of all services. This field contains connection information for the
+  component, and is a combination of the `host` and `port` fields
+- Add `external_postgresql` and `external_google_cloud_bigquery` service integration endpoints
+- Do not return error on `aiven_account_team_member` deletion if the member does not exist
+- Deprecating `aiven_organization_user` resource and update data source logic that will be used instead of the corresponding resource
+- Retry kafka topic creation error `Cluster only has N broker(s), cannot set replication factor to M`
+- Fix Kafka Topic migration issues from V3 to V4.
+- Fix V3 to V4 migration issue related to cloud_name diff.
+- Add support for the `aiven_organization_user_group_member` resource, allowing the association of groups with the users. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.
+
+## [4.9.4] - 2023-12-13
+
+- Fix race issues with `aiven_mirrormaker_replication_flow` on create/update/delete operations
+- Add `tech_emails` to services
 
 ## [4.9.3] - 2023-10-27
 
@@ -39,7 +353,7 @@ nav_order: 1
 
 - Add Organization User Groups support
 - Fixed incorrect `account_id` behavior in mixed constraint setup in `aiven_project` resource
-- Use updated aiven-go-client with enhanced retries 
+- Use updated aiven-go-client with enhanced retries
 - Change `plan` from optional to required
 - Improve `disk_space` deprecation message to become more explicit to migrating users
 - Fix account deletion flakiness
@@ -93,7 +407,7 @@ nav_order: 1
 
 - Added docs and validation for `aiven_service_integration_endpoint`
 - Dropped `signalfx` from supported integration types
-- Fix MySQL user creation authentication field 
+- Fix MySQL user creation authentication field
 - Fix Account SAML Field mapping set method
 - Adjust generated SQL for ClickHouse privilege grants
 - Fix `required` not generated for top level fields for user config options
@@ -171,7 +485,7 @@ nav_order: 1
   - Integration with Kafka source
   - Integration with PostgreSQL source
 - Fix VPC peering ID parser
-- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
+- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource
 - Add `ssl` and `kafka_authentication_method` output support in service components
 - Fix `admin_username` and `admin_password` fields diff
 
@@ -181,7 +495,7 @@ nav_order: 1
 - Add `ip_filter_object` and `namespaces_object` user config options which are meant to extend the existing `ip_filter` and `namespaces` ones
 - Revert `datasource_project_vpc` `cloud_name` and `project` deprecations
 - Add extra timeout for `kafka_connect` service integration create
-- Support `clickhouse_kafka` integration type in `aiven_service_integration` 
+- Support `clickhouse_kafka` integration type in `aiven_service_integration`
 - Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
 - Prevent generation of `Default` field in static schema generator
 - Add `self_link` field to `aiven_gcp_vpc_peering_connection` resource
@@ -201,7 +515,7 @@ nav_order: 1
 ## [3.8.0] - 2022-09-30
 
 - Fix `aiven_gcp_vpc_peering_connection` creation
-- Improve static IP error handling end messaging 
+- Improve static IP error handling end messaging
 - Fix `aiven_account_authentication` resource update, add tests
 - Change `aiven_project_vpc` datasource behaviour
 - Fix `aiven_service_component` optional parameters filters
@@ -260,7 +574,7 @@ nav_order: 1
 - Update Changelog Enforcer workflow
 - Add CodeQL workflow
 - Add `opensearch_index` support to `aiven_flink_table`
-- Add not found checks to the Kafka availability waiter 
+- Add not found checks to the Kafka availability waiter
 - Add PostgreSQL max connections and PgBouncer outputs
 - Perform general code clean-up and add `revive` linter
 - Add support for new user configuration options
@@ -345,15 +659,11 @@ nav_order: 1
 
 - `aiven_service` and `aiven_elasticsearch` resources were deleted
 - `aiven_project` resource previously deprecated schema field were deleted
-
 Deprecated resources and data-sources:
-
 - `aiven_database`
 - `aiven_service_user`
 - `aiven_vpc_peering_connection`
-
 New resources and data-sources:
-
 - `aiven_aws_vpc_peering_connection`
 - `aiven_azure_vpc_peering_connection`
 - `aiven_gcp_vpc_peering_connection`
@@ -804,19 +1114,16 @@ Add backwards compatibility for old TF state files created before Kafka `topic` 
 ## [1.2.1] - 2020-03-02
 
 Terraform client-side termination protection for resources:
-
 - aiven_kafka_topic
 - aiven_database
 
 ## [1.2.0] - 2020-02-18
 
 - Following new types of resources have been added:
-
     - account
     - account_team
     - account_team_member
     - account_team_project
-
 - New configuration options
 - Fix for a read-only replica service types
 - Service specific acceptance tests
@@ -953,5 +1260,4 @@ Support termination_protection property for services.
 Support all Aiven resource types. Also large changes to previously
 supported resource types, such as full support for all user config
 options.
-
 **NOTE**: This version is not backwards compatible with older versions.

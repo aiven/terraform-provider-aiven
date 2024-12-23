@@ -3,19 +3,19 @@
 page_title: "aiven_pg Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG data source provides information about the existing Aiven PostgreSQL service.
+  Gets information about an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg (Data Source)
 
-The PG data source provides information about the existing Aiven PostgreSQL service.
+Gets information about an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_pg" "pg" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-pg1"
+data "aiven_pg" "example_postgres" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-postgres-service"
 }
 ```
 
@@ -24,12 +24,12 @@ data "aiven_pg" "pg" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
 
-- `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
@@ -40,12 +40,12 @@ data "aiven_pg" "pg" {
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `pg` (List of Object) PostgreSQL specific server provided values (see [below for nested schema](#nestedatt--pg))
-- `pg_user_config` (List of Object) Pg user configurable settings (see [below for nested schema](#nestedatt--pg_user_config))
-- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `pg` (List of Object, Sensitive) Values provided by the PostgreSQL server. (see [below for nested schema](#nestedatt--pg))
+- `pg_user_config` (List of Object) Pg user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--pg_user_config))
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_host` (String) The hostname of the service.
-- `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
+- `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
@@ -54,6 +54,7 @@ data "aiven_pg" "pg" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -62,6 +63,7 @@ data "aiven_pg" "pg" {
 Read-Only:
 
 - `component` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
@@ -75,15 +77,33 @@ Read-Only:
 
 Read-Only:
 
+- `bouncer` (String)
 - `dbname` (String)
 - `host` (String)
 - `max_connections` (Number)
+- `params` (List of Object) (see [below for nested schema](#nestedobjatt--pg--params))
 - `password` (String)
 - `port` (Number)
 - `replica_uri` (String)
 - `sslmode` (String)
+- `standby_uris` (List of String)
+- `syncing_uris` (List of String)
 - `uri` (String)
+- `uris` (List of String)
 - `user` (String)
+
+<a id="nestedobjatt--pg--params"></a>
+### Nested Schema for `pg.params`
+
+Read-Only:
+
+- `database_name` (String)
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `sslmode` (String)
+- `user` (String)
+
 
 
 <a id="nestedatt--pg_user_config"></a>
@@ -97,15 +117,17 @@ Read-Only:
 - `backup_hour` (Number)
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
-- `ip_filter` (List of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter` (Set of String)
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
+- `pg_qualstats` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg_qualstats))
 - `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
 - `pg_stat_monitor_enable` (Boolean)
 - `pg_version` (String)
+- `pgaudit` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgaudit))
 - `pgbouncer` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgbouncer))
 - `pglookout` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pglookout))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--private_access))
@@ -113,6 +135,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--public_access))
 - `recovery_target_time` (String)
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `shared_buffers_percentage` (Number)
 - `static_ips` (Boolean)
@@ -138,6 +161,7 @@ Read-Only:
 - `dbname` (String)
 - `host` (String)
 - `ignore_dbs` (String)
+- `ignore_roles` (String)
 - `method` (String)
 - `password` (String)
 - `port` (Number)
@@ -186,6 +210,7 @@ Read-Only:
 - `max_standby_streaming_delay` (Number)
 - `max_wal_senders` (Number)
 - `max_worker_processes` (Number)
+- `password_encryption` (String)
 - `pg_partman_bgw__dot__interval` (Number)
 - `pg_partman_bgw__dot__role` (String)
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean)
@@ -201,6 +226,39 @@ Read-Only:
 - `wal_writer_delay` (Number)
 
 
+<a id="nestedobjatt--pg_user_config--pg_qualstats"></a>
+### Nested Schema for `pg_user_config.pg_qualstats`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `min_err_estimate_num` (Number)
+- `min_err_estimate_ratio` (Number)
+- `track_constants` (Boolean)
+- `track_pg_catalog` (Boolean)
+
+
+<a id="nestedobjatt--pg_user_config--pgaudit"></a>
+### Nested Schema for `pg_user_config.pgaudit`
+
+Read-Only:
+
+- `feature_enabled` (Boolean)
+- `log` (List of String)
+- `log_catalog` (Boolean)
+- `log_client` (Boolean)
+- `log_level` (String)
+- `log_max_string_length` (Number)
+- `log_nested_statements` (Boolean)
+- `log_parameter` (Boolean)
+- `log_parameter_max_size` (Number)
+- `log_relation` (Boolean)
+- `log_rows` (Boolean)
+- `log_statement` (Boolean)
+- `log_statement_once` (Boolean)
+- `role` (String)
+
+
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
 ### Nested Schema for `pg_user_config.pgbouncer`
 
@@ -211,6 +269,7 @@ Read-Only:
 - `autodb_pool_mode` (String)
 - `autodb_pool_size` (Number)
 - `ignore_startup_parameters` (List of String)
+- `max_prepared_statements` (Number)
 - `min_pool_size` (Number)
 - `server_idle_timeout` (Number)
 - `server_lifetime` (Number)
@@ -280,3 +339,11 @@ Read-Only:
 
 - `key` (String)
 - `value` (String)
+
+
+<a id="nestedatt--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Read-Only:
+
+- `email` (String)

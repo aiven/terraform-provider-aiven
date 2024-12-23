@@ -17,6 +17,7 @@ func opensearchSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeOpenSearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "OpenSearch server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -45,19 +46,19 @@ func ResourceOpenSearch() *schema.Resource {
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpenSearch),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
 			),
 			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
+				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(

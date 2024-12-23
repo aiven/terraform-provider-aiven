@@ -6,14 +6,24 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/organization"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
 type ResourceStateOrResourceDiff interface {
+	GetRawConfig() cty.Value
 	GetOk(key string) (interface{}, bool)
 	Get(key string) interface{}
+}
+
+func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
+	c := d.GetRawConfig()
+	return !(c.IsNull() || c.AsValueMap()[key].IsNull())
 }
 
 // PlanParameters service plan aparameters
@@ -23,21 +33,20 @@ type PlanParameters struct {
 	DiskSizeMBMax     int
 }
 
-func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewServiceIntegration {
-	var apiServiceIntegrations []aiven.NewServiceIntegration
-	tfServiceIntegrations := d.Get("service_integrations")
-	if tfServiceIntegrations != nil {
-		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
-		for _, definition := range tfServiceIntegrationList {
-			definitionMap := definition.(map[string]interface{})
-			sourceService := definitionMap["source_service_name"].(string)
-			apiIntegration := aiven.NewServiceIntegration{
-				IntegrationType: definitionMap["integration_type"].(string),
-				SourceService:   &sourceService,
-				UserConfig:      make(map[string]interface{}),
-			}
-			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
+func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceIntegrationIn {
+	tfServiceIntegrations := d.Get("service_integrations").(*schema.Set).List()
+	apiServiceIntegrations := make([]service.ServiceIntegrationIn, 0, len(tfServiceIntegrations))
+	for _, definition := range tfServiceIntegrations {
+		definitionMap := definition.(map[string]interface{})
+		sourceService := definitionMap["source_service_name"].(string)
+		userConfig := make(map[string]any)
+		integrationType := definitionMap["integration_type"].(string)
+		apiIntegration := service.ServiceIntegrationIn{
+			IntegrationType: service.IntegrationType(integrationType),
+			SourceService:   &sourceService,
+			UserConfig:      &userConfig,
 		}
+		apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
 	}
 	return apiServiceIntegrations
 }
@@ -60,7 +69,7 @@ func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 	return vpcIDPointer, nil
 }
 
-func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindow {
+func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *service.MaintenanceIn {
 	dow := d.Get("maintenance_window_dow").(string)
 	if dow == "never" {
 		// `never` is not available in the API, but can be set on the backend
@@ -69,7 +78,7 @@ func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindo
 	}
 	t := d.Get("maintenance_window_time").(string)
 	if len(dow) > 0 && len(t) > 0 {
-		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
+		return &service.MaintenanceIn{Dow: service.DowType(dow), Time: &t}
 	}
 	return nil
 }
@@ -79,8 +88,8 @@ func ConvertToDiskSpaceMB(b string) int {
 	return int(diskSizeMB / units.MiB)
 }
 
-func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, service *aiven.Service) (PlanParameters, error) {
-	return getServicePlanParametersInternal(ctx, client, project, service.Type, service.Plan)
+func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, s *service.ServiceGetOut) (PlanParameters, error) {
+	return getServicePlanParametersInternal(ctx, client, project, s.ServiceType, s.Plan)
 }
 
 func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
@@ -91,6 +100,7 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
 }
 
+// fixme: GetPlane is not available in the generated client
 func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
 	servicePlanResponse, err := client.ServiceTypes.GetPlan(ctx, project, serviceType, servicePlan)
 	if err != nil {
@@ -103,6 +113,7 @@ func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client,
 	}, nil
 }
 
+// fixme: GetPlanPricing is not available in the generated client
 func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
 	// to check if dynamic disk space is allowed, we currently have to check
 	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
@@ -122,13 +133,13 @@ func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Clien
 func HumanReadableByteSize(s int) string {
 	// we only allow GiB as unit and show decimal places to MiB precision, this should fix rounding issues
 	// when converting from mb to human readable and back
-	var suffixes = []string{"B", "KiB", "MiB", "GiB"}
+	suffixes := []string{"B", "KiB", "MiB", "GiB"}
 
 	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
 }
 
-// isStringAnOrganizationID is a helper function that returns true if the string is an organization ID.
-func isStringAnOrganizationID(s string) bool {
+// IsOrganizationID is a helper function that returns true if the string is an organization ID.
+func IsOrganizationID(s string) bool {
 	return strings.HasPrefix(s, "org")
 }
 
@@ -136,7 +147,7 @@ func isStringAnOrganizationID(s string) bool {
 // If the ID is an organization ID, it will be converted to an account ID via the API.
 // If the ID is an account ID, it will be returned as is, without performing any API calls.
 func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id string) (string, error) {
-	if isStringAnOrganizationID(id) {
+	if IsOrganizationID(id) {
 		r, err := client.Organization.Get(ctx, id)
 		if err != nil {
 			return "", err
@@ -148,37 +159,23 @@ func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id strin
 	return id, nil
 }
 
-// DetermineMixedOrganizationConstraintIDToStore is a helper function that returns the ID to store in the state.
-// We have several fields that can be either an organization ID or an account ID.
-// We want to store the one that was already in the state, if it was already there.
-// If it was not, we want to prioritize the organization ID, but if it is not available, we want to store the account
-// ID.
-// If the ID is an account ID, it will be returned as is, without performing any API calls.
-// If the ID is an organization ID, it will be refreshed via the provided account ID and returned.
-func DetermineMixedOrganizationConstraintIDToStore(
-	ctx context.Context,
-	client *aiven.Client,
-	stateID string,
-	accountID string,
-) (string, error) {
-	if len(accountID) == 0 {
-		return "", nil
+// organizationGetter helper type to shrinks the avngen.Client interface size.
+type organizationGetter interface {
+	OrganizationGet(ctx context.Context, id string) (*organization.OrganizationGetOut, error)
+}
+
+// ConvertOrganizationToAccountID transforms provided ID to an account ID via API call if it is an organization ID.
+func ConvertOrganizationToAccountID(ctx context.Context, id string, client organizationGetter) (string, error) {
+	if IsOrganizationID(id) {
+		resp, err := client.OrganizationGet(ctx, id)
+		if err != nil {
+			return "", err
+		}
+
+		return resp.AccountId, nil
 	}
 
-	if !isStringAnOrganizationID(stateID) {
-		return accountID, nil
-	}
-
-	r, err := client.Accounts.Get(ctx, accountID)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r.Account.OrganizationId) == 0 {
-		return accountID, nil
-	}
-
-	return r.Account.OrganizationId, nil
+	return id, nil
 }
 
 // StringToDiagWarning is a function that converts a string to a diag warning.

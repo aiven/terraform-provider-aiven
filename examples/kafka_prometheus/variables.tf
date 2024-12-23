@@ -1,4 +1,4 @@
-variable "avn_token" {}
+variable "aiven_token" {}
 variable "avn_project" {}
 variable "kafka_name" {}
 variable "prometheus_endpoint_name" {}

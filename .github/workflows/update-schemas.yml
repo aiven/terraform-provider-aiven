@@ -1,0 +1,50 @@
+name: Update Schemas
+
+on:
+  schedule:
+    - cron: 0 5 * * 1-5
+  workflow_dispatch: {}
+
+permissions: read-all
+
+jobs:
+  updater:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go install golang.org/x/tools/cmd/goimports@latest
+      - run: make update-schemas
+      - id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - id: changes
+        run: git diff CHANGELOG.md | awk '/^\+[ -]/ {print substr($0, 2)}' > changes.out
+      - id: create_pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          author: GitHub <noreply@github.com>
+          body-path: changes.out
+          branch: update-schemas/${{ steps.date.outputs.date }}-${{ github.run_id }}
+          commit-message: "chore(update-schemas): ${{ steps.date.outputs.date }}"
+          title: "chore(update-schemas): ${{ steps.date.outputs.date }}"
+          labels: |
+            dependencies
+      - name: Close previous update schemas PRs
+        if: steps.create_pr.outputs.pull-request-operation == 'created'
+        run: |
+          new_pr_number=${{ steps.create_pr.outputs.pull-request-number }}
+          prs=$(gh pr list --state open --json number,headRefName --jq '.[] | select(.headRefName | startswith("update-schemas/")) | .number')
+          for pr in $prs; do
+            if [ "$pr" != "$new_pr_number" ]; then
+              gh pr close $pr --comment "Auto-closing pull request in favor of #$new_pr_number" --delete-branch
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

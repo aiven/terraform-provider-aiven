@@ -3,23 +3,24 @@
 page_title: "aiven_organization_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organization User resource allows the creation and management of an Aiven Organization User.
-  During the creation of aiven_organization_userresource, an email invitation will be sent
-  to a user using user_email address. If the user accepts an invitation, they will become
-  a member of the organization. The deletion of aiven_organization_user will not only
-  delete the invitation if one was sent but not yet accepted by the user, it will also
-  eliminate the member from the organization if one has accepted an invitation previously.
+  **This resource is deprecated**. Users cannot be invited to an organization using Terraform.
+  	Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+  	to your organization. 
+  
+  After the user accepts the invite you can get their information using the aiven_organization_user
+  data source. You can manage user access to projects with the aiven_organization_user_group,
+  aiven_organization_user_group_member, and aiven_organization_permission resources.
 ---
 
 # aiven_organization_user (Resource)
 
-The Organization User resource allows the creation and management of an Aiven Organization User.
-
-During the creation of `aiven_organization_user`resource, an email invitation will be sent
-to a user using `user_email` address. If the user accepts an invitation, they will become
-a member of the organization. The deletion of `aiven_organization_user` will not only
-delete the invitation if one was sent but not yet accepted by the user, it will also 
-eliminate the member from the organization if one has accepted an invitation previously.
+**This resource is deprecated**. Users cannot be invited to an organization using Terraform.
+		Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+		to your organization. 
+		
+After the user accepts the invite you can get their information using the `aiven_organization_user`
+data source. You can manage user access to projects with the `aiven_organization_user_group`, 
+`aiven_organization_user_group_member`, and `aiven_organization_permission` resources.
 
 
 
@@ -28,8 +29,8 @@ eliminate the member from the organization if one has accepted an invitation pre
 
 ### Required
 
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The unique organization ID. Changing this property forces recreation of the resource.
+- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -37,10 +38,11 @@ eliminate the member from the organization if one has accepted an invitation pre
 
 ### Read-Only
 
-- `accepted` (Boolean) This is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an organization.
+- `accepted` (Boolean, Deprecated) This is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an organization.
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
-- `invited_by` (String) The email address of the user who sent an invitation to the user.
+- `invited_by` (String, Deprecated) The email address of the user who sent an invitation to the user.
+- `user_id` (String) The unique organization user ID
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

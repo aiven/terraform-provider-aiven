@@ -6,19 +6,26 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
+	"github.com/hamba/avro/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"golang.org/x/exp/slices"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-// newlineRegExp is a regular expression that matches a newline.
-var newlineRegExp = regexp.MustCompile(`\r?\n`)
+// whitespaceRegExp is a regular expression to match a whitespace, a new line, or a carriage return
+// character in a string. This is used to normalize Protobuf strings to compare them for logical equivalence.
+var whitespaceRegExp = regexp.MustCompile(`\s`)
 
 var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -41,11 +48,12 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
-		Description: "Kafka Schema configuration type. Defaults to AVRO. Possible values are AVRO, JSON, " +
-			"and PROTOBUF.",
-		Default:      "AVRO",
-		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON", "PROTOBUF"}, false),
-		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		Description: userconfig.
+			Desc("Kafka Schema configuration type. Defaults to AVRO").
+			PossibleValuesString(kafkaschemaregistry.SchemaTypeChoices()...).Build(),
+		Default:      kafkaschemaregistry.SchemaTypeAvro,
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.SchemaTypeChoices(), false),
+		DiffSuppressFunc: func(_, oldValue, _ string, d *schema.ResourceData) bool {
 			// This field can't be retrieved once resource is created.
 			// That produces a diff on plan on resource import.
 			// Ignores imported field.
@@ -60,24 +68,24 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"compatibility_level": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.CompatibilityTypeChoices(), false),
+		DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
-			return new == ""
+			return newValue == ""
 		},
-		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValuesString(kafkaschemaregistry.CompatibilityTypeChoices()...).Build(),
 	},
 }
 
 // diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
-func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
+func diffSuppressJSONObject(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	var objOld, objNew interface{}
 
-	if err := json.Unmarshal([]byte(old), &objOld); err != nil {
+	if err := json.Unmarshal([]byte(oldValue), &objOld); err != nil {
 		return false
 	}
-	if err := json.Unmarshal([]byte(new), &objNew); err != nil {
+	if err := json.Unmarshal([]byte(newValue), &objNew); err != nil {
 		return false
 	}
 
@@ -85,19 +93,19 @@ func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // diffSuppressJSONObjectOrProtobufString checks logical equivalences in JSON or Protobuf Kafka Schema values.
-func diffSuppressJSONObjectOrProtobufString(k, old, new string, d *schema.ResourceData) bool {
-	if !diffSuppressJSONObject(k, old, new, d) {
-		return normalizeProtobufString(old) == normalizeProtobufString(new)
+func diffSuppressJSONObjectOrProtobufString(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	if !diffSuppressJSONObject(k, oldValue, newValue, d) {
+		return normalizeProtobufString(oldValue) == normalizeProtobufString(newValue)
 	}
 
-	return false
+	return true
 }
 
 // normalizeProtobufString returns normalized Protobuf string.
 func normalizeProtobufString(i any) string {
 	v := i.(string)
 
-	return newlineRegExp.ReplaceAllString(v, "")
+	return whitespaceRegExp.ReplaceAllString(v, "")
 }
 
 // normalizeJSONOrProtobufString returns normalized JSON or Protobuf string.
@@ -114,8 +122,8 @@ func normalizeJSONOrProtobufString(i any) string {
 func ResourceKafkaSchema() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.",
-		CreateContext: resourceKafkaSchemaCreate,
-		UpdateContext: resourceKafkaSchemaUpdate,
+		CreateContext: resourceKafkaSchemaUpsert,
+		UpdateContext: resourceKafkaSchemaUpsert,
 		ReadContext:   resourceKafkaSchemaRead,
 		DeleteContext: resourceKafkaSchemaDelete,
 		Importer: &schema.ResourceImporter{
@@ -128,95 +136,15 @@ func ResourceKafkaSchema() *schema.Resource {
 	}
 }
 
-func kafkaSchemaSubjectGetLastVersion(
-	ctx context.Context,
-	m interface{},
-	project string,
-	serviceName string,
-	subjectName string,
-) (int, error) {
-	client := m.(*aiven.Client)
-
-	r, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
-	if err != nil {
-		return 0, err
-	}
-
-	var latestVersion int
-	for _, v := range r.Versions {
-		if v > latestVersion {
-			latestVersion = v
-		}
-	}
-
-	return latestVersion, nil
-}
-
-// Aiven Kafka schema creates a new Kafka Schema Subject with a new version, and if Kafka
-// Schema subject with a given name already exists API will validate new Kafka Schema
-// configuration against the previous version for compatibility and if compatible will
-// create a new version for the same Kafka Schema Subject
-func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	subjectName := d.Get("subject_name").(string)
 
 	client := m.(*aiven.Client)
-
-	// create Kafka Schema Subject
-	_, err := client.KafkaSubjectSchemas.Add(
-		ctx,
-		project,
-		serviceName,
-		subjectName,
-		aiven.KafkaSchemaSubject{
-			Schema:     d.Get("schema").(string),
-			SchemaType: d.Get("schema_type").(string),
-		},
-	)
-	if err != nil {
-		return diag.Errorf("unable to create schema: %s", err)
-	}
-
-	// set compatibility level if defined for a newly created Kafka Schema Subject
-	if compatibility, ok := d.GetOk("compatibility_level"); ok {
-		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
-			ctx,
-			project,
-			serviceName,
-			subjectName,
-			compatibility.(string),
-		)
-		if err != nil {
-			return diag.Errorf("unable to update configuration: %s", err)
-		}
-	}
-
-	version, err := kafkaSchemaSubjectGetLastVersion(ctx, m, project, serviceName, subjectName)
-	if err != nil {
-		return diag.Errorf("unable to get last version: %s", err)
-	}
-
-	// newly created versions start from 1
-	if version == 0 {
-		return diag.Errorf("kafka schema subject after creation has an empty list of versions")
-	}
-
-	d.SetId(schemautil.BuildResourceID(project, serviceName, subjectName))
-
-	return resourceKafkaSchemaRead(ctx, d, m)
-}
-
-func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, subjectName, err := schemautil.SplitResourceID3(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	client := m.(*aiven.Client)
-
 	if d.HasChange("schema") {
-		_, err := client.KafkaSubjectSchemas.Add(
+		// This call returns Schema ID, not its version
+		s, err := client.KafkaSubjectSchemas.Add(
 			ctx,
 			project,
 			serviceName,
@@ -226,25 +154,65 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 				SchemaType: d.Get("schema_type").(string),
 			},
 		)
+
 		if err != nil {
-			return diag.Errorf("unable to update schema: %s", err)
+			return diag.Errorf("unable to add schema: %s", err)
+		}
+
+		// Gets Schema's version by its ID
+		version, err := getSchemaVersion(ctx, client, project, serviceName, subjectName, s.Id)
+		if err != nil {
+			return diag.Errorf("unable to get schema version: %s", err)
+		}
+
+		if err := d.Set("version", version); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	// if compatibility_level has changed and the new value is not empty
 	if compatibility, ok := d.GetOk("compatibility_level"); ok {
-		_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
+		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
 			ctx,
 			project,
 			serviceName,
 			subjectName,
-			compatibility.(string))
+			compatibility.(string),
+		)
+
 		if err != nil {
 			return diag.Errorf("unable to update configuration: %s", err)
 		}
 	}
 
+	d.SetId(schemautil.BuildResourceID(project, serviceName, subjectName))
 	return resourceKafkaSchemaRead(ctx, d, m)
+}
+
+// getSchemaVersion polls until the version with given Schema ID appears in the version list
+func getSchemaVersion(ctx context.Context, client *aiven.Client, project, serviceName, subjectName string, id int) (int, error) {
+	for {
+		select {
+		case <-ctx.Done():
+			return 0, ctx.Err()
+		case <-time.After(time.Second):
+			versions, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
+			if err != nil {
+				return 0, err
+			}
+
+			for _, v := range versions.Versions {
+				s, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, v)
+				if err != nil {
+					return 0, err
+				}
+
+				if s.Version.Id == id {
+					return s.Version.Version, nil
+				}
+			}
+		}
+	}
 }
 
 func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -254,15 +222,26 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	client := m.(*aiven.Client)
+	version := d.Get("version").(int)
+	if version == 0 {
+		// For data source type and "import"
+		r, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
+		if err != nil {
+			return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		}
+		version = slices.Max(r.Versions)
+		if err := d.Set("version", version); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
-	version, err := kafkaSchemaSubjectGetLastVersion(ctx, m, project, serviceName, subjectName)
+	s, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, version)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	r, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, version)
-	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+	if err := d.Set("schema", s.Version.Schema); err != nil {
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -272,12 +251,6 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 	if err := d.Set("subject_name", subjectName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("version", version); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("schema", r.Version.Schema); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -302,35 +275,51 @@ func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	err = m.(*aiven.Client).KafkaSubjectSchemas.Delete(ctx, project, serviceName, schemaName)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	client := m.(*aiven.Client)
+func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, _ any) error {
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
+
+	schemaType := kafkaschemaregistry.SchemaType(d.Get("schema_type").(string))
+	schemaPayload := d.Get("schema").(string)
+	if schemaType == kafkaschemaregistry.SchemaTypeAvro {
+		_, err = avro.Parse(schemaPayload)
+		if err != nil {
+			return fmt.Errorf("schema validation error: %w", err)
+		}
+	}
 
 	// no previous version: allow the diff, nothing to check compatibility against
 	if _, ok := d.GetOk("version"); !ok {
 		return nil
 	}
 
-	if compatible, err := client.KafkaSubjectSchemas.Validate(
+	r, err := client.ServiceSchemaRegistryCompatibility(
 		ctx,
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		d.Get("subject_name").(string),
 		d.Get("version").(int),
-		aiven.KafkaSchemaSubject{
-			Schema:     d.Get("schema").(string),
-			SchemaType: d.Get("schema_type").(string),
+		&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityIn{
+			Schema:     schemaPayload,
+			SchemaType: schemaType,
 		},
-	); err != nil {
+	)
+
+	if err != nil {
 		return fmt.Errorf("unable to check schema validity: %w", err)
-	} else if !compatible {
-		return fmt.Errorf("schema is not compatible with previous version")
+	}
+
+	if !r.IsCompatible {
+		return fmt.Errorf("schema is not compatible with previous version: %s", strings.Join(r.Messages, ", "))
 	}
 
 	return nil
