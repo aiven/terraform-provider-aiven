@@ -314,11 +314,21 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	if billingGroupID, ok := d.GetOk("billing_group"); ok {
+	// Assigns the project to the billing group if it is not already assigned.
+	// The endpoints used in resourceProjectAssignToBillingGroup require admin privileges.
+	// So to make this resource manageable by non-admin users, we need to check if the billing group is already valid
+	// by making a simple comparison.
+	// The billing_group is either set in the config file or received by resourceProjectRead from ProjectGET,
+	// in which it is required https://api.aiven.io/doc/#tag/Project/operation/ProjectGet
+	// therefore, it is safe to assume that it is always set.
+	// ProjectUpdate also always returns the billing group.
+	// Hence, we can compare remote and local values.
+	billingGroupID := d.Get("billing_group").(string)
+	if billingGroupID != project.BillingGroupId {
 		dia := resourceProjectAssignToBillingGroup(
 			ctx,
 			d.Get("project").(string),
-			billingGroupID.(string),
+			billingGroupID,
 			client,
 			d,
 		)
