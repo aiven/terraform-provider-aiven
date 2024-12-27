@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/accountteammember"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -62,9 +62,9 @@ During the creation of this resource, an invite is sent to the address specified
 The user is added to the team after they accept the invite. Deleting ` + "`aiven_account_team_member`" + ` 
 deletes the pending invite if not accepted or removes the user from the team if they already accepted the invite.
 `,
-		CreateContext: resourceAccountTeamMemberCreate,
-		ReadContext:   resourceAccountTeamMemberRead,
-		DeleteContext: resourceAccountTeamMemberDelete,
+		CreateContext: common.WithGenClient(resourceAccountTeamMemberCreate),
+		ReadContext:   common.WithGenClient(resourceAccountTeamMemberRead),
+		DeleteContext: common.WithGenClient(resourceAccountTeamMemberDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -82,142 +82,121 @@ migration guide for more information: https://aiven.io/docs/tools/terraform/howt
 	}
 }
 
-func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	accountID := d.Get("account_id").(string)
-	teamID := d.Get("team_id").(string)
-	userEmail := d.Get("user_email").(string)
+func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		accountID = d.Get("account_id").(string)
+		teamID    = d.Get("team_id").(string)
+		userEmail = d.Get("user_email").(string)
+	)
 
-	err := client.AccountTeamMembers.Invite(
+	if err := client.AccountTeamMembersInvite(
 		ctx,
 		accountID,
 		teamID,
-		userEmail,
-	)
-	if err != nil {
-		return diag.FromErr(err)
+		&accountteammember.AccountTeamMembersInviteIn{Email: userEmail},
+	); err != nil {
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(accountID, teamID, userEmail))
 
-	return resourceAccountTeamMemberRead(ctx, d, m)
+	return resourceAccountTeamMemberRead(ctx, d, client)
 }
 
-func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var found bool
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, userEmail, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r, err := client.AccountTeamInvites.List(ctx, accountID, teamID)
+	resp, err := client.AccountTeamMembersList(ctx, accountID, teamID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, invite := range r.Invites {
+	for _, invite := range resp {
 		if invite.UserEmail == userEmail {
-			found = true
+			if err = schemautil.ResourceDataSet(
+				aivenAccountTeamMemberSchema,
+				d,
+				invite,
+				schemautil.RenameAliases(map[string]string{}),
+			); err != nil {
+				return err
+			}
 
-			if err := d.Set("account_id", invite.AccountId); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("team_id", invite.TeamId); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("user_email", invite.UserEmail); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("invited_by_user_email", invite.InvitedByUserEmail); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("create_time", invite.CreateTime.String()); err != nil {
-				return diag.FromErr(err)
+			if err = d.Set("account_id", accountID); err != nil {
+				return err
 			}
 
 			// if a user is in the invitations list, it means invitation was sent but not yet accepted
-			if err := d.Set("accepted", false); err != nil {
-				return diag.FromErr(err)
+			if err = d.Set("accepted", false); err != nil {
+				return err
 			}
+
+			return nil
 		}
 	}
 
-	if !found {
-		rm, err := client.AccountTeamMembers.List(ctx, accountID, teamID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	respTI, err := client.AccountTeamMembersList(ctx, accountID, teamID)
+	if err != nil {
+		return err
+	}
 
-		for _, member := range rm.Members {
-			if member.UserEmail == userEmail {
-				found = true
-
-				if err := d.Set("account_id", accountID); err != nil {
-					return diag.FromErr(err)
-				}
-				if err := d.Set("team_id", member.TeamId); err != nil {
-					return diag.FromErr(err)
-				}
-				if err := d.Set("user_email", member.UserEmail); err != nil {
-					return diag.FromErr(err)
-				}
-				if err := d.Set("create_time", member.CreateTime.String()); err != nil {
-					return diag.FromErr(err)
-				}
-
-				// when a user accepts an invitation, it will appear in the member's list
-				// and disappear from invitations list
-				if err := d.Set("accepted", true); err != nil {
-					return diag.FromErr(err)
-				}
+	for _, member := range respTI {
+		if member.UserEmail == userEmail {
+			if err = schemautil.ResourceDataSet(
+				aivenAccountTeamMemberSchema,
+				d,
+				member,
+			); err != nil {
+				return err
 			}
+
+			if err = d.Set("account_id", accountID); err != nil {
+				return err
+			}
+
+			// when a user accepts an invitation, it will appear in the member's list
+			// and disappear from invitations list
+			if err = d.Set("accepted", true); err != nil {
+				return err
+			}
+
+			return nil
 		}
 	}
 
-	if !found {
-		log.Printf("[WARNING] cannot find user invitation for %s", d.Id())
-		if !d.Get("accepted").(bool) {
-			log.Printf("[DEBUG] resending account team member invitation ")
-			return resourceAccountTeamMemberCreate(ctx, d, m)
-		}
+	log.Printf("[WARNING] cannot find user invitation for %s", d.Id())
+	if !d.Get("accepted").(bool) {
+		log.Printf("[DEBUG] resending account team member invitation ")
+		return resourceAccountTeamMemberCreate(ctx, d, client)
 	}
 
 	return nil
 }
 
-func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, userEmail, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	// delete account team user invitation
-	err = client.AccountTeamInvites.Delete(ctx, accountID, teamID, userEmail)
-	if common.IsCritical(err) {
-		return diag.FromErr(err)
+	if err = client.AccountTeamMemberCancelInvite(ctx, accountID, teamID, userEmail); common.IsCritical(err) {
+		return err
 	}
 
-	r, err := client.AccountTeamMembers.List(ctx, accountID, teamID)
+	resp, err := client.AccountTeamMembersList(ctx, accountID, teamID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	if len(r.Members) == 0 {
-		return nil
-	}
-
-	// delete account team member
-	for _, m := range r.Members {
+	for _, m := range resp {
 		if m.UserEmail == userEmail {
-			err = client.AccountTeamMembers.Delete(ctx, accountID, teamID, m.UserId)
-			if common.IsCritical(err) {
-				return diag.FromErr(err)
+			if err = client.AccountTeamMembersDelete(ctx, accountID, teamID, m.UserId); common.IsCritical(err) {
+				return err
 			}
-			break
 		}
 	}
 
