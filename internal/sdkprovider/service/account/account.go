@@ -5,11 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -67,10 +68,10 @@ func ResourceAccount() *schema.Resource {
 		
 **This resource is deprecated.** Use ` + "`aiven_organization`" + ` instead.
 		`,
-		CreateContext: resourceAccountCreate,
-		ReadContext:   resourceAccountRead,
-		UpdateContext: resourceAccountUpdate,
-		DeleteContext: resourceAccountDelete,
+		CreateContext: common.WithGenClient(resourceAccountCreate),
+		ReadContext:   common.WithGenClient(resourceAccountRead),
+		UpdateContext: common.WithGenClient(resourceAccountUpdate),
+		DeleteContext: common.WithGenClient(resourceAccountDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -82,82 +83,69 @@ func ResourceAccount() *schema.Resource {
 	}
 }
 
-func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	name := d.Get("name").(string)
-	bgID := d.Get("primary_billing_group_id").(string)
-
-	r, err := client.Accounts.Create(
-		ctx,
-		aiven.Account{
-			Name:                  name,
-			PrimaryBillingGroupId: bgID,
-		},
+func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		req account.AccountCreateIn
 	)
-	if err != nil {
-		return diag.FromErr(err)
+
+	if err := schemautil.ResourceDataGet(
+		d,
+		&req,
+		schemautil.RenameAlias("name", "account_name"),
+	); err != nil {
+		return err
 	}
 
-	d.SetId(r.Account.Id)
+	resp, err := client.AccountCreate(ctx, &req)
+	if err != nil {
+		return err
+	}
 
-	return resourceAccountRead(ctx, d, m)
+	d.SetId(resp.AccountId)
+
+	return resourceAccountRead(ctx, d, client)
 }
 
-func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	r, err := client.Accounts.Get(ctx, d.Id())
+func resourceAccountRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	resp, err := client.AccountGet(ctx, d.Id())
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	if err := d.Set("account_id", r.Account.Id); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("name", r.Account.Name); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("primary_billing_group_id", r.Account.PrimaryBillingGroupId); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("owner_team_id", r.Account.OwnerTeamId); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("create_time", r.Account.CreateTime.String()); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("update_time", r.Account.UpdateTime.String()); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("is_account_owner", r.Account.IsAccountOwner); err != nil {
-		return diag.FromErr(err)
+	if err = schemautil.ResourceDataSet(
+		aivenAccountSchema,
+		d,
+		resp,
+		schemautil.RenameAliases(map[string]string{
+			"account_name":          "name",
+			"account_owner_team_id": "owner_team_id",
+		}),
+	); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	r, err := client.Accounts.Update(ctx, d.Id(), aiven.Account{
-		Name:                  d.Get("name").(string),
-		PrimaryBillingGroupId: d.Get("primary_billing_group_id").(string),
+func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		name = d.Get("name").(string)
+		bgID = d.Get("primary_billing_group_id").(string)
+	)
+	resp, err := client.AccountUpdate(ctx, d.Id(), &account.AccountUpdateIn{
+		AccountName:           &name,
+		PrimaryBillingGroupId: &bgID,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	d.SetId(r.Account.Id)
+	d.SetId(resp.AccountId)
 
-	return resourceAccountRead(ctx, d, m)
+	return resourceAccountRead(ctx, d, client)
 }
 
-func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	// Sometimes deleting an account fails with "Billing group with existing projects cannot be deleted", which
 	// happens due to a race condition between deleting projects and deleting the account. To avoid this, we retry
 	// the deletion until it succeeds or fails with a different error.
@@ -165,16 +153,16 @@ func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interf
 	// TODO: Ideally, this should be fixed in the Aiven API. This is a temporary workaround, and should be removed
 	//  once the API is fixed.
 	if err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
-		err := client.Accounts.Delete(ctx, d.Id())
-		if err != nil {
+		if err := client.AccountDelete(ctx, d.Id()); err != nil {
 			return &retry.RetryError{
 				Err:       err,
 				Retryable: strings.Contains(err.Error(), "Billing group with existing projects cannot be deleted"),
 			}
 		}
+
 		return nil
-	}); err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+	}); err != nil && !avngen.IsNotFound(err) {
+		return err
 	}
 
 	return nil
