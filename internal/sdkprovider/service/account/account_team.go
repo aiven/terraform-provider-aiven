@@ -2,9 +2,10 @@ package account
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/accountteam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -42,10 +43,10 @@ var aivenAccountTeamSchema = map[string]*schema.Schema{
 func ResourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
 		Description:   `Creates and manages a team.`,
-		CreateContext: resourceAccountTeamCreate,
-		ReadContext:   resourceAccountTeamRead,
-		UpdateContext: resourceAccountTeamUpdate,
-		DeleteContext: resourceAccountTeamDelete,
+		CreateContext: common.WithGenClient(resourceAccountTeamCreate),
+		ReadContext:   common.WithGenClient(resourceAccountTeamRead),
+		UpdateContext: common.WithGenClient(resourceAccountTeamUpdate),
+		DeleteContext: common.WithGenClient(resourceAccountTeamDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -63,89 +64,82 @@ migration guide for more information: https://aiven.io/docs/tools/terraform/howt
 	}
 }
 
-func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	name := d.Get("name").(string)
-	accountID := d.Get("account_id").(string)
-
-	r, err := client.AccountTeams.Create(
-		ctx,
-		accountID,
-		aiven.AccountTeam{
-			Name: name,
-		},
+func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		name      = d.Get("name").(string)
+		accountID = d.Get("account_id").(string)
 	)
+
+	resp, err := client.AccountTeamCreate(ctx, accountID, &accountteam.AccountTeamCreateIn{
+		TeamName: name,
+	})
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	d.SetId(schemautil.BuildResourceID(r.Team.AccountId, r.Team.Id))
+	if resp.AccountId == nil {
+		return fmt.Errorf("account team create response missing account_id field")
+	}
 
-	return resourceAccountTeamRead(ctx, d, m)
+	d.SetId(schemautil.BuildResourceID(*resp.AccountId, resp.TeamId))
+
+	return resourceAccountTeamRead(ctx, d, client)
 }
 
-func resourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r, err := client.AccountTeams.Get(ctx, accountID, teamID)
+	resp, err := client.AccountTeamGet(ctx, accountID, teamID)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	if err := d.Set("account_id", r.Team.AccountId); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("team_id", r.Team.Id); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("name", r.Team.Name); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("create_time", r.Team.CreateTime.String()); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("update_time", r.Team.UpdateTime.String()); err != nil {
-		return diag.FromErr(err)
+	if err = schemautil.ResourceDataSet(
+		aivenAccountTeamSchema,
+		d,
+		resp,
+		schemautil.RenameAlias("team_name", "name"),
+	); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r, err := client.AccountTeams.Update(ctx, accountID, teamID, aiven.AccountTeam{
-		Name: d.Get("name").(string),
+	resp, err := client.AccountTeamUpdate(ctx, accountID, teamID, &accountteam.AccountTeamUpdateIn{
+		TeamName: d.Get("name").(string),
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	d.SetId(schemautil.BuildResourceID(r.Team.AccountId, r.Team.Id))
+	if resp.AccountId == nil {
+		return fmt.Errorf("account team update response missing account_id field")
+	}
 
-	return resourceAccountTeamRead(ctx, d, m)
+	d.SetId(schemautil.BuildResourceID(*resp.AccountId, resp.TeamId))
+
+	return resourceAccountTeamRead(ctx, d, client)
 }
 
-func resourceAccountTeamDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.AccountTeams.Delete(ctx, accountID, teamID)
+	err = client.AccountTeamDelete(ctx, accountID, teamID)
 	if common.IsCritical(err) {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
