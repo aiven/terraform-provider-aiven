@@ -26,6 +26,19 @@ func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
 	return !(c.IsNull() || c.AsValueMap()[key].IsNull())
 }
 
+// GetConfigValue returns the value from config if it exists
+// ResourceStateOrResourceDiff.GetOk returns values either from the config or the state,
+// and "ok" might return "true" even if the value is not in the config.
+func GetConfigValue(d ResourceStateOrResourceDiff, key string) (cty.Value, bool) {
+	config := d.GetRawConfig()
+	if config.IsNull() {
+		return config, false
+	}
+
+	v, ok := config.AsValueMap()[key]
+	return v, ok && !v.IsNull()
+}
+
 // PlanParameters service plan aparameters
 type PlanParameters struct {
 	DiskSizeMBDefault int
@@ -51,22 +64,19 @@ func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceI
 	return apiServiceIntegrations
 }
 
-func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
-	vpcID := d.Get("project_vpc_id").(string)
-	if len(vpcID) == 0 {
+// GetProjectVPCIDFromConfig returns the VPC ID from the config if it exists.
+// ResourceStateOrResourceDiff.GetOk returns values either from the config or the state for computed fields.
+func GetProjectVPCIDFromConfig(d ResourceStateOrResourceDiff) (*string, error) {
+	v, ok := GetConfigValue(d, "project_vpc_id")
+	if !ok || v.AsString() == "" {
 		return nil, nil
 	}
 
-	var vpcIDPointer *string
-
-	parts := strings.SplitN(vpcID, "/", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}")
+	_, vpcID, err := SplitResourceID2(v.AsString())
+	if err != nil {
+		return nil, err
 	}
-
-	p1 := parts[1]
-	vpcIDPointer = &p1
-	return vpcIDPointer, nil
+	return &vpcID, nil
 }
 
 func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *service.MaintenanceIn {
