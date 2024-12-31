@@ -112,10 +112,12 @@ lint: lint-go lint-test lint-docs
 lint-go: $(GOLANGCILINT)
 	$(GOLANGCILINT) run --build-tags all --timeout=30m ./...
 
+# Exclude files that use templates from linting
+TERRAFMT_EXCLUDE = -not -path "./internal/acctest/*" \
+	-not -path "./internal/sdkprovider/service/kafka/kafka_quota_test.go"
 
 lint-test: $(TERRAFMT)
-	$(TERRAFMT) diff ./internal -cfq
-
+	find ./internal -type f $(TERRAFMT_EXCLUDE) -exec $(TERRAFMT) diff {} -cfq \;
 
 lint-docs: $(TFPLUGINDOCS)
 	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate --rendered-website-dir tmp
@@ -131,7 +133,6 @@ lint-docs: $(TFPLUGINDOCS)
 #################################################
 
 fmt: fmt-test fmt-imports
-
 
 fmt-test: $(TERRAFMT)
 	$(TERRAFMT) fmt ./internal -fv

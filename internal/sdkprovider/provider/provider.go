@@ -268,6 +268,7 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_mirrormaker_replication_flow": kafka.ResourceMirrorMakerReplicationFlow(),
 			"aiven_kafka_connect":                kafka.ResourceKafkaConnect(),
 			"aiven_kafka_mirrormaker":            kafka.ResourceKafkaMirrormaker(),
+			"aiven_kafka_quota":                  kafka.ResourceKafkaQuota(),
 
 			// clickhouse
 			"aiven_clickhouse":          clickhouse.ResourceClickhouse(),
