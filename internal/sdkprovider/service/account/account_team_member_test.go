@@ -2,18 +2,17 @@ package account_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -73,7 +72,10 @@ data "aiven_account_team_member" "member" {
 }
 
 func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -88,30 +90,35 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 			return err
 		}
 
-		r, err := c.Accounts.List(ctx)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
-
-			return nil
+		resp, err := c.AccountList(ctx)
+		if common.IsCritical(err) {
+			return err
 		}
 
-		for _, a := range r.Accounts {
-			if a.Id == accountID {
-				ri, err := c.AccountTeamInvites.List(ctx, accountID, teamID)
-				if err != nil {
-					var e aiven.Error
-					if errors.As(err, &e) && e.Status != 404 {
-						return err
-					}
-
-					return nil
+		for _, r := range resp {
+			if r.AccountId == accountID {
+				respTI, err := c.AccountTeamInvitesList(ctx, accountID, teamID)
+				if common.IsCritical(err) {
+					return err
 				}
 
-				for _, i := range ri.Invites {
-					if i.UserEmail == userEmail {
+				for _, invite := range respTI {
+					if invite.UserEmail == userEmail {
+						return fmt.Errorf("account team member (%s) still exists", rs.Primary.ID)
+					}
+				}
+			}
+		}
+
+		for _, r := range resp {
+			if r.AccountId == accountID {
+				respTM, err := c.AccountTeamMembersList(ctx, accountID, teamID)
+				if common.IsCritical(err) {
+					return err
+				}
+
+				for _, member := range respTM {
+					if member.UserEmail == userEmail {
 						return fmt.Errorf("account team member (%s) still exists", rs.Primary.ID)
 					}
 				}
