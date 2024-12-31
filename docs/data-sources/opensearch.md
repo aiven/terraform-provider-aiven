@@ -221,6 +221,7 @@ Read-Only:
 - `action_destructive_requires_name` (Boolean)
 - `auth_failure_listeners` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number)
+- `cluster_routing_allocation_balance_prefer_primary` (Boolean)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `email_sender_name` (String)
 - `email_sender_password` (String)
@@ -252,6 +253,7 @@ Read-Only:
 - `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
 - `search_insights_top_queries` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number)
+- `segrep` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--segrep))
 - `shard_indexing_pressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number)
 - `thread_pool_analyze_size` (Number)
@@ -392,6 +394,17 @@ Read-Only:
 - `top_n_size` (Number)
 - `window_size` (String)
 
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--segrep"></a>
+### Nested Schema for `opensearch_user_config.opensearch.segrep`
+
+Read-Only:
+
+- `pressure_checkpoint_limit` (Number)
+- `pressure_enabled` (Boolean)
+- `pressure_replica_stale_limit` (Number)
+- `pressure_time_limit` (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure"></a>

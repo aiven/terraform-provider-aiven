@@ -9,6 +9,17 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Change `aiven_account_team_project` resource and datasource field `team_type` (enum): add `organization:projects:write`
+- Add `aiven_opensearch` resource and datasource field
+  `opensearch_user_config.opensearch.cluster_routing_allocation_balance_prefer_primary`: When set to true, OpenSearch
+  attempts to evenly distribute the primary shards between the cluster nodes
+- Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.segrep`: Segment Replication
+  Backpressure Settings
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `organization:projects:write`
+- Change `aiven_project_user` resource and datasource field `member_type` (enum): add `organization:projects:write`
+
 ## [4.31.1] - 2024-12-23
 
 - Validate whether the `aiven_project.billing_group` field has changed before calling admin API
