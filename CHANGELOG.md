@@ -18,6 +18,7 @@ nav_order: 1
   attempts to evenly distribute the primary shards between the cluster nodes
 - Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.segrep`: Segment Replication
   Backpressure Settings
+- Add `aiven_flink` resource and datasource field `flink_user_config.custom_code`: Enable to upload Custom JARs for Flink applications.
 
 ## [4.31.1] - 2024-12-23
 
