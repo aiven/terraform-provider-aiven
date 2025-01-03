@@ -83,6 +83,7 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `custom_code` (Boolean) Enable to upload Custom JARs for Flink applications.
 - `flink_version` (String) Enum: `1.16`, `1.19`, `1.20`, and newer. Flink major version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
