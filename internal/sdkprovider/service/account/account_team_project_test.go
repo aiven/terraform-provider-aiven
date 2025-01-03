@@ -2,18 +2,17 @@ package account_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -79,7 +78,10 @@ data "aiven_account_team_project" "project" {
 }
 
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error initializing Aiven client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -94,31 +96,21 @@ func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) erro
 			return err
 		}
 
-		r, err := c.Accounts.List(ctx)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
-
-			return nil
+		resp, err := c.AccountList(ctx)
+		if common.IsCritical(err) {
+			return err
 		}
 
-		for _, a := range r.Accounts {
-			if a.Id == accountID {
-				rp, err := c.AccountTeamProjects.List(ctx, accountID, teamID)
-				if err != nil {
-					var e aiven.Error
-					if errors.As(err, &e) && e.Status != 404 {
-						return err
-					}
-
-					return nil
+		for _, a := range resp {
+			if a.AccountId == accountID {
+				respTP, err := c.AccountTeamProjectList(ctx, accountID, teamID)
+				if common.IsCritical(err) {
+					return err
 				}
 
-				for _, p := range rp.Projects {
+				for _, p := range respTP {
 					if p.ProjectName == projectName {
-						return fmt.Errorf("account team project (%s) still exists", rs.Primary.ID)
+						return fmt.Errorf("account team project (%q) still exists", rs.Primary.ID)
 					}
 				}
 			}

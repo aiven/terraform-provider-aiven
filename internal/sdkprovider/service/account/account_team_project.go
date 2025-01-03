@@ -2,10 +2,11 @@ package account
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/aiven/go-client-codegen/handler/accountteam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -33,7 +34,7 @@ var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 	"team_type": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validation.StringInSlice(account.TeamTypeChoices(), false),
+		ValidateFunc: validation.StringInSlice(accountteam.TeamTypeChoices(), false),
 		Description:  userconfig.Desc("The Account team project type").PossibleValuesString(account.TeamTypeChoices()...).Build(),
 	},
 }
@@ -43,10 +44,10 @@ func ResourceAccountTeamProject() *schema.Resource {
 		Description: `
 Links an existing project to an existing team. Both the project and team should have the same ` + "`account_id`" + `.
 `,
-		CreateContext: resourceAccountTeamProjectCreate,
-		ReadContext:   resourceAccountTeamProjectRead,
-		UpdateContext: resourceAccountTeamProjectUpdate,
-		DeleteContext: resourceAccountTeamProjectDelete,
+		CreateContext: common.WithGenClient(resourceAccountTeamProjectCreate),
+		ReadContext:   common.WithGenClient(resourceAccountTeamProjectRead),
+		UpdateContext: common.WithGenClient(resourceAccountTeamProjectUpdate),
+		DeleteContext: common.WithGenClient(resourceAccountTeamProjectDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -64,107 +65,103 @@ migration guide for more information: https://aiven.io/docs/tools/terraform/howt
 	}
 }
 
-func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID := d.Get("account_id").(string)
 	teamID := d.Get("team_id").(string)
 	projectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
-	err := client.AccountTeamProjects.Create(
+	if err := client.AccountTeamProjectAssociate(
 		ctx,
 		accountID,
 		teamID,
-		aiven.AccountTeamProject{
-			ProjectName: projectName,
-			TeamType:    teamType,
+		projectName,
+		&accountteam.AccountTeamProjectAssociateIn{
+			TeamType: accountteam.TeamType(teamType),
 		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
+	); err != nil {
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(accountID, teamID, projectName))
 
-	return resourceAccountTeamProjectRead(ctx, d, m)
+	return resourceAccountTeamProjectRead(ctx, d, client)
 }
 
-func resourceAccountTeamProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamProjectRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, projectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r, err := client.AccountTeamProjects.List(ctx, accountID, teamID)
+	resp, err := client.AccountTeamProjectList(ctx, accountID, teamID)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return err
 	}
 
-	var project aiven.AccountTeamProject
-	for _, p := range r.Projects {
+	var project accountteam.ProjectOut
+	for _, p := range resp {
 		if p.ProjectName == projectName {
 			project = p
 		}
 	}
 
 	if project.ProjectName == "" {
-		return diag.Errorf("account team project %s not found", d.Id())
+		return fmt.Errorf("account team project %q not found", d.Id())
 	}
 
-	if err := d.Set("account_id", accountID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("account_id", accountID); err != nil {
+		return err
 	}
-	if err := d.Set("team_id", teamID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("team_id", teamID); err != nil {
+		return err
 	}
-	if err := d.Set("project_name", project.ProjectName); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("project_name", project.ProjectName); err != nil {
+		return err
 	}
-	if err := d.Set("team_type", project.TeamType); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("team_type", project.TeamType); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, _, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	newProjectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
-	err = client.AccountTeamProjects.Update(ctx, accountID, teamID, aiven.AccountTeamProject{
-		TeamType:    teamType,
-		ProjectName: newProjectName,
-	})
+	err = client.AccountTeamProjectAssociationUpdate(
+		ctx,
+		accountID,
+		teamID,
+		newProjectName,
+		&accountteam.AccountTeamProjectAssociationUpdateIn{
+			TeamType: accountteam.TeamType(teamType),
+		},
+	)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(accountID, teamID, newProjectName))
 
-	return resourceAccountTeamProjectRead(ctx, d, m)
+	return resourceAccountTeamProjectRead(ctx, d, client)
 }
 
-func resourceAccountTeamProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountTeamProjectDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, projectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.AccountTeamProjects.Delete(ctx, accountID, teamID, projectName)
+	err = client.AccountTeamProjectDisassociate(ctx, accountID, teamID, projectName)
 	if common.IsCritical(err) {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
