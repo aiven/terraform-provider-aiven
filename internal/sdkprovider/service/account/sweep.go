@@ -2,13 +2,13 @@ package account
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -50,21 +50,21 @@ func init() {
 	})
 }
 
-func listTestAccounts(ctx context.Context) ([]aiven.Account, error) {
-	client, err := sweep.SharedClient()
+func listTestAccounts(ctx context.Context) ([]account.AccountOut, error) {
+	client, err := sweep.SharedGenClient()
 	if err != nil {
 		return nil, err
 	}
 
-	var testAccounts []aiven.Account
+	var testAccounts []account.AccountOut
 
-	r, err := client.Accounts.List(ctx)
+	resp, err := client.AccountList(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, a := range r.Accounts {
-		if strings.Contains(a.Name, "test-acc-ac-") {
+	for _, a := range resp {
+		if strings.Contains(a.AccountName, "test-acc-ac-") {
 			testAccounts = append(testAccounts, a)
 		}
 	}
@@ -74,7 +74,7 @@ func listTestAccounts(ctx context.Context) ([]aiven.Account, error) {
 
 func sweepAccountAuthentications(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
@@ -86,17 +86,17 @@ func sweepAccountAuthentications(ctx context.Context) func(region string) error 
 		}
 
 		for _, a := range accounts {
-			rr, err := client.AccountAuthentications.List(ctx, a.Id)
+			aal, err := client.AccountAuthenticationMethodsList(ctx, a.AccountId)
 			if err != nil {
 				return fmt.Errorf("cannot get account authentications list: %w", err)
 			}
 
-			for _, m := range rr.AuthenticationMethods {
-				err := client.AccountAuthentications.Delete(ctx, a.Id, m.AuthenticationMethodID)
-				if err != nil {
+			for _, m := range aal {
+				if err = client.AccountAuthenticationMethodDelete(ctx, a.AccountId, m.AuthenticationMethodId); err != nil {
 					if strings.Contains(err.Error(), "Internal authentication methods cannot be deleted") {
 						continue
 					}
+
 					return fmt.Errorf("cannot delete account authentication: %w", err)
 				}
 			}
@@ -108,7 +108,7 @@ func sweepAccountAuthentications(ctx context.Context) func(region string) error 
 
 func sweepAccounts(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
@@ -119,13 +119,10 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 		}
 
 		for _, a := range accounts {
-			if err := client.Accounts.Delete(ctx, a.Id); err != nil {
-				var e aiven.Error
-				if errors.As(err, &e) && e.Status == 404 {
-					continue
+			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
+				if common.IsCritical(err) {
+					return fmt.Errorf("error destroying account %s during sweep: %w", a.AccountName, err)
 				}
-
-				return fmt.Errorf("error destroying account %s during sweep: %w", a.Name, err)
 			}
 		}
 
@@ -135,7 +132,7 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 
 func sweepAccountTeams(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
@@ -146,28 +143,28 @@ func sweepAccountTeams(ctx context.Context) func(region string) error {
 		}
 
 		for _, a := range accounts {
-			tr, err := client.AccountTeams.List(ctx, a.Id)
+			atl, err := client.AccountTeamList(ctx, a.AccountId)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
-			for _, t := range tr.Teams {
-				if strings.Contains(t.Name, "test-acc-team-") {
-					err = client.AccountTeams.Delete(ctx, t.AccountId, t.Id)
+			for _, at := range atl {
+				if strings.Contains(at.TeamName, "test-acc-team-") {
+					err = client.AccountTeamDelete(ctx, a.AccountId, at.TeamId)
 					if err != nil {
 						return fmt.Errorf("cannot delete account team: %w", err)
 					}
 				}
-
 			}
 		}
 
 		return nil
 	}
 }
+
 func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
@@ -178,40 +175,42 @@ func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 		}
 
 		for _, a := range accounts {
-			tr, err := client.AccountTeams.List(ctx, a.Id)
+			atl, err := client.AccountTeamList(ctx, a.AccountId)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
-			for _, t := range tr.Teams {
-				if strings.Contains(t.Name, "test-acc-team-") {
+			for _, t := range atl {
+				if strings.Contains(t.TeamName, "test-acc-team-") {
 					// delete all account team invitations
-					mi, err := client.AccountTeamInvites.List(ctx, t.AccountId, t.Id)
+					if t.AccountId == nil {
+						return fmt.Errorf("account id is empty for the team %q", t.TeamName)
+					}
+
+					mi, err := client.AccountTeamInvitesList(ctx, *t.AccountId, t.TeamId)
 					if err != nil {
 						return fmt.Errorf("error retrieving a list of account team invitations : %w", err)
 					}
 
-					for _, i := range mi.Invites {
-						err := client.AccountTeamInvites.Delete(ctx, i.AccountId, i.TeamId, i.UserEmail)
+					for _, i := range mi {
+						err = client.AccountTeamMemberCancelInvite(ctx, *t.AccountId, t.TeamId, i.UserEmail)
 						if err != nil {
 							return fmt.Errorf("cannot delete account team invitation : %w", err)
 						}
 					}
 
 					// delete all account team members
-					mr, err := client.AccountTeamMembers.List(ctx, t.AccountId, t.Id)
+					tml, err := client.AccountTeamMembersList(ctx, *t.AccountId, t.TeamId)
 					if err != nil {
 						return fmt.Errorf("error retrieving a list of account team members : %w", err)
 					}
 
-					for _, m := range mr.Members {
-						err := client.AccountTeamMembers.Delete(ctx, t.AccountId, t.Id, m.UserId)
-						if err != nil {
+					for _, tm := range tml {
+						if err = client.AccountTeamMembersDelete(ctx, *t.AccountId, t.TeamId, tm.UserId); err != nil {
 							return fmt.Errorf("cannot delete account team member : %w", err)
 						}
 					}
 				}
-
 			}
 		}
 
@@ -221,7 +220,7 @@ func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 
 func sweepAccountTeamProjects(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
@@ -232,26 +231,25 @@ func sweepAccountTeamProjects(ctx context.Context) func(region string) error {
 		}
 
 		for _, a := range accounts {
-			tr, err := client.AccountTeams.List(ctx, a.Id)
+			atl, err := client.AccountTeamList(ctx, a.AccountId)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
-			for _, t := range tr.Teams {
-				if strings.Contains(t.Name, "test-acc-team-") {
-					pr, err := client.AccountTeamProjects.List(ctx, t.AccountId, t.Id)
+			for _, t := range atl {
+				if strings.Contains(t.TeamName, "test-acc-team-") {
+					pl, err := client.AccountTeamProjectList(ctx, a.AccountId, t.TeamId)
 					if err != nil {
 						return fmt.Errorf("error retrieving a list of account team projects : %w", err)
 					}
 
-					for _, p := range pr.Projects {
-						err := client.AccountTeamProjects.Delete(ctx, t.AccountId, t.Id, p.ProjectName)
+					for _, p := range pl {
+						err := client.AccountTeamProjectDisassociate(ctx, a.AccountId, t.TeamId, p.ProjectName)
 						if err != nil {
 							return fmt.Errorf("cannot delete account team project : %w", err)
 						}
 					}
 				}
-
 			}
 		}
 

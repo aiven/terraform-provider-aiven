@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"golang.org/x/exp/maps"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
-var sharedClient *aiven.Client
-var sweeperFuncs map[string]struct{}
+var (
+	sharedClient *aiven.Client
+	sweeperFuncs map[string]struct{}
+
+	sharedGenClient avngen.Client
+	initOnce        sync.Once
+	initError       error
+)
 
 func init() {
 	sweeperFuncs = make(map[string]struct{})
@@ -36,6 +44,24 @@ func SharedClient() (*aiven.Client, error) {
 	}
 
 	return sharedClient, nil
+}
+
+func SharedGenClient() (avngen.Client, error) {
+	if os.Getenv("AIVEN_PROJECT_NAME") == "" {
+		return nil, fmt.Errorf("must provide environment variable AIVEN_PROJECT_NAME ")
+	}
+
+	initOnce.Do(func() {
+		var err error
+		sharedGenClient, err = common.NewAivenGenClient()
+		if err != nil {
+			initError = err
+
+			return
+		}
+	})
+
+	return sharedGenClient, initError
 }
 
 func SweepServices(ctx context.Context, t string) error {
