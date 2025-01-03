@@ -24,7 +24,10 @@ issues:
     - path: "internal/sdkprovider/service/account/account_team.*"
       linters:
         - staticcheck
-      text: ".*is deprecated.*"
+    - path: "internal/sdkprovider/service/account/sweep.go"
+      linters:
+        - staticcheck
+      text: "SA1019: (.*) is deprecated"
   exclude:
     # TODO: We can have a whitelist for revive's var-naming rule.
     - 'var-naming: .*'
