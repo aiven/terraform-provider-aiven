@@ -2,15 +2,16 @@ package account
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/accountauthentication"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -146,10 +147,10 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 func ResourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an authentication method.",
-		CreateContext: resourceAccountAuthenticationCreate,
-		ReadContext:   resourceAccountAuthenticationRead,
-		UpdateContext: resourceAccountAuthenticationUpdate,
-		DeleteContext: resourceAccountAuthenticationDelete,
+		CreateContext: common.WithGenClient(resourceAccountAuthenticationCreate),
+		ReadContext:   common.WithGenClient(resourceAccountAuthenticationRead),
+		UpdateContext: common.WithGenClient(resourceAccountAuthenticationUpdate),
+		DeleteContext: common.WithGenClient(resourceAccountAuthenticationDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -160,82 +161,80 @@ func ResourceAccountAuthentication() *schema.Resource {
 	}
 }
 
-func resourceAccountAuthenticationCreate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	return diag.Errorf("creating account authentication is unsupported")
+func resourceAccountAuthenticationCreate(_ context.Context, _ *schema.ResourceData, _ avngen.Client) error {
+	return fmt.Errorf("creating account authentication is unsupported")
 }
 
-func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r, err := client.AccountAuthentications.Get(ctx, accountID, authID)
+	resp, err := client.AccountAuthenticationMethodGet(ctx, accountID, authID)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return err
 	}
 
-	if err := d.Set("account_id", r.AuthenticationMethod.AccountID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("account_id", resp.AccountId); err != nil {
+		return err
 	}
-	if err := d.Set("name", r.AuthenticationMethod.AuthenticationMethodName); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("name", resp.AuthenticationMethodName); err != nil {
+		return err
 	}
-	if err := d.Set("type", r.AuthenticationMethod.AuthenticationMethodType); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("type", resp.AuthenticationMethodType); err != nil {
+		return err
 	}
-	if err := d.Set("enabled", r.AuthenticationMethod.AuthenticationMethodEnabled); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("enabled", resp.AuthenticationMethodEnabled); err != nil {
+		return err
 	}
-	if err := d.Set("auto_join_team_id", r.AuthenticationMethod.AutoJoinTeamID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("auto_join_team_id", resp.AutoJoinTeamId); err != nil {
+		return err
 	}
-	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_certificate", resp.SamlCertificate); err != nil {
+		return err
 	}
-	if err := d.Set("saml_digest_algorithm", r.AuthenticationMethod.SAMLDigestAlgorithm); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_digest_algorithm", resp.SamlDigestAlgorithm); err != nil {
+		return err
 	}
-	if err := d.Set("saml_field_mapping", flattenSAMLFieldMapping(r.AuthenticationMethod.SAMLFieldMapping)); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_field_mapping", flattenSAMLFieldMapping(resp.SamlFieldMapping)); err != nil {
+		return err
 	}
-	if err := d.Set("saml_idp_login_allowed", r.AuthenticationMethod.SAMLIdpLoginAllowed); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_idp_login_allowed", resp.SamlIdpLoginAllowed); err != nil {
+		return err
 	}
-	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpURL); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_idp_url", resp.SamlIdpUrl); err != nil {
+		return err
 	}
-	if err := d.Set("saml_signature_algorithm", r.AuthenticationMethod.SAMLSignatureAlgorithm); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_signature_algorithm", resp.SamlSignatureAlgorithm); err != nil {
+		return err
 	}
-	if err := d.Set("saml_variant", r.AuthenticationMethod.SAMLVariant); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_variant", resp.SamlVariant); err != nil {
+		return err
 	}
-	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntityID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_entity_id", resp.SamlEntityId); err != nil {
+		return err
 	}
-	if err := d.Set("authentication_id", r.AuthenticationMethod.AuthenticationMethodID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("authentication_id", resp.AuthenticationMethodId); err != nil {
+		return err
 	}
-	if err := d.Set("saml_acs_url", r.AuthenticationMethod.SAMLAcsURL); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_acs_url", resp.SamlAcsUrl); err != nil {
+		return err
 	}
-	if err := d.Set("saml_metadata_url", r.AuthenticationMethod.SAMLMetadataURL); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("saml_metadata_url", resp.SamlMetadataUrl); err != nil {
+		return err
 	}
-	if err := d.Set("create_time", r.AuthenticationMethod.CreateTime.String()); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("create_time", resp.CreateTime.String()); err != nil {
+		return err
 	}
-	if err := d.Set("update_time", r.AuthenticationMethod.UpdateTime.String()); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("update_time", resp.UpdateTime.String()); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func flattenSAMLFieldMapping(s *aiven.SAMLFieldMapping) []map[string]interface{} {
+func flattenSAMLFieldMapping(s *accountauthentication.SamlFieldMappingOut) []map[string]interface{} {
 	if s == nil {
 		return make([]map[string]interface{}, 0)
 	}
@@ -250,67 +249,65 @@ func flattenSAMLFieldMapping(s *aiven.SAMLFieldMapping) []map[string]interface{}
 	})
 }
 
-func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	r := aiven.AccountAuthenticationMethodUpdate{
-		AuthenticationMethodEnabled: d.Get("enabled").(bool),
-		AuthenticationMethodName:    d.Get("name").(string),
-		AutoJoinTeamID:              d.Get("auto_join_team_id").(string),
-		SAMLCertificate:             strings.TrimSpace(d.Get("saml_certificate").(string)),
-		SAMLDigestAlgorithm:         d.Get("saml_digest_algorithm").(string),
-		SAMLFieldMapping:            readSAMLFieldMappingFromSchema(d),
-		SAMLIdpLoginAllowed:         d.Get("saml_idp_login_allowed").(bool),
-		SAMLIdpURL:                  d.Get("saml_idp_url").(string),
-		SAMLSignatureAlgorithm:      d.Get("saml_signature_algorithm").(string),
-		SAMLVariant:                 d.Get("saml_variant").(string),
-		SAMLEntity:                  d.Get("saml_entity_id").(string),
+	req := accountauthentication.AccountAuthenticationMethodUpdateIn{
+		AuthenticationMethodEnabled: util.ToPtr(d.Get("enabled").(bool)),
+		AuthenticationMethodName:    util.ToPtr(d.Get("name").(string)),
+		AutoJoinTeamId:              util.ToPtr(d.Get("auto_join_team_id").(string)),
+		SamlCertificate:             util.ToPtr(strings.TrimSpace(d.Get("saml_certificate").(string))),
+		SamlDigestAlgorithm:         accountauthentication.SamlDigestAlgorithmType(d.Get("saml_digest_algorithm").(string)),
+		SamlFieldMapping:            readSAMLFieldMappingFromSchema(d),
+		SamlIdpLoginAllowed:         util.ToPtr(d.Get("saml_idp_login_allowed").(bool)),
+		SamlIdpUrl:                  util.ToPtr(d.Get("saml_idp_url").(string)),
+		SamlSignatureAlgorithm:      accountauthentication.SamlSignatureAlgorithmType(d.Get("saml_signature_algorithm").(string)),
+		SamlVariant:                 accountauthentication.SamlVariantType(d.Get("saml_variant").(string)),
+		SamlEntityId:                util.ToPtr(d.Get("saml_entity_id").(string)),
 	}
 
-	_, err = client.AccountAuthentications.Update(ctx, accountID, authID, r)
+	_, err = client.AccountAuthenticationMethodUpdate(ctx, accountID, authID, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(accountID, authID))
-	return resourceAccountAuthenticationRead(ctx, d, m)
+
+	return resourceAccountAuthenticationRead(ctx, d, client)
 }
 
-func resourceAccountAuthenticationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceAccountAuthenticationDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.AccountAuthentications.Delete(ctx, accountID, teamID)
+	err = client.AccountAuthenticationMethodDelete(ctx, accountID, teamID)
 	if common.IsCritical(err) {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
 }
 
-func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *aiven.SAMLFieldMapping {
+func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *accountauthentication.SamlFieldMappingIn {
 	set := d.Get("saml_field_mapping").(*schema.Set).List()
 	if len(set) == 0 {
 		return nil
 	}
 
-	r := aiven.SAMLFieldMapping{}
+	r := accountauthentication.SamlFieldMappingIn{}
 	for _, v := range set {
 		cv := v.(map[string]interface{})
 
-		r.Email = cv["email"].(string)
-		r.FirstName = cv["first_name"].(string)
-		r.Identity = cv["identity"].(string)
-		r.LastName = cv["last_name"].(string)
-		r.RealName = cv["real_name"].(string)
+		r.Email = util.ToPtr(cv["email"].(string))
+		r.FirstName = util.ToPtr(cv["first_name"].(string))
+		r.Identity = util.ToPtr(cv["identity"].(string))
+		r.LastName = util.ToPtr(cv["last_name"].(string))
+		r.RealName = util.ToPtr(cv["real_name"].(string))
 	}
 
 	return &r

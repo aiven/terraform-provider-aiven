@@ -10,8 +10,8 @@ import (
 // These functions are not specific to the Aiven plugin. If you are looking for Aiven plugin specific helpers,
 // please see the pluginhelpers.go file instead.
 
-// Ref is a helper function that returns a pointer to the value passed in.
-func Ref[T any](v T) *T {
+// ToPtr is a helper function that returns a pointer to the value passed in.
+func ToPtr[T any](v T) *T {
 	return &v
 }
 

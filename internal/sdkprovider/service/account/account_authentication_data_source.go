@@ -2,17 +2,18 @@ package account
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceAccountAuthenticationRead,
+		ReadContext: common.WithGenClient(datasourceAccountAuthenticationRead),
 		Description: "The Account Authentication data source provides information about the existing Aiven Account Authentication.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenAccountAuthenticationSchema,
 			"account_id", "name"),
@@ -20,23 +21,22 @@ func DatasourceAccountAuthentication() *schema.Resource {
 	}
 }
 
-func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	name := d.Get("name").(string)
 	accountID := d.Get("account_id").(string)
 
-	r, err := client.AccountAuthentications.List(ctx, accountID)
+	resp, err := client.AccountAuthenticationMethodsList(ctx, accountID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, a := range r.AuthenticationMethods {
-		if a.AuthenticationMethodName == name {
-			d.SetId(schemautil.BuildResourceID(a.AccountID, a.AuthenticationMethodID))
-			return resourceAccountAuthenticationRead(ctx, d, m)
+	for _, am := range resp {
+		if am.AuthenticationMethodName != nil && *am.AuthenticationMethodName == name {
+			d.SetId(schemautil.BuildResourceID(am.AccountId, am.AuthenticationMethodId))
+
+			return resourceAccountAuthenticationRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("account authentication %s not found", name)
+	return fmt.Errorf("account authentication method %q not found", name)
 }
