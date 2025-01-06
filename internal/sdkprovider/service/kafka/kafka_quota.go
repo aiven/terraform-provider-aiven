@@ -174,7 +174,7 @@ func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client 
 		params...,
 	)
 	if err != nil {
-		return err
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	return schemautil.ResourceDataSet(

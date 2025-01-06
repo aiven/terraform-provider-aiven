@@ -18,6 +18,11 @@ nav_order: 1
   attempts to evenly distribute the primary shards between the cluster nodes
 - Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.segrep`: Segment Replication
   Backpressure Settings
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account` resource/data source
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_authentication` resource/data source
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team` resource/data source
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team_member` resource/data source
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team_project` resource/data source
 
 ## [4.31.1] - 2024-12-23
 
