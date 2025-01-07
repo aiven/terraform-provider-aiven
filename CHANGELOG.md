@@ -23,6 +23,7 @@ nav_order: 1
 - Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team` resource/data source
 - Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team_member` resource/data source
 - Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `account_team_project` resource/data source
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `project_user` resource/data source
 
 ## [4.31.1] - 2024-12-23
 
