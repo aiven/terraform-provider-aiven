@@ -230,3 +230,49 @@ func ResourceFromState(state *terraform.State, name string) (*terraform.Resource
 
 	return rs, nil
 }
+
+// EnvVarCheckMode determines how missing environment variables are handled
+type EnvVarCheckMode int
+
+const (
+	// MustBeSet fails the test if any required env vars are missing
+	MustBeSet EnvVarCheckMode = iota
+	// SkipIfMissing skips the test if any required env vars are missing
+	SkipIfMissing
+)
+
+func CheckEnvVars(t *testing.T, mode EnvVarCheckMode, vars ...string) map[string]string {
+	t.Helper()
+
+	values := make(map[string]string)
+	missingVars := make([]string, 0)
+
+	for _, v := range vars {
+		val, ok := os.LookupEnv(v)
+		if !ok {
+			missingVars = append(missingVars, v)
+			continue
+		}
+		values[v] = val
+	}
+
+	if len(missingVars) > 0 {
+		msg := fmt.Sprintf("required environment variables not set: %s", strings.Join(missingVars, ", "))
+		switch mode {
+		case MustBeSet:
+			t.Fatal(msg)
+		case SkipIfMissing:
+			t.Skip(msg)
+		}
+	}
+
+	return values
+}
+
+func MustHaveEnvVars(t *testing.T, vars ...string) map[string]string {
+	return CheckEnvVars(t, MustBeSet, vars...)
+}
+
+func SkipIfEnvVarsNotSet(t *testing.T, vars ...string) map[string]string {
+	return CheckEnvVars(t, SkipIfMissing, vars...)
+}

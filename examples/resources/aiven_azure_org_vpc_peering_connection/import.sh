@@ -1,0 +1,1 @@
+terraform import aiven_azure_org_vpc_peering_connection.example ORGANIZATION_ID/ORGANIZATION_VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME/RESOURCE_GROUP

@@ -40,11 +40,27 @@ func init() {
 		},
 	})
 
+	sweep.AddTestSweepers("aiven_organization_vpc", &resource.Sweeper{
+		Name: "aiven_organization_vpc",
+		F:    sweepOrgVPCs(ctx),
+		Dependencies: []string{
+			"aiven_organization",
+		},
+	})
+
 	sweep.AddTestSweepers("aiven_aws_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_aws_vpc_peering_connection",
 		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
+		},
+	})
+
+	sweep.AddTestSweepers("aiven_aws_org_vpc_peering_connection", &resource.Sweeper{
+		Name: "aiven_aws_org_vpc_peering_connection",
+		F:    sweepOrgVPCPeeringCons(ctx),
+		Dependencies: []string{
+			"aiven_organization_vpc",
 		},
 	})
 
@@ -56,11 +72,27 @@ func init() {
 		},
 	})
 
+	sweep.AddTestSweepers("aiven_azure_org_vpc_peering_connection", &resource.Sweeper{
+		Name: "aiven_azure_org_vpc_peering_connection",
+		F:    sweepVPCPeeringCons(ctx),
+		Dependencies: []string{
+			"aiven_organization_vpc",
+		},
+	})
+
 	sweep.AddTestSweepers("aiven_gcp_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_gcp_vpc_peering_connection",
 		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
+		},
+	})
+
+	sweep.AddTestSweepers("aiven_gcp_org_vpc_peering_connection", &resource.Sweeper{
+		Name: "aiven_gcp_org_vpc_peering_connection",
+		F:    sweepVPCPeeringCons(ctx),
+		Dependencies: []string{
+			"aiven_organization_vpc",
 		},
 	})
 
@@ -108,6 +140,41 @@ func sweepVPCs(ctx context.Context) func(string) error {
 			err := client.VPCs.Delete(ctx, projectName, vpc.ProjectVPCID)
 			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting vpc %s: %w", vpc.ProjectVPCID, err)
+			}
+		}
+
+		return nil
+	}
+}
+
+func sweepOrgVPCs(ctx context.Context) func(string) error {
+	return func(_ string) error {
+		orgName := os.Getenv("AIVEN_ORGANIZATION_NAME")
+		client, err := sweep.SharedGenClient()
+		if err != nil {
+			return err
+		}
+
+		list, err := client.AccountList(ctx)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of organizations : %w", err)
+		}
+
+		for _, org := range list {
+			if org.AccountName != orgName {
+				continue
+			}
+
+			VPCs, err := client.OrganizationVpcList(ctx, org.OrganizationId)
+			if err != nil {
+				return fmt.Errorf("error retrieving a list of vpcs for a organization : %w", err)
+			}
+
+			for _, vpc := range VPCs {
+				_, err := client.OrganizationVpcDelete(ctx, org.OrganizationId, vpc.OrganizationVpcId)
+				if common.IsCritical(err) {
+					return fmt.Errorf("error deleting vpc %s: %w", vpc.OrganizationVpcId, err)
+				}
 			}
 		}
 
@@ -171,6 +238,58 @@ func sweepVPCPeeringCons(ctx context.Context) func(string) error {
 						*peeringCon.PeerRegion,
 						err)
 				}
+			}
+		}
+
+		return nil
+	}
+}
+
+func sweepOrgVPCPeeringCons(ctx context.Context) func(string) error {
+	return func(_ string) error {
+		orgName := os.Getenv("AIVEN_ORGANIZATION_NAME")
+		client, err := sweep.SharedGenClient()
+		if err != nil {
+			return err
+		}
+
+		list, err := client.AccountList(ctx)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of organizations : %w", err)
+		}
+
+		for _, org := range list {
+			if org.AccountName != orgName {
+				continue
+			}
+
+			VPCs, err := client.OrganizationVpcList(ctx, org.OrganizationId)
+			if common.IsCritical(err) {
+				return fmt.Errorf("error retrieving a list of vpcs for a project : %w", err)
+			}
+
+			for _, vpc := range VPCs {
+				orgVPC, err := client.OrganizationVpcGet(ctx, org.OrganizationId, vpc.OrganizationVpcId)
+				if common.IsCritical(err) {
+					return fmt.Errorf("error retrieving a list of vpcs for a project : %w", err)
+				}
+
+				for _, peeringCon := range orgVPC.PeeringConnections {
+					if peeringCon.PeeringConnectionId == nil {
+						continue // should not happen
+					}
+
+					_, err = client.OrganizationVpcPeeringConnectionDeleteById(ctx, org.OrganizationId, vpc.OrganizationVpcId, *peeringCon.PeeringConnectionId)
+					if common.IsCritical(err) {
+						return fmt.Errorf("error deleting vpc peering connection %s/%s/%s: %w",
+							vpc.OrganizationVpcId,
+							vpc.OrganizationVpcId,
+							*peeringCon.PeeringConnectionId,
+							err)
+					}
+
+				}
+
 			}
 		}
 
