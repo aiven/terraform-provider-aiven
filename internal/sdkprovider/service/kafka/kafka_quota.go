@@ -69,13 +69,13 @@ Exceeding this limit results in client throttling.`,
 		AtLeastOneOf: []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"},
 	},
 	"request_percentage": {
-		Type:     schema.TypeInt,
+		Type:     schema.TypeFloat,
 		Optional: true,
 		Description: `
 Sets the maximum percentage of CPU time that a client group can use on request handler I/O and network threads per broker within a quota window.
 Exceeding this limit triggers throttling.
 The quota, expressed as a percentage, also indicates the total allowable CPU usage for the client groups sharing the quota.`,
-		ValidateFunc: validation.IntBetween(0, 100),
+		ValidateFunc: validation.FloatBetween(0, 100),
 		AtLeastOneOf: []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"},
 	},
 }

@@ -256,17 +256,24 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 	}
 
 	req := accountauthentication.AccountAuthenticationMethodUpdateIn{
-		AuthenticationMethodEnabled: util.ToPtr(d.Get("enabled").(bool)),
-		AuthenticationMethodName:    util.ToPtr(d.Get("name").(string)),
-		AutoJoinTeamId:              util.ToPtr(d.Get("auto_join_team_id").(string)),
-		SamlCertificate:             util.ToPtr(strings.TrimSpace(d.Get("saml_certificate").(string))),
-		SamlDigestAlgorithm:         accountauthentication.SamlDigestAlgorithmType(d.Get("saml_digest_algorithm").(string)),
-		SamlFieldMapping:            readSAMLFieldMappingFromSchema(d),
-		SamlIdpLoginAllowed:         util.ToPtr(d.Get("saml_idp_login_allowed").(bool)),
-		SamlIdpUrl:                  util.ToPtr(d.Get("saml_idp_url").(string)),
-		SamlSignatureAlgorithm:      accountauthentication.SamlSignatureAlgorithmType(d.Get("saml_signature_algorithm").(string)),
-		SamlVariant:                 accountauthentication.SamlVariantType(d.Get("saml_variant").(string)),
-		SamlEntityId:                util.ToPtr(d.Get("saml_entity_id").(string)),
+		AuthenticationMethodName: util.NilIfZero(d.Get("name").(string)),
+		AutoJoinTeamId:           util.NilIfZero(d.Get("auto_join_team_id").(string)),
+		SamlCertificate:          util.NilIfZero(strings.TrimSpace(d.Get("saml_certificate").(string))),
+		SamlDigestAlgorithm:      accountauthentication.SamlDigestAlgorithmType(d.Get("saml_digest_algorithm").(string)),
+		SamlFieldMapping:         readSAMLFieldMappingFromSchema(d),
+		SamlIdpUrl:               util.NilIfZero(d.Get("saml_idp_url").(string)),
+		SamlSignatureAlgorithm:   accountauthentication.SamlSignatureAlgorithmType(d.Get("saml_signature_algorithm").(string)),
+		SamlVariant:              accountauthentication.SamlVariantType(d.Get("saml_variant").(string)),
+		SamlEntityId:             util.NilIfZero(d.Get("saml_entity_id").(string)),
+	}
+
+	// Handle booleans separately to distinguish between not set and false
+	if enabled, ok := d.GetOk("enabled"); ok {
+		req.AuthenticationMethodEnabled = util.ToPtr(enabled.(bool))
+	}
+
+	if allowed, ok := d.GetOk("saml_idp_login_allowed"); ok {
+		req.SamlIdpLoginAllowed = util.ToPtr(allowed.(bool))
 	}
 
 	_, err = client.AccountAuthenticationMethodUpdate(ctx, accountID, authID, &req)
@@ -303,11 +310,11 @@ func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *accountauthenticati
 	for _, v := range set {
 		cv := v.(map[string]interface{})
 
-		r.Email = util.ToPtr(cv["email"].(string))
-		r.FirstName = util.ToPtr(cv["first_name"].(string))
-		r.Identity = util.ToPtr(cv["identity"].(string))
-		r.LastName = util.ToPtr(cv["last_name"].(string))
-		r.RealName = util.ToPtr(cv["real_name"].(string))
+		r.Email = util.NilIfZero(cv["email"].(string))
+		r.FirstName = util.NilIfZero(cv["first_name"].(string))
+		r.Identity = util.NilIfZero(cv["identity"].(string))
+		r.LastName = util.NilIfZero(cv["last_name"].(string))
+		r.RealName = util.NilIfZero(cv["real_name"].(string))
 	}
 
 	return &r
