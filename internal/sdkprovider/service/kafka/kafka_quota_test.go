@@ -273,13 +273,13 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 				),
 			},
 			{
-				// craete multiple resources with different configurations
+				// create multiple resources with different configurations
 				Config: newComposition().
 					Add("kafka_quota", map[string]any{
 						"resource_name":      "new_full",
 						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
+						"user":               fmt.Sprintf("%s_1", user),
+						"client_id":          fmt.Sprintf("%s_1", clientID),
 						"consumer_byte_rate": 4000,
 						"producer_byte_rate": 4000,
 						"request_percentage": 40.5,
@@ -287,28 +287,28 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 					Add("kafka_quota", map[string]any{
 						"resource_name":      "user",
 						"service_name":       serviceName,
-						"user":               user,
+						"user":               fmt.Sprintf("%s_2", user),
 						"request_percentage": 20.22,
 					}).
 					Add("kafka_quota", map[string]any{
 						"resource_name":      "client",
 						"service_name":       serviceName,
-						"client_id":          clientID,
+						"client_id":          fmt.Sprintf("%s_3", clientID),
 						"producer_byte_rate": 2000,
 					}).
 					MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "project", projectName),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "service_name", serviceName),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "user", user),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "client_id", clientID),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "user", fmt.Sprintf("%s_1", user)),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "client_id", fmt.Sprintf("%s_1", clientID)),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "consumer_byte_rate", "4000"),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "producer_byte_rate", "4000"),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "request_percentage", "40.5"),
 
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "project", projectName),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "service_name", serviceName),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "user", user),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "user", fmt.Sprintf("%s_2", user)),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "request_percentage", "20.22"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "client_id"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "consumer_byte_rate"),
@@ -316,7 +316,7 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "project", projectName),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "service_name", serviceName),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "client_id", clientID),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "client_id", fmt.Sprintf("%s_3", clientID)),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "producer_byte_rate", "2000"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "user"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.client", kafkaQuotaResource), "consumer_byte_rate"),
