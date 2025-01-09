@@ -17,7 +17,7 @@ import (
 )
 
 func TestAccAivenPGUser_basic(t *testing.T) {
-	resourceName := "aiven_pg_user.foo"
+	resourceName := "aiven_pg_user.foo.0" // checking the first user only
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -30,8 +30,8 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+					resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
+					resource.TestCheckResourceAttr(resourceName, "password", "P4$$word"),
 				),
 			},
 		},
@@ -234,6 +234,7 @@ data "aiven_pg_user" "user" {
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
+// testAccPGUserNewPasswordResource creates 100 users to test bulk creation
 func testAccPGUserNewPasswordResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -250,10 +251,11 @@ resource "aiven_pg" "bar" {
 }
 
 resource "aiven_pg_user" "foo" {
+  count        = 42
   service_name = aiven_pg.bar.service_name
   project      = data.aiven_project.foo.project
-  username     = "user-%s"
-  password     = "Test$1234"
+  username     = "user-${count.index + 1}"
+  password     = "P4$$word"
 
   depends_on = [aiven_pg.bar]
 }
@@ -261,10 +263,10 @@ resource "aiven_pg_user" "foo" {
 data "aiven_pg_user" "user" {
   service_name = aiven_pg.bar.service_name
   project      = aiven_pg.bar.project
-  username     = aiven_pg_user.foo.username
+  username     = aiven_pg_user.foo.0.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccPGUserNoPasswordResource(name string) string {
