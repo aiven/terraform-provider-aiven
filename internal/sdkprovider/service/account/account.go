@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -134,7 +135,7 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, client a
 	)
 	resp, err := client.AccountUpdate(ctx, d.Id(), &account.AccountUpdateIn{
 		AccountName:           &name,
-		PrimaryBillingGroupId: &bgID,
+		PrimaryBillingGroupId: util.NilIfZero(bgID),
 	})
 	if err != nil {
 		return err

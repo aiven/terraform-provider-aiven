@@ -94,7 +94,7 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 						"request_percentage": 101, // invalid value
 					}).
 					MustRender(t),
-				ExpectError: regexp.MustCompile(`expected .+ to be in the range \(\d+ - \d+\), got \d+`),
+				ExpectError: regexp.MustCompile(`expected .+ to be in the range \([\d.]+ - [\d.]+\), got [\d.]+`),
 			},
 			{
 				// missing user and client_id
@@ -282,13 +282,13 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 						"client_id":          clientID,
 						"consumer_byte_rate": 4000,
 						"producer_byte_rate": 4000,
-						"request_percentage": 40,
+						"request_percentage": 40.5,
 					}).
 					Add("kafka_quota", map[string]any{
 						"resource_name":      "user",
 						"service_name":       serviceName,
 						"user":               user,
-						"request_percentage": 20,
+						"request_percentage": 20.22,
 					}).
 					Add("kafka_quota", map[string]any{
 						"resource_name":      "client",
@@ -304,12 +304,12 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "client_id", clientID),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "consumer_byte_rate", "4000"),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "producer_byte_rate", "4000"),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "request_percentage", "40"),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.new_full", kafkaQuotaResource), "request_percentage", "40.5"),
 
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "project", projectName),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "service_name", serviceName),
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "user", user),
-					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "request_percentage", "20"),
+					resource.TestCheckResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "request_percentage", "20.22"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "client_id"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "consumer_byte_rate"),
 					resource.TestCheckNoResourceAttr(fmt.Sprintf("%s.user", kafkaQuotaResource), "producer_byte_rate"),
