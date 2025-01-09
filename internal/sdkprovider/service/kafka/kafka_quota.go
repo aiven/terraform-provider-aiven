@@ -3,9 +3,11 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafka"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -120,7 +122,7 @@ func resourceKafkaQuotaCreate(ctx context.Context, d *schema.ResourceData, clien
 
 	d.SetId(schemautil.BuildResourceID(project, service, clientID, user))
 
-	return resourceKafkaQuotaRead(ctx, d, client)
+	return readKafkaQuotaWithRetry(ctx, d, client)
 }
 
 func resourceKafkaQuotaUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
@@ -145,7 +147,7 @@ func resourceKafkaQuotaUpdate(ctx context.Context, d *schema.ResourceData, clien
 		return err
 	}
 
-	return resourceKafkaQuotaRead(ctx, d, client)
+	return readKafkaQuotaWithRetry(ctx, d, client)
 }
 
 func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
@@ -208,4 +210,20 @@ func resourceKafkaQuotaDelete(ctx context.Context, d *schema.ResourceData, clien
 		serviceName,
 		params...,
 	)
+}
+
+// readKafkaQuotaWithRetry is a helper function that retries reading a Kafka quota resource in case of a 404 error.
+// We need to retry reading the resource because the Kafka quota may not be immediately available after creation.
+func readKafkaQuotaWithRetry(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	return retry.RetryContext(ctx, 3*time.Second, func() *retry.RetryError {
+		err := resourceKafkaQuotaRead(ctx, d, client)
+		if err == nil {
+			return nil
+		}
+
+		return &retry.RetryError{
+			Err:       err,
+			Retryable: avngen.IsNotFound(err), // retries not found errors only
+		}
+	})
 }
