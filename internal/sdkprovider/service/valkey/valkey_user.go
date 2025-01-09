@@ -85,7 +85,7 @@ func ResourceValkeyUser() *schema.Resource {
 		CreateContext: common.WithGenClient(resourceValkeyUserCreate),
 		UpdateContext: common.WithGenClient(resourceValkeyUserUpdate),
 		ReadContext:   common.WithGenClient(resourceValkeyUserRead),
-		DeleteContext: schemautil.ResourceServiceUserDelete,
+		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
