@@ -42,7 +42,7 @@ func ResourceM3DBUser() *schema.Resource {
 		CreateContext: schemautil.ResourceServiceUserCreate,
 		UpdateContext: schemautil.ResourceServiceUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
+		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

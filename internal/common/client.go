@@ -9,6 +9,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -62,10 +63,10 @@ func GenClient() (avngen.Client, error) {
 	return genClientCache, nil
 }
 
-type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
+type CrudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
 
 // WithGenClient wraps CRUD handlers and runs with avngen.Client
-func WithGenClient(handler crudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
+func WithGenClient(handler CrudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
 		return diag.FromErr(handler(ctx, d, genClientCache))
 	}
@@ -117,5 +118,19 @@ func BuildVersionOpt(v string) ClientOpt {
 func TokenOpt(v string) ClientOpt {
 	return func(o *clientOpts) {
 		o.token = v
+	}
+}
+
+// RetryCrudNotFound retries the handler if the error is NotFound
+// This happens when GET called right after CREATE, and the resource is not yet available
+func RetryCrudNotFound(f CrudHandler) CrudHandler {
+	return func(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+		return retry.Do(
+			func() error {
+				return f(ctx, d, client)
+			},
+			retry.Context(ctx),
+			retry.RetryIf(avngen.IsNotFound),
+		)
 	}
 }

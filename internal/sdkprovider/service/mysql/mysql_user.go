@@ -67,7 +67,7 @@ func ResourceMySQLUser() *schema.Resource {
 		CreateContext: resourceMySQLUserCreate,
 		UpdateContext: resourceMySQLUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
+		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

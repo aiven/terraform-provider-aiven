@@ -85,7 +85,7 @@ func ResourceRedisUser() *schema.Resource {
 		CreateContext: resourceRedisUserCreate,
 		UpdateContext: resourceRedisUserUpdate,
 		ReadContext:   resourceRedisUserRead,
-		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
+		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
