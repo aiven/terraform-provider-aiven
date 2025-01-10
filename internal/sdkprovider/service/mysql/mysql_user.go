@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -66,7 +67,7 @@ func ResourceMySQLUser() *schema.Resource {
 		CreateContext: resourceMySQLUserCreate,
 		UpdateContext: resourceMySQLUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: schemautil.ResourceServiceUserDelete,
+		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

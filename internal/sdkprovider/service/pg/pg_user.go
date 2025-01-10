@@ -2,19 +2,21 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var aivenPGUserSchema = map[string]*schema.Schema{
+var SchemaResourcePGUser = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
-
 	"username": {
 		Type:         schema.TypeString,
 		Required:     true,
@@ -59,124 +61,122 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 func ResourcePGUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for PostgreSQL® service user.",
-		CreateContext: resourcePGUserCreate,
-		UpdateContext: resourcePGUserUpdate,
-		ReadContext:   resourcePGUserRead,
-		DeleteContext: schemautil.ResourceServiceUserDelete,
+		CreateContext: common.WithGenClient(CreateResourcePGUser),
+		UpdateContext: common.WithGenClient(UpdateResourcePGUser),
+		ReadContext:   common.WithGenClient(ReadResourcePGUser),
+		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
-
-		Schema: aivenPGUserSchema,
+		Schema:   SchemaResourcePGUser,
 	}
 }
 
-func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func CreateResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-
-	// Validates that the service is an Pg service
-	pg, err := client.Services.Get(ctx, projectName, serviceName)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if pg.Type != schemautil.ServiceTypePG {
-		return diag.Errorf("expected service type %q, got %q", schemautil.ServiceTypePG, pg.Type)
-	}
-
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
-	_, err = client.ServiceUsers.Create(
+	_, err := client.ServiceUserCreate(
 		ctx,
 		projectName,
 		serviceName,
-		aiven.CreateServiceUserRequest{
+		&service.ServiceUserCreateIn{
 			Username: username,
-			AccessControl: &aiven.AccessControl{
-				PostgresAllowReplication: &allowReplication,
+			AccessControl: &service.AccessControlIn{
+				PgAllowReplication: &allowReplication,
 			},
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
+		_, err = client.ServiceUserCredentialsModify(
+			ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 				NewPassword: schemautil.OptionalStringPointer(d, "password"),
-			})
+			},
+		)
 		if err != nil {
-			return diag.FromErr(err)
+			return fmt.Errorf("error setting password: %w", err)
 		}
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
-
-	return resourcePGUserRead(ctx, d, m)
+	return RetryReadResourcePGUser(ctx, d, client)
 }
 
-func resourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func UpdateResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-		aiven.ModifyServiceUserRequest{
+	_, err = client.ServiceUserCredentialsModify(
+		ctx, projectName, serviceName, username,
+		&service.ServiceUserCredentialsModifyIn{
+			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 			NewPassword: schemautil.OptionalStringPointer(d, "password"),
-		})
+		},
+	)
+
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if d.HasChange("pg_allow_replication") {
 		allowReplication := d.Get("pg_allow_replication").(bool)
-
-		op := "set-access-control"
-
-		_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
-				AccessControl: &aiven.AccessControl{
-					PostgresAllowReplication: &allowReplication,
-				},
-				Operation: &op,
-			})
+		req := &service.ServiceUserCredentialsModifyIn{
+			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
+			AccessControl: &service.AccessControlIn{
+				PgAllowReplication: &allowReplication,
+			},
+		}
+		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, req)
 		if err != nil {
-			return diag.FromErr(err)
+			return fmt.Errorf("error updating credentials: %w", err)
 		}
 	}
 
-	return resourcePGUserRead(ctx, d, m)
+	return RetryReadResourcePGUser(ctx, d, client)
 }
 
-func resourcePGUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func ReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	user, err := client.ServiceUsers.Get(ctx, projectName, serviceName, username)
+	user, err := client.ServiceUserGet(ctx, projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.CopyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
+	err = schemautil.ResourceDataSet(SchemaResourcePGUser, d, user)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	if err := d.Set("pg_allow_replication", user.AccessControl.PostgresAllowReplication); err != nil {
-		return diag.FromErr(err)
+	if user.AccessControl != nil && user.AccessControl.PgAllowReplication != nil {
+		err = d.Set("pg_allow_replication", *user.AccessControl.PgAllowReplication)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func RetryReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	return retry.Do(
+		func() error {
+			return ReadResourcePGUser(ctx, d, client)
+		},
+		retry.Context(ctx),
+		retry.RetryIf(avngen.IsNotFound),
+	)
 }

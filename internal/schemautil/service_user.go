@@ -6,12 +6,11 @@ import (
 	"log"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -87,20 +86,14 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func DeleteResourceServiceUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
-	if common.IsCritical(err) {
-		return diag.FromErr(err)
-	}
-
-	return nil
+	err = client.ServiceUserDelete(ctx, projectName, serviceName, username)
+	return OmitNotFound(err)
 }
 
 func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
