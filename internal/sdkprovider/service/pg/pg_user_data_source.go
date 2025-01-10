@@ -12,21 +12,21 @@ import (
 
 func DatasourcePGUser() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: common.WithGenClient(ReadDatasourcePGUser),
+		ReadContext: common.WithGenClient(DatasourcePGUserRead),
 		Description: "Gets information about an Aiven for PostgreSQL® service user.",
-		Schema:      SchemaDatasourcePGUser(),
+		Schema:      DatasourcePGUserSchema(),
 	}
 }
 
-func SchemaDatasourcePGUser() map[string]*schema.Schema {
-	return schemautil.ResourceSchemaAsDatasourceSchema(SchemaResourcePGUser, "project", "service_name", "username")
+func DatasourcePGUserSchema() map[string]*schema.Schema {
+	return schemautil.ResourceSchemaAsDatasourceSchema(ResourcePGUserSchema, "project", "service_name", "username")
 }
 
-func ReadDatasourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func DatasourcePGUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	userName := d.Get("username").(string)
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, userName))
-	return ReadResourcePGUser(ctx, d, client)
+	return ResourcePGUserRead(ctx, d, client)
 }

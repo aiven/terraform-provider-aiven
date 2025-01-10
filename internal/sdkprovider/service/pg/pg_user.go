@@ -6,7 +6,6 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -14,7 +13,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var SchemaResourcePGUser = map[string]*schema.Schema{
+var ResourcePGUserSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 	"username": {
@@ -61,19 +60,19 @@ var SchemaResourcePGUser = map[string]*schema.Schema{
 func ResourcePGUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for PostgreSQL® service user.",
-		CreateContext: common.WithGenClient(CreateResourcePGUser),
-		UpdateContext: common.WithGenClient(UpdateResourcePGUser),
-		ReadContext:   common.WithGenClient(ReadResourcePGUser),
-		DeleteContext: common.WithGenClient(schemautil.DeleteResourceServiceUser),
+		CreateContext: common.WithGenClient(ResourcePGUserCreate),
+		UpdateContext: common.WithGenClient(ResourcePGUserUpdate),
+		ReadContext:   common.WithGenClient(ResourcePGUserRead),
+		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
-		Schema:   SchemaResourcePGUser,
+		Schema:   ResourcePGUserSchema,
 	}
 }
 
-func CreateResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
@@ -107,10 +106,10 @@ func CreateResourcePGUser(ctx context.Context, d *schema.ResourceData, client av
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
-	return RetryReadResourcePGUser(ctx, d, client)
+	return common.RetryCrudNotFound(ResourcePGUserRead)(ctx, d, client)
 }
 
-func UpdateResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
@@ -142,10 +141,10 @@ func UpdateResourcePGUser(ctx context.Context, d *schema.ResourceData, client av
 		}
 	}
 
-	return RetryReadResourcePGUser(ctx, d, client)
+	return ResourcePGUserRead(ctx, d, client)
 }
 
-func ReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
@@ -156,7 +155,7 @@ func ReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avng
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.ResourceDataSet(SchemaResourcePGUser, d, user)
+	err = schemautil.ResourceDataSet(ResourcePGUserSchema, d, user)
 	if err != nil {
 		return err
 	}
@@ -169,14 +168,4 @@ func ReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avng
 	}
 
 	return nil
-}
-
-func RetryReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	return retry.Do(
-		func() error {
-			return ReadResourcePGUser(ctx, d, client)
-		},
-		retry.Context(ctx),
-		retry.RetryIf(avngen.IsNotFound),
-	)
 }

@@ -86,7 +86,7 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func DeleteResourceServiceUser(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
 	if err != nil {
 		return err
