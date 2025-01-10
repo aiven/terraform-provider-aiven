@@ -91,7 +91,7 @@ func resourceAlloyDBOmniDatabaseRead(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	return schemautil.ResourceDataSet(aivenAlloyDBOmniDatabaseSchema, d, db)
+	return schemautil.ResourceDataSet(d, db)
 }
 
 func resourceAlloyDBOmniDatabaseDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {

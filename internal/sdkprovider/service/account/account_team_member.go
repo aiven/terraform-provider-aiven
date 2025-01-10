@@ -117,7 +117,6 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	for _, invite := range resp {
 		if invite.UserEmail == userEmail {
 			if err = schemautil.ResourceDataSet(
-				aivenAccountTeamMemberSchema,
 				d,
 				invite,
 				schemautil.RenameAliases(map[string]string{}),
@@ -146,7 +145,6 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	for _, member := range respTI {
 		if member.UserEmail == userEmail {
 			if err = schemautil.ResourceDataSet(
-				aivenAccountTeamMemberSchema,
 				d,
 				member,
 			); err != nil {

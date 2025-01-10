@@ -104,7 +104,7 @@ func resourceKafkaNativeACLCreate(ctx context.Context, d *schema.ResourceData, c
 		return err
 	}
 
-	err = schemautil.ResourceDataSet(aivenKafkaNativeACLSchema, d, acl)
+	err = schemautil.ResourceDataSet(d, acl)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func resourceKafkaNativeACLRead(ctx context.Context, d *schema.ResourceData, cli
 		return err
 	}
 
-	err = schemautil.ResourceDataSet(aivenKafkaNativeACLSchema, d, acl)
+	err = schemautil.ResourceDataSet(d, acl)
 	return err
 }
 

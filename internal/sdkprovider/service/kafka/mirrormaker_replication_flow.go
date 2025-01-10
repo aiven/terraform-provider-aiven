@@ -189,7 +189,7 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	}
 
 	err = schemautil.ResourceDataSet(
-		aivenMirrorMakerReplicationFlowSchema, d, dto, schemautil.RenameAliasesReverse(dtoFieldsAliases),
+		d, dto, schemautil.RenameAliasesReverse(dtoFieldsAliases),
 		func(k string, v any) (string, any) {
 			if k == configPropsKey {
 				// This field is received as a string

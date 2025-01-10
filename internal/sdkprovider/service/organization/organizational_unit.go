@@ -109,15 +109,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	if err = schemautil.ResourceDataSet(
-		aivenOrganizationalUnitSchema,
-		d,
-		resp,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	return schemautil.ResourceDataSet(d, resp)
 }
 
 func determineMixedOrganizationConstraintIDToStore(

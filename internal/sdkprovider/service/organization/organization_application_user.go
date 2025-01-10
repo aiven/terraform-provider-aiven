@@ -107,7 +107,7 @@ func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.Reso
 	}
 
 	// Sets name and user_id
-	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserSchema, d, user)
+	err = schemautil.ResourceDataSet(d, user)
 	if err != nil {
 		return err
 	}

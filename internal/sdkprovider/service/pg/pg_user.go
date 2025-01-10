@@ -156,7 +156,7 @@ func ReadResourcePGUser(ctx context.Context, d *schema.ResourceData, client avng
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.ResourceDataSet(SchemaResourcePGUser, d, user)
+	err = schemautil.ResourceDataSet(d, user)
 	if err != nil {
 		return err
 	}

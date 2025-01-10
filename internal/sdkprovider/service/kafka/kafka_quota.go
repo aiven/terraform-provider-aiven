@@ -180,7 +180,6 @@ func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client 
 	}
 
 	return schemautil.ResourceDataSet(
-		aivenKafkaQuotaSchema,
 		d,
 		resp,
 		schemautil.RenameAliasesReverse(quotaFieldsAliases),

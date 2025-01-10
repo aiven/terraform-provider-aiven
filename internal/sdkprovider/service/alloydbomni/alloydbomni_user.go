@@ -169,7 +169,7 @@ func resourceAlloyDBOmniUserRead(ctx context.Context, d *schema.ResourceData, cl
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.ResourceDataSet(aivenAlloyDBOmniUserSchema, d, user)
+	err = schemautil.ResourceDataSet(d, user)
 	if err != nil {
 		return err
 	}

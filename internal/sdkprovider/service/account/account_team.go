@@ -98,7 +98,6 @@ func resourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, client
 	}
 
 	if err = schemautil.ResourceDataSet(
-		aivenAccountTeamSchema,
 		d,
 		resp,
 		schemautil.RenameAlias("team_name", "name"),

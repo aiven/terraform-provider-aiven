@@ -100,7 +100,6 @@ func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if err = schemautil.ResourceDataSet(
-		aivenOrganizationUserGroupSchema,
 		d,
 		resp,
 		schemautil.RenameAliases(map[string]string{

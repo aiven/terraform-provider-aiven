@@ -344,7 +344,7 @@ func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
 //
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
-func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
+func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) (err error) {
 	rawConfig := d.GetRawConfig()
 	if rawConfig.IsNull() {
 		return nil
@@ -408,14 +408,15 @@ type KVModifier func(k string, v any) (string, any)
 //
 // Use:
 //
-//	err := ResourceDataSet(s, d, dto)
-func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto any, fns ...KVModifier) error {
+//	err := ResourceDataSet(d, dto)
+func ResourceDataSet(d *schema.ResourceData, dto any, fns ...KVModifier) (err error) {
 	var m map[string]any
-	err := Remarshal(dto, &m)
+	err = Remarshal(dto, &m)
 	if err != nil {
 		return err
 	}
 
+	// todo: doesn't work with nested objects
 	for _, f := range fns {
 		for k, v := range m {
 			delete(m, k) // remove the old key in case it is replaced
@@ -424,10 +425,11 @@ func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto an
 		}
 	}
 
-	m = serializeSet(s, m)
-	for k := range s {
-		if v, ok := m[k]; ok {
-			if err = d.Set(k, v); err != nil {
+	m = serializeSet(m)
+	for k, v := range m {
+		if err = d.Set(k, v); err != nil {
+			// Field doesn't exist in the schema
+			if !strings.Contains(err.Error(), "Invalid address to set") {
 				return err
 			}
 		}
@@ -435,28 +437,22 @@ func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto an
 	return nil
 }
 
-func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any {
-	for k, prop := range s {
-		value, ok := m[k]
-		if !ok {
-			continue
-		}
-
-		res, ok := prop.Elem.(*schema.Resource)
-		if !ok {
-			continue
-		}
-
+func serializeSet(m map[string]any) map[string]any {
+	for k, value := range m {
 		// When we have an object, we need to convert it to a list.
 		// So there is no difference between a single object and a list of objects.
 		var items []any
 		switch element := value.(type) {
 		case map[string]any:
-			items = append(items, serializeSet(res.Schema, element))
+			items = append(items, serializeSet(element))
 		case []any:
 			for _, v := range element {
-				items = append(items, serializeSet(res.Schema, v.(map[string]any)))
+				items = append(items, serializeSet(v.(map[string]any)))
 			}
+		default:
+			// Scalar types
+			m[k] = value
+			continue
 		}
 
 		m[k] = items
