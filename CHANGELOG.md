@@ -26,6 +26,7 @@ nav_order: 1
 - Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `aiven_pg_user` resource/data source
 - Fix `aiven_pg_user` creating in bulk occasionally results in a 404 error
 - Use `aiven_pg_user` handlers and schema in `aiven_alloydbomni_user` resource
+- Add `aiven_flink` resource and datasource field `flink_user_config.custom_code`: Enable to upload Custom JARs for Flink applications.
 
 ## [4.31.1] - 2024-12-23
 
