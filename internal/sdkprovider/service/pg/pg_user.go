@@ -3,9 +3,11 @@ package pg
 import (
 	"context"
 	"fmt"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -92,7 +94,8 @@ func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client av
 		return err
 	}
 
-	if _, ok := d.GetOk("password"); ok {
+	password := d.Get("password").(string)
+	if password != "" {
 		_, err = client.ServiceUserCredentialsModify(
 			ctx, projectName, serviceName, username,
 			&service.ServiceUserCredentialsModifyIn{
@@ -106,7 +109,11 @@ func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client av
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
-	return common.RetryCrudNotFound(ResourcePGUserRead)(ctx, d, client)
+
+	// Retry because the user may not be immediately available
+	return schemautil.RetryNotFound(ctx, func() error {
+		return ResourcePGUserRead(ctx, d, client)
+	})
 }
 
 func ResourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
@@ -127,8 +134,8 @@ func ResourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, client av
 		return err
 	}
 
+	allowReplication := d.Get("pg_allow_replication").(bool)
 	if d.HasChange("pg_allow_replication") {
-		allowReplication := d.Get("pg_allow_replication").(bool)
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
@@ -150,7 +157,25 @@ func ResourcePGUserRead(ctx context.Context, d *schema.ResourceData, client avng
 		return err
 	}
 
-	user, err := client.ServiceUserGet(ctx, projectName, serviceName, username)
+	// See schemautil.RetryPasswordIsNullAttempts
+	var user *service.ServiceUserGetOut
+	err = retry.Do(
+		func() error {
+			user, err = client.ServiceUserGet(ctx, projectName, serviceName, username)
+			if err != nil {
+				return retry.Unrecoverable(err)
+			}
+			// The field is not nullable, so we compare to an empty string
+			if user.Password == "" {
+				return fmt.Errorf("password is not received from the API")
+			}
+			return nil
+		},
+		retry.Context(ctx),
+		retry.Delay(time.Second),
+		retry.Attempts(schemautil.RetryPasswordIsNullAttempts),
+	)
+
 	if err != nil {
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
