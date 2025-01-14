@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -43,7 +45,13 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	d.SetId(BuildResourceID(projectName, serviceName, username))
 
-	return ResourceServiceUserRead(ctx, d, m)
+	// Retry because the user may not be immediately available
+	err = RetryNotFound(ctx, func() error {
+		err := ResourceServiceUserRead(ctx, d, m)
+		return ErrorFromDiagnostics(err)
+	})
+
+	return diag.FromErr(err)
 }
 
 func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -65,6 +73,11 @@ func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 	return ResourceServiceUserRead(ctx, d, m)
 }
 
+// RetryPasswordIsNullAttempts
+// User password might be Null https://api.aiven.io/doc/#tag/Service/operation/ServiceUserGet
+// > Account password. A null value indicates a user overridden password.
+const RetryPasswordIsNullAttempts = 5
+
 func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -73,7 +86,24 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	user, err := client.ServiceUsers.Get(ctx, projectName, serviceName, username)
+	var user *aiven.ServiceUser
+	err = retry.Do(
+		func() error {
+			user, err = client.ServiceUsers.Get(ctx, projectName, serviceName, username)
+			if err != nil {
+				return retry.Unrecoverable(err)
+			}
+			// The field is not nullable, so we compare to an empty string
+			if user.Password == "" {
+				return fmt.Errorf("password is not received from the API")
+			}
+			return nil
+		},
+		retry.Context(ctx),
+		retry.Delay(time.Second),
+		retry.Attempts(RetryPasswordIsNullAttempts),
+	)
+
 	if err != nil {
 		return diag.FromErr(ResourceReadHandleNotFound(err, d))
 	}

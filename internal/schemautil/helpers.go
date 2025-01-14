@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -189,4 +191,16 @@ func StringToDiagWarning(msg string) diag.Diagnostics {
 // ErrorToDiagWarning is a function that converts an error to a diag warning.
 func ErrorToDiagWarning(err error) diag.Diagnostics {
 	return StringToDiagWarning(err.Error())
+}
+
+// ErrorFromDiagnostics converts diag.Diagnostics to error.
+// Warning: ignores diag.Warning level diagnostics.
+func ErrorFromDiagnostics(diags diag.Diagnostics) error {
+	var err error
+	for _, v := range diags {
+		if v.Severity == diag.Error {
+			err = multierror.Append(err, errors.New(v.Summary))
+		}
+	}
+	return err
 }

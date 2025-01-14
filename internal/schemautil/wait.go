@@ -374,3 +374,16 @@ func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc)
 		retryGo.Delay(common.DefaultStateChangeDelay),
 	)
 }
+
+// retryNotFoundAttempts just a random number
+const retryNotFoundAttempts = 10
+
+func RetryNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc) error {
+	return retryGo.Do(
+		retryableFunc,
+		retryGo.Context(ctx),
+		retryGo.Delay(time.Second),
+		retryGo.Attempts(retryNotFoundAttempts),
+		retryGo.RetryIf(IsNotFound),
+	)
+}
