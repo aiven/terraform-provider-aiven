@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.31.2] - 2025-01-14
+
 - Add `aiven_kafka_quota` resource
 - Add `aiven_opensearch` resource and datasource field
   `opensearch_user_config.opensearch.cluster_routing_allocation_balance_prefer_primary`: When set to true, OpenSearch
