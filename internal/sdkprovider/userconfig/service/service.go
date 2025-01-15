@@ -111,6 +111,7 @@ func GetFieldMapping(kind string) map[string]string {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
 			"opensearch/cluster_routing_allocation_balance_prefer_primary": "opensearch/cluster.routing.allocation.balance.prefer_primary",
+			"opensearch/cluster_search_request_slowlog":                    "opensearch/cluster.search.request.slowlog",
 			"opensearch/search_insights_top_queries":                       "opensearch/search.insights.top_queries",
 			"opensearch/segrep/pressure_checkpoint_limit":                  "opensearch/segrep/pressure.checkpoint.limit",
 			"opensearch/segrep/pressure_enabled":                           "opensearch/segrep/pressure.enabled",

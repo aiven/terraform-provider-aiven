@@ -248,9 +248,11 @@ Optional:
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
+- `cluster_search_request_slowlog` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog))
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
 - `email_sender_username` (String) Sender username for Opensearch alerts. Example: `jane@example.com`.
+- `enable_remote_backed_storage` (Boolean) Enable remote-backed storage.
 - `enable_security_audit` (Boolean) Enable/Disable security audit.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes. Example: `8192`.
@@ -325,6 +327,26 @@ Optional:
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login. Example: `100000`.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced. Example: `3600`.
 - `type` (String) Enum: `ip`. The type of rate limiting.
+
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog`
+
+Optional:
+
+- `level` (String) Enum: `debug`, `info`, `trace`, `warn`. Log level. Default: `trace`.
+- `threshold` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog--threshold))
+
+<a id="nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog--threshold"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog.threshold`
+
+Optional:
+
+- `debug` (String) Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
+- `info` (String) Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
+- `trace` (String) Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
+- `warn` (String) Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
 
 
 

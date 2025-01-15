@@ -223,9 +223,11 @@ Read-Only:
 - `cluster_max_shards_per_node` (Number)
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
+- `cluster_search_request_slowlog` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog))
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
+- `enable_remote_backed_storage` (Boolean)
 - `enable_security_audit` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)
@@ -300,6 +302,26 @@ Read-Only:
 - `max_tracked_clients` (Number)
 - `time_window_seconds` (Number)
 - `type` (String)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog`
+
+Read-Only:
+
+- `level` (String)
+- `threshold` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog--threshold))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog--threshold"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog.threshold`
+
+Read-Only:
+
+- `debug` (String)
+- `info` (String)
+- `trace` (String)
+- `warn` (String)
 
 
 

@@ -57,6 +57,7 @@ resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
 - `external_aws_s3_user_config` (Block List, Max: 1) ExternalAwsS3 user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_s3_user_config))
+- `external_azure_blob_storage_user_config` (Block List, Max: 1) ExternalAzureBlobStorage user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_azure_blob_storage_user_config))
 - `external_clickhouse_user_config` (Block List, Max: 1) ExternalClickhouse user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_clickhouse_user_config))
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
 - `external_google_cloud_bigquery` (Block List, Max: 1) ExternalGoogleCloudBigquery user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_google_cloud_bigquery))
@@ -157,6 +158,19 @@ Required:
 - `access_key_id` (String) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
 - `secret_access_key` (String, Sensitive) Secret Access Key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 - `url` (String) S3-compatible bucket URL. Example: `https://mybucket.s3-myregion.amazonaws.com/mydataset/`.
+
+
+<a id="nestedblock--external_azure_blob_storage_user_config"></a>
+### Nested Schema for `external_azure_blob_storage_user_config`
+
+Required:
+
+- `connection_string` (String, Sensitive) Azure Blob Storage connection string. Example: `AccountName=IDENT;AccountKey=SECRET`.
+- `container` (String) Container. Example: `container-dev`.
+
+Optional:
+
+- `blob_path` (String) Blob path. Example: `path/to/blob/file.csv`.
 
 
 <a id="nestedblock--external_clickhouse_user_config"></a>

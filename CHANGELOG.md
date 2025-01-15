@@ -12,6 +12,16 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_flink` resource and datasource field `flink_user_config.custom_code`: Enable to upload Custom JARs for Flink applications.
+- Add `aiven_grafana` resource and datasource field `grafana_user_config.dashboard_scenes_enabled`: Enable
+  use of the Grafana Scenes Library as the dashboard engine
+- Add `aiven_kafka_connect` resource and datasource field `kafka_connect_user_config.plugin_versions`: The plugin selected by the user
+- Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.cluster_search_request_slowlog`
+- Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.enable_remote_backed_storage`:
+  Enable remote-backed storage.
+- Add `aiven_service_integration_endpoint` resource and datasource field `external_azure_blob_storage_user_config`:
+  ExternalAzureBlobStorage user configurable settings
+
 ## [4.32.0] - 2025-01-14
 
 - Add `aiven_kafka_quota` resource

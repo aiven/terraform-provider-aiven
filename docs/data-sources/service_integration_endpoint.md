@@ -36,6 +36,7 @@ data "aiven_service_integration_endpoint" "example_datadog_endpoint" {
 - `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `external_aws_s3_user_config` (List of Object) ExternalAwsS3 user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_aws_s3_user_config))
+- `external_azure_blob_storage_user_config` (List of Object) ExternalAzureBlobStorage user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_azure_blob_storage_user_config))
 - `external_clickhouse_user_config` (List of Object) ExternalClickhouse user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_clickhouse_user_config))
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
 - `external_google_cloud_bigquery` (List of Object) ExternalGoogleCloudBigquery user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_google_cloud_bigquery))
@@ -122,6 +123,16 @@ Read-Only:
 - `access_key_id` (String)
 - `secret_access_key` (String)
 - `url` (String)
+
+
+<a id="nestedatt--external_azure_blob_storage_user_config"></a>
+### Nested Schema for `external_azure_blob_storage_user_config`
+
+Read-Only:
+
+- `blob_path` (String)
+- `connection_string` (String)
+- `container` (String)
 
 
 <a id="nestedatt--external_clickhouse_user_config"></a>

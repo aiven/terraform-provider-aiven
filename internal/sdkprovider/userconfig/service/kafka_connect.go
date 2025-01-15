@@ -156,6 +156,23 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"plugin_versions": {
+				Description: "The plugin selected by the user",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"plugin_name": {
+						Description: "The name of the plugin. Example: `debezium-connector`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"version": {
+						Description: "The version of the plugin. Example: `2.5.0`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
