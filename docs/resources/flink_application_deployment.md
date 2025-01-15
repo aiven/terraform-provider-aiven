@@ -105,5 +105,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application_deployment.main PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID/DEPLOYMENT_ID
+terraform import aiven_flink_application_deployment.main PROJECT/SERVICE_NAME/APPLICATION_ID/DEPLOYMENT_ID
 ```
