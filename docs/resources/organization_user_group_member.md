@@ -3,15 +3,17 @@
 page_title: "aiven_organization_user_group_member Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages users in a user group https://aiven.io/docs/platform/howto/list-groups. You can add organization users and application users to groups.
-  Groups are given access to projects using the aiven_organization_group_project resource.
+  Adds and manages users in a user group https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group. You can add organization users and application users to groups.
+  Organization users must be managed in the Aiven Console https://aiven.io/docs/platform/howto/manage-org-users. Application users can be created and managed using the aiven_organization_application_user resource.
+  Groups are granted roles and permissions using the aiven_organization_permission resource.
 ---
 
 # aiven_organization_user_group_member (Resource)
 
-Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups). You can add organization users and application users to groups.
+Adds and manages users in a [user group](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group). You can add organization users and application users to groups.
+Organization users must be [managed in the Aiven Console](https://aiven.io/docs/platform/howto/manage-org-users). Application users can be created and managed using the `aiven_organization_application_user` resource.
 
-Groups are given access to projects using the `aiven_organization_group_project` resource.
+Groups are granted roles and permissions using the `aiven_organization_permission` resource.
 
 ## Example Usage
 
