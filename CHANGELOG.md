@@ -22,6 +22,7 @@ nav_order: 1
   Enable remote-backed storage.
 - Add `aiven_service_integration_endpoint` resource and datasource field `external_azure_blob_storage_user_config`:
   ExternalAzureBlobStorage user configurable settings
+- Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
 
 ## [4.32.0] - 2025-01-14
 
