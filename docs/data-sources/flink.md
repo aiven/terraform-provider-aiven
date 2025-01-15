@@ -86,6 +86,7 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `custom_code` (Boolean)
 - `flink_version` (String)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--ip_filter_object))

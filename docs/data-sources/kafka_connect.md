@@ -81,6 +81,7 @@ Read-Only:
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
+- `plugin_versions` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--plugin_versions))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
@@ -118,6 +119,15 @@ Read-Only:
 - `producer_max_request_size` (Number)
 - `scheduled_rebalance_max_delay_ms` (Number)
 - `session_timeout_ms` (Number)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--plugin_versions"></a>
+### Nested Schema for `kafka_connect_user_config.plugin_versions`
+
+Read-Only:
+
+- `plugin_name` (String)
+- `version` (String)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--private_access"></a>

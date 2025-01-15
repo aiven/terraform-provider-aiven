@@ -475,6 +475,46 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"cluster_search_request_slowlog": {
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"level": {
+								Description:  "Enum: `debug`, `info`, `trace`, `warn`. Log level. Default: `trace`.",
+								Optional:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"debug", "info", "trace", "warn"}, false),
+							},
+							"threshold": {
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"debug": {
+										Description: "Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+									"info": {
+										Description: "Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+									"trace": {
+										Description: "Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+									"warn": {
+										Description: "Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"email_sender_name": {
 						Description: "Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.",
 						Optional:    true,
@@ -490,6 +530,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "Sender username for Opensearch alerts. Example: `jane@example.com`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"enable_remote_backed_storage": {
+						Description: "Enable remote-backed storage.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"enable_security_audit": {
 						Description: "Enable/Disable security audit.",

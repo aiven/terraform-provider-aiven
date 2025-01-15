@@ -100,6 +100,7 @@ Read-Only:
 - `cookie_samesite` (String)
 - `custom_domain` (String)
 - `dashboard_previews_enabled` (Boolean)
+- `dashboard_scenes_enabled` (Boolean)
 - `dashboards_min_refresh_interval` (String)
 - `dashboards_versions_to_keep` (Number)
 - `dataproxy_send_user_header` (Boolean)

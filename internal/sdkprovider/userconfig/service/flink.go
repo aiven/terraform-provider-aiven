@@ -24,6 +24,12 @@ func flinkUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"custom_code": {
+				Description: "Enable to upload Custom JARs for Flink applications.",
+				ForceNew:    true,
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"flink_version": {
 				Description: "Enum: `1.16`, `1.19`, `1.20`, and newer. Flink major version.",
 				ForceNew:    true,

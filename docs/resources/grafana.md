@@ -101,6 +101,7 @@ Optional:
 - `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `dashboard_previews_enabled` (Boolean) Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
+- `dashboard_scenes_enabled` (Boolean) Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
 - `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard. Example: `20`.
 - `dataproxy_send_user_header` (Boolean) Send `X-Grafana-User` header to data source.
