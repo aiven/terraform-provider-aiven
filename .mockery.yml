@@ -9,3 +9,7 @@ packages:
     config:
     interfaces:
       Client:
+  github.com/aiven/terraform-provider-aiven/internal/schemautil:
+    config:
+    interfaces:
+      ResourceData:

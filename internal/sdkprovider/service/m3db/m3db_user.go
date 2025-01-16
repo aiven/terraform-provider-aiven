@@ -3,7 +3,6 @@ package m3db
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -42,7 +41,7 @@ func ResourceM3DBUser() *schema.Resource {
 		CreateContext: schemautil.ResourceServiceUserCreate,
 		UpdateContext: schemautil.ResourceServiceUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
+		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
