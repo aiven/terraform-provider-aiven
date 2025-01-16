@@ -9,8 +9,8 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -62,10 +62,10 @@ var ResourcePGUserSchema = map[string]*schema.Schema{
 func ResourcePGUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for PostgreSQL® service user.",
-		CreateContext: common.WithGenClient(ResourcePGUserCreate),
-		UpdateContext: common.WithGenClient(ResourcePGUserUpdate),
-		ReadContext:   common.WithGenClient(ResourcePGUserRead),
-		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
+		CreateContext: schemautil.WithResourceData(ResourcePGUserCreate),
+		UpdateContext: schemautil.WithResourceData(ResourcePGUserUpdate),
+		ReadContext:   schemautil.WithResourceData(ResourcePGUserRead),
+		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -74,7 +74,7 @@ func ResourcePGUser() *schema.Resource {
 	}
 }
 
-func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserCreate(ctx context.Context, d schemautil.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
@@ -100,7 +100,7 @@ func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client av
 			ctx, projectName, serviceName, username,
 			&service.ServiceUserCredentialsModifyIn{
 				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-				NewPassword: schemautil.OptionalStringPointer(d, "password"),
+				NewPassword: &password,
 			},
 		)
 		if err != nil {
@@ -108,38 +108,38 @@ func ResourcePGUserCreate(ctx context.Context, d *schema.ResourceData, client av
 		}
 	}
 
-	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
-
 	// Retry because the user may not be immediately available
 	return schemautil.RetryNotFound(ctx, func() error {
+		// ResourcePGUserRead resets id each time it gets 404, setting/restoring it here.
+		d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
 		return ResourcePGUserRead(ctx, d, client)
 	})
 }
 
-func ResourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserUpdate(ctx context.Context, d schemautil.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
 	}
 
-	_, err = client.ServiceUserCredentialsModify(
-		ctx, projectName, serviceName, username,
-		&service.ServiceUserCredentialsModifyIn{
-			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-			NewPassword: schemautil.OptionalStringPointer(d, "password"),
-		},
-	)
-
-	if err != nil {
-		return err
+	if d.HasChange("password") {
+		_, err = client.ServiceUserCredentialsModify(
+			ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+				NewPassword: lo.ToPtr(d.Get("password").(string)),
+			},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
-	allowReplication := d.Get("pg_allow_replication").(bool)
 	if d.HasChange("pg_allow_replication") {
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
-				PgAllowReplication: &allowReplication,
+				PgAllowReplication: lo.ToPtr(d.Get("pg_allow_replication").(bool)),
 			},
 		}
 		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, req)
@@ -151,13 +151,14 @@ func ResourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, client av
 	return ResourcePGUserRead(ctx, d, client)
 }
 
-func ResourcePGUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
 	}
 
-	// See schemautil.RetryPasswordIsNullAttempts
+	// User password might be Null https://api.aiven.io/doc/#tag/Service/operation/ServiceUserGet
+	// > Account password. A null value indicates a user overridden password.
 	var user *service.ServiceUserGetOut
 	err = retry.Do(
 		func() error {
@@ -173,7 +174,7 @@ func ResourcePGUserRead(ctx context.Context, d *schema.ResourceData, client avng
 		},
 		retry.Context(ctx),
 		retry.Delay(time.Second),
-		retry.Attempts(schemautil.RetryPasswordIsNullAttempts),
+		retry.LastErrorOnly(true), // retry returns a list of errors by default
 	)
 
 	if err != nil {

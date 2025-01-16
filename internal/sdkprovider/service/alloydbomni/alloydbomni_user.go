@@ -3,7 +3,6 @@ package alloydbomni
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 )
@@ -11,10 +10,10 @@ import (
 func ResourceAlloyDBOmniUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for AlloyDB Omni service user.",
-		CreateContext: common.WithGenClient(pg.ResourcePGUserCreate),
-		UpdateContext: common.WithGenClient(pg.ResourcePGUserUpdate),
-		ReadContext:   common.WithGenClient(pg.ResourcePGUserRead),
-		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
+		CreateContext: schemautil.WithResourceData(pg.ResourcePGUserCreate),
+		UpdateContext: schemautil.WithResourceData(pg.ResourcePGUserUpdate),
+		ReadContext:   schemautil.WithResourceData(pg.ResourcePGUserRead),
+		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

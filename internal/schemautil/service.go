@@ -1028,7 +1028,7 @@ func IsUnknownResource(err error) bool {
 	return IsNotFound(err) || IsUnknownRole(err)
 }
 
-func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
+func ResourceReadHandleNotFound(err error, d ResourceData) error {
 	if err != nil && IsUnknownResource(err) && !d.IsNewResource() {
 		d.SetId("")
 		return nil

@@ -1,0 +1,15 @@
+dir: "mocks"
+outpkg: "mocks"
+with-expecter: True
+issue-845-fix: True
+resolve-type-alias: False
+filename: "{{ .InterfaceName | lower }}.go"
+packages:
+  github.com/aiven/go-client-codegen:
+    config:
+    interfaces:
+      Client:
+  github.com/aiven/terraform-provider-aiven/internal/schemautil:
+    config:
+    interfaces:
+      ResourceData:
