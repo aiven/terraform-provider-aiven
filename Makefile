@@ -37,6 +37,12 @@ $(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/go-utils/selproj
 
 
+MOCKERY := $(TOOLS_BIN_DIR)/mockery
+
+$(MOCKERY): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/mockery github.com/vektra/mockery/v2
+
+
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
 ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
 BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/$(ARCH)
@@ -201,7 +207,10 @@ load-schemas:
 	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
 	go mod tidy
 
-update-schemas: dump-schemas load-schemas generate diff-schemas
+mockery:
+	$(MOCKERY) --config=./.mockery.yml
+
+update-schemas: dump-schemas load-schemas generate diff-schemas mockery
 
 #################################################
 # CI
