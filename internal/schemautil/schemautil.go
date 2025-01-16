@@ -344,7 +344,7 @@ func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
 //
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
-func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
+func ResourceDataGet(d ResourceData, dto any, fns ...KVModifier) error {
 	rawConfig := d.GetRawConfig()
 	if rawConfig.IsNull() {
 		return nil
@@ -409,7 +409,7 @@ type KVModifier func(k string, v any) (string, any)
 // Use:
 //
 //	err := ResourceDataSet(s, d, dto)
-func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto any, fns ...KVModifier) error {
+func ResourceDataSet(s map[string]*schema.Schema, d ResourceData, dto any, fns ...KVModifier) error {
 	var m map[string]any
 	err := Remarshal(dto, &m)
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -85,7 +84,7 @@ func ResourceRedisUser() *schema.Resource {
 		CreateContext: resourceRedisUserCreate,
 		UpdateContext: resourceRedisUserUpdate,
 		ReadContext:   resourceRedisUserRead,
-		DeleteContext: common.WithGenClient(schemautil.ResourceServiceUserDelete),
+		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

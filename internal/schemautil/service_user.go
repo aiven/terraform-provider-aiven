@@ -43,10 +43,10 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 		}
 	}
 
-	d.SetId(BuildResourceID(projectName, serviceName, username))
-
 	// Retry because the user may not be immediately available
 	err = RetryNotFound(ctx, func() error {
+		// ResourceServiceUserRead resets id each time it gets 404, setting/restoring it here.
+		d.SetId(BuildResourceID(projectName, serviceName, username))
 		err := ResourceServiceUserRead(ctx, d, m)
 		return ErrorFromDiagnostics(err)
 	})
@@ -62,21 +62,18 @@ func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-		aiven.ModifyServiceUserRequest{
-			NewPassword: OptionalStringPointer(d, "password"),
-		})
-	if err != nil {
-		return diag.FromErr(err)
+	if d.HasChange("password") {
+		_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
+			aiven.ModifyServiceUserRequest{
+				NewPassword: OptionalStringPointer(d, "password"),
+			})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return ResourceServiceUserRead(ctx, d, m)
 }
-
-// RetryPasswordIsNullAttempts
-// User password might be Null https://api.aiven.io/doc/#tag/Service/operation/ServiceUserGet
-// > Account password. A null value indicates a user overridden password.
-const RetryPasswordIsNullAttempts = 5
 
 func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
@@ -86,6 +83,8 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
+	// User password might be Null https://api.aiven.io/doc/#tag/Service/operation/ServiceUserGet
+	// > Account password. A null value indicates a user overridden password.
 	var user *aiven.ServiceUser
 	err = retry.Do(
 		func() error {
@@ -101,7 +100,7 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		},
 		retry.Context(ctx),
 		retry.Delay(time.Second),
-		retry.Attempts(RetryPasswordIsNullAttempts),
+		retry.LastErrorOnly(true), // retry returns a list of errors by default
 	)
 
 	if err != nil {
@@ -116,7 +115,7 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+func ResourceServiceUserDelete(ctx context.Context, d ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
 	if err != nil {
 		return err
