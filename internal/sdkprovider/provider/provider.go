@@ -243,10 +243,13 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":                        flink.ResourceFlink(),
-			"aiven_flink_application":            flink.ResourceFlinkApplication(),
-			"aiven_flink_application_version":    flink.ResourceFlinkApplicationVersion(),
-			"aiven_flink_application_deployment": flink.ResourceFlinkApplicationDeployment(),
+			"aiven_flink":                            flink.ResourceFlink(),
+			"aiven_flink_application":                flink.ResourceFlinkApplication(),
+			"aiven_flink_application_version":        flink.ResourceFlinkApplicationVersion(),
+			"aiven_flink_application_deployment":     flink.ResourceFlinkApplicationDeployment(),
+			"aiven_flink_jar_application":            flink.ResourceFlinkJarApplication(),
+			"aiven_flink_jar_application_version":    flink.ResourceFlinkJarApplicationVersion(),
+			"aiven_flink_jar_application_deployment": flink.ResourceFlinkJarApplicationDeployment(),
 
 			// opensearch
 			"aiven_opensearch":                        opensearch.ResourceOpenSearch(),
@@ -294,6 +297,9 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_alloydbomni",
 		"aiven_alloydbomni_user",
 		"aiven_alloydbomni_database",
+		"aiven_flink_jar_application",
+		"aiven_flink_jar_application_version",
+		"aiven_flink_jar_application_deployment",
 	}
 
 	betaDataSources := []string{
