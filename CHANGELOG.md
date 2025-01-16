@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `pg_user` gets 404 error on create
 - Add `aiven_flink` resource and datasource field `flink_user_config.custom_code`: Enable to upload Custom JARs for Flink applications.
 - Add `aiven_grafana` resource and datasource field `grafana_user_config.dashboard_scenes_enabled`: Enable
   use of the Grafana Scenes Library as the dashboard engine
