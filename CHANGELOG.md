@@ -10,7 +10,7 @@ nav_order: 1
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.33.0] - 2025-01-16
 
 - Fix `pg_user` gets 404 error on create
 - Add `aiven_flink` resource and datasource field `flink_user_config.custom_code`: Enable to upload Custom JARs for Flink applications.
