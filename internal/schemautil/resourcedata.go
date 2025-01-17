@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"context"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/go-cty/cty"
@@ -21,6 +22,7 @@ type ResourceData interface {
 	GetOk(string) (any, bool)
 	GetRawConfig() cty.Value
 	HasChange(string) bool
+	Timeout(string) time.Duration
 }
 
 // WithResourceData same as common.WithGenClient, except it takes ResourceData instead of *schema.ResourceData

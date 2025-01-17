@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -30,9 +31,14 @@ func renameAliasesToDto(kind userConfigType, name string, dto map[string]any) {
 	}
 }
 
-// resourceData to test schema.ResourceData with unit tests
+// resourceData implements *schema.ResourceData
 type resourceData interface {
+	Get(string) any
 	GetOk(string) (any, bool)
+	GetRawConfig() cty.Value
+	HasChange(string) bool
+	IsNewResource() bool
+	Set(string, any) error
 }
 
 // renameAliasesToTfo renames aliases to TF object

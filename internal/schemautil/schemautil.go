@@ -17,7 +17,7 @@ import (
 
 // OptionalStringPointer retrieves a string pointer to a field, empty string
 // will be converted to nil
-func OptionalStringPointer(d *schema.ResourceData, key string) *string {
+func OptionalStringPointer(d ResourceData, key string) *string {
 	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
@@ -30,7 +30,7 @@ func OptionalStringPointer(d *schema.ResourceData, key string) *string {
 }
 
 // OptionalIntPointer retrieves an int pointer to a field, if the field is not set, returns nil.
-func OptionalIntPointer(d *schema.ResourceData, key string) *int {
+func OptionalIntPointer(d ResourceData, key string) *int {
 	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
@@ -43,7 +43,7 @@ func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 }
 
 // OptionalBoolPointer retrieves a bool pointer to a field, if the field is not set, returns nil.
-func OptionalBoolPointer(d *schema.ResourceData, key string) *bool {
+func OptionalBoolPointer(d ResourceData, key string) *bool {
 	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
@@ -256,7 +256,7 @@ func FlattenToString[T any](a []T) []string {
 }
 
 func CopyServiceUserPropertiesFromAPIResponseToTerraform(
-	d *schema.ResourceData,
+	d ResourceData,
 	user *aiven.ServiceUser,
 	projectName string,
 	serviceName string,
@@ -292,7 +292,7 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 }
 
 func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
-	d *schema.ResourceData,
+	d ResourceData,
 	user *service.ServiceUserGetOut,
 	projectName string,
 	serviceName string,

@@ -57,7 +57,7 @@ func SetTagsTerraformProperties(t map[string]string) []map[string]interface{} {
 	return tags
 }
 
-func GetTagsFromSchema(d *schema.ResourceData) map[string]string {
+func GetTagsFromSchema(d ResourceData) map[string]string {
 	tags := make(map[string]string)
 
 	for _, tag := range d.Get("tag").(*schema.Set).List() {

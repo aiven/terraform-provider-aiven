@@ -682,7 +682,7 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func copyServicePropertiesFromAPIResponseToTerraform(
-	d *schema.ResourceData,
+	d ResourceData,
 	s *service.ServiceGetOut,
 	servicePlanParams PlanParameters,
 	project string,
@@ -844,7 +844,7 @@ func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]interface{}
 //
 //	We should change this in the next major version.
 func copyConnectionInfoFromAPIResponseToTerraform(
-	d *schema.ResourceData,
+	d ResourceData,
 	serviceType string,
 	connectionInfo *service.ConnectionInfoOut,
 	metadata map[string]any,
@@ -1057,7 +1057,7 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diag.Errorf("common %s/%s not found", projectName, serviceName)
 }
 
-func getContactEmailListForAPI(d *schema.ResourceData) (*[]service.TechEmailIn, error) {
+func getContactEmailListForAPI(d ResourceData) (*[]service.TechEmailIn, error) {
 	if valuesInterface, ok := d.GetOk("tech_emails"); ok {
 		var emails []service.TechEmailIn
 		err := Remarshal(valuesInterface.(*schema.Set).List(), &emails)
@@ -1069,11 +1069,11 @@ func getContactEmailListForAPI(d *schema.ResourceData) (*[]service.TechEmailIn, 
 	return &[]service.TechEmailIn{}, nil
 }
 
-func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {
+func ExpandService(name string, d ResourceData) (map[string]any, error) {
 	return converters.Expand(converters.ServiceUserConfig, name, d)
 }
 
-func FlattenService(name string, d *schema.ResourceData, dto map[string]any) error {
+func FlattenService(name string, d ResourceData, dto map[string]any) error {
 	return converters.Flatten(converters.ServiceUserConfig, name, d, dto)
 }
 
