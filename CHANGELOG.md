@@ -9,6 +9,9 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `disaster_recovery` service integration type support
 
 ## [4.33.0] - 2025-01-16
 
