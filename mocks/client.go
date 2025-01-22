@@ -8226,23 +8226,23 @@ func (_c *MockClient_ServiceBackupToAnotherRegionReport_Call) RunAndReturn(run f
 }
 
 // ServiceBackupsGet provides a mock function with given fields: ctx, _a1, serviceName
-func (_m *MockClient) ServiceBackupsGet(ctx context.Context, _a1 string, serviceName string) ([]service.BackupOut, error) {
+func (_m *MockClient) ServiceBackupsGet(ctx context.Context, _a1 string, serviceName string) (*service.ServiceBackupsGetOut, error) {
 	ret := _m.Called(ctx, _a1, serviceName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServiceBackupsGet")
 	}
 
-	var r0 []service.BackupOut
+	var r0 *service.ServiceBackupsGetOut
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) ([]service.BackupOut, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*service.ServiceBackupsGetOut, error)); ok {
 		return rf(ctx, _a1, serviceName)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) []service.BackupOut); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *service.ServiceBackupsGetOut); ok {
 		r0 = rf(ctx, _a1, serviceName)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]service.BackupOut)
+			r0 = ret.Get(0).(*service.ServiceBackupsGetOut)
 		}
 	}
 
@@ -8275,12 +8275,12 @@ func (_c *MockClient_ServiceBackupsGet_Call) Run(run func(ctx context.Context, _
 	return _c
 }
 
-func (_c *MockClient_ServiceBackupsGet_Call) Return(_a0 []service.BackupOut, _a1 error) *MockClient_ServiceBackupsGet_Call {
+func (_c *MockClient_ServiceBackupsGet_Call) Return(_a0 *service.ServiceBackupsGetOut, _a1 error) *MockClient_ServiceBackupsGet_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockClient_ServiceBackupsGet_Call) RunAndReturn(run func(context.Context, string, string) ([]service.BackupOut, error)) *MockClient_ServiceBackupsGet_Call {
+func (_c *MockClient_ServiceBackupsGet_Call) RunAndReturn(run func(context.Context, string, string) (*service.ServiceBackupsGetOut, error)) *MockClient_ServiceBackupsGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
