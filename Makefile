@@ -207,7 +207,7 @@ load-schemas:
 	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
 	go mod tidy
 
-mockery:
+mockery: $(MOCKERY)
 	$(MOCKERY) --config=./.mockery.yml
 
 update-schemas: dump-schemas load-schemas generate diff-schemas mockery
