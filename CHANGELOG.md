@@ -13,6 +13,7 @@ nav_order: 1
 
 - Add `disaster_recovery` service integration type support
 - Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
+- Fix: services always created in the default VPC of the same cloud, when `project_vpc_id` wasn't set
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:networking:read`, `organization:networking:write`
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum):
   add `organization:networking:read`, `organization:networking:write`
