@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -50,6 +51,8 @@ func findEnums(description string) []string {
 		result[i] = v[1 : len(v)-1]
 	}
 
+	// Sorts the values for consistent output and comparison
+	slices.Sort(result)
 	return result
 }
 

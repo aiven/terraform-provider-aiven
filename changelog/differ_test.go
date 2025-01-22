@@ -139,10 +139,10 @@ func TestSerializeDiff(t *testing.T) {
 	}
 
 	expect := []string{
-		"Change `aiven_cassandra` resource and datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
+		"Change `aiven_cassandra` field `cassandra_user_config.additional_backup_regions`: remove deprecation",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: foo",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: foo",
-		"Add `aiven_opensearch` resource and datasource field `opensearch_user_config.s3_migration.include_aliases`: foo",
+		"Add `aiven_opensearch` field `opensearch_user_config.s3_migration.include_aliases`: foo",
 	}
 
 	actual := serializeDiff(list)
