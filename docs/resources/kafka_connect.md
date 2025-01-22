@@ -115,7 +115,7 @@ Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_connect_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_connect_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `kafka_connect` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
 - `plugin_versions` (Block List) The plugin selected by the user (see [below for nested schema](#nestedblock--kafka_connect_user_config--plugin_versions))

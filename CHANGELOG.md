@@ -10,6 +10,88 @@ nav_order: 1
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Change `aiven_account_team_project` resource and datasource field `team_type` (enum):
+  add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_alloydbomni` resource and datasource field `alloydbomni_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_alloydbomni` resource and datasource field `alloydbomni_user_config.ip_filter_object`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_alloydbomni` resource and datasource field `alloydbomni_user_config.ip_filter_string`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_cassandra` resource and datasource field `cassandra_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_cassandra` resource and datasource field `cassandra_user_config.ip_filter_object`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_cassandra` resource and datasource field `cassandra_user_config.ip_filter_string`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_clickhouse` resource and datasource field `clickhouse_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_clickhouse` resource and datasource field `clickhouse_user_config.ip_filter_object`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_clickhouse` resource and datasource field `clickhouse_user_config.ip_filter_string`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_dragonfly` resource and datasource field `dragonfly_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_dragonfly` resource and datasource field `dragonfly_user_config.ip_filter_object`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_dragonfly` resource and datasource field `dragonfly_user_config.ip_filter_string`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_flink` resource and datasource field `flink_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_flink` resource and datasource field `flink_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_flink` resource and datasource field `flink_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_grafana` resource and datasource field `grafana_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_grafana` resource and datasource field `grafana_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_grafana` resource and datasource field `grafana_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_influxdb` resource and datasource field `influxdb_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_influxdb` resource and datasource field `influxdb_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_influxdb` resource and datasource field `influxdb_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka` resource and datasource field `kafka_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka` resource and datasource field `kafka_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka` resource and datasource field `kafka_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka_connect` resource and datasource field `kafka_connect_user_config.ip_filter`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_kafka_connect` resource and datasource field `kafka_connect_user_config.ip_filter_object`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_kafka_connect` resource and datasource field `kafka_connect_user_config.ip_filter_string`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_kafka_mirrormaker` resource and datasource field `kafka_mirrormaker_user_config.ip_filter`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_kafka_mirrormaker` resource and datasource field `kafka_mirrormaker_user_config.ip_filter_object`:
+  max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka_mirrormaker` resource and datasource field `kafka_mirrormaker_user_config.ip_filter_string`:
+  max items ~~`1024`~~ → `2048`
+- Change `aiven_kafka_native_acl` resource field `resource_type` (enum)
+- Change `aiven_m3aggregator` resource and datasource field `m3aggregator_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_m3aggregator` resource and datasource field `m3aggregator_user_config.ip_filter_object`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_m3aggregator` resource and datasource field `m3aggregator_user_config.ip_filter_string`: max items
+  ~~`1024`~~ → `2048`
+- Change `aiven_m3db` resource and datasource field `m3db_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_m3db` resource and datasource field `m3db_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_m3db` resource and datasource field `m3db_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_mysql` resource and datasource field `mysql_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_mysql` resource and datasource field `mysql_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_mysql` resource and datasource field `mysql_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_opensearch` resource and datasource field `opensearch_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_opensearch` resource and datasource field `opensearch_user_config.ip_filter_object`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_opensearch` resource and datasource field `opensearch_user_config.ip_filter_string`: max items ~~`1024`~~
+  → `2048`
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum):
+  add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_pg` resource and datasource field `pg_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_pg` resource and datasource field `pg_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_pg` resource and datasource field `pg_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_project_user` resource and datasource field `member_type` (enum): add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_redis` resource and datasource field `redis_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_redis` resource and datasource field `redis_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_redis` resource and datasource field `redis_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_service_integration_endpoint` resource and datasource field `endpoint_type` (enum): add `external_azure_blob_storage`
+- Change `aiven_thanos` resource and datasource field `thanos_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_thanos` resource and datasource field `thanos_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_thanos` resource and datasource field `thanos_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+- Change `aiven_valkey` resource and datasource field `valkey_user_config.ip_filter`: max items ~~`1024`~~ → `2048`
+- Change `aiven_valkey` resource and datasource field `valkey_user_config.ip_filter_object`: max items ~~`1024`~~ → `2048`
+- Change `aiven_valkey` resource and datasource field `valkey_user_config.ip_filter_string`: max items ~~`1024`~~ → `2048`
+
 ## [4.33.0] - 2025-01-16
 
 - Fix `pg_user` gets 404 error on create
