@@ -100,6 +100,10 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 		list = append(list, service.IntegrationTypeReadReplica)
 	}
 
+	if kind == ServiceTypePG {
+		list = append(list, service.IntegrationTypeDisasterRecovery)
+	}
+
 	return list
 }
 
