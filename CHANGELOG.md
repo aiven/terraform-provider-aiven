@@ -12,6 +12,12 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `disaster_recovery` service integration type support
+- Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
+- Change `aiven_account_team_project` field `team_type` (enum): add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum):
+  add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_project_user` field `member_type` (enum): add `organization:networking:read`, `organization:networking:write`
+- Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `external_azure_blob_storage`
 
 ## [4.33.0] - 2025-01-16
 
@@ -25,7 +31,6 @@ nav_order: 1
   Enable remote-backed storage.
 - Add `aiven_service_integration_endpoint` resource and datasource field `external_azure_blob_storage_user_config`:
   ExternalAzureBlobStorage user configurable settings
-- Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
 
 ## [4.32.0] - 2025-01-14
 

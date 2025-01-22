@@ -108,7 +108,7 @@ Optional:
 - `index_rollup` (Block List, Max: 1) Index rollup settings (see [below for nested schema](#nestedblock--opensearch_user_config--index_rollup))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
 - `max_index_count` (Number) Use index_patterns instead. Default: `0`.

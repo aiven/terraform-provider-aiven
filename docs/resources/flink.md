@@ -86,7 +86,7 @@ Optional:
 - `custom_code` (Boolean) Enable to upload Custom JARs for Flink applications.
 - `flink_version` (String) Enum: `1.16`, `1.19`, `1.20`, and newer. Flink major version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `number_of_task_slots` (Number) Task slots per node. For a 3 node plan, total number of task slots is 3x this value. Example: `1`.
 - `pekko_ask_timeout_s` (Number) Timeout in seconds used for all futures and blocking Pekko requests. Example: `10`.

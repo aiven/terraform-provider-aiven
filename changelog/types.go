@@ -49,16 +49,16 @@ type Diff struct {
 }
 
 func (c *Diff) String() string {
-	// Often the same diff applies both for resource and datasource
-	kinds := make([]string, 0, 2)
-	kinds = append(kinds, string(c.Item.Kind))
-	if c.AlsoAppliesTo != nil {
-		kinds = append(kinds, string(c.AlsoAppliesTo.Kind))
-	}
-
 	// e.g.: "Add `aiven_project` resource"
 	path := strings.SplitN(c.Item.Path, ".", 2)
-	msg := fmt.Sprintf("%s `%s` %s", c.Action, path[0], strings.Join(kinds, " and "))
+	msg := fmt.Sprintf("%s `%s`", c.Action, path[0])
+
+	// Often the same diff applies both for resource and datasource
+	// These makes every entry in the changelog have "resource and datasource field"
+	// This is a bit redundant, so we remove it
+	if c.AlsoAppliesTo == nil {
+		msg = fmt.Sprintf("%s %s", msg, c.Item.Kind)
+	}
 
 	// e.g.: "field `project`"
 	if len(path) > 1 {
