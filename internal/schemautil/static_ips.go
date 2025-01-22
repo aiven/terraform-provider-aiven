@@ -43,7 +43,7 @@ func ServiceStaticIpsList(ctx context.Context, client avngen.Client, projectName
 }
 
 // DiffStaticIps takes a service resource and computes which static ips to assign and which to disassociate
-func DiffStaticIps(ctx context.Context, d *schema.ResourceData, client avngen.Client) (ass, dis []string, err error) {
+func DiffStaticIps(ctx context.Context, d ResourceData, client avngen.Client) (ass, dis []string, err error) {
 	ipsFromSchema := FlattenToString(d.Get("static_ips").(*schema.Set).List())
 	ipsFromAPI, err := ServiceStaticIpsList(ctx, client, d.Get("project").(string), d.Get("service_name").(string))
 	if err != nil {
