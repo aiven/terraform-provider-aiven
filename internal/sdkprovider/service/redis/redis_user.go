@@ -80,7 +80,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 
 func ResourceRedisUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Redis User resource allows the creation and management of Aiven Redis Users.",
+		Description:   "Creates and manages an [Aiven for Caching](https://aiven.io/docs/products/caching) (formerly known as Aiven for Redis®) service user.",
 		CreateContext: resourceRedisUserCreate,
 		UpdateContext: resourceRedisUserUpdate,
 		ReadContext:   resourceRedisUserRead,
