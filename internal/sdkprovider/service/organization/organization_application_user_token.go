@@ -46,7 +46,7 @@ var aivenOrganizationApplicationUserTokenSchema = map[string]*schema.Schema{
 	},
 	"max_age_seconds": {
 		Type:        schema.TypeInt,
-		Description: "The number of hours after which a token expires. Default session duration is 10 hours.",
+		Description: "The number of hours after which a token expires. If not set, it never expires.",
 		Optional:    true,
 		ForceNew:    true,
 	},
