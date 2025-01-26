@@ -3,21 +3,21 @@
 page_title: "aiven_kafka_mirrormaker Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.
+  Creates and manages an Aiven for Apache Kafka® MirrorMaker 2 https://aiven.io/docs/products/kafka/kafka-mirrormaker service.
 ---
 
 # aiven_kafka_mirrormaker (Resource)
 
-The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.
+Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka_mirrormaker" "mm1" {
-  project      = data.aiven_project.pr1.project
+resource "aiven_kafka_mirrormaker" "example_mirrormaker" {
+  project      = data.aiven_project.example_project.project
   cloud_name   = "google-europe-west1"
   plan         = "startup-4"
-  service_name = "my-mm1"
+  service_name = "example-mirrormaker-service"
 
   kafka_mirrormaker_user_config {
     ip_filter = ["0.0.0.0/0"]
@@ -176,5 +176,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_mirrormaker.mm1 project/service_name
+terraform import aiven_kafka_mirrormaker.example_mirrormaker PROJECT/SERVICE_NAME
 ```

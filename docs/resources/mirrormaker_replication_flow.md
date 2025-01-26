@@ -3,19 +3,19 @@
 page_title: "aiven_mirrormaker_replication_flow Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.
+  Creates and manages an Aiven for Apache Kafka® MirrorMaker 2 https://aiven.io/docs/products/kafka/kafka-mirrormaker replication flow.
 ---
 
 # aiven_mirrormaker_replication_flow (Resource)
 
-The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.
+Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_mirrormaker_replication_flow" "f1" {
-  project        = aiven_project.kafka-mm-project1.project
-  service_name   = aiven_kafka.mm.service_name
+resource "aiven_mirrormaker_replication_flow" "example_replication_flow" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_kafka.example_kafka.service_name
   source_cluster = aiven_kafka.source.service_name
   target_cluster = aiven_kafka.target.service_name
   enable         = true
@@ -46,7 +46,7 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 
 ### Required
 
-- `enable` (Boolean) Enable of disable replication flows for a service.
+- `enable` (Boolean) Enables replication flow for a service.
 - `offset_syncs_topic_location` (String) Offset syncs topic location. The possible values are `source` and `target`.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `replication_policy_class` (String) Replication policy class. The possible values are `org.apache.kafka.connect.mirror.DefaultReplicationPolicy` and `org.apache.kafka.connect.mirror.IdentityReplicationPolicy`. The default value is `org.apache.kafka.connect.mirror.DefaultReplicationPolicy`.
@@ -56,16 +56,16 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 
 ### Optional
 
-- `config_properties_exclude` (Set of String) List of topic configuration properties and/or regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: ["follower\\\\.replication\\\\.throttled\\\\.replicas", "leader\\\\.replication\\\\.throttled\\\\.replicas", "message\\\\.timestamp\\\\.difference\\\\.max\\\\.ms",  "message\\\\.timestamp\\\\.type"]
-- `emit_backward_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.
-- `emit_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the target cluster. The default value is `false`.
-- `exactly_once_delivery_enabled` (Boolean) Whether to enable exactly-once message delivery. We recommend you set this to `enabled` for new replications. The default value is `false`.
+- `config_properties_exclude` (Set of String) List of topic configuration properties and regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: ["follower\\\\.replication\\\\.throttled\\\\.replicas", "leader\\\\.replication\\\\.throttled\\\\.replicas", "message\\\\.timestamp\\\\.difference\\\\.max\\\\.ms",  "message\\\\.timestamp\\\\.type"]
+- `emit_backward_heartbeats_enabled` (Boolean) Enables emitting heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.
+- `emit_heartbeats_enabled` (Boolean) Enables emitting heartbeats to the target cluster. The default value is `false`.
+- `exactly_once_delivery_enabled` (Boolean) Enables exactly-once message delivery. Set this to `enabled` for new replications. The default value is `false`.
 - `replication_factor` (Number) Replication factor, `>= 1`.
 - `sync_group_offsets_enabled` (Boolean) Sync consumer group offsets. The default value is `false`.
 - `sync_group_offsets_interval_seconds` (Number) Frequency of consumer group offset sync. The default value is `1`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `topics` (List of String) List of topics and/or regular expressions to replicate
-- `topics_blacklist` (List of String) List of topics and/or regular expressions to not replicate.
+- `topics` (List of String) The topics to include in the replica defined by a [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).
+- `topics_blacklist` (List of String) The topics to exclude from the replica defined by a [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).
 
 ### Read-Only
 
@@ -87,5 +87,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_mirrormaker_replication_flow.f1 project/service_name/source_cluster/target_cluster
+terraform import aiven_mirrormaker_replication_flow.example_replication_flow PROJECT/SERVICE_NAME/SOURCE_CLUSTER/TARGET_CLUSTER
 ```

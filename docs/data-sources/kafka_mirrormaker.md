@@ -3,19 +3,19 @@
 page_title: "aiven_kafka_mirrormaker Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka MirrorMaker data source provides information about the existing Aiven Kafka MirrorMaker 2 service.
+  Gets information about an Aiven for Apache Kafka® MirrorMaker 2 service.
 ---
 
 # aiven_kafka_mirrormaker (Data Source)
 
-The Kafka MirrorMaker data source provides information about the existing Aiven Kafka MirrorMaker 2 service.
+Gets information about an Aiven for Apache Kafka® MirrorMaker 2 service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_mirrormaker" "mm1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-mm1"
+data "aiven_kafka_mirrormaker" "example_mirrormaker" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-mirrormaker-service"
 }
 ```
 

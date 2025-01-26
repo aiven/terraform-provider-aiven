@@ -13,7 +13,7 @@ import (
 func DatasourceMirrorMakerReplicationFlowTopic() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClient(datasourceMirrorMakerReplicationFlowRead),
-		Description: "The MirrorMaker 2 Replication Flow data source provides information about the existing MirrorMaker 2 Replication Flow on Aiven Cloud.",
+		Description: "Gets information about an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
 			aivenMirrorMakerReplicationFlowSchema,
 			"project", "service_name", "source_cluster", "target_cluster"),
