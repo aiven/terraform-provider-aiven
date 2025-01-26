@@ -13,7 +13,7 @@ import (
 func DatasourceMySQLDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceDatabaseRead,
-		Description: "The MySQL Database data source provides information about the existing Aiven MySQL Database.",
+		Description: "Gets information about an Aiven for MySQL® database.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenMySQLDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}

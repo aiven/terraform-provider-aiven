@@ -3,20 +3,20 @@
 page_title: "aiven_mysql_database Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The MySQL Database data source provides information about the existing Aiven MySQL Database.
+  Gets information about an Aiven for MySQL® database.
 ---
 
 # aiven_mysql_database (Data Source)
 
-The MySQL Database data source provides information about the existing Aiven MySQL Database.
+Gets information about an Aiven for MySQL® database.
 
 ## Example Usage
 
 ```terraform
-data "aiven_mysql_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_mysql.mymysql.service_name
-  database_name = "<DATABASE_NAME>"
+data "aiven_mysql_database" "example_database" {
+  project       = aiven_project.example_project.project
+  service_name  = aiven_mysql.example_mysql.service_name
+  database_name = "example-database"
 }
 ```
 
@@ -25,11 +25,11 @@ data "aiven_mysql_database" "mydatabase" {
 
 ### Required
 
-- `database_name` (String) The name of the service database. Changing this property forces recreation of the resource.
+- `database_name` (String) The name of the database. Changing this property forces recreation of the resource.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+- `termination_protection` (Boolean) Client-side deletion protection that prevents the database from being deleted by Terraform. Enable this for production databases containing critical data. The default value is `false`.

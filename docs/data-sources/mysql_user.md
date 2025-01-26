@@ -3,20 +3,20 @@
 page_title: "aiven_mysql_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The MySQL User data source provides information about the existing Aiven MySQL User.
+  Gets information about an Aiven for MySQL® service user.
 ---
 
 # aiven_mysql_user (Data Source)
 
-The MySQL User data source provides information about the existing Aiven MySQL User.
+Gets information about an Aiven for MySQL® service user.
 
 ## Example Usage
 
 ```terraform
-data "aiven_mysql_user" "user" {
-  service_name = "my-service"
-  project      = "my-project"
-  username     = "user1"
+data "aiven_mysql_user" "example_mysql_user" {
+  service_name = aiven_mysql.example_mysql.service_name
+  project      = aiven_project.example_project.project
+  username     = "example-mysql-user"
 }
 ```
 
@@ -27,13 +27,13 @@ data "aiven_mysql_user" "user" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the MySQL User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The name of the MySQL service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user
-- `access_key` (String, Sensitive) Access certificate key for the user
+- `access_cert` (String, Sensitive) Access certificate for the user.
+- `access_key` (String, Sensitive) Access certificate key for the user.
 - `authentication` (String) Authentication details. The possible values are `caching_sha2_password`, `mysql_native_password` and `null`.
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `password` (String, Sensitive) The password of the MySQL service user.
+- `type` (String) User account type, such as primary or regular account.

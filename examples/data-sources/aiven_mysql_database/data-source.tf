@@ -1,6 +1,6 @@
-data "aiven_mysql_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_mysql.mymysql.service_name
-  database_name = "<DATABASE_NAME>"
+data "aiven_mysql_database" "example_database" {
+  project       = aiven_project.example_project.project
+  service_name  = aiven_mysql.example_mysql.service_name
+  database_name = "example-database"
 }
 

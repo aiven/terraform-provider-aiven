@@ -1,8 +1,8 @@
-resource "aiven_mysql" "mysql1" {
-  project                 = data.aiven_project.foo.project
+resource "aiven_mysql" "example_mysql" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-mysql1"
+  service_name            = "example-mysql"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 

@@ -3,20 +3,20 @@
 page_title: "aiven_mysql_database Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The MySQL Database resource allows the creation and management of Aiven MySQL Databases.
+  Creates and manages an Aiven for MySQL® https://aiven.io/docs/products/mysql database.
 ---
 
 # aiven_mysql_database (Resource)
 
-The MySQL Database resource allows the creation and management of Aiven MySQL Databases.
+Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_mysql_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_mysql.mymysql.service_name
-  database_name = "<DATABASE_NAME>"
+resource "aiven_mysql_database" "example_mysql_database" {
+  project       = data.aiven_project.example_project.project
+  service_name  = aiven_mysql.example_mysql.service_name
+  database_name = "example-database"
 }
 ```
 
@@ -25,13 +25,13 @@ resource "aiven_mysql_database" "mydatabase" {
 
 ### Required
 
-- `database_name` (String) The name of the service database. Changing this property forces recreation of the resource.
+- `database_name` (String) The name of the database. Changing this property forces recreation of the resource.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+- `termination_protection` (Boolean) Client-side deletion protection that prevents the database from being deleted by Terraform. Enable this for production databases containing critical data. The default value is `false`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -54,5 +54,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_mysql_database.mydatabase PROJECT/SERVICE_NAME/DATABASE_NAME
+terraform import aiven_mysql_database.example_database PROJECT/SERVICE_NAME/DATABASE_NAME
 ```

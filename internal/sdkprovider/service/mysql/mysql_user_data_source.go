@@ -9,7 +9,7 @@ import (
 func DatasourceMySQLUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceUserRead,
-		Description: "The MySQL User data source provides information about the existing Aiven MySQL User.",
+		Description: "Gets information about an Aiven for MySQL® service user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenMySQLUserSchema,
 			"project", "service_name", "username"),
 	}

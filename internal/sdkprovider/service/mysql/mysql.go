@@ -13,7 +13,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "MySQL specific server provided values",
+		Description: "MySQL server-provided values.",
 		Optional:    true,
 		Sensitive:   true,
 		Elem: &schema.Resource{
@@ -21,7 +21,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 				"uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "MySQL master connection URIs",
+					Description: "MySQL connection URIs.",
 					Optional:    true,
 					Sensitive:   true,
 					Elem: &schema.Schema{
@@ -32,7 +32,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 				"params": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "MySQL connection parameters",
+					Description: "MySQL connection parameters.",
 					Optional:    true,
 					Sensitive:   true,
 					Elem: &schema.Resource{
@@ -41,37 +41,37 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "MySQL host IP or name",
+								Description: "MySQL host IP or name.",
 							},
 							"port": {
 								Type:        schema.TypeInt,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "MySQL port",
+								Description: "MySQL port.",
 							},
 							"sslmode": {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "MySQL sslmode setting (currently always \"require\")",
+								Description: "MySQL SSL mode setting. Always set to \"require\".",
 							},
 							"user": {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "MySQL admin user name",
+								Description: "The username for the admin service user.",
 							},
 							"password": {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "MySQL admin user password",
+								Description: "The password for the admin service user.",
 							},
 							"database_name": {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "Primary MySQL database name",
+								Description: "Thr name of the primary MySQL database.",
 							},
 						},
 					},
@@ -79,13 +79,13 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "MySQL replica URI for services with a replica",
+					Description: "MySQL replica URI for services with a replica.",
 					Sensitive:   true,
 				},
 				"standby_uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "MySQL standby connection URIs",
+					Description: "MySQL standby connection URIs.",
 					Optional:    true,
 					Sensitive:   true,
 					Elem: &schema.Schema{
@@ -96,7 +96,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 				"syncing_uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "MySQL syncing connection URIs",
+					Description: "MySQL syncing connection URIs.",
 					Optional:    true,
 					Sensitive:   true,
 					Elem: &schema.Schema{
@@ -111,7 +111,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 }
 func ResourceMySQL() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The MySQL resource allows the creation and management of Aiven MySQL services.",
+		Description:   "Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeMySQL),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
