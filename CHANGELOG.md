@@ -11,6 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Enable `read_replica` service integration for all service types
 - Add `disaster_recovery` service integration type support
 - Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:networking:read`, `organization:networking:write`

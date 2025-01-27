@@ -166,7 +166,7 @@ Optional:
 
 Required:
 
-- `integration_type` (String) Type of the service integration
+- `integration_type` (String) Type of the service integration. The possible value is `read_replica`.
 - `source_service_name` (String) Name of the source service
 
 
