@@ -7,7 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.63.4
 	github.com/hashicorp/terraform-plugin-docs v0.20.1
 	github.com/katbyte/terrafmt v0.5.5
-	github.com/vektra/mockery/v2 v2.51.0
+	github.com/vektra/mockery/v2 v2.51.1
 )
 
 require (
