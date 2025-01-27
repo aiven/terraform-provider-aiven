@@ -511,3 +511,36 @@ resource "aiven_redis_user" "caching_example_user" {
    ```bash
    terraform state list
    ```
+
+## Migrate from M3DB to Thanos Metrics
+
+Migrate your Aiven for M3 databases to [Aiven for Thanos Metrics](https://aiven.io/docs/products/metrics).
+
+1. Create an Aiven for Thanos Metrics service to migrate your Aiven for M3 databases to using the `aiven_thanos` resource:
+   ```hcl
+   resource "aiven_thanos" "example_thanos" {
+    project      = data.aiven_project.example_project.project
+    cloud_name   = "google-europe-west1"
+    plan         = "business-4"
+    service_name = "example-thanos-service"
+   }
+   ```
+
+2. In the Aiven Console, [migrate your M3DB database to this Thanos service](https://aiven.io/docs/products/metrics/howto/migrate-m3db-thanos).
+
+3. After the migration, remove the `aiven_m3db` and `aiven_m3db_user` resources.
+
+  -> **Note**
+   Aiven for Metrics does not have service users. You can grant access to the service using [project roles and permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
+
+4. To preview the changes, run:
+
+   ```bash
+   terraform plan
+   ```
+
+5. To apply the changes, run:
+
+   ```bash
+   terraform apply --auto-approve
+   ```

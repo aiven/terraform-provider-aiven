@@ -66,7 +66,7 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 }
 func ResourceM3DB() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven for M3DB](https://aiven.io/docs/products/m3db) service.",
+		Description:   "Creates and manages an [Aiven for M3](https://aiven.io/docs/products/m3db) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
