@@ -14,7 +14,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/mocks"
 )
 
-func TestRetriesErrors(t *testing.T) {
+func TestCreateUpdateRetriesErrors(t *testing.T) {
 	ctx := context.Background()
 	client := mocks.NewMockClient(t)
 	projectName := "foo"
@@ -25,8 +25,8 @@ func TestRetriesErrors(t *testing.T) {
 	d.EXPECT().Get("project").Return(projectName)
 	d.EXPECT().Get("service_name").Return(serviceName)
 	d.EXPECT().Get("username").Return(username)
+	d.EXPECT().Get("password").Return(password).Once()
 	d.EXPECT().Get("pg_allow_replication").Return(true)
-	d.EXPECT().Get("password").Return(password)
 	d.EXPECT().SetId("foo/bar/baz")
 	d.EXPECT().Id().Return("foo/bar/baz")
 	d.EXPECT().IsNewResource().Return(true)
@@ -66,6 +66,7 @@ func TestRetriesErrors(t *testing.T) {
 		ServiceUserGet(ctx, projectName, serviceName, username).
 		Return(new(service.ServiceUserGetOut), nil).
 		Repeatability = retryPasswordFails
+	d.EXPECT().Get("password").Return("").Times(retryPasswordFails)
 
 	// Succeeds
 	userOut := &service.ServiceUserGetOut{Password: password}
@@ -73,6 +74,7 @@ func TestRetriesErrors(t *testing.T) {
 		ServiceUserGet(ctx, projectName, serviceName, username).
 		Return(userOut, nil).
 		Once()
+	d.EXPECT().Get("password").Return(password).Once()
 
 	// Sets lots of things, so doesn't matter what
 	d.EXPECT().Set(mock.Anything, mock.Anything).Return(nil)
@@ -83,4 +85,32 @@ func TestRetriesErrors(t *testing.T) {
 	client.AssertNumberOfCalls(t, "ServiceUserCreate", 1)
 	client.AssertNumberOfCalls(t, "ServiceUserCredentialsModify", 1)
 	client.AssertNumberOfCalls(t, "ServiceUserGet", retry404Fails+retryPasswordFails+1)
+}
+
+// TestReadDoesNotRetryEmptyPassword
+// When user resets user password in PG, the API returns an empty password,
+// because the password is not stored in the BE.
+// ReadContext must not retry empty password and the plan must show the diff.
+func TestReadDoesNotRetryEmptyPassword(t *testing.T) {
+	ctx := context.Background()
+	client := mocks.NewMockClient(t)
+	projectName := "foo"
+	serviceName := "bar"
+	username := "baz"
+	d := mocks.NewMockResourceData(t)
+	d.EXPECT().Id().Return("foo/bar/baz")
+
+	client.EXPECT().
+		ServiceUserGet(ctx, projectName, serviceName, username).
+		Return(&service.ServiceUserGetOut{Username: username, Type: "normal"}, nil)
+
+	d.EXPECT().Set("username", username).Return(nil)
+	d.EXPECT().Set("type", "normal").Return(nil)
+	d.EXPECT().Set("password", "").Return(nil) // Empty password!
+
+	err := ResourcePGUserRead(ctx, d, client)
+	require.NoError(t, err)
+
+	// No retries
+	client.AssertNumberOfCalls(t, "ServiceUserGet", 1)
 }
