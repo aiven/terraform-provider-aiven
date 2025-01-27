@@ -209,6 +209,7 @@ load-schemas:
 
 mockery: $(MOCKERY)
 	$(MOCKERY) --config=./.mockery.yml
+	$(MAKE) fmt-imports
 
 update-schemas: dump-schemas load-schemas generate diff-schemas mockery
 
