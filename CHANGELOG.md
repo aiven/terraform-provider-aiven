@@ -11,6 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Enable `read_replica` service integration for `aiven_redis` and `aiven_valkey` resources
 - Add `disaster_recovery` service integration type support
 - Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
 - Fix: services always created in the default VPC of the same cloud, when `project_vpc_id` wasn't set

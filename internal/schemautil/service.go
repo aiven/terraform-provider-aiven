@@ -95,8 +95,9 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 // getBootstrapIntegrationTypes returns the integration types that are allowed to be set when creating a service.
 func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 	list := make([]service.IntegrationType, 0)
+
 	switch kind {
-	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeAlloyDBOmni:
+	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeAlloyDBOmni, ServiceTypeRedis, ServiceTypeValkey:
 		list = append(list, service.IntegrationTypeReadReplica)
 	}
 
