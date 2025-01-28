@@ -44,14 +44,9 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// Retry because the user may not be immediately available
-	err = RetryNotFound(ctx, func() error {
-		// ResourceServiceUserRead resets id each time it gets 404, setting/restoring it here.
-		d.SetId(BuildResourceID(projectName, serviceName, username))
-		err := ResourceServiceUserRead(ctx, d, m)
-		return ErrorFromDiagnostics(err)
-	})
-
-	return diag.FromErr(err)
+	// todo: Retry NotFound user might be not available immediately
+	d.SetId(BuildResourceID(projectName, serviceName, username))
+	return ResourceServiceUserRead(ctx, d, m)
 }
 
 func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
