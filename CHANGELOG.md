@@ -9,9 +9,9 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.34.0] - 2025-01-29
 
-- Fix `pg_user`: throws an error when the password is modified directly in the service 
+- Fix `pg_user`: throws an error when the password is modified directly in the service
 - Enable `read_replica` service integration for `aiven_redis` and `aiven_valkey` resources
 - Add `disaster_recovery` service integration type support
 - Add `aiven_flink_jar_application`, `aiven_flink_jar_application_version` and `aiven_flink_jar_application_deployment` BETA resources
@@ -22,6 +22,7 @@ nav_order: 1
 - Change `aiven_project_user` field `member_type` (enum): add `organization:networking:read`, `organization:networking:write`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `external_azure_blob_storage`
 - Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `project_user` resource/data source
+- Add `aiven_valkey` field `valkey_user_config.frequent_snapshots`: When enabled, Valkey will create frequent local RDB snapshots
 
 ## [4.33.0] - 2025-01-16
 

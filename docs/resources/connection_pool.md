@@ -36,7 +36,7 @@ resource "aiven_connection_pool" "main" {
 
 ### Optional
 
-- `pool_mode` (String) The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes). The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
+- `pool_mode` (String) The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes). The possible values are `session`, `statement` and `transaction`. The default value is `transaction`.
 - `pool_size` (Number) The number of PostgreSQL server connections this pool can use at a time. This does not affect the number of incoming connections. Each pool can handle a minimum of 5000 client connections. The default value is `10`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `username` (String) The name of the service user used to connect to the database. To set up proper dependencies please refer to this variable as a reference.

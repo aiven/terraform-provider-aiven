@@ -34,6 +34,11 @@ func valkeyUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"frequent_snapshots": {
+				Description: "When enabled, Valkey will create frequent local RDB snapshots. When disabled, Valkey will only take RDB snapshots when a backup is created, based on the backup schedule. This setting is ignored when `valkey_persistence` is set to `off`. Default: `true`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
