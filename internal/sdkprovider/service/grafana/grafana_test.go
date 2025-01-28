@@ -1,6 +1,7 @@
 package grafana_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
@@ -694,4 +695,83 @@ resource "aiven_grafana" "bar" {
   }
 }
 `, networks, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}
+
+// TestAccAiven_grafana_and_default_vpc
+// Verifies that when `project_vpc_id` is not set, the service is NOT created in the default VPC.
+// The backend automatically assigns a service to the default VPC if `project_vpc_id` is not specified,
+// so terraform must ensure `project_vpc_id` is explicitly set to nil.
+// Although this behavior affects all service types due to shared backend logic,
+// we use Grafana for testing as it has the fastest setup time.
+func TestAccAiven_grafana_and_default_vpc(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	grafanaName := "test-acc-sr-" + acc.RandStr()
+	// Must be unique across all the tests,
+	// there can be only one VPC with the same name in the project
+	cloudName := "google-europe-west3"
+
+	vpcResource := "aiven_project_vpc.foo"
+	grafanaResource := "aiven_grafana.bar"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// STEP 1: Creates default VPC and Grafana service
+				Config: testAccGrafanaResourceAndDefaultVPC(project, cloudName, grafanaName),
+				Check: resource.ComposeTestCheckFunc(
+					// VPC
+					resource.TestCheckResourceAttr(vpcResource, "project", project),
+					resource.TestCheckResourceAttr(vpcResource, "cloud_name", cloudName),
+
+					// Grafana
+					resource.TestCheckResourceAttr(grafanaResource, "project", project),
+					resource.TestCheckResourceAttr(grafanaResource, "cloud_name", cloudName),
+					resource.TestCheckNoResourceAttr(grafanaResource, "project_vpc_id"),
+
+					// Proves the remote state
+					func(_ *terraform.State) error {
+						client, err := acc.GetTestGenAivenClient()
+						if err != nil {
+							return err
+						}
+
+						ctx := context.Background()
+						s, err := client.ServiceGet(ctx, project, grafanaName)
+						if err != nil {
+							return err
+						}
+
+						if s.ProjectVpcId != "" {
+							return fmt.Errorf("expected project_vpc_id to be empty, got %s", s.ProjectVpcId)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+func testAccGrafanaResourceAndDefaultVPC(project, cloudName, grafanaName string) string {
+	return fmt.Sprintf(`
+resource "aiven_project_vpc" "foo" {
+  project      = %[1]q
+  cloud_name   = %[2]q
+  network_cidr = "192.168.1.0/24"
+}
+
+resource "aiven_grafana" "bar" {
+  project                 = %[1]q
+  cloud_name              = %[2]q
+  plan                    = "startup-1"
+  service_name            = %[3]q
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  // There must be a _default_ VPC for the cloud first
+  depends_on = [aiven_project_vpc.foo]
+}
+`, project, cloudName, grafanaName)
 }
