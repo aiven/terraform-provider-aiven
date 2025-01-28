@@ -1,1 +1,1 @@
-terraform import aiven_mirrormaker_replication_flow.f1 project/service_name/source_cluster/target_cluster
+terraform import aiven_mirrormaker_replication_flow.example_replication_flow PROJECT/SERVICE_NAME/SOURCE_CLUSTER/TARGET_CLUSTER

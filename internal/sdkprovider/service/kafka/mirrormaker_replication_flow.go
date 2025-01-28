@@ -32,7 +32,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	"enable": {
 		Type:        schema.TypeBool,
 		Required:    true,
-		Description: "Enable of disable replication flows for a service.",
+		Description: "Enables replication flow for a service.",
 	},
 	"source_cluster": {
 		Type:         schema.TypeString,
@@ -49,7 +49,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	"topics": {
 		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "List of topics and/or regular expressions to replicate",
+		Description: "The topics to include in the replica defined by a [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).",
 		Elem: &schema.Schema{
 			Type:     schema.TypeString,
 			MaxItems: 256,
@@ -58,7 +58,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	"topics_blacklist": {
 		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "List of topics and/or regular expressions to not replicate.",
+		Description: "The topics to exclude from the replica defined by a [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).",
 		Elem: &schema.Schema{
 			Type:     schema.TypeString,
 			MaxItems: 256,
@@ -90,7 +90,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Optional: true,
 		Default:  false,
 		Description: userconfig.Desc(
-			"Whether to emit heartbeats to the target cluster",
+			"Enables emitting heartbeats to the target cluster.",
 		).DefaultValue(false).Build(),
 	},
 	"emit_backward_heartbeats_enabled": {
@@ -98,19 +98,19 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Optional: true,
 		Default:  false,
 		Description: userconfig.Desc(
-			"Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster",
+			"Enables emitting heartbeats to the direction opposite to the flow, i.e. to the source cluster",
 		).DefaultValue(false).Build(),
 	},
 	"offset_syncs_topic_location": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice(kafkamirrormaker.OffsetSyncsTopicLocationTypeChoices(), false),
-		Description:  userconfig.Desc("Offset syncs topic location").PossibleValuesString(kafkamirrormaker.OffsetSyncsTopicLocationTypeChoices()...).Build(),
+		Description:  userconfig.Desc("Offset syncs topic location.").PossibleValuesString(kafkamirrormaker.OffsetSyncsTopicLocationTypeChoices()...).Build(),
 	},
 	"config_properties_exclude": {
 		Type:        schema.TypeSet,
 		Optional:    true,
-		Description: "List of topic configuration properties and/or regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: [\"follower\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"leader\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"message\\\\\\\\.timestamp\\\\\\\\.difference\\\\\\\\.max\\\\\\\\.ms\",  \"message\\\\\\\\.timestamp\\\\\\\\.type\"]",
+		Description: "List of topic configuration properties and regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: [\"follower\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"leader\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"message\\\\\\\\.timestamp\\\\\\\\.difference\\\\\\\\.max\\\\\\\\.ms\",  \"message\\\\\\\\.timestamp\\\\\\\\.type\"]",
 		Elem: &schema.Schema{
 			Type:     schema.TypeString,
 			MaxItems: 256,
@@ -127,14 +127,14 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Optional: true,
 		Default:  false,
 		Description: userconfig.Desc(
-			"Whether to enable exactly-once message delivery. We recommend you set this to `enabled` for new replications.",
+			"Enables exactly-once message delivery. Set this to `enabled` for new replications.",
 		).DefaultValue(false).Build(),
 	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.",
+		Description:   "Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.",
 		CreateContext: common.WithGenClient(resourceMirrorMakerReplicationFlowCreate),
 		ReadContext:   common.WithGenClient(resourceMirrorMakerReplicationFlowRead),
 		UpdateContext: common.WithGenClient(resourceMirrorMakerReplicationFlowUpdate),

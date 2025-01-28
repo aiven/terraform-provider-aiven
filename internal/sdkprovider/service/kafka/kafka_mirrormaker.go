@@ -12,7 +12,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 }
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
+		Description:   "Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
