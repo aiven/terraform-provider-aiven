@@ -60,7 +60,7 @@ func redisSchema() map[string]*schema.Schema {
 
 func ResourceRedis() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
+		Description:   "Creates and manages and [Aiven for Caching](https://aiven.io/docs/products/caching) (formerly known as Aiven for Redis®) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeRedis),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
