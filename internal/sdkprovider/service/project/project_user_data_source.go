@@ -2,46 +2,50 @@ package project
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceProjectUserRead,
+		ReadContext: common.WithGenClient(datasourceProjectUserRead),
 		Description: "The Project User data source provides information about the existing Aiven Project User.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenProjectUserSchema,
 			"project", "email"),
 	}
 }
 
-func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		projectName = d.Get("project").(string)
+		email       = d.Get("email").(string)
+	)
 
-	projectName := d.Get("project").(string)
-	email := d.Get("email").(string)
-
-	users, invitations, err := client.ProjectUsers.List(ctx, projectName)
+	pul, err := client.ProjectUserList(ctx, projectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
-	for _, user := range users {
-		if user.Email == email {
+
+	for _, user := range pul.Users {
+		if user.UserEmail == email {
 			d.SetId(schemautil.BuildResourceID(projectName, email))
-			return resourceProjectUserRead(ctx, d, m)
+
+			return resourceProjectUserRead(ctx, d, client)
 		}
 	}
 
-	for _, invitation := range invitations {
-		if invitation.UserEmail == email {
+	for _, invitation := range pul.Invitations {
+		if invitation.InvitedUserEmail == email {
 			d.SetId(schemautil.BuildResourceID(projectName, email))
-			return resourceProjectUserRead(ctx, d, m)
+
+			return resourceProjectUserRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("project user %s/%s not found", projectName, email)
+	return fmt.Errorf("project user %s/%s not found", projectName, email)
 }

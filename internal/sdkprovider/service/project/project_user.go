@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/aiven/go-client-codegen/handler/project"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -44,10 +44,10 @@ func ResourceProjectUser() *schema.Resource {
 [migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
 to the new resource.
 		`,
-		CreateContext: resourceProjectUserCreate,
-		ReadContext:   resourceProjectUserRead,
-		UpdateContext: resourceProjectUserUpdate,
-		DeleteContext: resourceProjectUserDelete,
+		CreateContext: common.WithGenClient(resourceProjectUserCreate),
+		ReadContext:   common.WithGenClient(resourceProjectUserRead),
+		UpdateContext: common.WithGenClient(resourceProjectUserUpdate),
+		DeleteContext: common.WithGenClient(resourceProjectUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -58,139 +58,160 @@ to the new resource.
 	}
 }
 
-// isProjectUserAlreadyInvited return true if user already been invited to the project
-func isProjectUserAlreadyInvited(err error) bool {
-	var e aiven.Error
-	if errors.As(err, &e) {
-		if strings.Contains(e.Message, "already been invited to this project") && e.Status == 409 {
-			return true
-		}
-	}
-	return false
-}
-
-func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	projectName := d.Get("project").(string)
-	email := d.Get("email").(string)
-	err := client.ProjectUsers.Invite(
-		ctx,
-		projectName,
-		aiven.CreateProjectInvitationRequest{
-			UserEmail:  email,
-			MemberType: d.Get("member_type").(string),
-		},
+func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		projectName = d.Get("project").(string)
+		email       = d.Get("email").(string)
+		memberType  = d.Get("member_type").(string)
 	)
+
+	err := client.ProjectInvite(ctx, projectName, &project.ProjectInviteIn{
+		MemberType: project.MemberType(memberType),
+		UserEmail:  email,
+	})
+
 	if err != nil && !isProjectUserAlreadyInvited(err) {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, email))
-	if err := d.Set("accepted", false); err != nil {
-		return diag.FromErr(err)
+
+	if err = d.Set("accepted", false); err != nil {
+		return err
 	}
 
-	return resourceProjectUserRead(ctx, d, m)
+	return resourceProjectUserRead(ctx, d, client)
 }
 
-func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, email, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	user, invitation, err := client.ProjectUsers.Get(ctx, projectName, email)
+	pul, err := client.ProjectUserList(ctx, projectName)
 	if err != nil {
-		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
-			return resourceProjectUserCreate(ctx, d, m)
-		}
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return err
 	}
 
-	if err := d.Set("project", projectName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("email", email); err != nil {
-		return diag.FromErr(err)
-	}
-	if user != nil {
-		if err := d.Set("member_type", user.MemberType); err != nil {
-			return diag.FromErr(err)
-		}
-		if err := d.Set("accepted", true); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set("member_type", invitation.MemberType); err != nil {
-			return diag.FromErr(err)
-		}
-		if err := d.Set("accepted", false); err != nil {
-			return diag.FromErr(err)
+	for _, user := range pul.Users {
+		if user.UserEmail == email {
+			if err = d.Set("member_type", string(user.MemberType)); err != nil {
+				return err
+			}
+
+			if err = d.Set("accepted", true); err != nil {
+				return err
+			}
+
+			return nil
 		}
 	}
-	return nil
+
+	for _, invitation := range pul.Invitations {
+		if invitation.InvitedUserEmail == email {
+			if err = d.Set("member_type", string(invitation.MemberType)); err != nil {
+				return err
+			}
+
+			if err = d.Set("accepted", false); err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	if !d.Get("accepted").(bool) {
+		return resourceProjectUserCreate(ctx, d, client)
+	}
+
+	return schemautil.ResourceReadHandleNotFound(errors.New("project user not found"), d)
 }
 
-func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, email, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	memberType := d.Get("member_type").(string)
-	err = client.ProjectUsers.UpdateUserOrInvitation(
+	err = client.ProjectUserUpdate(
 		ctx,
 		projectName,
 		email,
-		aiven.UpdateProjectUserOrInvitationRequest{
-			MemberType: memberType,
-		},
+		&project.ProjectUserUpdateIn{MemberType: project.MemberType(memberType)},
 	)
-	if err != nil {
-		return diag.FromErr(err)
+
+	if err == nil {
+		return resourceProjectUserRead(ctx, d, client)
 	}
 
-	return resourceProjectUserRead(ctx, d, m)
+	if common.IsCritical(err) {
+		return err
+	}
+
+	// if user not found, delete the user invite and re-invite
+	if err = client.ProjectInviteDelete(ctx, projectName, email); err != nil {
+		return err
+	}
+
+	if err = client.ProjectInvite(ctx, projectName, &project.ProjectInviteIn{
+		MemberType: project.MemberType(memberType),
+		UserEmail:  email,
+	}); err != nil {
+		return err
+	}
+
+	return resourceProjectUserRead(ctx, d, client)
 }
 
-func resourceProjectUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceProjectUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, email, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	user, invitation, err := client.ProjectUsers.Get(ctx, projectName, email)
+	pul, err := client.ProjectUserList(ctx, projectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	// delete user if exists
-	if user != nil {
-		err := client.ProjectUsers.DeleteUser(ctx, projectName, email)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 ||
-				!strings.Contains(e.Message, "User does not exist") ||
-				!strings.Contains(e.Message, "User not found") {
+	for _, user := range pul.Users {
+		if user.UserEmail == email {
+			if err = client.ProjectUserRemove(ctx, projectName, email); err != nil {
+				var e avngen.Error
+				if errors.As(err, &e) && e.Status != 404 ||
+					!strings.Contains(e.Message, "User does not exist") ||
+					!strings.Contains(e.Message, "User not found") {
 
-				return diag.FromErr(err)
+					return err
+				}
 			}
 		}
 	}
 
 	// delete invitation if exists
-	if invitation != nil {
-		err := client.ProjectUsers.DeleteInvitation(ctx, projectName, email)
-		if common.IsCritical(err) {
-			return diag.FromErr(err)
+	for _, invitation := range pul.Invitations {
+		if invitation.InvitedUserEmail == email {
+			if err = client.ProjectInviteDelete(ctx, projectName, email); common.IsCritical(err) {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+// isProjectUserAlreadyInvited return true if user already been invited to the project
+func isProjectUserAlreadyInvited(err error) bool {
+	var e avngen.Error
+	if errors.As(err, &e) {
+		if strings.Contains(e.Message, "already been invited to this project") && e.Status == 409 {
+			return true
+		}
+	}
+
+	return false
 }

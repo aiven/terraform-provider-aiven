@@ -21,6 +21,7 @@ nav_order: 1
   add `organization:networking:read`, `organization:networking:write`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:networking:read`, `organization:networking:write`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `external_azure_blob_storage`
+- Replaced `aiven-go-client/v2` with `aiven/go-client-codegen` in `project_user` resource/data source
 
 ## [4.33.0] - 2025-01-16
 

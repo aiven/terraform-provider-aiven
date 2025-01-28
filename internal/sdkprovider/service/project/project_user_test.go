@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -48,7 +48,10 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -63,20 +66,24 @@ func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, i, err := c.ProjectUsers.Get(ctx, projectName, email)
+		pul, err := c.ProjectUserList(ctx, projectName)
 		if err != nil {
-			var e aiven.Error
+			var e avngen.Error
 			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
 		}
 
-		if p != nil {
-			return fmt.Errorf("porject user (%s) still exists", rs.Primary.ID)
+		for _, user := range pul.Users {
+			if user.UserEmail == email {
+				return fmt.Errorf("porject user (%s) still exists", rs.Primary.ID)
+			}
 		}
 
-		if i != nil {
-			return fmt.Errorf("porject user invitation (%s) still exists", rs.Primary.ID)
+		for _, invitation := range pul.Invitations {
+			if invitation.InvitedUserEmail == email {
+				return fmt.Errorf("porject user invitation (%s) still exists", rs.Primary.ID)
+			}
 		}
 	}
 
