@@ -80,7 +80,7 @@ resource "aiven_organization_permission" "example_org_permissions" {
 - `organization_id` (String) Organization ID.
 - `permissions` (Block Set, Min: 1) Permissions to grant to principals. (see [below for nested schema](#nestedblock--permissions))
 - `resource_id` (String) Resource ID.
-- `resource_type` (String) Resource type. The possible values are `project`, `organization` and `organization_unit`.
+- `resource_type` (String) Resource type. The possible values are `organization`, `organization_unit` and `project`.
 
 ### Optional
 

@@ -79,7 +79,7 @@ resource "aiven_opensearch_acl_rule" "os_acl_rule" {
 ### Required
 
 - `index` (String) The index pattern for this ACL entry. Maximum length: `249`. Changing this property forces recreation of the resource.
-- `permission` (String) The permissions for this ACL entry. The possible values are `deny`, `admin`, `read`, `readwrite` and `write`.
+- `permission` (String) The permissions for this ACL entry. The possible values are `admin`, `deny`, `read`, `readwrite` and `write`.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `username` (String) The username for the ACL entry. Maximum length: `40`. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
