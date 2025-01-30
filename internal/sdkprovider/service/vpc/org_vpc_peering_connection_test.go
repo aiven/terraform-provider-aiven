@@ -23,8 +23,6 @@ import (
 var testMu = &sync.RWMutex{}
 
 func TestCreatePeeringConnection(t *testing.T) {
-	t.Parallel()
-
 	var (
 		ctx        = context.Background()
 		mockClient = mocks.NewMockClient(t)
@@ -171,8 +169,6 @@ func TestCreatePeeringConnection(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			mc := tc.setupMocks()
 
 			result, err := createPeeringConnection(

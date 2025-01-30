@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
@@ -194,19 +195,45 @@ resource "aiven_organization_project" "foo" {
 }
 
 func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
+	acc.SkipIfEnvVarsNotSet(t, "PROVIDER_AIVEN_ENABLE_BETA")
+
 	var (
-		registry       = acc.NewTemplateRegistry(aivenOrganizationProjectResource)
-		rName          = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		newComposition = func() *acc.CompositionBuilder {
-			return registry.NewCompositionBuilder()
-		}
+		rName = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 		resourceName     = fmt.Sprintf("%s.foo", aivenOrganizationProjectResource)
 		projectID        = fmt.Sprintf("test-acc-pr-%s", rName)
 		updatedProjectID = fmt.Sprintf("%s-new", projectID)
-	)
 
-	preSetOrganizationProjectTemplates(t, registry)
+		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
+				AddResource("aiven_organization", map[string]interface{}{
+				"resource_name": "foo",
+				"name":          fmt.Sprintf("test-acc-org-%s", rName),
+			}).
+			AddResource("aiven_organization", map[string]interface{}{
+				"resource_name": "bar",
+				"name":          fmt.Sprintf("test-acc-org-%s-bar", rName),
+			}).
+			AddResource("aiven_billing_group", map[string]interface{}{
+				"resource_name": "foo",
+				"name":          fmt.Sprintf("test-acc-bg-%s", rName),
+				"parent_id":     template.Reference("aiven_organization.foo.id"),
+			}).
+			AddResource("aiven_billing_group", map[string]interface{}{
+				"resource_name": "bar",
+				"name":          fmt.Sprintf("test-acc-bg-%s-bar", rName),
+				"parent_id":     template.Reference("aiven_organization.bar.id"),
+			}).
+			AddResource("aiven_organizational_unit", map[string]interface{}{
+				"resource_name": "foo",
+				"name":          fmt.Sprintf("test-acc-unit-%s", rName),
+				"parent_id":     template.Reference("aiven_organization.foo.id"),
+			}).
+			AddResource("aiven_organizational_unit", map[string]interface{}{
+				"resource_name": "bar",
+				"name":          fmt.Sprintf("test-acc-unit-%s-bar", rName),
+				"parent_id":     template.Reference("aiven_organization.bar.id"),
+			}).Factory()
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -215,12 +242,12 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// basic creation with required fields without parent_id
-				Config: newComposition().
-					Add("project", map[string]interface{}{
-						"name":       rName,
-						"project_id": projectID,
-						"ref_org":    "foo",
-						"ref_bg":     "foo",
+				Config: templBuilder().
+					AddResource(aivenOrganizationProjectResource, map[string]any{
+						"resource_name":    "foo",
+						"project_id":       projectID,
+						"organization_id":  template.Reference("aiven_organization.foo.id"),
+						"billing_group_id": template.Reference("aiven_billing_group.foo.id"),
 					}).MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
@@ -238,36 +265,36 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 			},
 			{
 				// try to change only parent_id - should fail
-				Config: newComposition().
-					Add("project", map[string]interface{}{
-						"name":       rName,
-						"project_id": projectID,
-						"ref_org":    "foo",
-						"ref_bg":     "foo",
-						"ref_par":    "bar", // trying to change parent_id group only
+				Config: templBuilder().
+					AddResource(aivenOrganizationProjectResource, map[string]any{
+						"resource_name":    "foo",
+						"project_id":       projectID,
+						"organization_id":  template.Reference("aiven_organization.foo.id"),
+						"billing_group_id": template.Reference("aiven_billing_group.foo.id"),
+						"parent_id":        template.Reference("aiven_organizational_unit.bar.id"), // trying to change parent_id group only
 					}).MustRender(t),
 				ExpectError: regexp.MustCompile(organization.ErrProjectStructureChangeNotSupported.Error()),
 			},
 			{
 				// try to change only billing_group_id - should fail
-				Config: newComposition().
-					Add("project", map[string]interface{}{
-						"name":       rName,
-						"project_id": projectID,
-						"ref_org":    "foo",
-						"ref_bg":     "bar", // trying to change billing group only
-						"ref_par":    "foo",
+				Config: templBuilder().
+					AddResource(aivenOrganizationProjectResource, map[string]any{
+						"resource_name":    "foo",
+						"project_id":       projectID,
+						"organization_id":  template.Reference("aiven_organization.foo.id"),
+						"billing_group_id": template.Reference("aiven_billing_group.bar.id"), // trying to change parent_id group only
+						"parent_id":        template.Reference("aiven_organizational_unit.foo.id"),
 					}).MustRender(t),
 				ExpectError: regexp.MustCompile(organization.ErrProjectStructureChangeNotSupported.Error()),
 			},
 			{
 				// update project_id
-				Config: newComposition().
-					Add("project", map[string]interface{}{
-						"name":       rName,
-						"project_id": updatedProjectID,
-						"ref_org":    "foo",
-						"ref_bg":     "foo",
+				Config: templBuilder().
+					AddResource(aivenOrganizationProjectResource, map[string]any{
+						"resource_name":    "foo",
+						"project_id":       updatedProjectID,
+						"organization_id":  template.Reference("aiven_organization.foo.id"),
+						"billing_group_id": template.Reference("aiven_billing_group.foo.id"),
 					}).MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", updatedProjectID),
@@ -277,14 +304,14 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 				),
 			},
 			{
-				// update all
-				Config: newComposition().
-					Add("project", map[string]interface{}{
-						"name":       rName,
-						"project_id": updatedProjectID,
-						"ref_org":    "bar",
-						"ref_bg":     "bar",
-						"ref_par":    "bar",
+				// move project to another organization
+				Config: templBuilder().
+					AddResource(aivenOrganizationProjectResource, map[string]any{
+						"resource_name":    "foo",
+						"project_id":       updatedProjectID,
+						"organization_id":  template.Reference("aiven_organization.bar.id"),
+						"billing_group_id": template.Reference("aiven_billing_group.bar.id"),
+						"parent_id":        template.Reference("aiven_organizational_unit.bar.id"),
 					}).MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", updatedProjectID),
@@ -295,59 +322,6 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 			},
 		},
 	})
-}
-
-func preSetOrganizationProjectTemplates(t *testing.T, registry *acc.TemplateRegistry) {
-	registry.MustAddTemplate(t, "project", `
-resource "aiven_organization" "foo" {
-    name = "test-acc-org-{{.name}}"
-}
-
-resource "aiven_organization" "bar" {
-    name = "test-acc-org-{{.name}}-bar"
-}
-
-resource "aiven_billing_group" "foo" {
-    name = "test-acc-bg-{{.name}}"
-	parent_id = aiven_organization.foo.id
-}
-
-resource "aiven_billing_group" "bar" {
-    name = "test-acc-bg-{{.name}}-bar"
-	parent_id = aiven_organization.bar.id
-}
-
-resource "aiven_organizational_unit" "foo" {
-    name      = "test-acc-unit-{{.name}}"
-    parent_id = aiven_organization.foo.id
-}
-
-resource "aiven_organizational_unit" "bar" {
-    name      = "test-acc-unit-{{.name}}-bar"
-    parent_id = aiven_organization.bar.id
-}
-
-resource "aiven_organization_project" "foo" {
-    project_id       = "{{.project_id}}"
-    organization_id  = aiven_organization.{{.ref_org}}.id
-    billing_group_id = aiven_billing_group.{{.ref_bg}}.id
-	{{- if .ref_par}}
-    parent_id        = aiven_organizational_unit.{{.ref_par}}.id
-    {{- end}}
-
-    {{- if .technical_emails}}
-    technical_emails = [{{range .technical_emails}}"{{.}}",{{end}}]
-    {{- end}}
-
-    {{- if .tags}}
-    {{- range .tags}}
-    tag {
-        key   = "{{.key}}"
-        value = "{{.value}}"
-    }
-    {{- end}}
-    {{- end}}
-}`)
 }
 
 func testAccCheckAivenOrganizationProjectResourceDestroy(s *terraform.State) error {

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -22,60 +23,28 @@ const kafkaQuotaResource = "aiven_kafka_quota"
 
 func TestAccAivenKafkaQuota(t *testing.T) {
 	var (
-		registry    = acc.NewTemplateRegistry(kafkaQuotaResource)
 		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 		serviceName = fmt.Sprintf("test-acc-sr-%s", randName)
 		projectName = os.Getenv("AIVEN_PROJECT_NAME")
 
 		user     = fmt.Sprintf("acc_test_user_%s", randName)
 		clientID = fmt.Sprintf("acc_test_client_%s", randName)
+
+		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
+				AddDataSource("aiven_project", map[string]interface{}{
+				"resource_name": "foo",
+				"project":       projectName,
+			}).
+			AddResource("aiven_kafka", map[string]interface{}{
+				"resource_name":           "bar",
+				"project":                 projectName,
+				"service_name":            serviceName,
+				"plan":                    "startup-2",
+				"cloud_name":              "google-europe-west1",
+				"maintenance_window_dow":  "monday",
+				"maintenance_window_time": "10:00:00",
+			}).Factory()
 	)
-
-	// Add templates
-	registry.MustAddTemplate(t, "project_data", `
-data "aiven_project" "foo" {
-  project = "{{ .project }}"
-}`)
-
-	registry.MustAddTemplate(t, "aiven_kafka", `
-resource "aiven_kafka" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
-  service_name            = "{{ .service_name }}"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}`)
-
-	registry.MustAddTemplate(t, "kafka_quota", `
-resource "aiven_kafka_quota" "{{ .resource_name }}" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
-  {{- if .user }}
-  user         = "{{ .user }}"
-  {{- end }}
-  {{- if .client_id }}
-  client_id    = "{{ .client_id }}"
-  {{- end }}
-  {{- if .consumer_byte_rate }}
-  consumer_byte_rate = {{ .consumer_byte_rate }}
-  {{- end }}
-  {{- if .producer_byte_rate }}
-  producer_byte_rate = {{ .producer_byte_rate }}
-  {{- end }}
-  {{- if .request_percentage }}
-  request_percentage = {{ .request_percentage }}
-  {{- end }}
-}`)
-
-	var newComposition = func() *acc.CompositionBuilder {
-		return registry.NewCompositionBuilder().
-			Add("project_data", map[string]interface{}{
-				"project": projectName}).
-			Add("aiven_kafka", map[string]interface{}{
-				"service_name": serviceName,
-			})
-	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -83,10 +52,11 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 		CheckDestroy:             testAccCheckAivenKafkaQuotaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
+				Config: templBuilder().
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "full",
-						"service_name":       serviceName,
+						"project":            projectName,
+						"service_name":       template.Reference("aiven_kafka.bar.service_name"),
 						"user":               user,
 						"client_id":          clientID,
 						"consumer_byte_rate": 1000,
@@ -98,29 +68,29 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// missing user and client_id
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"consumer_byte_rate": 1000,
-						"producer_byte_rate": 1000,
-						"request_percentage": 10,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"consumer_byte_rate": 1000,
+					"producer_byte_rate": 1000,
+					"request_percentage": 10,
+				}).
 					MustRender(t),
 				ExpectError: regexp.MustCompile(`"(?:user|client_id)": one of ` + "`" + `client_id,user` + "`" + ` must be specified`),
 			},
 			{
 				// valid configuration
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 1000,
-						"producer_byte_rate": 1000,
-						"request_percentage": 10,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 1000,
+					"producer_byte_rate": 1000,
+					"request_percentage": 10,
+				}).
 					MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.full", kafkaQuotaResource), "project", projectName),
@@ -134,48 +104,47 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// check that the resource is not updated without changes
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 1000,
-						"producer_byte_rate": 1000,
-						"request_percentage": 10,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 1000,
+					"producer_byte_rate": 1000,
+					"request_percentage": 10,
+				}).
 					MustRender(t),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
 			},
 			{
 				// check plan that resource should be updated
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 2000,
-						"producer_byte_rate": 2000,
-						"request_percentage": 100,
-					}).
-					MustRender(t),
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 2000,
+					"producer_byte_rate": 2000,
+					"request_percentage": 100,
+				}).MustRender(t),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
 			{
 				// check that the update action is triggered, only changed attributes are updated
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 3000,
-						"producer_byte_rate": 3000,
-						"request_percentage": 10,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 3000,
+					"producer_byte_rate": 3000,
+					"request_percentage": 10,
+				}).
 					MustRender(t),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -195,16 +164,16 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// check that resource is replaced when user is updated
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "full",
-						"service_name":       serviceName,
-						"user":               fmt.Sprintf("%s_updated", user),
-						"client_id":          clientID,
-						"consumer_byte_rate": 3000,
-						"producer_byte_rate": 3000,
-						"request_percentage": 10,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "full",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               fmt.Sprintf("%s_updated", user),
+					"client_id":          clientID,
+					"consumer_byte_rate": 3000,
+					"producer_byte_rate": 3000,
+					"request_percentage": 10,
+				}).
 					MustRender(t),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -224,14 +193,14 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// create new resource with only consumer_byte_rate set
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "byte_rate",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 100,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "byte_rate",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 100,
+				}).
 					MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fmt.Sprintf("%s.byte_rate", kafkaQuotaResource), "project", projectName),
@@ -246,14 +215,14 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// check that the resource is updated and only consumer_byte_rate was modified
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
-						"resource_name":      "byte_rate",
-						"service_name":       serviceName,
-						"user":               user,
-						"client_id":          clientID,
-						"consumer_byte_rate": 3000,
-					}).
+				Config: templBuilder().AddResource(kafkaQuotaResource, map[string]any{
+					"resource_name":      "byte_rate",
+					"project":            projectName,
+					"service_name":       template.Reference("aiven_kafka.bar.service_name"),
+					"user":               user,
+					"client_id":          clientID,
+					"consumer_byte_rate": 3000,
+				}).
 					MustRender(t),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -274,25 +243,28 @@ resource "aiven_kafka_quota" "{{ .resource_name }}" {
 			},
 			{
 				// create multiple resources with different configurations
-				Config: newComposition().
-					Add("kafka_quota", map[string]any{
+				Config: templBuilder().
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "new_full",
-						"service_name":       serviceName,
+						"project":            projectName,
+						"service_name":       template.Reference("aiven_kafka.bar.service_name"),
 						"user":               fmt.Sprintf("%s_1", user),
 						"client_id":          fmt.Sprintf("%s_1", clientID),
 						"consumer_byte_rate": 4000,
 						"producer_byte_rate": 4000,
 						"request_percentage": 40.5,
 					}).
-					Add("kafka_quota", map[string]any{
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "user",
-						"service_name":       serviceName,
+						"project":            projectName,
+						"service_name":       template.Reference("aiven_kafka.bar.service_name"),
 						"user":               fmt.Sprintf("%s_2", user),
 						"request_percentage": 20.22,
 					}).
-					Add("kafka_quota", map[string]any{
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "client",
-						"service_name":       serviceName,
+						"project":            projectName,
+						"service_name":       template.Reference("aiven_kafka.bar.service_name"),
 						"client_id":          fmt.Sprintf("%s_3", clientID),
 						"producer_byte_rate": 2000,
 					}).
