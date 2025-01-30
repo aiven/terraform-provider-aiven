@@ -2,38 +2,38 @@ package project
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceProject() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceProjectRead,
+		ReadContext: common.WithGenClient(datasourceProjectRead),
 		Description: "Gets information about an Aiven project.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenProjectSchema, "project"),
 	}
 }
 
-func datasourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceProjectRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 
-	projects, err := client.Projects.List(ctx)
+	resp, err := client.ProjectList(ctx)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, project := range projects {
-		if project.Name == projectName {
+	for _, project := range resp.Projects {
+		if project.ProjectName == projectName {
 			d.SetId(projectName)
-			return resourceProjectRead(ctx, d, m)
+
+			return resourceProjectRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("project %s not found", projectName)
+	return fmt.Errorf("project %s not found", projectName)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 )
 
 var aivenOrganizationalUnitSchema = map[string]*schema.Schema{
@@ -94,7 +95,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if stateID, ok := d.GetOk("parent_id"); ok {
-		idToSet, err := determineMixedOrganizationConstraintIDToStore(
+		idToSet, err := project.DetermineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
 			stateID.(string),
@@ -118,32 +119,6 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	return nil
-}
-
-func determineMixedOrganizationConstraintIDToStore(
-	ctx context.Context,
-	client avngen.Client,
-	stateID string,
-	accountID string,
-) (string, error) {
-	if len(accountID) == 0 {
-		return "", nil
-	}
-
-	if !schemautil.IsOrganizationID(stateID) {
-		return accountID, nil
-	}
-
-	r, err := client.AccountGet(ctx, accountID)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r.OrganizationId) == 0 {
-		return accountID, nil
-	}
-
-	return r.OrganizationId, nil
 }
 
 func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {

@@ -3,10 +3,11 @@ package project
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/exp/maps"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -22,13 +23,14 @@ func DatasourceBillingGroup() *schema.Resource {
 	})
 
 	return &schema.Resource{
-		ReadContext: datasourceBillingGroupRead,
+		ReadContext: common.WithGenClient(datasourceBillingGroupRead),
 		Description: "Gets information about a billing group.",
 		Schema:      s,
 	}
 }
 
-func datasourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	d.SetId(d.Get("billing_group_id").(string))
-	return resourceBillingGroupRead(ctx, d, m)
+
+	return resourceBillingGroupRead(ctx, d, client)
 }

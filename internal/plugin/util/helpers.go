@@ -2,6 +2,7 @@ package util
 
 import (
 	"math/big"
+	"os"
 
 	"golang.org/x/exp/constraints"
 )
@@ -33,4 +34,9 @@ func First[T any, U any](a T, _ U) T {
 // ToBigFloat is a helper function that converts any integer or float type to a big.Float.
 func ToBigFloat[T constraints.Integer | constraints.Float](v T) *big.Float {
 	return big.NewFloat(float64(v))
+}
+
+// IsAcceptanceTestEnvironment checks if code is running in Terraform acceptance test environment
+func IsAcceptanceTestEnvironment() bool {
+	return os.Getenv("TF_ACC") != ""
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -46,7 +46,10 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error getting aiven client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -56,13 +59,13 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		db, err := c.BillingGroup.Get(ctx, rs.Primary.ID)
-		var e aiven.Error
+		bg, err := c.BillingGroupGet(ctx, rs.Primary.ID)
+		var e avngen.Error
 		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}
 
-		if db != nil {
+		if bg != nil {
 			return fmt.Errorf("billing group (%s) still exists", rs.Primary.ID)
 		}
 	}
