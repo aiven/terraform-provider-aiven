@@ -37,12 +37,13 @@ func cassandraSchema() map[string]*schema.Schema {
 
 func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven for Apache Cassandra®](https://aiven.io/docs/products/cassandra) service.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
-		ReadContext:   schemautil.ResourceServiceRead,
-		UpdateContext: schemautil.ResourceServiceUpdate,
-		DeleteContext: schemautil.ResourceServiceDelete,
-		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeCassandra),
+		Description:        "Creates and manages an [Aiven for Apache Cassandra®](https://aiven.io/docs/products/cassandra) service.",
+		DeprecationMessage: "Aiven for Apache Cassandra® is approaching its end of life on the Aiven Platform. After 31 December 2025, all active Cassandra services will be powered off and deleted, making data from these services inaccessible.",
+		CreateContext:      schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
+		ReadContext:        schemautil.ResourceServiceRead,
+		UpdateContext:      schemautil.ResourceServiceUpdate,
+		DeleteContext:      schemautil.ResourceServiceDelete,
+		CustomizeDiff:      schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeCassandra),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
