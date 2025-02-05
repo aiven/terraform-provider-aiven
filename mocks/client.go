@@ -17959,6 +17959,64 @@ func (_c *MockClient_UserCreate_Call) RunAndReturn(run func(context.Context, *us
 	return _c
 }
 
+// UserCreditCardsList provides a mock function with given fields: ctx
+func (_m *MockClient) UserCreditCardsList(ctx context.Context) ([]user.CardOut, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UserCreditCardsList")
+	}
+
+	var r0 []user.CardOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]user.CardOut, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []user.CardOut); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]user.CardOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_UserCreditCardsList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserCreditCardsList'
+type MockClient_UserCreditCardsList_Call struct {
+	*mock.Call
+}
+
+// UserCreditCardsList is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockClient_Expecter) UserCreditCardsList(ctx interface{}) *MockClient_UserCreditCardsList_Call {
+	return &MockClient_UserCreditCardsList_Call{Call: _e.mock.On("UserCreditCardsList", ctx)}
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) Run(run func(ctx context.Context)) *MockClient_UserCreditCardsList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) Return(_a0 []user.CardOut, _a1 error) *MockClient_UserCreditCardsList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) RunAndReturn(run func(context.Context) ([]user.CardOut, error)) *MockClient_UserCreditCardsList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UserExpireTokens provides a mock function with given fields: ctx
 func (_m *MockClient) UserExpireTokens(ctx context.Context) error {
 	ret := _m.Called(ctx)
