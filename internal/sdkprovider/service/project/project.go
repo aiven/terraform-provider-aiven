@@ -469,7 +469,7 @@ func getLongCardID(ctx context.Context, client avngen.Client, cardID string) (*s
 		return nil, nil
 	}
 
-	cards, err := client.UserCreditCardsList(ctx)
+	cards, err := client.UserCreditCardsList(ctx) //nolint:staticcheck
 	if err != nil {
 		return nil, err
 	}
