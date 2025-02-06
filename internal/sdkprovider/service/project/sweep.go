@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	avngen "github.com/aiven/go-client-codegen"
 	"log"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
@@ -48,20 +48,20 @@ func init() {
 
 func sweepProjects(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
 
-		projects, err := client.Projects.List(ctx)
+		resp, err := client.ProjectList(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of projects : %w", err)
 		}
 
-		for _, project := range projects {
-			if strings.Contains(project.Name, "test-acc-") {
-				if err := client.Projects.Delete(ctx, project.Name); err != nil {
-					var e aiven.Error
+		for _, project := range resp.Projects {
+			if strings.Contains(project.ProjectName, "test-acc-") {
+				if err = client.ProjectDelete(ctx, project.ProjectName); err != nil {
+					var e avngen.Error
 
 					// project not found
 					if errors.As(err, &e) && e.Status == 404 {
@@ -70,11 +70,11 @@ func sweepProjects(ctx context.Context) func(region string) error {
 
 					// project with open balance cannot be destroyed
 					if strings.Contains(e.Message, "open balance") && e.Status == 403 {
-						log.Printf("[DEBUG] project %s with open balance cannot be destroyed", project.Name)
+						log.Printf("[DEBUG] project %s with open balance cannot be destroyed", project.ProjectName)
 						continue
 					}
 
-					return fmt.Errorf("error destroying project %s during sweep: %w", project.Name, err)
+					return fmt.Errorf("error destroying project %s during sweep: %w", project.ProjectName, err)
 				}
 			}
 		}
@@ -85,21 +85,21 @@ func sweepProjects(ctx context.Context) func(region string) error {
 
 func sweepBillingGroups(ctx context.Context) func(region string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
 
-		billingGroups, err := client.BillingGroup.ListAll(ctx)
+		billingGroups, err := client.BillingGroupList(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of billing groups : %w", err)
 		}
 
 		for _, billingGroup := range billingGroups {
 			if strings.Contains(billingGroup.BillingGroupName, "test-acc-") {
-				if err := client.BillingGroup.Delete(ctx, billingGroup.Id); err != nil {
+				if err := client.BillingGroupDelete(ctx, billingGroup.BillingGroupId); err != nil {
 					// billing group not found
-					var e aiven.Error
+					var e avngen.Error
 					if errors.As(err, &e) && e.Status == 404 {
 						continue
 					}
