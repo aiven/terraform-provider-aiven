@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	avngen "github.com/aiven/go-client-codegen"
 	"log"
 	"strings"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
