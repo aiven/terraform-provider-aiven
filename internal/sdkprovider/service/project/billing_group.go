@@ -61,11 +61,11 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Description:      "Additional information to include on your invoice (for example, a reference number).",
 	},
 	"billing_emails": {
-		Type:             schema.TypeSet,
-		Elem:             &schema.Schema{Type: schema.TypeString},
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Email address of billing contacts. Invoices and other payment notifications are emailed to all billing contacts.",
+		Type:     schema.TypeSet,
+		Elem:     &schema.Schema{Type: schema.TypeString},
+		Optional: true,
+		//DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
+		Description: "Email address of billing contacts. Invoices and other payment notifications are emailed to all billing contacts.",
 	},
 	"company": {
 		Type:             schema.TypeString,
@@ -74,11 +74,9 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Description:      "Your company name.",
 	},
 	"address_lines": {
-		Type:     schema.TypeSet,
-		Elem:     &schema.Schema{Type: schema.TypeString},
-		Optional: true,
-		//DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		//Computed:    true,
+		Type:        schema.TypeSet,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
 		Description: "Address lines 1 and 2. For example, street, PO box, or building.",
 	},
 	"country_code": {
@@ -266,19 +264,6 @@ func resourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, clien
 }
 
 func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	var billingEmails *[]billinggroup.BillingEmailIn
-
-	if emails := contactEmailListForAPI(
-		d,
-		"billing_emails",
-		true,
-		func(email string) billinggroup.BillingEmailIn {
-			return billinggroup.BillingEmailIn{Email: email}
-		},
-	); len(emails) > 0 {
-		billingEmails = &emails
-	}
-
 	cardID, err := getLongCardID(ctx, client, d.Get("card_id").(string))
 	if err != nil {
 		return fmt.Errorf("error getting card id: %w", err)
@@ -296,7 +281,6 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, cli
 				list := schemautil.FlattenToString(v.(*schema.Set).List())
 				return &list
 			}
-			// If the field is not set in config at all, return empty array to clear it
 			emptyList := make([]string, 0)
 
 			return &emptyList
@@ -307,7 +291,24 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, cli
 			}
 			return ""
 		}(),
-		BillingEmails:    billingEmails,
+		BillingEmails: func() *[]billinggroup.BillingEmailIn {
+			var billingEmails = make([]billinggroup.BillingEmailIn, 0)
+
+			_, ok := d.GetOk("billing_emails")
+			if ok {
+				billingEmails = contactEmailListForAPI(
+					d,
+					"billing_emails",
+					true,
+					func(email string) billinggroup.BillingEmailIn {
+						return billinggroup.BillingEmailIn{Email: email}
+					},
+				)
+			}
+
+			return &billingEmails
+
+		}(),
 		BillingExtraText: util.NilIfZero(d.Get("billing_extra_text").(string)),
 		BillingGroupName: util.NilIfZero(d.Get("name").(string)),
 		CardId:           cardID,

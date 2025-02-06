@@ -296,7 +296,6 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, client avn
 
 	pr := resp.(*project.ProjectGetOut)
 
-	//TODO: finish this part
 	if stateID := d.Get("parent_id"); stateID != "" {
 		idToSet, err := DetermineMixedOrganizationConstraintIDToStore(
 			ctx,
