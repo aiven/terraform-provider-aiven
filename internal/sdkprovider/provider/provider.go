@@ -103,9 +103,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
 
 			// project
-			"aiven_project":       project.DatasourceProject(),
-			"aiven_project_user":  project.DatasourceProjectUser(),
-			"aiven_billing_group": project.DatasourceBillingGroup(),
+			"aiven_project":              project.DatasourceProject(),
+			"aiven_project_user":         project.DatasourceProjectUser(),
+			"aiven_billing_group":        project.DatasourceBillingGroup(),
+			"aiven_organization_project": project.DatasourceOrganizationProject(),
 
 			// vpc
 			"aiven_aws_privatelink":                vpc.DatasourceAWSPrivatelink(),
@@ -218,9 +219,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
 
 			// project
-			"aiven_project":       project.ResourceProject(),
-			"aiven_project_user":  project.ResourceProjectUser(),
-			"aiven_billing_group": project.ResourceBillingGroup(),
+			"aiven_project":              project.ResourceProject(),
+			"aiven_project_user":         project.ResourceProjectUser(),
+			"aiven_billing_group":        project.ResourceBillingGroup(),
+			"aiven_organization_project": project.ResourceOrganizationProject(),
 
 			// vpc
 			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
@@ -301,6 +303,7 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_flink_jar_application",
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
+		"aiven_organization_project",
 	}
 
 	betaDataSources := []string{
@@ -308,6 +311,7 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_alloydbomni_user",
 		"aiven_alloydbomni_database",
 		"aiven_organization_user_list",
+		"aiven_organization_project",
 	}
 
 	missing := append(

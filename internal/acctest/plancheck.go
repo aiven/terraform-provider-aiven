@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/go-cmp/cmp"
 	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
@@ -41,7 +42,6 @@ func (c *attributeChangeCheck) CheckPlan(_ context.Context, req plancheck.CheckP
 		return
 	}
 
-	// Convert Before and After to maps
 	before, ok := targetResource.Change.Before.(map[string]interface{})
 	if !ok {
 		resp.Error = fmt.Errorf("before state for resource %s is not a map", c.resourceAddr)
@@ -51,7 +51,6 @@ func (c *attributeChangeCheck) CheckPlan(_ context.Context, req plancheck.CheckP
 	after, ok := targetResource.Change.After.(map[string]interface{})
 	if !ok {
 		resp.Error = fmt.Errorf("after state for resource %s is not a map", c.resourceAddr)
-
 		return
 	}
 
@@ -66,20 +65,33 @@ func (c *attributeChangeCheck) CheckPlan(_ context.Context, req plancheck.CheckP
 		beforeValue, existsInBefore := before[key]
 
 		// If value changed
-		if !existsInBefore || beforeValue != afterValue {
+		if !existsInBefore || !cmp.Equal(beforeValue, afterValue) {
 			// Check if this change was expected
 			if _, expected := expectedChanges[key]; !expected {
+				if afterValue == nil && beforeValue != nil {
+					continue
+				}
+
+				diff := cmp.Diff(beforeValue, afterValue)
 				resp.Error = fmt.Errorf(
-					"unexpected change in attribute %q for resource %s: before=%v, after=%v",
+					"unexpected change in attribute %q for resource %s:\n%s",
 					key,
 					c.resourceAddr,
-					beforeValue,
-					afterValue,
+					diff,
 				)
 				return
 			}
 			// Remove from expected changes as we found it
 			delete(expectedChanges, key)
+		}
+	}
+
+	for key := range expectedChanges {
+		if beforeValue, exists := before[key]; exists {
+			if _, existsInAfter := after[key]; !existsInAfter && beforeValue != nil {
+				// If the value existed in before but not in after, consider it changed
+				delete(expectedChanges, key)
+			}
 		}
 	}
 
