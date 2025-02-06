@@ -74,11 +74,12 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Description:      "Your company name.",
 	},
 	"address_lines": {
-		Type:             schema.TypeSet,
-		Elem:             &schema.Schema{Type: schema.TypeString},
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "Address lines 1 and 2. For example, street, PO box, or building.",
+		Type:     schema.TypeSet,
+		Elem:     &schema.Schema{Type: schema.TypeString},
+		Optional: true,
+		//DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
+		//Computed:    true,
+		Description: "Address lines 1 and 2. For example, street, PO box, or building.",
 	},
 	"country_code": {
 		Type:             schema.TypeString,
@@ -147,7 +148,14 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, cli
 	}
 
 	var req = billinggroup.BillingGroupCreateIn{
-		AddressLines: nil,
+		AddressLines: func() *[]string {
+			list := schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List())
+			if len(list) > 0 {
+				return &list
+			}
+
+			return nil
+		}(),
 		BillingCurrency: func() billinggroup.BillingCurrencyType {
 			if v, ok := d.GetOk("billing_currency"); ok {
 				return billinggroup.BillingCurrencyType(v.(string))
@@ -284,12 +292,14 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, cli
 	var req = billinggroup.BillingGroupUpdateIn{
 		AccountId: ptrAccountID,
 		AddressLines: func() *[]string {
-			list := schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List())
-			if len(list) > 0 {
+			if v, ok := d.GetOk("address_lines"); ok {
+				list := schemautil.FlattenToString(v.(*schema.Set).List())
 				return &list
 			}
+			// If the field is not set in config at all, return empty array to clear it
+			emptyList := make([]string, 0)
 
-			return nil
+			return &emptyList
 		}(),
 		BillingCurrency: func() billinggroup.BillingCurrencyType {
 			if v, ok := d.GetOk("billing_currency"); ok {
