@@ -31,6 +31,7 @@ import (
 	mysql "github.com/aiven/go-client-codegen/handler/mysql"
 	opensearch "github.com/aiven/go-client-codegen/handler/opensearch"
 	organization "github.com/aiven/go-client-codegen/handler/organization"
+	organizationprojects "github.com/aiven/go-client-codegen/handler/organizationprojects"
 	organizationuser "github.com/aiven/go-client-codegen/handler/organizationuser"
 	postgresql "github.com/aiven/go-client-codegen/handler/postgresql"
 	privatelink "github.com/aiven/go-client-codegen/handler/privatelink"
@@ -4964,6 +4965,234 @@ func (_c *MockClient_OrganizationMemberGroupsList_Call) Return(_a0 []user.UserGr
 }
 
 func (_c *MockClient_OrganizationMemberGroupsList_Call) RunAndReturn(run func(context.Context, string, string) ([]user.UserGroupOut, error)) *MockClient_OrganizationMemberGroupsList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationProjectsCreate provides a mock function with given fields: ctx, organizationId, in
+func (_m *MockClient) OrganizationProjectsCreate(ctx context.Context, organizationId string, in *organizationprojects.OrganizationProjectsCreateIn) (*organizationprojects.OrganizationProjectsCreateOut, error) {
+	ret := _m.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationProjectsCreate")
+	}
+
+	var r0 *organizationprojects.OrganizationProjectsCreateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationprojects.OrganizationProjectsCreateIn) (*organizationprojects.OrganizationProjectsCreateOut, error)); ok {
+		return rf(ctx, organizationId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationprojects.OrganizationProjectsCreateIn) *organizationprojects.OrganizationProjectsCreateOut); ok {
+		r0 = rf(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationprojects.OrganizationProjectsCreateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *organizationprojects.OrganizationProjectsCreateIn) error); ok {
+		r1 = rf(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationProjectsCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationProjectsCreate'
+type MockClient_OrganizationProjectsCreate_Call struct {
+	*mock.Call
+}
+
+// OrganizationProjectsCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - in *organizationprojects.OrganizationProjectsCreateIn
+func (_e *MockClient_Expecter) OrganizationProjectsCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_OrganizationProjectsCreate_Call {
+	return &MockClient_OrganizationProjectsCreate_Call{Call: _e.mock.On("OrganizationProjectsCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_OrganizationProjectsCreate_Call) Run(run func(ctx context.Context, organizationId string, in *organizationprojects.OrganizationProjectsCreateIn)) *MockClient_OrganizationProjectsCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*organizationprojects.OrganizationProjectsCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsCreate_Call) Return(_a0 *organizationprojects.OrganizationProjectsCreateOut, _a1 error) *MockClient_OrganizationProjectsCreate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsCreate_Call) RunAndReturn(run func(context.Context, string, *organizationprojects.OrganizationProjectsCreateIn) (*organizationprojects.OrganizationProjectsCreateOut, error)) *MockClient_OrganizationProjectsCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationProjectsDelete provides a mock function with given fields: ctx, organizationId, projectId
+func (_m *MockClient) OrganizationProjectsDelete(ctx context.Context, organizationId string, projectId string) error {
+	ret := _m.Called(ctx, organizationId, projectId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationProjectsDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, organizationId, projectId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockClient_OrganizationProjectsDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationProjectsDelete'
+type MockClient_OrganizationProjectsDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationProjectsDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - projectId string
+func (_e *MockClient_Expecter) OrganizationProjectsDelete(ctx interface{}, organizationId interface{}, projectId interface{}) *MockClient_OrganizationProjectsDelete_Call {
+	return &MockClient_OrganizationProjectsDelete_Call{Call: _e.mock.On("OrganizationProjectsDelete", ctx, organizationId, projectId)}
+}
+
+func (_c *MockClient_OrganizationProjectsDelete_Call) Run(run func(ctx context.Context, organizationId string, projectId string)) *MockClient_OrganizationProjectsDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsDelete_Call) Return(_a0 error) *MockClient_OrganizationProjectsDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsDelete_Call) RunAndReturn(run func(context.Context, string, string) error) *MockClient_OrganizationProjectsDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationProjectsList provides a mock function with given fields: ctx, organizationId
+func (_m *MockClient) OrganizationProjectsList(ctx context.Context, organizationId string) (*organizationprojects.OrganizationProjectsListOut, error) {
+	ret := _m.Called(ctx, organizationId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationProjectsList")
+	}
+
+	var r0 *organizationprojects.OrganizationProjectsListOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*organizationprojects.OrganizationProjectsListOut, error)); ok {
+		return rf(ctx, organizationId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *organizationprojects.OrganizationProjectsListOut); ok {
+		r0 = rf(ctx, organizationId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationprojects.OrganizationProjectsListOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationProjectsList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationProjectsList'
+type MockClient_OrganizationProjectsList_Call struct {
+	*mock.Call
+}
+
+// OrganizationProjectsList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+func (_e *MockClient_Expecter) OrganizationProjectsList(ctx interface{}, organizationId interface{}) *MockClient_OrganizationProjectsList_Call {
+	return &MockClient_OrganizationProjectsList_Call{Call: _e.mock.On("OrganizationProjectsList", ctx, organizationId)}
+}
+
+func (_c *MockClient_OrganizationProjectsList_Call) Run(run func(ctx context.Context, organizationId string)) *MockClient_OrganizationProjectsList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsList_Call) Return(_a0 *organizationprojects.OrganizationProjectsListOut, _a1 error) *MockClient_OrganizationProjectsList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsList_Call) RunAndReturn(run func(context.Context, string) (*organizationprojects.OrganizationProjectsListOut, error)) *MockClient_OrganizationProjectsList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationProjectsUpdate provides a mock function with given fields: ctx, organizationId, projectId, in
+func (_m *MockClient) OrganizationProjectsUpdate(ctx context.Context, organizationId string, projectId string, in *organizationprojects.OrganizationProjectsUpdateIn) (*organizationprojects.OrganizationProjectsUpdateOut, error) {
+	ret := _m.Called(ctx, organizationId, projectId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationProjectsUpdate")
+	}
+
+	var r0 *organizationprojects.OrganizationProjectsUpdateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organizationprojects.OrganizationProjectsUpdateIn) (*organizationprojects.OrganizationProjectsUpdateOut, error)); ok {
+		return rf(ctx, organizationId, projectId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organizationprojects.OrganizationProjectsUpdateIn) *organizationprojects.OrganizationProjectsUpdateOut); ok {
+		r0 = rf(ctx, organizationId, projectId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationprojects.OrganizationProjectsUpdateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, *organizationprojects.OrganizationProjectsUpdateIn) error); ok {
+		r1 = rf(ctx, organizationId, projectId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationProjectsUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationProjectsUpdate'
+type MockClient_OrganizationProjectsUpdate_Call struct {
+	*mock.Call
+}
+
+// OrganizationProjectsUpdate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - projectId string
+//   - in *organizationprojects.OrganizationProjectsUpdateIn
+func (_e *MockClient_Expecter) OrganizationProjectsUpdate(ctx interface{}, organizationId interface{}, projectId interface{}, in interface{}) *MockClient_OrganizationProjectsUpdate_Call {
+	return &MockClient_OrganizationProjectsUpdate_Call{Call: _e.mock.On("OrganizationProjectsUpdate", ctx, organizationId, projectId, in)}
+}
+
+func (_c *MockClient_OrganizationProjectsUpdate_Call) Run(run func(ctx context.Context, organizationId string, projectId string, in *organizationprojects.OrganizationProjectsUpdateIn)) *MockClient_OrganizationProjectsUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*organizationprojects.OrganizationProjectsUpdateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsUpdate_Call) Return(_a0 *organizationprojects.OrganizationProjectsUpdateOut, _a1 error) *MockClient_OrganizationProjectsUpdate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsUpdate_Call) RunAndReturn(run func(context.Context, string, string, *organizationprojects.OrganizationProjectsUpdateIn) (*organizationprojects.OrganizationProjectsUpdateOut, error)) *MockClient_OrganizationProjectsUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -17955,6 +18184,64 @@ func (_c *MockClient_UserCreate_Call) Return(_a0 *user.UserCreateOut, _a1 error)
 }
 
 func (_c *MockClient_UserCreate_Call) RunAndReturn(run func(context.Context, *user.UserCreateIn) (*user.UserCreateOut, error)) *MockClient_UserCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UserCreditCardsList provides a mock function with given fields: ctx
+func (_m *MockClient) UserCreditCardsList(ctx context.Context) ([]user.CardOut, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UserCreditCardsList")
+	}
+
+	var r0 []user.CardOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]user.CardOut, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []user.CardOut); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]user.CardOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_UserCreditCardsList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserCreditCardsList'
+type MockClient_UserCreditCardsList_Call struct {
+	*mock.Call
+}
+
+// UserCreditCardsList is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockClient_Expecter) UserCreditCardsList(ctx interface{}) *MockClient_UserCreditCardsList_Call {
+	return &MockClient_UserCreditCardsList_Call{Call: _e.mock.On("UserCreditCardsList", ctx)}
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) Run(run func(ctx context.Context)) *MockClient_UserCreditCardsList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) Return(_a0 []user.CardOut, _a1 error) *MockClient_UserCreditCardsList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_UserCreditCardsList_Call) RunAndReturn(run func(context.Context) ([]user.CardOut, error)) *MockClient_UserCreditCardsList_Call {
 	_c.Call.Return(run)
 	return _c
 }
