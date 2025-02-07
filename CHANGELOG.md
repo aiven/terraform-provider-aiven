@@ -9,6 +9,9 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [4.34.1] - 2025-02-07
+- Fix `organization_user_group` import
+
 ## [4.34.0] - 2025-01-29
 
 - Fix `pg_user`: throws an error when the password is modified directly in the service
