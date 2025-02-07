@@ -111,6 +111,11 @@ func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceDa
 		return err
 	}
 
+	// set the organization_id directly as it is not returned by the API and may not be set in case of import
+	if err = d.Set("organization_id", orgID); err != nil {
+		return err
+	}
+
 	return nil
 }
 
