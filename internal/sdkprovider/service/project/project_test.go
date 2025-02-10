@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -253,7 +253,10 @@ func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource
 }
 
 func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error getting Aiven client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -263,15 +266,15 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		p, err := c.Projects.Get(ctx, rs.Primary.ID)
+		resp, err := c.ProjectGet(ctx, rs.Primary.ID)
 		if err != nil {
-			var e aiven.Error
+			var e avngen.Error
 			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
 		}
 
-		if p != nil {
+		if resp != nil {
 			return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
 		}
 	}
