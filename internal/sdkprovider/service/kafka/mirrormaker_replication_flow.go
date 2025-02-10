@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -181,25 +182,26 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	if err := d.Set("project", project); err != nil {
-		return err
-	}
-	if err := d.Set("service_name", serviceName); err != nil {
-		return err
-	}
-
 	err = schemautil.ResourceDataSet(
-		aivenMirrorMakerReplicationFlowSchema, d, dto, schemautil.RenameAliasesReverse(dtoFieldsAliases),
-		func(k string, v any) (string, any) {
-			if k == configPropsKey {
+		d, dto, aivenMirrorMakerReplicationFlowSchema,
+		schemautil.AddForceNew("project", project),
+		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.RenameAliasesReverse(dtoFieldsAliases),
+		func(m map[string]any) error {
+			if v, ok := m[configPropsKey]; ok {
 				// This field is received as a string
-				s := v.(string)
+				s, ok := v.(string)
+				if !ok {
+					return fmt.Errorf("unexpected type %T for %s", v, configPropsKey)
+				}
+
 				v = make([]any, 0)
 				if s != "" {
 					v = strings.Split(s, ",")
 				}
+				m[configPropsKey] = v
 			}
-			return k, v
+			return nil
 		},
 	)
 
@@ -239,12 +241,12 @@ func resourceMirrorMakerReplicationFlowDelete(ctx context.Context, d *schema.Res
 func marshalFlow(d *schema.ResourceData, dto any) error {
 	return schemautil.ResourceDataGet(
 		d, dto, schemautil.RenameAliases(dtoFieldsAliases),
-		func(k string, v any) (string, any) {
+		func(m map[string]any) error {
 			// This field is sent as a string
-			if k == configPropsKey {
-				v = strings.Join(schemautil.FlattenToString(v.([]any)), ",")
+			if v, ok := m[configPropsKey]; ok {
+				m[configPropsKey] = strings.Join(schemautil.FlattenToString(v.([]any)), ",")
 			}
-			return k, v
+			return nil
 		},
 	)
 }

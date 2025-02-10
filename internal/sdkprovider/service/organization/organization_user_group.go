@@ -100,19 +100,11 @@ func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if err = schemautil.ResourceDataSet(
-		aivenOrganizationUserGroupSchema,
-		d,
-		resp,
-		schemautil.RenameAliases(map[string]string{
-			"user_group_name": "name",
-			"user_group_id":   "group_id",
-		}),
+		d, resp, aivenOrganizationUserGroupSchema,
+		schemautil.RenameAlias("user_group_name", "name"),
+		schemautil.RenameAlias("user_group_id", "group_id"),
+		schemautil.AddForceNew("organization_id", orgID),
 	); err != nil {
-		return err
-	}
-
-	// set the organization_id directly as it is not returned by the API and may not be set in case of import
-	if err = d.Set("organization_id", orgID); err != nil {
 		return err
 	}
 

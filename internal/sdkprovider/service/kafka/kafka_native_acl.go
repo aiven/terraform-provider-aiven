@@ -91,12 +91,12 @@ func resourceKafkaNativeACLCreate(ctx context.Context, d *schema.ResourceData, c
 		return err
 	}
 
-	project := d.Get("project").(string)
+	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
 	acl, err := client.ServiceKafkaNativeAclAdd(
 		ctx,
-		project,
+		projectName,
 		serviceName,
 		&req,
 	)
@@ -104,24 +104,28 @@ func resourceKafkaNativeACLCreate(ctx context.Context, d *schema.ResourceData, c
 		return err
 	}
 
-	err = schemautil.ResourceDataSet(aivenKafkaNativeACLSchema, d, acl)
+	err = schemautil.ResourceDataSet(
+		d, acl, aivenKafkaNativeACLSchema,
+		schemautil.AddForceNew("project", projectName),
+		schemautil.AddForceNew("service_name", serviceName),
+	)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(schemautil.BuildResourceID(project, serviceName, acl.Id))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, acl.Id))
 	return resourceKafkaNativeACLRead(ctx, d, client)
 }
 
 func resourceKafkaNativeACLRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
 	}
 
 	acl, err := client.ServiceKafkaNativeAclGet(
 		ctx,
-		project,
+		projectName,
 		serviceName,
 		aclID,
 	)
@@ -129,7 +133,11 @@ func resourceKafkaNativeACLRead(ctx context.Context, d *schema.ResourceData, cli
 		return err
 	}
 
-	err = schemautil.ResourceDataSet(aivenKafkaNativeACLSchema, d, acl)
+	err = schemautil.ResourceDataSet(
+		d, acl, aivenKafkaNativeACLSchema,
+		schemautil.AddForceNew("project", projectName),
+		schemautil.AddForceNew("service_name", serviceName),
+	)
 	return err
 }
 

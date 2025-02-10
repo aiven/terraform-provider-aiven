@@ -84,18 +84,21 @@ func flinkApplicationDeploymentDelete(ctx context.Context, d *schema.ResourceDat
 }
 
 func flinkApplicationDeploymentRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	project, serviceName, applicationID, deploymentID, err := schemautil.SplitResourceID4(d.Id())
+	projectName, serviceName, applicationID, deploymentID, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return err
 	}
 
-	rsp, err := client.ServiceFlinkGetJarApplicationDeployment(ctx, project, serviceName, applicationID, deploymentID)
+	rsp, err := client.ServiceFlinkGetJarApplicationDeployment(ctx, projectName, serviceName, applicationID, deploymentID)
 	if err != nil {
 		return err
 	}
 
 	return schemautil.ResourceDataSet(
-		flinkJarApplicationDeploymentSchema(), d, rsp,
+		d, rsp, flinkJarApplicationDeploymentSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationDeploymentRename()),
+		schemautil.AddForceNew("project", projectName),
+		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.AddForceNew("application_id", applicationID),
 	)
 }
