@@ -109,11 +109,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	if err = schemautil.ResourceDataSet(
-		aivenOrganizationalUnitSchema,
-		d,
-		resp,
-	); err != nil {
+	if err = schemautil.ResourceDataSet(d, resp, aivenOrganizationalUnitSchema); err != nil {
 		return err
 	}
 
