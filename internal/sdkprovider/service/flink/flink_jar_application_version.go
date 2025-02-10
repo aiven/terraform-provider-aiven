@@ -117,12 +117,12 @@ func flinkJarApplicationVersionCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func flinkJarApplicationVersionRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	project, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
+	projectName, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return err
 	}
 
-	rsp, err := client.ServiceFlinkGetJarApplicationVersion(ctx, project, serviceName, applicationID, version)
+	rsp, err := client.ServiceFlinkGetJarApplicationVersion(ctx, projectName, serviceName, applicationID, version)
 	if err != nil {
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
@@ -134,8 +134,11 @@ func flinkJarApplicationVersionRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	return schemautil.ResourceDataSet(
-		flinkJarApplicationVersionSchema(), d, rsp,
+		d, rsp, flinkJarApplicationVersionSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationVersionRename()),
+		schemautil.AddForceNew("project", projectName),
+		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.AddForceNew("application_id", applicationID),
 	)
 }
 

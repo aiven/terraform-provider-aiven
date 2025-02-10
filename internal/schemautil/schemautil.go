@@ -13,6 +13,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 )
 
 // OptionalStringPointer retrieves a string pointer to a field, empty string
@@ -353,7 +354,7 @@ func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
 //
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
-func ResourceDataGet(d ResourceData, dto any, fns ...KVModifier) error {
+func ResourceDataGet(d ResourceData, dto any, fns ...MapModifier) error {
 	rawConfig := d.GetRawConfig()
 	if rawConfig.IsNull() {
 		return nil
@@ -373,11 +374,13 @@ func ResourceDataGet(d ResourceData, dto any, fns ...KVModifier) error {
 			value = set.List()
 		}
 
-		for _, f := range fns {
-			k, value = f(k, value)
-		}
-
 		m[k] = serializeGet(value)
+	}
+
+	for _, f := range fns {
+		if err := f(m); err != nil {
+			return err
+		}
 	}
 
 	return Remarshal(&m, dto)
@@ -400,8 +403,13 @@ func serializeGet(value any) any {
 	return value
 }
 
-// KVModifier modifier for key/value pair
-type KVModifier func(k string, v any) (string, any)
+// MapModifier modifier for key/value pair
+type MapModifier func(m map[string]any) error
+
+// errMissingForceNew `terraform import` requires all ForceNew fields to be set
+// otherwise it will output "replace" plan.
+// All ForceNew fields must be set.
+var errMissingForceNew = fmt.Errorf("missing required ForceNew field")
 
 // ResourceDataSet Sets the given dto values to schema.ResourceData
 // Instead of setting every field individually and dealing with pointers,
@@ -417,8 +425,8 @@ type KVModifier func(k string, v any) (string, any)
 //
 // Use:
 //
-//	err := ResourceDataSet(s, d, dto)
-func ResourceDataSet(s map[string]*schema.Schema, d ResourceData, dto any, fns ...KVModifier) error {
+//	err := ResourceDataSet(d, dto, s)
+func ResourceDataSet(d ResourceData, dto any, s map[string]*schema.Schema, fns ...MapModifier) error {
 	var m map[string]any
 	err := Remarshal(dto, &m)
 	if err != nil {
@@ -426,28 +434,41 @@ func ResourceDataSet(s map[string]*schema.Schema, d ResourceData, dto any, fns .
 	}
 
 	for _, f := range fns {
-		for k, v := range m {
-			delete(m, k) // remove the old key in case it is replaced
-			k, v = f(k, v)
-			m[k] = v
+		if err := f(m); err != nil {
+			return err
 		}
 	}
 
-	m = serializeSet(s, m)
-	for k := range s {
-		if v, ok := m[k]; ok {
-			if err = d.Set(k, v); err != nil {
-				return err
-			}
+	if err = serializeSet(s, m); err != nil {
+		return err
+	}
+
+	for k, v := range m {
+		if err := d.Set(k, v); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
-func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any {
-	for k, prop := range s {
+func serializeSet(s map[string]*schema.Schema, m map[string]any) error {
+	keys := lo.Uniq(append(lo.Keys(m), lo.Keys(s)...))
+	for _, k := range keys {
+		prop, ok := s[k]
+		if !ok {
+			// The field not in the schema, removes it.
+			delete(m, k)
+			continue
+		}
+
 		value, ok := m[k]
 		if !ok {
+			if prop.ForceNew && prop.Required {
+				return fmt.Errorf("%w: %q", errMissingForceNew, k)
+			}
+
+			// The field is not in the dto, moves on.
 			continue
 		}
 
@@ -458,25 +479,32 @@ func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any 
 
 		// When we have an object, we need to convert it to a list.
 		// So there is no difference between a single object and a list of objects.
-		var items []any
-		switch element := value.(type) {
-		case map[string]any:
-			items = append(items, serializeSet(res.Schema, element))
-		case []any:
-			for _, v := range element {
-				items = append(items, serializeSet(res.Schema, v.(map[string]any)))
-			}
+		var list []any
+		if v, ok := value.([]any); ok {
+			list = v
+		} else {
+			list = append(list, value)
 		}
 
-		m[k] = items
+		m[k] = list
+		for _, v := range list {
+			o, ok := v.(map[string]any)
+			if !ok {
+				return fmt.Errorf("expected object for field %q, got type %T", k, v)
+			}
+
+			if err := serializeSet(res.Schema, o); err != nil {
+				return fmt.Errorf("failed to serialize object %q: %w", k, err)
+			}
+		}
 	}
 
-	return m
+	return nil
 }
 
 // RenameAlias renames field names terraform name -> dto name
 // Example: RenameAlias("hasFoo", "wantBar", "hasBaz", "wantEgg")
-func RenameAlias(keys ...string) KVModifier {
+func RenameAlias(keys ...string) MapModifier {
 	m := make(map[string]string, len(keys)/2)
 	for i := 0; i < len(keys); i += 2 {
 		m[keys[i]] = keys[i+1]
@@ -485,23 +513,39 @@ func RenameAlias(keys ...string) KVModifier {
 }
 
 // RenameAliases renames field names terraform name -> dto name
-func RenameAliases(aliases map[string]string) KVModifier {
-	return func(k string, v any) (string, any) {
-		alias, ok := aliases[k]
-		if ok {
-			return alias, v
+func RenameAliases(aliases map[string]string) MapModifier {
+	return func(m map[string]any) error {
+		for k, v := range m {
+			alias, ok := aliases[k]
+			if ok {
+				m[alias] = v
+				delete(m, k)
+			}
 		}
-		return k, v
+		return nil
 	}
 }
 
 // RenameAliasesReverse reverse version of RenameAliases
-func RenameAliasesReverse(aliases map[string]string) KVModifier {
+func RenameAliasesReverse(aliases map[string]string) MapModifier {
 	m := make(map[string]string, len(aliases))
 	for k, v := range aliases {
 		m[v] = k
 	}
 	return RenameAliases(m)
+}
+
+// AddForceNew adds extra key/value pair to the dto
+// Use it to set ForceNew fields when they are not in the dto
+func AddForceNew(k string, v string) MapModifier {
+	return func(dto map[string]any) error {
+		exist, ok := dto[k]
+		if ok {
+			return fmt.Errorf("field %q already exists: %v", k, exist)
+		}
+		dto[k] = v
+		return nil
+	}
 }
 
 // Remarshal marshals "in" object to "out" through json

@@ -104,6 +104,8 @@ func TestReadDoesNotRetryEmptyPassword(t *testing.T) {
 		ServiceUserGet(ctx, projectName, serviceName, username).
 		Return(&service.ServiceUserGetOut{Username: username, Type: "normal"}, nil)
 
+	d.EXPECT().Set("project", projectName).Return(nil)
+	d.EXPECT().Set("service_name", serviceName).Return(nil)
 	d.EXPECT().Set("username", username).Return(nil)
 	d.EXPECT().Set("type", "normal").Return(nil)
 	d.EXPECT().Set("password", "").Return(nil) // Empty password!
