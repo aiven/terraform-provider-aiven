@@ -20,32 +20,32 @@ func TestRenameAliasesToDto(t *testing.T) {
 		{
 			serviceType: "kafka",
 			name:        "keeps original key",
-			src:         `{"ip_filter": ["0.0.0.0/0"]}`,
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
+			src:         `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 		},
 		{
 			serviceType: "kafka",
 			name:        "chooses original out if 3",
-			src:         `{"ip_filter": ["0.0.0.0/0"], "ip_filter_string": [], "ip_filter_object": []}`,
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
+			src:         `{"ip_filter": ["0.0.0.0/0", "::/0"], "ip_filter_string": [], "ip_filter_object": []}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 		},
 		{
 			serviceType: "kafka",
 			name:        "chooses string out if 3",
-			src:         `{"ip_filter": [], "ip_filter_string": ["0.0.0.0/0"], "ip_filter_object": []}`,
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
+			src:         `{"ip_filter": [], "ip_filter_string": ["0.0.0.0/0", "::/0"], "ip_filter_object": []}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 		},
 		{
 			serviceType: "kafka",
 			name:        "ignores unknown key",
-			src:         `{"whatever": ["0.0.0.0/0"]}`,
-			expected:    `{"whatever": ["0.0.0.0/0"]}`,
+			src:         `{"whatever": ["0.0.0.0/0", "::/0"]}`,
+			expected:    `{"whatever": ["0.0.0.0/0", "::/0"]}`,
 		},
 		{
 			serviceType: `kafka`,
 			name:        `renames "_string" prefix`,
-			src:         `{"ip_filter_string": ["0.0.0.0/0"]}`,
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
+			src:         `{"ip_filter_string": ["0.0.0.0/0", "::/0"]}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 		},
 		{
 			serviceType: `kafka`,
@@ -117,28 +117,34 @@ func TestRenameAliasesToTfo(t *testing.T) {
 		{
 			serviceType: "kafka",
 			name:        "keeps original key",
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
-			dto:         `{"ip_filter": ["0.0.0.0/0"]}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
+			dto:         `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("kafka_user_config.0.ip_filter", []string{"0.0.0.0/0"}),
+				newResourceDataKV("kafka_user_config.0.ip_filter", []string{"0.0.0.0/0", "::/0"}),
 			),
 		},
 		{
 			serviceType: "kafka",
 			name:        "uses ip_filter_string",
-			expected:    `{"ip_filter_string": ["0.0.0.0/0"]}`,
-			dto:         `{"ip_filter": ["0.0.0.0/0"]}`,
+			expected:    `{"ip_filter_string": ["0.0.0.0/0", "::/0"]}`,
+			dto:         `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("kafka_user_config.0.ip_filter_string", []string{"0.0.0.0/0"}),
+				newResourceDataKV("kafka_user_config.0.ip_filter_string", []string{"0.0.0.0/0", "::/0"}),
 			),
 		},
 		{
 			serviceType: "kafka",
 			name:        "uses ip_filter_object",
-			expected:    `{"ip_filter_object": [{"network": "0.0.0.0/0"}]}`,
-			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"}]}`,
+			expected:    `{"ip_filter_object": [{"network": "0.0.0.0/0"},{"network": "::/0"}]}`,
+			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"},{"network": "::/0"}]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("kafka_user_config.0.ip_filter_object", []map[string]string{{"network": "0.0.0.0/0"}}),
+				newResourceDataKV(
+					"kafka_user_config.0.ip_filter_object",
+					[]map[string]string{
+						{"network": "0.0.0.0/0"},
+						{"network": "::/0"},
+					},
+				),
 			),
 		},
 		{
@@ -176,28 +182,34 @@ func TestRenameAliasesToTfo(t *testing.T) {
 		{
 			serviceType: "thanos",
 			name:        "ip_filter gets a list of objects",
-			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
-			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"}]}`,
+			expected:    `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
+			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"},{"network": "::/0"}]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("thanos_user_config.0.ip_filter", []string{"0.0.0.0/0"}),
+				newResourceDataKV("thanos_user_config.0.ip_filter", []string{"0.0.0.0/0", "::/0"}),
 			),
 		},
 		{
 			serviceType: "thanos",
 			name:        "ip_filter_string gets a list of objects",
-			expected:    `{"ip_filter_string": ["0.0.0.0/0"]}`,
-			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"}]}`,
+			expected:    `{"ip_filter_string": ["0.0.0.0/0", "::/0"]}`,
+			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"},{"network": "::/0"}]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("thanos_user_config.0.ip_filter_string", []string{"0.0.0.0/0"}),
+				newResourceDataKV("thanos_user_config.0.ip_filter_string", []string{"0.0.0.0/0", "::/0"}),
 			),
 		},
 		{
 			serviceType: "thanos",
 			name:        "ip_filter_object gets a list of strings",
-			expected:    `{"ip_filter_object": [{"network": "0.0.0.0/0"}]}`,
-			dto:         `{"ip_filter": ["0.0.0.0/0"]}`,
+			expected:    `{"ip_filter_object": [{"network": "0.0.0.0/0"},{"network": "::/0"}]}`,
+			dto:         `{"ip_filter": ["0.0.0.0/0", "::/0"]}`,
 			tfo: newResourceDataMock(
-				newResourceDataKV("thanos_user_config.0.ip_filter_object", []map[string]string{{"network": "0.0.0.0/0"}}),
+				newResourceDataKV(
+					"thanos_user_config.0.ip_filter_object",
+					[]map[string]string{
+						{"network": "0.0.0.0/0"},
+						{"network": "::/0"},
+					},
+				),
 			),
 		},
 		{

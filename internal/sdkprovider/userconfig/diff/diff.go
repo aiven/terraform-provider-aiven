@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -26,11 +27,11 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 		return oldValue == newValue
 	}
 
-	// Lists, sets and objects (object is list with one item).
+	// Lists, sets and objects (object is networks with one item).
 	if strings.HasSuffix(k, ".#") {
 		if d.HasChange(k) {
 			// By some reason terraform might mark objects as "changed".
-			// In that case, terraform returns a list with a nil value.
+			// In that case, terraform returns a networks with a nil value.
 			// "nil" means that the object has no value.
 			key := strings.TrimSuffix(k, ".#")
 			v, ok := d.Get(key).([]any)
@@ -39,8 +40,8 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 
 		// Suppresses object diff, because it might have been received as default value from the API.
 		// So the diff happens when the object's field is changed.
-		// Object is a list, and both set and list end with "#".
-		// So set == list == object (by type).
+		// Object is a networks, and both set and networks end with "#".
+		// So set == networks == object (by type).
 		// A set of objects is different.
 		// Because hash is calculated for the whole object, not per field.
 		return !isObjectSet(k, d)
@@ -74,14 +75,34 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 	return false
 }
 
-// suppressIPFilterSet ip_filter list has specific logic, like default list value
-func suppressIPFilterSet(k, oldValue, newValue string, d *schema.ResourceData) bool {
-	// Suppresses ip_filter = [0.0.0.0/0]
-	path := strings.Split(k, ".")
-	// Turns ~ip_filter.1234 to ~ip_filter.#
-	v, ok := d.GetOk(strings.Join(path[:len(path)-1], ".") + ".#")
-	// Literally, if the value is "0.0.0.0/0" and the parent's length is "1"
-	return oldValue == "0.0.0.0/0" && newValue == "" && ok && v.(int) == 1
+// suppressIPFilterSet ip_filter networks has specific logic
+// By default services have a non-empty ip_filter networks: either ["0.0.0.0/0"] or ["0.0.0.0/0", "::/0"]
+// Suppress the diff when user didn't define the ip_filter networks in the config but got it from the API:
+// - ip_filter = [0.0.0.0/0, ::/0] -- suppress
+// - ip_filter = [0.0.0.0/0] 	   -- suppress
+// - ip_filter = [::/0] 		   -- don't
+// - ip_filter = [127.0.0.1/32]    -- don't
+// As a side effect suppresses "default" networks removal from the config.
+// But terraform doesn't know the difference, so nothing we can do here.
+func suppressIPFilterSet(k, _, _ string, d *schema.ResourceData) bool {
+	const ipFilterDepth = 3 // foo_user_config.0.ip_filter
+	// Turns ~ip_filter.1234 to ~ip_filter to get the set.
+	ipFilterKey := strings.Join(strings.Split(k, ".")[0:ipFilterDepth], ".")
+	if d.HasChange(ipFilterKey) {
+		// Something is changed in the ip_filter networks.
+		// Shows the diff.
+		return false
+	}
+
+	// The ip_filter networks is removed.
+	// Makes sure it has only default values.
+	set, ok := d.Get(ipFilterKey).(*schema.Set)
+	if !ok {
+		// Can't happen, but shouldn't panic
+		return false
+	}
+
+	return IsDefaultIPFilterList(set.List())
 }
 
 // isObjectSet returns true if given k is for collection of objects
@@ -103,4 +124,48 @@ func isObjectSet(k string, d *schema.ResourceData) bool {
 
 	t := value.Type()
 	return t.IsSetType() && t.ElementType().IsObjectType()
+}
+
+// defaultIPFilterLists returns service default ip_filter lists
+// the old one: ["0.0.0.0/0"]
+// the new one: ["0.0.0.0/0", "::/0"]
+func defaultIPFilterLists() [][]string {
+	return [][]string{
+		{"0.0.0.0/0"},
+		{"0.0.0.0/0", "::/0"},
+	}
+}
+
+func IsDefaultIPFilterList(list []any) bool {
+	norm := make([]string, len(list))
+	for i, v := range list {
+		n, ok := NormalizeIPFilter(v)
+		if !ok {
+			return false
+		}
+		norm[i] = n
+	}
+
+	slices.Sort(norm)
+	for _, def := range defaultIPFilterLists() {
+		if slices.Equal(norm, def) {
+			return true
+		}
+	}
+	return false
+}
+
+// NormalizeIPFilter returns ip_filter CIDR:
+// 1. when it is a string, it returns string
+// 2. when it is a map, it returns the value of the "network" key
+func NormalizeIPFilter(v any) (string, bool) {
+	s, ok := v.(string)
+	if ok {
+		return s, ok
+	}
+	m, ok := v.(map[string]any)
+	if ok {
+		return NormalizeIPFilter(m["network"])
+	}
+	return "", false
 }

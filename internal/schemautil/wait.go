@@ -18,6 +18,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
 
 const (
@@ -202,20 +203,12 @@ func grafanaReady(s *service.ServiceGetOut) bool {
 		return true
 	}
 
-	// if IP filter is anything but 0.0.0.0/0 skip Grafana service availability checks
-	ipFilters, ok := s.UserConfig["ip_filter"]
-	if ok {
-		f := ipFilters.([]interface{})
-		if len(f) > 1 {
-			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
+	// if IP filter is anything but 0.0.0.0/0 and/or ::/0 skip Grafana service availability checks
+	if ipFilters, ok := s.UserConfig["ip_filter"]; ok {
+		list, ok := ipFilters.([]any)
+		if !(ok && diff.IsDefaultIPFilterList(list)) {
+			log.Printf("[DEBUG] grafana service has `%v` ip filters, and availability checks will be skipped", ipFilters)
 			return true
-		}
-
-		if len(f) == 1 {
-			if f[0] != "0.0.0.0/0" {
-				log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
-				return true
-			}
 		}
 	}
 

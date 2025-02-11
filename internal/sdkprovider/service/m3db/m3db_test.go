@@ -227,7 +227,7 @@ resource "aiven_grafana" "grafana1" {
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {
-    ip_filter        = ["0.0.0.0/0"]
+    ip_filter        = ["0.0.0.0/0", "::/0"]
     alerting_enabled = true
 
     public_access {
@@ -303,7 +303,7 @@ resource "aiven_grafana" "grafana1" {
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {
-    ip_filter        = ["0.0.0.0/0"]
+    ip_filter        = ["0.0.0.0/0", "::/0"]
     alerting_enabled = true
 
     public_access {

@@ -25,7 +25,13 @@ func TestAccAiven_grafana(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGrafanaResource(rName),
+				Config:             testAccGrafanaDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
+			{
+				Config: testAccGrafanaResource(rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
@@ -38,13 +44,87 @@ func TestAccAiven_grafana(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					// Gets default IP filter list from the API
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.1", "::/0"),
 				),
 			},
 			{
-				Config:             testAccGrafanaDoubleTagResource(rName),
+				// Uses default values, but all remains
+				Config: testAccGrafanaResource(rName, `ip_filter = ["0.0.0.0/0", "::/0"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.1", "::/0"),
+				),
+			},
+			{
+				// Removes one value, expects non empty plan
+				Config:             testAccGrafanaResource(rName, `ip_filter = ["::/0"]`),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
+			{
+				// Removes the other value, same story: plan is not empty
+				Config:             testAccGrafanaResource(rName, `ip_filter = ["0.0.0.0/0"]`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Empty list, expects non-empty plan
+				Config:             testAccGrafanaResource(rName, `ip_filter = []`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Adds one more, applies
+				Config: testAccGrafanaResource(rName, `ip_filter = ["0.0.0.0/0", "127.0.0.1/32", "::/0"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.1", "127.0.0.1/32"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.2", "::/0"),
+				),
+			},
+			{
+				// This is tricky: the diff suppressor expects 2 values, the test proves that "0.0.0.0/0" and "another one"
+				// do not suppress the diff
+				Config:             testAccGrafanaResource(rName, `ip_filter = ["0.0.0.0/0", "127.0.0.1/32"]`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Compatibility test: recently [0.0.0.0/0] was the default value
+				Config: testAccGrafanaResource(rName, `ip_filter = ["0.0.0.0/0"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+				),
+			},
+			{
+				// Compatibility test: removing it suppresses the diff
+				Config:             testAccGrafanaResource(rName, ``),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false, // the plan is empty
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+				),
+			},
+			{
+				// False positive test: [::/0] is not a default value
+				Config: testAccGrafanaResource(rName, `ip_filter = ["::/0"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "::/0"),
+				),
+			},
+			{
+				// False positive test: [::/0] is not a default value
+				Config:             testAccGrafanaResource(rName, ``),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true, // the plan is NOT empty
 			},
 		},
 	})
@@ -62,12 +142,12 @@ func TestAccAiven_grafana_user_config(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGrafanaResource(rName),
+				Config: testAccGrafanaResource(rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "true"),
 				),
@@ -223,7 +303,7 @@ data "aiven_grafana" "common" {
 	})
 }
 
-func testAccGrafanaResource(name string) string {
+func testAccGrafanaResource(name string, ipFilters string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -243,8 +323,8 @@ resource "aiven_grafana" "bar" {
   }
 
   grafana_user_config {
-    ip_filter        = ["0.0.0.0/0"]
     alerting_enabled = true
+	%s
 
     public_access {
       grafana = true
@@ -257,7 +337,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, ipFilters)
 }
 func testAccGrafanaDoubleTagResource(name string) string {
 	return fmt.Sprintf(`
@@ -283,7 +363,7 @@ resource "aiven_grafana" "bar" {
   }
 
   grafana_user_config {
-    ip_filter        = ["0.0.0.0/0"]
+    ip_filter        = ["0.0.0.0/0", "::/0"]
     alerting_enabled = true
 
     public_access {
@@ -362,7 +442,7 @@ resource "aiven_grafana" "bar" {
   maintenance_window_time = "10:00:00"
 
   grafana_user_config {
-    ip_filter        = ["0.0.0.0/0"]
+    ip_filter        = ["0.0.0.0/0", "::/0"]
     alerting_enabled = true
 
     public_access {
@@ -434,78 +514,6 @@ func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc 
 
 		return nil
 	}
-}
-
-func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
-	t.Skip(`activate when provider can manage default object values`)
-
-	project := os.Getenv("AIVEN_PROJECT_NAME")
-	prefix := "test-acc-" + acctest.RandString(7)
-	resourceName := "aiven_grafana.grafana"
-
-	// This checks prove that deleting ip_filter_objects does not change the state
-	checks := resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-		resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter_object.#", "1"),
-	)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, true),
-				Check:  checks,
-			},
-			{
-				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, false),
-				Check:  checks,
-			},
-		},
-	})
-}
-
-//nolint:unused
-func testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project string, addIPFilterObjs bool) string {
-	ipFilterObjs := `ip_filter_object {
-      description = "test"
-      network     = "1.3.3.7/32"
-    }`
-
-	if !addIPFilterObjs {
-		ipFilterObjs = ``
-	}
-
-	return fmt.Sprintf(`
-data "aiven_project" "project" {
-  project = %[2]q
-}
-
-resource "aiven_grafana" "grafana" {
-  project                 = data.aiven_project.project.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-1"
-  service_name            = "%[1]s-grafana"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-
-  tag {
-    key   = "test"
-    value = "val"
-  }
-
-  grafana_user_config {
-    alerting_enabled = true
-    %[3]s
-
-    public_access {
-      grafana = false
-    }
-  }
-}
-
-`, prefix, project, ipFilterObjs)
 }
 
 // TestAccAiven_grafana_set_change tests that changing a set actually changes it count

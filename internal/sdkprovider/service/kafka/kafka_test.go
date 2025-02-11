@@ -323,7 +323,7 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
-		if a["kafka_user_config.0.ip_filter.0"] != "0.0.0.0/0" {
+		if a["kafka_user_config.0.ip_filter.0"] != "0.0.0.0/0" || a["kafka_user_config.0.ip_filter.1"] != "::/0" {
 			return fmt.Errorf("expected to get a correct ip_filter from Aiven")
 		}
 
