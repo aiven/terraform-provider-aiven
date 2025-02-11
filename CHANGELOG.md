@@ -9,7 +9,12 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Fix: Static IPs are not dissociated upon service deletion in some cases
+
 ## [4.34.1] - 2025-02-07
+
 - Fix `organization_user_group` import
 
 ## [4.34.0] - 2025-01-29

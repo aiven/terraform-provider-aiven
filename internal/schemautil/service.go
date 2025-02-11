@@ -678,7 +678,13 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error deleting a service: %s", err)
 	}
 
-	// Delete already takes care of static IPs disassociation; no need to explicitly disassociate them here
+	// Disassociates static ips
+	for _, ip := range d.Get("static_ips").(*schema.Set).List() {
+		err := client.StaticIPs.Dissociate(ctx, projectName, ip.(string))
+		if common.IsCritical(err) {
+			return diag.Errorf("error dissociating static IP %q from service: %s", ip, err)
+		}
+	}
 
 	if err := WaitForDeletion(ctx, d, m); err != nil {
 		return diag.Errorf("error waiting for service deletion: %s", err)
