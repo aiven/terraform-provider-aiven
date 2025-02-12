@@ -54,7 +54,7 @@ to the new resource.
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenProjectUserSchema,
-		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
+		DeprecationMessage: "Use aiven_organization_permission instead.",
 	}
 }
 

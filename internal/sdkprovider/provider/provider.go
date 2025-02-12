@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -314,6 +315,25 @@ func Provider(version string) (*schema.Provider, error) {
 		addBeta(p.DataSourcesMap, betaDataSources...)...,
 	)
 
+	// Deprecates datasources along with their resources
+	for k, d := range p.DataSourcesMap {
+		if d.DeprecationMessage == "" {
+			r, ok := p.ResourcesMap[k]
+			if ok && r.DeprecationMessage != "" {
+				d.DeprecationMessage = r.DeprecationMessage
+			}
+		}
+	}
+
+	// Adds deprecation callouts to the description, so they are visible in the Terraform registry
+	for _, m := range []map[string]*schema.Resource{p.ResourcesMap, p.DataSourcesMap} {
+		for _, r := range m {
+			if r.DeprecationMessage != "" {
+				r.Description += "\n\n" + formatDeprecation(r.DeprecationMessage)
+			}
+		}
+	}
+
 	// Marks sensitive fields recursively
 	err := validateSensitive(p.ResourcesMap, false)
 	if err != nil {
@@ -410,4 +430,21 @@ func validateSensitiveResource(r *schema.Resource, sensitive bool) error {
 		}
 	}
 	return nil
+}
+
+var (
+	// reCallouts https://developer.hashicorp.com/terraform/registry/providers/docs#callouts
+	reCallouts = regexp.MustCompile(`^([~>!-]>)`)
+	// reAivenResourceName finds `aiven_*` resources
+	reAivenResourceName = regexp.MustCompile(`(aiven_[a-z_0-9]+)`)
+)
+
+// formatDeprecation Adds a deprecation callout to the description
+func formatDeprecation(s string) string {
+	msg := strings.TrimSpace(reAivenResourceName.ReplaceAllString(s, "`$1`"))
+	if reCallouts.MatchString(msg) {
+		// Doesn't turn the deprecation into a callout if it already is one
+		return msg
+	}
+	return "~> **This resource is deprecated**.\n\n" + msg
 }

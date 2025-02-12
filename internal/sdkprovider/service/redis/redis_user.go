@@ -90,7 +90,8 @@ func ResourceRedisUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenRedisUserSchema,
+		Schema:             aivenRedisUserSchema,
+		DeprecationMessage: deprecationMessage,
 	}
 }
 

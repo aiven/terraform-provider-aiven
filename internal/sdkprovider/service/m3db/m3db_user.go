@@ -37,11 +37,12 @@ var aivenM3DBUserSchema = map[string]*schema.Schema{
 
 func ResourceM3DBUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an Aiven for M3 service user.",
-		CreateContext: schemautil.ResourceServiceUserCreate,
-		UpdateContext: schemautil.ResourceServiceUserUpdate,
-		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
+		Description:        "Creates and manages an Aiven for M3 service user.",
+		DeprecationMessage: deprecationMessage,
+		CreateContext:      schemautil.ResourceServiceUserCreate,
+		UpdateContext:      schemautil.ResourceServiceUserUpdate,
+		ReadContext:        schemautil.ResourceServiceUserRead,
+		DeleteContext:      schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

@@ -156,8 +156,11 @@ func ResourceAccountAuthentication() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:             aivenAccountAuthenticationSchema,
-		DeprecationMessage: "This resource is deprecated. Use the Aiven Console instead. View the documentation for more information: https://aiven.io/docs/platform/howto/saml/add-identity-providers",
+		Schema: aivenAccountAuthenticationSchema,
+		DeprecationMessage: `
+To set up an identity provider as an authentication method for your organization,
+[use the Aiven Console](https://aiven.io/docs/platform/howto/saml/add-identity-providers).
+It guides you through the steps and explains the settings.`,
 	}
 }
 

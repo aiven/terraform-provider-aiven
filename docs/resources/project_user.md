@@ -7,6 +7,8 @@ description: |-
   This resource is deprecated. Use aiven_organization_permission and
   migrate existing aiven_project_user resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources
   to the new resource.
+  ~> This resource is deprecated.
+  Use aiven_organization_permission instead.
 ---
 
 # aiven_project_user (Resource)
@@ -16,6 +18,11 @@ Creates and manages an Aiven project member.
 **This resource is deprecated.** Use `aiven_organization_permission` and
 [migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
 to the new resource.
+		
+
+~> **This resource is deprecated**.
+
+Use `aiven_organization_permission` instead.
 
 ## Example Usage
 

@@ -65,10 +65,7 @@ var aivenAccountSchema = map[string]*schema.Schema{
 
 func ResourceAccount() *schema.Resource {
 	return &schema.Resource{
-		Description: `Creates and manages an Aiven account.
-		
-**This resource is deprecated.** Use ` + "`aiven_organization`" + ` instead.
-		`,
+		Description:   `Creates and manages an Aiven account.`,
 		CreateContext: common.WithGenClient(resourceAccountCreate),
 		ReadContext:   common.WithGenClient(resourceAccountRead),
 		UpdateContext: common.WithGenClient(resourceAccountUpdate),

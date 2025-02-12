@@ -4,11 +4,17 @@ page_title: "aiven_account_authentication Data Source - terraform-provider-aiven
 subcategory: ""
 description: |-
   The Account Authentication data source provides information about the existing Aiven Account Authentication.
+  ~> This resource is deprecated.
+  This resource is deprecated
 ---
 
 # aiven_account_authentication (Data Source)
 
 The Account Authentication data source provides information about the existing Aiven Account Authentication.
+
+~> **This resource is deprecated**.
+
+This resource is deprecated
 
 ## Example Usage
 

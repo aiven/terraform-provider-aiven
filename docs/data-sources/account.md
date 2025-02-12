@@ -4,11 +4,17 @@ page_title: "aiven_account Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Account data source provides information about the existing Aiven Account.
+  ~> This resource is deprecated.
+  This resource will be removed in v5.0.0. Use aiven_organization instead.
 ---
 
 # aiven_account (Data Source)
 
 The Account data source provides information about the existing Aiven Account.
+
+~> **This resource is deprecated**.
+
+This resource will be removed in v5.0.0. Use `aiven_organization` instead.
 
 ## Example Usage
 
