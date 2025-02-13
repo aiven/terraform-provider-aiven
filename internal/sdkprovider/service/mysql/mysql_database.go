@@ -18,19 +18,19 @@ var aivenMySQLDatabaseSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The name of the service database.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the database.").ForceNew().Build(),
 	},
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: userconfig.Desc(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Description: userconfig.Desc(`Client-side deletion protection that prevents the database from being deleted by Terraform. Enable this for production databases containing critical data.`).DefaultValue(false).Build(),
 	},
 }
 
 func ResourceMySQLDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The MySQL Database resource allows the creation and management of Aiven MySQL Databases.",
+		Description:   "Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.",
 		CreateContext: resourceMySQLDatabaseCreate,
 		ReadContext:   resourceMySQLDatabaseRead,
 		DeleteContext: resourceMySQLDatabaseDelete,
