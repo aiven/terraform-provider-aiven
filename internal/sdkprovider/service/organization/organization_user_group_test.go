@@ -196,14 +196,14 @@ func TestAccAivenOrganizationUserGroup_Import(t *testing.T) {
 func testAccOrganizationUserGroupImportConfig(orgID, name, groupID string) string {
 	return fmt.Sprintf(`
 resource "aiven_organization_user_group" "import_group" {
-    organization_id = "%s"
-    name            = "%s"
-    description     = "Imported group"
+  organization_id = "%s"
+  name            = "%s"
+  description     = "Imported group"
 }
 
 import {
-    id = "%s/%s"
-    to = aiven_organization_user_group.import_group
+  id = "%s/%s"
+  to = aiven_organization_user_group.import_group
 }
 `, orgID, name, orgID, groupID)
 }

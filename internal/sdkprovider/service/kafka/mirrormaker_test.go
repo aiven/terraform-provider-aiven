@@ -52,7 +52,7 @@ resource "aiven_kafka_mirrormaker" "bar" {
   service_name = "test-acc-sr-%s"
 
   kafka_mirrormaker_user_config {
-    ip_filter = ["0.0.0.0/0"]
+    ip_filter = ["0.0.0.0/0", "::/0"]
 
     kafka_mirrormaker {
       refresh_groups_interval_seconds = 600
