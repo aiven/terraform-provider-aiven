@@ -417,6 +417,7 @@ func opensearchUserConfig() *schema.Schema {
 								Type:     schema.TypeList,
 							},
 							"ip_rate_limiting": {
+								Deprecated:  "This property is deprecated.",
 								Description: "IP address rate limiting settings",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"allowed_tries": {
