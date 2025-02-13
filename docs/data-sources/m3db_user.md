@@ -4,11 +4,22 @@ page_title: "aiven_m3db_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Gets information about an Aiven for M3DB service user.
+  !> End of life notice
+  After 30 April 2025 all running Aiven for M3 services will be powered off and deleted, making data from these services inaccessible.
+  You cannot create M3DB services in Aiven projects that didn't have M3DB services before.
+  To avoid interruptions to your service, migrate to Aiven for Thanos Metrics https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources#migrate-from-m3db-to-thanos-metrics
+  before the end of life date.
 ---
 
 # aiven_m3db_user (Data Source)
 
 Gets information about an Aiven for M3DB service user.
+
+!> **End of life notice**
+**After 30 April 2025** all running Aiven for M3 services will be powered off and deleted, making data from these services inaccessible.
+You cannot create M3DB services in Aiven projects that didn't have M3DB services before.
+To avoid interruptions to your service, [migrate to Aiven for Thanos Metrics](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources#migrate-from-m3db-to-thanos-metrics)
+before the end of life date.
 
 ## Example Usage
 

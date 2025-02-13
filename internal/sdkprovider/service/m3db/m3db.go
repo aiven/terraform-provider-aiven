@@ -7,6 +7,14 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
 
+const deprecationMessage = `
+!> **End of life notice**
+**After 30 April 2025** all running Aiven for M3 services will be powered off and deleted, making data from these services inaccessible.
+You cannot create M3DB services in Aiven projects that didn't have M3DB services before.
+To avoid interruptions to your service, [migrate to Aiven for Thanos Metrics](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources#migrate-from-m3db-to-thanos-metrics)
+before the end of life date.
+`
+
 func aivenM3DBSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
 	s[schemautil.ServiceTypeM3] = &schema.Schema{
@@ -66,12 +74,13 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 }
 func ResourceM3DB() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven for M3](https://aiven.io/docs/products/m3db) service.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3),
-		ReadContext:   schemautil.ResourceServiceRead,
-		UpdateContext: schemautil.ResourceServiceUpdate,
-		DeleteContext: schemautil.ResourceServiceDelete,
-		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeM3),
+		Description:        "Creates and manages an [Aiven for M3](https://aiven.io/docs/products/m3db) service.",
+		DeprecationMessage: deprecationMessage,
+		CreateContext:      schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3),
+		ReadContext:        schemautil.ResourceServiceRead,
+		UpdateContext:      schemautil.ResourceServiceUpdate,
+		DeleteContext:      schemautil.ResourceServiceDelete,
+		CustomizeDiff:      schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeM3),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

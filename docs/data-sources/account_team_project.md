@@ -4,11 +4,31 @@ page_title: "aiven_account_team_project Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Account Team Project data source provides information about the existing Account Team Project.
+  !> Teams have been deprecated and are being migrated to groups
+  On 30 September 2024 the Account Owners team will transition to super admin. Super admin have full access to the organization.
+  The Account Owners and super admin are synced, so the removal of the Account Owners team will have no impact on existing permissions.
+  From 4 November 2024 you won't be able to create new teams or update existing ones. Existing teams will be migrated to groups after
+  this date. On 2 December 2024 all teams will be deleted and the teams feature will be completely removed. View the
+  migration guide https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups for more information on the changes and migrating to groups.
+  ~> Important
+  You can't delete the Account Owners team. Deleting all other teams in your organization will disable the teams feature.
+  You won't be able to create new teams or access your Account Owners team.
 ---
 
 # aiven_account_team_project (Data Source)
 
 The Account Team Project data source provides information about the existing Account Team Project.
+
+!> **Teams have been deprecated and are being migrated to groups**
+**On 30 September 2024** the Account Owners team will transition to super admin. Super admin have full access to the organization.
+The Account Owners and super admin are synced, so the removal of the Account Owners team will have no impact on existing permissions.
+**From 4 November 2024** you won't be able to create new teams or update existing ones. Existing teams will be migrated to groups after
+this date. **On 2 December 2024** all teams will be deleted and the teams feature will be completely removed. [View the 
+migration guide](https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups) for more information on the changes and migrating to groups.
+
+~> **Important**
+You can't delete the Account Owners team. **Deleting all other teams in your organization will disable the teams feature.**
+You won't be able to create new teams or access your Account Owners team.
 
 ## Example Usage
 
