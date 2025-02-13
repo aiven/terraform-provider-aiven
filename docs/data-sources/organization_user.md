@@ -4,10 +4,10 @@ page_title: "aiven_organization_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Organization User data source provides information about the existing Aiven Organization User.
-  ~> This resource is deprecated.
+  ~> This resource is deprecated
   Users cannot be invited to an organization using Terraform.
-  Use the Aiven Console to invite users to your organization. After the user accepts the invite
-  you can get their information using the aiven_organization_user data source. You can manage
+  Use the Aiven Console to invite users to your organization https://aiven.io/docs/platform/howto/manage-org-users.
+  After the user accepts the invite you can get their information using the aiven_organization_user data source. You can manage
   user access to projects with the aiven_organization_user_group, aiven_organization_user_group_member,
   and aiven_organization_permission resources.
 ---
@@ -16,11 +16,10 @@ description: |-
 
 The Organization User data source provides information about the existing Aiven Organization User.
 
-~> **This resource is deprecated**.
-
+~> **This resource is deprecated**
 Users cannot be invited to an organization using Terraform.
-Use the Aiven Console to invite users to your organization. After the user accepts the invite
-you can get their information using the `aiven_organization_user` data source. You can manage
+Use the Aiven Console to [invite users to your organization](https://aiven.io/docs/platform/howto/manage-org-users).
+After the user accepts the invite you can get their information using the `aiven_organization_user` data source. You can manage
 user access to projects with the `aiven_organization_user_group`, `aiven_organization_user_group_member`,
 and `aiven_organization_permission` resources.
 

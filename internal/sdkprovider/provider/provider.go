@@ -446,5 +446,5 @@ func formatDeprecation(s string) string {
 		// Doesn't turn the deprecation into a callout if it already is one
 		return msg
 	}
-	return "~> **This resource is deprecated**.\n\n" + msg
+	return "~> **This resource is deprecated**\n" + msg
 }

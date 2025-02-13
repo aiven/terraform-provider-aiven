@@ -4,17 +4,20 @@ page_title: "aiven_project_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Project User data source provides information about the existing Aiven Project User.
-  ~> This resource is deprecated.
-  Use aiven_organization_permission instead.
+  ~> This resource is deprecated
+  Use aiven_organization_permission instead and
+  migrate existing aiven_project_user resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources
+  to the new resource.
 ---
 
 # aiven_project_user (Data Source)
 
 The Project User data source provides information about the existing Aiven Project User.
 
-~> **This resource is deprecated**.
-
-Use `aiven_organization_permission` instead.
+~> **This resource is deprecated**
+Use `aiven_organization_permission` instead and
+[migrate existing `aiven_project_user` resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
 
 ## Example Usage
 
