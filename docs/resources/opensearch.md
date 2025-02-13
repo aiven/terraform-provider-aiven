@@ -300,7 +300,7 @@ Optional:
 Optional:
 
 - `internal_authentication_backend_limiting` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
-- `ip_rate_limiting` (Block List, Max: 1) IP address rate limiting settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
+- `ip_rate_limiting` (Block List, Max: 1, Deprecated) IP address rate limiting settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
 
 <a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
 ### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.internal_authentication_backend_limiting`

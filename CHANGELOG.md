@@ -11,7 +11,11 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.34.2] - 2025-02-13
+
 - Fix `ip_filter`, suppress plan for the new `ip_filter` default value (`::/0`) when a new service is created
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`: deprecate:
+  This property is deprecated
 
 ## [4.34.1] - 2025-02-07
 
