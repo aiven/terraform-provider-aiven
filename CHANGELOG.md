@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_service_integration` type `clickhouse_kafka` crashes when a table is removed
+
 ## [4.34.2] - 2025-02-13
 
 - Fix `ip_filter`, suppress plan for the new `ip_filter` default value (`::/0`) when a new service is created

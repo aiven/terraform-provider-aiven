@@ -575,7 +575,7 @@ func TestAccAivenServiceIntegration_datadog_with_user_config_creates(t *testing.
 	})
 }
 
-func testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project string) string {
+func testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, tables string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
   project = %[2]q
@@ -588,6 +588,11 @@ resource "aiven_kafka" "kafka" {
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    // Enables Kafka Schemas
+    schema_registry = true
+  }
 }
 
 resource "aiven_clickhouse" "clickhouse" {
@@ -604,8 +609,27 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
   integration_type         = "clickhouse_kafka"
   source_service_name      = aiven_kafka.kafka.service_name
   destination_service_name = aiven_clickhouse.clickhouse.service_name
+
+  clickhouse_kafka_user_config {
+    dynamic "tables" {
+      for_each = %[3]s
+      content {
+        data_format   = "AvroConfluent"
+        name          = tables.key
+        group_name    = tables.key
+        num_consumers = 1
+        topics {
+          name = tables.key
+        }
+        columns {
+          name = tables.key
+          type = "LowCardinality(String)"
+        }
+      }
+    }
+  }
 }
-`, prefix, project)
+`, prefix, project, tables)
 }
 
 func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *testing.T) {
@@ -618,12 +642,27 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *test
 		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project),
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, "[]"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
 					resource.TestCheckResourceAttr(resourceName, "project", project),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", prefix+"-kafka"),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", prefix+"-clickhouse"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "0"),
+				),
+			},
+			{
+				// Tests table removal: adds three
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["foo", "bar", "baz"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "3"),
+				),
+			},
+			{
+				// Tests table removal: leaves one
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["bar"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "1"),
 				),
 			},
 		},
