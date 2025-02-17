@@ -4,7 +4,7 @@ page_title: "aiven_account Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages an Aiven account.
-  ~> This resource is deprecated.
+  ~> This resource is deprecated
   This resource will be removed in v5.0.0. Use aiven_organization instead.
 ---
 
@@ -12,8 +12,7 @@ description: |-
 
 Creates and manages an Aiven account.
 
-~> **This resource is deprecated**.
-
+~> **This resource is deprecated**
 This resource will be removed in v5.0.0. Use `aiven_organization` instead.
 
 ## Example Usage
