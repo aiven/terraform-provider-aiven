@@ -2,6 +2,7 @@ package diff
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,26 +28,6 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 		return oldValue == newValue
 	}
 
-	// Lists, sets and objects (object is networks with one item).
-	if strings.HasSuffix(k, ".#") {
-		if d.HasChange(k) {
-			// By some reason terraform might mark objects as "changed".
-			// In that case, terraform returns a networks with a nil value.
-			// "nil" means that the object has no value.
-			key := strings.TrimSuffix(k, ".#")
-			v, ok := d.Get(key).([]any)
-			return ok && len(v) == 1 && v[0] == nil
-		}
-
-		// Suppresses object diff, because it might have been received as default value from the API.
-		// So the diff happens when the object's field is changed.
-		// Object is a networks, and both set and networks end with "#".
-		// So set == networks == object (by type).
-		// A set of objects is different.
-		// Because hash is calculated for the whole object, not per field.
-		return !isObjectSet(k, d)
-	}
-
 	// SuppressUnchanged is applied to each nested field.
 	// Ip filter items handled with a special suppressor.
 	if reIsIPFilterStrings.MatchString(k) {
@@ -55,7 +36,29 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 
 	// Doesn't suppress "set" items.
 	if reIsSetElement.MatchString(k) {
+		// A hash mostly calculated for the whole object.
 		return false
+	}
+
+	// Lists, sets and objects (object is list with one item).
+	// But never a set of nested objects: it is impossible to find an object in a set by its hash.
+	if strings.HasSuffix(k, ".#") {
+		if d.HasChange(k) {
+			// By some reason terraform might mark objects as "changed".
+			// In that case, terraform returns a list with a nil value.
+			// "nil" means that the object has no value.
+			key := strings.TrimSuffix(k, ".#")
+			v, ok := d.Get(key).([]any)
+			return ok && len(v) == 1 && v[0] == nil
+		}
+
+		// Suppresses object diff, because it might have been received as default value from the API.
+		// So the diff happens when the object's field is changed.
+		// Object is a list, and both set and list end with "#".
+		// So set == list == object (by type).
+		// A set of objects is different.
+		// Because hash is calculated for the whole object, not per field.
+		return !isObjectSet(k, d)
 	}
 
 	// Object properties.
@@ -75,7 +78,8 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 	return false
 }
 
-// suppressIPFilterSet ip_filter networks has specific logic
+// suppressIPFilterSet ip_filter list has specific logic
+// Doesn't support ip_filter_object.
 // By default services have a non-empty ip_filter networks: either ["0.0.0.0/0"] or ["0.0.0.0/0", "::/0"]
 // Suppress the diff when user didn't define the ip_filter networks in the config but got it from the API:
 // - ip_filter = [0.0.0.0/0, ::/0] -- suppress
@@ -105,7 +109,9 @@ func suppressIPFilterSet(k, _, _ string, d *schema.ResourceData) bool {
 	return IsDefaultIPFilterList(set.List())
 }
 
-// isObjectSet returns true if given k is for collection of objects
+// isObjectSet returns true if the given k is a set, and its elements are objects
+// Doesn't support sets with nested objects!
+// Terraform fails to calculate hash for nested objects, and can simply not detect changes.
 func isObjectSet(k string, d *schema.ResourceData) bool {
 	path := strings.Split(strings.TrimSuffix(k, ".#"), ".")
 	value := d.GetRawState().AsValueMap()[path[0]]
@@ -113,12 +119,15 @@ func isObjectSet(k string, d *schema.ResourceData) bool {
 	// user_config field
 	path = path[1:]
 
-	// Drills down the field
+	// Drills down the field: foo_user_config.0.ip_filter_object
 	for _, v := range path {
-		if v == "0" {
-			value = value.AsValueSlice()[0]
+		// When mets ".0." it is an index of list/set.
+		index, err := strconv.Atoi(v)
+		if err == nil {
+			value = value.AsValueSlice()[index]
 			continue
 		}
+
 		value = value.GetAttr(v)
 	}
 
