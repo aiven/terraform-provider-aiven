@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `aiven_service_integration` type `clickhouse_kafka` crashes when a table is removed
+- Added `aiven_organization_project` resource
 
 ## [4.34.2] - 2025-02-13
 
