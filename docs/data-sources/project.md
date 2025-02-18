@@ -4,11 +4,16 @@ page_title: "aiven_project Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Gets information about an Aiven project.
+  ~> This resource is deprecated
+  Use aiven_organization_project instead and migrate your existing aiven_project resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources to the new resource.
 ---
 
 # aiven_project (Data Source)
 
 Gets information about an Aiven project.
+
+~> **This resource is deprecated**
+Use ``aiven_organization_project`` instead and [migrate your existing `aiven_project` resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) to the new resource.
 
 ## Example Usage
 

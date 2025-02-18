@@ -430,6 +430,145 @@ resource "aiven_account_team_project" "main" {
       terraform state list
       ```
 
+## Migrate `aiven_project` to `aiven_organization_project`
+
+The `aiven_project` resource and data source have been replaced by [`aiven_organization_project`](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_project).
+Migrate your existing project resources and data sources by replacing them with `aiven_organization_project`.
+
+1. Replace all `aiven_project` resources with the `aiven_organization_project` resource.
+   * Change the `project` attribute to `project_id`. Don't change the value.
+   * Add the `organization_id`.
+   * For projects in an organizational unit, keep the `parent_id` attribute.
+   * Add the `billing_group_id`. You can [get IDs from the Aiven Console](https://docs.aiven.io/docs/platform/reference/get-resource-IDs).
+
+   For example, the following file has one project in an organization and one in an organizational unit:
+
+      ```hcl
+      data "aiven_organization" "main" {
+        name = "Example organization"
+      }
+
+      resource "aiven_organizational_unit" "example_unit" {
+        name      = "Production"
+        parent_id = data.aiven_organization.main.id
+      }
+
+      resource "aiven_project" "example_project_in_org" {
+        project   = "example-project-in-organization"
+        parent_id = data.aiven_organization.main.id
+      }
+
+      resource "aiven_project" "example_project_in_unit" {
+        project   = "example-project-in-unit"
+        parent_id = aiven_organizational_unit.example_unit.id
+      }
+     ```
+
+     The updated file with the new `aiven_organization_project` resource is:
+
+      ```hcl
+      data "aiven_organization" "main" {
+        name = "Example organization"
+      }
+
+      resource "aiven_organizational_unit" "example_unit" {
+        name      = "Production"
+        parent_id = data.aiven_organization.main.id
+      }
+
+      resource "aiven_organization_project" "example_project_in_org" {
+        project_id       = "example-project-in-organization"
+        organization_id  = data.aiven_organization.main.id
+        billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+      }
+
+      resource "aiven_organization_project" "example_project_in_unit" {
+        project_id       = "example-project-in-unit"
+        parent_id        = aiven_organizational_unit.example_unit.id
+        organization_id  = data.aiven_organization.main.id
+        billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+      }
+     ```
+
+2. Replace all references to `aiven_project` resources with the new `aiven_organization_project` resources. 
+
+   In the following example, a PostgreSQL service references the `aiven_project` resource:
+
+      ```hcl
+      resource "aiven_pg" "example_postgres" {
+        project = aiven_project.example_project.project
+        ...
+      }
+      ```
+
+   In the updated file, `aiven_project` was replaced with `aiven_organization_project` and `project` with `project_id`:
+
+      ```hcl
+      resource "aiven_pg" "example_postgres" {
+        project = aiven_organization_project.example_project.project_id
+        ...
+      }
+      ```
+
+3. Replace all `aiven_project` data sources with the `aiven_organization_project` data source. 
+   * Change the `project` attribute to `project_id`.
+   * Add the `organization_id`.
+
+   For example, given the following `aiven_project` data source:
+      ```hcl
+        data "aiven_project" "example_project" {
+          project   = "example-project"
+          parent_id = aiven_organization.main.id
+      }
+      ```
+
+     The migrated data source with updated attributes is:
+
+      ```hcl
+        resource "aiven_organization_project" "example_project" {
+          project_id      = "example-project"
+          organization_id = aiven_organization.main.id
+      }
+      ```
+
+4. Replace all references to the `aiven_project` data sources with the new `aiven_organization_project` data sources.
+
+   In the following example, a PostgreSQL service references the `aiven_project` data source:
+
+      ```hcl
+      resource "aiven_pg" "example_postgres" {
+        project = data.aiven_project.example_project.project
+        ...
+      }
+      ```
+
+   In the updated file, `aiven_project` was replaced with `aiven_organization_project` and `project` with `project_id`:
+
+      ```hcl
+      resource "aiven_pg" "example_postgres" {
+        project = data.aiven_organization_project.example_project.project_id
+        ...
+      }
+      ```
+
+5. To remove the deprecated resource from Terraform's control, run `terraform sate rm`. For example:
+
+    ```bash
+    terraform state rm aiven_project.example_project
+    ```
+
+6. Add the new project resources by [importing them](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/importing-resources). For example:
+
+    ```bash
+    terraform import aiven_organization_project.example_project org12345678/example-project
+    ```
+
+7. To confirm the migration is complete, check that there are no changes by running:
+
+    ```bash
+    terraform plan
+    ```
+
 ## Update `aiven_redis` resources after Valkey upgrade
 
 After you [upgrade from Aiven for Caching to Aiven for Valkey™](https://aiven.io/docs/products/caching/howto/upgrade-aiven-for-caching-to-valkey), update your
