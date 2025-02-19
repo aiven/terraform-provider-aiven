@@ -94,8 +94,8 @@ func TestComplexSchema(t *testing.T) {
 	}
 
 	const expectedHCL = `resource "aiven_pg" "complex_pg" {
-  plan = "business-4"
-  project = "test-project"
+  plan         = "business-4"
+  project      = "test-project"
   service_name = "pg-complex"
   postgresql {
     uri = "postgresql://user:pass@host:5432/db"
@@ -104,12 +104,12 @@ func TestComplexSchema(t *testing.T) {
       "postgresql://user:pass@host2:5432/db",
     ]
     params {
-      user = "admin"
-      password = "secret"
+      user          = "admin"
+      password      = "secret"
       database_name = "mydb"
-      sslmode = "verify-full"
-      host = "pg-host"
-      port = 5432
+      sslmode       = "verify-full"
+      host          = "pg-host"
+      port          = 5432
     }
   }
 }`
@@ -177,14 +177,14 @@ func TestKafkaQuotaResource(t *testing.T) {
 	})
 
 	expected := `resource "aiven_kafka_quota" "test-kafka" {
-	  project = "test-project"
-	  service_name = "test-kafka"
-	  client_id = "test-client-id"
-	  user = "test-user"
-	  consumer_byte_rate = 123
-      producer_byte_rate = 456
-	  request_percentage = 78
-	}`
+  project            = "test-project"
+  service_name       = "test-kafka"
+  client_id          = "test-client-id"
+  user               = "test-user"
+  consumer_byte_rate = 123
+  producer_byte_rate = 456
+  request_percentage = 78
+}`
 
 	res := b.MustRender(t)
 

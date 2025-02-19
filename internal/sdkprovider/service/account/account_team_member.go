@@ -111,7 +111,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 		if invite.UserEmail == userEmail {
 			if err = schemautil.ResourceDataSet(
 				d, invite, aivenAccountTeamMemberSchema,
-				schemautil.AddForceNew("account_id", accountID),
+				schemautil.SetForceNew("account_id", accountID),
 			); err != nil {
 				return err
 			}
@@ -134,7 +134,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 		if member.UserEmail == userEmail {
 			if err = schemautil.ResourceDataSet(
 				d, member, aivenAccountTeamMemberSchema,
-				schemautil.AddForceNew("account_id", accountID),
+				schemautil.SetForceNew("account_id", accountID),
 			); err != nil {
 				return err
 			}

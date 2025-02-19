@@ -378,7 +378,7 @@ func ResourceDataGet(d ResourceData, dto any, fns ...MapModifier) error {
 	}
 
 	for _, f := range fns {
-		if err := f(m); err != nil {
+		if err := f(d, m); err != nil {
 			return err
 		}
 	}
@@ -404,7 +404,7 @@ func serializeGet(value any) any {
 }
 
 // MapModifier modifier for key/value pair
-type MapModifier func(m map[string]any) error
+type MapModifier func(d ResourceData, dto map[string]any) error
 
 // errMissingForceNew `terraform import` requires all ForceNew fields to be set
 // otherwise it will output "replace" plan.
@@ -434,7 +434,7 @@ func ResourceDataSet(d ResourceData, dto any, s map[string]*schema.Schema, fns .
 	}
 
 	for _, f := range fns {
-		if err := f(m); err != nil {
+		if err := f(d, m); err != nil {
 			return err
 		}
 	}
@@ -514,12 +514,12 @@ func RenameAlias(keys ...string) MapModifier {
 
 // RenameAliases renames field names terraform name -> dto name
 func RenameAliases(aliases map[string]string) MapModifier {
-	return func(m map[string]any) error {
-		for k, v := range m {
+	return func(_ ResourceData, dto map[string]any) error {
+		for k, v := range dto {
 			alias, ok := aliases[k]
 			if ok {
-				m[alias] = v
-				delete(m, k)
+				dto[alias] = v
+				delete(dto, k)
 			}
 		}
 		return nil
@@ -535,15 +535,10 @@ func RenameAliasesReverse(aliases map[string]string) MapModifier {
 	return RenameAliases(m)
 }
 
-// AddForceNew adds extra key/value pair to the dto
-// Use it to set ForceNew fields when they are not in the dto
-func AddForceNew(k string, v string) MapModifier {
-	return func(dto map[string]any) error {
-		exist, ok := dto[k]
-		if ok {
-			return fmt.Errorf("field %q already exists: %v", k, exist)
-		}
-		dto[k] = v
+// SetForceNew sets missing ForceNew fields to the DTO which are required by `terraform import`
+func SetForceNew(key string, value any) MapModifier {
+	return func(_ ResourceData, dto map[string]any) error {
+		dto[key] = value
 		return nil
 	}
 }

@@ -122,7 +122,7 @@ func TestResourceDataSetAddForceNew(t *testing.T) {
 
 	err = ResourceDataSet(
 		d, dto, s,
-		AddForceNew("force_new", "hey!"),
+		SetForceNew("force_new", "hey!"),
 		RenameAlias("to_rename", "set_of_objects"),
 	)
 	require.NoError(t, err)

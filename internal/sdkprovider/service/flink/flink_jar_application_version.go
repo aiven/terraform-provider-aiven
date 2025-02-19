@@ -136,9 +136,9 @@ func flinkJarApplicationVersionRead(ctx context.Context, d *schema.ResourceData,
 	return schemautil.ResourceDataSet(
 		d, rsp, flinkJarApplicationVersionSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationVersionRename()),
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
-		schemautil.AddForceNew("application_id", applicationID),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
+		schemautil.SetForceNew("application_id", applicationID),
 	)
 }
 

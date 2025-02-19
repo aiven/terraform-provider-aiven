@@ -192,8 +192,8 @@ func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client a
 
 	err = schemautil.ResourceDataSet(
 		d, user, ResourcePGUserSchema,
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
 	)
 	if err != nil {
 		return err
