@@ -93,8 +93,8 @@ func resourceAlloyDBOmniDatabaseRead(ctx context.Context, d *schema.ResourceData
 
 	return schemautil.ResourceDataSet(
 		d, db, aivenAlloyDBOmniDatabaseSchema,
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
 	)
 }
 

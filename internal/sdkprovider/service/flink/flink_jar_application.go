@@ -65,8 +65,8 @@ func flinkJarApplicationRead(ctx context.Context, d *schema.ResourceData, client
 	return schemautil.ResourceDataSet(
 		d, rsp, flinkJarApplicationSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationRename()),
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
 	)
 }
 

@@ -103,7 +103,7 @@ func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceDa
 		d, resp, aivenOrganizationUserGroupSchema,
 		schemautil.RenameAlias("user_group_name", "name"),
 		schemautil.RenameAlias("user_group_id", "group_id"),
-		schemautil.AddForceNew("organization_id", orgID),
+		schemautil.SetForceNew("organization_id", orgID),
 	); err != nil {
 		return err
 	}
