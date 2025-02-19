@@ -45,7 +45,7 @@ resource "aiven_project" "example_project" {
 - `company` (String) Your company name.
 - `copy_from_billing_group` (String) ID of the billing group to copy the company name, address, currency, billing contacts, and extra text from.
 - `country_code` (String) Two-letter country code.
-- `parent_id` (String) Link a billing group to an existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `parent_id` (String) Link a billing group to an existing organization by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `state` (String) Address state.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) The VAT identification number for your company.

@@ -36,7 +36,7 @@ data "aiven_project" "example_project" {
 - `default_cloud` (String) Default cloud provider and region where services are hosted. This can be changed after the project is created and will not affect existing services.
 - `estimated_balance` (String) The monthly running estimate for this project for the current billing period.
 - `id` (String) The ID of this resource.
-- `parent_id` (String) Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `payment_method` (String) The payment type used for this project. For example,`card`.
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))
 - `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.

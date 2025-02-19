@@ -44,7 +44,7 @@ var aivenOrganizationProjectSchema = map[string]*schema.Schema{
 		Optional: true,
 		Computed: true,
 		Description: userconfig.Desc(
-			"Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID.",
+			"Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID.",
 		).Referenced().Build(),
 	},
 	"technical_emails": {
