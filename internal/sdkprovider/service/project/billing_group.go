@@ -42,8 +42,7 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
 		Description: userconfig.Desc(
-			"Link a billing group to an existing organization or account by using " +
-				"its ID.",
+			"Link a billing group to an existing organization by using its ID.",
 		).Referenced().Build(),
 	},
 	"billing_currency": {
