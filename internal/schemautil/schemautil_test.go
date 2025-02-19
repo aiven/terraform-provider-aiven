@@ -115,6 +115,7 @@ func TestResourceDataSetAddForceNew(t *testing.T) {
 	require.Error(t, err, fmt.Errorf("%w: %q", errMissingForceNew, "force_new"))
 
 	// Expects to set all fields
+	d.EXPECT().Id().Return("hey!")
 	d.EXPECT().Set("set", fieldSet).Return(nil)
 	d.EXPECT().Set("object", []any{fieldObject}).Return(nil)        // is wrapped into a list
 	d.EXPECT().Set("set_of_objects", fieldSetOfObjects).Return(nil) // renamed
@@ -122,7 +123,7 @@ func TestResourceDataSetAddForceNew(t *testing.T) {
 
 	err = ResourceDataSet(
 		d, dto, s,
-		AddForceNew("force_new", "hey!"),
+		ResourceIDKeys("force_new"),
 		RenameAlias("to_rename", "set_of_objects"),
 	)
 	require.NoError(t, err)

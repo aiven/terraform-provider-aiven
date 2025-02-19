@@ -143,8 +143,7 @@ func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *sche
 
 	err = schemautil.ResourceDataSet(
 		d, token, aivenOrganizationApplicationUserTokenSchema,
-		schemautil.AddForceNew("organization_id", orgID),
-		schemautil.AddForceNew("user_id", userID),
+		schemautil.ResourceIDKeys("organization_id", "user_id"),
 	)
 	if err != nil {
 		return err
@@ -179,8 +178,7 @@ func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema
 
 	err = schemautil.ResourceDataSet(
 		d, token, aivenOrganizationApplicationUserTokenSchema,
-		schemautil.AddForceNew("organization_id", orgID),
-		schemautil.AddForceNew("user_id", userID),
+		schemautil.ResourceIDKeys("organization_id", "user_id"),
 	)
 	if err != nil {
 		return err

@@ -97,8 +97,6 @@ func flinkApplicationDeploymentRead(ctx context.Context, d *schema.ResourceData,
 	return schemautil.ResourceDataSet(
 		d, rsp, flinkJarApplicationDeploymentSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationDeploymentRename()),
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
-		schemautil.AddForceNew("application_id", applicationID),
+		schemautil.ResourceIDKeys("project", "service_name", "application_id"),
 	)
 }

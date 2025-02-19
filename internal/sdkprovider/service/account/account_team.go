@@ -106,7 +106,7 @@ func resourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, client
 	if err = schemautil.ResourceDataSet(
 		d, resp, aivenAccountTeamSchema,
 		schemautil.RenameAlias("team_name", "name"),
-		schemautil.AddForceNew("account_id", accountID),
+		schemautil.ResourceIDKeys("account_id"),
 	); err != nil {
 		return err
 	}

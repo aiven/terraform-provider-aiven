@@ -182,8 +182,7 @@ func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client 
 	return schemautil.ResourceDataSet(
 		d, resp, aivenKafkaQuotaSchema,
 		schemautil.RenameAliasesReverse(quotaFieldsAliases),
-		schemautil.AddForceNew("project", projectName),
-		schemautil.AddForceNew("service_name", serviceName),
+		schemautil.ResourceIDKeys("project", "service_name"),
 	)
 }
 

@@ -110,7 +110,7 @@ func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.Reso
 	err = schemautil.ResourceDataSet(
 		d, user, aivenOrganizationApplicationUserSchema,
 		schemautil.RenameAlias("user_email", "email"),
-		schemautil.AddForceNew("organization_id", orgID),
+		schemautil.ResourceIDKeys("organization_id"),
 	)
 	if err != nil {
 		return err
