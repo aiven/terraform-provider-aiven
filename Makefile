@@ -116,6 +116,7 @@ lint: lint-go lint-test lint-docs
 
 
 lint-go: $(GOLANGCILINT)
+	 go mod tidy
 	$(GOLANGCILINT) run --build-tags all --timeout=30m ./...
 
 # Exclude files that use templates from linting
