@@ -37,6 +37,7 @@ resource "aiven_organization_application_user_token" "foo" {
   max_age_seconds  = 3600
   extend_when_used = true
   scopes           = ["user:read"]
+  ip_allowlist     = ["10.0.0.0/8"]
 }
 
 // Required fields only
@@ -44,12 +45,16 @@ resource "aiven_organization_application_user_token" "bar" {
   organization_id = aiven_organization_application_user.foo.organization_id
   user_id         = aiven_organization_application_user.foo.user_id
 }
+
+
 `, acc.RandStr(), org),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(tokenFoo, "description", "Terraform acceptance tests"),
 					resource.TestCheckResourceAttr(tokenFoo, "max_age_seconds", "3600"),
 					resource.TestCheckResourceAttr(tokenFoo, "extend_when_used", "true"),
 					resource.TestCheckResourceAttr(tokenFoo, "scopes.#", "1"),
+					resource.TestCheckResourceAttr(tokenFoo, "ip_allowlist.#", "1"),
+					resource.TestCheckResourceAttr(tokenFoo, "ip_allowlist.0", "10.0.0.0/8"),
 					// Bar token has required fields only
 					resource.TestCheckResourceAttr(tokenBar, "extend_when_used", "false"),
 				),

@@ -38,7 +38,7 @@ resource "aiven_organization" "foo" {
 }
 
 resource "aiven_billing_group" "foo" {
-  name = "test-acc-bg-%[1]s"
+  name      = "test-acc-bg-%[1]s"
   parent_id = aiven_organization.foo.id
 }
 

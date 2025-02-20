@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_organization_application_user_token` resource field `ip_allowlist`: List of allowed IP ranges.
+
 ## [4.36.0] - 2025-02-20
 
 - Added `aiven_organization_vpc` beta resource and data source
