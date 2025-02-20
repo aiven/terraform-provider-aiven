@@ -1,6 +1,6 @@
 module github.com/aiven/terraform-provider-aiven/tools
 
-go 1.24
+go 1.23
 
 toolchain go1.24.0
 
