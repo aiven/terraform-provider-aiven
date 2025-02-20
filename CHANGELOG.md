@@ -11,6 +11,13 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.36.0] - 2025-02-20
+
+- Added `aiven_organization_vpc` beta resource and data source
+- Added `aiven_aws_org_vpc_peering_connection` beta resource and data source
+- Added `aiven_gcp_org_vpc_peering_connection` beta resource and data source
+- Added `aiven_azure_org_vpc_peering_connection` beta resource and data source
+
 ## [4.35.0] - 2025-02-18
 
 - Fix `aiven_service_integration` type `clickhouse_kafka` crashes when a table is removed
