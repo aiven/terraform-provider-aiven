@@ -221,3 +221,16 @@ func (b *CompositionBuilder) MustRender(t testing.TB) string {
 	}
 	return result
 }
+
+type TemplateValue struct {
+	Value     string
+	IsLiteral bool
+}
+
+func Literal(v string) TemplateValue {
+	return TemplateValue{Value: v, IsLiteral: true}
+}
+
+func Reference(v string) TemplateValue {
+	return TemplateValue{Value: v, IsLiteral: false}
+}

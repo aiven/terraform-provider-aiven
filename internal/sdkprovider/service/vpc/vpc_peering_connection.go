@@ -109,7 +109,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	pc = res.(*aiven.VPCPeeringConnection)
-	diags := getDiagnosticsFromState(pc)
+	diags := getDiagnosticsFromState(newAivenVPCPeeringState(pc))
 
 	if peerRegion != "" {
 		d.SetId(schemautil.BuildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
@@ -123,30 +123,6 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	return append(diags, resourceVPCPeeringConnectionRead(ctx, d, m)...)
-}
-
-// stateInfoToString converts VPC peering connection state_info to a string
-func stateInfoToString(s *map[string]interface{}) string {
-	if len(*s) == 0 {
-		return ""
-	}
-
-	var str string
-	// Print message first
-	if m, ok := (*s)["message"]; ok {
-		str = fmt.Sprintf("%s", m)
-		delete(*s, "message")
-	}
-
-	for k, v := range *s {
-		if _, ok := v.(string); ok {
-			str += fmt.Sprintf("\n %q:%q", k, v)
-		} else {
-			str += fmt.Sprintf("\n %q:`%+v`", k, v)
-		}
-	}
-
-	return str
 }
 
 type peeringVPCID struct {
@@ -487,37 +463,6 @@ func isAzureVPCPeeringConnection(ctx context.Context, d *schema.ResourceData, c 
 	}
 
 	return false, nil
-}
-
-func getDiagnosticsFromState(pc *aiven.VPCPeeringConnection) diag.Diagnostics {
-	if pc.State != "ACTIVE" {
-		switch pc.State {
-		case "PENDING_PEER":
-			return diag.Diagnostics{{
-				Severity: diag.Warning,
-				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
-					"peer successfully in the cloud, but the connection is not active until the user "+
-					"completes the setup in their cloud account. The steps needed in the user cloud "+
-					"account depend on the used cloud provider. Find more in the state info: %s",
-					stateInfoToString(pc.StateInfo))}}
-		case "DELETED":
-			return diag.Errorf("A user has deleted the peering connection through the Aiven " +
-				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +
-				"transitions from this state")
-		case "DELETED_BY_PEER":
-			return diag.Errorf("A user deleted the peering cloud resource in their account. " +
-				"There are no transitions from this state")
-		case "REJECTED_BY_PEER":
-			return diag.Errorf("VPC peering connection request was rejected, state info: %s",
-				stateInfoToString(pc.StateInfo))
-		case "INVALID_SPECIFICATION":
-			return diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
-				stateInfoToString(pc.StateInfo))
-		default:
-			return diag.Errorf("Unknown VPC peering connection state: %s", pc.State)
-		}
-	}
-	return nil
 }
 
 func validateVPCID(i interface{}, k string) (warnings []string, errors []error) {

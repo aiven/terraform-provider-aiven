@@ -33,47 +33,47 @@ func TestAccAivenOrganizationProject(t *testing.T) {
 			// test creating project with all possible fields
 			{
 				Config: fmt.Sprintf(`
-					resource "aiven_organization" "foo" {
-						name = "test-acc-org-%[1]s"
-					}
+resource "aiven_organization" "foo" {
+  name = "test-acc-org-%[1]s"
+}
 
-					resource "aiven_billing_group" "foo" {
-						name           = "test-acc-bg-%[1]s"
-					}
+resource "aiven_billing_group" "foo" {
+  name = "test-acc-bg-%[1]s"
+}
 
-					resource "aiven_organizational_unit" "foo" {
-						name      = "test-acc-unit-%[1]s"
-						parent_id = aiven_organization.foo.id
-					}
+resource "aiven_organizational_unit" "foo" {
+  name      = "test-acc-unit-%[1]s"
+  parent_id = aiven_organization.foo.id
+}
 
-					resource "aiven_organization_project" "foo" {
-						project_id = "%[2]s"
-						
-						organization_id = aiven_organization.foo.id
-						billing_group_id = aiven_billing_group.foo.id
-						parent_id = aiven_organizational_unit.foo.id
-						technical_emails = ["john.doe+1@gmail.com", "john.doe+2@gmail.com"]
-						
-                        tag {
-                            key = "key1"
-                            value = "value1"
-                        }
-                        
-                        tag {
-                            key = "key2"
-                            value = "value2"
-                        }
-                        
-                        tag {
-                            key = "key3"
-                            value = "value3"
-                        }
-					}
+resource "aiven_organization_project" "foo" {
+  project_id = "%[2]s"
 
-					data "aiven_organization_project" "ds_test" {
-						project_id      = aiven_organization_project.foo.project_id
-						organization_id = aiven_organization_project.foo.organization_id
-					}
+  organization_id  = aiven_organization.foo.id
+  billing_group_id = aiven_billing_group.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+  technical_emails = ["john.doe+1@gmail.com", "john.doe+2@gmail.com"]
+
+  tag {
+    key   = "key1"
+    value = "value1"
+  }
+
+  tag {
+    key   = "key2"
+    value = "value2"
+  }
+
+  tag {
+    key   = "key3"
+    value = "value3"
+  }
+}
+
+data "aiven_organization_project" "ds_test" {
+  project_id      = aiven_organization_project.foo.project_id
+  organization_id = aiven_organization_project.foo.organization_id
+}
 				`, rName, projectID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
@@ -117,44 +117,42 @@ func TestAccAivenOrganizationProject(t *testing.T) {
 			},
 			// test resource update
 			{
-				Config: fmt.Sprintf(
-					`
-					resource "aiven_organization" "foo" {
-						name = "test-acc-org-%[1]s"
-					}
+				Config: fmt.Sprintf(`
+resource "aiven_organization" "foo" {
+  name = "test-acc-org-%[1]s"
+}
 
-					resource "aiven_billing_group" "foo" {
-						name           = "test-acc-bg-%[1]s"
-					}
+resource "aiven_billing_group" "foo" {
+  name = "test-acc-bg-%[1]s"
+}
 
-					resource "aiven_organizational_unit" "foo" {
-						name      = "test-acc-unit-%[1]s"
-						parent_id = aiven_organization.foo.id
-					}
+resource "aiven_organizational_unit" "foo" {
+  name      = "test-acc-unit-%[1]s"
+  parent_id = aiven_organization.foo.id
+}
 
-					resource "aiven_organization_project" "foo" {
-						project_id = "%[2]s" #updating project_id without changing other billing_group_id would fail in this scenario
-			
-						organization_id = aiven_organization.foo.id # should not change
-						billing_group_id = aiven_billing_group.foo.id
-						parent_id = aiven_organizational_unit.foo.id
-						technical_emails = ["john.doe+3@gmail.com", "john.doe+2@gmail.com", "john.doe+4@gmail.com"] #update emails
-			
-			          tag { #update tags
-			              key = "key1"
-			              value = "value1"
-			          }
-			          tag {
-			              key = "key2"
-			              value = "value2-new"
-			          }
-			          tag {
-			              key = "key4"
-			              value = "value4"
-			          }
-					}
-				`,
-					rName,
+resource "aiven_organization_project" "foo" {
+  project_id = "%[2]s" #updating project_id without changing other billing_group_id would fail in this scenario
+
+  organization_id  = aiven_organization.foo.id # should not change
+  billing_group_id = aiven_billing_group.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+  technical_emails = ["john.doe+3@gmail.com", "john.doe+2@gmail.com", "john.doe+4@gmail.com"] #update emails
+
+  tag { #update tags
+    key   = "key1"
+    value = "value1"
+  }
+  tag {
+    key   = "key2"
+    value = "value2-new"
+  }
+  tag {
+    key   = "key4"
+    value = "value4"
+  }
+}
+				`, rName,
 					projectID,
 				),
 				ConfigPlanChecks: resource.ConfigPlanChecks{

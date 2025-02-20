@@ -246,6 +246,15 @@ func SplitResourceID4(resourceID string) (string, string, string, string, error)
 	return parts[0], parts[1], parts[2], parts[3], nil
 }
 
+func SplitResourceID5(resourceID string) (string, string, string, string, string, error) {
+	parts, err := SplitResourceID(resourceID, 5)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+
+	return parts[0], parts[1], parts[2], parts[3], parts[4], nil
+}
+
 func FlattenToString[T any](a []T) []string {
 	r := make([]string, len(a))
 	for i, v := range a {

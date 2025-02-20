@@ -71,6 +71,17 @@ func WithGenClient(handler CrudHandler) func(context.Context, *schema.ResourceDa
 	}
 }
 
+// WithGenClientDiag wraps the CRUD handlers and runs with avngen.Client, but returns diag.Diagnostics instead of error
+func WithGenClientDiag(f func(context.Context, *schema.ResourceData, avngen.Client) diag.Diagnostics) func(
+	context.Context,
+	*schema.ResourceData,
+	any,
+) diag.Diagnostics {
+	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
+		return f(ctx, d, genClientCache)
+	}
+}
+
 type ClientOpt func(o *clientOpts)
 type clientOpts struct {
 	token        string

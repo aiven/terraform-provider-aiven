@@ -147,7 +147,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	}
 
 	pc = res.(*aiven.VPCPeeringConnection)
-	diags := getDiagnosticsFromState(pc)
+	diags := getDiagnosticsFromState(newAivenVPCPeeringState(pc))
 
 	d.SetId(schemautil.BuildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 
