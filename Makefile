@@ -12,12 +12,17 @@ TOOLS_BIN_DIR ?= $(TOOLS_DIR)/bin
 $(TOOLS_BIN_DIR):
 	mkdir -p $(TOOLS_BIN_DIR)
 
+# Add a target for tools/go.mod tidy
+$(TOOLS_DIR)/go.mod.tidy: $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && GOTOOLCHAIN=auto $(GO) mod tidy
 
 GOLANGCILINT := $(TOOLS_BIN_DIR)/golangci-lint
 
-$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
+#$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+#	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
+$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod.tidy
+	cd $(TOOLS_DIR) && GOTOOLCHAIN=auto $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
 TFPLUGINDOCS := $(TOOLS_BIN_DIR)/tfplugindocs
 
