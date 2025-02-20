@@ -156,7 +156,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 				availabilityCommonPart,
 				db.entityType.String(),
 				"limited availability",
-				" To enable this feature, contact the [sales team](mailto:sales@aiven.io). After it's enabled, set",
+				" To enable this feature, contact the [sales team](http://aiven.io/contact). After it's enabled, set",
 			))
 		}
 	}
