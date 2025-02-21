@@ -14,7 +14,7 @@ Gets information about a billing group.
 
 ```terraform
 data "aiven_billing_group" "example_billing_group" {
-  name = "example-billing-group"
+  billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 }
 ```
 
@@ -23,7 +23,7 @@ data "aiven_billing_group" "example_billing_group" {
 
 ### Required
 
-- `billing_group_id` (String) The ID of the billing group. To set up proper dependencies please refer to this variable as a reference.
+- `billing_group_id` (String) The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.
 
 ### Read-Only
 
