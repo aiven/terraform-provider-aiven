@@ -17,7 +17,7 @@ func DatasourceBillingGroup() *schema.Resource {
 		"billing_group_id": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: userconfig.Desc("The ID of the billing group.").Referenced().Build(),
+			Description: userconfig.Desc("The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id).").Referenced().Build(),
 		},
 	})
 
