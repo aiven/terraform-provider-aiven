@@ -101,12 +101,12 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_user_list":        organization.DatasourceOrganizationUserList(),
 			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
 			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
+			"aiven_organization_project":          organization.DatasourceOrganizationProject(),
 
 			// project
-			"aiven_project":              project.DatasourceProject(),
-			"aiven_project_user":         project.DatasourceProjectUser(),
-			"aiven_billing_group":        project.DatasourceBillingGroup(),
-			"aiven_organization_project": project.DatasourceOrganizationProject(),
+			"aiven_project":       project.DatasourceProject(),
+			"aiven_project_user":  project.DatasourceProjectUser(),
+			"aiven_billing_group": project.DatasourceBillingGroup(),
 
 			// vpc
 			"aiven_aws_privatelink":                  vpc.DatasourceAWSPrivatelink(),
@@ -221,12 +221,12 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
 			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
 			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
+			"aiven_organization_project":                organization.ResourceOrganizationProject(),
 
 			// project
-			"aiven_project":              project.ResourceProject(),
-			"aiven_project_user":         project.ResourceProjectUser(),
-			"aiven_billing_group":        project.ResourceBillingGroup(),
-			"aiven_organization_project": project.ResourceOrganizationProject(),
+			"aiven_project":       project.ResourceProject(),
+			"aiven_project_user":  project.ResourceProjectUser(),
+			"aiven_billing_group": project.ResourceBillingGroup(),
 
 			// vpc
 			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),

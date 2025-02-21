@@ -1,4 +1,4 @@
-package project_test
+package organization_test
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 )
 
 var aivenOrganizationProjectResource = "aiven_organization_project"
@@ -246,7 +246,7 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 						"ref_bg":     "foo",
 						"ref_par":    "bar", // trying to change parent_id group only
 					}).MustRender(t),
-				ExpectError: regexp.MustCompile(project.ErrProjectStructureChangeNotSupported.Error()),
+				ExpectError: regexp.MustCompile(organization.ErrProjectStructureChangeNotSupported.Error()),
 			},
 			{
 				// try to change only billing_group_id - should fail
@@ -258,7 +258,7 @@ func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
 						"ref_bg":     "bar", // trying to change billing group only
 						"ref_par":    "foo",
 					}).MustRender(t),
-				ExpectError: regexp.MustCompile(project.ErrProjectStructureChangeNotSupported.Error()),
+				ExpectError: regexp.MustCompile(organization.ErrProjectStructureChangeNotSupported.Error()),
 			},
 			{
 				// update project_id
