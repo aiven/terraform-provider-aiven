@@ -11,6 +11,17 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_account_team_project` field `team_type` (enum): add `organization:billing:read`, `organization:billing:write`
+- Add `aiven_kafka` field `kafka_user_config.kafka_rest_config.consumer_idle_disconnect_timeout`: Specifies the maximum
+  duration (in seconds) a client can remain idle before it is deleted
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `organization:billing:read`, `organization:billing:write`
+- Change `aiven_project_user` field `member_type` (enum): add `organization:billing:read`, `organization:billing:write`
+- Change `aiven_service_integration` field `clickhouse_kafka_user_config.tables`: max items ~~`100`~~ → `400`
+- Add `aiven_valkey` field `valkey_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow IPv6
+  packets to service ports.
+- Add `aiven_valkey` field `valkey_user_config.valkey_active_expire_effort`: Valkey reclaims expired keys both when
+  accessed and in the background
+
 ## [4.36.0] - 2025-02-20
 
 - Added `aiven_organization_vpc` beta resource and data source

@@ -115,7 +115,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 			}},
-			MaxItems: 100,
+			MaxItems: 400,
 			Optional: true,
 			Type:     schema.TypeList,
 		}}},

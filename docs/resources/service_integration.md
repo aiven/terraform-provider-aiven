@@ -95,7 +95,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 Optional:
 
-- `tables` (Block List, Max: 100) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
+- `tables` (Block List, Max: 400) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables`
