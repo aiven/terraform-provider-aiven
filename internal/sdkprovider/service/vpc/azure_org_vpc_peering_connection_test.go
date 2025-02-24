@@ -23,7 +23,7 @@ const (
 func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 	var (
 		orgName      = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
-		templBuilder = template.NewSDKStore(t).NewBuilder().
+		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
 				AddDataSource("aiven_organization", map[string]interface{}{
 				"resource_name": "foo",
 				"name":          orgName,
