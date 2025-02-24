@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -27,13 +28,8 @@ const (
 // 3. Validates that the creation fails with the expected error due to invalid GCP project ID
 func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 	var (
-		orgName        = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
-		registry       = preSetGcpOrgVPCPeeringTemplates(t)
-		newComposition = func() *acc.CompositionBuilder {
-			return registry.NewCompositionBuilder().
-				Add("organization_data", map[string]any{
-					"organization_name": orgName})
-		}
+		orgName      = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
+		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -42,18 +38,23 @@ func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 		CheckDestroy:             testAccCheckGCPOrgVPCPeeringResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: newComposition().
-					Add(organizationVPCResource, map[string]any{
-						"resource_name": "test_org_vpc",
-						"cloud_name":    "google-europe-west10",
-						"network_cidr":  "10.0.0.0/24",
+				Config: templBuilder.
+					AddDataSource("aiven_organization", map[string]any{
+						"resource_name": "foo",
+						"name":          orgName,
 					}).
-					Add(gcpOrgVPCPeeringResource, map[string]any{
+					AddResource(organizationVPCResource, map[string]any{
+						"resource_name":   "test_org_vpc",
+						"organization_id": template.Reference("data.aiven_organization.foo.id"),
+						"cloud_name":      "google-europe-west10",
+						"network_cidr":    "10.0.0.0/24",
+					}).
+					AddResource(gcpOrgVPCPeeringResource, map[string]any{
 						"resource_name":       "test_org_vpc_peering",
-						"organization_id":     acc.Reference("data.aiven_organization.foo.id"),
-						"organization_vpc_id": acc.Reference("aiven_organization_vpc.test_org_vpc.organization_vpc_id"),
-						"gcp_project_id":      acc.Literal("wrong_project_id"),
-						"peer_vpc":            acc.Literal("wrong_peer_vpc"),
+						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
+						"organization_vpc_id": template.Reference("aiven_organization_vpc.test_org_vpc.organization_vpc_id"),
+						"gcp_project_id":      template.Literal("wrong_project_id"),
+						"peer_vpc":            template.Literal("wrong_peer_vpc"),
 					}).MustRender(t),
 				ExpectError: regexp.MustCompile(`peer_cloud_account must be a valid GCP project ID`), // Expected error due to invalid GCP arguments
 			},
@@ -82,23 +83,16 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 	)
 
 	var (
-		orgName        = envVars["AIVEN_ORGANIZATION_NAME"]
-		gcpProject     = envVars["GOOGLE_PROJECT"]
-		gcpRegion      = "europe-west10"
-		registry       = preSetGcpOrgVPCPeeringTemplates(t)
-		newComposition = func() *acc.CompositionBuilder {
-			return registry.NewCompositionBuilder().
-				Add("gcp_provider", map[string]any{
-					"gcp_project": gcpProject,
-					"gcp_region":  gcpRegion}).
-				Add("organization_data", map[string]any{
-					"organization_name": orgName})
-		}
-
+		orgName      = envVars["AIVEN_ORGANIZATION_NAME"]
+		gcpProject   = envVars["GOOGLE_PROJECT"]
+		gcpRegion    = "europe-west10"
 		resourceName = fmt.Sprintf("%s.%s", gcpOrgVPCPeeringResource, "test_peering")
 
 		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 		serviceName = fmt.Sprintf("test-acc-%s", randName)
+
+		// Register the templates needed for this test
+		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -113,22 +107,32 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: newComposition().
-					Add("google_vpc", map[string]any{
-						"resource_name": "example",
-						"vpc_name":      fmt.Sprintf("%s-vpc", serviceName),
+				Config: templBuilder.
+					AddTemplate("gcp_provider", map[string]any{
+						"gcp_project": gcpProject,
+						"gcp_region":  gcpRegion,
 					}).
-					Add(organizationVPCResource, map[string]any{
-						"resource_name": "example",
-						"cloud_name":    fmt.Sprintf("google-%s", gcpRegion),
-						"network_cidr":  "10.0.0.0/24",
+					AddDataSource("aiven_organization", map[string]any{
+						"resource_name": "foo",
+						"name":          orgName,
 					}).
-					Add(gcpOrgVPCPeeringResource, map[string]any{
+					AddResource("google_compute_network", map[string]any{
+						"resource_name":           "example",
+						"network_name":            fmt.Sprintf("%s-vpc", serviceName),
+						"auto_create_subnetworks": false,
+					}).
+					AddResource(organizationVPCResource, map[string]any{
+						"resource_name":   "example",
+						"organization_id": template.Reference("data.aiven_organization.foo.id"),
+						"cloud_name":      fmt.Sprintf("google-%s", gcpRegion),
+						"network_cidr":    "10.0.0.0/24",
+					}).
+					AddResource(gcpOrgVPCPeeringResource, map[string]any{
 						"resource_name":       "test_peering",
-						"organization_id":     acc.Reference("data.aiven_organization.foo.id"),
-						"organization_vpc_id": acc.Reference("aiven_organization_vpc.example.organization_vpc_id"),
-						"gcp_project_id":      acc.Literal(gcpProject),
-						"peer_vpc":            acc.Reference("google_compute_network.example.name"),
+						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
+						"organization_vpc_id": template.Reference("aiven_organization_vpc.example.organization_vpc_id"),
+						"gcp_project_id":      template.Literal(gcpProject),
+						"peer_vpc":            template.Reference("google_compute_network.example.name"),
 					}).MustRender(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "data.aiven_organization.foo", "id"),
@@ -190,44 +194,4 @@ func testAccCheckGCPOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func preSetGcpOrgVPCPeeringTemplates(t *testing.T) *acc.TemplateRegistry {
-	t.Helper()
-
-	registry := acc.NewTemplateRegistry(gcpOrgVPCPeeringResource)
-
-	registry.MustAddTemplate(t, "organization_data", `
-data "aiven_organization" "foo" {
-  name = "{{ .organization_name }}"
-}`)
-
-	registry.MustAddTemplate(t, "gcp_provider", `
-provider "google" {
-	project = "{{ .gcp_project }}"
-	region  = "{{ .gcp_region }}"
-}`)
-
-	registry.MustAddTemplate(t, organizationVPCResource, `
-resource "aiven_organization_vpc" "{{ .resource_name }}" {
-    organization_id = data.aiven_organization.foo.id
-    cloud_name     = "{{ .cloud_name }}"
-    network_cidr   = "{{ .network_cidr }}"
-}`)
-
-	registry.MustAddTemplate(t, gcpOrgVPCPeeringResource, `
-resource "aiven_gcp_org_vpc_peering_connection" "{{ .resource_name }}" {
-	organization_id         	= {{ if .organization_id.IsLiteral }}"{{ .organization_id.Value }}"{{ else }}{{ .organization_id.Value }}{{ end }}
-    organization_vpc_id         = {{ if .organization_vpc_id.IsLiteral }}"{{ .organization_vpc_id.Value }}"{{ else }}{{ .organization_vpc_id.Value }}{{ end }}
-    gcp_project_id = {{ if .gcp_project_id.IsLiteral }}"{{ .gcp_project_id.Value }}"{{ else }}{{ .gcp_project_id.Value }}{{ end }}
-    peer_vpc       = {{ if .peer_vpc.IsLiteral }}"{{ .peer_vpc.Value }}"{{ else }}{{ .peer_vpc.Value }}{{ end }}
-}`)
-
-	registry.MustAddTemplate(t, "google_vpc", `
-resource "google_compute_network" "{{ .resource_name }}" {
-    name                    = "{{ .vpc_name }}"
-    auto_create_subnetworks = false
-}`)
-
-	return registry
 }
