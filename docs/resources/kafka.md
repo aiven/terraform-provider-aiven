@@ -286,6 +286,7 @@ Optional:
 Optional:
 
 - `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. Default: `true`.
+- `consumer_idle_disconnect_timeout` (Number) Specifies the maximum duration (in seconds) a client can remain idle before it is deleted. If a consumer is inactive, it will exit the consumer group, and its state will be discarded. A value of 0 (default) indicates that the consumer will not be disconnected automatically due to inactivity. Default: `0`.
 - `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. Default: `67108864`.
 - `consumer_request_timeout_ms` (Number) Enum: `1000`, `15000`, `30000`. The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. Default: `1000`.
 - `name_strategy` (String) Enum: `record_name`, `topic_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. Default: `topic_name`.
