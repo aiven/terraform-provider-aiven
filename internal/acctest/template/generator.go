@@ -238,7 +238,7 @@ func (g *TextTemplateGenerator) generateDependsOn(b *strings.Builder, indent int
 	fmt.Fprintf(b, "%s{{- end }}\n", indentStr)
 }
 
-func (g *TextTemplateGenerator) generateNestedBlock(b *strings.Builder, field string, schemaField *schema.Schema, indent string, required bool) {
+func (g *TextTemplateGenerator) generateNestedBlock(b *strings.Builder, field string, schemaField *schema.Schema, indent string, _ bool) {
 	elem := schemaField.Elem
 	switch e := elem.(type) {
 	case *schema.Resource:
@@ -331,47 +331,12 @@ func (g *TextTemplateGenerator) generateListBlock(b *strings.Builder, parentFiel
 	fmt.Fprintf(b, "%s{{- end }}\n", indent)
 }
 
-func (g *TextTemplateGenerator) generatePrimitiveList(b *strings.Builder, parentField, field string, elemSchema *schema.Schema, indent string) {
+func (g *TextTemplateGenerator) generatePrimitiveList(b *strings.Builder, parentField, field string, _ *schema.Schema, indent string) {
 	fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" }}\n", indent, parentField, field)
 	fmt.Fprintf(b, "%s%s = [\n", indent, field)
 	fmt.Fprintf(b, "%s  {{- range $idx, $item := index .%s 0 \"%s\" }}\n", indent, parentField, field)
 	fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indent)
 	fmt.Fprintf(b, "%s  {{- end }}\n", indent)
 	fmt.Fprintf(b, "%s]\n", indent)
-	fmt.Fprintf(b, "%s{{- end }}\n", indent)
-}
-
-// generateResourceList handles lists of resource blocks
-func (g *TextTemplateGenerator) generateResourceList(b *strings.Builder, field string, res *schema.Resource, parentField string, indent string) {
-	fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" }}\n", indent, parentField, field)
-	fmt.Fprintf(b, "%s%s {\n", indent, field)
-
-	// Sort inner fields
-	var innerFields []string
-	for k := range res.Schema {
-		if !res.Schema[k].Computed || res.Schema[k].Optional {
-			innerFields = append(innerFields, k)
-		}
-	}
-	sort.Strings(innerFields)
-
-	for _, innerField := range innerFields {
-		innerSchema := res.Schema[innerField]
-		if innerSchema.Type == schema.TypeBool {
-			fmt.Fprintf(b, "%s  {{- if ne (index .%s 0 \"%s\" 0 \"%s\") nil }}\n",
-				indent, parentField, field, innerField)
-			fmt.Fprintf(b, "%s  %s = {{ index .%s 0 \"%s\" 0 \"%s\" }}\n",
-				indent, innerField, parentField, field, innerField)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-		} else {
-			fmt.Fprintf(b, "%s  {{- if index .%s 0 \"%s\" 0 \"%s\" }}\n",
-				indent, parentField, field, innerField)
-			fmt.Fprintf(b, "%s  %s = {{ renderValue (index .%s 0 \"%s\" 0 \"%s\") }}\n",
-				indent, innerField, parentField, field, innerField)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-		}
-	}
-
-	fmt.Fprintf(b, "%s}\n", indent)
 	fmt.Fprintf(b, "%s{{- end }}\n", indent)
 }

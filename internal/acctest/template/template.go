@@ -4,12 +4,6 @@ import (
 	"fmt"
 )
 
-// ResourceConfig is the interface that all resource configs must implement
-type resourceConfig interface {
-	// ToMap converts the config to a map for template rendering
-	ToMap() map[string]any
-}
-
 // Template represents a single Terraform configuration template
 type Template struct {
 	Name     string

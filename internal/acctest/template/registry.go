@@ -69,18 +69,6 @@ func (r *registry) render(templateKey string, cfg map[string]any) (string, error
 	return buf.String(), nil
 }
 
-// mustRender is like render but fails the test on error
-func (r *registry) mustRender(templateKey string, cfg map[string]any) string {
-	r.t.Helper()
-
-	result, err := r.render(templateKey, cfg)
-	if err != nil {
-		r.t.Fatal(err)
-	}
-
-	return result
-}
-
 // addFunction adds a custom function to the template registry
 func (r *registry) addFunction(name string, fn any) {
 	r.funcs.register(name, fn)

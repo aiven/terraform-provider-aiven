@@ -3,8 +3,6 @@ package organization_test
 import (
 	"context"
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"regexp"
 	"testing"
 
@@ -14,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
@@ -359,7 +358,7 @@ func testAccCheckAivenOrganizationProjectResourceDestroy(s *terraform.State) err
 		resp, err := c.OrganizationProjectsList(ctx, orgID)
 		if err != nil {
 			if common.IsCritical(err) {
-				//return err
+				return err
 			}
 
 			return nil //consider project as destroyed if it's not found
@@ -367,7 +366,7 @@ func testAccCheckAivenOrganizationProjectResourceDestroy(s *terraform.State) err
 
 		for _, p := range resp.Projects {
 			if p.ProjectId == projectID {
-				//return fmt.Errorf("project (%q) still exists", rs.Primary.ID)
+				return fmt.Errorf("project (%q) still exists", rs.Primary.ID)
 			}
 		}
 	}

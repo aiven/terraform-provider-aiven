@@ -2,7 +2,6 @@ package template
 
 import (
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"os"
 	"strings"
 	"sync"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 

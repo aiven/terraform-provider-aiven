@@ -66,7 +66,7 @@ func TestCompositionBuilder_Remove(t *testing.T) {
 		},
 		{
 			name:         "remove from empty builder",
-			initialSetup: func(b *CompositionBuilder) {},
+			initialSetup: func(_ *CompositionBuilder) {},
 			resourcePath: "aiven_kafka.test",
 			expectedSize: 0,
 			validateFunc: func(t *testing.T, b *CompositionBuilder) {

@@ -59,7 +59,7 @@ func (b *CompositionBuilder) Remove(resourcePath string) *CompositionBuilder {
 	resourceType := parts[0]
 
 	// Filter out the composition entry that matches both resource type and name
-	var filtered []compositionEntry
+	var filtered = make([]compositionEntry, 0, len(b.compositions))
 	for _, comp := range b.compositions {
 		// Skip if this is the entry we want to remove
 		if comp.ResourceType == resourceType {
@@ -175,7 +175,7 @@ func formatTemplateError(err error, templateKey string, cfg map[string]any) stri
 
 	// Handle template syntax errors
 	if strings.Contains(errStr, "template:") && strings.Contains(errStr, "executing") {
-		return fmt.Sprintf("Invalid configuration for resource. Please check all required fields are provided.")
+		return "Invalid configuration for resource. Please check all required fields are provided."
 	}
 
 	return fmt.Sprintf("Configuration error: %s", errStr)
@@ -248,7 +248,7 @@ func (b *CompositionBuilder) Render(t testing.TB) (string, error) {
 
 	// If we encountered any errors, return them all
 	if len(errors) > 0 {
-		return "", fmt.Errorf("Configuration Error(s):\n%s\n\n%s",
+		return "", fmt.Errorf("configuration Error(s):\n%s\n\n%s",
 			strings.Join(errors, "\n"),
 			b.debugString())
 	}
@@ -280,7 +280,7 @@ func (b *CompositionBuilder) MustRender(t testing.TB) string {
 func validateHCL(content string) error {
 	_, diags := hclwrite.ParseConfig([]byte(content), "", hcl.Pos{Line: 1, Column: 1})
 	if diags.HasErrors() {
-		return fmt.Errorf("%v", diags)
+		return fmt.Errorf("%w", diags)
 	}
 
 	return nil

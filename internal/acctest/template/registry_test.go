@@ -115,7 +115,7 @@ func TestRegistry(t *testing.T) {
 		},
 		{
 			name: "get available templates",
-			operations: func(t *testing.T, r *registry) {
+			operations: func(_ *testing.T, r *registry) {
 				r.mustAddTemplate("b", "template B")
 				r.mustAddTemplate("a", "template A")
 				r.mustAddTemplate("c", "template C")
