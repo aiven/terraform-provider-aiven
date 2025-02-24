@@ -68,7 +68,7 @@ func (tf *templateFunctions) registerDefaults() {
 		default:
 			result = fmt.Sprintf("%q", val)
 		}
-		return template.HTML(result) // #nosec - content is verified safe
+		return template.HTML(result) // nosemgrep: - content is verified safe
 	})
 }
 

@@ -43,9 +43,10 @@ func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 			{
 				Config: templBuilder.
 					AddResource(organizationVPCResource, map[string]any{
-						"resource_name": "test_org_vpc",
-						"cloud_name":    "azure-germany-westcentral",
-						"network_cidr":  "10.0.0.0/24",
+						"resource_name":   "test_org_vpc",
+						"organization_id": template.Reference("data.aiven_organization.foo.id"),
+						"cloud_name":      "azure-germany-westcentral",
+						"network_cidr":    "10.0.0.0/24",
 					}).
 					AddResource(azureOrgVPCPeeringResource, map[string]any{
 						"resource_name":         "test_org_vpc_peering",

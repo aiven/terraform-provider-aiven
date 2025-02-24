@@ -56,6 +56,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				Config: builder.
 					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "full",
+						"project":            projectName,
 						"service_name":       serviceName,
 						"user":               user,
 						"client_id":          clientID,
@@ -68,8 +69,9 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 			},
 			{
 				// missing user and client_id
-				Config: builder.Replace("kafka_quota.full", map[string]any{
+				Config: builder.Replace(fmt.Sprintf("%s.full", kafkaQuotaResource), map[string]any{
 					"resource_name":      "full",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"consumer_byte_rate": 1000,
 					"producer_byte_rate": 1000,
@@ -80,8 +82,9 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 			},
 			{
 				// valid configuration
-				Config: builder.Replace("kafka_quota.full", map[string]any{
+				Config: builder.Replace(fmt.Sprintf("%s.full", kafkaQuotaResource), map[string]any{
 					"resource_name":      "full",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               user,
 					"client_id":          clientID,
@@ -110,6 +113,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				// check plan that resource should be updated
 				Config: builder.Replace(fmt.Sprintf("%s.full", kafkaQuotaResource), map[string]any{
 					"resource_name":      "full",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               user,
 					"client_id":          clientID,
@@ -124,6 +128,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				// check that the update action is triggered, only changed attributes are updated
 				Config: builder.Replace(fmt.Sprintf("%s.full", kafkaQuotaResource), map[string]any{
 					"resource_name":      "full",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               user,
 					"client_id":          clientID,
@@ -152,6 +157,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				// check that resource is replaced when user is updated
 				Config: builder.Replace(fmt.Sprintf("%s.full", kafkaQuotaResource), map[string]any{
 					"resource_name":      "full",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               fmt.Sprintf("%s_updated", user),
 					"client_id":          clientID,
@@ -180,6 +186,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				// create new resource with only consumer_byte_rate set
 				Config: builder.AddResource(kafkaQuotaResource, map[string]any{
 					"resource_name":      "byte_rate",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               user,
 					"client_id":          clientID,
@@ -201,6 +208,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				// check that the resource is updated and only consumer_byte_rate was modified
 				Config: builder.Replace(fmt.Sprintf("%s.byte_rate", kafkaQuotaResource), map[string]any{
 					"resource_name":      "byte_rate",
+					"project":            projectName,
 					"service_name":       serviceName,
 					"user":               user,
 					"client_id":          clientID,
@@ -227,8 +235,9 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 			{
 				// create multiple resources with different configurations
 				Config: template.InitializeTemplateStore(t).NewBuilder().
-					AddTemplate("kafka_quota", map[string]any{
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "new_full",
+						"project":            projectName,
 						"service_name":       serviceName,
 						"user":               fmt.Sprintf("%s_1", user),
 						"client_id":          fmt.Sprintf("%s_1", clientID),
@@ -236,14 +245,16 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 						"producer_byte_rate": 4000,
 						"request_percentage": 40.5,
 					}).
-					AddTemplate("kafka_quota", map[string]any{
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "user",
+						"project":            projectName,
 						"service_name":       serviceName,
 						"user":               fmt.Sprintf("%s_2", user),
 						"request_percentage": 20.22,
 					}).
-					AddTemplate("kafka_quota", map[string]any{
+					AddResource(kafkaQuotaResource, map[string]any{
 						"resource_name":      "client",
+						"project":            projectName,
 						"service_name":       serviceName,
 						"client_id":          fmt.Sprintf("%s_3", clientID),
 						"producer_byte_rate": 2000,
