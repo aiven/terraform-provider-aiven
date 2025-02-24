@@ -108,6 +108,16 @@ var aivenOrganizationApplicationUserTokenSchema = map[string]*schema.Schema{
 		Description: "User agent of the last request made with this token in human-readable format.",
 		Computed:    true,
 	},
+	"ip_allowlist": {
+		Type:        schema.TypeSet,
+		Description: "List of allowed IP ranges.",
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+		MaxItems: 100,
+		Optional: true,
+		ForceNew: true,
+	},
 }
 
 func ResourceOrganizationApplicationUserToken() *schema.Resource {
