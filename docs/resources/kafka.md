@@ -25,7 +25,7 @@ resource "aiven_kafka" "example_kafka" {
     kafka_rest      = true
     kafka_connect   = true
     schema_registry = true
-    kafka_version   = "3.5"
+    kafka_version   = "3.8"
 
     kafka {
       group_max_session_timeout_ms = 70000

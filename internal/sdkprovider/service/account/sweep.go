@@ -64,7 +64,7 @@ func listTestAccounts(ctx context.Context) ([]account.AccountOut, error) {
 	}
 
 	for _, a := range resp {
-		if strings.Contains(a.AccountName, "test-acc-ac-") {
+		if strings.Contains(a.AccountName, "test-acc") {
 			testAccounts = append(testAccounts, a)
 		}
 	}

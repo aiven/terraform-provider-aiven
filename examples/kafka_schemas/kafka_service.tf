@@ -10,7 +10,7 @@ resource "aiven_kafka" "kafka-service1" {
   kafka_user_config {
     // Enables Kafka Schemas
     schema_registry = true
-    kafka_version   = "3.5"
+    kafka_version   = "3.8"
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000

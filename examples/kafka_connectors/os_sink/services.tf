@@ -9,7 +9,7 @@ resource "aiven_kafka" "kafka" {
   kafka_user_config {
     // Enables Kafka Connectors
     kafka_connect = true
-    kafka_version = "3.5"
+    kafka_version = "3.8"
 
     kafka {
       group_max_session_timeout_ms = 70000

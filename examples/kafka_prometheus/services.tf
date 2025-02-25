@@ -10,7 +10,7 @@ resource "aiven_kafka" "kafka" {
     kafka_rest      = true
     kafka_connect   = true
     schema_registry = true
-    kafka_version   = "3.5"
+    kafka_version   = "3.8"
 
     public_access {
       kafka_rest    = true

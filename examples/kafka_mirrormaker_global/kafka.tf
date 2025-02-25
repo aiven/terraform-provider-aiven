@@ -8,7 +8,7 @@ resource "aiven_kafka" "kafka-syd" {
   service_name = "kafka-syd"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka_rest    = "true"
   }
 }
@@ -20,7 +20,7 @@ resource "aiven_kafka" "kafka-use" {
   service_name = "kafka-us-east"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka_rest    = "true"
   }
 }
@@ -32,7 +32,7 @@ resource "aiven_kafka" "kafka-usw" {
   service_name = "kafka-us-west"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka_rest    = "true"
   }
 }

@@ -50,6 +50,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
       - uses: actions/cache@v4
         with:
           path: |

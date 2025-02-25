@@ -8,7 +8,7 @@ resource "aiven_kafka" "kafka-ue1" {
   service_name = "kafka-ue1"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka_rest    = "true"
   }
 }
@@ -20,7 +20,7 @@ resource "aiven_kafka" "kafka-uw2" {
   service_name = "kafka-uw2"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka_rest    = "true"
   }
 }

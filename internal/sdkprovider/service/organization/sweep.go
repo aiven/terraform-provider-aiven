@@ -16,6 +16,11 @@ const defaultPrefix = "test-acc"
 func init() {
 	ctx := context.Background()
 
+	sweep.AddTestSweepers("aiven_organization_project", &resource.Sweeper{
+		Name: "aiven_organization_project",
+		F:    sweepOrganizationProjects(ctx),
+	})
+
 	sweep.AddTestSweepers("aiven_organization", &resource.Sweeper{
 		Name: "aiven_organization",
 		F:    sweepOrganizations(ctx),
@@ -71,6 +76,47 @@ func sweepOrganizations(ctx context.Context) func(string) error {
 			err = client.Accounts.Delete(ctx, organization.Id)
 			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization %s: %w", organization.Name, err)
+			}
+		}
+
+		return nil
+	}
+}
+
+func sweepOrganizationProjects(ctx context.Context) func(string) error {
+	return func(_ string) error {
+		client, err := sweep.SharedGenClient()
+		if err != nil {
+			return err
+		}
+
+		organizations, err := client.AccountList(ctx)
+		if common.IsCritical(err) {
+			return fmt.Errorf("error retrieving a list of organizations: %w", err)
+		}
+
+		if organizations == nil {
+			return nil
+		}
+
+		for _, organization := range organizations {
+			if !strings.HasPrefix(organization.AccountName, "test-acc") {
+				continue
+			}
+
+			projects, err := client.OrganizationProjectsList(ctx, organization.OrganizationId)
+			if common.IsCritical(err) {
+				return fmt.Errorf("error retrieving a list of projects: %w", err)
+			}
+
+			for _, project := range projects.Projects {
+				if !strings.HasPrefix(project.ProjectId, "test-acc") {
+					continue
+				}
+
+				if err = client.OrganizationProjectsDelete(ctx, organization.OrganizationId, project.ProjectId); common.IsCritical(err) {
+					return fmt.Errorf("error deleting project %s: %w", project.ProjectId, err)
+				}
 			}
 		}
 
