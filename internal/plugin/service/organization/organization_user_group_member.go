@@ -201,7 +201,8 @@ func (r *organizationUserGroupMembersResource) Create(
 ) {
 	var plan organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -233,12 +234,10 @@ func (r *organizationUserGroupMembersResource) Create(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-// Delete deletes an organization user group member resource.
+// Read reads an organization user group member resource.
 func (r *organizationUserGroupMembersResource) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
@@ -246,7 +245,8 @@ func (r *organizationUserGroupMembersResource) Read(
 ) {
 	var state organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -257,9 +257,7 @@ func (r *organizationUserGroupMembersResource) Read(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 // Update updates an organization user group member resource.
@@ -279,7 +277,8 @@ func (r *organizationUserGroupMembersResource) Delete(
 ) {
 	var plan organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

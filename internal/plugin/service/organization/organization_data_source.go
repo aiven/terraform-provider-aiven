@@ -158,7 +158,8 @@ func (r *organizationDataSource) fillModel(ctx context.Context, model *organizat
 func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state organizationDataSourceModel
 
-	if !util.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -194,7 +195,5 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

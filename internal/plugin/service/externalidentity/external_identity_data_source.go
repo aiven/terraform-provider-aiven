@@ -104,7 +104,8 @@ func (r *externalIdentityDataSource) Configure(
 func (r *externalIdentityDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state externalIdentityDataSourceModel
 
-	if !util.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -138,5 +139,5 @@ func (r *externalIdentityDataSource) Read(ctx context.Context, req datasource.Re
 	state.ExternalUserID = types.StringValue(externalUserID)
 	state.ExternalServiceName = types.StringValue(externalServiceName)
 
-	util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

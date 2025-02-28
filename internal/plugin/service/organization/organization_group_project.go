@@ -210,7 +210,8 @@ func (r *organizationGroupProjectResource) Read(
 ) {
 	var state organizationGroupProjectResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -221,9 +222,7 @@ func (r *organizationGroupProjectResource) Read(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 // Update updates an organization group project resource.
@@ -243,7 +242,8 @@ func (r *organizationGroupProjectResource) Delete(
 ) {
 	var plan organizationGroupProjectResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
