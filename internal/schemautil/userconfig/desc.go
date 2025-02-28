@@ -39,8 +39,6 @@ type DescriptionBuilder struct {
 	base string
 	// availabilityType is the availability type of the entity that the description is for.
 	availabilityType AvailabilityType
-	// withForcedFirstLetterCapitalization is a flag that indicates if the first letter should be capitalized.
-	withForcedFirstLetterCapitalization bool
 	// withPossibleValues is a flag that indicates if the possible values should be included.
 	withPossibleValues []string
 	// withRequiredWith is a flag that indicates if the required with should be included.
@@ -74,12 +72,6 @@ func (db *DescriptionBuilder) MarkAsDataSource() *DescriptionBuilder {
 // AvailabilityType is a function that sets the availabilityType field.
 func (db *DescriptionBuilder) AvailabilityType(t AvailabilityType) *DescriptionBuilder {
 	db.availabilityType = t
-	return db
-}
-
-// ForceFirstLetterCapitalization is a function that sets the withForcedFirstLetterCapitalization flag.
-func (db *DescriptionBuilder) ForceFirstLetterCapitalization() *DescriptionBuilder {
-	db.withForcedFirstLetterCapitalization = true
 	return db
 }
 
@@ -122,13 +114,7 @@ func (db *DescriptionBuilder) ForceNew() *DescriptionBuilder {
 func (db *DescriptionBuilder) Build() string {
 	builder := new(strings.Builder)
 
-	// Capitalize the first letter, if needed.
-	if db.withForcedFirstLetterCapitalization {
-		builder.WriteRune(rune(strings.ToUpper(string(db.base[0]))[0]))
-		builder.WriteString(db.base[1:])
-	} else {
-		builder.WriteString(db.base)
-	}
+	builder.WriteString(db.base)
 
 	// Add a trailing dot if it's missing.
 	if !strings.HasSuffix(db.base, ".") {
