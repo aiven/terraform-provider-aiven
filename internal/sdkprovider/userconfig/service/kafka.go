@@ -536,6 +536,11 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"consumer_idle_disconnect_timeout": {
+						Description: "Specifies the maximum duration (in seconds) a client can remain idle before it is deleted. If a consumer is inactive, it will exit the consumer group, and its state will be discarded. A value of 0 (default) indicates that the consumer will not be disconnected automatically due to inactivity. Default: `0`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"consumer_request_max_bytes": {
 						Description: "Maximum number of bytes in unencoded message keys and values by a single request. Default: `67108864`.",
 						Optional:    true,

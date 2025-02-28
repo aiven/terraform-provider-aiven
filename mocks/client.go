@@ -4286,6 +4286,294 @@ func (_c *MockClient_MySQLServiceQueryStatistics_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// OrganizationAddressCreate provides a mock function with given fields: ctx, organizationId, in
+func (_m *MockClient) OrganizationAddressCreate(ctx context.Context, organizationId string, in *organization.OrganizationAddressCreateIn) (*organization.OrganizationAddressCreateOut, error) {
+	ret := _m.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationAddressCreate")
+	}
+
+	var r0 *organization.OrganizationAddressCreateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organization.OrganizationAddressCreateIn) (*organization.OrganizationAddressCreateOut, error)); ok {
+		return rf(ctx, organizationId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organization.OrganizationAddressCreateIn) *organization.OrganizationAddressCreateOut); ok {
+		r0 = rf(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization.OrganizationAddressCreateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *organization.OrganizationAddressCreateIn) error); ok {
+		r1 = rf(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationAddressCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationAddressCreate'
+type MockClient_OrganizationAddressCreate_Call struct {
+	*mock.Call
+}
+
+// OrganizationAddressCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - in *organization.OrganizationAddressCreateIn
+func (_e *MockClient_Expecter) OrganizationAddressCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_OrganizationAddressCreate_Call {
+	return &MockClient_OrganizationAddressCreate_Call{Call: _e.mock.On("OrganizationAddressCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_OrganizationAddressCreate_Call) Run(run func(ctx context.Context, organizationId string, in *organization.OrganizationAddressCreateIn)) *MockClient_OrganizationAddressCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*organization.OrganizationAddressCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressCreate_Call) Return(_a0 *organization.OrganizationAddressCreateOut, _a1 error) *MockClient_OrganizationAddressCreate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressCreate_Call) RunAndReturn(run func(context.Context, string, *organization.OrganizationAddressCreateIn) (*organization.OrganizationAddressCreateOut, error)) *MockClient_OrganizationAddressCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationAddressDelete provides a mock function with given fields: ctx, organizationId, addressId
+func (_m *MockClient) OrganizationAddressDelete(ctx context.Context, organizationId string, addressId string) error {
+	ret := _m.Called(ctx, organizationId, addressId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationAddressDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, organizationId, addressId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockClient_OrganizationAddressDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationAddressDelete'
+type MockClient_OrganizationAddressDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationAddressDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - addressId string
+func (_e *MockClient_Expecter) OrganizationAddressDelete(ctx interface{}, organizationId interface{}, addressId interface{}) *MockClient_OrganizationAddressDelete_Call {
+	return &MockClient_OrganizationAddressDelete_Call{Call: _e.mock.On("OrganizationAddressDelete", ctx, organizationId, addressId)}
+}
+
+func (_c *MockClient_OrganizationAddressDelete_Call) Run(run func(ctx context.Context, organizationId string, addressId string)) *MockClient_OrganizationAddressDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressDelete_Call) Return(_a0 error) *MockClient_OrganizationAddressDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressDelete_Call) RunAndReturn(run func(context.Context, string, string) error) *MockClient_OrganizationAddressDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationAddressGet provides a mock function with given fields: ctx, organizationId, addressId
+func (_m *MockClient) OrganizationAddressGet(ctx context.Context, organizationId string, addressId string) (*organization.OrganizationAddressGetOut, error) {
+	ret := _m.Called(ctx, organizationId, addressId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationAddressGet")
+	}
+
+	var r0 *organization.OrganizationAddressGetOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*organization.OrganizationAddressGetOut, error)); ok {
+		return rf(ctx, organizationId, addressId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *organization.OrganizationAddressGetOut); ok {
+		r0 = rf(ctx, organizationId, addressId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization.OrganizationAddressGetOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, addressId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationAddressGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationAddressGet'
+type MockClient_OrganizationAddressGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationAddressGet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - addressId string
+func (_e *MockClient_Expecter) OrganizationAddressGet(ctx interface{}, organizationId interface{}, addressId interface{}) *MockClient_OrganizationAddressGet_Call {
+	return &MockClient_OrganizationAddressGet_Call{Call: _e.mock.On("OrganizationAddressGet", ctx, organizationId, addressId)}
+}
+
+func (_c *MockClient_OrganizationAddressGet_Call) Run(run func(ctx context.Context, organizationId string, addressId string)) *MockClient_OrganizationAddressGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressGet_Call) Return(_a0 *organization.OrganizationAddressGetOut, _a1 error) *MockClient_OrganizationAddressGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressGet_Call) RunAndReturn(run func(context.Context, string, string) (*organization.OrganizationAddressGetOut, error)) *MockClient_OrganizationAddressGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationAddressList provides a mock function with given fields: ctx, organizationId
+func (_m *MockClient) OrganizationAddressList(ctx context.Context, organizationId string) ([]organization.AddresseOut, error) {
+	ret := _m.Called(ctx, organizationId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationAddressList")
+	}
+
+	var r0 []organization.AddresseOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]organization.AddresseOut, error)); ok {
+		return rf(ctx, organizationId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []organization.AddresseOut); ok {
+		r0 = rf(ctx, organizationId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]organization.AddresseOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationAddressList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationAddressList'
+type MockClient_OrganizationAddressList_Call struct {
+	*mock.Call
+}
+
+// OrganizationAddressList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+func (_e *MockClient_Expecter) OrganizationAddressList(ctx interface{}, organizationId interface{}) *MockClient_OrganizationAddressList_Call {
+	return &MockClient_OrganizationAddressList_Call{Call: _e.mock.On("OrganizationAddressList", ctx, organizationId)}
+}
+
+func (_c *MockClient_OrganizationAddressList_Call) Run(run func(ctx context.Context, organizationId string)) *MockClient_OrganizationAddressList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressList_Call) Return(_a0 []organization.AddresseOut, _a1 error) *MockClient_OrganizationAddressList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressList_Call) RunAndReturn(run func(context.Context, string) ([]organization.AddresseOut, error)) *MockClient_OrganizationAddressList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationAddressUpdate provides a mock function with given fields: ctx, organizationId, addressId, in
+func (_m *MockClient) OrganizationAddressUpdate(ctx context.Context, organizationId string, addressId string, in *organization.OrganizationAddressUpdateIn) (*organization.OrganizationAddressUpdateOut, error) {
+	ret := _m.Called(ctx, organizationId, addressId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationAddressUpdate")
+	}
+
+	var r0 *organization.OrganizationAddressUpdateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organization.OrganizationAddressUpdateIn) (*organization.OrganizationAddressUpdateOut, error)); ok {
+		return rf(ctx, organizationId, addressId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organization.OrganizationAddressUpdateIn) *organization.OrganizationAddressUpdateOut); ok {
+		r0 = rf(ctx, organizationId, addressId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization.OrganizationAddressUpdateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, *organization.OrganizationAddressUpdateIn) error); ok {
+		r1 = rf(ctx, organizationId, addressId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationAddressUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationAddressUpdate'
+type MockClient_OrganizationAddressUpdate_Call struct {
+	*mock.Call
+}
+
+// OrganizationAddressUpdate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - addressId string
+//   - in *organization.OrganizationAddressUpdateIn
+func (_e *MockClient_Expecter) OrganizationAddressUpdate(ctx interface{}, organizationId interface{}, addressId interface{}, in interface{}) *MockClient_OrganizationAddressUpdate_Call {
+	return &MockClient_OrganizationAddressUpdate_Call{Call: _e.mock.On("OrganizationAddressUpdate", ctx, organizationId, addressId, in)}
+}
+
+func (_c *MockClient_OrganizationAddressUpdate_Call) Run(run func(ctx context.Context, organizationId string, addressId string, in *organization.OrganizationAddressUpdateIn)) *MockClient_OrganizationAddressUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*organization.OrganizationAddressUpdateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressUpdate_Call) Return(_a0 *organization.OrganizationAddressUpdateOut, _a1 error) *MockClient_OrganizationAddressUpdate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationAddressUpdate_Call) RunAndReturn(run func(context.Context, string, string, *organization.OrganizationAddressUpdateIn) (*organization.OrganizationAddressUpdateOut, error)) *MockClient_OrganizationAddressUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrganizationAuthDomainLink provides a mock function with given fields: ctx, organizationId, authenticationMethodId, in
 func (_m *MockClient) OrganizationAuthDomainLink(ctx context.Context, organizationId string, authenticationMethodId string, in *organization.OrganizationAuthDomainLinkIn) error {
 	ret := _m.Called(ctx, organizationId, authenticationMethodId, in)
