@@ -72,7 +72,7 @@ func (r *organizationResource) TypeName() string {
 
 // Schema defines the schema for the organization resource.
 func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	schemaObj := schema.Schema{
 		Description: "Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -99,7 +99,15 @@ func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequ
 				Computed:    true,
 			},
 		},
-	})
+	}
+
+	// Add timeouts block
+	if schemaObj.Blocks == nil {
+		schemaObj.Blocks = make(map[string]schema.Block)
+	}
+	schemaObj.Blocks["timeouts"] = timeouts.BlockAll(ctx)
+
+	resp.Schema = schemaObj
 }
 
 // Configure sets up the organization resource.

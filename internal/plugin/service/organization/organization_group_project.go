@@ -79,12 +79,13 @@ func (r *organizationGroupProjectResource) TypeName() string {
 func (r *organizationGroupProjectResource) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
-	resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	resp *resource.SchemaResponse,
+) {
+	schemaObj := schema.Schema{
 		Description: `Adds and manages a group of users as members of a project.
 
 **This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
-[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources)
 to the new resource. **Do not use the aiven_organization_group_project and aiven_organization_permission resources together**.
 			`,
 		DeprecationMessage: deprecationMessage,
@@ -121,7 +122,15 @@ to the new resource. **Do not use the aiven_organization_group_project and aiven
 				},
 			},
 		},
-	})
+	}
+
+	// Add timeouts block
+	if schemaObj.Blocks == nil {
+		schemaObj.Blocks = make(map[string]schema.Block)
+	}
+	schemaObj.Blocks["timeouts"] = timeouts.BlockAll(ctx)
+
+	resp.Schema = schemaObj
 }
 
 // Configure is called to configure the resource.
