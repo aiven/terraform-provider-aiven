@@ -43,9 +43,6 @@ const (
 	// SummaryErrorDeletingResource is the error summary for when a resource cannot be deleted.
 	SummaryErrorDeletingResource = "Error Deleting Resource"
 
-	// SummaryErrorImportingResource is the error summary for when a resource cannot be imported.
-	SummaryErrorImportingResource = "Error Importing Resource"
-
 	// SummaryDuplicateFoundByName is the error summary for when a duplicate resource is found by name.
 	SummaryDuplicateFoundByName = "Duplicate Found By Name"
 
