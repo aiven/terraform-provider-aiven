@@ -7,7 +7,7 @@ resource "aiven_kafka" "source" {
   maintenance_window_time = "10:00:00"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
@@ -32,7 +32,7 @@ resource "aiven_kafka" "target" {
   maintenance_window_time = "10:00:00"
 
   kafka_user_config {
-    kafka_version = "3.5"
+    kafka_version = "3.8"
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
