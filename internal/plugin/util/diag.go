@@ -75,17 +75,6 @@ func DiagErrorDeletingResource(diagnostics diag.Diagnostics, typenameable TypeNa
 	return diagnostics
 }
 
-// DiagErrorImportingResourceNotSupported is a function that adds a resource importing not supported error to the
-// diagnostics and returns it. It is used in the ImportState method of the resource structs.
-func DiagErrorImportingResourceNotSupported(diagnostics diag.Diagnostics, typenameable TypeNameable) diag.Diagnostics {
-	diagnostics.AddError(
-		errmsg.SummaryErrorImportingResource,
-		fmt.Sprintf(errmsg.DetailErrorImportingResourceNotSupported, typenameable.TypeName()),
-	)
-
-	return diagnostics
-}
-
 // DiagErrorReadingDataSource is a function that adds a data source reading error to the diagnostics and returns it.
 // It is used in the Read method of the data source structs.
 func DiagErrorReadingDataSource(diagnostics diag.Diagnostics, typenameable TypeNameable, err error) diag.Diagnostics {
