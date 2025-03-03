@@ -261,6 +261,7 @@ Read-Only:
 Read-Only:
 
 - `consumer_enable_auto_commit` (Boolean)
+- `consumer_idle_disconnect_timeout` (Number)
 - `consumer_request_max_bytes` (Number)
 - `consumer_request_timeout_ms` (Number)
 - `name_strategy` (String)
