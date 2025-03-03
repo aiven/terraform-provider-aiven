@@ -127,6 +127,7 @@ Optional:
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
+- `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `frequent_snapshots` (Boolean) When enabled, Valkey will create frequent local RDB snapshots. When disabled, Valkey will only take RDB snapshots when a backup is created, based on the backup schedule. This setting is ignored when `valkey_persistence` is set to `off`. Default: `true`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--valkey_user_config--ip_filter_object))
@@ -141,6 +142,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
 - `valkey_acl_channels_default` (String) Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Valkey configuration acl-pubsub-default.
+- `valkey_active_expire_effort` (Number) Valkey reclaims expired keys both when accessed and in the background. The background process scans for expired keys to free memory. Increasing the active-expire-effort setting (default 1, max 10) uses more CPU to reclaim expired keys faster, reducing memory usage but potentially increasing latency. Default: `1`.
 - `valkey_io_threads` (Number) Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.
 - `valkey_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. Default: `1`.
 - `valkey_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.
