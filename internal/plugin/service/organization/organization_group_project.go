@@ -83,7 +83,7 @@ func (r *organizationGroupProjectResource) Schema(
 
 **This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
 [migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
-to the new resource.
+to the new resource. **Do not use the aiven_organization_group_project and aiven_organization_permission resources together**.
 			`,
 		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
 		Attributes: map[string]schema.Attribute{
