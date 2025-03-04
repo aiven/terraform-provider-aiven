@@ -17,6 +17,8 @@ import (
 )
 
 func TestAccAivenRedisUser_basic(t *testing.T) {
+	t.Skip(redisDeprecated)
+
 	resourceName := "aiven_redis_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
