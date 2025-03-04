@@ -249,6 +249,7 @@ Optional:
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
 - `cluster_search_request_slowlog` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog))
+- `disk_watermarks` (Block List, Max: 1) Watermark settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--disk_watermarks))
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
 - `email_sender_username` (String) Sender username for Opensearch alerts. Example: `jane@example.com`.
@@ -348,6 +349,16 @@ Optional:
 - `trace` (String) Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
 - `warn` (String) Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
 
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--disk_watermarks"></a>
+### Nested Schema for `opensearch_user_config.opensearch.disk_watermarks`
+
+Required:
+
+- `flood_stage` (Number) The flood stage watermark for disk usage. Example: `95`.
+- `high` (Number) The high watermark for disk usage. Example: `90`.
+- `low` (Number) The low watermark for disk usage. Example: `85`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--search_backpressure"></a>

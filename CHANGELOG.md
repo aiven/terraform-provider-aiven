@@ -22,6 +22,7 @@ nav_order: 1
   packets to service ports.
 - Add `aiven_valkey` field `valkey_user_config.valkey_active_expire_effort`: Valkey reclaims expired keys both when
   accessed and in the background
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.disk_watermarks`: Watermark settings
 
 ## [4.36.0] - 2025-02-20
 
