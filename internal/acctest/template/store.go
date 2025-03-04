@@ -1,14 +1,18 @@
 package template
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"sync"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
@@ -21,17 +25,29 @@ var (
 
 // Store represents a set of related resources and their templates
 type Store struct {
-	registry  *registry
-	t         testing.TB
-	generator *TextTemplateGenerator
+	registry           *registry
+	t                  testing.TB
+	generator          *TextTemplateGenerator
+	frameworkGenerator *FrameworkTextTemplateGenerator
 }
 
 // NewSDKStore creates a new empty template store for SDK-v2 tests
 func NewSDKStore(t testing.TB) *Store {
 	return &Store{
-		registry:  newTemplateRegistry(t),
-		t:         t,
-		generator: NewSchemaTemplateGenerator(),
+		registry:           newTemplateRegistry(t),
+		t:                  t,
+		generator:          NewSchemaTemplateGenerator(),
+		frameworkGenerator: NewFrameworkSchemaTemplateGenerator(),
+	}
+}
+
+// NewFrameworkStore creates a new store specifically for framework resources
+func NewFrameworkStore(t testing.TB) *Store {
+	return &Store{
+		registry:           newTemplateRegistry(t),
+		t:                  t,
+		generator:          NewSchemaTemplateGenerator(),
+		frameworkGenerator: NewFrameworkSchemaTemplateGenerator(),
 	}
 }
 
@@ -128,11 +144,28 @@ func initTemplateStore(t testing.TB) *Store {
 		set.registerResource(resourceType, resource, ResourceKindDataSource)
 	}
 
+	// Register all framework resources and data sources
+	aivenProvider := plugin.New("dev")()
+
+	// Get framework resources
+	for _, resourceFunc := range aivenProvider.Resources(context.Background()) {
+		r := resourceFunc()
+		var resp resource.MetadataResponse
+		r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "aiven"}, &resp)
+		set.registerFrameworkResource(resp.TypeName, r)
+	}
+
+	// Get framework data sources
+	for _, dataSourceFunc := range aivenProvider.DataSources(context.Background()) {
+		d := dataSourceFunc()
+		var resp datasource.MetadataResponse
+		d.Metadata(context.Background(), datasource.MetadataRequest{ProviderTypeName: "aiven"}, &resp)
+		set.registerFrameworkDataSource(resp.TypeName, d)
+	}
+
 	for resourceType, resource := range externalTemplates {
 		set.AddExternalTemplate(resourceType, resource)
 	}
-
-	set.addExtraTemplates()
 
 	return set
 }
@@ -144,22 +177,26 @@ func (s *Store) registerResource(resourceType string, r *schema.Resource, kind R
 	s.registry.mustAddTemplate(templateKey(resourceType, kind), template)
 }
 
-// addExtraTemplates Add some extra templates that are not part of the provider.
-// Some of the resources can be implemented in TF plugin. This is a temporary solution to add them.
-func (s *Store) addExtraTemplates() {
-	s.registry.mustAddTemplate(templateKey("aiven_organization", ResourceKindResource),
-		`resource "aiven_organization" "{{ .resource_name }}" {
-        name = {{ renderValue (required .name) }}
-    }`)
+// registerFrameworkResource handles the registration of a framework resource
+func (s *Store) registerFrameworkResource(resourceType string, r resource.Resource) {
+	// Get the schema from the resource
+	var resp resource.SchemaResponse
+	r.Schema(context.Background(), resource.SchemaRequest{}, &resp)
 
-	s.registry.mustAddTemplate(templateKey("aiven_organization", ResourceKindDataSource),
-		`data "aiven_organization" "{{ .resource_name }}" {
-		name = {{ renderValue (required .name) }}
-        {{- if .id }}
-        # id is computed and will be populated automatically
-        {{- end }}
-    }`)
+	// Generate and register the template
+	template := s.frameworkGenerator.GenerateTemplate(resp.Schema, resourceType, ResourceKindResource)
+	s.registry.mustAddTemplate(templateKey(resourceType, ResourceKindResource), template)
+}
 
+// registerFrameworkDataSource handles the registration of a framework data source
+func (s *Store) registerFrameworkDataSource(resourceType string, d datasource.DataSource) {
+	// Get the schema from the data source
+	var resp datasource.SchemaResponse
+	d.Schema(context.Background(), datasource.SchemaRequest{}, &resp)
+
+	// Generate and register the template
+	template := s.frameworkGenerator.GenerateTemplate(resp.Schema, resourceType, ResourceKindDataSource)
+	s.registry.mustAddTemplate(templateKey(resourceType, ResourceKindDataSource), template)
 }
 
 // templateKey generates a unique template key based on resource type and kind

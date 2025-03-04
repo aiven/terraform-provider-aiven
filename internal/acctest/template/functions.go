@@ -54,6 +54,12 @@ func (tf *templateFunctions) registerDefaults() {
 				elements = append(elements, fmt.Sprintf("%v", elem))
 			}
 			result = fmt.Sprintf("[%s]", strings.Join(elements, ", "))
+		case []string:
+			var elements []string
+			for _, elem := range val {
+				elements = append(elements, fmt.Sprintf("%q", elem))
+			}
+			result = fmt.Sprintf("[%s]", strings.Join(elements, ", "))
 		case map[string]interface{}:
 			var pairs []string
 			keys := make([]string, 0, len(val))

@@ -28,28 +28,50 @@ func (k ResourceKind) String() string {
 	}
 }
 
+// TemplateGenerator is the base interface for all template generators
+type TemplateGenerator interface {
+	// GenerateTemplate generates a template for the given resource type and kind
+	GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) string
+}
+
+// SchemaTemplateGenerator is the interface for SDK v2 template generators
 type SchemaTemplateGenerator interface {
-	GenerateTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string
+	TemplateGenerator
+	GenerateSDKTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string
 }
 
 // TextTemplateGenerator creates Go templates from Terraform resource schemas for testing purposes.
 // It analyzes a resource's schema definition and generates a template that mirrors the structure
 // of a Terraform configuration, but with template variables for dynamic values.
-type TextTemplateGenerator struct {
-}
+type TextTemplateGenerator struct{}
 
 // NewSchemaTemplateGenerator creates a new template generator for a specific resource type
 func NewSchemaTemplateGenerator() *TextTemplateGenerator {
 	return &TextTemplateGenerator{}
 }
 
-// GenerateTemplate generates a Go template string that resembles Terraform HCL configuration.
+// GenerateTemplate implements the TemplateGenerator interface
+func (g *TextTemplateGenerator) GenerateTemplate(schemaObj interface{}, resourceType string, kind ResourceKind) string {
+	// For SDK resources, we expect a *schema.Resource
+	if r, ok := schemaObj.(*schema.Resource); ok {
+		return g.GenerateSDKTemplate(r, resourceType, kind)
+	}
+
+	// If not a *schema.Resource, return a basic template with an error comment
+	var b strings.Builder
+	_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
+	b.WriteString("  # Error: SDK generator received non-SDK schema\n")
+	b.WriteString("}")
+	return b.String()
+}
+
+// GenerateSDKTemplate generates a Go template string that resembles Terraform HCL configuration.
 // The generated template is not actual Terraform code, but rather a template that can be rendered
 // with different values to produce valid Terraform configurations for testing purposes.
 //
 // The template variables can then be populated using a template.Config to generate
 // different variations of the resource configuration for testing.
-func (g *TextTemplateGenerator) GenerateTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string {
+func (g *TextTemplateGenerator) GenerateSDKTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string {
 	var b strings.Builder
 
 	// Header differs based on kind
