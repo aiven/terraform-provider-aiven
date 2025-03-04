@@ -516,6 +516,29 @@ func opensearchUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"disk_watermarks": {
+						Description: "Watermark settings",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"flood_stage": {
+								Description: "The flood stage watermark for disk usage. Example: `95`.",
+								Required:    true,
+								Type:        schema.TypeInt,
+							},
+							"high": {
+								Description: "The high watermark for disk usage. Example: `90`.",
+								Required:    true,
+								Type:        schema.TypeInt,
+							},
+							"low": {
+								Description: "The low watermark for disk usage. Example: `85`.",
+								Required:    true,
+								Type:        schema.TypeInt,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"email_sender_name": {
 						Description: "Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.",
 						Optional:    true,

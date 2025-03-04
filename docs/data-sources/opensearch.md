@@ -224,6 +224,7 @@ Read-Only:
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `cluster_search_request_slowlog` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog))
+- `disk_watermarks` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--disk_watermarks))
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
@@ -323,6 +324,16 @@ Read-Only:
 - `trace` (String)
 - `warn` (String)
 
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--disk_watermarks"></a>
+### Nested Schema for `opensearch_user_config.opensearch.disk_watermarks`
+
+Read-Only:
+
+- `flood_stage` (Number)
+- `high` (Number)
+- `low` (Number)
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure"></a>
