@@ -23,6 +23,7 @@ import (
 	flinkjarapplicationdeployment "github.com/aiven/go-client-codegen/handler/flinkjarapplicationdeployment"
 	flinkjarapplicationversion "github.com/aiven/go-client-codegen/handler/flinkjarapplicationversion"
 	flinkjob "github.com/aiven/go-client-codegen/handler/flinkjob"
+	governance "github.com/aiven/go-client-codegen/handler/governance"
 	kafka "github.com/aiven/go-client-codegen/handler/kafka"
 	kafkaconnect "github.com/aiven/go-client-codegen/handler/kafkaconnect"
 	kafkamirrormaker "github.com/aiven/go-client-codegen/handler/kafkamirrormaker"
@@ -5194,6 +5195,318 @@ func (_c *MockClient_OrganizationGet_Call) Return(_a0 *organization.Organization
 }
 
 func (_c *MockClient_OrganizationGet_Call) RunAndReturn(run func(context.Context, string) (*organization.OrganizationGetOut, error)) *MockClient_OrganizationGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceSubscriptionCreate provides a mock function with given fields: ctx, organizationId, in
+func (_m *MockClient) OrganizationGovernanceSubscriptionCreate(ctx context.Context, organizationId string, in *governance.OrganizationGovernanceSubscriptionCreateIn) (*governance.OrganizationGovernanceSubscriptionCreateOut, error) {
+	ret := _m.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceSubscriptionCreate")
+	}
+
+	var r0 *governance.OrganizationGovernanceSubscriptionCreateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *governance.OrganizationGovernanceSubscriptionCreateIn) (*governance.OrganizationGovernanceSubscriptionCreateOut, error)); ok {
+		return rf(ctx, organizationId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *governance.OrganizationGovernanceSubscriptionCreateIn) *governance.OrganizationGovernanceSubscriptionCreateOut); ok {
+		r0 = rf(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*governance.OrganizationGovernanceSubscriptionCreateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *governance.OrganizationGovernanceSubscriptionCreateIn) error); ok {
+		r1 = rf(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceSubscriptionCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceSubscriptionCreate'
+type MockClient_OrganizationGovernanceSubscriptionCreate_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceSubscriptionCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - in *governance.OrganizationGovernanceSubscriptionCreateIn
+func (_e *MockClient_Expecter) OrganizationGovernanceSubscriptionCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_OrganizationGovernanceSubscriptionCreate_Call {
+	return &MockClient_OrganizationGovernanceSubscriptionCreate_Call{Call: _e.mock.On("OrganizationGovernanceSubscriptionCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCreate_Call) Run(run func(ctx context.Context, organizationId string, in *governance.OrganizationGovernanceSubscriptionCreateIn)) *MockClient_OrganizationGovernanceSubscriptionCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*governance.OrganizationGovernanceSubscriptionCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCreate_Call) Return(_a0 *governance.OrganizationGovernanceSubscriptionCreateOut, _a1 error) *MockClient_OrganizationGovernanceSubscriptionCreate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCreate_Call) RunAndReturn(run func(context.Context, string, *governance.OrganizationGovernanceSubscriptionCreateIn) (*governance.OrganizationGovernanceSubscriptionCreateOut, error)) *MockClient_OrganizationGovernanceSubscriptionCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceSubscriptionCredentialsGet provides a mock function with given fields: ctx, organizationId, subscriptionId
+func (_m *MockClient) OrganizationGovernanceSubscriptionCredentialsGet(ctx context.Context, organizationId string, subscriptionId string) (*governance.OrganizationGovernanceSubscriptionCredentialsGetOut, error) {
+	ret := _m.Called(ctx, organizationId, subscriptionId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceSubscriptionCredentialsGet")
+	}
+
+	var r0 *governance.OrganizationGovernanceSubscriptionCredentialsGetOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*governance.OrganizationGovernanceSubscriptionCredentialsGetOut, error)); ok {
+		return rf(ctx, organizationId, subscriptionId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *governance.OrganizationGovernanceSubscriptionCredentialsGetOut); ok {
+		r0 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*governance.OrganizationGovernanceSubscriptionCredentialsGetOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceSubscriptionCredentialsGet'
+type MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceSubscriptionCredentialsGet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - subscriptionId string
+func (_e *MockClient_Expecter) OrganizationGovernanceSubscriptionCredentialsGet(ctx interface{}, organizationId interface{}, subscriptionId interface{}) *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call {
+	return &MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call{Call: _e.mock.On("OrganizationGovernanceSubscriptionCredentialsGet", ctx, organizationId, subscriptionId)}
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call) Run(run func(ctx context.Context, organizationId string, subscriptionId string)) *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call) Return(_a0 *governance.OrganizationGovernanceSubscriptionCredentialsGetOut, _a1 error) *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call) RunAndReturn(run func(context.Context, string, string) (*governance.OrganizationGovernanceSubscriptionCredentialsGetOut, error)) *MockClient_OrganizationGovernanceSubscriptionCredentialsGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceSubscriptionDelete provides a mock function with given fields: ctx, organizationId, subscriptionId
+func (_m *MockClient) OrganizationGovernanceSubscriptionDelete(ctx context.Context, organizationId string, subscriptionId string) (string, error) {
+	ret := _m.Called(ctx, organizationId, subscriptionId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceSubscriptionDelete")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+		return rf(ctx, organizationId, subscriptionId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+		r0 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceSubscriptionDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceSubscriptionDelete'
+type MockClient_OrganizationGovernanceSubscriptionDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceSubscriptionDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - subscriptionId string
+func (_e *MockClient_Expecter) OrganizationGovernanceSubscriptionDelete(ctx interface{}, organizationId interface{}, subscriptionId interface{}) *MockClient_OrganizationGovernanceSubscriptionDelete_Call {
+	return &MockClient_OrganizationGovernanceSubscriptionDelete_Call{Call: _e.mock.On("OrganizationGovernanceSubscriptionDelete", ctx, organizationId, subscriptionId)}
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionDelete_Call) Run(run func(ctx context.Context, organizationId string, subscriptionId string)) *MockClient_OrganizationGovernanceSubscriptionDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionDelete_Call) Return(_a0 string, _a1 error) *MockClient_OrganizationGovernanceSubscriptionDelete_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionDelete_Call) RunAndReturn(run func(context.Context, string, string) (string, error)) *MockClient_OrganizationGovernanceSubscriptionDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceSubscriptionGet provides a mock function with given fields: ctx, organizationId, subscriptionId
+func (_m *MockClient) OrganizationGovernanceSubscriptionGet(ctx context.Context, organizationId string, subscriptionId string) (*governance.OrganizationGovernanceSubscriptionGetOut, error) {
+	ret := _m.Called(ctx, organizationId, subscriptionId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceSubscriptionGet")
+	}
+
+	var r0 *governance.OrganizationGovernanceSubscriptionGetOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*governance.OrganizationGovernanceSubscriptionGetOut, error)); ok {
+		return rf(ctx, organizationId, subscriptionId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *governance.OrganizationGovernanceSubscriptionGetOut); ok {
+		r0 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*governance.OrganizationGovernanceSubscriptionGetOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, subscriptionId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceSubscriptionGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceSubscriptionGet'
+type MockClient_OrganizationGovernanceSubscriptionGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceSubscriptionGet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - subscriptionId string
+func (_e *MockClient_Expecter) OrganizationGovernanceSubscriptionGet(ctx interface{}, organizationId interface{}, subscriptionId interface{}) *MockClient_OrganizationGovernanceSubscriptionGet_Call {
+	return &MockClient_OrganizationGovernanceSubscriptionGet_Call{Call: _e.mock.On("OrganizationGovernanceSubscriptionGet", ctx, organizationId, subscriptionId)}
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionGet_Call) Run(run func(ctx context.Context, organizationId string, subscriptionId string)) *MockClient_OrganizationGovernanceSubscriptionGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionGet_Call) Return(_a0 *governance.OrganizationGovernanceSubscriptionGetOut, _a1 error) *MockClient_OrganizationGovernanceSubscriptionGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionGet_Call) RunAndReturn(run func(context.Context, string, string) (*governance.OrganizationGovernanceSubscriptionGetOut, error)) *MockClient_OrganizationGovernanceSubscriptionGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceSubscriptionList provides a mock function with given fields: ctx, organizationId, query
+func (_m *MockClient) OrganizationGovernanceSubscriptionList(ctx context.Context, organizationId string, query ...[2]string) (*governance.OrganizationGovernanceSubscriptionListOut, error) {
+	_va := make([]interface{}, len(query))
+	for _i := range query {
+		_va[_i] = query[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, organizationId)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceSubscriptionList")
+	}
+
+	var r0 *governance.OrganizationGovernanceSubscriptionListOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...[2]string) (*governance.OrganizationGovernanceSubscriptionListOut, error)); ok {
+		return rf(ctx, organizationId, query...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...[2]string) *governance.OrganizationGovernanceSubscriptionListOut); ok {
+		r0 = rf(ctx, organizationId, query...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*governance.OrganizationGovernanceSubscriptionListOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...[2]string) error); ok {
+		r1 = rf(ctx, organizationId, query...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceSubscriptionList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceSubscriptionList'
+type MockClient_OrganizationGovernanceSubscriptionList_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceSubscriptionList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - query ...[2]string
+func (_e *MockClient_Expecter) OrganizationGovernanceSubscriptionList(ctx interface{}, organizationId interface{}, query ...interface{}) *MockClient_OrganizationGovernanceSubscriptionList_Call {
+	return &MockClient_OrganizationGovernanceSubscriptionList_Call{Call: _e.mock.On("OrganizationGovernanceSubscriptionList",
+		append([]interface{}{ctx, organizationId}, query...)...)}
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionList_Call) Run(run func(ctx context.Context, organizationId string, query ...[2]string)) *MockClient_OrganizationGovernanceSubscriptionList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([][2]string, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.([2]string)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionList_Call) Return(_a0 *governance.OrganizationGovernanceSubscriptionListOut, _a1 error) *MockClient_OrganizationGovernanceSubscriptionList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceSubscriptionList_Call) RunAndReturn(run func(context.Context, string, ...[2]string) (*governance.OrganizationGovernanceSubscriptionListOut, error)) *MockClient_OrganizationGovernanceSubscriptionList_Call {
 	_c.Call.Return(run)
 	return _c
 }
