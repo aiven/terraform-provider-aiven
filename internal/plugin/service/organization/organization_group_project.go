@@ -8,7 +8,6 @@ import (
 	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -16,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -27,6 +27,8 @@ var (
 	_ resource.ResourceWithImportState = &organizationGroupProjectResource{}
 
 	_ util.TypeNameable = &organizationGroupProjectResource{}
+
+	deprecationMessage = "This resource is deprecated. Use aiven_organization_permission instead."
 )
 
 // NewOrganizationGroupProjectResource is a constructor for the organization group project relation resource.
@@ -85,7 +87,7 @@ func (r *organizationGroupProjectResource) Schema(
 [migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
 to the new resource. **Do not use the aiven_organization_group_project and aiven_organization_permission resources together**.
 			`,
-		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
+		DeprecationMessage: deprecationMessage,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "A compound identifier of the resource in the format `project/group_id`.",
@@ -180,39 +182,15 @@ func (r *organizationGroupProjectResource) fillModel(
 
 // Create creates an organization group project relation resource.
 func (r *organizationGroupProjectResource) Create(
-	ctx context.Context,
-	req resource.CreateRequest,
+	_ context.Context,
+	_ resource.CreateRequest,
 	resp *resource.CreateResponse,
 ) {
-	var plan organizationGroupProjectResourceModel
-
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
-		return
-	}
-
-	if err := r.client.ProjectOrganization.Add(
-		ctx,
-		plan.Project.ValueString(),
-		plan.GroupID.ValueString(),
-		plan.Role.ValueString(),
-	); err != nil {
-		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
-
-		return
-	}
-
-	plan.ID = types.StringValue(util.ComposeID(plan.Project.ValueString(), plan.GroupID.ValueString()))
-
-	err := r.fillModel(ctx, &plan)
-	if err != nil {
-		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
-
-		return
-	}
-
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics = util.DiagErrorCreatingResource(
+		resp.Diagnostics,
+		r,
+		common.ResourceDeprecatedError(deprecationMessage),
+	)
 }
 
 // Read reads the existing state of the resource.
@@ -273,11 +251,13 @@ func (r *organizationGroupProjectResource) Delete(
 
 // ImportState imports an existing resource into Terraform.
 func (r *organizationGroupProjectResource) ImportState(
-	ctx context.Context,
-	req resource.ImportStateRequest,
+	_ context.Context,
+	_ resource.ImportStateRequest,
 	resp *resource.ImportStateResponse,
 ) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-
-	util.UnpackCompoundID(ctx, req, resp, "project", "group_id")
+	resp.Diagnostics = util.DiagErrorCreatingResource(
+		resp.Diagnostics,
+		r,
+		common.ResourceDeprecatedError(deprecationMessage),
+	)
 }

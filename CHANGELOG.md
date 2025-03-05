@@ -13,6 +13,8 @@ nav_order: 1
 
 - Fix `terraform import` for various resources
 - Improve `aiven_organiztion_permission`: use `PermissionsSet` endpoint to set permissions
+- Restricted `organization_group_project` resource modification
+- Restricted `project_user` resource modification
 - Add `aiven_organization_application_user_token` resource field `ip_allowlist`: List of allowed IP ranges.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:billing:read`, `organization:billing:write`
 - Add `aiven_kafka` field `kafka_user_config.kafka_rest_config.consumer_idle_disconnect_timeout`: Specifies the maximum
