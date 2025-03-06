@@ -1,1 +1,1 @@
-terraform import aiven_organization.main ORGANIZATION_ID/PROJECT_ID
+terraform import aiven_organization_project.example_project ORGANIZATION_ID/PROJECT_ID

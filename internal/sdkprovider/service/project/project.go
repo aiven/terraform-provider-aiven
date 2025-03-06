@@ -127,11 +127,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 
 func ResourceProject() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
-		CreateContext: resourceProjectCreate,
-		ReadContext:   resourceProjectRead,
-		UpdateContext: resourceProjectUpdate,
-		DeleteContext: resourceProjectDelete,
+		Description:        "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
+		DeprecationMessage: "Use `aiven_organization_project` instead and [migrate your existing aiven_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) to the new resource.",
+		CreateContext:      resourceProjectCreate,
+		ReadContext:        resourceProjectRead,
+		UpdateContext:      resourceProjectUpdate,
+		DeleteContext:      resourceProjectDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
