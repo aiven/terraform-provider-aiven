@@ -13,7 +13,11 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
+const redisDeprecated = "This resource is deprecated. Can't run tests"
+
 func TestAccAiven_redis(t *testing.T) {
+	t.Skip(redisDeprecated)
+
 	resourceName := "aiven_redis.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
