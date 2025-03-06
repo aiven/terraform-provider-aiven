@@ -6738,6 +6738,56 @@ func (_c *MockClient_PermissionsGet_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// PermissionsSet provides a mock function with given fields: ctx, organizationId, resourceType, resourceId, in
+func (_m *MockClient) PermissionsSet(ctx context.Context, organizationId string, resourceType organization.ResourceType, resourceId string, in *organization.PermissionsSetIn) error {
+	ret := _m.Called(ctx, organizationId, resourceType, resourceId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PermissionsSet")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, organization.ResourceType, string, *organization.PermissionsSetIn) error); ok {
+		r0 = rf(ctx, organizationId, resourceType, resourceId, in)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockClient_PermissionsSet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PermissionsSet'
+type MockClient_PermissionsSet_Call struct {
+	*mock.Call
+}
+
+// PermissionsSet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - resourceType organization.ResourceType
+//   - resourceId string
+//   - in *organization.PermissionsSetIn
+func (_e *MockClient_Expecter) PermissionsSet(ctx interface{}, organizationId interface{}, resourceType interface{}, resourceId interface{}, in interface{}) *MockClient_PermissionsSet_Call {
+	return &MockClient_PermissionsSet_Call{Call: _e.mock.On("PermissionsSet", ctx, organizationId, resourceType, resourceId, in)}
+}
+
+func (_c *MockClient_PermissionsSet_Call) Run(run func(ctx context.Context, organizationId string, resourceType organization.ResourceType, resourceId string, in *organization.PermissionsSetIn)) *MockClient_PermissionsSet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(organization.ResourceType), args[3].(string), args[4].(*organization.PermissionsSetIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_PermissionsSet_Call) Return(_a0 error) *MockClient_PermissionsSet_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockClient_PermissionsSet_Call) RunAndReturn(run func(context.Context, string, organization.ResourceType, string, *organization.PermissionsSetIn) error) *MockClient_PermissionsSet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PermissionsUpdate provides a mock function with given fields: ctx, organizationId, resourceType, resourceId, in
 func (_m *MockClient) PermissionsUpdate(ctx context.Context, organizationId string, resourceType organization.ResourceType, resourceId string, in *organization.PermissionsUpdateIn) error {
 	ret := _m.Called(ctx, organizationId, resourceType, resourceId, in)
