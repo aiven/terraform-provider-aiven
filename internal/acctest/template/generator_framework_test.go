@@ -1,16 +1,18 @@
 package template
 
 import (
+	"context"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFrameworkGenerateTemplate(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
 	tests := []struct {
 		name         string
@@ -19,6 +21,44 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 		kind         ResourceKind
 		want         string
 	}{
+		{
+			name: "resource with boolean fields",
+			schema: resourceschema.Schema{
+				Attributes: map[string]resourceschema.Attribute{
+					"enable_feature": resourceschema.BoolAttribute{
+						Required: true,
+					},
+					"disable_feature": resourceschema.BoolAttribute{
+						Optional: true,
+					},
+					"settings": resourceschema.SingleNestedAttribute{
+						Required: true,
+						Attributes: map[string]resourceschema.Attribute{
+							"feature_one": resourceschema.BoolAttribute{
+								Required: true,
+							},
+							"feature_two": resourceschema.BoolAttribute{
+								Optional: true,
+							},
+						},
+					},
+				},
+			},
+			resourceType: "test_resource",
+			kind:         ResourceKindResource,
+			want: `resource "test_resource" "{{ required .resource_name }}" {
+  enable_feature = {{ .enable_feature }}
+  {{- if ne .disable_feature nil }}
+  disable_feature = {{ .disable_feature }}
+  {{- end }}
+  settings {
+    feature_one = {{ (index .settings "feature_one") }}
+    {{- if ne (index .settings "feature_two") nil }}
+    feature_two = {{ (index .settings "feature_two") }}
+    {{- end }}
+  }
+}`,
+		},
 		{
 			name: "basic resource with required string field",
 			schema: resourceschema.Schema{
@@ -57,9 +97,9 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 		},
 		{
 			name: "data source with required fields",
-			schema: schema.Schema{
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+			schema: datasourceschema.Schema{
+				Attributes: map[string]datasourceschema.Attribute{
+					"id": datasourceschema.StringAttribute{
 						Required: true,
 					},
 				},
@@ -113,9 +153,9 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 			kind:         ResourceKindResource,
 			want: `resource "test_resource" "{{ required .resource_name }}" {
   config {
-    name = {{ renderValue (required .name) }}
-    {{- if .value }}
-    value = {{ renderValue .value }}
+    name = {{ renderValue (required (index .config "name")) }}
+    {{- if (index .config "value") }}
+    value = {{ renderValue (index .config "value") }}
     {{- end }}
   }
 }`,
@@ -144,22 +184,69 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 			want: `resource "test_resource" "{{ required .resource_name }}" {
   {{- if .items }}
   items {
-    name = {{ renderValue (required .name) }}
-    {{- if .value }}
-    value = {{ renderValue .value }}
+    name = {{ renderValue (required (index .items 0 "name")) }}
+    {{- if (index .items 0 "value") }}
+    value = {{ renderValue (index .items 0 "value") }}
     {{- end }}
   }
   {{- end }}
 }`,
 		},
+		{
+			name: "resource with timeouts",
+			schema: resourceschema.Schema{
+				Attributes: map[string]resourceschema.Attribute{
+					"name": resourceschema.StringAttribute{
+						Required: true,
+					},
+					"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
+						Create: true,
+						Update: true,
+					}),
+				},
+			},
+			resourceType: "test_resource",
+			kind:         ResourceKindResource,
+			want: `resource "test_resource" "{{ required .resource_name }}" {
+  name = {{ renderValue (required .name) }}
+  {{- if .timeouts }}
+  timeouts {
+    {{- if .timeouts.create }}
+    create = {{ renderValue .timeouts.create }}
+    {{- end }}
+    {{- if .timeouts.update }}
+    update = {{ renderValue .timeouts.update }}
+    {{- end }}
+  }
+  {{- end }}
+}`,
+		},
+		{
+			name: "resource with depends_on",
+			schema: resourceschema.Schema{
+				Attributes: map[string]resourceschema.Attribute{
+					"name": resourceschema.StringAttribute{
+						Required: true,
+					},
+					"depends_on": resourceschema.StringAttribute{},
+				},
+			},
+			resourceType: "test_resource",
+			kind:         ResourceKindResource,
+			want: `resource "test_resource" "{{ required .resource_name }}" {
+  name = {{ renderValue (required .name) }}
+  {{- if .depends_on }}
+  depends_on = [{{- range $i, $dep := .depends_on }}{{if $i}}, {{end}}{{ renderValue $dep }}{{- end }}]
+  {{- end }}
+}`,
+		},
 	}
 
-	generator := NewFrameworkSchemaTemplateGenerator()
+	generator := NewFrameworkTemplateGenerator()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			got := generator.GenerateTemplate(tt.schema, tt.resourceType, tt.kind)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")
 		})
@@ -167,14 +254,12 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 }
 
 func TestFrameworkGenerateTemplateWithInvalidSchema(t *testing.T) {
-	t.Parallel()
-
-	generator := NewFrameworkSchemaTemplateGenerator()
+	generator := NewFrameworkTemplateGenerator()
 
 	// Test with an invalid schema type
 	got := generator.GenerateTemplate("invalid schema", "test_resource", ResourceKindResource)
 	want := `resource "test_resource" "{{ required .resource_name }}" {
-  # Error: Framework generator received non-Framework schema
+  # Error extracting fields: unsupported schema type: string
 }`
 
 	assert.Equal(t, normalizeHCL(want), normalizeHCL(got), "Generated template for invalid schema mismatch")
