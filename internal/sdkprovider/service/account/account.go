@@ -111,9 +111,7 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, client avn
 	}
 
 	if err = schemautil.ResourceDataSet(
-		aivenAccountSchema,
-		d,
-		resp,
+		d, resp, aivenAccountSchema,
 		schemautil.RenameAliases(map[string]string{
 			"account_name":          "name",
 			"account_owner_team_id": "owner_team_id",

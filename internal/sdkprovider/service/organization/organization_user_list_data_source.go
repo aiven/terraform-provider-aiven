@@ -151,7 +151,7 @@ func datasourceOrganizationUserListRead(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(organizationID)
 	users := map[string]any{"users": list}
-	return schemautil.ResourceDataSet(datasourceOrganizationUserListSchema(), d, users)
+	return schemautil.ResourceDataSet(d, users, datasourceOrganizationUserListSchema())
 }
 
 func GetOrganizationByName(ctx context.Context, client avngen.Client, name string) (string, error) {

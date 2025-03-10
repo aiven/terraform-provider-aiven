@@ -106,18 +106,12 @@ func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.Reso
 	}
 
 	// Sets name and user_id
-	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserSchema, d, user)
+	err = schemautil.ResourceDataSet(
+		d, user, aivenOrganizationApplicationUserSchema,
+		schemautil.RenameAlias("user_email", "email"),
+		schemautil.SetForceNew("organization_id", orgID),
+	)
 	if err != nil {
-		return err
-	}
-
-	// This field has "email" in the schema and "user_email" in the request
-	if err = d.Set("email", user.UserEmail); err != nil {
-		return err
-	}
-
-	// This is for import command
-	if err = d.Set("organization_id", orgID); err != nil {
 		return err
 	}
 

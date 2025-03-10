@@ -151,7 +151,7 @@ func resourceKafkaQuotaUpdate(ctx context.Context, d *schema.ResourceData, clien
 }
 
 func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	project, serviceName, clientID, user, err := schemautil.SplitResourceID4(d.Id())
+	projectName, serviceName, clientID, user, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client 
 
 	resp, err := client.ServiceKafkaQuotaDescribe(
 		ctx,
-		project,
+		projectName,
 		serviceName,
 		params...,
 	)
@@ -180,10 +180,10 @@ func resourceKafkaQuotaRead(ctx context.Context, d *schema.ResourceData, client 
 	}
 
 	return schemautil.ResourceDataSet(
-		aivenKafkaQuotaSchema,
-		d,
-		resp,
+		d, resp, aivenKafkaQuotaSchema,
 		schemautil.RenameAliasesReverse(quotaFieldsAliases),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
 	)
 }
 
