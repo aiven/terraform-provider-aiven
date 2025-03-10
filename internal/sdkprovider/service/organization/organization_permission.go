@@ -90,35 +90,17 @@ func resourceOrganizationalPermissionUpsert(ctx context.Context, d *schema.Resou
 	resourceType := d.Get("resource_type").(string)
 	resourceID := d.Get("resource_id").(string)
 
-	req := new(organization.PermissionsUpdateIn)
+	req := new(organization.PermissionsSetIn)
 	err := schemautil.ResourceDataGet(d, req)
 	if err != nil {
 		return err
 	}
 
-	// Must remove all existing permissions by sending an empty list per type and id
-	old, err := client.PermissionsGet(ctx, orgID, organization.ResourceType(resourceType), resourceID)
-	if err != nil && !avngen.IsNotFound(err) {
-		return err
+	if req.Permissions == nil {
+		req.Permissions = make([]organization.PermissionIn, 0)
 	}
 
-outer:
-	for _, o := range old {
-		for _, n := range req.Permissions {
-			if n.PrincipalType == o.PrincipalType && o.PrincipalId == n.PrincipalId {
-				continue outer
-			}
-		}
-
-		n := organization.PermissionIn{
-			PrincipalType: o.PrincipalType,
-			PrincipalId:   o.PrincipalId,
-			Permissions:   make([]string, 0),
-		}
-		req.Permissions = append(req.Permissions, n)
-	}
-
-	err = client.PermissionsUpdate(ctx, orgID, organization.ResourceType(resourceType), resourceID, req)
+	err = client.PermissionsSet(ctx, orgID, organization.ResourceType(resourceType), resourceID, req)
 	if err != nil {
 		return err
 	}
