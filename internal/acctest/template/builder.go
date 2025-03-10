@@ -59,7 +59,7 @@ func (b *CompositionBuilder) Remove(resourcePath string) *CompositionBuilder {
 	resourceType := parts[0]
 
 	// Filter out the composition entry that matches both resource type and name
-	var filtered = make([]compositionEntry, 0, len(b.compositions))
+	filtered := make([]compositionEntry, 0, len(b.compositions))
 	for _, comp := range b.compositions {
 		// Skip if this is the entry we want to remove
 		if comp.ResourceType == resourceType {
