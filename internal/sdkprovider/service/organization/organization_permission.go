@@ -72,7 +72,12 @@ var permissionFields = map[string]*schema.Schema{
 
 func ResourceOrganizationalPermission() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console.",
+		Description: `Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)
+to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. 
+Unit-level permissions aren't shown in the Aiven Console.
+
+**Do not use the ` + "`aiven_project_user`" + ` or ` + "`aiven_organization_group_project`" + ` resources with this resource**.
+`,
 		CreateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),
 		ReadContext:   common.WithGenClient(resourceOrganizationalPermissionRead),
 		UpdateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),

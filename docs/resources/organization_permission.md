@@ -3,12 +3,19 @@
 page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console.
+  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions
+  to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level.
+  Unit-level permissions aren't shown in the Aiven Console.
+  Do not use the aiven_project_user or aiven_organization_group_project resources with this resource.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console.
+Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)
+to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. 
+Unit-level permissions aren't shown in the Aiven Console.
+
+**Do not use the `aiven_project_user` or `aiven_organization_group_project` resources with this resource**.
 
 ## Example Usage
 
