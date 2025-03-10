@@ -24,6 +24,7 @@ nav_order: 1
 - Add `aiven_valkey` field `valkey_user_config.valkey_active_expire_effort`: Valkey reclaims expired keys both when
   accessed and in the background
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.disk_watermarks`: Watermark settings
+- Add `aiven_organization` fields `parent_account_id` and `primary_billing_group_id`
 
 ## [4.36.0] - 2025-02-20
 

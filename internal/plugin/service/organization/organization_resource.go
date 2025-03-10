@@ -3,7 +3,8 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	account2 "github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -32,7 +35,7 @@ func NewOrganizationResource() resource.Resource {
 // organizationResource is the organization resource implementation.
 type organizationResource struct {
 	// client is the instance of the Aiven client to use.
-	client *aiven.Client
+	client avngen.Client
 
 	// typeName is the name of the resource type.
 	typeName string
@@ -40,16 +43,7 @@ type organizationResource struct {
 
 // organizationResourceModel is the model for the organization resource.
 type organizationResourceModel struct {
-	// ID is the identifier of the organization.
-	ID types.String `tfsdk:"id"`
-	// Name is the name of the organization.
-	Name types.String `tfsdk:"name"`
-	// TenantID is the tenant identifier of the organization.
-	TenantID types.String `tfsdk:"tenant_id"`
-	// CreateTime is the timestamp of the creation of the organization.
-	CreateTime types.String `tfsdk:"create_time"`
-	// UpdateTime is the timestamp of the last update of the organization.
-	UpdateTime types.String `tfsdk:"update_time"`
+	organizationDataSourceModel
 	// Timeouts is the configuration for resource-specific timeouts.
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
@@ -90,6 +84,19 @@ func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequ
 				Description: "Tenant ID of the organization.",
 				Computed:    true,
 			},
+			"parent_account_id": schema.StringAttribute{
+				Description: "ID of the parent account of the organization.",
+				Computed:    true,
+				Optional:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"primary_billing_group_id": schema.StringAttribute{
+				Description: "ID of the primary billing group of the organization.",
+				Computed:    true,
+				Optional:    true,
+			},
 			"create_time": schema.StringAttribute{
 				Description: "Timestamp of the creation of the organization.",
 				Computed:    true,
@@ -112,10 +119,9 @@ func (r *organizationResource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
-	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+	client, err := common.GenClient()
+	if err != nil {
+		resp.Diagnostics.AddError(errmsg.SummaryUnexpectedProviderDataType, err.Error())
 		return
 	}
 
@@ -124,24 +130,22 @@ func (r *organizationResource) Configure(
 
 // fillModel fills the organization resource model from the Aiven API.
 func (r *organizationResource) fillModel(ctx context.Context, model *organizationResourceModel) (err error) {
-	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, model.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationIDGen(ctx, r.client, model.ID.ValueString())
 	if err != nil {
 		return
 	}
 
-	account, err := r.client.Accounts.Get(ctx, normalizedID)
+	account, err := r.client.AccountGet(ctx, normalizedID)
 	if err != nil {
 		return
 	}
 
-	model.Name = types.StringValue(account.Account.Name)
-
-	model.TenantID = types.StringValue(account.Account.TenantId)
-
-	model.CreateTime = types.StringValue(account.Account.CreateTime.String())
-
-	model.UpdateTime = types.StringValue(account.Account.UpdateTime.String())
-
+	model.Name = types.StringValue(account.AccountName)
+	model.TenantID = types.StringPointerValue(account.TenantId)
+	model.ParentAccountID = types.StringPointerValue(account.ParentAccountId)
+	model.PrimaryBillingGroupID = types.StringValue(account.PrimaryBillingGroupId)
+	model.CreateTime = types.StringValue(account.CreateTime.String())
+	model.UpdateTime = types.StringValue(account.UpdateTime.String())
 	return
 }
 
@@ -153,16 +157,26 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	account, err := r.client.Accounts.Create(ctx, aiven.Account{
-		Name: plan.Name.ValueString(),
-	})
+	in := &account2.AccountCreateIn{
+		AccountName: plan.Name.ValueString(),
+	}
+
+	if !plan.PrimaryBillingGroupID.IsUnknown() {
+		in.PrimaryBillingGroupId = plan.PrimaryBillingGroupID.ValueStringPointer()
+	}
+
+	if !plan.ParentAccountID.IsUnknown() {
+		in.PrimaryBillingGroupId = plan.ParentAccountID.ValueStringPointer()
+	}
+
+	account, err := r.client.AccountCreate(ctx, in)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	plan.ID = types.StringValue(account.Account.OrganizationId)
+	plan.ID = types.StringValue(account.OrganizationId)
 
 	err = r.fillModel(ctx, &plan)
 	if err != nil {
@@ -204,16 +218,22 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, plan.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationIDGen(ctx, r.client, plan.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if _, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
-		Name: plan.Name.ValueString(),
-	}); err != nil {
+	in := &account2.AccountUpdateIn{
+		AccountName: plan.Name.ValueStringPointer(),
+	}
+
+	if !plan.PrimaryBillingGroupID.IsUnknown() {
+		in.PrimaryBillingGroupId = plan.PrimaryBillingGroupID.ValueStringPointer()
+	}
+
+	if _, err = r.client.AccountUpdate(ctx, normalizedID, in); err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
@@ -239,14 +259,14 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, state.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationIDGen(ctx, r.client, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if err = r.client.Accounts.Delete(ctx, normalizedID); err != nil {
+	if err = r.client.AccountDelete(ctx, normalizedID); err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
