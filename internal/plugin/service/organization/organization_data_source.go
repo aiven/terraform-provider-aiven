@@ -3,13 +3,15 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -29,7 +31,7 @@ func NewOrganizationDataSource() datasource.DataSource {
 // organizationDataSource is the organization data source implementation.
 type organizationDataSource struct {
 	// client is the instance of the Aiven client to use.
-	client *aiven.Client
+	client avngen.Client
 
 	// typeName is the name of the data source type.
 	typeName string
@@ -41,8 +43,12 @@ type organizationDataSourceModel struct {
 	ID types.String `tfsdk:"id"`
 	// Name is the name of the organization.
 	Name types.String `tfsdk:"name"`
+	// ParentAccountID is the identifier of the parent account of the organization.
+	ParentAccountID types.String `tfsdk:"parent_account_id"`
 	// TenantID is the tenant identifier of the organization.
 	TenantID types.String `tfsdk:"tenant_id"`
+	// PrimaryBillingGroupID is the identifier of the primary billing group of the organization.
+	PrimaryBillingGroupID types.String `tfsdk:"primary_billing_group_id"`
 	// CreateTime is the timestamp of the creation of the organization.
 	CreateTime types.String `tfsdk:"create_time"`
 	// UpdateTime is the timestamp of the last update of the organization.
@@ -86,6 +92,14 @@ func (r *organizationDataSource) Schema(
 				Description: "Tenant ID of the organization.",
 				Computed:    true,
 			},
+			"parent_account_id": schema.StringAttribute{
+				Description: "ID of the parent account of the organization.",
+				Computed:    true,
+			},
+			"primary_billing_group_id": schema.StringAttribute{
+				Description: "ID of the primary billing group of the organization.",
+				Computed:    true,
+			},
 			"create_time": schema.StringAttribute{
 				Description: "Timestamp of the creation of the organization.",
 				Computed:    true,
@@ -108,10 +122,9 @@ func (r *organizationDataSource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
-	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+	client, err := common.GenClient()
+	if err != nil {
+		resp.Diagnostics.AddError(errmsg.SummaryUnexpectedProviderDataType, err.Error())
 		return
 	}
 
@@ -133,24 +146,22 @@ func (r *organizationDataSource) ConfigValidators(_ context.Context) []datasourc
 
 // fillModel fills the organization data source model from the Aiven API.
 func (r *organizationDataSource) fillModel(ctx context.Context, model *organizationDataSourceModel) (err error) {
-	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, model.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationIDGen(ctx, r.client, model.ID.ValueString())
 	if err != nil {
 		return
 	}
 
-	account, err := r.client.Accounts.Get(ctx, normalizedID)
+	account, err := r.client.AccountGet(ctx, normalizedID)
 	if err != nil {
 		return
 	}
 
-	model.Name = types.StringValue(account.Account.Name)
-
-	model.TenantID = types.StringValue(account.Account.TenantId)
-
-	model.CreateTime = types.StringValue(account.Account.CreateTime.String())
-
-	model.UpdateTime = types.StringValue(account.Account.UpdateTime.String())
-
+	model.Name = types.StringValue(account.AccountName)
+	model.TenantID = types.StringPointerValue(account.TenantId)
+	model.ParentAccountID = types.StringPointerValue(account.ParentAccountId)
+	model.PrimaryBillingGroupID = types.StringValue(account.PrimaryBillingGroupId)
+	model.CreateTime = types.StringValue(account.CreateTime.String())
+	model.UpdateTime = types.StringValue(account.UpdateTime.String())
 	return
 }
 
@@ -163,7 +174,7 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 
 	if state.ID.IsNull() {
-		list, err := r.client.Accounts.List(ctx)
+		list, err := r.client.AccountList(ctx)
 		if err != nil {
 			resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 
@@ -172,8 +183,8 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 		var found bool
 
-		for _, account := range list.Accounts {
-			if account.Name == state.Name.ValueString() {
+		for _, account := range list {
+			if account.AccountName == state.Name.ValueString() {
 				if found {
 					resp.Diagnostics = util.DiagDuplicateFoundByName(resp.Diagnostics, state.Name.ValueString())
 

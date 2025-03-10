@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
@@ -154,6 +155,20 @@ func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id strin
 		}
 
 		id = r.AccountID
+	}
+
+	return id, nil
+}
+
+// NormalizeOrganizationIDGen same as NormalizeOrganizationID but uses avngen.Client
+func NormalizeOrganizationIDGen(ctx context.Context, client avngen.Client, id string) (string, error) {
+	if IsOrganizationID(id) {
+		r, err := client.OrganizationGet(ctx, id)
+		if err != nil {
+			return "", err
+		}
+
+		id = r.AccountId
 	}
 
 	return id, nil

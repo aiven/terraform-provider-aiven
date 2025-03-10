@@ -29,5 +29,7 @@ data "aiven_organization" "main" {
 ### Read-Only
 
 - `create_time` (String) Timestamp of the creation of the organization.
+- `parent_account_id` (String) ID of the parent account of the organization.
+- `primary_billing_group_id` (String) ID of the primary billing group of the organization.
 - `tenant_id` (String) Tenant ID of the organization.
 - `update_time` (String) Timestamp of the last update of the organization.

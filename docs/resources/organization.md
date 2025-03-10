@@ -27,6 +27,8 @@ resource "aiven_organization" "main" {
 
 ### Optional
 
+- `parent_account_id` (String) ID of the parent account of the organization.
+- `primary_billing_group_id` (String) ID of the primary billing group of the organization.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
