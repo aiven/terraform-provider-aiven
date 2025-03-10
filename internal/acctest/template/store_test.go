@@ -114,7 +114,7 @@ func TestComplexSchema(t *testing.T) {
   }
 }`
 
-	set := NewSDKStore(t)
+	set := NewStore(t)
 	set.registerResource("aiven_pg", pgResource, ResourceKindResource)
 
 	config := map[string]any{
