@@ -4,20 +4,18 @@ page_title: "aiven_organization_application_user Resource - terraform-provider-a
 subcategory: ""
 description: |-
   Creates and manages an organization application user. Application users https://aiven.io/docs/platform/concepts/application-users can be used for
-  programmatic access to the platform.
-  You give application users access to projects by adding them as members of a group using aiven_organization_user_group_member
-  and assigning the group to a project with aiven_organization_group_project. You can give an application user access to all
-  resources in your organization by setting is_super_admin = true .
+  programmatic access to the platform using a token created with the aiven_organization_application_user_token resource.
+  You give application users access to projects using the aiven_organization_permission resource. You can also add application users to
+  groups with access to projects using aiven_organization_user_group_member.
 ---
 
 # aiven_organization_application_user (Resource)
 
 Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for
-programmatic access to the platform.
+programmatic access to the platform using a token created with the `aiven_organization_application_user_token` resource.
 
-You give application users access to projects by adding them as members of a group using `aiven_organization_user_group_member`
-and assigning the group to a project with `aiven_organization_group_project`. You can give an application user access to all
-resources in your organization by setting `is_super_admin = true` .
+You give application users access to projects using the `aiven_organization_permission` resource. You can also add application users to
+groups with access to projects using `aiven_organization_user_group_member`.
 
 ## Example Usage
 
@@ -38,7 +36,7 @@ resource "aiven_organization_application_user" "tf_user" {
 
 ### Optional
 
-- `is_super_admin` (Boolean) Makes the application user a super admin. The super admin role has full access to an organization, its billing and settings, and all its organizational units, projects, and services.
+- `is_super_admin` (Boolean) Makes the application user a [super admin](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_application_user_token#scopes-1). The super admin role has completely unrestricted access to all organization resources and settings. This role should be limited to as few users as possible. For daily administrative tasks, assign users the organization admin role instead using the `aiven_organization_permission` resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
