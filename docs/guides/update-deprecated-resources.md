@@ -23,69 +23,72 @@ To replace resources that are deprecated:
 2. Replace all instances of the deprecated resource with the new resource in your Terraform files.
    In the following example, the `aiven_database` resource was replaced with `aiven_pg_database`:
 
-   ```hcl
-   - resource "aiven_database" "mydatabase" {
-       project       = "myproject"
-       service_name  = "mypgservice"
-       database_name = "example-database"
-   }
+      ```hcl
+      - resource "aiven_database" "mydatabase" {
+          project       = "myproject"
+          service_name  = "mypgservice"
+          database_name = "example-database"
+      }
 
 
-   + resource "aiven_pg_database" "mydatabase" {
-       project       = "myproject"
-       service_name  = "mypgservice"
-       database_name = "example-database"
-   }
-   ```
+      + resource "aiven_pg_database" "mydatabase" {
+          project       = "myproject"
+          service_name  = "mypgservice"
+          database_name = "example-database"
+      }
+      ```
 
-   -> **Tip**
-   To list all resources in the state file, run: `terraform state list`
+      -> **Tip**
+      To list all resources in the state file, run: `terraform state list`.
 
 3. Preview removing all instances of the deprecated resource from Terraform's control by running:
 
-   ```bash
-   terraform state rm -dry-run RESOURCE.RESOURCE_NAME
-   ```
+      ```bash
+      terraform state rm -dry-run RESOURCE.RESOURCE_NAME
+      ```
 
-   For example, to preview removing the `aiven_database` resource named `mydatabase`, run:
+      For example, to preview removing the `aiven_database` resource named `mydatabase`, run:
 
-   ```bash
-   terraform state rm -dry-run aiven_database.mydatabase
-   ```
+      ```bash
+      terraform state rm -dry-run aiven_database.mydatabase
+      ```
 
 4. To remove the resources, run the command without the `-dry-run` flag:
 
-   ```bash
-   terraform state rm RESOURCE.RESOURCE_NAME
-   ```
+    ```bash
+    terraform state rm RESOURCE.RESOURCE_NAME
+    ```
 
 5. Add the new resources to Terraform by [importing them](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/importing-resources).
 
    For example, to add the `aiven_pg_database` resource, run:
 
-   ```bash
-   terraform import aiven_pg_database.mydatabase myproject/mypgservice/example-database
-   ```
+    ```bash
+    terraform import aiven_pg_database.mydatabase myproject/mypgservice/example-database
+     ```
 
 6. To preview your configuration changes, run:
 
-   ```bash
-   terraform plan
-   ```
+    ```bash
+    terraform plan
+    ```
 
 7. To add the new resources, apply the new configuration by running:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+    ```bash
+    terraform apply --auto-approve
+     ```
 
 ## Migrate to `aiven_organization_permission`
 
 The `aiven_project_user` and `aiven_organization_group_project` resources have been replaced by
 [the `aiven_organization_permission` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
-This example shows you how to migrate to the new permission resource.
 
-The following file has a user assigned to a project with the read only role and a group assigned to the same project with the operator role.
+   ~> **Important**
+   Do not use the `aiven_project_user` or  `aiven_organization_group_project` resources with `aiven_organization_permission`.
+
+This example shows you how to migrate to the new permission resource. The following file has a user assigned to a project with the
+read only role and a group assigned to the same project with the operator role.
 
 ```hcl
 # Project
@@ -116,65 +119,69 @@ resource "aiven_organization_group_project" "example" {
 
 1. Replace all `aiven_project_user` and `aiven_organization_group_project` resources with the `aiven_organization_permission` resource:
 
-   ```hcl
-   # Project
-   data "aiven_project" "example_project" {
-     project = "example-project"
-   }
+      ```hcl
+      # Project
+      data "aiven_project" "example_project" {
+        project = "example-project"
+      }
 
-   # Group
-   data "aiven_organization_user_group" "example_group" {
-     name            = "example-group"
-     organization_id = aiven_organization.main.id
-   }
+      # Group
+      data "aiven_organization_user_group" "example_group" {
+        name            = "example-group"
+        organization_id = aiven_organization.main.id
+      }
 
-   # Grant the read_only role to the user and the operator role to the group
-   resource "aiven_organization_permission" "example_permissions" {
-     organization_id = data.aiven_organization.main.id
-     resource_id     = data.aiven_project.example_project.id
-     resource_type   = "project"
-     permissions {
-       permissions = [
-         "read_only"
-       ]
-       principal_id   = "u123a456b7890c"
-       principal_type = "user"
-     }
+      # Organization users
+      data "aiven_organization_user_list" "users" {
+       id    = aiven_organization.main.id
+       name  = aiven.organization.main.name
+      }
 
-     permissions {
-       permissions = [
-         "operator"
-       ]
-       principal_id   = data.aiven_organization_user_group.example_group.group_id
-       principal_type = "user_group"
-     }
-   }
-   ```
+      # Grant the read_only role to the user and the operator role to the group
+      resource "aiven_organization_permission" "example_permissions" {
+        organization_id = data.aiven_organization.main.id
+        resource_id     = data.aiven_project.example_project.project
+        resource_type   = "project"
+        permissions {
+          permissions = [
+            "read_only"
+          ]
+          principal_id   = one([for user in data.aiven_organization_user_list.users: user if user.email == "izumi@example.com" ])
+          principal_type = "user"
+        }
 
-   Where `principal_id` is the user or group ID. You can [get the IDs from the Aiven Console](https://docs.aiven.io/docs/platform/reference/get-resource-IDs).
+        permissions {
+          permissions = [
+            "operator"
+          ]
+          principal_id   = data.aiven_organization_user_group.example_group.group_id
+          principal_type = "user_group"
+        }
+      }
+      ```
 
 2. Remove the deprecated resources from Terraform's control by running:
 
-   ```bash
-   terraform state rm aiven_organization_group_project.example
-   terraform state rm aiven_project_user.example_project_user
-   ```
+      ```bash
+      terraform state rm aiven_organization_group_project.example
+      terraform state rm aiven_project_user.example_project_user
+      ```
 
 3. Preview your changes by running:
 
-   ```bash
-   terraform plan
-   ```
+      ```bash
+      terraform plan
+      ```
 
 4. To apply the new configuration, run:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+      ```bash
+      terraform apply --auto-approve
+      ```
 
 ## Migrate teams to `aiven_organization_user_group`
 
-Teams have been deprecated and are being migrated to groups. Groups are an easier way to 
+Teams have been deprecated and are being migrated to groups. Groups are an easier way to
 control access to your organization's projects and services for a group of users.
 
 * **On 30 September 2024 the Account Owners team will be removed.**
@@ -204,61 +211,62 @@ To migrate from teams to groups:
    sample creates a group using the
    [`aiven_organization_user_group` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group).
 
-   ```hcl
-   resource "aiven_organization_user_group" "admin" {
-     organization_id = data.aiven_organization.main.id
-     name       = "Admin user group"
-     description = "Administrators"
-   }
-   ```
+      ```hcl
+      resource "aiven_organization_user_group" "admin" {
+        organization_id = data.aiven_organization.main.id
+        name       = "Admin user group"
+        description = "Administrators"
+      }
+      ```
 
-   -> **Note**
-   Users on the Account Owners team automatically become super admin with full access to
-   manage the organization. You don't need to create a group for these users or manage
-   this team after the migration, and you also can't delete this team.
+      -> **Note**
+      Users on the Account Owners team automatically become super admin with full access to
+      manage the organization. You don't need to create a group for these users or manage
+      this team after the migration, and you also can't delete this team.
 
 3. To add the users to the groups, use the
    [`aiven_organization_user_group_member` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group_member):
 
-   ```hcl
-   resource "aiven_organization_user_group_member" "admin_members" {
-     group_id         = aiven_organization_user_group.admin.group_id
-     organization_id  = data.aiven_organization.main.id
-     user_id          = "u123a456b7890c"
-   }
-   ```
+      ```hcl
+      resource "aiven_organization_user_group_member" "admin_members" {
+        group_id         = aiven_organization_user_group.admin.group_id
+        organization_id  = data.aiven_organization.main.id
+        user_id          = one([for user in data.aiven_organization_user_list.users: user if user.email == "izumi@example.com" ])
+      }
+      ```
 
-   You can [get IDs from the Aiven Console](https://docs.aiven.io/docs/platform/reference/get-resource-IDs).
+      You can [use the `aiven_organization_user_list` data source](https://docs.aiven.io/docs/platform/reference/get-resource-IDs) to get
+      the `user_id`.
 
 4. To add each new group to the same projects that the teams are assigned to, use the
    [`aiven_organization_permission` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission):
 
-   ```hcl
-   resource "aiven_organization_permission" "project_admin" {
-     organization_id = data.aiven_organization.main.id
-     resource_id     = data.aiven_project.example_project.id
-     resource_type   = "project"
-     permissions {
-       permissions = [
-         "admin"
-       ]
-       principal_id   = aiven_organization_user_group.admin.group_id
-       principal_type = "user_group"
-     }
-   }
-   ```
+      ```hcl
+      resource "aiven_organization_permission" "project_admin" {
+        organization_id = data.aiven_organization.main.id
+        resource_id     = data.aiven_project.example_project.id
+        resource_type   = "project"
+        permissions {
+          permissions = [
+            "admin"
+          ]
+          principal_id   = aiven_organization_user_group.admin.group_id
+          principal_type = "user_group"
+        }
+      }
+      ```
 
 5. Preview your changes by running:
 
-   ```bash
-   terraform plan
-   ```
+      ```bash
+      terraform plan
+      ```
 
 6. To apply the new configuration, run:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+      ```bash
+      terraform apply --auto-approve
+      ```
 
 7. After confirming all users have the correct access, delete the team resources.
 
@@ -327,27 +335,28 @@ resource "aiven_account_team_project" "main" {
 1. Replace the `aiven_account_team` resources with
    `aiven_organization_user_group`:
 
-   ```hcl
-   # The new group created by Aiven from a team of the same name.
-   resource "aiven_organization_user_group" "example_group" {
-    name            = "Example group"
-    description     = ""
-    organization_id = "org1a23f456789"
-    }
-   ```
-
-   You can [get the IDs](https://docs.aiven.io/docs/platform/reference/get-resource-IDs) in the Aiven Console.
+      ```hcl
+      # The new group created by Aiven from a team of the same name.
+      resource "aiven_organization_user_group" "example_group" {
+       name            = "Example group"
+       description     = ""
+       organization_id = data.aiven_organization.main.id
+       }
+      ```
 
 2. Replace the `aiven_account_team_member` resources with
    `aiven_organization_user_group_member`:
 
-   ```hcl
-   resource "aiven_organization_user_group_member" "project_admin" {
-       group_id        = aiven_organization_user_group.example_group.group_id
-       organization_id = "org1a23f456789"
-       user_id         = "u123a456b7890c"
-    }
-   ```
+      ```hcl
+      resource "aiven_organization_user_group_member" "project_admin" {
+          group_id        = aiven_organization_user_group.example_group.group_id
+          organization_id = "org1a23f456789"
+          user_id         =    one([for user in data.aiven_organization_user_list.users: user if user.email == "izumi@example.com" ])
+       }
+      ```
+
+    You can [use the `aiven_organization_user_list` data source](https://docs.aiven.io/docs/platform/reference/get-resource-IDs) to get
+    the `user_id`.
 
 3. Replace the `aiven_account_team_project` resources with
     `aiven_organization_permission`:
@@ -369,11 +378,11 @@ resource "aiven_account_team_project" "main" {
 
 4. To remove Terraform's control of the team resources in this list run:
 
-   ```bash
-   terraform state rm aiven_account_team.example_team
-   terraform state rm aiven_account_team_member.example_team_member
-   terraform state rm aiven_account_team_project.main
-   ```
+      ```bash
+      terraform state rm aiven_account_team.example_team
+      terraform state rm aiven_account_team_member.example_team_member
+      terraform state rm aiven_account_team_project.main
+      ```
 
 5. Add the group resources to Terraform by [importing them](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/importing-resources).
     * For groups, run:
@@ -403,23 +412,23 @@ resource "aiven_account_team_project" "main" {
 
 6. To preview the changes, run:
 
-   ```bash
-   terraform plan
-   ```
+      ```bash
+      terraform plan
+      ```
 
-   -> The user group resources will be replaced. This is expected behavior.
+      -> The user group resources will be replaced. This is expected behavior.
 
 7. To apply the changes, run:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+      ```bash
+      terraform apply --auto-approve
+      ```
 
 8. To confirm the changes, list the resources in the state file by running:
 
-   ```bash
-   terraform state list
-   ```
+      ```bash
+      terraform state list
+      ```
 
 ## Update `aiven_redis` resources after Valkey upgrade
 
@@ -451,96 +460,95 @@ resource "aiven_redis_user" "caching_example_user" {
 
 1. Replace the `aiven_redis` resources with `aiven_valkey`:
 
-   ```hcl
-   resource "aiven_valkey" "caching_service" {
-    project      = data.aiven_project.example_project.project
-    cloud_name   = "google-europe-west1"
-    plan         = "business-4"
-    service_name = "example-caching-service"
+      ```hcl
+      resource "aiven_valkey" "caching_service" {
+       project      = data.aiven_project.example_project.project
+       cloud_name   = "google-europe-west1"
+       plan         = "business-4"
+       service_name = "example-caching-service"
 
-    valkey_user_config {
-      valkey_timeout = 120
-      valkey_maxmemory_policy = "allkeys-random"
-    }
-   }
-   ```
+       valkey_user_config {
+         valkey_timeout = 120
+         valkey_maxmemory_policy = "allkeys-random"
+       }
+      }
+      ```
 
 2. Replace `aiven_redis_user` resources with `aiven_valkey_user`:
 
-   ```hcl
-   resource "aiven_valkey_user" "caching_example_user" {
-      service_name = aiven_valkey.caching_service.service_name
-      project      = data.aiven_project.example_project.project
-      username     = "example-user"
-      password     = var.caching_user_pw
-   }
-   ```
+      ```hcl
+      resource "aiven_valkey_user" "caching_example_user" {
+         service_name = aiven_valkey.caching_service.service_name
+         project      = data.aiven_project.example_project.project
+         username     = "example-user"
+         password     = var.caching_user_pw
+      }
+      ```
 
 3. To remove Terraform's control of the aiven_redis resources, run:
 
-   ```bash
-   terraform state rm aiven_redis.caching_service
-   terraform state rm aiven_redis_user.caching_example_user
-   ```
+      ```bash
+      terraform state rm aiven_redis.caching_service
+      terraform state rm aiven_redis_user.caching_example_user
+      ```
 
 4. Add the Valkey resources to Terraform by [importing them](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/importing-resources).
-
    For example:
 
-   ```bash
-   terraform import aiven_valkey.caching_service PROJECT/example-caching-service
-   terraform import aiven_valkey_user.caching_example_user PROJECT/example-caching-service/example-user
-   ```
+      ```bash
+      terraform import aiven_valkey.caching_service PROJECT/example-caching-service
+      terraform import aiven_valkey_user.caching_example_user PROJECT/example-caching-service/example-user
+      ```
 
-  Where `PROJECT` is the name of the project.
+     Where `PROJECT` is the name of the project.
 
 5. To preview the changes, run:
 
-   ```bash
-   terraform plan
-   ```
+      ```bash
+      terraform plan
+      ```
 
 6. To apply the changes, run:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+      ```bash
+      terraform apply --auto-approve
+      ```
 
 7. To confirm the changes, list the resources in the state file by running:
 
-   ```bash
-   terraform state list
-   ```
+      ```bash
+      terraform state list
+      ```
 
 ## Migrate from M3DB to Thanos Metrics
 
 Migrate your Aiven for M3 databases to [Aiven for Thanos Metrics](https://aiven.io/docs/products/metrics).
 
 1. Create an Aiven for Thanos Metrics service to migrate your Aiven for M3 databases to using the `aiven_thanos` resource:
-   ```hcl
-   resource "aiven_thanos" "example_thanos" {
-    project      = data.aiven_project.example_project.project
-    cloud_name   = "google-europe-west1"
-    plan         = "business-4"
-    service_name = "example-thanos-service"
-   }
-   ```
+      ```hcl
+      resource "aiven_thanos" "example_thanos" {
+       project      = data.aiven_project.example_project.project
+       cloud_name   = "google-europe-west1"
+       plan         = "business-4"
+       service_name = "example-thanos-service"
+      }
+      ```
 
 2. In the Aiven Console, [migrate your M3DB database to this Thanos service](https://aiven.io/docs/products/metrics/howto/migrate-m3db-thanos).
 
 3. After the migration, remove the `aiven_m3db` and `aiven_m3db_user` resources.
 
-  -> **Note**
-   Aiven for Metrics does not have service users. You can grant access to the service using [project roles and permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
+     -> **Note**
+      Aiven for Metrics does not have service users. You can grant access to the service using [project roles and permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
 
 4. To preview the changes, run:
 
-   ```bash
-   terraform plan
-   ```
+      ```bash
+      terraform plan
+      ```
 
 5. To apply the changes, run:
 
-   ```bash
-   terraform apply --auto-approve
-   ```
+      ```bash
+      terraform apply --auto-approve
+      ```
