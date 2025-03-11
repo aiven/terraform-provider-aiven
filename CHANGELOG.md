@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `terraform import` for various resources
+- Fix `aiven_organization_application_user`: improve delete operation
 - Improve `aiven_organiztion_permission`: use `PermissionsSet` endpoint to set permissions
 - Restricted `organization_group_project` resource modification
 - Restricted `project_user` resource modification

@@ -144,9 +144,9 @@ func resourceOrganizationApplicationUserDelete(ctx context.Context, d *schema.Re
 		return err
 	}
 
-	err = client.ApplicationUserDelete(ctx, orgID, userID)
-	if err != nil {
-		return fmt.Errorf("failed to delete application user %s/%s: %w", orgID, userID, err)
-	}
-	return nil
+	// Ignores all the errors until the user is deleted (404)
+	// Currently there is an issue with the API that returns 400 on the first delete request
+	return schemautil.WaitUntilNotFound(ctx, func() error {
+		return client.ApplicationUserDelete(ctx, orgID, userID)
+	})
 }
