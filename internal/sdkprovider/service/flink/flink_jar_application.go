@@ -45,12 +45,12 @@ func flinkJarApplicationCreate(ctx context.Context, d *schema.ResourceData, clie
 }
 
 func flinkJarApplicationRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	project, serviceName, applicationID, err := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, applicationID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return err
 	}
 
-	rsp, err := client.ServiceFlinkGetJarApplication(ctx, project, serviceName, applicationID)
+	rsp, err := client.ServiceFlinkGetJarApplication(ctx, projectName, serviceName, applicationID)
 	if err != nil {
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
@@ -63,8 +63,10 @@ func flinkJarApplicationRead(ctx context.Context, d *schema.ResourceData, client
 	}
 
 	return schemautil.ResourceDataSet(
-		flinkJarApplicationSchema(), d, rsp,
+		d, rsp, flinkJarApplicationSchema(),
 		schemautil.RenameAliasesReverse(flinkJarApplicationRename()),
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
 	)
 }
 

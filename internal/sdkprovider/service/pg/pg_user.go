@@ -190,7 +190,11 @@ func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client a
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.ResourceDataSet(ResourcePGUserSchema, d, user)
+	err = schemautil.ResourceDataSet(
+		d, user, ResourcePGUserSchema,
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
+	)
 	if err != nil {
 		return err
 	}

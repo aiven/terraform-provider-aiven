@@ -151,7 +151,11 @@ func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *sche
 		return err
 	}
 
-	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
+	err = schemautil.ResourceDataSet(
+		d, token, aivenOrganizationApplicationUserTokenSchema,
+		schemautil.SetForceNew("organization_id", orgID),
+		schemautil.SetForceNew("user_id", userID),
+	)
 	if err != nil {
 		return err
 	}
@@ -183,7 +187,11 @@ func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema
 		return fmt.Errorf("application user token not found")
 	}
 
-	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
+	err = schemautil.ResourceDataSet(
+		d, token, aivenOrganizationApplicationUserTokenSchema,
+		schemautil.SetForceNew("organization_id", orgID),
+		schemautil.SetForceNew("user_id", userID),
+	)
 	if err != nil {
 		return err
 	}

@@ -91,7 +91,11 @@ func resourceAlloyDBOmniDatabaseRead(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	return schemautil.ResourceDataSet(aivenAlloyDBOmniDatabaseSchema, d, db)
+	return schemautil.ResourceDataSet(
+		d, db, aivenAlloyDBOmniDatabaseSchema,
+		schemautil.SetForceNew("project", projectName),
+		schemautil.SetForceNew("service_name", serviceName),
+	)
 }
 
 func resourceAlloyDBOmniDatabaseDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {

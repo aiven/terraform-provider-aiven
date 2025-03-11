@@ -13,26 +13,51 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenPGUser_basic(t *testing.T) {
 	resourceName := "aiven_pg_user.foo.0" // checking the first user only
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	serviceName := "test-acc-sr-" + acc.RandStr()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenPGUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGUserNewPasswordResource(rName),
+				Config: testAccPGUserNewPasswordResource(projectName, serviceName),
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
 					resource.TestCheckResourceAttr(resourceName, "password", "P4$$word"),
 				),
+			},
+			{
+				// Validates that the import sets all ForceNew fields
+				// https://github.com/aiven/terraform-provider-aiven/issues/2065
+				Config: fmt.Sprintf(`
+resource "aiven_pg_user" "foo" {
+  project      = %q
+  service_name = %q
+  username     = "user-1"
+}
+				`, projectName, serviceName),
+				ResourceName:      "aiven_pg_user.foo",
+				ImportStateId:     util.ComposeID(projectName, serviceName, "user-1"),
+				ImportState:       true,
+				ImportStateVerify: true,
+				// ImportState uses the current state
+				// ImportStateVerify compares it with the state after importing, they must match.
+				// Without a fix it outputs:
+				// Step 2/2 error running import: ImportStateVerify attributes not equivalent.
+				// map[string]string{
+				//	"project":      "...",
+				//	"service_name": "...",
+				//}
 			},
 		},
 	})
@@ -235,17 +260,17 @@ data "aiven_pg_user" "user" {
 }
 
 // testAccPGUserNewPasswordResource creates 100 users to test bulk creation
-func testAccPGUserNewPasswordResource(name string) string {
+func testAccPGUserNewPasswordResource(projectName, serviceName string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
-  project = "%s"
+  project = %[1]q
 }
 
 resource "aiven_pg" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
+  service_name            = %[2]q
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 }
@@ -256,8 +281,6 @@ resource "aiven_pg_user" "foo" {
   project      = data.aiven_project.foo.project
   username     = "user-${count.index + 1}"
   password     = "P4$$word"
-
-  depends_on = [aiven_pg.bar]
 }
 
 data "aiven_pg_user" "user" {
@@ -266,7 +289,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.0.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, projectName, serviceName)
 }
 
 func testAccPGUserNoPasswordResource(name string) string {

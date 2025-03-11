@@ -11,6 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `terraform import` for various resources
 - Improve `aiven_organiztion_permission`: use `PermissionsSet` endpoint to set permissions
 - Add `aiven_organization_application_user_token` resource field `ip_allowlist`: List of allowed IP ranges.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:billing:read`, `organization:billing:write`
