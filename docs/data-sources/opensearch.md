@@ -131,6 +131,7 @@ Read-Only:
 - `include_aliases` (Boolean)
 - `indices` (String)
 - `key` (String)
+- `readonly` (Boolean)
 - `restore_global_state` (Boolean)
 - `sas_token` (String)
 - `snapshot_name` (String)
@@ -148,6 +149,7 @@ Read-Only:
 - `credentials` (String)
 - `include_aliases` (Boolean)
 - `indices` (String)
+- `readonly` (Boolean)
 - `restore_global_state` (Boolean)
 - `snapshot_name` (String)
 
@@ -541,6 +543,7 @@ Read-Only:
 - `endpoint` (String)
 - `include_aliases` (Boolean)
 - `indices` (String)
+- `readonly` (Boolean)
 - `region` (String)
 - `restore_global_state` (Boolean)
 - `secret_key` (String)

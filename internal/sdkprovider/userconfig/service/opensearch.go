@@ -73,6 +73,11 @@ func opensearchUserConfig() *schema.Schema {
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
+					"readonly": {
+						Description: "Whether the repository is read-only. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"restore_global_state": {
 						Description: "If true, restore the cluster state. Defaults to false.",
 						Optional:    true,
@@ -142,6 +147,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
 						Required:    true,
 						Type:        schema.TypeString,
+					},
+					"readonly": {
+						Description: "Whether the repository is read-only. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"restore_global_state": {
 						Description: "If true, restore the cluster state. Defaults to false.",
@@ -1221,6 +1231,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
 						Required:    true,
 						Type:        schema.TypeString,
+					},
+					"readonly": {
+						Description: "Whether the repository is read-only. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"region": {
 						Description: "S3 region.",
