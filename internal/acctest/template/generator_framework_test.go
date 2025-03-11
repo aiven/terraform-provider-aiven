@@ -247,7 +247,8 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := generator.GenerateTemplate(tt.schema, tt.resourceType, tt.kind)
+			got, err := generator.GenerateTemplate(tt.schema, tt.resourceType, tt.kind)
+			assert.NoError(t, err)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")
 		})
 	}
@@ -257,10 +258,9 @@ func TestFrameworkGenerateTemplateWithInvalidSchema(t *testing.T) {
 	generator := NewFrameworkTemplateGenerator()
 
 	// Test with an invalid schema type
-	got := generator.GenerateTemplate("invalid schema", "test_resource", ResourceKindResource)
-	want := `resource "test_resource" "{{ required .resource_name }}" {
-  # Error extracting fields: unsupported schema type: string
-}`
+	got, err := generator.GenerateTemplate("invalid schema", "test_resource", ResourceKindResource)
 
-	assert.Equal(t, normalizeHCL(want), normalizeHCL(got), "Generated template for invalid schema mismatch")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unsupported schema type")
+	assert.Equal(t, "", got)
 }

@@ -1,24 +1,3 @@
-// Package template provides a framework for generating Terraform configuration templates
-// from schema definitions across different Terraform development frameworks.
-//
-// This package enables automated template generation for both Terraform SDK v2 and
-// Plugin Framework schemas through a unified interface. The core workflow is:
-//
-//  1. Schema Analysis: Extract fields and their properties (required, optional, computed)
-//     from different schema types (SDK v2 Resources or Plugin Framework Schemas)
-//
-//  2. Field Processing: Determine field characteristics (type, nested structure, etc.)
-//     and organize them into a unified TemplateField representation
-//
-//  3. Template Generation: Convert the structured field data into properly formatted
-//     Terraform configuration templates with appropriate conditionals and formatting
-//
-// The package uses a modular design with discrete interfaces for each part of the process:
-// - TemplateGenerator: Main entry point for template generation
-// - SchemaFieldExtractor: Extracts fields from different schema types
-//
-// By separating these concerns, the package supports different schema types through
-// specialized implementations while maintaining a consistent template generation pipeline.
 package template
 
 import (
@@ -50,7 +29,7 @@ func (k ResourceKind) String() string {
 // TemplateGenerator is the base interface for all template generators
 type TemplateGenerator interface {
 	// GenerateTemplate generates a template for the given schema, resource type, and kind
-	GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) string
+	GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) (string, error)
 }
 
 // SchemaFieldExtractor is an interface for extracting fields from different schema types
@@ -127,6 +106,34 @@ func (p TemplatePath) Expression() string {
 // CommonTemplateRenderer provides shared template rendering logic
 // for both SDK and Framework template generators
 type CommonTemplateRenderer struct{}
+
+// GenerateTemplate generates a complete Terraform configuration template from extracted fields.
+func (r *CommonTemplateRenderer) GenerateTemplate(fields []TemplateField, resourceType string, kind ResourceKind, timeoutsConfig TimeoutsConfig, hasDependsOn bool) (string, error) {
+	var b strings.Builder
+
+	// Header differs based on kind
+	_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
+
+	// Handle regular fields
+	for _, field := range fields {
+		r.RenderField(&b, field, 1, TemplatePath{})
+	}
+
+	// Handle timeouts
+	// Only generate the timeouts block if at least one timeout is configured
+	if timeoutsConfig.Create || timeoutsConfig.Read || timeoutsConfig.Update || timeoutsConfig.Delete {
+		r.RenderTimeouts(&b, 1, timeoutsConfig)
+	}
+
+	// Handle depends_on
+	if hasDependsOn {
+		r.RenderDependsOn(&b, 1)
+	}
+
+	b.WriteString("}")
+
+	return b.String(), nil
+}
 
 // RenderTimeouts renders a timeouts block with standard structure
 func (r *CommonTemplateRenderer) RenderTimeouts(builder *strings.Builder, indent int, config TimeoutsConfig) {

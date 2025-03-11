@@ -2,10 +2,12 @@ package template
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// Ensure SDKTemplateGenerator implements TemplateGenerator
+var _ TemplateGenerator = &SDKTemplateGenerator{}
 
 // SDKTemplateGenerator creates Go templates for Terraform SDK resources
 type SDKTemplateGenerator struct {
@@ -22,60 +24,29 @@ func NewSDKTemplateGenerator() *SDKTemplateGenerator {
 }
 
 // GenerateTemplate implements the TemplateGenerator interface
-func (g *SDKTemplateGenerator) GenerateTemplate(schemaObj interface{}, resourceType string, kind ResourceKind) string {
+func (g *SDKTemplateGenerator) GenerateTemplate(schemaObj interface{}, resourceType string, kind ResourceKind) (string, error) {
 	// For SDK resources, we expect a *schema.Resource
 	resource, ok := schemaObj.(*schema.Resource)
 	if !ok {
-		// If not a *schema.Resource, return a basic template with an error comment
-		var b strings.Builder
-		_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
-		b.WriteString("  # Error: SDK generator received non-SDK schema\n")
-		b.WriteString("}")
-		return b.String()
+		return "", fmt.Errorf("SDK generator received non-SDK schema of type %T", schemaObj)
 	}
 
 	fields, err := g.extractor.ExtractFields(resource)
 	if err != nil {
-		// Handle extraction error
-		var b strings.Builder
-		_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
-		b.WriteString(fmt.Sprintf("  # Error extracting fields: %v\n", err))
-		b.WriteString("}")
-		return b.String()
+		return "", fmt.Errorf("error extracting fields: %w", err)
 	}
 
-	return g.generateTemplateFromFields(fields, resource, resourceType, kind)
-}
-
-func (g *SDKTemplateGenerator) generateTemplateFromFields(fields []TemplateField, r *schema.Resource, resourceType string, kind ResourceKind) string {
-	var b strings.Builder
-
-	// Header differs based on kind
-	_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
-
-	// Handle regular fields
-	for _, field := range fields {
-		g.renderer.RenderField(&b, field, 1, TemplatePath{})
+	var timeoutsConfig TimeoutsConfig
+	if resource.Timeouts != nil {
+		timeoutsConfig = g.extractTimeoutsConfig(resource.Timeouts)
 	}
 
-	// Handle timeouts
-	if r.Timeouts != nil {
-		timeoutsConfig := g.extractTimeoutsConfig(r.Timeouts)
-
-		// Only generate the timeouts block if at least one timeout is configured
-		if timeoutsConfig.Create || timeoutsConfig.Read || timeoutsConfig.Update || timeoutsConfig.Delete {
-			g.renderer.RenderTimeouts(&b, 1, timeoutsConfig)
-		}
+	hasDependsOn := false
+	if _, ok := resource.Schema["depends_on"]; ok {
+		hasDependsOn = true
 	}
 
-	// Handle depends_on
-	if _, hasDependsOn := r.Schema["depends_on"]; hasDependsOn {
-		g.renderer.RenderDependsOn(&b, 1)
-	}
-
-	b.WriteString("}")
-
-	return b.String()
+	return g.renderer.GenerateTemplate(fields, resourceType, kind, timeoutsConfig, hasDependsOn)
 }
 
 // extractTimeoutsConfig extracts timeout configuration from a SDKv2 schema.ResourceTimeout

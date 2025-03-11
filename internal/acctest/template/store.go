@@ -126,12 +126,12 @@ func initTemplateStore(t testing.TB) *Store {
 
 	// Register all resources
 	for resourceType, resource := range p.ResourcesMap {
-		set.registerResource(resourceType, resource, ResourceKindResource)
+		set.registerSDKResource(resourceType, resource, ResourceKindResource)
 	}
 
 	// Register all data sources
 	for resourceType, resource := range p.DataSourcesMap {
-		set.registerResource(resourceType, resource, ResourceKindDataSource)
+		set.registerSDKResource(resourceType, resource, ResourceKindDataSource)
 	}
 
 	// Register all framework resources and data sources
@@ -160,10 +160,13 @@ func initTemplateStore(t testing.TB) *Store {
 	return set
 }
 
-// registerResource handles the registration of a single resource or data source
-func (s *Store) registerResource(resourceType string, r *sdkschema.Resource, kind ResourceKind) {
+// registerSDKResource handles the registration of a single resource or data source
+func (s *Store) registerSDKResource(resourceType string, r *sdkschema.Resource, kind ResourceKind) {
 	// Generate and register the template
-	template := s.sdkGenerator.GenerateTemplate(r, resourceType, kind)
+	template, err := s.sdkGenerator.GenerateTemplate(r, resourceType, kind)
+	if err != nil {
+		s.t.Fatalf("failed to generate SDK template for %s %s: %v", kind, resourceType, err)
+	}
 	s.registry.mustAddTemplate(templateKey(resourceType, kind), template)
 }
 
@@ -190,7 +193,10 @@ func (s *Store) registerFrameworkComponent(resourceType string, schemaProvider i
 	}
 
 	// Generate and register the template
-	template := s.frameworkGenerator.GenerateTemplate(schema, resourceType, kind)
+	template, err := s.frameworkGenerator.GenerateTemplate(schema, resourceType, kind)
+	if err != nil {
+		s.t.Fatalf("failed to generate framework template for %s %s: %v", kind, resourceType, err)
+	}
 	s.registry.mustAddTemplate(templateKey(resourceType, kind), template)
 }
 

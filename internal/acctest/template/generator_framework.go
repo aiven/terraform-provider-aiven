@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// Ensure FrameworkTemplateGenerator implements TemplateGenerator
+var _ TemplateGenerator = &FrameworkTemplateGenerator{}
+
 // FrameworkTemplateGenerator implements TemplateGenerator for Terraform Plugin Framework resources
 type FrameworkTemplateGenerator struct {
 	extractor *FrameworkFieldExtractor
@@ -21,18 +24,10 @@ func NewFrameworkTemplateGenerator() *FrameworkTemplateGenerator {
 
 // GenerateTemplate generates a Go template string that resembles Terraform HCL configuration
 // for a Framework resource or data source.
-func (g *FrameworkTemplateGenerator) GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) string {
-	var b strings.Builder
-
-	// Header differs based on kind
-	_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
-
+func (g *FrameworkTemplateGenerator) GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) (string, error) {
 	fields, err := g.extractor.ExtractFields(schema)
 	if err != nil {
-		// If schema type is not recognized, return a basic template with an error comment
-		b.WriteString(fmt.Sprintf("  # Error extracting fields: %v\n", err))
-		b.WriteString("}")
-		return b.String()
+		return "", fmt.Errorf("error extracting fields: %w", err)
 	}
 
 	var (
@@ -54,22 +49,12 @@ func (g *FrameworkTemplateGenerator) GenerateTemplate(schema interface{}, resour
 		}
 	}
 
-	for _, field := range regularFields {
-		g.renderer.RenderField(&b, field, 1, TemplatePath{})
-	}
-
+	var timeoutsConfig TimeoutsConfig
 	if hasTimeouts {
-		timeoutsConfig := g.extractTimeoutsConfig(timeoutsField)
-		g.renderer.RenderTimeouts(&b, 1, timeoutsConfig)
+		timeoutsConfig = g.extractTimeoutsConfig(timeoutsField)
 	}
 
-	if hasDependsOn {
-		g.renderer.RenderDependsOn(&b, 1)
-	}
-
-	b.WriteString("}")
-
-	return b.String()
+	return g.renderer.GenerateTemplate(regularFields, resourceType, kind, timeoutsConfig, hasDependsOn)
 }
 
 // extractTimeoutsConfig analyzes the timeouts field to determine which timeouts are configured

@@ -249,7 +249,8 @@ func TestGenerateSDKTemplate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := generator.GenerateTemplate(tt.resource, tt.resourceType, tt.kind)
+			got, err := generator.GenerateTemplate(tt.resource, tt.resourceType, tt.kind)
+			assert.NoError(t, err)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")
 		})
 	}
