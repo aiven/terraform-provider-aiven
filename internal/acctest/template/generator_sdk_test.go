@@ -9,6 +9,8 @@ import (
 )
 
 func TestGenerateSDKTemplate(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name         string
 		resource     *schema.Resource
@@ -50,10 +52,10 @@ func TestGenerateSDKTemplate(t *testing.T) {
 			resourceType: "test_resource",
 			kind:         ResourceKindResource,
 			want: `resource "test_resource" "{{ required .resource_name }}" {
-  enable_feature = {{ .enable_feature }}
   {{- if ne .disable_feature nil }}
   disable_feature = {{ .disable_feature }}
   {{- end }}
+  enable_feature = {{ .enable_feature }}
   nested_settings {
     feature_one = {{ (index .nested_settings 0 "feature_one") }}
     {{- if ne (index .nested_settings 0 "feature_two") nil }}
@@ -95,10 +97,10 @@ func TestGenerateSDKTemplate(t *testing.T) {
 			resourceType: "test_resource",
 			kind:         ResourceKindResource,
 			want: `resource "test_resource" "{{ required .resource_name }}" {
-  name = {{ renderValue (required .name) }}
   {{- if .description }}
   description = {{ renderValue .description }}
   {{- end }}
+  name = {{ renderValue (required .name) }}
 }`,
 		},
 		{

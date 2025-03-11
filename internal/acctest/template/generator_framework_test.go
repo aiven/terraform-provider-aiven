@@ -12,6 +12,8 @@ import (
 )
 
 func TestFrameworkGenerateTemplate(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 
 	tests := []struct {
@@ -47,10 +49,10 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 			resourceType: "test_resource",
 			kind:         ResourceKindResource,
 			want: `resource "test_resource" "{{ required .resource_name }}" {
-  enable_feature = {{ .enable_feature }}
   {{- if ne .disable_feature nil }}
   disable_feature = {{ .disable_feature }}
   {{- end }}
+  enable_feature = {{ .enable_feature }}
   settings {
     feature_one = {{ (index .settings "feature_one") }}
     {{- if ne (index .settings "feature_two") nil }}
@@ -89,10 +91,10 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 			resourceType: "test_resource",
 			kind:         ResourceKindResource,
 			want: `resource "test_resource" "{{ required .resource_name }}" {
-  name = {{ renderValue (required .name) }}
   {{- if .description }}
   description = {{ renderValue .description }}
   {{- end }}
+  name = {{ renderValue (required .name) }}
 }`,
 		},
 		{
@@ -247,6 +249,7 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got, err := generator.GenerateTemplate(tt.schema, tt.resourceType, tt.kind)
 			assert.NoError(t, err)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")

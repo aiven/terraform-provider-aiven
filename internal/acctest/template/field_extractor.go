@@ -3,6 +3,7 @@ package template
 import (
 	"fmt"
 	"reflect"
+	"sort"
 
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -63,6 +64,9 @@ func (e *FrameworkFieldExtractor) ExtractFields(schema interface{}) ([]TemplateF
 	if len(fields) == 0 {
 		return nil, fmt.Errorf("no fields could be extracted from framework schema, schema may be empty or nil")
 	}
+
+	// Sort fields to ensure consistent order
+	fields = sortTemplateFields(fields)
 
 	return fields, nil
 }
@@ -195,6 +199,9 @@ func (e *SDKFieldExtractor) ExtractFields(schema interface{}) ([]TemplateField, 
 		return nil, fmt.Errorf("no fields could be extracted from SDK schema, schema may be empty or nil")
 	}
 
+	// Sort fields to ensure consistent order
+	fields = sortTemplateFields(fields)
+
 	return fields, nil
 }
 
@@ -242,4 +249,25 @@ func (e *SDKFieldExtractor) processSchema(schema map[string]*sdkschema.Schema) [
 	}
 
 	return fields
+}
+
+// sortTemplateFields returns a sorted copy of the fields slice to ensure deterministic rendering
+func sortTemplateFields(fields []TemplateField) []TemplateField {
+	// Make a copy to avoid modifying the original
+	result := make([]TemplateField, len(fields))
+	copy(result, fields)
+
+	// Sort fields by name
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
+
+	// Sort nested fields recursively
+	for i := range result {
+		if len(result[i].NestedFields) > 0 {
+			result[i].NestedFields = sortTemplateFields(result[i].NestedFields)
+		}
+	}
+
+	return result
 }
