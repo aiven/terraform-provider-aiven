@@ -1,6 +1,7 @@
 package servicecomponent_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -52,7 +53,7 @@ func testAccServiceComponentAttributes(n, component, route string) resource.Test
 		a := r.Primary.Attributes
 
 		if a["project"] != os.Getenv("AIVEN_PROJECT_NAME") {
-			return fmt.Errorf("expected to get a corect project name from Aiven got: " + a["project"]) //nolint //fixme: remove when fixed https://github.com/anchore/syft/issues/3126
+			return errors.New("expected to get a corect project name from Aiven got: " + a["project"])
 		}
 
 		if a["component"] != component {
