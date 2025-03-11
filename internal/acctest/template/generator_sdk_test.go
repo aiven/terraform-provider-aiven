@@ -288,3 +288,36 @@ func TestResourceKindString(t *testing.T) {
 		})
 	}
 }
+
+func TestSDKGenerateTemplateWithErrors(t *testing.T) {
+	t.Parallel()
+
+	generator := NewSDKTemplateGenerator()
+
+	// Test with non-schema input
+	_, err := generator.GenerateTemplate("not a schema", "test_resource", ResourceKindResource)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "non-SDK schema")
+
+	// Create a schema that will cause extraction error by having nil schema
+	badSchema := &schema.Resource{
+		Schema: nil,
+	}
+
+	_, err = generator.GenerateTemplate(badSchema, "test_resource", ResourceKindResource)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error extracting fields")
+}
+
+func TestExtractTimeoutsConfigWithNil(t *testing.T) {
+	t.Parallel()
+
+	generator := NewSDKTemplateGenerator()
+	config := generator.extractTimeoutsConfig(nil)
+
+	// Verify all timeouts are false when input is nil
+	assert.False(t, config.Create)
+	assert.False(t, config.Read)
+	assert.False(t, config.Update)
+	assert.False(t, config.Delete)
+}

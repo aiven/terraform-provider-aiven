@@ -48,14 +48,23 @@ var _ SchemaFieldExtractor = &FrameworkFieldExtractor{}
 
 // ExtractFields implements SchemaFieldExtractor for Framework schemas
 func (e *FrameworkFieldExtractor) ExtractFields(schema interface{}) ([]TemplateField, error) {
+	var fields []TemplateField
+
 	switch s := schema.(type) {
 	case resourceschema.Schema:
-		return e.extractFields(s.Attributes), nil
+		fields = e.extractFields(s.Attributes)
 	case datasourceschema.Schema:
-		return e.extractFields(s.Attributes), nil
+		fields = e.extractFields(s.Attributes)
 	default:
 		return nil, fmt.Errorf("unsupported schema type: %T", schema)
 	}
+
+	// Check if we extracted zero fields, which indicates an invalid or empty schema
+	if len(fields) == 0 {
+		return nil, fmt.Errorf("no fields could be extracted from framework schema, schema may be empty or nil")
+	}
+
+	return fields, nil
 }
 
 // extractFields extracts fields from either resource or datasource attributes
@@ -179,7 +188,14 @@ func (e *SDKFieldExtractor) ExtractFields(schema interface{}) ([]TemplateField, 
 		return nil, fmt.Errorf("schema is not a *schema.Resource: %T", schema)
 	}
 
-	return e.processSchema(resource.Schema), nil
+	fields := e.processSchema(resource.Schema)
+
+	// Check if we extracted zero fields, which indicates an invalid or empty schema
+	if len(fields) == 0 {
+		return nil, fmt.Errorf("no fields could be extracted from SDK schema, schema may be empty or nil")
+	}
+
+	return fields, nil
 }
 
 // processSchema extracts fields from an SDK schema

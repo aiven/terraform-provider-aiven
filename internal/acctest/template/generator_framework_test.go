@@ -264,3 +264,45 @@ func TestFrameworkGenerateTemplateWithInvalidSchema(t *testing.T) {
 	assert.Contains(t, err.Error(), "unsupported schema type")
 	assert.Equal(t, "", got)
 }
+
+func TestFrameworkTimeoutsRendering(t *testing.T) {
+	t.Parallel()
+
+	generator := NewFrameworkTemplateGenerator()
+
+	// Create a test field with all timeout types
+	timeoutsField := TemplateField{
+		Name: "timeouts",
+		NestedFields: []TemplateField{
+			{Name: "create"},
+			{Name: "read"},
+			{Name: "update"},
+			{Name: "delete"},
+		},
+	}
+
+	config := generator.extractTimeoutsConfig(timeoutsField)
+
+	// Verify all timeouts are detected
+	assert.True(t, config.Create)
+	assert.True(t, config.Read)
+	assert.True(t, config.Update)
+	assert.True(t, config.Delete)
+
+	// Test with only some timeouts
+	partialTimeoutsField := TemplateField{
+		Name: "timeouts",
+		NestedFields: []TemplateField{
+			{Name: "read"},
+			{Name: "delete"},
+		},
+	}
+
+	partialConfig := generator.extractTimeoutsConfig(partialTimeoutsField)
+
+	// Verify only specific timeouts are detected
+	assert.False(t, partialConfig.Create)
+	assert.True(t, partialConfig.Read)
+	assert.False(t, partialConfig.Update)
+	assert.True(t, partialConfig.Delete)
+}
