@@ -14,6 +14,8 @@ import (
 
 // TestAccOrganizationGroupProject tests the organization group project relation resource.
 func TestAccOrganizationGroupProject(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	deps := acc.CommonTestDependencies(t)
 
 	_ = deps.IsBeta(true)
