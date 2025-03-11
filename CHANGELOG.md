@@ -24,6 +24,12 @@ nav_order: 1
 - Add `aiven_valkey` field `valkey_user_config.valkey_active_expire_effort`: Valkey reclaims expired keys both when
   accessed and in the background
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.disk_watermarks`: Watermark settings
+- Add `aiven_opensearch` field `opensearch_user_config.azure_migration.readonly`: Whether the repository is read-only.
+  Default: `false`.
+- Add `aiven_opensearch` field `opensearch_user_config.gcs_migration.readonly`: Whether the repository is read-only.
+  Default: `false`.
+- Add `aiven_opensearch` field `opensearch_user_config.s3_migration.readonly`: Whether the repository is read-only.
+  Default: `false`.
 
 ## [4.36.0] - 2025-02-20
 
