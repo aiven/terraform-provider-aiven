@@ -1,3 +1,24 @@
+// Package template provides a framework for generating Terraform configuration templates
+// from schema definitions across different Terraform development frameworks.
+//
+// This package enables automated template generation for both Terraform SDK v2 and
+// Plugin Framework schemas through a unified interface. The core workflow is:
+//
+//  1. Schema Analysis: Extract fields and their properties (required, optional, computed)
+//     from different schema types (SDK v2 Resources or Plugin Framework Schemas)
+//
+//  2. Field Processing: Determine field characteristics (type, nested structure, etc.)
+//     and organize them into a unified TemplateField representation
+//
+//  3. Template Generation: Convert the structured field data into properly formatted
+//     Terraform configuration templates with appropriate conditionals and formatting
+//
+// The package uses a modular design with discrete interfaces for each part of the process:
+// - TemplateGenerator: Main entry point for template generation
+// - SchemaFieldExtractor: Extracts fields from different schema types
+//
+// By separating these concerns, the package supports different schema types through
+// specialized implementations while maintaining a consistent template generation pipeline.
 package template
 
 import (

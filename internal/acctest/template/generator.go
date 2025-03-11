@@ -2,18 +2,16 @@ package template
 
 import (
 	"fmt"
-	"sort"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // ResourceKind represents the type of terraform configuration item
-type ResourceKind int
+type ResourceKind string
 
+// Possible values for ResourceKind
 const (
-	ResourceKindResource ResourceKind = iota
-	ResourceKindDataSource
+	ResourceKindResource   ResourceKind = "resource"
+	ResourceKindDataSource ResourceKind = "data"
 )
 
 // String returns the string representation of ResourceKind
@@ -28,315 +26,274 @@ func (k ResourceKind) String() string {
 	}
 }
 
-type SchemaTemplateGenerator interface {
-	GenerateTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string
+// TemplateGenerator is the base interface for all template generators
+type TemplateGenerator interface {
+	// GenerateTemplate generates a template for the given schema, resource type, and kind
+	GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) (string, error)
 }
 
-// TextTemplateGenerator creates Go templates from Terraform resource schemas for testing purposes.
-// It analyzes a resource's schema definition and generates a template that mirrors the structure
-// of a Terraform configuration, but with template variables for dynamic values.
-type TextTemplateGenerator struct {
+// SchemaFieldExtractor is an interface for extracting fields from different schema types
+type SchemaFieldExtractor interface {
+	// ExtractFields extracts fields from a schema
+	ExtractFields(schema interface{}) ([]TemplateField, error)
 }
 
-// NewSchemaTemplateGenerator creates a new template generator for a specific resource type
-func NewSchemaTemplateGenerator() *TextTemplateGenerator {
-	return &TextTemplateGenerator{}
+// TimeoutsConfig defines which timeouts are configured for a resource
+type TimeoutsConfig struct {
+	Create bool
+	Read   bool
+	Update bool
+	Delete bool
 }
 
-// GenerateTemplate generates a Go template string that resembles Terraform HCL configuration.
-// The generated template is not actual Terraform code, but rather a template that can be rendered
-// with different values to produce valid Terraform configurations for testing purposes.
-//
-// The template variables can then be populated using a template.Config to generate
-// different variations of the resource configuration for testing.
-func (g *TextTemplateGenerator) GenerateTemplate(r *schema.Resource, resourceType string, kind ResourceKind) string {
+// TemplatePath represents a field access path in a Go template
+type TemplatePath struct {
+	// For the following example:
+	//
+	// resource "example" "foo" {
+	//   top {
+	//     nested {
+	//       field = "value"
+	//     }
+	//   }
+	// }
+	//
+	// `components` would be: ["top", "nested", "field"] and
+	// `isCollection` would be: [true, true, false]
+
+	components   []string
+	isCollection []bool
+}
+
+// NewTemplatePath creates a new template path with a top-level field
+func NewTemplatePath(fieldName string, isCollection bool) TemplatePath {
+	return TemplatePath{
+		components:   []string{fieldName},
+		isCollection: []bool{isCollection},
+	}
+}
+
+// AppendField adds a new field to the path
+func (p TemplatePath) AppendField(fieldName string, isCollection bool) TemplatePath {
+	p.components = append(p.components, fieldName)
+	p.isCollection = append(p.isCollection, isCollection)
+	return p
+}
+
+// Expression returns the template expression for accessing this path
+func (p TemplatePath) Expression() string {
+	if len(p.components) == 0 {
+		return ""
+	}
+
+	// Start with the root
+	expr := "." + p.components[0]
+
+	// Build the expression with string-indexed paths
+	for i := 1; i < len(p.components); i++ {
+		if p.isCollection[i-1] {
+			// For collections, use numeric index 0 followed by string index
+			expr = fmt.Sprintf("(index %s 0 %q)", expr, p.components[i])
+		} else {
+			// For regular fields, use string index
+			expr = fmt.Sprintf("(index %s %q)", expr, p.components[i])
+		}
+	}
+
+	return expr
+}
+
+// CommonTemplateRenderer provides shared template rendering logic
+// for both SDK and Framework template generators
+type CommonTemplateRenderer struct{}
+
+// GenerateTemplate generates a complete Terraform configuration template from extracted fields.
+func (r *CommonTemplateRenderer) GenerateTemplate(fields []TemplateField, resourceType string, kind ResourceKind, timeoutsConfig TimeoutsConfig, hasDependsOn bool) (string, error) {
 	var b strings.Builder
 
 	// Header differs based on kind
 	_, _ = fmt.Fprintf(&b, "%s %q %q {\n", kind, resourceType, "{{ required .resource_name }}")
 
-	g.generateFields(&b, r.Schema, 1)
-	g.generateTimeouts(&b, r.Timeouts, 1)
-	if _, hasDependsOn := r.Schema["depends_on"]; hasDependsOn {
-		g.generateDependsOn(&b, 1)
+	// Handle regular fields
+	for _, field := range fields {
+		r.RenderField(&b, field, 1, TemplatePath{})
+	}
+
+	// Handle timeouts
+	// Only generate the timeouts block if at least one timeout is configured
+	if timeoutsConfig.Create || timeoutsConfig.Read || timeoutsConfig.Update || timeoutsConfig.Delete {
+		r.RenderTimeouts(&b, 1, timeoutsConfig)
+	}
+
+	// Handle depends_on
+	if hasDependsOn {
+		r.RenderDependsOn(&b, 1)
 	}
 
 	b.WriteString("}")
 
-	return b.String()
+	return b.String(), nil
 }
 
-func (g *TextTemplateGenerator) generateFields(b *strings.Builder, s map[string]*schema.Schema, indent int) {
+// RenderTimeouts renders a timeouts block with standard structure
+func (r *CommonTemplateRenderer) RenderTimeouts(builder *strings.Builder, indent int, config TimeoutsConfig) {
 	indentStr := strings.Repeat("  ", indent)
 
-	// Collect fields by type
-	var (
-		required []string
-		optional []string
-		lists    []string
-		maps     []string
-	)
+	// Add top-level conditional for the entire timeouts block
+	fmt.Fprintf(builder, "%s{{- if .timeouts }}\n", indentStr)
+	fmt.Fprintf(builder, "%stimeouts {\n", indentStr)
 
-	for k, field := range s {
-		if field.Computed && !field.Optional && !field.Required {
-			continue
-		}
-
-		switch field.Type {
-		case schema.TypeList, schema.TypeSet:
-			lists = append(lists, k)
-		case schema.TypeMap:
-			maps = append(maps, k)
-		default:
-			if field.Required {
-				required = append(required, k)
-			} else {
-				optional = append(optional, k)
-			}
-		}
+	// Only render the timeouts that are configured in the schema
+	if config.Create {
+		fmt.Fprintf(builder, "%s  {{- if .timeouts.create }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  create = {{ renderValue .timeouts.create }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  {{- end }}\n", indentStr)
 	}
 
-	// Sort all field groups for consistent ordering
-	sort.Strings(required)
-	sort.Strings(optional)
-	sort.Strings(lists)
-	sort.Strings(maps)
-
-	// Process fields in specified order
-	for _, field := range required {
-		g.generateField(b, field, s[field], indentStr)
+	if config.Read {
+		fmt.Fprintf(builder, "%s  {{- if .timeouts.read }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  read = {{ renderValue .timeouts.read }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  {{- end }}\n", indentStr)
 	}
 
-	for _, field := range optional {
-		g.generateField(b, field, s[field], indentStr)
+	if config.Update {
+		fmt.Fprintf(builder, "%s  {{- if .timeouts.update }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  update = {{ renderValue .timeouts.update }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  {{- end }}\n", indentStr)
 	}
 
-	for _, field := range lists {
-		g.generateField(b, field, s[field], indentStr)
+	if config.Delete {
+		fmt.Fprintf(builder, "%s  {{- if .timeouts.delete }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  delete = {{ renderValue .timeouts.delete }}\n", indentStr)
+		fmt.Fprintf(builder, "%s  {{- end }}\n", indentStr)
 	}
 
-	for _, field := range maps {
-		g.generateField(b, field, s[field], indentStr)
-	}
+	fmt.Fprintf(builder, "%s}\n", indentStr)
+	fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
 }
 
-func (g *TextTemplateGenerator) generateField(b *strings.Builder, field string, schemaField *schema.Schema, indent string) {
-	switch schemaField.Type {
-	case schema.TypeList, schema.TypeSet:
-		if schemaField.Optional || schemaField.Required {
-			g.generateNestedBlock(b, field, schemaField, indent, schemaField.Required)
-		}
-	case schema.TypeString:
-		if schemaField.Required {
-			fmt.Fprintf(b, "%s%s = {{ renderValue (required .%s) }}\n", indent, field, field)
-		} else {
-			fmt.Fprintf(b, "%s{{- if .%s }}\n", indent, field)
-			fmt.Fprintf(b, "%s%s = {{ renderValue .%s }}\n", indent, field, field)
-			fmt.Fprintf(b, "%s{{- end }}\n", indent)
-		}
-
-	case schema.TypeBool:
-		if schemaField.Required {
-			fmt.Fprintf(b, "%s%s = {{ required .%s }}\n", indent, field, field)
-		} else {
-			// For booleans, we want to render false values too
-			fmt.Fprintf(b, "%s{{- if ne .%s nil }}\n", indent, field)
-			fmt.Fprintf(b, "%s%s = {{ .%s }}\n", indent, field, field)
-			fmt.Fprintf(b, "%s{{- end }}\n", indent)
-		}
-
-	case schema.TypeInt, schema.TypeFloat:
-		if schemaField.Required {
-			fmt.Fprintf(b, "%s%s = {{ required .%s }}\n", indent, field, field)
-		} else {
-			fmt.Fprintf(b, "%s{{- if ne .%s nil }}\n", indent, field)
-			fmt.Fprintf(b, "%s%s = {{ .%s }}\n", indent, field, field)
-			fmt.Fprintf(b, "%s{{- end }}\n", indent)
-		}
-
-	case schema.TypeMap:
-		if schemaField.Required {
-			fmt.Fprintf(b, "%s%s = {\n", indent, field)
-			fmt.Fprintf(b, "%s  {{- range $k, $v := (required .%s) }}\n", indent, field)
-			fmt.Fprintf(b, "%s  {{ renderValue $k }} = {{ renderValue $v }}\n", indent)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-			fmt.Fprintf(b, "%s}\n", indent)
-		} else {
-			fmt.Fprintf(b, "%s{{- if .%s }}\n", indent, field)
-			fmt.Fprintf(b, "%s%s = {\n", indent, field)
-			fmt.Fprintf(b, "%s  {{- range $k, $v := .%s }}\n", indent, field)
-			fmt.Fprintf(b, "%s  {{ renderValue $k }} = {{ renderValue $v }}\n", indent)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-			fmt.Fprintf(b, "%s}\n", indent)
-			fmt.Fprintf(b, "%s{{- end }}\n", indent)
-		}
-
-	default:
-		if schemaField.Required {
-			fmt.Fprintf(b, "%s%s = {{ renderValue (required .%s) }}\n", indent, field, field)
-		} else {
-			fmt.Fprintf(b, "%s{{- if .%s }}\n", indent, field)
-			fmt.Fprintf(b, "%s%s = {{ renderValue .%s }}\n", indent, field, field)
-			fmt.Fprintf(b, "%s{{- end }}\n", indent)
-		}
-	}
-}
-
-// generateTimeouts AddTemplate timeouts block if timeouts are configured
-func (g *TextTemplateGenerator) generateTimeouts(b *strings.Builder, timeouts *schema.ResourceTimeout, indent int) {
-	if timeouts == nil {
-		return
-	}
-
+// RenderDependsOn renders a depends_on attribute with standard format
+func (r *CommonTemplateRenderer) RenderDependsOn(builder *strings.Builder, indent int) {
 	indentStr := strings.Repeat("  ", indent)
-	hasTimeouts := false
 
-	// Check if any timeouts are configured in schema
-	if timeouts.Create != nil || timeouts.Read != nil || timeouts.Update != nil || timeouts.Delete != nil {
-		hasTimeouts = true
+	fmt.Fprintf(builder, "%s{{- if .depends_on }}\n", indentStr)
+	fmt.Fprintf(builder, "%sdepends_on = [%s", indentStr, "")
+	fmt.Fprintf(builder, "%s", "{{- range $i, $dep := .depends_on }}{{if $i}}, {{end}}{{ renderValue $dep }}{{- end }}]\n")
+	fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
+}
+
+// RenderField renders a template field based on its properties
+func (r *CommonTemplateRenderer) RenderField(builder *strings.Builder, field TemplateField, indent int, parentPath TemplatePath) {
+	// Create a path for this field
+	var path TemplatePath
+	if parentPath.components == nil {
+		// This is a top-level field
+		path = NewTemplatePath(field.Name, field.IsCollection)
+	} else {
+		// This is a nested field
+		path = parentPath.AppendField(field.Name, field.IsCollection)
 	}
 
-	// Only generate the timeouts block if there are timeouts configured
-	if hasTimeouts {
-		// AddTemplate top-level conditional for the entire timeouts block
-		fmt.Fprintf(b, "%s{{- if .timeouts }}\n", indentStr)
-		fmt.Fprintf(b, "%stimeouts {\n", indentStr)
+	if field.IsObject && len(field.NestedFields) > 0 {
+		r.renderBlock(builder, field, path, indent)
+	} else if field.IsCollection && !field.IsObject {
+		r.renderCollection(builder, field, path, indent)
+	} else if field.IsMap {
+		r.renderMap(builder, field, path, indent)
+	} else if field.FieldType == FieldTypeBool {
+		r.renderBool(builder, field, path, indent)
+	} else if field.FieldType == FieldTypeNumber {
+		r.renderSimple(builder, field, path, indent)
+	} else {
+		r.renderSimple(builder, field, path, indent)
+	}
+}
 
-		if timeouts.Create != nil {
-			fmt.Fprintf(b, "%s  {{- if .timeouts.create }}\n", indentStr)
-			fmt.Fprintf(b, "%s  create = {{ renderValue .timeouts.create }}\n", indentStr)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
-		}
-		if timeouts.Read != nil {
-			fmt.Fprintf(b, "%s  {{- if .timeouts.read }}\n", indentStr)
-			fmt.Fprintf(b, "%s  read = {{ renderValue .timeouts.read }}\n", indentStr)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
-		}
-		if timeouts.Update != nil {
-			fmt.Fprintf(b, "%s  {{- if .timeouts.update }}\n", indentStr)
-			fmt.Fprintf(b, "%s  update = {{ renderValue .timeouts.update }}\n", indentStr)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
-		}
-		if timeouts.Delete != nil {
-			fmt.Fprintf(b, "%s  {{- if .timeouts.delete }}\n", indentStr)
-			fmt.Fprintf(b, "%s  delete = {{ renderValue .timeouts.delete }}\n", indentStr)
-			fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
+// renderFieldWithContent is a helper that handles the common pattern of optional/required fields
+func (r *CommonTemplateRenderer) renderFieldWithContent(builder *strings.Builder, field TemplateField, path TemplatePath, indent int,
+	renderFunc func(*strings.Builder, TemplateField, string, int),
+) {
+	indentStr := strings.Repeat("  ", indent)
+	pathExpr := path.Expression()
+
+	if !field.Required || field.Optional {
+		// Optional fields need an existence check
+		fmt.Fprintf(builder, "%s{{- if %s }}\n", indentStr, pathExpr)
+	}
+
+	// Render the specific content for this field type
+	renderFunc(builder, field, pathExpr, indent)
+
+	if !field.Required || field.Optional {
+		// Close the conditional for optional fields
+		fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
+	}
+}
+
+// renderBlock handles a block with nested fields
+func (r *CommonTemplateRenderer) renderBlock(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	r.renderFieldWithContent(builder, field, path, indent, func(b *strings.Builder, field TemplateField, _ string, indent int) {
+		indentStr := strings.Repeat("  ", indent)
+		fmt.Fprintf(b, "%s%s {\n", indentStr, field.Name)
+
+		for _, nestedField := range field.NestedFields {
+			// Pass the current path as parent for nested fields
+			r.RenderField(b, nestedField, indent+1, path)
 		}
 
 		fmt.Fprintf(b, "%s}\n", indentStr)
-		fmt.Fprintf(b, "%s{{- end }}\n", indentStr)
-	}
+	})
 }
 
-// generateDependsOn AddTemplate depends_on block if dependencies are specified
-func (g *TextTemplateGenerator) generateDependsOn(b *strings.Builder, indent int) {
-	indentStr := strings.Repeat("  ", indent)
-
-	fmt.Fprintf(b, "%s{{- if .depends_on }}\n", indentStr)
-	fmt.Fprintf(b, "%sdepends_on = [%s", indentStr, "")
-	fmt.Fprintf(b, "%s", "{{- range $i, $dep := .depends_on }}{{if $i}}, {{end}}{{ renderValue $dep }}{{- end }}]\n")
-	fmt.Fprintf(b, "%s{{- end }}\n", indentStr)
-}
-
-func (g *TextTemplateGenerator) generateNestedBlock(b *strings.Builder, field string, schemaField *schema.Schema, indent string, _ bool) {
-	elem := schemaField.Elem
-	switch e := elem.(type) {
-	case *schema.Resource:
-		fmt.Fprintf(b, "%s{{- if .%s }}\n", indent, field)
-		fmt.Fprintf(b, "%s%s {\n", indent, field)
-
-		nestedIndent := indent + "  "
-
-		// Filter and sort fields
-		var fields []string
-		for k, v := range e.Schema {
-			// Include field if it's either:
-			// 1. Not computed, or
-			// 2. Both computed and optional (but skip purely computed fields)
-			if !v.Computed || v.Optional {
-				fields = append(fields, k)
-			}
-		}
-		sort.Strings(fields)
-
-		for _, nestedField := range fields {
-			nestedSchema := e.Schema[nestedField]
-
-			switch nestedSchema.Type {
-			case schema.TypeList, schema.TypeSet:
-				if res, ok := nestedSchema.Elem.(*schema.Resource); ok {
-					g.generateListBlock(b, field, nestedField, res, nestedIndent)
-				} else if elemSchema, ok := nestedSchema.Elem.(*schema.Schema); ok {
-					g.generatePrimitiveList(b, field, nestedField, elemSchema, nestedIndent)
-				}
-			case schema.TypeBool:
-				fmt.Fprintf(b, "%s{{- if ne (index .%s 0 \"%s\") nil }}\n", nestedIndent, field, nestedField)
-				fmt.Fprintf(b, "%s%s = {{ index .%s 0 \"%s\" }}\n", nestedIndent, nestedField, field, nestedField)
-				fmt.Fprintf(b, "%s{{- end }}\n", nestedIndent)
-			default:
-				fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" }}\n", nestedIndent, field, nestedField)
-				fmt.Fprintf(b, "%s%s = {{ renderValue (index .%s 0 \"%s\") }}\n", nestedIndent, nestedField, field, nestedField)
-				fmt.Fprintf(b, "%s{{- end }}\n", nestedIndent)
-			}
-		}
-
-		fmt.Fprintf(b, "%s}\n", indent)
-		fmt.Fprintf(b, "%s{{- end }}\n", indent)
-
-	case *schema.Schema:
-		fmt.Fprintf(b, "%s{{- if .%s }}\n", indent, field)
-		fmt.Fprintf(b, "%s%s = [\n", indent, field)
-		fmt.Fprintf(b, "%s  {{- range $idx, $item := .%s }}\n", indent, field)
-		fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indent)
-		fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-		fmt.Fprintf(b, "%s]\n", indent)
-		fmt.Fprintf(b, "%s{{- end }}\n", indent)
-	}
-}
-
-func (g *TextTemplateGenerator) generateListBlock(b *strings.Builder, parentField, field string, res *schema.Resource, indent string) {
-	fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" }}\n", indent, parentField, field)
-	fmt.Fprintf(b, "%s%s {\n", indent, field)
-
-	nestedIndent := indent + "  "
-
-	var fields []string
-	for k, v := range res.Schema {
-		// Use same filtering logic as in generateNestedBlock
-		if !v.Computed || v.Optional {
-			fields = append(fields, k)
-		}
-	}
-	sort.Strings(fields)
-
-	for _, nestedField := range fields {
-		nestedSchema := res.Schema[nestedField]
-
-		if nestedSchema.Type == schema.TypeBool {
-			fmt.Fprintf(b, "%s{{- if ne (index .%s 0 \"%s\" 0 \"%s\") nil }}\n",
-				nestedIndent, parentField, field, nestedField)
-			fmt.Fprintf(b, "%s%s = {{ index .%s 0 \"%s\" 0 \"%s\" }}\n",
-				nestedIndent, nestedField, parentField, field, nestedField)
-			fmt.Fprintf(b, "%s{{- end }}\n", nestedIndent)
+// renderSimple handles simple fields (strings, etc.)
+func (r *CommonTemplateRenderer) renderSimple(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	r.renderFieldWithContent(builder, field, path, indent, func(b *strings.Builder, field TemplateField, pathExpr string, indent int) {
+		indentStr := strings.Repeat("  ", indent)
+		if field.Required {
+			// Add required wrapper for required fields
+			fmt.Fprintf(b, "%s%s = {{ renderValue (required %s) }}\n", indentStr, field.Name, path.Expression())
 		} else {
-			fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" 0 \"%s\" }}\n",
-				nestedIndent, parentField, field, nestedField)
-			fmt.Fprintf(b, "%s%s = {{ renderValue (index .%s 0 \"%s\" 0 \"%s\") }}\n",
-				nestedIndent, nestedField, parentField, field, nestedField)
-			fmt.Fprintf(b, "%s{{- end }}\n", nestedIndent)
+			fmt.Fprintf(b, "%s%s = {{ renderValue %s }}\n", indentStr, field.Name, pathExpr)
 		}
-	}
-
-	fmt.Fprintf(b, "%s}\n", indent)
-	fmt.Fprintf(b, "%s{{- end }}\n", indent)
+	})
 }
 
-func (g *TextTemplateGenerator) generatePrimitiveList(b *strings.Builder, parentField, field string, _ *schema.Schema, indent string) {
-	fmt.Fprintf(b, "%s{{- if index .%s 0 \"%s\" }}\n", indent, parentField, field)
-	fmt.Fprintf(b, "%s%s = [\n", indent, field)
-	fmt.Fprintf(b, "%s  {{- range $idx, $item := index .%s 0 \"%s\" }}\n", indent, parentField, field)
-	fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indent)
-	fmt.Fprintf(b, "%s  {{- end }}\n", indent)
-	fmt.Fprintf(b, "%s]\n", indent)
-	fmt.Fprintf(b, "%s{{- end }}\n", indent)
+// renderBool handles boolean fields with special null handling
+func (r *CommonTemplateRenderer) renderBool(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	indentStr := strings.Repeat("  ", indent)
+	pathExpr := path.Expression()
+
+	if field.Required {
+		// Just use the standard path expression for required booleans
+		fmt.Fprintf(builder, "%s%s = {{ %s }}\n", indentStr, field.Name, pathExpr)
+	} else {
+		// Build condition with the prefix "ne ... nil" to check existence, not value
+		fmt.Fprintf(builder, "%s{{- if ne %s nil }}\n", indentStr, pathExpr)
+		fmt.Fprintf(builder, "%s%s = {{ %s }}\n", indentStr, field.Name, pathExpr)
+		fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
+	}
+}
+
+// renderMap handles map fields
+func (r *CommonTemplateRenderer) renderMap(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	r.renderFieldWithContent(builder, field, path, indent, func(b *strings.Builder, field TemplateField, pathExpr string, indent int) {
+		indentStr := strings.Repeat("  ", indent)
+		fmt.Fprintf(b, "%s%s = {\n", indentStr, field.Name)
+		fmt.Fprintf(b, "%s  {{- range $k, $v := %s }}\n", indentStr, pathExpr)
+		fmt.Fprintf(b, "%s  {{ renderValue $k }} = {{ renderValue $v }}\n", indentStr)
+		fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
+		fmt.Fprintf(b, "%s}\n", indentStr)
+	})
+}
+
+// renderCollection handles list/set fields of primitive values
+func (r *CommonTemplateRenderer) renderCollection(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	r.renderFieldWithContent(builder, field, path, indent, func(b *strings.Builder, field TemplateField, pathExpr string, indent int) {
+		indentStr := strings.Repeat("  ", indent)
+		fmt.Fprintf(b, "%s%s = [\n", indentStr, field.Name)
+		fmt.Fprintf(b, "%s  {{- range $idx, $item := %s }}\n", indentStr, pathExpr)
+		fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indentStr)
+		fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
+		fmt.Fprintf(b, "%s]\n", indentStr)
+	})
 }

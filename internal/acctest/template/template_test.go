@@ -27,7 +27,7 @@ func normalizeHCL(input string) string {
 func sortAndRewriteBody(src, dst *hclwrite.Body) {
 	// Get all attributes and sort them
 	attrs := src.Attributes()
-	var attrNames = make([]string, 0, len(attrs))
+	attrNames := make([]string, 0, len(attrs))
 	for name := range attrs {
 		attrNames = append(attrNames, name)
 	}

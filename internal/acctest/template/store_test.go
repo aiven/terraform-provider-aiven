@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 )
 
@@ -114,8 +115,8 @@ func TestComplexSchema(t *testing.T) {
   }
 }`
 
-	set := NewSDKStore(t)
-	set.registerResource("aiven_pg", pgResource, ResourceKindResource)
+	set := NewStore(t)
+	set.registerSDKResource("aiven_pg", pgResource, ResourceKindResource)
 
 	config := map[string]any{
 		"resource_name": "complex_pg",
@@ -157,7 +158,7 @@ func TestKafkaQuotaResource(t *testing.T) {
 	t.Parallel()
 
 	ts := InitializeTemplateStore(t)
-	ts.registerResource(
+	ts.registerSDKResource(
 		"aiven_kafka_quota",
 		kafka.ResourceKafkaQuota(),
 		ResourceKindResource,
@@ -185,6 +186,32 @@ func TestKafkaQuotaResource(t *testing.T) {
   producer_byte_rate = 456
   request_percentage = 78
 }`
+
+	res := b.MustRender(t)
+
+	assert.Equal(t, normalizeHCL(expected), normalizeHCL(res))
+}
+
+func TestOrganizationResource(t *testing.T) {
+	t.Parallel()
+
+	ts := NewStore(t)
+	ts.registerFrameworkComponent(
+		"aiven_organization",
+		organization.NewOrganizationResource(),
+		ResourceKindResource,
+	)
+
+	b := ts.NewBuilder()
+
+	b.AddResource("aiven_organization", map[string]any{
+		"resource_name": "test-org",
+		"name":          "Test Organization",
+	})
+
+	expected := `resource "aiven_organization" "test-org" {
+	  name = "Test Organization"
+	}`
 
 	res := b.MustRender(t)
 
