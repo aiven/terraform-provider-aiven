@@ -1,6 +1,6 @@
 module github.com/aiven/terraform-provider-aiven
 
-go 1.23.0
+go 1.24
 
 require (
 	github.com/aiven/aiven-go-client/v2 v2.34.0

@@ -151,7 +151,7 @@ func TestMap(t *testing.T) {
 			}
 
 			if !tt.wantErr && !cmp.Equal(tt.args.mapInput, tt.want) {
-				t.Errorf(cmp.Diff(tt.want, tt.args.mapInput)) //nolint //fixme: remove when fixed https://github.com/anchore/syft/issues/3126
+				t.Error(cmp.Diff(tt.want, tt.args.mapInput))
 			}
 		})
 	}
@@ -206,7 +206,7 @@ func TestSlice(t *testing.T) {
 			}
 
 			if !tt.wantErr && !cmp.Equal(tt.args.sliceInput, tt.want) {
-				t.Errorf(cmp.Diff(tt.want, tt.args.sliceInput)) //nolint //fixme: remove when fixed https://github.com/anchore/syft/issues/3126
+				t.Error(cmp.Diff(tt.want, tt.args.sliceInput))
 			}
 		})
 	}

@@ -7,7 +7,10 @@ nav_order: 1
 # Changelog
 
 <!-- Always keep the following header in place: -->
+
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+- Upgraded `go` version to `1.24`
 
 ## [4.37.0] - 2025-03-12
 
