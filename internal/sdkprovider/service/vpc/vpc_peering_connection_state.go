@@ -28,7 +28,7 @@ func getDiagnosticsFromState(pc peeringConnectionState) diag.Diagnostics {
 					"completes the setup in their cloud account. The steps needed in the user cloud "+
 					"account depend on the used cloud provider. Find more in the state info: %s",
 					stateInfoToString(pc.GetStateInfo()))}}
-		case "DELETED":
+		case "DELETED", "DELETING":
 			return diag.Errorf("A user has deleted the peering connection through the Aiven " +
 				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +
 				"transitions from this state")
