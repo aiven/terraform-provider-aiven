@@ -18,34 +18,35 @@ type peeringConnectionState interface {
 }
 
 func getDiagnosticsFromState(pc peeringConnectionState) diag.Diagnostics {
-	if pc.GetState() != "ACTIVE" {
-		switch pc.GetState() {
-		case "PENDING_PEER":
-			return diag.Diagnostics{{
-				Severity: diag.Warning,
-				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
-					"peer successfully in the cloud, but the connection is not active until the user "+
-					"completes the setup in their cloud account. The steps needed in the user cloud "+
-					"account depend on the used cloud provider. Find more in the state info: %s",
-					stateInfoToString(pc.GetStateInfo()))}}
-		case "DELETED":
-			return diag.Errorf("A user has deleted the peering connection through the Aiven " +
-				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +
-				"transitions from this state")
-		case "DELETED_BY_PEER":
-			return diag.Errorf("A user deleted the peering cloud resource in their account. " +
-				"There are no transitions from this state")
-		case "REJECTED_BY_PEER":
-			return diag.Errorf("VPC peering connection request was rejected, state info: %s",
-				stateInfoToString(pc.GetStateInfo()))
-		case "INVALID_SPECIFICATION":
-			return diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
-				stateInfoToString(pc.GetStateInfo()))
-		default:
-			return diag.Errorf("Unknown VPC peering connection state: %s", pc.GetState())
-		}
+	state := organizationvpc.VpcPeeringConnectionStateType(pc.GetState())
+
+	switch state {
+	case organizationvpc.VpcPeeringConnectionStateTypeActive:
+		return nil
+	case organizationvpc.VpcPeeringConnectionStateTypePendingPeer:
+		return diag.Diagnostics{{
+			Severity: diag.Warning,
+			Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
+				"peer successfully in the cloud, but the connection is not active until the user "+
+				"completes the setup in their cloud account. The steps needed in the user cloud "+
+				"account depend on the used cloud provider. Find more in the state info: %s",
+				stateInfoToString(pc.GetStateInfo()))}}
+	case organizationvpc.VpcPeeringConnectionStateTypeDeleted, organizationvpc.VpcPeeringConnectionStateTypeDeleting:
+		return diag.Errorf("A user has deleted the peering connection through the Aiven " +
+			"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +
+			"transitions from this state")
+	case organizationvpc.VpcPeeringConnectionStateTypeDeletedByPeer:
+		return diag.Errorf("A user deleted the peering cloud resource in their account. " +
+			"There are no transitions from this state")
+	case organizationvpc.VpcPeeringConnectionStateTypeRejectedByPeer:
+		return diag.Errorf("VPC peering connection request was rejected, state info: %s",
+			stateInfoToString(pc.GetStateInfo()))
+	case organizationvpc.VpcPeeringConnectionStateTypeInvalidSpecification:
+		return diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
+			stateInfoToString(pc.GetStateInfo()))
+	default:
+		return diag.Errorf("Unknown VPC peering connection state: %s", pc.GetState())
 	}
-	return nil
 }
 
 // stateInfoToString converts VPC peering connection state_info to a string
