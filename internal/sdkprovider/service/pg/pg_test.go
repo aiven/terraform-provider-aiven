@@ -1143,3 +1143,80 @@ resource "aiven_pg" "secondary" {
 }
 `, project, randStr)
 }
+
+func TestAccAivenServicePG_user_config_zero_values(t *testing.T) {
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	serviceName := "test-acc-" + acc.RandStr()
+	resourceName := "aiven_pg.foo"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Creates a PG service without a user config.
+				// The plan is never suppressed for new services,
+				// so the resource must have and ID to make the diff suppressor work.
+				Config: testAccAivenServicePGUserConfigZeroValues(projectName, serviceName, ``),
+			},
+			{
+				// Adds `true` value to change it later to `false`
+				Config: testAccAivenServicePGUserConfigZeroValues(
+					projectName, serviceName,
+					`pg_user_config {
+						pg {
+						  jit = true
+						}
+					  }`,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.pg.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.pg.0.jit", "true"),
+					// public_access will be set with the next step, here it proves the block does not exist
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.public_access.#", "0"),
+				),
+			},
+			{
+				// Sets existing field to `false` (proves the change is detected for an existing field)
+				// Adds `public_access` block with all fields set to `false` (proves the changes are detected for new fields)
+				Config: testAccAivenServicePGUserConfigZeroValues(
+					projectName, serviceName,
+					`pg_user_config {
+						pg {
+						  jit = false
+						}
+
+						public_access {
+						  pg         = false
+						  pgbouncer  = false
+						  prometheus = false
+						}
+					  }`,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.pg.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.pg.0.jit", "false"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.public_access.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.public_access.0.pg", "false"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.public_access.0.pgbouncer", "false"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.public_access.0.prometheus", "false"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenServicePGUserConfigZeroValues(projectName, serviceName, userConfig string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "foo" {
+  project      = %[1]q
+  service_name = %[2]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+
+  %s
+}
+`, projectName, serviceName, userConfig)
+}

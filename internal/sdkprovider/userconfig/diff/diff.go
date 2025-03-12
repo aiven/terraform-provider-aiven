@@ -70,10 +70,16 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 	// This switch suppresses that, as well, as other "default" values.
 	switch newValue {
 	case "", "0", "false":
-		// "" — kafka_version = "3.5" -> ""
-		// 0 — backup_hour = "4" -> 0
-		// false — allow_sign_up = true -> false
-		return !d.HasChange(k)
+		// 1. d.HasChange(k): detects field changes — it compares the old value with a new value.
+		//    When the old value is "unknown" (not set) and the new value is "false",
+		//    it compares "false" with "false" and detects no changes.
+		//    The same applies to "0" and "" (but an empty strings can't be a real value).
+		// 2. oldValue == "": it means the field previously had no value, but now it does.
+		//    So it kind of fixes HasChange() for booleans.
+		// Still might not detect changes for int fields, because TF stores 0 for them in the state,
+		// and the oldValue is always "0", not "".
+		// This case can be fixed with the Plugin Framework only.
+		return !(d.HasChange(k) || oldValue == "")
 	}
 	return false
 }
