@@ -28,7 +28,7 @@ Instead, use multiple permission blocks as in the example usage.
 # Grant access to a specific project
 resource "aiven_organization_permission" "example_project_permissions" {
   organization_id = data.aiven_organization.main.id
-  resource_id     = data.aiven_project.example_project.id
+  resource_id     = data.aiven_project.example_project.project
   resource_type   = "project"
   permissions {
     # Grant a user the operator role and 
