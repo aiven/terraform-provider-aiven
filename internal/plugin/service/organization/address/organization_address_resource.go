@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/diagnostics"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -122,6 +123,19 @@ func validateRequiredFields(
 	validation.ValidateRequiredStringField(model.CountryCode, "country_code", diags, diagHelper)
 }
 
+// handleCompanyName handles the special case for company_name to prevent drift detection.
+// This is a workaround that should be removed once the API is fixed.
+func handleCompanyName(companyName string) basetypes.StringValue {
+	// WORKAROUND: Handle empty company_name specially to prevent drift detection
+	// The API returns an empty string ("") for company_name when it's not set,
+	// but Terraform represents unset optional values as null.
+	// This workaround should be removed once the API is fixed to return null for unset fields.
+	if companyName == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(companyName)
+}
+
 // Create creates an organization address resource.
 func (r *organizationAddressResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan organizationAddressResourceModel
@@ -175,7 +189,7 @@ func (r *organizationAddressResource) Create(ctx context.Context, req resource.C
 	plan.AddressLines = addressLines
 
 	plan.City = types.StringPointerValue(address.City)
-	plan.CompanyName = types.StringValue(address.CompanyName)
+	plan.CompanyName = handleCompanyName(address.CompanyName)
 	plan.CountryCode = types.StringValue(address.CountryCode)
 	plan.State = types.StringPointerValue(address.State)
 	plan.ZipCode = types.StringPointerValue(address.ZipCode)
@@ -215,7 +229,7 @@ func (r *organizationAddressResource) Read(ctx context.Context, req resource.Rea
 	state.AddressLines = addressLines
 
 	state.City = types.StringPointerValue(address.City)
-	state.CompanyName = types.StringValue(address.CompanyName)
+	state.CompanyName = handleCompanyName(address.CompanyName)
 	state.CountryCode = types.StringValue(address.CountryCode)
 	state.State = types.StringPointerValue(address.State)
 	state.ZipCode = types.StringPointerValue(address.ZipCode)
@@ -253,9 +267,20 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 		AddressLines: &lines,
 		City:         plan.City.ValueStringPointer(),
 		CountryCode:  plan.CountryCode.ValueStringPointer(),
-		CompanyName:  plan.CompanyName.ValueStringPointer(),
 		State:        plan.State.ValueStringPointer(),
 		ZipCode:      plan.ZipCode.ValueStringPointer(),
+	}
+
+	// WORKAROUND: Handle company_name specially to prevent drift detection
+	// The API returns an empty string ("") for company_name when it's not set,
+	// but Terraform represents unset optional values as null.
+	// This workaround should be removed once the API is fixed to return null for unset fields.
+	if plan.CompanyName.IsNull() {
+		// When company_name is null in the plan, explicitly set an empty string in the API request
+		emptyString := ""
+		updateReq.CompanyName = &emptyString
+	} else {
+		updateReq.CompanyName = plan.CompanyName.ValueStringPointer()
 	}
 
 	// Update the address
@@ -278,7 +303,7 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 	plan.AddressLines = addressLines
 
 	plan.City = types.StringPointerValue(address.City)
-	plan.CompanyName = types.StringValue(address.CompanyName)
+	plan.CompanyName = handleCompanyName(address.CompanyName)
 	plan.CountryCode = types.StringValue(address.CountryCode)
 	plan.State = types.StringPointerValue(address.State)
 	plan.ZipCode = types.StringPointerValue(address.ZipCode)
