@@ -145,7 +145,7 @@ Optional:
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
 - `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
-- `readonly` (Boolean) Whether the repository is read-only. Default: `false`.
+- `readonly` (Boolean) Whether the repository is read-only. Default: `true`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
 
@@ -166,7 +166,7 @@ Optional:
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `readonly` (Boolean) Whether the repository is read-only. Default: `false`.
+- `readonly` (Boolean) Whether the repository is read-only. Default: `true`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 
 
@@ -592,7 +592,7 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `readonly` (Boolean) Whether the repository is read-only. Default: `false`.
+- `readonly` (Boolean) Whether the repository is read-only. Default: `true`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `server_side_encryption` (Boolean) When set to true files are encrypted on server side.
 

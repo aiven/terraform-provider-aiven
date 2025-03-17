@@ -74,7 +74,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"readonly": {
-						Description: "Whether the repository is read-only. Default: `false`.",
+						Description: "Whether the repository is read-only. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -149,7 +149,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"readonly": {
-						Description: "Whether the repository is read-only. Default: `false`.",
+						Description: "Whether the repository is read-only. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -1233,7 +1233,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"readonly": {
-						Description: "Whether the repository is read-only. Default: `false`.",
+						Description: "Whether the repository is read-only. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
