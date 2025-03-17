@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -90,21 +92,24 @@ func (r *externalIdentityDataSource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
+	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+		resp.Diagnostics.AddError(
+			errmsg.SummaryUnexpectedProviderDataType,
+			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
+		)
 		return
 	}
 
-	r.client = client
+	r.client = p.GetClient()
 }
 
 // Read reads an external_identity data source.
 func (r *externalIdentityDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state externalIdentityDataSourceModel
 
-	if !util.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -138,5 +143,5 @@ func (r *externalIdentityDataSource) Read(ctx context.Context, req datasource.Re
 	state.ExternalUserID = types.StringValue(externalUserID)
 	state.ExternalServiceName = types.StringValue(externalServiceName)
 
-	util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

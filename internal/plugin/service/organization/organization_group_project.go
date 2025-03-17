@@ -17,6 +17,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -79,12 +80,13 @@ func (r *organizationGroupProjectResource) TypeName() string {
 func (r *organizationGroupProjectResource) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
-	resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	resp *resource.SchemaResponse,
+) {
+	schemaObj := schema.Schema{
 		Description: `Adds and manages a group of users as members of a project.
 
 **This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
-[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources)
 to the new resource. **Do not use the aiven_organization_group_project and aiven_organization_permission resources together**.
 			`,
 		DeprecationMessage: deprecationMessage,
@@ -121,7 +123,15 @@ to the new resource. **Do not use the aiven_organization_group_project and aiven
 				},
 			},
 		},
-	})
+	}
+
+	// Add timeouts block
+	if schemaObj.Blocks == nil {
+		schemaObj.Blocks = make(map[string]schema.Block)
+	}
+	schemaObj.Blocks["timeouts"] = timeouts.BlockAll(ctx)
+
+	resp.Schema = schemaObj
 }
 
 // Configure is called to configure the resource.
@@ -134,14 +144,16 @@ func (r *organizationGroupProjectResource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
+	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+		resp.Diagnostics.AddError(
+			errmsg.SummaryUnexpectedProviderDataType,
+			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
+		)
 		return
 	}
 
-	r.client = client
+	r.client = p.GetClient()
 }
 
 // fillModel fills the organization group project relation model from the Aiven API.
@@ -201,7 +213,8 @@ func (r *organizationGroupProjectResource) Read(
 ) {
 	var state organizationGroupProjectResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -212,9 +225,7 @@ func (r *organizationGroupProjectResource) Read(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 // Update updates an organization group project resource.
@@ -234,7 +245,8 @@ func (r *organizationGroupProjectResource) Delete(
 ) {
 	var plan organizationGroupProjectResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

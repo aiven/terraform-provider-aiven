@@ -31,6 +31,9 @@ const (
 	// SummaryUnexpectedProviderDataType is the error summary for when the provider data type is unexpected.
 	SummaryUnexpectedProviderDataType = "Unexpected Provider Data Type"
 
+	// SummaryErrorImportingResource is the error summary for when a resource cannot be imported.
+	SummaryErrorImportingResource = "Error Importing Resource"
+
 	// SummaryErrorCreatingResource is the error summary for when a resource cannot be created.
 	SummaryErrorCreatingResource = "Error Creating Resource"
 
@@ -48,6 +51,18 @@ const (
 
 	// SummaryErrorReadingDataSource is the error summary for when a data source cannot be read.
 	SummaryErrorReadingDataSource = "Error Reading Data Source"
+
+	// SummaryMissingRequiredField is the error summary for when a required field is missing.
+	SummaryMissingRequiredField = "Missing Required Field"
+
+	// SummaryEmptyRequiredField is the error summary for when a required field is empty.
+	SummaryEmptyRequiredField = "Empty Required Field"
+
+	// SummaryInvalidFieldFormat is the error summary for when a field has an invalid format.
+	SummaryInvalidFieldFormat = "Invalid Field Format"
+
+	// SummaryInvalidConfiguration is the error summary for when a configuration is invalid.
+	SummaryInvalidConfiguration = "Invalid Configuration"
 )
 
 // Below is the list of detailed error messages that are used in the provider.
@@ -96,6 +111,21 @@ var (
 
 	// DetailErrorReadingDataSource is the detailed error message for when a data source cannot be read.
 	DetailErrorReadingDataSource = "An unexpected error occurred while reading the data source (%s): %s."
+
+	// DetailMissingRequiredField is the detailed error message for when a required field is missing.
+	DetailMissingRequiredField = "The %s attribute must be set."
+
+	// DetailEmptyRequiredField is the detailed error message for when a required field is empty.
+	DetailEmptyRequiredField = "The %s attribute cannot be empty."
+
+	// DetailInvalidFieldFormat is the detailed error message for when a field has an invalid format.
+	DetailInvalidFieldFormat = "The %s attribute has an invalid format: %s."
+
+	// DetailInvalidImportIDFormat is the detailed error message for when an import ID has an invalid format.
+	DetailInvalidImportIDFormat = "Expected import ID in the format '%s', got: %s."
+
+	// DetailResourceNotFound is the detailed error message for when a resource cannot be found.
+	DetailResourceNotFound = "Resource with ID %s does not exist: %s."
 )
 
 // Below is the list of classic Go-style error messages that are used in the provider.

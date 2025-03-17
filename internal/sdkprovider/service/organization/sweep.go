@@ -49,7 +49,6 @@ func init() {
 			"aiven_organization",
 		},
 	})
-
 }
 
 func sweepOrganizations(ctx context.Context) func(string) error {

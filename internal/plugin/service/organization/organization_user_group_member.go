@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -76,7 +77,7 @@ func (r *organizationUserGroupMembersResource) Schema(
 	_ resource.SchemaRequest,
 	resp *resource.SchemaResponse,
 ) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	schemaObj := schema.Schema{
 		Description: userconfig.Desc(`
 Adds and manages users in a [user group](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group). You can add organization users and application users to groups.
 Organization users must be [managed in the Aiven Console](https://aiven.io/docs/platform/howto/manage-org-users). Application users can be created and managed using the ` + "`aiven_organization_application_user`" + ` resource.
@@ -118,7 +119,15 @@ Groups are granted roles and permissions using the ` + "`aiven_organization_perm
 				Computed:    true,
 			},
 		},
-	})
+	}
+
+	// Add timeouts block
+	if schemaObj.Blocks == nil {
+		schemaObj.Blocks = make(map[string]schema.Block)
+	}
+	schemaObj.Blocks["timeouts"] = timeouts.BlockAll(ctx)
+
+	resp.Schema = schemaObj
 }
 
 // Configure configures the organization user group member resource.
@@ -131,14 +140,16 @@ func (r *organizationUserGroupMembersResource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
+	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+		resp.Diagnostics.AddError(
+			errmsg.SummaryUnexpectedProviderDataType,
+			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
+		)
 		return
 	}
 
-	r.client = client
+	r.client = p.GetClient()
 }
 
 // fillModel fills the organization group project relation model from the Aiven API.
@@ -193,7 +204,8 @@ func (r *organizationUserGroupMembersResource) Create(
 ) {
 	var plan organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -225,12 +237,10 @@ func (r *organizationUserGroupMembersResource) Create(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-// Delete deletes an organization user group member resource.
+// Read reads an organization user group member resource.
 func (r *organizationUserGroupMembersResource) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
@@ -238,7 +248,8 @@ func (r *organizationUserGroupMembersResource) Read(
 ) {
 	var state organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -249,9 +260,7 @@ func (r *organizationUserGroupMembersResource) Read(
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 // Update updates an organization user group member resource.
@@ -271,7 +280,8 @@ func (r *organizationUserGroupMembersResource) Delete(
 ) {
 	var plan organizationUserGroupMembersResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

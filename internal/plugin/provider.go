@@ -5,6 +5,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -15,6 +17,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -22,9 +26,28 @@ import (
 type AivenProvider struct {
 	// version is the version of the provider.
 	version string
+
+	// Client is the handwritten Aiven client
+	Client *aiven.Client
+
+	// GenClient is the generated Aiven client
+	GenClient avngen.Client
 }
 
-var _ provider.Provider = &AivenProvider{}
+// GetClient returns the handwritten Aiven client.
+func (p *AivenProvider) GetClient() *aiven.Client {
+	return p.Client
+}
+
+// GetGenClient returns the generated Aiven client.
+func (p *AivenProvider) GetGenClient() avngen.Client {
+	return p.GenClient
+}
+
+var (
+	_ provider.Provider                 = &AivenProvider{}
+	_ providertypes.AivenClientProvider = &AivenProvider{}
+)
 
 // AivenProviderModel is the configuration for the Aiven provider.
 type AivenProviderModel struct {
@@ -80,7 +103,6 @@ func (p *AivenProvider) Configure(
 	var data AivenProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -96,6 +118,7 @@ func (p *AivenProvider) Configure(
 		data.APIToken = types.StringValue(token)
 	}
 
+	// Initialize the handwritten client
 	client, err := common.NewAivenClient(
 		common.TokenOpt(data.APIToken.ValueString()),
 		common.TFVersionOpt(req.TerraformVersion),
@@ -103,13 +126,25 @@ func (p *AivenProvider) Configure(
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
-
 		return
 	}
+	p.Client = client
 
-	resp.DataSourceData = client
+	// Initialize the generated client
+	genClient, err := common.NewAivenGenClient(
+		common.TokenOpt(data.APIToken.ValueString()),
+		common.TFVersionOpt(req.TerraformVersion),
+		common.BuildVersionOpt(p.version),
+	)
+	if err != nil {
+		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
+		return
+	}
+	p.GenClient = genClient
 
-	resp.ResourceData = client
+	// Pass the provider itself as the provider data
+	resp.DataSourceData = p
+	resp.ResourceData = p
 }
 
 // Resources returns the resources supported by this provider.
@@ -123,7 +158,9 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
-		var betaResources []func() resource.Resource
+		betaResources := []func() resource.Resource{
+			address.NewOrganizationAddressResource,
+		}
 		resources = append(resources, betaResources...)
 	}
 
@@ -141,6 +178,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
 			externalidentity.NewExternalIdentityDataSource,
+			address.NewOrganizationAddressDataSource,
 		}
 		dataSources = append(dataSources, betaDataSources...)
 	}

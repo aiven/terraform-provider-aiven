@@ -2,6 +2,7 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
@@ -12,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -72,7 +75,7 @@ func (r *organizationResource) TypeName() string {
 
 // Schema defines the schema for the organization resource.
 func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	schemaObj := schema.Schema{
 		Description: "Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -99,7 +102,15 @@ func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequ
 				Computed:    true,
 			},
 		},
-	})
+	}
+
+	// Add timeouts block
+	if schemaObj.Blocks == nil {
+		schemaObj.Blocks = make(map[string]schema.Block)
+	}
+	schemaObj.Blocks["timeouts"] = timeouts.BlockAll(ctx)
+
+	resp.Schema = schemaObj
 }
 
 // Configure sets up the organization resource.
@@ -112,14 +123,16 @@ func (r *organizationResource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
+	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+		resp.Diagnostics.AddError(
+			errmsg.SummaryUnexpectedProviderDataType,
+			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
+		)
 		return
 	}
 
-	r.client = client
+	r.client = p.GetClient()
 }
 
 // fillModel fills the organization resource model from the Aiven API.
@@ -149,7 +162,8 @@ func (r *organizationResource) fillModel(ctx context.Context, model *organizatio
 func (r *organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -171,16 +185,15 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 // Read reads an organization resource.
 func (r *organizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -191,16 +204,15 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 // Update updates an organization resource.
 func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -226,16 +238,15 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 // Delete deletes an organization resource.
 func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

@@ -2,6 +2,7 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
@@ -10,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -108,14 +111,16 @@ func (r *organizationDataSource) Configure(
 		return
 	}
 
-	client, ok := req.ProviderData.(*aiven.Client)
+	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
-
+		resp.Diagnostics.AddError(
+			errmsg.SummaryUnexpectedProviderDataType,
+			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
+		)
 		return
 	}
 
-	r.client = client
+	r.client = p.GetClient()
 }
 
 // ConfigValidators returns the configuration validators for the organization data source.
@@ -158,7 +163,8 @@ func (r *organizationDataSource) fillModel(ctx context.Context, model *organizat
 func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state organizationDataSourceModel
 
-	if !util.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
+	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -194,7 +200,5 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

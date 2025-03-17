@@ -11,6 +11,7 @@ nav_order: 1
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 - Upgraded `go` version to `1.24`
+- Add `aiven_organization_address` resource & datasource
 
 ## [4.37.0] - 2025-03-12
 
