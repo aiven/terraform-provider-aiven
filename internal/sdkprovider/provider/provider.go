@@ -20,6 +20,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/governance"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
@@ -300,6 +301,9 @@ func Provider(version string) (*schema.Provider, error) {
 			// valkey
 			"aiven_valkey":      valkey.ResourceValkey(),
 			"aiven_valkey_user": valkey.ResourceValkeyUser(),
+
+			// Governance
+			"aiven_governance_access": governance.ResourceGovernanceAccess(),
 		},
 	}
 
@@ -316,6 +320,7 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",
 		"aiven_azure_org_vpc_peering_connection",
+		"aiven_governance_access",
 	}
 
 	betaDataSources := []string{

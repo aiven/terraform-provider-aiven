@@ -64,6 +64,7 @@ nav_order: 1
 - Add `aiven_opensearch` field `opensearch_user_config.s3_migration.readonly`: Whether the repository is read-only.
   Default: `false`.
   - Change `aiven_kafka_native_acl` field `host`: Gets default value from API if not provided, mark as computed.
+- Add `aiven_governance_access` resource.
 
 ## [4.36.0] - 2025-02-20
 
