@@ -39,6 +39,7 @@ nav_order: 1
   Default: `false`.
 - Add `aiven_opensearch` field `opensearch_user_config.s3_migration.readonly`: Whether the repository is read-only.
   Default: `false`.
+- Add `aiven_governance_access` resource
 
 ## [4.36.0] - 2025-02-20
 
