@@ -31,6 +31,7 @@ import (
 	mysql "github.com/aiven/go-client-codegen/handler/mysql"
 	opensearch "github.com/aiven/go-client-codegen/handler/opensearch"
 	organization "github.com/aiven/go-client-codegen/handler/organization"
+	organizationgovernance "github.com/aiven/go-client-codegen/handler/organizationgovernance"
 	organizationprojects "github.com/aiven/go-client-codegen/handler/organizationprojects"
 	organizationuser "github.com/aiven/go-client-codegen/handler/organizationuser"
 	organizationvpc "github.com/aiven/go-client-codegen/handler/organizationvpc"
@@ -5194,6 +5195,184 @@ func (_c *MockClient_OrganizationGet_Call) Return(_a0 *organization.Organization
 }
 
 func (_c *MockClient_OrganizationGet_Call) RunAndReturn(run func(context.Context, string) (*organization.OrganizationGetOut, error)) *MockClient_OrganizationGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceAccessCreate provides a mock function with given fields: ctx, organizationId, in
+func (_m *MockClient) OrganizationGovernanceAccessCreate(ctx context.Context, organizationId string, in *organizationgovernance.OrganizationGovernanceAccessCreateIn) (*organizationgovernance.OrganizationGovernanceAccessCreateOut, error) {
+	ret := _m.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceAccessCreate")
+	}
+
+	var r0 *organizationgovernance.OrganizationGovernanceAccessCreateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationgovernance.OrganizationGovernanceAccessCreateIn) (*organizationgovernance.OrganizationGovernanceAccessCreateOut, error)); ok {
+		return rf(ctx, organizationId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationgovernance.OrganizationGovernanceAccessCreateIn) *organizationgovernance.OrganizationGovernanceAccessCreateOut); ok {
+		r0 = rf(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationgovernance.OrganizationGovernanceAccessCreateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *organizationgovernance.OrganizationGovernanceAccessCreateIn) error); ok {
+		r1 = rf(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceAccessCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceAccessCreate'
+type MockClient_OrganizationGovernanceAccessCreate_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceAccessCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - in *organizationgovernance.OrganizationGovernanceAccessCreateIn
+func (_e *MockClient_Expecter) OrganizationGovernanceAccessCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_OrganizationGovernanceAccessCreate_Call {
+	return &MockClient_OrganizationGovernanceAccessCreate_Call{Call: _e.mock.On("OrganizationGovernanceAccessCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessCreate_Call) Run(run func(ctx context.Context, organizationId string, in *organizationgovernance.OrganizationGovernanceAccessCreateIn)) *MockClient_OrganizationGovernanceAccessCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*organizationgovernance.OrganizationGovernanceAccessCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessCreate_Call) Return(_a0 *organizationgovernance.OrganizationGovernanceAccessCreateOut, _a1 error) *MockClient_OrganizationGovernanceAccessCreate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessCreate_Call) RunAndReturn(run func(context.Context, string, *organizationgovernance.OrganizationGovernanceAccessCreateIn) (*organizationgovernance.OrganizationGovernanceAccessCreateOut, error)) *MockClient_OrganizationGovernanceAccessCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceAccessDelete provides a mock function with given fields: ctx, organizationId, accessId
+func (_m *MockClient) OrganizationGovernanceAccessDelete(ctx context.Context, organizationId string, accessId string) (string, error) {
+	ret := _m.Called(ctx, organizationId, accessId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceAccessDelete")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+		return rf(ctx, organizationId, accessId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+		r0 = rf(ctx, organizationId, accessId)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, accessId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceAccessDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceAccessDelete'
+type MockClient_OrganizationGovernanceAccessDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceAccessDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - accessId string
+func (_e *MockClient_Expecter) OrganizationGovernanceAccessDelete(ctx interface{}, organizationId interface{}, accessId interface{}) *MockClient_OrganizationGovernanceAccessDelete_Call {
+	return &MockClient_OrganizationGovernanceAccessDelete_Call{Call: _e.mock.On("OrganizationGovernanceAccessDelete", ctx, organizationId, accessId)}
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessDelete_Call) Run(run func(ctx context.Context, organizationId string, accessId string)) *MockClient_OrganizationGovernanceAccessDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessDelete_Call) Return(_a0 string, _a1 error) *MockClient_OrganizationGovernanceAccessDelete_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessDelete_Call) RunAndReturn(run func(context.Context, string, string) (string, error)) *MockClient_OrganizationGovernanceAccessDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationGovernanceAccessGet provides a mock function with given fields: ctx, organizationId, accessId
+func (_m *MockClient) OrganizationGovernanceAccessGet(ctx context.Context, organizationId string, accessId string) (*organizationgovernance.OrganizationGovernanceAccessGetOut, error) {
+	ret := _m.Called(ctx, organizationId, accessId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceAccessGet")
+	}
+
+	var r0 *organizationgovernance.OrganizationGovernanceAccessGetOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*organizationgovernance.OrganizationGovernanceAccessGetOut, error)); ok {
+		return rf(ctx, organizationId, accessId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *organizationgovernance.OrganizationGovernanceAccessGetOut); ok {
+		r0 = rf(ctx, organizationId, accessId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationgovernance.OrganizationGovernanceAccessGetOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, accessId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceAccessGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceAccessGet'
+type MockClient_OrganizationGovernanceAccessGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceAccessGet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - accessId string
+func (_e *MockClient_Expecter) OrganizationGovernanceAccessGet(ctx interface{}, organizationId interface{}, accessId interface{}) *MockClient_OrganizationGovernanceAccessGet_Call {
+	return &MockClient_OrganizationGovernanceAccessGet_Call{Call: _e.mock.On("OrganizationGovernanceAccessGet", ctx, organizationId, accessId)}
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessGet_Call) Run(run func(ctx context.Context, organizationId string, accessId string)) *MockClient_OrganizationGovernanceAccessGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessGet_Call) Return(_a0 *organizationgovernance.OrganizationGovernanceAccessGetOut, _a1 error) *MockClient_OrganizationGovernanceAccessGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessGet_Call) RunAndReturn(run func(context.Context, string, string) (*organizationgovernance.OrganizationGovernanceAccessGetOut, error)) *MockClient_OrganizationGovernanceAccessGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
