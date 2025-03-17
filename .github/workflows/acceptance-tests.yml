@@ -84,7 +84,16 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - run: make test-acc
+      - name: Run Acceptance Tests
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 40
+          max_attempts: 3
+          retry_on_exit_code: 42
+          retry_on: error
+          command: >-
+            "$GITHUB_WORKSPACE/scripts/retry_test.sh" 
+            ${{ env.RETRY_ALL_ERRORS == 'true' && '--retry-all' || '' }}
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: >-
