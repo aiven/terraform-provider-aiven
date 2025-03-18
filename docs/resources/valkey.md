@@ -65,7 +65,7 @@ resource "aiven_valkey" "example_valkey" {
 - `service_type` (String) Aiven internal service type code
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
-- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `state` (String) Service state. Possible values are `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle).
 
 <a id="nestedblock--service_integrations"></a>
 ### Nested Schema for `service_integrations`

@@ -239,7 +239,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"state": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`",
+			Description: "Service state. Possible values are `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle).",
 		},
 		"service_integrations": {
 			Type:        schema.TypeSet,
