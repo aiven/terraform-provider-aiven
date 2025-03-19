@@ -31,6 +31,7 @@ import (
 	mysql "github.com/aiven/go-client-codegen/handler/mysql"
 	opensearch "github.com/aiven/go-client-codegen/handler/opensearch"
 	organization "github.com/aiven/go-client-codegen/handler/organization"
+	organizationbilling "github.com/aiven/go-client-codegen/handler/organizationbilling"
 	organizationgovernance "github.com/aiven/go-client-codegen/handler/organizationgovernance"
 	organizationprojects "github.com/aiven/go-client-codegen/handler/organizationprojects"
 	organizationuser "github.com/aiven/go-client-codegen/handler/organizationuser"
@@ -4848,6 +4849,294 @@ func (_c *MockClient_OrganizationAuthenticationConfigUpdate_Call) Return(_a0 *or
 }
 
 func (_c *MockClient_OrganizationAuthenticationConfigUpdate_Call) RunAndReturn(run func(context.Context, string, *organization.OrganizationAuthenticationConfigUpdateIn) (*organization.OrganizationAuthenticationConfigUpdateOut, error)) *MockClient_OrganizationAuthenticationConfigUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationBillingGroupCreate provides a mock function with given fields: ctx, organizationId, in
+func (_m *MockClient) OrganizationBillingGroupCreate(ctx context.Context, organizationId string, in *organizationbilling.OrganizationBillingGroupCreateIn) (*organizationbilling.OrganizationBillingGroupCreateOut, error) {
+	ret := _m.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationBillingGroupCreate")
+	}
+
+	var r0 *organizationbilling.OrganizationBillingGroupCreateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationbilling.OrganizationBillingGroupCreateIn) (*organizationbilling.OrganizationBillingGroupCreateOut, error)); ok {
+		return rf(ctx, organizationId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *organizationbilling.OrganizationBillingGroupCreateIn) *organizationbilling.OrganizationBillingGroupCreateOut); ok {
+		r0 = rf(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationbilling.OrganizationBillingGroupCreateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *organizationbilling.OrganizationBillingGroupCreateIn) error); ok {
+		r1 = rf(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationBillingGroupCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationBillingGroupCreate'
+type MockClient_OrganizationBillingGroupCreate_Call struct {
+	*mock.Call
+}
+
+// OrganizationBillingGroupCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - in *organizationbilling.OrganizationBillingGroupCreateIn
+func (_e *MockClient_Expecter) OrganizationBillingGroupCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_OrganizationBillingGroupCreate_Call {
+	return &MockClient_OrganizationBillingGroupCreate_Call{Call: _e.mock.On("OrganizationBillingGroupCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_OrganizationBillingGroupCreate_Call) Run(run func(ctx context.Context, organizationId string, in *organizationbilling.OrganizationBillingGroupCreateIn)) *MockClient_OrganizationBillingGroupCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*organizationbilling.OrganizationBillingGroupCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupCreate_Call) Return(_a0 *organizationbilling.OrganizationBillingGroupCreateOut, _a1 error) *MockClient_OrganizationBillingGroupCreate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupCreate_Call) RunAndReturn(run func(context.Context, string, *organizationbilling.OrganizationBillingGroupCreateIn) (*organizationbilling.OrganizationBillingGroupCreateOut, error)) *MockClient_OrganizationBillingGroupCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationBillingGroupDelete provides a mock function with given fields: ctx, organizationId, billingGroupId
+func (_m *MockClient) OrganizationBillingGroupDelete(ctx context.Context, organizationId string, billingGroupId string) error {
+	ret := _m.Called(ctx, organizationId, billingGroupId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationBillingGroupDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, organizationId, billingGroupId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockClient_OrganizationBillingGroupDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationBillingGroupDelete'
+type MockClient_OrganizationBillingGroupDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationBillingGroupDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - billingGroupId string
+func (_e *MockClient_Expecter) OrganizationBillingGroupDelete(ctx interface{}, organizationId interface{}, billingGroupId interface{}) *MockClient_OrganizationBillingGroupDelete_Call {
+	return &MockClient_OrganizationBillingGroupDelete_Call{Call: _e.mock.On("OrganizationBillingGroupDelete", ctx, organizationId, billingGroupId)}
+}
+
+func (_c *MockClient_OrganizationBillingGroupDelete_Call) Run(run func(ctx context.Context, organizationId string, billingGroupId string)) *MockClient_OrganizationBillingGroupDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupDelete_Call) Return(_a0 error) *MockClient_OrganizationBillingGroupDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupDelete_Call) RunAndReturn(run func(context.Context, string, string) error) *MockClient_OrganizationBillingGroupDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationBillingGroupGet provides a mock function with given fields: ctx, organizationId, billingGroupId
+func (_m *MockClient) OrganizationBillingGroupGet(ctx context.Context, organizationId string, billingGroupId string) (*organizationbilling.OrganizationBillingGroupGetOut, error) {
+	ret := _m.Called(ctx, organizationId, billingGroupId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationBillingGroupGet")
+	}
+
+	var r0 *organizationbilling.OrganizationBillingGroupGetOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*organizationbilling.OrganizationBillingGroupGetOut, error)); ok {
+		return rf(ctx, organizationId, billingGroupId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *organizationbilling.OrganizationBillingGroupGetOut); ok {
+		r0 = rf(ctx, organizationId, billingGroupId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationbilling.OrganizationBillingGroupGetOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationId, billingGroupId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationBillingGroupGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationBillingGroupGet'
+type MockClient_OrganizationBillingGroupGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationBillingGroupGet is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - billingGroupId string
+func (_e *MockClient_Expecter) OrganizationBillingGroupGet(ctx interface{}, organizationId interface{}, billingGroupId interface{}) *MockClient_OrganizationBillingGroupGet_Call {
+	return &MockClient_OrganizationBillingGroupGet_Call{Call: _e.mock.On("OrganizationBillingGroupGet", ctx, organizationId, billingGroupId)}
+}
+
+func (_c *MockClient_OrganizationBillingGroupGet_Call) Run(run func(ctx context.Context, organizationId string, billingGroupId string)) *MockClient_OrganizationBillingGroupGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupGet_Call) Return(_a0 *organizationbilling.OrganizationBillingGroupGetOut, _a1 error) *MockClient_OrganizationBillingGroupGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupGet_Call) RunAndReturn(run func(context.Context, string, string) (*organizationbilling.OrganizationBillingGroupGetOut, error)) *MockClient_OrganizationBillingGroupGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationBillingGroupList provides a mock function with given fields: ctx, organizationId
+func (_m *MockClient) OrganizationBillingGroupList(ctx context.Context, organizationId string) ([]organizationbilling.BillingGroupOut, error) {
+	ret := _m.Called(ctx, organizationId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationBillingGroupList")
+	}
+
+	var r0 []organizationbilling.BillingGroupOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]organizationbilling.BillingGroupOut, error)); ok {
+		return rf(ctx, organizationId)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []organizationbilling.BillingGroupOut); ok {
+		r0 = rf(ctx, organizationId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]organizationbilling.BillingGroupOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationBillingGroupList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationBillingGroupList'
+type MockClient_OrganizationBillingGroupList_Call struct {
+	*mock.Call
+}
+
+// OrganizationBillingGroupList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+func (_e *MockClient_Expecter) OrganizationBillingGroupList(ctx interface{}, organizationId interface{}) *MockClient_OrganizationBillingGroupList_Call {
+	return &MockClient_OrganizationBillingGroupList_Call{Call: _e.mock.On("OrganizationBillingGroupList", ctx, organizationId)}
+}
+
+func (_c *MockClient_OrganizationBillingGroupList_Call) Run(run func(ctx context.Context, organizationId string)) *MockClient_OrganizationBillingGroupList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupList_Call) Return(_a0 []organizationbilling.BillingGroupOut, _a1 error) *MockClient_OrganizationBillingGroupList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupList_Call) RunAndReturn(run func(context.Context, string) ([]organizationbilling.BillingGroupOut, error)) *MockClient_OrganizationBillingGroupList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// OrganizationBillingGroupUpdate provides a mock function with given fields: ctx, organizationId, billingGroupId, in
+func (_m *MockClient) OrganizationBillingGroupUpdate(ctx context.Context, organizationId string, billingGroupId string, in *organizationbilling.OrganizationBillingGroupUpdateIn) (*organizationbilling.OrganizationBillingGroupUpdateOut, error) {
+	ret := _m.Called(ctx, organizationId, billingGroupId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationBillingGroupUpdate")
+	}
+
+	var r0 *organizationbilling.OrganizationBillingGroupUpdateOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organizationbilling.OrganizationBillingGroupUpdateIn) (*organizationbilling.OrganizationBillingGroupUpdateOut, error)); ok {
+		return rf(ctx, organizationId, billingGroupId, in)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *organizationbilling.OrganizationBillingGroupUpdateIn) *organizationbilling.OrganizationBillingGroupUpdateOut); ok {
+		r0 = rf(ctx, organizationId, billingGroupId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationbilling.OrganizationBillingGroupUpdateOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, *organizationbilling.OrganizationBillingGroupUpdateIn) error); ok {
+		r1 = rf(ctx, organizationId, billingGroupId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationBillingGroupUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationBillingGroupUpdate'
+type MockClient_OrganizationBillingGroupUpdate_Call struct {
+	*mock.Call
+}
+
+// OrganizationBillingGroupUpdate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - billingGroupId string
+//   - in *organizationbilling.OrganizationBillingGroupUpdateIn
+func (_e *MockClient_Expecter) OrganizationBillingGroupUpdate(ctx interface{}, organizationId interface{}, billingGroupId interface{}, in interface{}) *MockClient_OrganizationBillingGroupUpdate_Call {
+	return &MockClient_OrganizationBillingGroupUpdate_Call{Call: _e.mock.On("OrganizationBillingGroupUpdate", ctx, organizationId, billingGroupId, in)}
+}
+
+func (_c *MockClient_OrganizationBillingGroupUpdate_Call) Run(run func(ctx context.Context, organizationId string, billingGroupId string, in *organizationbilling.OrganizationBillingGroupUpdateIn)) *MockClient_OrganizationBillingGroupUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*organizationbilling.OrganizationBillingGroupUpdateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupUpdate_Call) Return(_a0 *organizationbilling.OrganizationBillingGroupUpdateOut, _a1 error) *MockClient_OrganizationBillingGroupUpdate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationBillingGroupUpdate_Call) RunAndReturn(run func(context.Context, string, string, *organizationbilling.OrganizationBillingGroupUpdateIn) (*organizationbilling.OrganizationBillingGroupUpdateOut, error)) *MockClient_OrganizationBillingGroupUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
