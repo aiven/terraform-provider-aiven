@@ -194,7 +194,9 @@ func (r *CommonTemplateRenderer) RenderField(builder *strings.Builder, field Tem
 		path = parentPath.AppendField(field.Name, field.IsCollection)
 	}
 
-	if field.IsObject && len(field.NestedFields) > 0 {
+	if field.IsCollection && field.IsObject && field.IsSetType {
+		r.renderSetBlock(builder, field, path, indent)
+	} else if field.IsObject && len(field.NestedFields) > 0 {
 		r.renderBlock(builder, field, path, indent)
 	} else if field.IsCollection && !field.IsObject {
 		r.renderCollection(builder, field, path, indent)
@@ -294,4 +296,44 @@ func (r *CommonTemplateRenderer) renderCollection(builder *strings.Builder, fiel
 		fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
 		fmt.Fprintf(b, "%s]\n", indentStr)
 	})
+}
+
+// renderSetBlock handles rendering of blocks that are collections of objects
+func (r *CommonTemplateRenderer) renderSetBlock(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
+	indentStr := strings.Repeat("  ", indent)
+	pathExpr := path.Expression()
+
+	if !field.Required || field.Optional {
+		// Optional fields need an existence check
+		fmt.Fprintf(builder, "%s{{- if %s }}\n", indentStr, pathExpr)
+	}
+
+	// For collections of objects, we need to render a block for each item
+	fmt.Fprintf(builder, "%s{{- range $idx, $item := %s }}\n", indentStr, pathExpr)
+	fmt.Fprintf(builder, "%s%s {\n", indentStr, field.Name)
+
+	// Render nested fields directly from $item
+	for _, nestedField := range field.NestedFields {
+		nestedIndentStr := strings.Repeat("  ", indent+1)
+
+		if nestedField.Required {
+			// For required fields, use the required function
+			fmt.Fprintf(builder, "%s%s = {{ renderValue (required $item.%s) }}\n",
+				nestedIndentStr, nestedField.Name, nestedField.Name)
+		} else {
+			// For optional fields, add a conditional
+			fmt.Fprintf(builder, "%s{{- if $item.%s }}\n", nestedIndentStr, nestedField.Name)
+			fmt.Fprintf(builder, "%s%s = {{ renderValue $item.%s }}\n",
+				nestedIndentStr, nestedField.Name, nestedField.Name)
+			fmt.Fprintf(builder, "%s{{- end }}\n", nestedIndentStr)
+		}
+	}
+
+	fmt.Fprintf(builder, "%s}\n", indentStr)
+	fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
+
+	if !field.Required || field.Optional {
+		// Close the conditional for optional fields
+		fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
+	}
 }

@@ -15,6 +15,9 @@ nav_order: 1
 - Upgraded `go` version to `1.24`
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.1-IV0`, `4.1`
 - Add `aiven_organization_address` resource & datasource
+- Added `ca_cert` field to `aiven_organization_project` resource
+- Marked `parent_id` field as required in `aiven_organization_project` resource
+- Allowed to move `aiven_organization_project` resource between different organizations
 
 ## [4.37.0] - 2025-03-12
 

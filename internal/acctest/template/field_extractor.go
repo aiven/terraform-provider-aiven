@@ -35,6 +35,7 @@ type TemplateField struct {
 	IsObject     bool
 	IsCollection bool
 	IsMap        bool
+	IsSetType    bool
 }
 
 // FrameworkFieldExtractor extracts fields from Framework schema
@@ -110,32 +111,32 @@ func (e *FrameworkFieldExtractor) processField(name string, attr interface{}, fi
 	case resourceschema.MapAttribute, datasourceschema.MapAttribute:
 		field.IsMap = true
 		field.FieldType = FieldTypeMap
-	case resourceschema.ListAttribute, resourceschema.SetAttribute,
-		datasourceschema.ListAttribute, datasourceschema.SetAttribute:
+	case resourceschema.ListAttribute, datasourceschema.ListAttribute:
 		field.IsCollection = true
 		field.FieldType = FieldTypeCollection
-	case resourceschema.ListNestedAttribute, resourceschema.SetNestedAttribute:
+	case resourceschema.ListNestedAttribute:
 		field.IsCollection = true
 		field.IsObject = true
 		field.FieldType = FieldTypeObject
-		// Type assertion is needed to access the NestedObject.Attributes
-		switch nested := a.(type) {
-		case resourceschema.ListNestedAttribute:
-			field.NestedFields = e.extractFields(nested.NestedObject.Attributes)
-		case resourceschema.SetNestedAttribute:
-			field.NestedFields = e.extractFields(nested.NestedObject.Attributes)
-		}
-	case datasourceschema.ListNestedAttribute, datasourceschema.SetNestedAttribute:
+		field.IsSetType = false
+		field.NestedFields = e.extractFields(a.NestedObject.Attributes)
+	case resourceschema.SetNestedAttribute:
 		field.IsCollection = true
 		field.IsObject = true
 		field.FieldType = FieldTypeObject
-		// Type assertion is needed to access the NestedObject.Attributes
-		switch nested := a.(type) {
-		case datasourceschema.ListNestedAttribute:
-			field.NestedFields = e.extractFields(nested.NestedObject.Attributes)
-		case datasourceschema.SetNestedAttribute:
-			field.NestedFields = e.extractFields(nested.NestedObject.Attributes)
-		}
+		field.IsSetType = true
+		field.NestedFields = e.extractFields(a.NestedObject.Attributes)
+	case datasourceschema.ListNestedAttribute:
+		field.IsCollection = true
+		field.IsObject = true
+		field.FieldType = FieldTypeObject
+		field.NestedFields = e.extractFields(a.NestedObject.Attributes)
+	case datasourceschema.SetNestedAttribute:
+		field.IsCollection = true
+		field.IsObject = true
+		field.FieldType = FieldTypeObject
+		field.IsSetType = true
+		field.NestedFields = e.extractFields(a.NestedObject.Attributes)
 	case resourceschema.SingleNestedAttribute:
 		field.IsObject = true
 		field.FieldType = FieldTypeObject
@@ -144,6 +145,10 @@ func (e *FrameworkFieldExtractor) processField(name string, attr interface{}, fi
 		field.IsObject = true
 		field.FieldType = FieldTypeObject
 		field.NestedFields = e.extractFields(a.Attributes)
+	case resourceschema.SetAttribute, datasourceschema.SetAttribute:
+		field.IsCollection = true
+		field.FieldType = FieldTypeCollection
+		field.IsSetType = true
 	}
 
 	*fields = append(*fields, field)
@@ -232,9 +237,21 @@ func (e *SDKFieldExtractor) processSchema(schema map[string]*sdkschema.Schema) [
 		case sdkschema.TypeMap:
 			field.IsMap = true
 			field.FieldType = FieldTypeMap
-		case sdkschema.TypeList, sdkschema.TypeSet:
+		case sdkschema.TypeList:
 			field.IsCollection = true
 			field.FieldType = FieldTypeCollection
+
+			// Check if Elem is a resource (nested block)
+			if res, ok := sch.Elem.(*sdkschema.Resource); ok {
+				field.IsObject = true
+				field.FieldType = FieldTypeObject
+				// Recursively process nested schema
+				field.NestedFields = e.processSchema(res.Schema)
+			}
+		case sdkschema.TypeSet:
+			field.IsCollection = true
+			field.FieldType = FieldTypeCollection
+			field.IsSetType = true
 
 			// Check if Elem is a resource (nested block)
 			if res, ok := sch.Elem.(*sdkschema.Resource); ok {
