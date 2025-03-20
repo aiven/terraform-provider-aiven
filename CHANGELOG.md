@@ -18,6 +18,9 @@ nav_order: 1
 - Add `aiven_organization_billing` resource & datasource and `aiven_organization_billing_list` datasource
 - Promoted `aiven_organization_user_list` datasource from Beta to GA
 - Add `kafka_ssl_ca` field in service components
+- Added `ca_cert` field to `aiven_organization_project` resource
+- Marked `parent_id` field as required in `aiven_organization_project` resource
+- Allowed to move `aiven_organization_project` resource between different organizations
 
 ## [4.37.0] - 2025-03-12
 
