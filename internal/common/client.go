@@ -11,6 +11,8 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/exporter"
 )
 
 const (
@@ -68,6 +70,22 @@ type CrudHandler func(context.Context, *schema.ResourceData, avngen.Client) erro
 func WithGenClient(handler CrudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
 		return diag.FromErr(handler(ctx, d, genClientCache))
+	}
+}
+
+// WithExport wraps the read handler and exports the resource if export is enabled
+func WithExport(readFunc schema.ReadContextFunc, resourceType string) schema.ReadContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+		diags := readFunc(ctx, d, m)
+
+		// If read was successful and export is enabled, export the resource
+		if !diags.HasError() && exporter.IsEnabled() {
+			if err := exporter.ExportResource(d, resourceType); err != nil {
+				panic(err)
+			} //todo: handle or ign
+		}
+
+		return diags
 	}
 }
 

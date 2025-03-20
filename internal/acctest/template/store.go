@@ -29,6 +29,7 @@ type Store struct {
 	t                  testing.TB
 	sdkGenerator       *SDKTemplateGenerator
 	frameworkGenerator *FrameworkTemplateGenerator
+	SchemaMap          map[string]*sdkschema.Resource
 }
 
 // NewStore creates a new empty template store for SDK-v2 tests
@@ -38,6 +39,7 @@ func NewStore(t testing.TB) *Store {
 		t:                  t,
 		sdkGenerator:       NewSDKTemplateGenerator(),
 		frameworkGenerator: NewFrameworkTemplateGenerator(),
+		SchemaMap:          make(map[string]*sdkschema.Resource),
 	}
 }
 
@@ -126,6 +128,7 @@ func initTemplateStore(t testing.TB) *Store {
 
 	// Register all resources
 	for resourceType, resource := range p.ResourcesMap {
+		set.SchemaMap[resourceType] = resource
 		set.registerSDKResource(resourceType, resource, ResourceKindResource)
 	}
 
@@ -210,4 +213,8 @@ func templateKey(resourceType string, kind ResourceKind) string {
 	default:
 		return resourceType
 	}
+}
+
+func (s *Store) GetRawTemplates() map[string]string {
+	return s.registry.getRawTemplates()
 }

@@ -287,13 +287,26 @@ func (r *CommonTemplateRenderer) renderMap(builder *strings.Builder, field Templ
 }
 
 // renderCollection handles list/set fields of primitive values
+// renderCollection handles list/set fields of primitive values or maps
 func (r *CommonTemplateRenderer) renderCollection(builder *strings.Builder, field TemplateField, path TemplatePath, indent int) {
 	r.renderFieldWithContent(builder, field, path, indent, func(b *strings.Builder, field TemplateField, pathExpr string, indent int) {
 		indentStr := strings.Repeat("  ", indent)
-		fmt.Fprintf(b, "%s%s = [\n", indentStr, field.Name)
-		fmt.Fprintf(b, "%s  {{- range $idx, $item := %s }}\n", indentStr, pathExpr)
-		fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indentStr)
-		fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
-		fmt.Fprintf(b, "%s]\n", indentStr)
+
+		// Check if the collection contains objects that should be rendered as blocks
+		if field.IsObject {
+			// For lists of objects, render each as a block
+			fmt.Fprintf(b, "%s%s {\n", indentStr, field.Name)
+			for _, nestedField := range field.NestedFields {
+				r.RenderField(b, nestedField, indent+1, path)
+			}
+			fmt.Fprintf(b, "%s}\n", indentStr)
+		} else {
+			// For lists of primitives, render as array
+			fmt.Fprintf(b, "%s%s = [\n", indentStr, field.Name)
+			fmt.Fprintf(b, "%s  {{- range $idx, $item := %s }}\n", indentStr, pathExpr)
+			fmt.Fprintf(b, "%s  {{ renderValue $item }},\n", indentStr)
+			fmt.Fprintf(b, "%s  {{- end }}\n", indentStr)
+			fmt.Fprintf(b, "%s]\n", indentStr)
+		}
 	})
 }

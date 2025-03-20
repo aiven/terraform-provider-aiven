@@ -1,0 +1,89 @@
+### Export Postgres Service
+
+GET {{host}}/resources/existing
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "resource_type": "aiven_pg",
+  "project": "aiven-ci-terraform-provider",
+  "resource_id": "pg-cf316ce"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body['hcl'] && response.body['hcl'].trim() !== "", "HCL content is empty");
+    });
+
+
+    client.log("============= TERRAFORM HCL (COPY BELOW) =============");
+    client.log("");
+    client.log(response.body['hcl']);
+    client.log("");
+    client.log("=======================================================");
+%}
+
+### Export Kafka Service
+
+GET {{host}}/resources/existing
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "resource_type": "aiven_kafka",
+  "project": "aiven-ci-terraform-provider",
+  "resource_id": "kafka-2c45e92f"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body['hcl'] && response.body['hcl'].trim() !== "", "HCL content is empty");
+    });
+
+
+    client.log("============= TERRAFORM HCL (COPY BELOW) =============");
+    client.log("");
+    client.log(response.body['hcl']);
+    client.log("");
+    client.log("=======================================================");
+%}
+
+### Provision PG Service
+
+GET {{host}}/resources/aiven-tf-provider/provisions
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cloud": "google-europe-west1",
+  "group_name": "default",
+  "plan": "startup-4",
+  "service_name": "pg-1cae3426",
+  "service_type": "pg",
+  "project_vpc_id": null,
+  "user_config": {},
+  "tags": {
+    "key": "value"
+  },
+  "disk_space_mb": 92160
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body['hcl'] && response.body['hcl'].trim() !== "", "HCL content is empty");
+    });
+
+
+    client.log("============= TERRAFORM HCL (COPY BELOW) =============");
+    client.log("");
+    client.log(response.body['hcl']);
+    client.log("");
+    client.log("=======================================================");
+%}
+

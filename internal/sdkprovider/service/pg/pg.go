@@ -187,7 +187,7 @@ func ResourcePG() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for PostgreSQL® service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypePG),
-		ReadContext:   schemautil.ResourceServiceRead,
+		ReadContext:   common.WithExport(schemautil.ResourceServiceRead, "aiven_pg"),
 		UpdateContext: resourceServicePGUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypePG),

@@ -63,3 +63,4 @@ dist/
 
 # Editors
 .vscode
+/rtfm/http-client.private.env.json

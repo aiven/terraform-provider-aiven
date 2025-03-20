@@ -7,7 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
+	"github.com/aiven/terraform-provider-aiven/internal/exporter"
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
@@ -40,6 +43,10 @@ func main() {
 	if version == "dev" {
 		name = registryPrefix + "aiven-dev/aiven"
 	}
+
+	exporter.RegisterExportHook(func(d *schema.ResourceData, resourceType string) error {
+		return template.ExportResourceAsHCL(d, resourceType)
+	})
 
 	err = tf6server.Serve(
 		name,
