@@ -1,27 +1,25 @@
-package organization
+package org
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/diagnostics"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var (
 	_ datasource.DataSource              = &organizationDataSource{}
 	_ datasource.DataSourceWithConfigure = &organizationDataSource{}
-
-	_ util.TypeNameable = &organizationDataSource{}
 )
 
 // NewOrganizationDataSource is a constructor for the organization data source.
@@ -32,24 +30,20 @@ func NewOrganizationDataSource() datasource.DataSource {
 // organizationDataSource is the organization data source implementation.
 type organizationDataSource struct {
 	// client is the instance of the Aiven client to use.
-	client *aiven.Client
+	client avngen.Client
 
-	// typeName is the name of the data source type.
-	typeName string
+	// diag is the diagnostics helper.
+	diag *diagnostics.DiagnosticsHelper
 }
 
 // organizationDataSourceModel is the model for the organization data source.
 type organizationDataSourceModel struct {
-	// ID is the identifier of the organization.
-	ID types.String `tfsdk:"id"`
-	// Name is the name of the organization.
-	Name types.String `tfsdk:"name"`
-	// TenantID is the tenant identifier of the organization.
-	TenantID types.String `tfsdk:"tenant_id"`
-	// CreateTime is the timestamp of the creation of the organization.
-	CreateTime types.String `tfsdk:"create_time"`
-	// UpdateTime is the timestamp of the last update of the organization.
-	UpdateTime types.String `tfsdk:"update_time"`
+	OrganizationModel
+}
+
+// TypeName returns the data source type name for the organization data source.
+func (r *organizationDataSource) TypeName() string {
+	return "organization_data_source"
 }
 
 // Metadata returns the metadata for the organization data source.
@@ -59,13 +53,6 @@ func (r *organizationDataSource) Metadata(
 	resp *datasource.MetadataResponse,
 ) {
 	resp.TypeName = req.ProviderTypeName + "_organization"
-
-	r.typeName = resp.TypeName
-}
-
-// TypeName returns the data source type name for the organization data source.
-func (r *organizationDataSource) TypeName() string {
-	return r.typeName
 }
 
 // Schema defines the schema for the organization data source.
@@ -76,28 +63,7 @@ func (r *organizationDataSource) Schema(
 ) {
 	resp.Schema = schema.Schema{
 		Description: "Gets information about an organization.",
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "ID of the organization.",
-				Optional:    true,
-			},
-			"name": schema.StringAttribute{
-				Description: "Name of the organization.",
-				Optional:    true,
-			},
-			"tenant_id": schema.StringAttribute{
-				Description: "Tenant ID of the organization.",
-				Computed:    true,
-			},
-			"create_time": schema.StringAttribute{
-				Description: "Timestamp of the creation of the organization.",
-				Computed:    true,
-			},
-			"update_time": schema.StringAttribute{
-				Description: "Timestamp of the last update of the organization.",
-				Computed:    true,
-			},
-		},
+		Attributes:  util.ResourceSchemaToDataSourceSchema(ResourceSchema(), []string{"id", "name"}, []string{}),
 	}
 }
 
@@ -120,7 +86,8 @@ func (r *organizationDataSource) Configure(
 		return
 	}
 
-	r.client = p.GetClient()
+	r.client = p.GetGenClient()
+	r.diag = diagnostics.NewDiagnosticsHelper(r.TypeName())
 }
 
 // ConfigValidators returns the configuration validators for the organization data source.
@@ -136,69 +103,64 @@ func (r *organizationDataSource) ConfigValidators(_ context.Context) []datasourc
 	}
 }
 
-// fillModel fills the organization data source model from the Aiven API.
-func (r *organizationDataSource) fillModel(ctx context.Context, model *organizationDataSourceModel) (err error) {
-	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, model.ID.ValueString())
-	if err != nil {
-		return
-	}
-
-	account, err := r.client.Accounts.Get(ctx, normalizedID)
-	if err != nil {
-		return
-	}
-
-	model.Name = types.StringValue(account.Account.Name)
-
-	model.TenantID = types.StringValue(account.Account.TenantId)
-
-	model.CreateTime = types.StringValue(account.Account.CreateTime.String())
-
-	model.UpdateTime = types.StringValue(account.Account.UpdateTime.String())
-
-	return
-}
-
 // Read reads an organization data source.
 func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state organizationDataSourceModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
+	var config organizationDataSourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if state.ID.IsNull() {
-		list, err := r.client.Accounts.List(ctx)
+	// If ID is not set, find by name
+	var organizationID string
+	if !config.ID.IsNull() {
+		organizationID = config.ID.ValueString()
+	} else if !config.Name.IsNull() {
+		// List organizations and find by name
+		accounts, err := r.client.AccountList(ctx)
 		if err != nil {
-			resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
-
+			r.diag.AddError(&resp.Diagnostics, "reading", err)
 			return
 		}
 
 		var found bool
-
-		for _, account := range list.Accounts {
-			if account.Name == state.Name.ValueString() {
+		for _, account := range accounts {
+			if account.AccountName == config.Name.ValueString() {
 				if found {
-					resp.Diagnostics = util.DiagDuplicateFoundByName(resp.Diagnostics, state.Name.ValueString())
-
+					resp.Diagnostics.AddError(
+						"Multiple organizations found with the same name",
+						fmt.Sprintf("Multiple organizations found with name %s, please use ID instead", config.Name.ValueString()),
+					)
 					return
 				}
-
-				state.ID = types.StringValue(account.OrganizationId)
-
+				organizationID = account.AccountId
 				found = true
 			}
 		}
+
+		if !found {
+			resp.Diagnostics.AddError(
+				"Organization not found",
+				fmt.Sprintf("No organization found with name %s", config.Name.ValueString()),
+			)
+			return
+		}
 	}
 
-	err := r.fillModel(ctx, &state)
+	// Get the organization
+	account, err := r.client.AccountGet(ctx, organizationID)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
-
+		r.diag.AddError(&resp.Diagnostics, "reading", err)
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	// Set all fields
+	state := organizationDataSourceModel{}
+	state.ID = types.StringValue(account.OrganizationId)
+	state.Name = types.StringValue(account.AccountName)
+	state.TenantID = types.StringPointerValue(account.TenantId)
+	state.CreateTime = types.StringValue(account.CreateTime.String())
+	state.UpdateTime = types.StringValue(account.UpdateTime.String())
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }

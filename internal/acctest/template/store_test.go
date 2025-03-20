@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/org"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 )
 
@@ -198,7 +198,7 @@ func TestOrganizationResource(t *testing.T) {
 	ts := NewStore(t)
 	ts.registerFrameworkComponent(
 		"aiven_organization",
-		organization.NewOrganizationResource(),
+		org.NewOrganizationResource(),
 		ResourceKindResource,
 	)
 

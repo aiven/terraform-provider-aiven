@@ -9,17 +9,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-// DiagErrorUnexpectedProviderDataType is a function that adds an unexpected provider data type error to the
-// diagnostics and returns it. It is used in the Configure method of the resource structs.
-func DiagErrorUnexpectedProviderDataType(diagnostics diag.Diagnostics, providerData any) diag.Diagnostics {
-	diagnostics.AddError(
-		errmsg.SummaryUnexpectedProviderDataType,
-		fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, providerData),
-	)
-
-	return diagnostics
-}
-
 // DiagErrorCreatingResource is a function that adds a resource creation error to the diagnostics and returns it.
 // It is used in the Create method of the resource structs.
 func DiagErrorCreatingResource(diagnostics diag.Diagnostics, typenameable TypeNameable, err error) diag.Diagnostics {
@@ -37,17 +26,6 @@ func DiagErrorReadingResource(diagnostics diag.Diagnostics, typenameable TypeNam
 	diagnostics.AddError(
 		errmsg.SummaryErrorReadingResource,
 		fmt.Sprintf(errmsg.DetailErrorReadingResource, typenameable.TypeName(), err.Error()),
-	)
-
-	return diagnostics
-}
-
-// DiagErrorUpdatingResource is a function that adds a resource updating error to the diagnostics and returns it.
-// It is used in the Update method of the resource structs.
-func DiagErrorUpdatingResource(diagnostics diag.Diagnostics, typenameable TypeNameable, err error) diag.Diagnostics {
-	diagnostics.AddError(
-		errmsg.SummaryErrorUpdatingResource,
-		fmt.Sprintf(errmsg.DetailErrorUpdatingResource, typenameable.TypeName(), err.Error()),
 	)
 
 	return diagnostics
@@ -81,15 +59,6 @@ func DiagErrorReadingDataSource(diagnostics diag.Diagnostics, typenameable TypeN
 	diagnostics.AddError(
 		errmsg.SummaryErrorReadingDataSource,
 		fmt.Sprintf(errmsg.DetailErrorReadingDataSource, typenameable.TypeName(), err.Error()),
-	)
-
-	return diagnostics
-}
-
-// DiagDuplicateFoundByName is a function that adds a duplicate found by name error to the diagnostics and returns it.
-func DiagDuplicateFoundByName(diagnostics diag.Diagnostics, name string) diag.Diagnostics {
-	diagnostics.AddError(
-		errmsg.SummaryDuplicateFoundByName, fmt.Sprintf(errmsg.DetailDuplicateFoundByName, name),
 	)
 
 	return diagnostics
