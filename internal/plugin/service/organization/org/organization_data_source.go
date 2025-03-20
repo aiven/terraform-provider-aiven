@@ -115,6 +115,14 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 	var organizationID string
 	if !config.ID.IsNull() {
 		organizationID = config.ID.ValueString()
+
+		// Resolve the organization ID to account ID if provided
+		var err error
+		organizationID, err = ResolveAccountID(ctx, r.client, organizationID)
+		if err != nil {
+			r.diag.AddError(&resp.Diagnostics, "resolving account ID", err)
+			return
+		}
 	} else if !config.Name.IsNull() {
 		// List organizations and find by name
 		accounts, err := r.client.AccountList(ctx)
@@ -154,7 +162,7 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	// Set all fields
+	// Set all fields - store organization ID in state
 	state := organizationDataSourceModel{}
 	state.ID = types.StringValue(account.OrganizationId)
 	state.Name = types.StringValue(account.AccountName)

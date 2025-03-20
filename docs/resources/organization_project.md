@@ -76,5 +76,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization_project.main ORGANIZATION_ROOT_ACCOUNT_ID/PROJECT_NAME # (e.g. a1234567890/your-project-name)
+terraform import aiven_organization.main ORGANIZATION_ID/PROJECT_ID
 ```

@@ -1,6 +1,10 @@
 package org
 
 import (
+	"context"
+	"strings"
+
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -52,4 +56,21 @@ func ResourceSchema() map[string]schema.Attribute {
 			Computed:    true,
 		},
 	}
+}
+
+// ResolveAccountID is a helper function that returns the account ID to use for API calls.
+// If the ID is an organization ID, it will be converted to an account ID via the API.
+// If the ID is an account ID, it will be returned as is, without performing any API calls.
+func ResolveAccountID(ctx context.Context, client avngen.Client, id string) (string, error) {
+	if strings.HasPrefix(id, "org") {
+		// For organization IDs, use the organization API to get the account ID
+		org, err := client.OrganizationGet(ctx, id)
+		if err != nil {
+			return "", err
+		}
+
+		id = org.AccountId
+	}
+
+	return id, nil
 }

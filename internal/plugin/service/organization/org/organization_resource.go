@@ -124,7 +124,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	// Set all fields
+	// Set all fields - store organization ID in state
 	plan.ID = types.StringValue(account.OrganizationId)
 	plan.Name = types.StringValue(account.AccountName)
 	plan.TenantID = types.StringPointerValue(account.TenantId)
@@ -143,8 +143,19 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	// Get the organization
-	account, err := r.client.AccountGet(ctx, state.ID.ValueString())
+	// Resolve the organization ID to account ID for API call
+	accountID, err := ResolveAccountID(ctx, r.client, state.ID.ValueString())
+	if err != nil {
+		if avngen.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		r.diag.AddError(&resp.Diagnostics, "resolving account ID", err)
+		return
+	}
+
+	// Get the organization using the account ID
+	account, err := r.client.AccountGet(ctx, accountID)
 	if err != nil {
 		if avngen.IsNotFound(err) {
 			resp.State.RemoveResource(ctx)
@@ -154,7 +165,8 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	// Set all fields
+	// Set all fields - keep organization ID in state
+	state.ID = types.StringValue(account.OrganizationId)
 	state.Name = types.StringValue(account.AccountName)
 	state.TenantID = types.StringPointerValue(account.TenantId)
 	state.CreateTime = types.StringValue(account.CreateTime.String())
@@ -173,9 +185,16 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	// Update name
+	// Resolve the organization ID to account ID for API call
+	accountID, err := ResolveAccountID(ctx, r.client, state.ID.ValueString())
+	if err != nil {
+		r.diag.AddError(&resp.Diagnostics, "resolving account ID", err)
+		return
+	}
+
+	// Update name if changed
 	name := plan.Name.ValueString()
-	if _, err := r.client.AccountUpdate(ctx, state.ID.ValueString(), &account.AccountUpdateIn{
+	if _, err := r.client.AccountUpdate(ctx, accountID, &account.AccountUpdateIn{
 		AccountName: &name,
 	}); err != nil {
 		r.diag.AddError(&resp.Diagnostics, "updating", err)
@@ -183,13 +202,13 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	// Read the resource after update
-	account, err := r.client.AccountGet(ctx, state.ID.ValueString())
+	account, err := r.client.AccountGet(ctx, accountID)
 	if err != nil {
 		r.diag.AddError(&resp.Diagnostics, "reading", err)
 		return
 	}
 
-	// Set all fields
+	// Set all fields - keep organization ID in state
 	plan.ID = types.StringValue(account.OrganizationId)
 	plan.Name = types.StringValue(account.AccountName)
 	plan.TenantID = types.StringPointerValue(account.TenantId)
@@ -208,8 +227,19 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	// Delete the organization
-	if err := r.client.AccountDelete(ctx, state.ID.ValueString()); err != nil {
+	// Resolve the organization ID to account ID for API call
+	accountID, err := ResolveAccountID(ctx, r.client, state.ID.ValueString())
+	if err != nil {
+		if avngen.IsNotFound(err) {
+			// Resource already gone, nothing to do
+			return
+		}
+		r.diag.AddError(&resp.Diagnostics, "resolving account ID", err)
+		return
+	}
+
+	// Delete the organization using the account ID
+	if err := r.client.AccountDelete(ctx, accountID); err != nil {
 		if !avngen.IsNotFound(err) {
 			r.diag.AddError(&resp.Diagnostics, "deleting", err)
 			return
@@ -223,5 +253,6 @@ func (r *organizationResource) ImportState(
 	req resource.ImportStateRequest,
 	resp *resource.ImportStateResponse,
 ) {
+	// Import the ID directly - it will be resolved to account ID during Read operations
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
