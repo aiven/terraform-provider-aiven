@@ -8,11 +8,18 @@ import (
 )
 
 // ResourceSchemaToDataSourceSchema converts a resource schema to a data source schema.
-// All attributes are made computed by default, except for the specified required fields.
+// All attributes are made computed by default, except for the specified optional and required fields.
+// Optional fields are both optional and computed to allow for flexible lookups.
+// Required fields must be provided by the user.
 // See https://github.com/hashicorp/terraform-plugin-framework/issues/568.
 // Adapted from https://github.com/Doridian/terraform-provider-hexonet/blob/42a3ee1ab12544cde4d31b4897ceacf75d46cb3a/hexonet/utils/schema_helpers.go#L10.
-func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.Attribute, requiredFields ...string) map[string]datasource_schema.Attribute {
-	// Create a map to track required fields
+func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.Attribute, optionalFields []string, requiredFields []string) map[string]datasource_schema.Attribute {
+	// Create maps to track optional and required fields
+	optionalFieldsMap := make(map[string]bool)
+	for _, field := range optionalFields {
+		optionalFieldsMap[field] = true
+	}
+
 	requiredFieldsMap := make(map[string]bool)
 	for _, field := range requiredFields {
 		requiredFieldsMap[field] = true
@@ -25,8 +32,16 @@ func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.
 		required := false
 		computed := true
 
+		// If this is an optional field, make it optional and computed
+		if optionalFieldsMap[name] {
+			optional = true
+			required = false
+			computed = true
+		}
+
 		// If this is a required field, make it required and not computed
 		if requiredFieldsMap[name] {
+			optional = false
 			required = true
 			computed = false
 		}
@@ -105,7 +120,7 @@ func ResourceSchemaToDataSourceSchema(resourceSchema map[string]resource_schema.
 				Description:         srcAttrTyped.Description,
 				MarkdownDescription: srcAttrTyped.MarkdownDescription,
 				Sensitive:           srcAttrTyped.Sensitive,
-				Attributes:          ResourceSchemaToDataSourceSchema(srcAttrTyped.Attributes),
+				Attributes:          ResourceSchemaToDataSourceSchema(srcAttrTyped.Attributes, []string{}, []string{}),
 				Optional:            optional,
 				Required:            required,
 				Computed:            computed,
