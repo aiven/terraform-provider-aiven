@@ -35,6 +35,7 @@ data "aiven_organization_project" "example" {
 ### Read-Only
 
 - `billing_group_id` (String) Billing group ID to assign to the project.
+- `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
 - `id` (String) The ID of this resource.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))

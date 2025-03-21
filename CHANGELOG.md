@@ -12,6 +12,7 @@ nav_order: 1
 
 - Upgraded `go` version to `1.24`
 - Add `aiven_organization_address` resource & datasource
+- Allowed to modify fields in `aiven_organization_project` resource
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 

@@ -49,6 +49,7 @@ resource "aiven_organization_project" "foo" {
 
 ### Read-Only
 
+- `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--tag"></a>
