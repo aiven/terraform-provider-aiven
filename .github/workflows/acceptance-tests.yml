@@ -84,18 +84,21 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run Acceptance Tests
-        uses: nick-invision/retry@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3 #Install latest Terraform version
         with:
-          timeout_minutes: 40
-          max_attempts: 3
-          retry_on_exit_code: 42
-          retry_on: error
-          command: >-
-            "$GITHUB_WORKSPACE/scripts/retry_test.sh" 
-            ${{ env.RETRY_ALL_ERRORS == 'true' && '--retry-all' || '' }}
+          terraform_wrapper: false
+
+      # Get the path to the installed Terraform binary
+      - id: get_tf_path
+        name: Get Terraform Path
+        run: echo "terraform_path=$(which terraform)" >> $GITHUB_OUTPUT
+
+      - name: Run Acceptance Tests
+        run: make test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          TF_ACC_TERRAFORM_PATH: ${{ steps.get_tf_path.outputs.terraform_path }}
           AIVEN_PROJECT_NAME: >-
             ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
