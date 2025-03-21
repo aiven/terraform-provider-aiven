@@ -13,9 +13,13 @@ nav_order: 1
 - Upgraded `go` version to `1.24`
 - Add `aiven_organization_address` resource & datasource
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.1-IV0`, `4.1`
+
 ## [4.37.0] - 2025-03-12
 
-- Fix user config plan suppresses `false` values 
+- Fix user config plan suppresses `false` values
 - Fix `terraform import` for various resources
 - Fix `aiven_organization_application_user`: improve delete operation
 - Improve `aiven_organiztion_permission`: use `PermissionsSet` endpoint to set permissions
