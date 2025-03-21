@@ -84,9 +84,6 @@ To replace resources that are deprecated:
 The `aiven_project_user` and `aiven_organization_group_project` resources have been replaced by
 [the `aiven_organization_permission` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
 
-   ~> **Important**
-   Do not use the `aiven_project_user` or  `aiven_organization_group_project` resources with `aiven_organization_permission`.
-
 This example shows you how to migrate to the new permission resource. The following file has a user assigned to a project with the
 read only role and a group assigned to the same project with the operator role.
 
@@ -146,10 +143,9 @@ resource "aiven_organization_group_project" "example" {
           permissions = [
             "read_only"
           ]
-          principal_id   = one([for user in data.aiven_organization_user_list.users: user if user.email == "izumi@example.com" ])
+          principal_id   = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "izumi@example.com"])
           principal_type = "user"
         }
-
         permissions {
           permissions = [
             "operator"
@@ -159,6 +155,10 @@ resource "aiven_organization_group_project" "example" {
         }
       }
       ```
+
+      ~> **Important**
+      Do not use the `aiven_project_user` or `aiven_organization_group_project` resource with `aiven_organization_permission`.
+      All of these resources manage organization-level permissions and using them together can cause conflicts and unexpected behavior.
 
 2. Remove the deprecated resources from Terraform's control by running:
 
@@ -244,7 +244,7 @@ To migrate from teams to groups:
       ```hcl
       resource "aiven_organization_permission" "project_admin" {
         organization_id = data.aiven_organization.main.id
-        resource_id     = data.aiven_project.example_project.id
+        resource_id     = data.aiven_project.example_project.project
         resource_type   = "project"
         permissions {
           permissions = [
@@ -364,7 +364,7 @@ resource "aiven_account_team_project" "main" {
       ```hcl
       resource "aiven_organization_permission" "main" {
         organization_id = data.aiven_organization.main.id
-        resource_id     = data.aiven_project.example_project.id
+        resource_id     = data.aiven_project.example_project.project
         resource_type   = "project"
         permissions {
           permissions = [
