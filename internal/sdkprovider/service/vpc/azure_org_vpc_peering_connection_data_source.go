@@ -32,5 +32,5 @@ func datasourceAzureOrgVPCPeeringConnectionRead(ctx context.Context, d *schema.R
 
 	d.SetId(schemautil.BuildResourceID(orgID, vpcID, subID, vnet, rg))
 
-	return resourceAzureVPCPeeringConnectionRead(ctx, d, client)
+	return resourceAzureOrgVPCPeeringConnectionRead(ctx, d, client)
 }
