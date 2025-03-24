@@ -36,6 +36,27 @@ rules:
     Each schema field should have a description
   severity: WARNING
 
+# Rules to enforce using acctest helpers instead of direct environment variable access:
+- id: direct-env-var-access-in-tests
+  languages: [go]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+    - pattern-either:
+      - pattern: os.Getenv("AIVEN_PROJECT_NAME")
+      - pattern: os.Getenv("AIVEN_ORGANIZATION_NAME")
+      - pattern: os.Getenv("AIVEN_ACCOUNT_NAME")
+      - pattern: os.LookupEnv("AIVEN_PROJECT_NAME")
+      - pattern: os.LookupEnv("AIVEN_ORGANIZATION_NAME")
+      - pattern: os.LookupEnv("AIVEN_ACCOUNT_NAME")
+  message: |
+    Do not use os.Getenv/LookupEnv directly in tests for Aiven environment variables.
+    Instead use the helper functions from internal/acctest:
+    - Use acc.ProjectName() for AIVEN_PROJECT_NAME
+    - Use acc.OrganizationName() for AIVEN_ORGANIZATION_NAME
+  severity: ERROR
+
 # Rules to select small service plans in tests:
 
 # TODO: we can maybe use startup-2 for most kafka needs
