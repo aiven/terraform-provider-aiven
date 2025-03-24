@@ -1,6 +1,7 @@
 package org_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -61,6 +62,45 @@ func TestAccAivenOrganizationDataSource(t *testing.T) {
 
 					// Directly check some values for additional confirmation
 					resource.TestCheckResourceAttr(resourceName, "name", orgName),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAivenOrganizationDataSourceValidation(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Test case: neither id nor name provided
+				Config: `data "aiven_organization" "test" {}`,
+				ExpectError: regexp.MustCompile(
+					`At least one of these attributes must be configured: \[id,name\]`,
+				),
+			},
+			{
+				// Test case: both id and name provided
+				Config: `
+					data "aiven_organization" "test" {
+						id   = "test-id"
+						name = "test-name"
+					}
+				`,
+				ExpectError: regexp.MustCompile(
+					`These attributes cannot be configured together: \[id,name\]`,
+				),
+			},
+			{
+				// Test case: empty id provided
+				Config: `
+					data "aiven_organization" "test" {
+						id = ""
+					}
+				`,
+				ExpectError: regexp.MustCompile(
+					`Organization ID not found`,
 				),
 			},
 		},

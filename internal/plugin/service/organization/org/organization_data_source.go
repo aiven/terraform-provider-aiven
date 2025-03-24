@@ -111,19 +111,22 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	// If ID is not set, find by name
+	// Initialize empty organization ID
 	var organizationID string
-	if !config.ID.IsNull() {
-		organizationID = config.ID.ValueString()
 
-		// Resolve the organization ID to account ID if provided
+	// Try to find organization ID based on provided attributes
+	switch {
+	case !config.ID.IsNull():
 		var err error
+		organizationID = config.ID.ValueString()
+		// Resolve the organization ID to account ID if provided
 		organizationID, err = ResolveAccountID(ctx, r.client, organizationID)
 		if err != nil {
 			r.diag.AddError(&resp.Diagnostics, "resolving account ID", err)
 			return
 		}
-	} else if !config.Name.IsNull() {
+
+	case !config.Name.IsNull():
 		// List organizations and find by name
 		accounts, err := r.client.AccountList(ctx)
 		if err != nil {
@@ -153,6 +156,15 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 			)
 			return
 		}
+	}
+
+	// Ensure we have an organization ID before proceeding
+	if organizationID == "" {
+		resp.Diagnostics.AddError(
+			"Organization ID not found",
+			"Failed to determine organization ID from provided configuration",
+		)
+		return
 	}
 
 	// Get the organization
