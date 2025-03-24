@@ -25,17 +25,18 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v6
-      
+
   semgrep:
     runs-on: ubuntu-latest
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     container:
-      image: returntocorp/semgrep
+      image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: semgrep ci --config auto --no-suppress-errors
+      # Keep in sync with Makefile
+      - run: semgrep --config "p/auto" --config ".semgrep.yml" --include="**" --error
 
   make_lint:
     runs-on: ubuntu-latest
@@ -63,7 +64,7 @@ jobs:
 
       - run: make docs
       - run: git diff --exit-code
-  
+
   sweep_check:
     runs-on: ubuntu-latest
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
@@ -74,5 +75,5 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
-        
+
     - run: make sweep-check

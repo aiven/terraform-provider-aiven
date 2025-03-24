@@ -1,0 +1,3 @@
+# See https://semgrep.dev/docs/ignoring-files-folders-code#understand-semgrep-defaults to understand why this is needed...
+# Remove when https://github.com/semgrep/semgrep/issues/4524 is resolved
+!*_test.go
