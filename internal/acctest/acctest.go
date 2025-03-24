@@ -30,6 +30,7 @@ const (
 	envBetaFeatures     = "PROVIDER_AIVEN_ENABLE_BETA"
 	envUserID           = "AIVEN_ORGANIZATION_USER_ID"
 	envAccountID        = "AIVEN_ORGANIZATION_ACCOUNT_ID"
+	envAccountName      = "AIVEN_ACCOUNT_NAME"
 )
 
 var TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
@@ -96,6 +97,11 @@ func UserID() string {
 // AccountID returns the Aiven organization account ID
 func AccountID() string {
 	return getEnvVar(envAccountID)
+}
+
+// AccountName returns the Aiven account name
+func AccountName() string {
+	return getEnvVar(envAccountName)
 }
 
 // TestAccPreCheck validates the necessary test API keys exist in the testing environment
