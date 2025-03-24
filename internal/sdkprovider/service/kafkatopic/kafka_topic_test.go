@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"regexp"
 	"testing"
@@ -195,7 +194,7 @@ resource "aiven_kafka_topic" "topic2" {
   owner_user_group_id = aiven_organization_user_group.foo.group_id
   partitions          = 3
   replication         = 2
-}`, os.Getenv("AIVEN_ORGANIZATION_NAME"), name, acc.ProjectName(), name, name, name, name)
+}`, acc.OrganizationName(), name, acc.ProjectName(), name, name, name, name)
 }
 
 func testAccKafkaTopicCustomTimeoutsResource(name string) string {

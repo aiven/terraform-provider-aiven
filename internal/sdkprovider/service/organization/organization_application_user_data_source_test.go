@@ -2,7 +2,6 @@ package organization_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -32,7 +31,7 @@ data "aiven_organization_application_user" "foo" {
   organization_id = aiven_organization_application_user.foo.organization_id
   user_id         = aiven_organization_application_user.foo.user_id
 }
-`, os.Getenv("AIVEN_ORGANIZATION_NAME"), suffix),
+`, acc.OrganizationName(), suffix),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(dataUserFoo, "name", "test-acc-org-app-user-"+suffix),
 					resource.TestCheckResourceAttr(dataUserFoo, "is_super_admin", "false"),
