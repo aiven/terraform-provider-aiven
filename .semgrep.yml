@@ -10,14 +10,14 @@ rules:
     - "datasource_*"
   patterns:
   - pattern: |
-      &schema.Resource{ ... } 
+      &schema.Resource{ ... }
   - pattern-not: |
       &schema.Resource{ ..., Description: ..., ... }
   - pattern-inside: |
       func $F() *schema.Resource { ... }
   message: |
     Each schema resource should have a description
-  severity: WARNING
+  severity: ERROR
 
 - id: schema-element-without-description
   languages: [go]
@@ -34,7 +34,7 @@ rules:
       { ..., Description: ..., ... }
   message: |
     Each schema field should have a description
-  severity: WARNING
+  severity: ERROR
 
 # Rules to enforce using acctest helpers instead of direct environment variable access:
 - id: direct-env-var-access-in-tests
@@ -77,7 +77,7 @@ rules:
     plan = "business-4"
   message: |
     Tests should use the smallest kafka plan to save costs
-  severity: WARNING
+  severity: ERROR
 
 - id: large-plan-in-test-m3aggregator
   languages: [generic]
@@ -96,7 +96,7 @@ rules:
     plan = "business-8"
   message: |
     Tests should use the smallest m3aggregator plan to save costs
-  severity: WARNING
+  severity: ERROR
 
 - id: large-plan-in-test-clickhouse
   languages: [generic]
@@ -110,12 +110,12 @@ rules:
       resource "aiven_clickhouse" ... {
         ...
       }
-  - pattern-not-regex: startup-beta-8
+  - pattern-not-regex: startup-16
   fix: |
-    plan = "startup-beta-8"
+    plan = "startup-16"
   message: |
     Tests should use the smallest clickhouse plan to save costs
-  severity: WARNING
+  severity: ERROR
 
 - id: large-plan-in-test-other
   languages: [generic]
@@ -146,4 +146,4 @@ rules:
     plan = "startup-4"
   message: |
     Tests should use the smallest service plan to save costs
-  severity: WARNING
+  severity: ERROR
