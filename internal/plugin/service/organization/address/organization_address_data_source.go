@@ -65,7 +65,7 @@ func (r *organizationAddressDataSource) Schema(
 ) {
 	resp.Schema = schema.Schema{
 		Description: "Gets information about an organization address.",
-		Attributes:  util.ResourceSchemaToDataSourceSchema(ResourceSchema(), "organization_id", "address_id"),
+		Attributes:  util.ResourceSchemaToDataSourceSchema(ResourceSchema(), []string{}, []string{"organization_id", "address_id"}),
 	}
 }
 

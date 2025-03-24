@@ -18,7 +18,7 @@ Gets information about an organization address.
 ### Required
 
 - `address_id` (String) ID of the address.
-- `organization_id` (String) ID of the organization.
+- `organization_id` (String) ID of organization.
 
 ### Read-Only
 

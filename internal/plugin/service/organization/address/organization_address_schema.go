@@ -15,7 +15,7 @@ type OrganizationAddressModel struct {
 	// ID is a composite of organization_id and address_id
 	ID types.String `tfsdk:"id"`
 
-	// OrganizationID is the identifier of the organization
+	// OrganizationID is the identifier of the root account of the organization
 	OrganizationID types.String `tfsdk:"organization_id"`
 
 	// AddressID is the identifier of the address
@@ -57,7 +57,7 @@ func ResourceSchema() map[string]schema.Attribute {
 			},
 		},
 		"organization_id": schema.StringAttribute{
-			Description: "ID of the organization.",
+			Description: "ID of organization.",
 			Required:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
