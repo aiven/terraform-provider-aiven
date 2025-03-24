@@ -12,12 +12,10 @@ import (
 
 // TestExternalIdentityDataSource tests the external_identity datasource.
 func TestExternalIdentityDataSource(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
+	acc.SkipIfNotBeta(t)
 
-	_ = deps.IsBeta(true)
-
-	organizationName := deps.OrganizationName()
-	userID := deps.OrganizationUserID(true)
+	organizationName := acc.OrganizationName()
+	userID := acc.UserID()
 	prefix := acc.DefaultResourceNamePrefix
 	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 	userGroupName := fmt.Sprintf("%s-usr-group-%s", prefix, suffix)
@@ -29,10 +27,10 @@ func TestExternalIdentityDataSource(t *testing.T) {
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testExternalIdentityDataSourceBasic(organizationName, userGroupName, *userID, externalUserID),
+				Config: testExternalIdentityDataSourceBasic(organizationName, userGroupName, userID, externalUserID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "external_user_id", "alice"),
-					resource.TestCheckResourceAttr(resourceName, "internal_user_id", *userID),
+					resource.TestCheckResourceAttr(resourceName, "internal_user_id", userID),
 				),
 			},
 		},

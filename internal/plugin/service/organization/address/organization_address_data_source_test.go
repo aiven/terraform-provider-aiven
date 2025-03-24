@@ -10,10 +10,8 @@ import (
 )
 
 func TestAccAivenOrganizationAddressDataSource(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
-
 	var (
-		organizationName = deps.OrganizationName()
+		organizationName = acc.OrganizationName()
 		dataSourceName   = "data.aiven_organization_address.ds"
 		resourceName     = "aiven_organization_address.address"
 		templBuilder     = template.InitializeTemplateStore(t).NewBuilder().
