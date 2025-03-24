@@ -23,7 +23,7 @@ const (
 
 func TestAccAivenOrganizationVPC(t *testing.T) {
 	var (
-		orgName = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
+		orgName = acc.OrganizationName()
 
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
 				AddDataSource("aiven_organization", map[string]interface{}{
