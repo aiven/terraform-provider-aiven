@@ -267,7 +267,7 @@ func testAccAivenOpenSearchUserUserConfigZeroValues(kv ...string) string {
 resource "aiven_opensearch" "os2" {
   project      = "foo"
   cloud_name   = "google-europe-west1"
-  plan         = "business-4"
+  plan         = "startup-4"
   service_name = "bar"
 
   opensearch_user_config {

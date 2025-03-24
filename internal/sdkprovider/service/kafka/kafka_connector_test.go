@@ -126,7 +126,6 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -191,7 +190,6 @@ data "aiven_kafka_connector" "connector" {
 }`, acc.ProjectName(), name, name, name, name, name)
 }
 
-// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorWrongConfigNameResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -265,7 +263,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "business-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"

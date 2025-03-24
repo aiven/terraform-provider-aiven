@@ -222,7 +222,7 @@ resource "aiven_service_integration" "int-m3db-pg" {
 resource "aiven_grafana" "grafana1" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
-  plan         = "startup-4"
+  plan         = "startup-1"
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {
@@ -298,7 +298,7 @@ resource "aiven_service_integration" "int-m3db-pg" {
 resource "aiven_grafana" "grafana1" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
-  plan         = "startup-4"
+  plan         = "startup-1"
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {

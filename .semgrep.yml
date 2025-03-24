@@ -59,7 +59,32 @@ rules:
 
 # Rules to select small service plans in tests:
 
-# TODO: we can maybe use startup-2 for most kafka needs
+# Rule for Kafka with Kafka Connect
+- id: large-plan-in-test-kafka-connect
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside: |
+      resource "aiven_kafka" ... {
+        ...
+        kafka_user_config {
+          ...
+          kafka_connect = true
+          ...
+        }
+        ...
+      }
+  - pattern-not-regex: business-4|%s
+  fix: plan = "business-4"
+  message: |
+    Kafka with kafka_connect enabled requires at least business-4 plan
+  severity: ERROR
+
+# Rule for Kafka without Kafka Connect
 - id: large-plan-in-test-kafka
   languages: [generic]
   paths:
@@ -68,17 +93,65 @@ rules:
   patterns:
   - pattern-inside:
       plan = "..."
-  - pattern-inside:
+  - pattern-inside: |
       resource "aiven_kafka" ... {
         ...
       }
-  - pattern-not-regex: business-4
-  fix: |
-    plan = "business-4"
+  - pattern-not-inside: |
+      resource "aiven_kafka" ... {
+        ...
+        kafka_user_config {
+          ...
+          kafka_connect = true
+          ...
+        }
+        ...
+      }
+  - pattern-not-regex: startup-2|%s
+  fix: plan = "startup-2"
   message: |
-    Tests should use the smallest kafka plan to save costs
+    Tests should use startup-2 for Kafka without kafka_connect
   severity: ERROR
 
+# Rule for Flink
+- id: large-plan-in-test-flink
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside: |
+      resource "aiven_flink" ... {
+        ...
+      }
+  - pattern-not-regex: business-4|%s
+  fix: plan = "business-4"
+  message: |
+    Flink requires at least business-4 plan
+  severity: ERROR
+
+# Rule for Grafana
+- id: large-plan-in-test-grafana
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside: |
+      resource "aiven_grafana" ... {
+        ...
+      }
+  - pattern-not-regex: startup-1|%s
+  fix: plan = "startup-1"
+  message: |
+    Grafana should use the smallest plan (startup-1) to save costs
+  severity: ERROR
+
+# Rule for M3 Aggregator
 - id: large-plan-in-test-m3aggregator
   languages: [generic]
   paths:
@@ -87,17 +160,17 @@ rules:
   patterns:
   - pattern-inside:
       plan = "..."
-  - pattern-inside:
+  - pattern-inside: |
       resource "aiven_m3aggregator" ... {
         ...
       }
-  - pattern-not-regex: business-8
-  fix: |
-    plan = "business-8"
+  - pattern-not-regex: business-8|%s
+  fix: plan = "business-8"
   message: |
-    Tests should use the smallest m3aggregator plan to save costs
+    M3Aggregator requires at least business-8 plan
   severity: ERROR
 
+# Rule for ClickHouse
 - id: large-plan-in-test-clickhouse
   languages: [generic]
   paths:
@@ -106,17 +179,17 @@ rules:
   patterns:
   - pattern-inside:
       plan = "..."
-  - pattern-inside:
+  - pattern-inside: |
       resource "aiven_clickhouse" ... {
         ...
       }
-  - pattern-not-regex: startup-16
-  fix: |
-    plan = "startup-16"
+  - pattern-not-regex: startup-16|%s
+  fix: plan = "startup-16"
   message: |
-    Tests should use the smallest clickhouse plan to save costs
+    Clickhouse requires at least startup-16 plan
   severity: ERROR
 
+# Rule for all other services
 - id: large-plan-in-test-other
   languages: [generic]
   paths:
@@ -125,25 +198,36 @@ rules:
   patterns:
   - pattern-inside:
       plan = "..."
-  - pattern-inside:
+  - pattern-inside: |
       resource ... ... {
         ...
       }
-  - pattern-not-inside:
+  - pattern-not-inside: |
       resource "aiven_kafka" ... {
         ...
       }
-  - pattern-not-inside:
+  - pattern-not-inside: |
+      resource "aiven_flink" ... {
+        ...
+      }
+  - pattern-not-inside: |
       resource "aiven_m3aggregator" ... {
         ...
       }
-  - pattern-not-inside:
+  - pattern-not-inside: |
+      resource "aiven_m3db" ... {
+        ...
+      }
+  - pattern-not-inside: |
       resource "aiven_clickhouse" ... {
         ...
       }
-  - pattern-not-regex: (startup-(1|2|4|8)|%s)
-  fix: |
-    plan = "startup-4"
+  - pattern-not-inside: |
+      resource "aiven_grafana" ... {
+        ...
+      }
+  - pattern-not-regex: startup-4|%s
+  fix: plan = "startup-4"
   message: |
     Tests should use the smallest service plan to save costs
   severity: ERROR

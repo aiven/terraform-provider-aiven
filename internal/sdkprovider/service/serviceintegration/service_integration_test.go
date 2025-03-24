@@ -867,7 +867,7 @@ resource "aiven_thanos" "thanos" {
 resource "aiven_kafka" "kafka_service" {
   project                 = data.aiven_project.services.project
   cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
+  plan                    = "startup-2"
   service_name            = "test-acc-kafka-%[3]s"
   maintenance_window_dow  = "sunday"
   maintenance_window_time = "10:00:00"

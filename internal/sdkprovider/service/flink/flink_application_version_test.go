@@ -95,7 +95,7 @@ resource "aiven_flink" "foo" {
 resource "aiven_kafka" "kafka" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
-  plan         = "business-4"
+  plan         = "startup-2"
   service_name = "test-acc-kafka-%[2]s"
 }
 
