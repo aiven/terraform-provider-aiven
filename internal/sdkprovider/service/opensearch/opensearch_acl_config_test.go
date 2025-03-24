@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -28,7 +27,7 @@ func TestAccAivenOpenSearchACLConfig_basic(t *testing.T) {
 			{
 				Config: testAccOpenSearchACLConfigResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-es-aclconf-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "extended_acl", "false"),
@@ -64,7 +63,7 @@ resource "aiven_opensearch_acl_config" "foo" {
   service_name = aiven_opensearch.bar.service_name
   enabled      = true
   extended_acl = false
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) error {

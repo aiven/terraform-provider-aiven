@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -30,7 +29,7 @@ func TestAccAivenM3DBUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_m3db_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 				),
@@ -104,5 +103,5 @@ data "aiven_m3db_user" "user" {
   service_name = aiven_m3db_user.foo.service_name
   project      = aiven_m3db_user.foo.project
   username     = aiven_m3db_user.foo.username
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}`, acc.ProjectName(), name, name, name)
 }

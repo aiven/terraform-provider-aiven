@@ -2,7 +2,6 @@ package mysql_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -28,7 +27,7 @@ func TestAccAiven_mysql(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_mysql.common"),
 					testAccCheckAivenServiceMysqlAttributes("data.aiven_mysql.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "mysql"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -88,7 +87,7 @@ data "aiven_mysql" "common" {
   project      = aiven_mysql.bar.project
 
   depends_on = [aiven_mysql.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccMysqlDoubleTagResource(name string) string {
@@ -131,7 +130,7 @@ data "aiven_mysql" "common" {
   project      = aiven_mysql.bar.project
 
   depends_on = [aiven_mysql.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // MySQL service tests
@@ -151,7 +150,7 @@ func TestAccAivenService_mysql(t *testing.T) {
 					testAccCheckAivenServiceMysqlAttributes("data.aiven_mysql.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "mysql"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -195,7 +194,7 @@ data "aiven_mysql" "common" {
   project      = aiven_mysql.bar.project
 
   depends_on = [aiven_mysql.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceMysqlAttributes(n string) resource.TestCheckFunc {

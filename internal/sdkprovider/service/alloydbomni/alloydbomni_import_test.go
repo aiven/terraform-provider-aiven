@@ -2,7 +2,6 @@ package alloydbomni_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -15,7 +14,7 @@ import (
 
 func TestAccAivenAlloyDBOmni_import(t *testing.T) {
 	resourceName := "aiven_alloydbomni.main"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{

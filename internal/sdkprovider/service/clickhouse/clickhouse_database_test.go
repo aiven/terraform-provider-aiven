@@ -2,7 +2,6 @@ package clickhouse_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -22,7 +21,7 @@ func TestAccAivenClickhouseDatabase_basic(t *testing.T) {
 			{
 				Config: testAccClickhouseDatabaseResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-db-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
@@ -57,5 +56,5 @@ data "aiven_clickhouse_database" "database" {
   project      = aiven_clickhouse_database.foo.project
   service_name = aiven_clickhouse_database.foo.service_name
   name         = aiven_clickhouse_database.foo.name
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }

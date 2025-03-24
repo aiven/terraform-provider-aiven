@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -31,7 +30,7 @@ func TestAccAivenClickhouseUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenClickhouseUserAttributes("data.aiven_clickhouse_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "password"),
 					resource.TestCheckResourceAttrSet(resourceName, "uuid"),
@@ -99,7 +98,7 @@ data "aiven_clickhouse_user" "user" {
   service_name = aiven_clickhouse_user.foo.service_name
   project      = aiven_clickhouse_user.foo.project
   username     = aiven_clickhouse_user.foo.username
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenClickhouseUserAttributes(n string) resource.TestCheckFunc {

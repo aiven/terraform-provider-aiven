@@ -2,7 +2,6 @@ package flink_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 
 // TestAccAiven_flink tests Flink resource.
 func TestAccAiven_flink(t *testing.T) {
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 
 	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
 

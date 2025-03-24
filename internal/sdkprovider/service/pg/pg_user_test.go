@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -19,7 +18,7 @@ import (
 
 func TestAccAivenPGUser_basic(t *testing.T) {
 	resourceName := "aiven_pg_user.foo.0" // checking the first user only
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	serviceName := "test-acc-sr-" + acc.RandStr()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -77,7 +76,7 @@ func TestAccAivenPGUser_pg_no_password(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 				),
 			},
@@ -99,7 +98,7 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
@@ -110,7 +109,7 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "false"),
@@ -121,7 +120,7 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
@@ -192,7 +191,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccPGUserPgReplicationDisableResource(name string) string {
@@ -224,7 +223,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccPGUserPgReplicationEnableResource(name string) string {
@@ -256,7 +255,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 // testAccPGUserNewPasswordResource creates 100 users to test bulk creation
@@ -327,5 +326,5 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.username
 
   depends_on = [aiven_pg_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }

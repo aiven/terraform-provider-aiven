@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -28,7 +27,7 @@ func TestAccAivenOpenSearchACLRule_basic(t *testing.T) {
 			{
 				Config: testAccOpenSearchACLRuleResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-aclrule-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "index", "test-index"),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
@@ -73,7 +72,7 @@ resource "aiven_opensearch_acl_rule" "foo" {
   username     = aiven_opensearch_user.foo.username
   index        = "test-index"
   permission   = "readwrite"
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenOpenSearchACLRuleResourceDestroy(s *terraform.State) error {

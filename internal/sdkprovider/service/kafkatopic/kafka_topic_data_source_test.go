@@ -2,7 +2,6 @@ package kafkatopic_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 // TestAccAivenDatasourceKafkaTopic_doesnt_exist this datasource shares Read() function with real "resource"
 // This test makes sure the read func doesn't create missing topics as it does for "resources"
 func TestAccAivenDatasourceKafkaTopic_doesnt_exist(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },

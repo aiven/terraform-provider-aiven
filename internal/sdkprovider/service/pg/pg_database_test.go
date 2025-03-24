@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -19,7 +18,7 @@ import (
 
 func TestAccAivenPGDatabase_basic(t *testing.T) {
 	resourceName := "aiven_pg_database.foo"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 

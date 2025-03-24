@@ -2,7 +2,6 @@ package kafkaschema_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -25,7 +24,7 @@ func TestAccAivenKafkaSchemaConfiguration_basic(t *testing.T) {
 			{
 				Config: testAccKafkaSchemaConfigurationResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "compatibility_level", "BACKWARD"),
 				),
@@ -66,5 +65,5 @@ resource "aiven_kafka_schema_configuration" "foo" {
   project             = data.aiven_project.foo.project
   service_name        = aiven_kafka.bar.service_name
   compatibility_level = "BACKWARD"
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }

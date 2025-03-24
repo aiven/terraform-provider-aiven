@@ -3,7 +3,6 @@ package opensearch_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -50,9 +49,9 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar, aiven_opensearch_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
+}`, acc.ProjectName(), rName, openSearchTestPassword),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-os-sec-plugin-%s", rName),
 					),
@@ -85,9 +84,9 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
+}`, acc.ProjectName(), rName, openSearchTestPassword),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-os-sec-plugin-%s", rName),
 					),
@@ -126,7 +125,7 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar, aiven_opensearch_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
+}`, acc.ProjectName(), rName, openSearchTestPassword),
 				ExpectError: regexp.MustCompile("when the OpenSearch Security Plugin is enabled"),
 			},
 		},

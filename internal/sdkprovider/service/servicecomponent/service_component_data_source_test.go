@@ -3,7 +3,6 @@ package servicecomponent_test
 import (
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -52,7 +51,7 @@ func testAccServiceComponentAttributes(n, component, route string) resource.Test
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
-		if a["project"] != os.Getenv("AIVEN_PROJECT_NAME") {
+		if a["project"] != acc.ProjectName() {
 			return errors.New("expected to get a corect project name from Aiven got: " + a["project"])
 		}
 
@@ -159,7 +158,7 @@ data "aiven_service_component" "schema_registry" {
   route        = "dynamic"
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(name string) string {
@@ -191,5 +190,5 @@ data "aiven_service_component" "kafka" {
   kafka_authentication_method = "sasl"
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }

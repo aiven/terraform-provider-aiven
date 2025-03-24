@@ -3,7 +3,6 @@ package flink_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -28,7 +27,7 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 				Config: testAccFlinkApplicationVersionResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					checkAivenFlinkApplicationVersionAttributes("data.aiven_flink_application_version.bar"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName,
 						"service_name",
@@ -37,7 +36,7 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "sink.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "source.#", "1"),
 					resource.TestCheckResourceAttr(
-						resourceNameDeployment, "project", os.Getenv("AIVEN_PROJECT_NAME"),
+						resourceNameDeployment, "project", acc.ProjectName(),
 					),
 					resource.TestCheckResourceAttr(
 						resourceNameDeployment,
@@ -181,7 +180,7 @@ data "aiven_flink_application_version" "bar" {
   application_id         = aiven_flink_application.foo.application_id
   application_version_id = aiven_flink_application_version.foo.application_version_id
 }
-`, os.Getenv("AIVEN_PROJECT_NAME"), r)
+`, acc.ProjectName(), r)
 }
 
 func checkAivenFlinkApplicationVersionAttributes(n string) resource.TestCheckFunc {

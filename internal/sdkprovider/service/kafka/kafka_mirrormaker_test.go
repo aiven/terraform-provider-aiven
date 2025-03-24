@@ -2,7 +2,6 @@ package kafka_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -26,7 +25,7 @@ func TestAccAiven_kafka_mirrormaker(t *testing.T) {
 					testAccCheckAivenServiceMirrorMakerAttributes("data.aiven_kafka_mirrormaker.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka_mirrormaker"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -65,5 +64,5 @@ data "aiven_kafka_mirrormaker" "common" {
   project      = aiven_kafka_mirrormaker.bar.project
 
   depends_on = [aiven_kafka_mirrormaker.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }

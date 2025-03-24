@@ -75,8 +75,8 @@ func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error 
 }
 
 func testAccAzurePrivatelinkResource(name string) string {
-	var principal = os.Getenv("AIVEN_AZURE_PRIVATELINK_SUB_ID")
-	var vpcID = os.Getenv("AIVEN_AZURE_PRIVATELINK_VPCID")
+	principal := os.Getenv("AIVEN_AZURE_PRIVATELINK_SUB_ID")
+	vpcID := os.Getenv("AIVEN_AZURE_PRIVATELINK_VPCID")
 
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -111,7 +111,7 @@ data "aiven_azure_privatelink" "pr" {
   service_name = aiven_pg.bar.service_name
 
   depends_on = [aiven_azure_privatelink.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
+}`, acc.ProjectName(), name, vpcID, principal)
 }
 
 func testAccCheckAivenAzurePrivatelinkAttributes(n string) resource.TestCheckFunc {

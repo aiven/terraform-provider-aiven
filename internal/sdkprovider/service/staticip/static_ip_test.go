@@ -3,7 +3,6 @@ package staticip_test
 import (
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -16,7 +15,7 @@ import (
 
 func TestAccAivenResourceStaticIp(t *testing.T) {
 	resourceName := "aiven_static_ip.foo"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	cloudName := "google-europe-west1"
 	manifest := fmt.Sprintf(`
 resource "aiven_static_ip" "foo" {
@@ -73,7 +72,7 @@ resource "aiven_static_ip" "foo" {
 
 func TestAccAivenResourceStaticIpNonExistentIdentifier(t *testing.T) {
 	resourceName := "aiven_static_ip.foo"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	cloudName := "google-europe-west1"
 	manifest := fmt.Sprintf(`
 resource "aiven_static_ip" "foo" {

@@ -30,7 +30,7 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 				Config: testAccKafkaConnectorResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaConnectorAttributes("data.aiven_kafka_connector.connector"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
 				),
@@ -60,7 +60,7 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 			{
 				Config: testAccKafkaConnectorMonoSinkResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-mongo-sink-%s", rName)),
 				),
@@ -188,7 +188,7 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name, name)
 }
 
 // nosemgrep: kafka connectors need kafka with business plans
@@ -253,7 +253,7 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name, name)
 }
 
 func testAccKafkaConnectorMonoSinkResource(name string) string {
@@ -314,7 +314,7 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
+}`, acc.ProjectName(), name, name, name, name, os.Getenv("MONGO_URI"))
 }
 
 func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc {

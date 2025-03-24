@@ -2,7 +2,6 @@ package dragonfly_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -32,7 +31,7 @@ func TestAccAiven_dragonfly(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.0.email", "techsupport@company.com"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "dragonfly"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -100,7 +99,7 @@ data "aiven_dragonfly" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_dragonfly.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccDragonflyRemoveEmailsResource(name string) string {
@@ -134,7 +133,7 @@ data "aiven_dragonfly" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_dragonfly.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccDragonflyDoubleTagResource(name string) string {
@@ -172,7 +171,7 @@ data "aiven_dragonfly" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_dragonfly.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // Dragonfly service tests
@@ -191,7 +190,7 @@ func TestAccAivenService_dragonfly(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_dragonfly.common"),
 					testAccCheckAivenServiceDragonflyAttributes("data.aiven_dragonfly.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "dragonfly"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -206,7 +205,7 @@ func TestAccAivenService_dragonfly(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_dragonfly.common"),
 					testAccCheckAivenServiceDragonflyAttributes("data.aiven_dragonfly.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "dragonfly"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -245,7 +244,7 @@ data "aiven_dragonfly" "common" {
   project      = aiven_dragonfly.bar.project
 
   depends_on = [aiven_dragonfly.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccDragonflyServiceResourceWithPersistenceOff(name string) string {
@@ -274,7 +273,7 @@ data "aiven_dragonfly" "common" {
   project      = aiven_dragonfly.bar.project
 
   depends_on = [aiven_dragonfly.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceDragonflyAttributes(n string) resource.TestCheckFunc {

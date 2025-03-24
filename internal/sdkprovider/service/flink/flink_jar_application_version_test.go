@@ -31,7 +31,7 @@ func TestAccAivenFlinkJarApplicationVersion_basic(t *testing.T) {
 		defer remove()
 	}
 
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	resourceNameApp := "aiven_flink_jar_application.app"
 	resourceNameVersion := "aiven_flink_jar_application_version.version"
 	resourceNameDeployment := "aiven_flink_jar_application_deployment.deployment"

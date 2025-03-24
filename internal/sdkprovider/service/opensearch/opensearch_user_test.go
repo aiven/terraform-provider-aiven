@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -33,7 +32,7 @@ func TestAccAivenOpenSearchUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_opensearch_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", openSearchTestPassword),
 				),
@@ -100,5 +99,5 @@ data "aiven_opensearch_user" "user" {
   service_name = aiven_opensearch_user.foo.service_name
   project      = aiven_opensearch_user.foo.project
   username     = aiven_opensearch_user.foo.username
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, openSearchTestPassword)
+}`, acc.ProjectName(), name, openSearchTestPassword)
 }

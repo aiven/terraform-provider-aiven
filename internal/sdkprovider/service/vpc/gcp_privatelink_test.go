@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -110,7 +109,7 @@ data "aiven_gcp_privatelink" "pr" {
   service_name = aiven_kafka.bar.service_name
 
   depends_on = [aiven_gcp_privatelink.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenGCPPrivatelinkAttributes(n string) resource.TestCheckFunc {

@@ -2,7 +2,6 @@ package cassandra_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -29,7 +28,7 @@ func TestAccAiven_cassandra(t *testing.T) {
 					testAccCheckAivenServiceCassandraAttributes("data.aiven_cassandra.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "cassandra"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -86,7 +85,7 @@ data "aiven_cassandra" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_cassandra.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCassandraDoubleTagKeyResource(name string) string {
@@ -126,7 +125,7 @@ data "aiven_cassandra" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_cassandra.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceCassandraAttributes(n string) resource.TestCheckFunc {

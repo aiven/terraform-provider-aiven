@@ -3,7 +3,6 @@ package pg_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -133,7 +132,7 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -200,7 +199,7 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -215,7 +214,7 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -242,7 +241,7 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -259,7 +258,7 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -287,7 +286,7 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -303,7 +302,7 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -331,7 +330,7 @@ func TestAccAivenPG_changing_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -347,7 +346,7 @@ func TestAccAivenPG_changing_disk_size(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -392,7 +391,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), count, name)
+}`, acc.ProjectName(), count, name)
 }
 
 func testAccPGResourceWithDiskSize(name, diskSize string) string {
@@ -428,7 +427,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
+}`, acc.ProjectName(), name, diskSize)
 }
 
 func testAccPGResourceWithAdditionalDiskSize(name, diskSize string) string {
@@ -464,7 +463,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
+}`, acc.ProjectName(), name, diskSize)
 }
 
 func testAccPGResourceWithoutDiskSize(name string) string {
@@ -504,7 +503,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccPGResourcePlanChange(name, plan string) string {
@@ -544,7 +543,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), plan, name)
+}`, acc.ProjectName(), plan, name)
 }
 
 func testAccPGDoubleTagResource(name string) string {
@@ -588,7 +587,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccPGProjectDoesntExist() string {
@@ -609,7 +608,7 @@ resource "aiven_pg" "bar" {
 func TestAccAivenPG_admin_creds(t *testing.T) {
 	resourceName := "aiven_pg.pg"
 	prefix := "test-tf-acc-" + acctest.RandString(7)
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	expectedURLPrefix := fmt.Sprintf("postgres://root:%s-password", prefix)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -665,7 +664,7 @@ func TestAccAivenServicePG_basic(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -692,7 +691,7 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -720,7 +719,7 @@ func TestAccAivenServicePG_read_replica(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -746,7 +745,7 @@ func TestAccAivenServicePG_custom_timeouts(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -789,7 +788,7 @@ data "aiven_pg" "common-pg" {
   project      = aiven_pg.bar-pg.project
 
   depends_on = [aiven_pg.bar-pg]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccPGServiceCustomTimeoutsResource(name string) string {
@@ -828,7 +827,7 @@ data "aiven_pg" "common-pg" {
   project      = aiven_pg.bar-pg.project
 
   depends_on = [aiven_pg.bar-pg]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccPGTerminationProtectionServiceResource(name string) string {
@@ -863,7 +862,7 @@ data "aiven_pg" "common-pg" {
   project      = aiven_pg.bar-pg.project
 
   depends_on = [aiven_pg.bar-pg]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccPGReadReplicaServiceResource(name string) string {
@@ -935,7 +934,7 @@ data "aiven_pg" "common-pg" {
   project      = aiven_pg.bar-pg.project
 
   depends_on = [aiven_pg.bar-pg]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckFunc {
@@ -983,7 +982,6 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 				UserConfig:            service.UserConfig,
 			},
 		)
-
 		if err != nil {
 			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
 		}
@@ -1092,7 +1090,7 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 func TestAccAivenServicePG_disaster_recovery(t *testing.T) {
 	primaryName := "aiven_pg.primary"
 	secondaryName := "aiven_pg.secondary"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	randStr := acc.RandStr()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -1145,7 +1143,7 @@ resource "aiven_pg" "secondary" {
 }
 
 func TestAccAivenServicePG_user_config_zero_values(t *testing.T) {
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	serviceName := "test-acc-" + acc.RandStr()
 	resourceName := "aiven_pg.foo"
 	resource.ParallelTest(t, resource.TestCase{

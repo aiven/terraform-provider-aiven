@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -20,7 +19,7 @@ import (
 // TestAccAivenKafkaSchema_import_compatibility_level
 // checks that compatibility_level doesn't appear in plan after KafkaSchema import
 func TestAccAivenKafkaSchema_import_compatibility_level(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	serviceName := "test-acc-sr-" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resourceName := "aiven_kafka_schema.schema"
 	resource.ParallelTest(t, resource.TestCase{
@@ -112,7 +111,7 @@ func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema2"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
 					),
@@ -121,7 +120,7 @@ func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "schema_type", "JSON"),
-					resource.TestCheckResourceAttr(resourceName2, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName2, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName2, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
 					),
@@ -149,7 +148,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 				Config: testAccKafkaSchemaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
@@ -160,7 +159,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 				Config: testAccKafkaSchemaResourceGoodUpdate(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "2"),
@@ -323,7 +322,7 @@ data "aiven_kafka_schema" "schema2" {
   subject_name = aiven_kafka_schema.bar.subject_name
 
   depends_on = [aiven_kafka_schema.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccKafkaSchemaResource(name string) string {
@@ -386,7 +385,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccKafkaSchemaResourceInvalidUpdate(name string) string {
@@ -448,7 +447,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccKafkaSchemaResourceGoodUpdate(name string) string {
@@ -517,7 +516,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {

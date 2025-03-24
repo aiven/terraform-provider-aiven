@@ -2,7 +2,6 @@ package opensearch_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -17,7 +16,7 @@ import (
 // OpenSearch service tests
 func TestAccAivenService_os(t *testing.T) {
 	resourceName := "aiven_opensearch.bar-os"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	serviceName := fmt.Sprintf("test-acc-os-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	manifest := fmt.Sprintf(`
 data "aiven_project" "foo-es" {
