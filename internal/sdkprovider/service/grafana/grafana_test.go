@@ -37,7 +37,7 @@ func TestAccAiven_grafana(t *testing.T) {
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "grafana"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -186,7 +186,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName),
+}`, acc.ProjectName(), rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
@@ -224,7 +224,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName),
+}`, acc.ProjectName(), rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
@@ -260,7 +260,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName),
+}`, acc.ProjectName(), rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
@@ -292,7 +292,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName),
+}`, acc.ProjectName(), rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
@@ -337,8 +337,9 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, ipFilters)
+}`, acc.ProjectName(), name, ipFilters)
 }
+
 func testAccGrafanaDoubleTagResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -377,7 +378,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // Grafana service tests
@@ -398,7 +399,7 @@ func TestAccAivenService_grafana(t *testing.T) {
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "grafana"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -414,7 +415,7 @@ func TestAccAivenService_grafana(t *testing.T) {
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "grafana"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -456,7 +457,7 @@ data "aiven_grafana" "common" {
   project      = aiven_grafana.bar.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccGrafanaServiceCustomIPFiltersResource(name string) string {
@@ -488,7 +489,7 @@ data "aiven_grafana" "common" {
   project      = aiven_grafana.bar.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc {
@@ -575,7 +576,7 @@ data "aiven_grafana" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_grafana.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, teamIDs)
+}`, acc.ProjectName(), name, teamIDs)
 }
 
 func TestAccAiven_grafana_user_config_ip_filter_object(t *testing.T) {
@@ -702,7 +703,7 @@ resource "aiven_grafana" "bar" {
     }
   }
 }
-`, networks, os.Getenv("AIVEN_PROJECT_NAME"), name)
+`, networks, acc.ProjectName(), name)
 }
 
 // TestAccAiven_grafana_and_default_vpc
@@ -712,7 +713,7 @@ resource "aiven_grafana" "bar" {
 // Although this behavior affects all service types due to shared backend logic,
 // we use Grafana for testing as it has the fastest setup time.
 func TestAccAiven_grafana_and_default_vpc(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	grafanaName := "test-acc-sr-" + acc.RandStr()
 	// Must be unique across all the tests,
 	// there can be only one VPC with the same name in the project

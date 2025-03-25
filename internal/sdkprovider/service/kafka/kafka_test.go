@@ -3,7 +3,6 @@ package kafka_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -38,7 +37,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -60,7 +59,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -81,7 +80,7 @@ func TestAccAiven_kafka(t *testing.T) {
 
 						ctx := context.Background()
 
-						a, err := c.KafkaACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+						a, err := c.KafkaACLs.List(ctx, acc.ProjectName(), rName2)
 						if common.IsCritical(err) {
 							return fmt.Errorf("cannot get a list of kafka ACLs: %w", err)
 						}
@@ -90,7 +89,7 @@ func TestAccAiven_kafka(t *testing.T) {
 							return fmt.Errorf("list of ACLs should be empty")
 						}
 
-						s, err := c.KafkaSchemaRegistryACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+						s, err := c.KafkaSchemaRegistryACLs.List(ctx, acc.ProjectName(), rName2)
 						if common.IsCritical(err) {
 							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %w", err)
 						}
@@ -116,7 +115,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "business-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -140,7 +139,7 @@ data "aiven_kafka" "common" {
   project      = aiven_kafka.bar.project
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccKafkaWithoutDefaultACLResource(name string) string {
@@ -180,7 +179,7 @@ data "aiven_kafka" "common" {
   project      = aiven_kafka.bar.project
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccKafkaDoubleTagResource(name string) string {
@@ -225,7 +224,7 @@ data "aiven_kafka" "common" {
   project      = aiven_kafka.bar.project
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // Kafka service tests
@@ -245,7 +244,7 @@ func TestAccAivenService_kafka(t *testing.T) {
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -299,7 +298,7 @@ data "aiven_kafka" "common" {
   project      = aiven_kafka.bar.project
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
@@ -356,7 +355,7 @@ func testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix string) 
 resource "aiven_kafka" "kafka" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "business-4"
   service_name            = "%s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -375,7 +374,7 @@ resource "aiven_kafka" "kafka" {
 }
 
 func TestAccAiven_kafka_user_config_kafka_omits_null_fields(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
 	resource.ParallelTest(t, resource.TestCase{
@@ -397,7 +396,7 @@ func TestAccAiven_kafka_user_config_kafka_omits_null_fields(t *testing.T) {
 
 // TestAccAiven_kafka_user_config_boolean_field_removed removed boolean field should not get "false"
 func TestAccAiven_kafka_user_config_boolean_field_removed(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
 	withConfig := func(c string) string {

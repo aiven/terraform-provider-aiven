@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -29,7 +28,7 @@ func TestAccAivenAlloyDBOmniUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_alloydbomni_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 				),
@@ -52,7 +51,7 @@ func TestAccAivenAlloyDBOmniUser_alloydbomni_no_password(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_alloydbomni_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 				),
 			},
@@ -63,7 +62,7 @@ func TestAccAivenAlloyDBOmniUser_alloydbomni_no_password(t *testing.T) {
 func TestAccAivenAlloyDBOmniUser_alloydbomni_replica(t *testing.T) {
 	resourceName := "aiven_alloydbomni_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -168,7 +167,7 @@ data "aiven_alloydbomni_user" "user" {
   username     = aiven_alloydbomni_user.foo.username
 
   depends_on = [aiven_alloydbomni_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccAlloyDBOmniUserPgReplicationDisableResource(name string) string {
@@ -200,7 +199,7 @@ data "aiven_alloydbomni_user" "user" {
   username     = aiven_alloydbomni_user.foo.username
 
   depends_on = [aiven_alloydbomni_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccAlloyDBOmniUserPgReplicationEnableResource(name string) string {
@@ -232,7 +231,7 @@ data "aiven_alloydbomni_user" "user" {
   username     = aiven_alloydbomni_user.foo.username
 
   depends_on = [aiven_alloydbomni_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccAlloyDBOmniUserNewPasswordResource(name string) string {
@@ -265,7 +264,7 @@ data "aiven_alloydbomni_user" "user" {
   username     = aiven_alloydbomni_user.foo.username
 
   depends_on = [aiven_alloydbomni_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccAlloyDBOmniUserNoPasswordResource(name string) string {
@@ -303,5 +302,5 @@ data "aiven_alloydbomni_user" "user" {
   username     = aiven_alloydbomni_user.foo.username
 
   depends_on = [aiven_alloydbomni_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }

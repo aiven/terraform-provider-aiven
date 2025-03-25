@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"regexp"
 	"testing"
@@ -37,7 +36,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 				Config: testAccKafkaTopicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
@@ -64,7 +63,7 @@ func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
 				Config: testAccKafka451TopicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
@@ -89,7 +88,7 @@ func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
 				ExpectNonEmptyPlan:        true,
 				PlanOnly:                  true,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
@@ -113,7 +112,7 @@ func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
 				Config: testAccKafkaTopicCustomTimeoutsResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
@@ -136,7 +135,6 @@ resource "aiven_kafka_topic" "more" {
   partitions   = 3
   replication  = 2
 }`
-
 }
 
 func testAccKafkaTopicResource(name string) string {
@@ -196,7 +194,7 @@ resource "aiven_kafka_topic" "topic2" {
   owner_user_group_id = aiven_organization_user_group.foo.group_id
   partitions          = 3
   replication         = 2
-}`, os.Getenv("AIVEN_ORGANIZATION_NAME"), name, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+}`, acc.OrganizationName(), name, acc.ProjectName(), name, name, name, name)
 }
 
 func testAccKafkaTopicCustomTimeoutsResource(name string) string {
@@ -238,7 +236,7 @@ data "aiven_kafka_topic" "topic" {
   topic_name   = aiven_kafka_topic.foo.topic_name
 
   depends_on = [aiven_kafka_topic.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccKafkaTopicTerminationProtectionResource(name string) string {
@@ -278,7 +276,7 @@ data "aiven_kafka_topic" "topic" {
   topic_name   = aiven_kafka_topic.foo.topic_name
 
   depends_on = [aiven_kafka_topic.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
@@ -395,7 +393,7 @@ func TestPartitions(t *testing.T) {
 // TestAccAivenKafkaTopic_recreate validates that topic is recreated if it is missing
 // Kafka looses all topics on turn off/on, then TF recreates topics. This test imitates the case.
 func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	kafkaResource := "aiven_kafka.kafka"
@@ -502,7 +500,7 @@ resource "aiven_kafka_topic" "topic" {
 
 // TestAccAivenKafkaTopic_import_missing tests that simple import doesn't create a new topic
 func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	kafkaName := prefix + "-kafka"
 	topicName := "topic"
@@ -569,7 +567,7 @@ resource "aiven_kafka_topic" "topic" {
 }
 
 func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -629,7 +627,7 @@ func partitions(numPartitions int) (partitions []*aiven.Partition) {
 }
 
 func TestAccAivenKafkaTopic_local_retention_bytes_overflow_error(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -657,7 +655,7 @@ resource "aiven_kafka_topic" "topic" {
 }
 
 func TestAccAivenKafkaTopic_local_retention_bytes_overflow_dependency(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,

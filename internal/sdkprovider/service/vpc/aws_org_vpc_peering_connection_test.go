@@ -28,7 +28,7 @@ const (
 // 3. Validates that the creation fails with the expected error due to invalid AWS credentials
 func TestAccAivenAWSOrgVPCPeeringConnection(t *testing.T) {
 	var (
-		orgName = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
+		orgName = acc.OrganizationName()
 
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
 				AddDataSource("aiven_organization", map[string]interface{}{
@@ -83,18 +83,18 @@ func TestAccAivenAWSOrgVPCPeeringConnection(t *testing.T) {
 // - Proper AWS profile configuration (can be set via AWS_PROFILE env var)
 // - Required permissions: VPC creation/deletion, VPC peering, route table management
 func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
-	var envVars = acc.SkipIfEnvVarsNotSet(
-		t,
-		"AIVEN_ORGANIZATION_NAME",
+	var (
+		orgName   = acc.OrganizationName()
+		awsRegion = "eu-central-1"
+	)
+
+	acc.RequireEnvVars(t,
 		"AWS_ACCESS_KEY_ID",
 		"AWS_SECRET_ACCESS_KEY",
 		"AWS_SESSION_TOKEN",
 	)
 
 	var (
-		orgName   = envVars["AIVEN_ORGANIZATION_NAME"]
-		awsRegion = "eu-central-1"
-
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
 				AddDataSource("aiven_organization", map[string]any{
 				"resource_name": "foo",

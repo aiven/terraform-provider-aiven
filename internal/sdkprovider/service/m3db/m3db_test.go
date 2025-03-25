@@ -2,7 +2,6 @@ package m3db_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -161,7 +160,7 @@ resource "aiven_m3db" "bar" {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3db.common"),
 					testAccCheckAivenServiceM3DBAttributes("data.aiven_m3db.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3db"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -223,7 +222,7 @@ resource "aiven_service_integration" "int-m3db-pg" {
 resource "aiven_grafana" "grafana1" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
-  plan         = "startup-4"
+  plan         = "startup-1"
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {
@@ -248,7 +247,7 @@ data "aiven_m3db" "common" {
   project      = aiven_m3db.bar.project
 
   depends_on = [aiven_m3db.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name)
 }
 
 func testAccM3DBDoubleTagResource(name string) string {
@@ -299,7 +298,7 @@ resource "aiven_service_integration" "int-m3db-pg" {
 resource "aiven_grafana" "grafana1" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
-  plan         = "startup-4"
+  plan         = "startup-1"
   service_name = "test-acc-sr-g-%s"
 
   grafana_user_config {
@@ -324,7 +323,7 @@ data "aiven_m3db" "common" {
   project      = aiven_m3db.bar.project
 
   depends_on = [aiven_m3db.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name)
 }
 
 func testAccCheckAivenServiceM3DBAttributes(n string) resource.TestCheckFunc {

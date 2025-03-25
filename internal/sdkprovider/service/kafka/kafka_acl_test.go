@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"testing"
 
@@ -66,7 +65,7 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				Config: testAccKafkaACLResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaACLAttributes("data.aiven_kafka_acl.acl"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
@@ -118,7 +117,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongServiceNameResource(_ string) string {
@@ -130,7 +128,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongPermisionResource(_ string) string {
@@ -142,7 +139,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "wrong-permission"
 }`
-
 }
 
 func testAccKafkaACLWildcardResource(_ string) string {
@@ -154,7 +150,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "*"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLPrefixWildcardResource(_ string) string {
@@ -166,7 +161,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "group-user-*"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongUsernameResource(_ string) string {
@@ -178,7 +172,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "#-user"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLInvalidCharsResource(_ string) string {
@@ -190,7 +183,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "!./,£$^&*()_"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLResource(name string) string {
@@ -239,7 +231,7 @@ data "aiven_kafka_acl" "acl" {
   permission   = aiven_kafka_acl.foo.permission
 
   depends_on = [aiven_kafka_acl.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}`, acc.ProjectName(), name, name, name)
 }
 
 func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {

@@ -2,7 +2,6 @@ package valkey_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -32,7 +31,7 @@ func TestAccAiven_valkey(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.0.email", "techsupport@company.com"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "valkey"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -61,7 +60,7 @@ func TestAccAiven_valkey(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_valkey.common"),
 					testAccCheckAivenServiceValkeyAttributes("data.aiven_valkey.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "valkey"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -117,7 +116,7 @@ data "aiven_valkey" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_valkey.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccValkeyRemoveEmailsResource(name string) string {
@@ -153,7 +152,7 @@ data "aiven_valkey" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_valkey.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccValkeyServiceResourceWithPersistenceOff(name string) string {
@@ -185,7 +184,7 @@ data "aiven_valkey" "common" {
   project      = aiven_valkey.bar.project
 
   depends_on = [aiven_valkey.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccValkeyDoubleTagResource(name string) string {
@@ -225,7 +224,7 @@ data "aiven_valkey" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_valkey.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceValkeyAttributes(n string) resource.TestCheckFunc {

@@ -24,7 +24,7 @@ func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 	t.Skip("Skipping due to Azure SDK dependency")
 
 	var (
-		orgName      = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
+		orgName      = acc.OrganizationName()
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
 				AddDataSource("aiven_organization", map[string]interface{}{
 				"resource_name": "foo",

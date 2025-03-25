@@ -5,6 +5,7 @@
 #################################################
 
 GO := CGO_ENABLED=0 go
+CONTAINER_TOOL ?= podman
 
 TOOLS_DIR ?= tools
 TOOLS_BIN_DIR ?= $(TOOLS_DIR)/bin
@@ -113,7 +114,7 @@ test-examples: build-dev clean-examples
 # Lint
 #################################################
 
-lint: lint-go lint-test lint-docs
+lint: lint-go lint-test lint-docs semgrep
 
 
 lint-go: $(GOLANGCILINT)
@@ -134,6 +135,14 @@ lint-docs: $(TFPLUGINDOCS)
 	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) validate --provider-name aiven
 	rm -f docs/data-sources/influxdb*.md
 	rm -f docs/resources/influxdb*.md
+
+semgrep:
+	$(CONTAINER_TOOL) run --rm -v "${PWD}:/src" semgrep/semgrep semgrep \
+		--config="p/auto" \
+		--config=".semgrep.yml" \
+		--include="**" \
+		--metrics=off \
+		--error
 
 #################################################
 # Format

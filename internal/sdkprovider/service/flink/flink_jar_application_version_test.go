@@ -21,8 +21,7 @@ import (
 // TestAccAivenFlinkJarApplicationVersion_basic
 // This test requires a jar file to run.
 func TestAccAivenFlinkJarApplicationVersion_basic(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
-	_ = deps.IsBeta(true)
+	acc.SkipIfNotBeta(t)
 
 	jarFile := os.Getenv("AIVEN_TEST_FLINK_JAR_FILE")
 	if jarFile == "" {
@@ -32,7 +31,7 @@ func TestAccAivenFlinkJarApplicationVersion_basic(t *testing.T) {
 		defer remove()
 	}
 
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	resourceNameApp := "aiven_flink_jar_application.app"
 	resourceNameVersion := "aiven_flink_jar_application_version.version"
 	resourceNameDeployment := "aiven_flink_jar_application_deployment.deployment"
@@ -159,7 +158,7 @@ func createMinimalJar() (func(), string, error) {
 		Method:   zip.Store, // entries should use STORE
 		Modified: time.Now(),
 	}
-	dirHeader.SetMode(0755)
+	dirHeader.SetMode(0o755)
 	_, err = zw.CreateHeader(dirHeader)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to create META-INF directory: %w", err)
@@ -171,7 +170,7 @@ func createMinimalJar() (func(), string, error) {
 		Method:   zip.Deflate, // use compression for files
 		Modified: time.Now(),
 	}
-	manifestHeader.SetMode(0644)
+	manifestHeader.SetMode(0o644)
 
 	mf, err := zw.CreateHeader(manifestHeader)
 	if err != nil {

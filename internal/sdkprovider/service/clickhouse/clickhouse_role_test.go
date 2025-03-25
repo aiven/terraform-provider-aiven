@@ -3,7 +3,6 @@ package clickhouse_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -18,7 +17,7 @@ import (
 
 func TestAccAivenClickhouseRole(t *testing.T) {
 	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	resourceName := "aiven_clickhouse_role.foo"
 
 	manifest := fmt.Sprintf(`

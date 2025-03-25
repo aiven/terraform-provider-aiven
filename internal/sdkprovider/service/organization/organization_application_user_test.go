@@ -2,7 +2,6 @@ package organization_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -28,7 +27,7 @@ resource "aiven_organization_application_user" "bar" {
   name            = "test-acc-bar-%[2]s"
   is_super_admin  = %[3]t
 }
-`, os.Getenv("AIVEN_ORGANIZATION_NAME"), suffix, barAdmin)
+`, acc.OrganizationName(), suffix, barAdmin)
 }
 
 func TestAccOrganizationApplicationUserResource(t *testing.T) {

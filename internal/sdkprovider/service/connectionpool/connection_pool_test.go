@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -30,7 +29,7 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 				Config: testAccConnectionPoolResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenConnectionPoolAttributes("data.aiven_connection_pool.pool"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
@@ -42,7 +41,7 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 			{
 				Config: testAccConnectionPoolNoUserResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "pool_name", fmt.Sprintf("test-acc-pool-%s", rName2)),
@@ -92,7 +91,7 @@ data "aiven_connection_pool" "pool" {
   pool_name    = aiven_connection_pool.foo.pool_name
 
   depends_on = [aiven_connection_pool.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}`, acc.ProjectName(), name, name, name)
 }
 
 func testAccConnectionPoolResource(name string) string {
@@ -140,7 +139,7 @@ data "aiven_connection_pool" "pool" {
   pool_name    = aiven_connection_pool.foo.pool_name
 
   depends_on = [aiven_connection_pool.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name)
 }
 
 func testAccCheckAivenConnectionPoolAttributes(n string) resource.TestCheckFunc {

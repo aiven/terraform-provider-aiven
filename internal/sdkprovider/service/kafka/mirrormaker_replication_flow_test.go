@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -27,11 +26,10 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-
 				Config: testAccMirrorMakerReplicationFlowResource(rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenMirrorMakerReplicationFlowAttributes("data.aiven_mirrormaker_replication_flow.flow"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "source_cluster", "source"),
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
@@ -249,7 +247,7 @@ data "aiven_mirrormaker_replication_flow" "flow" {
   target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
 
   depends_on = [aiven_mirrormaker_replication_flow.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, configExclude)
+}`, acc.ProjectName(), name, configExclude)
 }
 
 func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.TestCheckFunc {

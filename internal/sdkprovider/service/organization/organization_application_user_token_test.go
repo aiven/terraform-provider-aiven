@@ -2,7 +2,6 @@ package organization_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,7 +10,7 @@ import (
 )
 
 func TestAccOrganizationApplicationUserTokenResource(t *testing.T) {
-	org := os.Getenv("AIVEN_ORGANIZATION_NAME")
+	org := acc.OrganizationName()
 
 	tokenFoo := "aiven_organization_application_user_token.foo"
 	tokenBar := "aiven_organization_application_user_token.bar"

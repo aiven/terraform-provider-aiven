@@ -10,11 +10,9 @@ import (
 )
 
 func TestAccAivenOrganizationAddress(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
-
 	var (
 		name             = "aiven_organization_address.address"
-		organizationName = deps.OrganizationName()
+		organizationName = acc.OrganizationName()
 		templateStore    = template.InitializeTemplateStore(t)
 	)
 
@@ -105,11 +103,9 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 // This test and the corresponding workaround in the code should be removed once the API is fixed
 // to properly handle null vs. empty string for company_name.
 func TestAccAivenOrganizationAddress_CompanyNameHandling(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
-
 	var (
 		name             = "aiven_organization_address.test_address"
-		organizationName = deps.OrganizationName()
+		organizationName = acc.OrganizationName()
 		templateStore    = template.InitializeTemplateStore(t)
 	)
 

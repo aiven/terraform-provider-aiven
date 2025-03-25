@@ -14,11 +14,8 @@ import (
 
 // TestAccOrganizationUserGroupMember tests the organization user group member resource.
 func TestAccOrganizationUserGroupMember(t *testing.T) {
-	deps := acc.CommonTestDependencies(t)
-
-	_ = deps.IsBeta(true)
-
-	userID := deps.OrganizationUserID(true)
+	acc.SkipIfNotBeta(t)
+	userID := acc.UserID()
 
 	name := "aiven_organization_user_group_member.foo"
 
@@ -45,7 +42,7 @@ resource "aiven_organization_user_group_member" "foo" {
   group_id        = aiven_organization_user_group.foo.group_id
   user_id         = "%[4]s"
 }
-	`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName(), *userID),
+	`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName(), userID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(name, "last_activity_time"),
 				),

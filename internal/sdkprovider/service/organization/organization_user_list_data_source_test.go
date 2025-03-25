@@ -3,7 +3,6 @@ package organization_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -29,7 +28,7 @@ func TestAccAivenOrganizationUserListByName(t *testing.T) {
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAivenOrganizationUserListByName(os.Getenv("AIVEN_ORGANIZATION_NAME")),
+				Config: testAccAivenOrganizationUserListByName(acc.OrganizationName()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "users.#"),
 					resource.TestMatchResourceAttr(resourceName, "users.0.user_info.0.user_email", regexp.MustCompile(`.*@.*`)),
@@ -48,10 +47,11 @@ data "aiven_organization_user_list" "org" {
 }
 
 func TestAccAivenOrganizationUserListByID(t *testing.T) {
+	// Skip test if TF_ACC is not set
+	acc.TestAccPreCheck(t)
+
 	// This test creates Aiven client before running PreCheck part
 	// Runs checks manually
-	_ = acc.CommonTestDependencies(t)
-
 	resourceName := "data.aiven_organization_user_list.org"
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)
@@ -59,7 +59,7 @@ func TestAccAivenOrganizationUserListByID(t *testing.T) {
 	id, err := organization.GetOrganizationByName(
 		context.Background(),
 		client,
-		os.Getenv("AIVEN_ORGANIZATION_NAME"),
+		acc.OrganizationName(),
 	)
 	require.NoError(t, err)
 

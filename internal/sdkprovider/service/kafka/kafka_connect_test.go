@@ -2,7 +2,6 @@ package kafka_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -29,7 +28,7 @@ func TestAccAiven_kafkaconnect(t *testing.T) {
 					testAccCheckAivenServiceKafkaConnectAttributes("data.aiven_kafka_connect.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka_connect"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -72,7 +71,7 @@ data "aiven_kafka_connect" "common" {
   project      = aiven_kafka_connect.bar.project
 
   depends_on = [aiven_kafka_connect.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // Kafka Connect service tests
@@ -91,7 +90,7 @@ func TestAccAivenService_kafkaconnect(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka_connect.common"),
 					testAccCheckAivenServiceKafkaConnectAttributes("data.aiven_kafka_connect.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka_connect"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -134,7 +133,7 @@ data "aiven_kafka_connect" "common" {
   project      = aiven_kafka_connect.bar.project
 
   depends_on = [aiven_kafka_connect.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceKafkaConnectAttributes(n string) resource.TestCheckFunc {

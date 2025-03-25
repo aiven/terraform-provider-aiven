@@ -2,7 +2,6 @@ package m3db_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -28,7 +27,7 @@ func TestAccAiven_m3aggregator(t *testing.T) {
 					testAccCheckAivenServiceM3AggregatorAttributes("data.aiven_m3aggregator.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-m3a-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3aggregator"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -82,7 +81,7 @@ data "aiven_m3aggregator" "common" {
   project      = aiven_m3aggregator.bar.project
 
   depends_on = [aiven_m3aggregator.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}`, acc.ProjectName(), name, name, name)
 }
 
 func testAccCheckAivenServiceM3AggregatorAttributes(n string) resource.TestCheckFunc {

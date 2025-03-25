@@ -30,7 +30,7 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 				Config: testAccKafkaConnectorResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaConnectorAttributes("data.aiven_kafka_connector.connector"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
 				),
@@ -60,7 +60,7 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 			{
 				Config: testAccKafkaConnectorMonoSinkResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-mongo-sink-%s", rName)),
 				),
@@ -126,7 +126,6 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -188,10 +187,9 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name, name)
 }
 
-// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorWrongConfigNameResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
@@ -253,7 +251,7 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name, name)
 }
 
 func testAccKafkaConnectorMonoSinkResource(name string) string {
@@ -265,7 +263,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "business-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -314,7 +312,7 @@ data "aiven_kafka_connector" "connector" {
   connector_name = aiven_kafka_connector.foo.connector_name
 
   depends_on = [aiven_kafka_connector.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
+}`, acc.ProjectName(), name, name, name, name, os.Getenv("MONGO_URI"))
 }
 
 func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc {

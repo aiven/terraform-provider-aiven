@@ -16,9 +16,7 @@ import (
 func TestAccOrganizationGroupProject(t *testing.T) {
 	t.Skip("Deprecated resource")
 
-	deps := acc.CommonTestDependencies(t)
-
-	_ = deps.IsBeta(true)
+	acc.SkipIfNotBeta(t)
 
 	name := "aiven_organization_group_project.foo"
 
@@ -50,7 +48,7 @@ resource "aiven_organization_group_project" "foo" {
   group_id = aiven_organization_user_group.foo.group_id
   role     = "admin"
 }
-`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName()),
+`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						name,

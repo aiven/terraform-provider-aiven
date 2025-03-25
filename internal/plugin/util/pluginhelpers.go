@@ -14,9 +14,9 @@ const (
 	AivenEnableBeta                 = "PROVIDER_AIVEN_ENABLE_BETA"
 )
 
-// IsBeta is a helper function that returns a flag that indicates whether the provider is in beta mode.
-// This SHOULD NOT be used anywhere else except in the provider and acceptance tests initialization.
-// In case this functionality is needed in tests, please use the acctest.CommonTestDependencies.IsBeta() function.
+// IsBeta returns true if beta features are enabled.
+// This is used in the provider schema to determine if beta features should be included.
+// In case this functionality is needed in tests, please use acc.SkipIfNotBeta(t) to skip tests when beta features are not enabled.
 func IsBeta() bool {
 	return os.Getenv(AivenEnableBeta) != ""
 }

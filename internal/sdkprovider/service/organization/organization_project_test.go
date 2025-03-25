@@ -195,7 +195,7 @@ resource "aiven_organization_project" "foo" {
 }
 
 func TestAccAivenOrganizationProjectUpdateStages(t *testing.T) {
-	acc.SkipIfEnvVarsNotSet(t, "PROVIDER_AIVEN_ENABLE_BETA")
+	acc.SkipIfNotBeta(t)
 
 	var (
 		rName = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -349,7 +349,7 @@ func testAccCheckAivenOrganizationProjectResourceDestroy(s *terraform.State) err
 				return err
 			}
 
-			return nil //consider project as destroyed if it's not found
+			return nil // consider project as destroyed if it's not found
 		}
 
 		for _, p := range resp.Projects {

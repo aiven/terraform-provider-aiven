@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -18,10 +17,6 @@ import (
 
 func TestAccAivenAccountTeamProject_basic(t *testing.T) {
 	t.Skip(accountTeamDeprecated)
-
-	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
-		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
-	}
 
 	resourceName := "aiven_account_team_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -44,7 +39,7 @@ func TestAccAivenAccountTeamProject_basic(t *testing.T) {
 }
 
 func testAccAccountTeamProjectResource(name string) string {
-	orgName := os.Getenv("AIVEN_ACCOUNT_NAME")
+	accountName := acc.AccountName()
 
 	return fmt.Sprintf(`
 data "aiven_account" "foo" {
@@ -74,7 +69,7 @@ data "aiven_account_team_project" "project" {
   project_name = aiven_account_team_project.foo.project_name
 
   depends_on = [aiven_account_team_project.foo]
-}`, orgName, name)
+}`, accountName, name)
 }
 
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {

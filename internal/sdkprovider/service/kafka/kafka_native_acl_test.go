@@ -2,7 +2,6 @@ package kafka_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -13,7 +12,7 @@ import (
 
 // TestKafkaNativeAcl tests the kafka acl resource.
 func TestKafkaNativeAcl(t *testing.T) {
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	serviceName := fmt.Sprintf("test-acc-native-acl-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	resourceName := "aiven_kafka_native_acl.foo"
 

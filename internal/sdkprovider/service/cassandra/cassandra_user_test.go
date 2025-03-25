@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -30,7 +29,7 @@ func TestAccAivenCassandraUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_cassandra_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 				),
@@ -101,5 +100,5 @@ data "aiven_cassandra_user" "user" {
   username     = aiven_cassandra_user.foo.username
 
   depends_on = [aiven_cassandra_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }

@@ -2,7 +2,6 @@ package influxdb_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -28,7 +27,7 @@ func TestAccAiven_influxdb(t *testing.T) {
 					testAccCheckAivenServiceInfluxdbAttributes("data.aiven_influxdb.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "influxdb"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -83,7 +82,7 @@ data "aiven_influxdb" "common" {
   project      = aiven_influxdb.bar.project
 
   depends_on = [aiven_influxdb.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccInfluxDBDoubleTagResource(name string) string {
@@ -121,5 +120,5 @@ data "aiven_influxdb" "common" {
   project      = aiven_influxdb.bar.project
 
   depends_on = [aiven_influxdb.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }

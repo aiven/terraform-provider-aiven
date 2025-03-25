@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -32,7 +31,6 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile("invalid resource id"),
 			},
 			{
-
 				Config:      testAccServiceProjectVPCResourceFail(rName),
 				ExpectError: regexp.MustCompile("invalid project_vpc_id"),
 			},
@@ -40,7 +38,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				Config: testAccProjectVPCResource(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west2"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.0.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
@@ -50,7 +48,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				Config: testAccProjectVPCResourceGetByID(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc2"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "azure-westeurope"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.1.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
@@ -75,7 +73,7 @@ resource "aiven_project_vpc" "bar" {
 data "aiven_project_vpc" "vpc" {
   project    = aiven_project_vpc.bar.project
   cloud_name = aiven_project_vpc.bar.cloud_name
-}`, os.Getenv("AIVEN_PROJECT_NAME"))
+}`, acc.ProjectName())
 }
 
 func testAccCheckAivenProjectVPCAttributes(n string) resource.TestCheckFunc {
@@ -152,7 +150,7 @@ resource "aiven_pg" "bar" {
   service_name   = "test-acc-sr-%s"
   project_vpc_id = "wrong_vpc_id"
 }
-`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+`, acc.ProjectName(), name)
 }
 
 func testAccProjectVPCResourceFail() string {
@@ -176,5 +174,5 @@ resource "aiven_project_vpc" "bar" {
 
 data "aiven_project_vpc" "vpc2" {
   vpc_id = aiven_project_vpc.bar.id
-}`, os.Getenv("AIVEN_PROJECT_NAME"))
+}`, acc.ProjectName())
 }

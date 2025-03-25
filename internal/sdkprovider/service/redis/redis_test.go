@@ -2,7 +2,6 @@ package redis_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -36,7 +35,7 @@ func TestAccAiven_redis(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.0.email", "techsupport@company.com"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -65,7 +64,7 @@ func TestAccAiven_redis(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_redis.common"),
 					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -121,7 +120,7 @@ data "aiven_redis" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_redis.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccRedisRemoveEmailsResource(name string) string {
@@ -157,7 +156,7 @@ data "aiven_redis" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_redis.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccRedisServiceResourceWithPersistenceOff(name string) string {
@@ -189,7 +188,7 @@ data "aiven_redis" "common" {
   project      = aiven_redis.bar.project
 
   depends_on = [aiven_redis.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccRedisDoubleTagResource(name string) string {
@@ -229,7 +228,7 @@ data "aiven_redis" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_redis.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceRedisAttributes(n string) resource.TestCheckFunc {

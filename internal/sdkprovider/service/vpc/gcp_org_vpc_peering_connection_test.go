@@ -28,7 +28,7 @@ const (
 // 3. Validates that the creation fails with the expected error due to invalid GCP project ID
 func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 	var (
-		orgName      = acc.SkipIfEnvVarsNotSet(t, "AIVEN_ORGANIZATION_NAME")["AIVEN_ORGANIZATION_NAME"]
+		orgName      = acc.OrganizationName()
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
 	)
 
@@ -76,16 +76,13 @@ func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 // - GCP project with VPC API enabled
 // - Required permissions: VPC creation/deletion, VPC peering, route management
 func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
-	var envVars = acc.SkipIfEnvVarsNotSet(
-		t,
-		"AIVEN_ORGANIZATION_NAME",
-		"GOOGLE_PROJECT",
+	var (
+		orgName   = acc.OrganizationName()
+		gcpRegion = "europe-west10"
 	)
 
 	var (
-		orgName      = envVars["AIVEN_ORGANIZATION_NAME"]
-		gcpProject   = envVars["GOOGLE_PROJECT"]
-		gcpRegion    = "europe-west10"
+		gcpProject   = acc.RequireEnvVars(t, "GOOGLE_PROJECT")["GOOGLE_PROJECT"]
 		resourceName = fmt.Sprintf("%s.%s", gcpOrgVPCPeeringResource, "test_peering")
 
 		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

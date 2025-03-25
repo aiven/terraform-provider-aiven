@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -30,7 +29,7 @@ func TestAccAivenInfluxDBUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_influxdb_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 				),
@@ -97,7 +96,7 @@ data "aiven_influxdb_user" "user" {
   service_name = aiven_influxdb_user.foo.service_name
   project      = aiven_influxdb_user.foo.project
   username     = aiven_influxdb_user.foo.username
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 // InfluxDB service tests
@@ -117,7 +116,7 @@ func TestAccAivenService_influxdb(t *testing.T) {
 					testAccCheckAivenServiceInfluxdbAttributes("data.aiven_influxdb.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "influxdb"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -156,7 +155,7 @@ data "aiven_influxdb" "common" {
   project      = aiven_influxdb.bar.project
 
   depends_on = [aiven_influxdb.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceInfluxdbAttributes(n string) resource.TestCheckFunc {

@@ -3,7 +3,6 @@ package kafka_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -25,7 +24,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 	var (
 		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 		serviceName = fmt.Sprintf("test-acc-sr-%s", randName)
-		projectName = os.Getenv("AIVEN_PROJECT_NAME")
+		projectName = acc.ProjectName()
 
 		user     = fmt.Sprintf("acc_test_user_%s", randName)
 		clientID = fmt.Sprintf("acc_test_client_%s", randName)

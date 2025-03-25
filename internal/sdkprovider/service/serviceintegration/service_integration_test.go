@@ -44,7 +44,7 @@ func TestAccAivenServiceIntegration_preexisting_read_replica(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "read_replica"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-pg-%s", rName)),
 				),
@@ -66,7 +66,7 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-os-%s", rName)),
 				),
@@ -87,7 +87,7 @@ func TestAccAivenServiceIntegration_mm(t *testing.T) {
 				Config: testAccServiceIntegrationMirrorMakerResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_mirrormaker"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
 				),
@@ -109,7 +109,7 @@ func TestAccAivenServiceIntegration_kafka_connect(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_connect"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName)),
 				),
@@ -131,7 +131,7 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "metrics"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-influxdb-%s", rName)),
 				),
@@ -197,7 +197,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccServiceIntegrationKafkaConnectResource(name string) string {
@@ -256,7 +256,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccServiceIntegrationMirrorMakerResource(name string) string {
@@ -350,7 +350,7 @@ resource "aiven_service_integration" "i2" {
   kafka_mirrormaker_user_config {
     cluster_alias = "target"
   }
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, acc.ProjectName(), name, name, name, name, name)
 }
 
 func testAccServiceIntegrationLogs(name string) string {
@@ -395,7 +395,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccServiceIntegrationPreexistingReadReplica(name string) string {
@@ -440,7 +440,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccServiceIntegrationShouldFailResource() string {
@@ -550,7 +550,7 @@ resource "aiven_service_integration" "postgres-datadog" {
     }
   }
 }
-`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+`, acc.ProjectName(), name, name)
 }
 
 func TestAccAivenServiceIntegration_datadog_with_user_config_creates(t *testing.T) {
@@ -565,7 +565,7 @@ func TestAccAivenServiceIntegration_datadog_with_user_config_creates(t *testing.
 				Config: testAccServiceIntegrationDatadogWithUserConfig(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "datadog"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-postgres-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.tag", "lol:bar"),
 					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.comment", "my custom config"),
@@ -633,7 +633,7 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
 }
 
 func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_service_integration.clickhouse_kafka_source"
 	resource.ParallelTest(t, resource.TestCase{
@@ -708,7 +708,7 @@ resource "aiven_service_integration" "clickhouse_pg_source" {
 }
 
 func TestAccAivenServiceIntegration_clickhouse_postgres_user_config_creates(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_service_integration.clickhouse_pg_source"
 	resource.ParallelTest(t, resource.TestCase{
@@ -767,11 +767,11 @@ resource "aiven_service_integration" "test_autoscaler" {
   source_service_name     = aiven_pg.test_pg.service_name
   destination_endpoint_id = aiven_service_integration_endpoint.test_endpoint.id
 }
-`, os.Getenv("AIVEN_PROJECT_NAME"), prefix, additionalDiskSpace)
+`, acc.ProjectName(), prefix, additionalDiskSpace)
 }
 
 func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_service_integration.test_autoscaler"
 	endpointResourceName := "aiven_service_integration_endpoint.test_endpoint"
@@ -802,7 +802,7 @@ func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
 }
 
 func TestAccAivenServiceIntegration_destination_service_name(t *testing.T) {
-	projectMetrics := os.Getenv("AIVEN_PROJECT_NAME")
+	projectMetrics := acc.ProjectName()
 	projectServices := os.Getenv("AIVEN_PROJECT_NAME_SECONDARY")
 	if projectServices == "" {
 		t.Skip("AIVEN_PROJECT_NAME_SECONDARY is not set")
@@ -867,7 +867,7 @@ resource "aiven_thanos" "thanos" {
 resource "aiven_kafka" "kafka_service" {
   project                 = data.aiven_project.services.project
   cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
+  plan                    = "startup-2"
   service_name            = "test-acc-kafka-%[3]s"
   maintenance_window_dow  = "sunday"
   maintenance_window_time = "10:00:00"

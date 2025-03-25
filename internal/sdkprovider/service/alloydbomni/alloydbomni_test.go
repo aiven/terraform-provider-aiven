@@ -3,7 +3,6 @@ package alloydbomni_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -120,7 +119,7 @@ func TestAccAivenAlloyDBOmni_static_ips(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -187,7 +186,7 @@ func TestAccAivenAlloyDBOmni_changing_plan(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -202,7 +201,7 @@ func TestAccAivenAlloyDBOmni_changing_plan(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -229,7 +228,7 @@ func TestAccAivenAlloyDBOmni_deleting_additional_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -246,7 +245,7 @@ func TestAccAivenAlloyDBOmni_deleting_additional_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -274,7 +273,7 @@ func TestAccAivenAlloyDBOmni_deleting_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -290,7 +289,7 @@ func TestAccAivenAlloyDBOmni_deleting_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -318,7 +317,7 @@ func TestAccAivenAlloyDBOmni_changing_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -334,7 +333,7 @@ func TestAccAivenAlloyDBOmni_changing_disk_size(t *testing.T) {
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -379,7 +378,7 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), count, name)
+}`, acc.ProjectName(), count, name)
 }
 
 func testAccAlloyDBOmniResourceWithDiskSize(name, diskSize string) string {
@@ -415,7 +414,7 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
+}`, acc.ProjectName(), name, diskSize)
 }
 
 func testAccAlloyDBOmniResourceWithAdditionalDiskSize(name, diskSize string) string {
@@ -451,7 +450,7 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
+}`, acc.ProjectName(), name, diskSize)
 }
 
 func testAccAlloyDBOmniResourceWithoutDiskSize(name string) string {
@@ -491,7 +490,7 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccAlloyDBOmniResourcePlanChange(name, plan string) string {
@@ -531,7 +530,7 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), plan, name)
+}`, acc.ProjectName(), plan, name)
 }
 
 func testAccAlloyDBOmniDoubleTagResource(name string) string {
@@ -575,14 +574,14 @@ data "aiven_alloydbomni" "common" {
   project      = aiven_alloydbomni.bar.project
 
   depends_on = [aiven_alloydbomni.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // TestAccAivenAlloyDBOmni_admin_creds tests admin creds in user_config
 func TestAccAivenAlloyDBOmni_admin_creds(t *testing.T) {
 	resourceName := "aiven_alloydbomni.alloydbomni"
 	prefix := "test-tf-acc-" + acctest.RandString(7)
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	expectedURLPrefix := fmt.Sprintf("postgres://root:%s-password", prefix)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -638,7 +637,7 @@ func TestAccAivenServiceAlloyDBOmni_basic(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -665,7 +664,7 @@ func TestAccAivenServiceAlloyDBOmni_termination_protection(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -693,7 +692,7 @@ func TestAccAivenServiceAlloyDBOmni_read_replica(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -719,7 +718,7 @@ func TestAccAivenServiceAlloyDBOmni_custom_timeouts(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					testAccCheckAivenServiceAlloyDBOmniAttributes("data.aiven_alloydbomni.common-alloydbomni"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -762,7 +761,7 @@ data "aiven_alloydbomni" "common-alloydbomni" {
   project      = aiven_alloydbomni.bar-alloydbomni.project
 
   depends_on = [aiven_alloydbomni.bar-alloydbomni]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccAlloyDBOmniServiceCustomTimeoutsResource(name string) string {
@@ -801,7 +800,7 @@ data "aiven_alloydbomni" "common-alloydbomni" {
   project      = aiven_alloydbomni.bar-alloydbomni.project
 
   depends_on = [aiven_alloydbomni.bar-alloydbomni]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccAlloyDBOmniTerminationProtectionServiceResource(name string) string {
@@ -836,7 +835,7 @@ data "aiven_alloydbomni" "common-alloydbomni" {
   project      = aiven_alloydbomni.bar-alloydbomni.project
 
   depends_on = [aiven_alloydbomni.bar-alloydbomni]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccAlloyDBOmniReadReplicaServiceResource(name string) string {
@@ -908,7 +907,7 @@ data "aiven_alloydbomni" "common-alloydbomni" {
   project      = aiven_alloydbomni.bar-alloydbomni.project
 
   depends_on = [aiven_alloydbomni.bar-alloydbomni]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, acc.ProjectName(), name, name)
 }
 
 func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckFunc {
@@ -956,7 +955,6 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 				UserConfig:            service.UserConfig,
 			},
 		)
-
 		if err != nil {
 			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
 		}
@@ -1069,7 +1067,7 @@ func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
 		t.Skipf("cannot get aiven client: %s", err)
 	}
 
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := acc.ProjectName()
 	resourceName := "aiven_alloydbomni.foo"
 	serviceName := fmt.Sprintf("test-acc-sr-%s", acc.RandStr())
 

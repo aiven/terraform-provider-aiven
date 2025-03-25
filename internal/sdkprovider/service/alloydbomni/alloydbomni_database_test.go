@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -19,7 +18,7 @@ import (
 
 func TestAccAivenAlloyDBOmniDatabase_basic(t *testing.T) {
 	resourceName := "aiven_alloydbomni_database.foo"
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := acc.ProjectName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{

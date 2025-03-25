@@ -202,8 +202,6 @@ func (r *CommonTemplateRenderer) RenderField(builder *strings.Builder, field Tem
 		r.renderMap(builder, field, path, indent)
 	} else if field.FieldType == FieldTypeBool {
 		r.renderBool(builder, field, path, indent)
-	} else if field.FieldType == FieldTypeNumber {
-		r.renderSimple(builder, field, path, indent)
 	} else {
 		r.renderSimple(builder, field, path, indent)
 	}

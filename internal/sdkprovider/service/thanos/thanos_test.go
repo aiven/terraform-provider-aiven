@@ -2,7 +2,6 @@ package thanos_test
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -32,7 +31,7 @@ func TestAccAiven_thanos(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.0.email", "techsupport@company.com"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "thanos"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -106,7 +105,7 @@ data "aiven_thanos" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_thanos.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccThanosRemoveEmailsResource(name string) string {
@@ -144,7 +143,7 @@ data "aiven_thanos" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_thanos.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccThanosDoubleTagResource(name string) string {
@@ -182,7 +181,7 @@ data "aiven_thanos" "common" {
   project      = data.aiven_project.foo.project
 
   depends_on = [aiven_thanos.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 // Thanos service tests
@@ -201,7 +200,7 @@ func TestAccAivenService_thanos(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_thanos.common"),
 					testAccCheckAivenServiceThanosAttributes("data.aiven_thanos.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "thanos"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -216,7 +215,7 @@ func TestAccAivenService_thanos(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_thanos.common"),
 					testAccCheckAivenServiceThanosAttributes("data.aiven_thanos.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "thanos"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -255,7 +254,7 @@ data "aiven_thanos" "common" {
   project      = aiven_thanos.bar.project
 
   depends_on = [aiven_thanos.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccThanosServiceResourceWithPersistenceOff(name string) string {
@@ -284,7 +283,7 @@ data "aiven_thanos" "common" {
   project      = aiven_thanos.bar.project
 
   depends_on = [aiven_thanos.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceThanosAttributes(n string) resource.TestCheckFunc {

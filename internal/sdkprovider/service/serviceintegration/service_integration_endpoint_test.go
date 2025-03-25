@@ -3,7 +3,6 @@ package serviceintegration_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -28,7 +27,7 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 				Config: testAccServiceIntegrationEndpointBasicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceEndpointIntegrationAttributes("data.aiven_service_integration_endpoint.endpoint"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_opensearch_logs"),
 				),
@@ -52,7 +51,7 @@ func TestAccAivenServiceIntegrationEndpoint_username_password(t *testing.T) {
 					testAccCheckAivenServiceEndpointIntegrationAttributes(
 						"data.aiven_service_integration_endpoint.endpoint",
 					),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName),
 					),
@@ -67,7 +66,7 @@ func TestAccAivenServiceIntegrationEndpoint_username_password(t *testing.T) {
 					testAccCheckAivenServiceEndpointIntegrationAttributes(
 						"data.aiven_service_integration_endpoint.endpoint",
 					),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName),
 					),
@@ -131,7 +130,7 @@ data "aiven_service_integration_endpoint" "endpoint" {
   endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
 
   depends_on = [aiven_service_integration_endpoint.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}`, acc.ProjectName(), name, name, name)
 }
 
 func testAccServiceIntegrationEndpointUsernamePasswordResource(name string) string {
@@ -179,7 +178,7 @@ data "aiven_service_integration_endpoint" "endpoint" {
   endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
 
   depends_on = [aiven_service_integration_endpoint.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccServiceIntegrationEndpointUpdatePasswordResource(name string) string {
@@ -227,7 +226,7 @@ data "aiven_service_integration_endpoint" "endpoint" {
   endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
 
   depends_on = [aiven_service_integration_endpoint.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, acc.ProjectName(), name)
 }
 
 func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.State) error {
@@ -292,7 +291,7 @@ func TestAccAivenServiceIntegrationEndpointExternalPostgresql(t *testing.T) {
 				Config: testAccAivenServiceIntegrationEndpointExternalPostgresql(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceEndpointIntegrationAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_postgresql"),
 					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.port", "1234"),
 					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.ssl_mode", "require"),
@@ -325,5 +324,5 @@ resource "aiven_service_integration_endpoint" "pg" {
     ssl_mode = "require"
   }
 }
-`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+`, acc.ProjectName(), name, name)
 }
