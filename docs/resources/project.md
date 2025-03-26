@@ -4,11 +4,16 @@ page_title: "aiven_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages an Aiven project https://aiven.io/docs/platform/concepts/orgs-units-projects#projects.
+  ~> This resource is deprecated
+  Use aiven_organization_project instead and migrate your existing aiven_project resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources to the new resource.
 ---
 
 # aiven_project (Resource)
 
 Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
+
+~> **This resource is deprecated**
+Use ``aiven_organization_project`` instead and [migrate your existing `aiven_project` resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) to the new resource.
 
 ## Example Usage
 
