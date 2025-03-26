@@ -5,8 +5,8 @@ subcategory: ""
 description: |-
   Creates and manages an organization application user. Application users https://aiven.io/docs/platform/concepts/application-users can be used for
   programmatic access to the platform using a token created with the aiven_organization_application_user_token resource.
-  You give application users access to projects using the aiven_organization_permission resource. You can also add application users to
-  groups with access to projects using aiven_organization_user_group_member.
+  You give application users access to your organization, projects, and services using the aiven_organization_permission resource. You can also add application users to
+  groups using the aiven_organization_user_group_member resource.
 ---
 
 # aiven_organization_application_user (Resource)
@@ -14,15 +14,15 @@ description: |-
 Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for
 programmatic access to the platform using a token created with the `aiven_organization_application_user_token` resource.
 
-You give application users access to projects using the `aiven_organization_permission` resource. You can also add application users to
-groups with access to projects using `aiven_organization_user_group_member`.
+You give application users access to your organization, projects, and services using the `aiven_organization_permission` resource. You can also add application users to
+groups using the `aiven_organization_user_group_member` resource.
 
 ## Example Usage
 
 ```terraform
 resource "aiven_organization_application_user" "tf_user" {
   organization_id = aiven_organization.main.id
-  name = "app-terraform"
+  name            = "app-terraform"
 }
 ```
 
