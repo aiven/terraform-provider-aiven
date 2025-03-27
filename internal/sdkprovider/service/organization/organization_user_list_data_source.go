@@ -17,40 +17,40 @@ func datasourceOrganizationUserListSchema() map[string]*schema.Schema {
 		"id": {
 			Type:          schema.TypeString,
 			Optional:      true,
-			Description:   "Organization id. Example: `org12345678`.",
+			Description:   "The ID of the organization.",
 			ConflictsWith: []string{"name"},
 		},
 		"name": {
 			Type:          schema.TypeString,
 			Optional:      true,
-			Description:   "Organization name. Example: `aiven`.",
+			Description:   "The name of the organization.",
 			ConflictsWith: []string{"id"},
 		},
 		"users": {
 			Type:        schema.TypeList,
 			Computed:    true,
-			Description: "List of users of the organization",
+			Description: "List of the users, their profile information, and other data.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"is_super_admin": {
 						Type:        schema.TypeBool,
 						Computed:    true,
-						Description: "Super admin state of the organization user",
+						Description: "Indicates whether the user is a [super admin](https://aiven.io/docs/platform/concepts/permissions).",
 					},
 					"join_time": {
 						Type:        schema.TypeString,
 						Computed:    true,
-						Description: "Join time",
+						Description: "Date and time when the user joined the organization.",
 					},
 					"last_activity_time": {
 						Type:        schema.TypeString,
 						Computed:    true,
-						Description: "Last activity time",
+						Description: "Last activity time.",
 					},
 					"user_id": {
 						Type:        schema.TypeString,
 						Computed:    true,
-						Description: "User ID",
+						Description: "User ID.",
 					},
 					"user_info": {
 						Type:     schema.TypeList,
@@ -70,7 +70,7 @@ func datasourceOrganizationUserListSchema() map[string]*schema.Schema {
 								"create_time": {
 									Type:        schema.TypeString,
 									Computed:    true,
-									Description: "Creation time",
+									Description: "Date and time when the user was created.",
 								},
 								"department": {
 									Type:        schema.TypeString,
@@ -80,27 +80,27 @@ func datasourceOrganizationUserListSchema() map[string]*schema.Schema {
 								"is_application_user": {
 									Type:        schema.TypeBool,
 									Computed:    true,
-									Description: "Is Application User",
+									Description: "Inidicates whether the user is an [application user](https://aiven.io/docs/platform/concepts/application-users).",
 								},
 								"job_title": {
 									Type:        schema.TypeString,
 									Computed:    true,
-									Description: "Job Title",
+									Description: "Job title",
 								},
 								"managed_by_scim": {
 									Type:        schema.TypeBool,
 									Computed:    true,
-									Description: "Managed By Scim",
+									Description: "Indicates whether the user is managed by [System for Cross-domain Identity Management (SCIM)](https://aiven.io/docs/platform/howto/list-identity-providers).",
 								},
 								"managing_organization_id": {
 									Type:        schema.TypeString,
 									Computed:    true,
-									Description: "Managing Organization ID",
+									Description: "The ID of the organization that [manages the user](https://aiven.io/docs/platform/concepts/managed-users).",
 								},
 								"real_name": {
 									Type:        schema.TypeString,
 									Computed:    true,
-									Description: "Real Name",
+									Description: "Full name of the user.",
 								},
 								"state": {
 									Type:        schema.TypeString,
@@ -110,7 +110,7 @@ func datasourceOrganizationUserListSchema() map[string]*schema.Schema {
 								"user_email": {
 									Type:        schema.TypeString,
 									Computed:    true,
-									Description: "User Email",
+									Description: "Email address.",
 								},
 							},
 						},
@@ -124,7 +124,7 @@ func datasourceOrganizationUserListSchema() map[string]*schema.Schema {
 func DatasourceOrganizationUserList() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClient(datasourceOrganizationUserListRead),
-		Description: "List of users of the organization",
+		Description: "Returns a list of [users in the organization](https://aiven.io/docs/platform/concepts/user-access-management), their profile details, and other data . This includes users you add to your organization and application users.",
 		Schema:      datasourceOrganizationUserListSchema(),
 	}
 }

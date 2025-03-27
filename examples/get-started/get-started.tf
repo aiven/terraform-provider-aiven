@@ -20,6 +20,11 @@ data "aiven_organization" "main" {
   name = "ORGANIZATION_NAME"
 }
 
+# List of users in your organization
+data "aiven_organization_user_list" "users" {
+  name = "ORGANIZATION_NAME"
+}
+
 # Create a project in your organization 
 resource "aiven_project" "example_project" {
   project    = "ORGANIZATION_NAME-first-project"
@@ -37,7 +42,7 @@ resource "aiven_organization_user_group" "example_group" {
 resource "aiven_organization_user_group_member" "group-members" {
   group_id      = aiven_organization_user_group.example_group.group_id 
   organization_id = data.aiven_organization.main.id
-  user_id = "USER_ID"
+  user_id = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "EMAIL_ADDRESS"])
 }
 
 # Give the group access to your project with the developer role

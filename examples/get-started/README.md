@@ -30,9 +30,11 @@ Terraform v1.6.2
 
 2. Clone this repository.
 
-3. Replace the placeholders `ORGANIZATION_NAME` and `USER_ID` in the `get-started.tf` file. It's recommended to use your organization name as a prefix for the project name.
+3. Replace the `ORGANIZATION_NAME` placeholders in the `get-started.tf` file. It's recommended to use your organization name as a prefix for the project name because project names must be globally unique.
 
-4. Initialize Terraform:
+4. In the `aiven_organization_user_group_member` resource, replace `EMAIL_ADDRESS` with the email of one of your organization users.
+
+5. Initialize Terraform:
 
 ```sh
 $ terraform init
