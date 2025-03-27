@@ -1,17 +1,18 @@
 locals {
   acl_rules = [
     {
-      username   = aiven_opensearch_user.os-user.username
+      username   = aiven_opensearch_user.os_user.username
       index      = "_*"
       permission = "admin"
     },
     {
-      username   = aiven_opensearch_user.os-user.username
+      username   = aiven_opensearch_user.os_user.username
       index      = "*"
       permission = "admin"
     },
 
-    # avnadmin is a default user created by Aivan for Opensearch service, and it has admin ACL by default
+    # avnadmin is a default user created by the Aiven for OpenSearch service
+    # It has admin ACL by default
 
     {
       username   = "avnadmin"
@@ -26,18 +27,18 @@ locals {
   ]
 }
 
-resource "aiven_opensearch_acl_config" "os_acls_config" {
-  project      = aiven_opensearch.os.project
-  service_name = aiven_opensearch.os.service_name
+resource "aiven_opensearch_acl_config" "acls" {
+  project      = data.aiven_project.main.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   enabled      = true
   extended_acl = false
 }
 
 resource "aiven_opensearch_acl_rule" "os_acl_rule" {
-  for_each = {for i, v in local.acl_rules : i => v}
+  for_each = { for i, v in local.acl_rules : i => v }
 
-  project      = aiven_opensearch_acl_config.os_acls_config.project
-  service_name = aiven_opensearch_acl_config.os_acls_config.service_name
+  project      = aiven_opensearch_acl_config.acls.project
+  service_name = aiven_opensearch_acl_config.acls.service_name
 
   username   = each.value.username
   index      = each.value.index

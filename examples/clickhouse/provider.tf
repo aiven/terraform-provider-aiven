@@ -1,4 +1,3 @@
-# Initialize the provider
 terraform {
   required_version = ">=0.13"
   required_providers {
@@ -10,10 +9,5 @@ terraform {
 }
 
 provider "aiven" {
-  api_token = var.aiven_api_token
-}
-
-variable "aiven_api_token" {
-  description = "Aiven API token"
-  type        = string
+  api_token = var.aiven_token
 }

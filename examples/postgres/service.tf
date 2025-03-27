@@ -1,23 +1,16 @@
-# European Postgres Service
-resource "aiven_pg" "avn-eu-pg" {
-  project      = var.avn_project
-  service_name = var.postgres_eu_name
-  cloud_name   = "aws-eu-west-2" # London
+# Your Aiven project
+data "aiven_project" "main" {
+  project = var.aiven_project_name
+}
+
+# PostgreSQL service
+resource "aiven_pg" "example_pg" {
+  project      = data.aiven_project.main.project
+  service_name = var.postgres_service_name
+  cloud_name   = "aws-eu-west-2"
   plan         = "startup-4"
 }
 
-# US Postgres Service
-resource "aiven_pg" "avn-us-pg" {
-  project      = var.avn_project
-  service_name = var.postgres_us_name
-  cloud_name   = "do-nyc"     # New York
-  plan         = "business-8" # Primary + read replica
-}
-
-# Asia Postgres Service
-resource "aiven_pg" "avn-as-pg" {
-  project      = var.avn_project
-  service_name = var.postgres_as_name
-  cloud_name   = "google-asia-southeast1" # Singapore
-  plan         = "business-8"             # Primary + read replica
+output "pg_service_uri" {
+  value = aiven_pg.example_pg.service_uri
 }
