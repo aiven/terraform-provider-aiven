@@ -19,20 +19,17 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var ErrProjectStructureChangeNotSupported = fmt.Errorf("modifying parent_id, or billing_group_id is not supported - please use Aiven Console at https://console.aiven.io/ to perform this operation")
-
 var aivenOrganizationProjectSchema = map[string]*schema.Schema{
-	"organization_id": {
-		Type:        schema.TypeString,
-		Description: "ID of an organization. Changing this property forces recreation of the resource.",
-		Required:    true,
-		ForceNew:    true,
-	},
 	"project_id": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
 		Description: "Unique identifier for the project that also serves as the project name.",
+	},
+	"organization_id": {
+		Type:        schema.TypeString,
+		Description: "ID of an organization. Changing this property forces recreation of the resource.",
+		Required:    true,
 	},
 	"billing_group_id": {
 		Type:        schema.TypeString,
@@ -41,11 +38,16 @@ var aivenOrganizationProjectSchema = map[string]*schema.Schema{
 	},
 	"parent_id": {
 		Type:     schema.TypeString,
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Description: userconfig.Desc(
-			"Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID.",
+			"Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its account ID.",
 		).Referenced().Build(),
+	},
+	"ca_cert": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Sensitive:   true,
+		Description: "The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"technical_emails": {
 		Type:        schema.TypeSet,
@@ -92,19 +94,6 @@ func ResourceOrganizationProject() *schema.Resource {
 				schemautil.ShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
 			),
-
-			func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-				if d.Id() != "" {
-					// If org is changing, allow billing_group and parent changes
-					if !d.HasChange("organization_id") {
-						// Block billing_group and parent changes when org isn't changing
-						if d.HasChange("parent_id") || d.HasChange("billing_group_id") {
-							return ErrProjectStructureChangeNotSupported
-						}
-					}
-				}
-				return nil
-			},
 		),
 	}
 }
@@ -114,42 +103,30 @@ func resourceOrganizationProjectCreate(ctx context.Context, d *schema.ResourceDa
 		orgID          = d.Get("organization_id").(string)
 		billingGroupID = d.Get("billing_group_id").(string)
 		projectID      = d.Get("project_id").(string)
+		parentID       = d.Get("parent_id").(string)
 
 		req = organizationprojects.OrganizationProjectsCreateIn{
 			BillingGroupId: billingGroupID,
-			ParentId:       util.NilIfZero(d.Get("parent_id").(string)),
 			ProjectId:      projectID,
 			Tags:           schemautil.GetTagsFromSchema(d),
+			TechEmails:     techEmails(d.Get("technical_emails").(*schema.Set).List()),
 		}
 	)
 
-	// create project
-	_, err := client.OrganizationProjectsCreate(ctx, orgID, &req)
+	// convert the parent ID to an account ID in case it's an organization
+	accountID, err := schemautil.ConvertOrganizationToAccountID(ctx, parentID, client)
 	if err != nil {
-		return err
+		return fmt.Errorf("error converting organization to account ID: %w", err)
 	}
 
-	// update technical emails separately as API does not support setting them on project creation
-	emails, ok := d.GetOk("technical_emails")
-	if ok {
-		var upReq = organizationprojects.OrganizationProjectsUpdateIn{
-			TechEmails: func() *[]organizationprojects.TechEmailIn {
-				var techEmails []organizationprojects.TechEmailIn
-				for _, e := range emails.(*schema.Set).List() {
-					techEmails = append(techEmails, organizationprojects.TechEmailIn{Email: e.(string)})
-				}
+	req.ParentId = util.NilIfZero(accountID)
 
-				return lo.ToPtr(techEmails)
-			}(),
-		}
-
-		_, err = client.OrganizationProjectsUpdate(ctx, orgID, projectID, &upReq)
-		if err != nil {
-			return err
-		}
+	resp, err := client.OrganizationProjectsCreate(ctx, orgID, &req)
+	if err != nil {
+		return fmt.Errorf("error during project creation: %w", err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(orgID, projectID))
+	d.SetId(schemautil.BuildResourceID(resp.OrganizationId, resp.ProjectId))
 
 	return resourceOrganizationProjectRead(ctx, d, client)
 }
@@ -159,7 +136,7 @@ func resourceOrganizationProjectRead(ctx context.Context, d *schema.ResourceData
 
 	orgID, projectID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return fmt.Errorf("error parsing resource ID: %w", err)
+		return err
 	}
 
 	resp, err := client.OrganizationProjectsList(ctx, orgID)
@@ -194,12 +171,22 @@ func resourceOrganizationProjectRead(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	var techEmails = make([]string, 0, len(project.TechEmails))
+	var emails = make([]string, 0, len(project.TechEmails))
 	for _, e := range project.TechEmails {
-		techEmails = append(techEmails, e.Email)
+		emails = append(emails, e.Email)
 	}
 
-	if err = d.Set("technical_emails", techEmails); err != nil {
+	if err = d.Set("technical_emails", emails); err != nil {
+		return err
+	}
+
+	// get the CA cert for a project
+	cert, err := client.ProjectKmsGetCA(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("error getting CA cert: %w", err)
+	}
+
+	if err = d.Set("ca_cert", cert); err != nil {
 		return err
 	}
 
@@ -209,31 +196,30 @@ func resourceOrganizationProjectRead(ctx context.Context, d *schema.ResourceData
 func resourceOrganizationProjectUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, projectID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return fmt.Errorf("error parsing resource ID: %w", err)
+		return err
 	}
 
-	// only handle allowed updates (tags, technical_emails, project_id)
-	var updateReq organizationprojects.OrganizationProjectsUpdateIn
-
-	if d.HasChange("tag") {
-		updateReq.Tags = lo.ToPtr(schemautil.GetTagsFromSchema(d))
+	// convert the parent ID to an account ID in case it's an organization
+	accountID, err := schemautil.ConvertOrganizationToAccountID(ctx, d.Get("parent_id").(string), client)
+	if err != nil {
+		return fmt.Errorf("error converting organization to account ID: %w", err)
 	}
-	if d.HasChange("technical_emails") {
-		var techEmails []organizationprojects.TechEmailIn
-		for _, e := range d.Get("technical_emails").(*schema.Set).List() {
-			techEmails = append(techEmails, organizationprojects.TechEmailIn{Email: e.(string)})
-		}
-		updateReq.TechEmails = lo.ToPtr(techEmails)
+
+	updateReq := organizationprojects.OrganizationProjectsUpdateIn{
+		OrganizationId: lo.ToPtr(d.Get("organization_id").(string)),
+		ParentId:       lo.EmptyableToPtr(accountID),
+		BillingGroupId: lo.ToPtr(d.Get("billing_group_id").(string)),
+		Tags:           lo.ToPtr(schemautil.GetTagsFromSchema(d)),
+		TechEmails:     techEmails(d.Get("technical_emails").(*schema.Set).List()),
 	}
 
 	resp, err := client.OrganizationProjectsUpdate(ctx, orgID, projectID, &updateReq)
 	if err != nil {
-		return fmt.Errorf("failed to update attributes: %w", err)
+		return fmt.Errorf("failed to update project attributes: %w", err)
 	}
 
-	if d.HasChange("project_id") {
-		d.SetId(schemautil.BuildResourceID(orgID, resp.ProjectId))
-	}
+	// update the resource ID if organization ID changed
+	d.SetId(schemautil.BuildResourceID(resp.OrganizationId, resp.ProjectId))
 
 	return resourceOrganizationProjectRead(ctx, d, client)
 }
@@ -271,4 +257,17 @@ func resourceOrganizationProjectDelete(ctx context.Context, d *schema.ResourceDa
 	)
 
 	return err
+}
+
+func techEmails(emails []any) *[]organizationprojects.TechEmailIn {
+	var res = make([]organizationprojects.TechEmailIn, 0, len(emails))
+	if len(emails) == 0 {
+		return lo.ToPtr(res)
+	}
+
+	for _, e := range emails {
+		res = append(res, organizationprojects.TechEmailIn{Email: e.(string)})
+	}
+
+	return lo.ToPtr(res)
 }

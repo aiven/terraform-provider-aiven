@@ -3,9 +3,12 @@ package organization
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -158,8 +161,20 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	if err := client.AccountDelete(ctx, d.Id()); common.IsCritical(err) {
-		return err
+	// sometimes the project happens to be deleted with some delay, so we need to retry
+	if err := retry.Do(
+		func() error {
+			return client.AccountDelete(ctx, d.Id())
+		},
+		retry.Attempts(3),
+		retry.Delay(5*time.Second),
+		retry.DelayType(retry.FixedDelay),
+		retry.Context(ctx),
+		retry.RetryIf(func(err error) bool {
+			return strings.Contains(err.Error(), "Account must not contain any projects when deleting")
+		}),
+	); err != nil {
+		return fmt.Errorf("error deleting organizational unit: %w", err)
 	}
 
 	return nil
