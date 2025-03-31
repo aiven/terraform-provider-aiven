@@ -289,11 +289,10 @@ func (b *CompositionBuilder) Render(t testing.TB) (string, error) {
 	// Combine all rendered parts
 	combined := strings.Join(renderedParts, "\n\n")
 
-	//TODO: uncomment to fix
 	// Do a simple HCL validation of the final result
-	//if err := validateHCL(combined); err != nil {
-	//	return "", fmt.Errorf("invalid HCL generated:\n%s\n\nError: %w", combined, err)
-	//}
+	if err := validateHCL(combined); err != nil {
+		return "", fmt.Errorf("invalid HCL generated:\n%s\n\nError: %w", combined, err)
+	}
 
 	return combined, nil
 }

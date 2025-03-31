@@ -82,7 +82,7 @@ func WithExport(readFunc schema.ReadContextFunc, resourceType string) schema.Rea
 		if !diags.HasError() && exporter.IsEnabled() {
 			if err := exporter.ExportResource(d, resourceType); err != nil {
 				panic(err)
-			} //todo: handle or ign
+			} //todo: handle or ignore error
 		}
 
 		return diags

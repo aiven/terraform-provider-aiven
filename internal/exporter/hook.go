@@ -2,7 +2,8 @@ package exporter
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-// ExportHookFunc is the signature for a function that can export ResourceData
+// ExportHookFunc is the signature for a function that can export ResourceData.
+// This is a quick hand to avoid circular dependencies.
 type ExportHookFunc func(d *schema.ResourceData, resourceType string) error
 
 var (
@@ -10,12 +11,12 @@ var (
 	exportHook ExportHookFunc
 )
 
-// exportEnabled is set at build time //TODO: add ldflags
-var exportEnabled = true //todo: Should be always false
+// exportEnabled is set at build time
+var exportEnabled = true //todo: Should be always false. add ldflags for build
 
 func init() {
 	if exportEnabled {
-		// Register hook only if enabled
+		// register hook only if enabled
 		RegisterExportHook(func(d *schema.ResourceData, resourceType string) error {
 			// Export implementation
 			return nil
