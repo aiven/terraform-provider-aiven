@@ -322,7 +322,6 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_alloydbomni",
 		"aiven_alloydbomni_user",
 		"aiven_alloydbomni_database",
-		"aiven_organization_user_list",
 		"aiven_organization_project",
 		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",

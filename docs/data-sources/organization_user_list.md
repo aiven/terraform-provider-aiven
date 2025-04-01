@@ -4,16 +4,11 @@ page_title: "aiven_organization_user_list Data Source - terraform-provider-aiven
 subcategory: ""
 description: |-
   Returns a list of users in the organization https://aiven.io/docs/platform/concepts/user-access-management, their profile details, and other data . This includes users you add to your organization and application users.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_user_list (Data Source)
 
-Returns a list of [users in the organization](https://aiven.io/docs/platform/concepts/user-access-management), their profile details, and other data . This includes users you add to your organization and application users. 
-
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+Returns a list of [users in the organization](https://aiven.io/docs/platform/concepts/user-access-management), their profile details, and other data . This includes users you add to your organization and application users.
 
 ## Example Usage
 
