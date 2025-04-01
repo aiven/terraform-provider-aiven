@@ -49,8 +49,8 @@ func ResourceOrganizationApplicationUser() *schema.Resource {
 Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for
 programmatic access to the platform using a token created with the ` + "`aiven_organization_application_user_token`" + ` resource.
 
-You give application users access to projects using the ` + "`aiven_organization_permission`" + ` resource. You can also add application users to
-groups with access to projects using ` + "`aiven_organization_user_group_member`" + `.`,
+You give application users access to your organization, projects, and services using the ` + "`aiven_organization_permission`" + ` resource. You can also add application users to
+groups using the ` + "`aiven_organization_user_group_member`" + ` resource.`,
 		).Build(),
 		CreateContext: common.WithGenClient(resourceOrganizationApplicationUserCreate),
 		ReadContext:   common.WithGenClient(resourceOrganizationApplicationUserRead),
