@@ -48,6 +48,7 @@ var aivenKafkaNativeACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ForceNew:     true,
+		Computed:     true,
 		ValidateFunc: validation.StringLenBetween(1, 256),
 		Description:  userconfig.Desc("The IP address from which a principal is allowed or denied access to the resource. Use `*` for all hosts.").ForceNew().MaxLen(256).Build(),
 	},

@@ -15,6 +15,7 @@ func TestKafkaNativeAcl(t *testing.T) {
 	projectName := acc.ProjectName()
 	serviceName := fmt.Sprintf("test-acc-native-acl-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	resourceName := "aiven_kafka_native_acl.foo"
+	resourceName2 := "aiven_kafka_native_acl.bar"
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -32,6 +33,7 @@ func TestKafkaNativeAcl(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "host"),
 					resource.TestCheckResourceAttrSet(resourceName, "operation"),
 					resource.TestCheckResourceAttrSet(resourceName, "permission_type"),
+					resource.TestCheckResourceAttr(resourceName2, "host", "*"),
 				),
 			},
 		},
@@ -70,5 +72,17 @@ resource "aiven_kafka_native_acl" "foo" {
   host            = "host-test"
   operation       = "Create"
   permission_type = "ALLOW"
-}`, projectName, serviceName)
+}
+
+resource "aiven_kafka_native_acl" "bar" {
+  project         = data.aiven_project.foo.project
+  service_name    = aiven_kafka.bar.service_name
+  resource_name   = "name-test"
+  resource_type   = "Topic"
+  pattern_type    = "LITERAL"
+  principal       = "User:alice"
+  operation       = "Create"
+  permission_type = "ALLOW"
+}
+`, projectName, serviceName)
 }
