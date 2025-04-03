@@ -29,8 +29,8 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 		TerraformDir: "../examples/kafka_connect",
 		Vars: map[string]interface{}{
 			"aiven_token":        s.config.Token,
-			"avn_project":        s.config.Project,
-			"kafka_name":         kafkaServiceName,
+			"aiven_project_name": s.config.Project,
+			"kafka_service_name": kafkaServiceName,
 			"kafka_connect_name": kafkaConnectName,
 		},
 	})
