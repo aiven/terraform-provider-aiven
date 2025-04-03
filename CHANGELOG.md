@@ -16,6 +16,7 @@ nav_order: 1
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.1-IV0`, `4.1`
 - Add `aiven_organization_address` resource & datasource
 - Add `aiven_organization_billing` resource & datasource and `aiven_organization_billing_list` datasource
+- Promoted `aiven_organization_user_list` datasource from Beta to GA
 
 ## [4.37.0] - 2025-03-12
 
