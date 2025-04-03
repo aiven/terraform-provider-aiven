@@ -65,6 +65,11 @@ func DatasourceServiceComponent() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(service.KafkaAuthenticationMethodTypeChoices(), false),
 				Description:  userconfig.Desc("Kafka authentication method. This is a value specific to the 'kafka' service component").PossibleValuesString(service.KafkaAuthenticationMethodTypeChoices()...).Build(),
 			},
+			"kafka_ssl_ca": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: userconfig.Desc("Kafka certificate used").PossibleValuesString(service.KafkaSslCaTypeChoices()...).Build(),
+			},
 			"ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,

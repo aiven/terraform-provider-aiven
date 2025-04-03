@@ -299,6 +299,11 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Computed:    true,
 						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
 					},
+					"kafka_ssl_ca": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "Kafka certificate used. The possible values are `letsencrypt` and `project_ca`.",
+					},
 					"route": {
 						Type:        schema.TypeString,
 						Computed:    true,
@@ -833,6 +838,7 @@ func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]interface{}
 			"port":                        c.Port,
 			"connection_uri":              fmt.Sprintf("%s:%d", c.Host, c.Port),
 			"kafka_authentication_method": c.KafkaAuthenticationMethod,
+			"kafka_ssl_ca":                c.KafkaSslCa,
 			"route":                       c.Route,
 			// By default, endpoints are always encrypted and
 			// this property is only included for service components that may disable encryption.
