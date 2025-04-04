@@ -39,5 +39,6 @@ data "aiven_service_component" "sc1" {
 
 - `host` (String) DNS name for connecting to the service component
 - `id` (String) The ID of this resource.
+- `kafka_ssl_ca` (String) Kafka certificate used. The possible values are `letsencrypt` and `project_ca`.
 - `port` (Number) Port number for connecting to the service component
 

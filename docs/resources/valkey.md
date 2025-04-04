@@ -222,6 +222,7 @@ Read-Only:
 - `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
+- `kafka_ssl_ca` (String)
 - `port` (Number)
 - `route` (String)
 - `ssl` (Boolean)
