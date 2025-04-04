@@ -158,9 +158,8 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	if err := client.AccountDelete(ctx, d.Id()); common.IsCritical(err) {
-		return err
-	}
-
-	return nil
+	// sometimes the project happens to be deleted with some delay, so we need to retry
+	return schemautil.WaitUntilNotFound(ctx, func() error {
+		return client.AccountDelete(ctx, d.Id())
+	})
 }

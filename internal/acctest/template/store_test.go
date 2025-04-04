@@ -296,3 +296,40 @@ func TestPostgresResource(t *testing.T) {
 	result := builder.MustRender(t)
 	assert.Equal(t, normalizeHCL(expected), normalizeHCL(result))
 }
+
+// TestCollectionBlocks tests that collection blocks (like tags which are usually sets with key-value pairs) are rendered correctly
+func TestCollectionBlocks(t *testing.T) {
+	t.Parallel()
+
+	var builder = InitializeTemplateStore(t).NewBuilder()
+
+	res, err := builder.AddResource("aiven_organization_project", map[string]any{
+		"resource_name":    "foo",
+		"project_id":       "test-acc-pr-ilvqhrtmdy",
+		"organization_id":  Reference("aiven_organization.foo.id"),
+		"billing_group_id": Reference("aiven_billing_group.foo.id"),
+		"parent_id":        Reference("aiven_organizational_unit.foo.id"),
+		"tag": []map[string]interface{}{
+			{"key": "key1", "value": "value1"},
+			{"key": "key2", "value": "value2"},
+		},
+	}).Render(t)
+	require.NoError(t, err, "failed to render HCL")
+
+	expected := `resource "aiven_organization_project" "foo" {
+  billing_group_id = aiven_billing_group.foo.id
+  organization_id = aiven_organization.foo.id
+  parent_id = aiven_organizational_unit.foo.id
+  project_id = "test-acc-pr-ilvqhrtmdy"
+  tag {
+    key = "key1"
+    value = "value1"
+  }
+  tag {
+    key = "key2"
+    value = "value2"
+  }
+}`
+
+	assert.Equal(t, normalizeHCL(expected), normalizeHCL(res))
+}
