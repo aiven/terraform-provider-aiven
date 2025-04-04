@@ -1,5 +1,15 @@
-variable "aiven_token" {}
-variable "avn_project" {}
-variable "postgres_eu_name" {}
-variable "postgres_us_name" {}
-variable "postgres_as_name" {}
+variable "aiven_token" {
+  description = "Aiven token"
+  type        = string
+}
+
+variable "aiven_project_name" {
+  description = "Name of an Aiven project assigned to a billing group"
+  type        = string
+}
+
+variable "postgres_service_name" {
+  description = "Name of the PostgreSQL service"
+  type        = string
+  default     = "example-eu-pg-service"
+}
