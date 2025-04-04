@@ -83,10 +83,10 @@ func TestAccAivenOrganizationDataSourceValidation(t *testing.T) {
 			{
 				// Test case: both id and name provided
 				Config: `
-					data "aiven_organization" "test" {
-						id   = "test-id"
-						name = "test-name"
-					}
+data "aiven_organization" "test" {
+  id   = "test-id"
+  name = "test-name"
+}
 				`,
 				ExpectError: regexp.MustCompile(
 					`These attributes cannot be configured together: \[id,name\]`,
@@ -95,9 +95,9 @@ func TestAccAivenOrganizationDataSourceValidation(t *testing.T) {
 			{
 				// Test case: empty id provided
 				Config: `
-					data "aiven_organization" "test" {
-						id = ""
-					}
+data "aiven_organization" "test" {
+  id = ""
+}
 				`,
 				ExpectError: regexp.MustCompile(
 					`Organization ID not found`,

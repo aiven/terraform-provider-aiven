@@ -210,8 +210,8 @@ func TestOrganizationResource(t *testing.T) {
 	})
 
 	expected := `resource "aiven_organization" "test-org" {
-	  name = "Test Organization"
-	}`
+  name = "Test Organization"
+}`
 
 	res := b.MustRender(t)
 
