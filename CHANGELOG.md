@@ -21,6 +21,7 @@ nav_order: 1
 - Added `ca_cert` field to `aiven_organization_project` resource
 - Marked `parent_id` field as required in `aiven_organization_project` resource
 - Allowed to move `aiven_organization_project` resource between different organizations
+- Fix `aiven_clickhouse_grant` import
 
 ## [4.37.0] - 2025-03-12
 

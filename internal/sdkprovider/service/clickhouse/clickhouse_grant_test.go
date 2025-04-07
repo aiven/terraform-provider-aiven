@@ -23,7 +23,7 @@ func TestAccAivenClickhouseGrant(t *testing.T) {
 resource "aiven_clickhouse" "bar" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-16"
+  plan                    = "hobbyist"
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -87,6 +87,12 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 					// role grant checks
 					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
 				),
+			},
+			{
+
+				ResourceName:      "aiven_clickhouse_grant.foo-role-grant",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

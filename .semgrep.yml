@@ -170,25 +170,6 @@ rules:
     M3Aggregator requires at least business-8 plan
   severity: ERROR
 
-# Rule for ClickHouse
-- id: large-plan-in-test-clickhouse
-  languages: [generic]
-  paths:
-    include:
-    - "*_test.go"
-  patterns:
-  - pattern-inside:
-      plan = "..."
-  - pattern-inside: |
-      resource "aiven_clickhouse" ... {
-        ...
-      }
-  - pattern-not-regex: startup-16|%s
-  fix: plan = "startup-16"
-  message: |
-    Clickhouse requires at least startup-16 plan
-  severity: ERROR
-
 # Rule for all other services
 - id: large-plan-in-test-other
   languages: [generic]
