@@ -23,7 +23,6 @@ var aivenClickhouseDatabaseSchema = map[string]*schema.Schema{
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
 		Description: userconfig.Desc(`Client-side deletion protection that prevents the ClickHouse database from being deleted by Terraform. Enable this for production databases containing critical data.`).DefaultValue(false).Build(),
 	},
 }
@@ -77,6 +76,12 @@ func resourceClickhouseDatabaseRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
+	if err := d.Set("project", projectName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("name", database.Name); err != nil {
 		return diag.FromErr(err)
 	}
