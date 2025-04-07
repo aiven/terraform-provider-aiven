@@ -8,8 +8,8 @@ variable "aiven_project_name" {
   type        = string
 }
 
-variable "opensearch_service_name" {
-  description = "Name of the OpenSearch service"
+variable "valkey_service_name" {
+  description = "Name of the Valkey service"
   type        = string
-  default     = "example-opensearch-service"
+  default     = "example-valkey-service"
 }

@@ -8,8 +8,8 @@ variable "aiven_project_name" {
   type        = string
 }
 
-variable "opensearch_service_name" {
-  description = "Name of the OpenSearch service"
+variable "clickhouse_service_name" {
+  description = "Name of the ClickHouse service"
   type        = string
-  default     = "example-opensearch-service"
+  default     = "example-eu-clickhouse-service" 
 }
