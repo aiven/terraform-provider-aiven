@@ -22,6 +22,7 @@ nav_order: 1
 - Marked `parent_id` field as required in `aiven_organization_project` resource
 - Allowed to move `aiven_organization_project` resource between different organizations
 - Fix `aiven_clickhouse_grant` import
+- Fix `aiven_clickhouse_database` import
 
 ## [4.37.0] - 2025-03-12
 
