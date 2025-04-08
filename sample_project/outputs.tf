@@ -116,35 +116,35 @@ output "sample_acl_id" {
   description = "Resource's Terraform identifier."
 }
 
-# M3DB service
-output "samplem3db_id" {
-  value       = aiven_m3db.samplem3db.id
+# Thanos service
+output "thanos_id" {
+  value       = aiven_thanos.example_thanos.id
   description = "Resource's Terraform identifier."
 }
 
-output "samplem3db_service_uri" {
-  value       = aiven_m3db.samplem3db.service_uri
+output "thanos_service_uri" {
+  value       = aiven_thanos.example_thanos.service_uri
   description = "URI for connecting to the service."
   sensitive   = true
 }
 
-output "samplem3db_service_host" {
-  value       = aiven_m3db.samplem3db.service_host
+output "thanos_service_host" {
+  value       = aiven_thanos.example_thanos.service_host
   description = "The hostname of the service."
 }
 
-output "samplem3db_service_port" {
-  value       = aiven_m3db.samplem3db.service_port
+output "thanos_service_port" {
+  value       = aiven_thanos.example_thanos.service_port
   description = "The port of the service."
 }
 
-output "samplem3db_service_username" {
-  value       = aiven_m3db.samplem3db.service_username
+output "thanos_service_username" {
+  value       = aiven_thanos.example_thanos.service_username
   description = "Username used for connecting to the service."
 }
 
-output "samplem3db_service_password" {
-  value       = aiven_m3db.samplem3db.service_password
+output "thanos_service_password" {
+  value       = aiven_thanos.example_thanos.service_password
   description = "Password used for connecting to the service."
   sensitive   = true
 }

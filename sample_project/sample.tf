@@ -28,7 +28,7 @@ resource "aiven_kafka" "samplekafka" {
   project                 = data.aiven_project.sample.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "samplekafka"
+  service_name            = "sample-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
   kafka_user_config {
@@ -69,27 +69,27 @@ resource "aiven_kafka_acl" "sample_acl" {
   topic        = "*"
 }
 
-# M3DB service
-resource "aiven_m3db" "samplem3db" {
+# Thanos service
+resource "aiven_thanos" "example_thanos" {
   project                 = data.aiven_project.sample.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-8"
-  service_name            = "samplem3db"
+  service_name            = "sample-thanos"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "11:00:00"
-  m3db_user_config {
+  thanos_user_config {
     ip_filter_object {
       network = "0.0.0.0/0"
     }
   }
 }
 
-# Send metrics from Kafka to M3DB
+# Send metrics from Kafka to Thanos
 resource "aiven_service_integration" "samplekafka_metrics" {
   project                  = data.aiven_project.sample.project
   integration_type         = "metrics"
   source_service_name      = aiven_kafka.samplekafka.service_name
-  destination_service_name = aiven_m3db.samplem3db.service_name
+  destination_service_name = aiven_thanos.example_thanos.service_name
 }
 
 # PostgreSQL service
@@ -97,7 +97,7 @@ resource "aiven_pg" "samplepg" {
   project                 = data.aiven_project.sample.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "samplepg"
+  service_name            = "sample-pg"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "12:00:00"
   pg_user_config {
@@ -107,12 +107,12 @@ resource "aiven_pg" "samplepg" {
   }
 }
 
-# Send metrics from PostgreSQL to M3DB
+# Send metrics from PostgreSQL to Thanos
 resource "aiven_service_integration" "samplepg_metrics" {
   project                  = data.aiven_project.sample.project
   integration_type         = "metrics"
   source_service_name      = aiven_pg.samplepg.service_name
-  destination_service_name = aiven_m3db.samplem3db.service_name
+  destination_service_name = aiven_thanos.example_thanos.service_name
 }
 
 # PostgreSQL database
@@ -160,5 +160,5 @@ resource "aiven_service_integration" "samplegrafana_dashboards" {
   project                  = data.aiven_project.sample.project
   integration_type         = "dashboard"
   source_service_name      = aiven_grafana.samplegrafana.service_name
-  destination_service_name = aiven_m3db.samplem3db.service_name
+  destination_service_name = aiven_thanos.example_thanos.service_name
 }
