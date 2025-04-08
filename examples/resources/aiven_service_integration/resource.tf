@@ -1,9 +1,9 @@
-# Integrate Kafka and M3DB services for metrics
+# Integrate Kafka and Thanos services for metrics
 resource "aiven_service_integration" "example_integration" {
   project                  = data.aiven_project.example_project.project
   integration_type         = "metrics"
   source_service_name      = aiven_kafka.example_kafka.service_name
-  destination_service_name = aiven_m3db.example_m3db.service_name
+  destination_service_name = aiven_thanos.example_thanos.service_name
 }
 
 # Use disk autoscaler with a PostgreSQL service
