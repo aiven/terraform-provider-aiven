@@ -17,18 +17,45 @@ Gets information about a billing group.
 
 ### Required
 
-- `billing_group_id` (String) ID of the billing group.
-- `organization_id` (String) ID of the organization.
+- `billing_group_id` (String) Billing group id.
+- `organization_id` (String) ID of an organization.
+
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `billing_address_id` (String) ID of the billing address.
-- `billing_contact_emails` (List of String) List of billing contact emails.
-- `billing_currency` (String) Billing currency.
-- `billing_emails` (List of String) List of billing emails.
-- `billing_group_name` (String) Name of the billing group.
-- `custom_invoice_text` (String) Custom invoice text.
-- `id` (String) Resource ID, a composite of organization_id and billing_group_id.
-- `payment_method_id` (String) ID of the payment method.
-- `shipping_address_id` (String) ID of the shipping address.
+- `billing_address_id` (String) Billing address ID.
+- `billing_contact_emails` (Attributes Set) List of billing contact emails. (see [below for nested schema](#nestedatt--billing_contact_emails))
+- `billing_currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
+- `billing_emails` (Attributes Set) List of billing contact emails. (see [below for nested schema](#nestedatt--billing_emails))
+- `billing_group_name` (String) Billing Group Name.
+- `custom_invoice_text` (String) Extra billing text.
+- `id` (String) Resource ID, a composite of `organization_id` and `billing_group_id` IDs.
+- `payment_method_id` (String) Payment method ID.
+- `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedatt--billing_contact_emails"></a>
+### Nested Schema for `billing_contact_emails`
+
+Read-Only:
+
+- `email` (String) Email.
+
+
+<a id="nestedatt--billing_emails"></a>
+### Nested Schema for `billing_emails`
+
+Read-Only:
+
+- `email` (String) Email.
