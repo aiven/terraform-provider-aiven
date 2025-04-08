@@ -1,0 +1,16 @@
+variable "aiven_token" {
+  description = "Aiven token"
+  type        = string
+  sensitive   = true
+}
+
+variable "aiven_project_name" {
+  description = "Name of an Aiven project assigned to a billing group"
+  type        = string
+}
+
+variable "alloydb_name" {
+  description = "Name of the AlloyDB Omni service"
+  type        = string
+  default     = "example-alloydb-omni-service"
+}
