@@ -103,6 +103,8 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 // This test and the corresponding workaround in the code should be removed once the API is fixed
 // to properly handle null vs. empty string for company_name.
 func TestAccAivenOrganizationAddress_CompanyNameHandling(t *testing.T) {
+	t.Skip("The company_name can't bet updated to null. Todo: run this test when the API is fixed.")
+
 	var (
 		name             = "aiven_organization_address.test_address"
 		organizationName = acc.OrganizationName()
