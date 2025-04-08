@@ -21,6 +21,9 @@ nav_order: 1
 - Added `ca_cert` field to `aiven_organization_project` resource
 - Marked `parent_id` field as required in `aiven_organization_project` resource
 - Allowed to move `aiven_organization_project` resource between different organizations
+- Add `aiven_clickhouse` field `clickhouse_user_config.backup_hour`: The hour of day (in UTC) when backup for the service is started
+- Add `aiven_clickhouse` field `clickhouse_user_config.backup_minute`: The minute of an hour when backup for the service is started
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `3.9`
 - Fix `aiven_clickhouse_grant` import
 - Fix `aiven_clickhouse_database` import
 

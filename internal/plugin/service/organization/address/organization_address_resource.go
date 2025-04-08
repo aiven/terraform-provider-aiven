@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/diagnostics"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -125,15 +126,16 @@ func validateRequiredFields(
 
 // handleCompanyName handles the special case for company_name to prevent drift detection.
 // This is a workaround that should be removed once the API is fixed.
-func handleCompanyName(companyName string) basetypes.StringValue {
+func handleCompanyName(companyName *string) basetypes.StringValue {
 	// WORKAROUND: Handle empty company_name specially to prevent drift detection
 	// The API returns an empty string ("") for company_name when it's not set,
 	// but Terraform represents unset optional values as null.
 	// This workaround should be removed once the API is fixed to return null for unset fields.
-	if companyName == "" {
+	v := lo.FromPtr(companyName)
+	if v == "" {
 		return types.StringNull()
 	}
-	return types.StringValue(companyName)
+	return types.StringValue(v)
 }
 
 // Create creates an organization address resource.
@@ -269,18 +271,7 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 		CountryCode:  plan.CountryCode.ValueStringPointer(),
 		State:        plan.State.ValueStringPointer(),
 		ZipCode:      plan.ZipCode.ValueStringPointer(),
-	}
-
-	// WORKAROUND: Handle company_name specially to prevent drift detection
-	// The API returns an empty string ("") for company_name when it's not set,
-	// but Terraform represents unset optional values as null.
-	// This workaround should be removed once the API is fixed to return null for unset fields.
-	if plan.CompanyName.IsNull() {
-		// When company_name is null in the plan, explicitly set an empty string in the API request
-		emptyString := ""
-		updateReq.CompanyName = &emptyString
-	} else {
-		updateReq.CompanyName = plan.CompanyName.ValueStringPointer()
+		CompanyName:  plan.CompanyName.ValueStringPointer(),
 	}
 
 	// Update the address

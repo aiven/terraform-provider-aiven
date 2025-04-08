@@ -206,7 +206,7 @@ func (r *organizationBillingGroupResource) Create(ctx context.Context, req resou
 		BillingEmails:        billingEmails.([]organizationbilling.BillingEmailIn),
 		BillingGroupName:     plan.BillingGroupName.ValueString(),
 		CustomInvoiceText:    plan.CustomInvoiceText.ValueStringPointer(),
-		PaymentMethodId:      plan.PaymentMethodID.ValueStringPointer(),
+		PaymentMethodId:      plan.PaymentMethodID.ValueString(),
 		ShippingAddressId:    plan.ShippingAddressID.ValueString(),
 		VatId:                plan.VATID.ValueStringPointer(),
 	}

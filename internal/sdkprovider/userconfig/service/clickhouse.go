@@ -24,6 +24,16 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"backup_hour": {
+				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"backup_minute": {
+				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
