@@ -10,7 +10,7 @@ nav_order: 1
 
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.1-IV0`, `4.1`
