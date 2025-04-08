@@ -32,42 +32,29 @@ jobs:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
-  acceptance_tests:
-    needs: setup_aiven_project_suffix
+  find_tests:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.find_tests.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - id: find_tests
+        run: |
+          echo "matrix=$(find ./internal -type f -name '*_test.go' -exec dirname {} \; | sort -u | jq -cnR '[inputs | select(length>0)]')" >> $GITHUB_OUTPUT
+
+  test:
+    needs: [setup_aiven_project_suffix, find_tests]
     runs-on: ubuntu-latest
     env:
       ACC_TEST_PARALLELISM: 5
     strategy:
       max-parallel: 5
-      fail-fast: false
+      fail-fast: true
       matrix:
-        pkg: [
-          account,
-          alloydbomni,
-          cassandra,
-          clickhouse,
-          connectionpool,
-          dragonfly,
-          flink,
-          grafana,
-          influxdb,
-          kafka,
-          kafkaschema,
-          kafkatopic,
-          m3db,
-          mysql,
-          opensearch,
-          organization,
-          pg,
-          project,
-          redis,
-          servicecomponent,
-          serviceintegration,
-          staticip,
-          thanos,
-          valkey,
-          vpc,
-        ]
+        pkg_path: ${{ fromJson(needs.find_tests.outputs.matrix) }}
 
     steps:
       - uses: softprops/turnstyle@v2
@@ -103,11 +90,11 @@ jobs:
             ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-          PKG: ${{ matrix.pkg }}
+          PKG_PATH: ${{ matrix.pkg_path }}
 
   sweep:
     if: always()
-    needs: [acceptance_tests, setup_aiven_project_suffix]
+    needs: [test, setup_aiven_project_suffix]
     runs-on: ubuntu-latest
     steps:
       - uses: softprops/turnstyle@v2
