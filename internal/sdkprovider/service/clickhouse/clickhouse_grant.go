@@ -107,6 +107,9 @@ func ResourceClickhouseGrant() *schema.Resource {
 		DeleteContext: resourceClickhouseGrantDelete,
 		Schema:        aivenClickhouseGrantSchema,
 		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 
