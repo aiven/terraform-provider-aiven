@@ -89,16 +89,6 @@ func OrganizationName() string {
 	return getEnvVar(envOrganizationName)
 }
 
-// UserID returns the Aiven organization user ID
-func UserID() string {
-	return getEnvVar(envUserID)
-}
-
-// AccountID returns the Aiven organization account ID
-func AccountID() string {
-	return getEnvVar(envAccountID)
-}
-
 // AccountName returns the Aiven account name
 func AccountName() string {
 	return getEnvVar(envAccountName)

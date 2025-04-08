@@ -318,15 +318,15 @@ func TestCollectionBlocks(t *testing.T) {
 
 	expected := `resource "aiven_organization_project" "foo" {
   billing_group_id = aiven_billing_group.foo.id
-  organization_id = aiven_organization.foo.id
-  parent_id = aiven_organizational_unit.foo.id
-  project_id = "test-acc-pr-ilvqhrtmdy"
+  organization_id  = aiven_organization.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+  project_id       = "test-acc-pr-ilvqhrtmdy"
   tag {
-    key = "key1"
+    key   = "key1"
     value = "value1"
   }
   tag {
-    key = "key2"
+    key   = "key2"
     value = "value2"
   }
 }`
