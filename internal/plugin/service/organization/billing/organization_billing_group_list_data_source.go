@@ -156,14 +156,14 @@ func (r *organizationBillingGroupListDataSource) Read(ctx context.Context, req d
 
 	// Convert billing groups
 	for _, bg := range billingGroups {
-		// Convert email lists to types.List
-		contactEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(bg.BillingContactEmails))
+		// Convert email lists to types.Set
+		contactEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(bg.BillingContactEmails))
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
 
-		billingEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(bg.BillingEmails))
+		billingEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(bg.BillingEmails))
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return

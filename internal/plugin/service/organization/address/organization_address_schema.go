@@ -22,7 +22,7 @@ type OrganizationAddressModel struct {
 	AddressID types.String `tfsdk:"address_id"`
 
 	// AddressLines is the array of address lines
-	AddressLines types.List `tfsdk:"address_lines"`
+	AddressLines types.Set `tfsdk:"address_lines"`
 
 	// City is the city name
 	City types.String `tfsdk:"city"`
@@ -67,7 +67,7 @@ func ResourceSchema() map[string]schema.Attribute {
 			Description: "ID of the address.",
 			Computed:    true,
 		},
-		"address_lines": schema.ListAttribute{
+		"address_lines": schema.SetAttribute{
 			Description: "Array of address lines.",
 			Required:    true,
 			ElementType: types.StringType,

@@ -18,8 +18,8 @@ Creates and manages an organization billing group.
 ### Required
 
 - `billing_address_id` (String) ID of the billing address.
-- `billing_contact_emails` (List of String) List of billing contact emails.
-- `billing_emails` (List of String) List of billing emails.
+- `billing_contact_emails` (Set of String) List of billing contact emails.
+- `billing_emails` (Set of String) List of billing emails.
 - `billing_group_name` (String) Name of the billing group.
 - `organization_id` (String) ID of the organization.
 - `payment_method_id` (String) ID of the payment method.

@@ -104,21 +104,19 @@ func (r *organizationBillingGroupResource) Configure(
 
 // validateRequiredFields validates that all required fields are set.
 func validateRequiredFields(
-	ctx context.Context,
+	_ context.Context,
 	model *organizationBillingGroupResourceModel,
 	diags *diag.Diagnostics,
 	diagHelper *diagnostics.DiagnosticsHelper,
 ) {
 	validation.ValidateRequiredStringField(model.OrganizationID, "organization_id", diags, diagHelper)
 	validation.ValidateRequiredStringField(model.BillingAddressID, "billing_address_id", diags, diagHelper)
-	validation.ValidateRequiredListField(ctx, model.BillingContactEmails, "billing_contact_emails", diags, diagHelper)
-	validation.ValidateRequiredListField(ctx, model.BillingEmails, "billing_emails", diags, diagHelper)
 	validation.ValidateRequiredStringField(model.BillingGroupName, "billing_group_name", diags, diagHelper)
 	validation.ValidateRequiredStringField(model.ShippingAddressID, "shipping_address_id", diags, diagHelper)
 }
 
-// getEmailList converts a types.List to []organizationbilling.BillingContactEmailIn or []organizationbilling.BillingEmailIn
-func getEmailList(ctx context.Context, list types.List, isContactEmail bool) (interface{}, error) {
+// getEmailList converts a types.Set to []organizationbilling.BillingContactEmailIn or []organizationbilling.BillingEmailIn
+func getEmailList(ctx context.Context, list types.Set, isContactEmail bool) (interface{}, error) {
 	if list.IsNull() || list.IsUnknown() {
 		return nil, nil
 	}
@@ -222,15 +220,15 @@ func (r *organizationBillingGroupResource) Create(ctx context.Context, req resou
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), billingGroup.BillingGroupId))
 	plan.BillingGroupID = types.StringValue(billingGroup.BillingGroupId)
 
-	// Convert email lists to types.List
-	contactEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
+	// Convert email lists to types.Set
+	contactEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	plan.BillingContactEmails = contactEmailsList
 
-	billingEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
+	billingEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -269,15 +267,15 @@ func (r *organizationBillingGroupResource) Read(ctx context.Context, req resourc
 	state.PaymentMethodID = types.StringPointerValue(billingGroup.PaymentMethodId)
 	state.BillingGroupName = types.StringValue(billingGroup.BillingGroupName)
 
-	// Convert email lists to types.List
-	contactEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
+	// Convert email lists to types.Set
+	contactEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	state.BillingContactEmails = contactEmailsList
 
-	billingEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
+	billingEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -355,15 +353,15 @@ func (r *organizationBillingGroupResource) Update(ctx context.Context, req resou
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), billingGroup.BillingGroupId))
 	plan.BillingGroupID = types.StringValue(billingGroup.BillingGroupId)
 
-	// Convert email lists to types.List
-	contactEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
+	// Convert email lists to types.Set
+	contactEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	plan.BillingContactEmails = contactEmailsList
 
-	billingEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
+	billingEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

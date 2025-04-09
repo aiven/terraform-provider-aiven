@@ -133,8 +133,8 @@ func (r *organizationAddressDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

@@ -106,16 +106,13 @@ func (r *organizationAddressResource) Configure(
 
 // validateRequiredFields validates that all required fields are set.
 func validateRequiredFields(
-	ctx context.Context,
+	_ context.Context,
 	model *organizationAddressResourceModel,
 	diags *diag.Diagnostics,
 	diagHelper *diagnostics.DiagnosticsHelper,
 ) {
 	// Validate organization_id
 	validation.ValidateRequiredStringField(model.OrganizationID, "organization_id", diags, diagHelper)
-
-	// Validate address_lines
-	validation.ValidateRequiredListField(ctx, model.AddressLines, "address_lines", diags, diagHelper)
 
 	// Validate city
 	validation.ValidateRequiredStringField(model.City, "city", diags, diagHelper)
@@ -182,8 +179,8 @@ func (r *organizationAddressResource) Create(ctx context.Context, req resource.C
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), address.AddressId))
 	plan.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -222,8 +219,8 @@ func (r *organizationAddressResource) Read(ctx context.Context, req resource.Rea
 	state.ID = types.StringValue(fmt.Sprintf("%s/%s", state.OrganizationID.ValueString(), address.AddressId))
 	state.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -285,8 +282,8 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), address.AddressId))
 	plan.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

@@ -106,9 +106,9 @@ func TestAccAivenOrganizationBillingGroup(t *testing.T) {
 
 					// Check email lists
 					resource.TestCheckResourceAttr(name, "billing_contact_emails.#", "1"),
-					resource.TestCheckResourceAttr(name, "billing_contact_emails.0", "billing@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing@example.com"),
 					resource.TestCheckResourceAttr(name, "billing_emails.#", "1"),
-					resource.TestCheckResourceAttr(name, "billing_emails.0", "invoices@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices@example.com"),
 
 					// Check other fields
 					resource.TestCheckResourceAttr(name, "payment_method_id", paymentMethodID),
@@ -127,11 +127,11 @@ func TestAccAivenOrganizationBillingGroup(t *testing.T) {
 
 					// Check email lists
 					resource.TestCheckResourceAttr(name, "billing_contact_emails.#", "2"),
-					resource.TestCheckResourceAttr(name, "billing_contact_emails.0", "billing@example.com"),
-					resource.TestCheckResourceAttr(name, "billing_contact_emails.1", "billing2@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing2@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing@example.com"),
 					resource.TestCheckResourceAttr(name, "billing_emails.#", "2"),
-					resource.TestCheckResourceAttr(name, "billing_emails.0", "invoices@example.com"),
-					resource.TestCheckResourceAttr(name, "billing_emails.1", "invoices2@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices2@example.com"),
+					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices@example.com"),
 
 					// Check updated fields
 					resource.TestCheckResourceAttr(name, "billing_currency", "EUR"),
