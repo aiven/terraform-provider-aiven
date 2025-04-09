@@ -93,10 +93,6 @@ test-unit:
 
 
 PKG_PATH ?= internal
-ifneq ($(origin PKG), undefined)
-	PKG_PATH = internal/sdkprovider/service/$(PKG)
-endif
-
 TEST_COUNT ?= 1
 ACC_TEST_TIMEOUT ?= 180m
 ACC_TEST_PARALLELISM ?= 10

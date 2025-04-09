@@ -15,7 +15,6 @@ func TestExternalIdentityDataSource(t *testing.T) {
 	acc.SkipIfNotBeta(t)
 
 	organizationName := acc.OrganizationName()
-	userID := acc.UserID()
 	prefix := acc.DefaultResourceNamePrefix
 	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 	userGroupName := fmt.Sprintf("%s-usr-group-%s", prefix, suffix)
@@ -27,20 +26,24 @@ func TestExternalIdentityDataSource(t *testing.T) {
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testExternalIdentityDataSourceBasic(organizationName, userGroupName, userID, externalUserID),
+				Config: testExternalIdentityDataSourceBasic(organizationName, userGroupName, externalUserID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "external_user_id", "alice"),
-					resource.TestCheckResourceAttr(resourceName, "internal_user_id", userID),
+					resource.TestCheckResourceAttr(resourceName, "external_user_id", externalUserID),
 				),
 			},
 		},
 	})
 }
 
-func testExternalIdentityDataSourceBasic(organizationName string, userGroupName string, userID string, externalUserID string) string {
+func testExternalIdentityDataSourceBasic(organizationName string, userGroupName string, externalUserID string) string {
 	return fmt.Sprintf(`
 data "aiven_organization" "foo" {
   name = "%s"
+}
+
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "foo"
 }
 
 resource "aiven_organization_user_group" "foo" {
@@ -49,17 +52,11 @@ resource "aiven_organization_user_group" "foo" {
   description     = "Terraform acceptance tests"
 }
 
-resource "aiven_organization_user_group_member" "foo" {
-  organization_id = data.aiven_organization.foo.id
-  group_id        = aiven_organization_user_group.foo.group_id
-  user_id         = "%s"
-}
-
 data "aiven_external_identity" "foo" {
   organization_id       = data.aiven_organization.foo.id
-  internal_user_id      = "%[3]s"
+  internal_user_id      = aiven_organization_application_user.foo.user_id
   external_user_id      = "%s"
   external_service_name = "github"
 }
-`, organizationName, userGroupName, userID, externalUserID)
+`, organizationName, userGroupName, externalUserID)
 }

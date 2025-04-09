@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/diagnostics"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -105,16 +106,13 @@ func (r *organizationAddressResource) Configure(
 
 // validateRequiredFields validates that all required fields are set.
 func validateRequiredFields(
-	ctx context.Context,
+	_ context.Context,
 	model *organizationAddressResourceModel,
 	diags *diag.Diagnostics,
 	diagHelper *diagnostics.DiagnosticsHelper,
 ) {
 	// Validate organization_id
 	validation.ValidateRequiredStringField(model.OrganizationID, "organization_id", diags, diagHelper)
-
-	// Validate address_lines
-	validation.ValidateRequiredListField(ctx, model.AddressLines, "address_lines", diags, diagHelper)
 
 	// Validate city
 	validation.ValidateRequiredStringField(model.City, "city", diags, diagHelper)
@@ -125,15 +123,16 @@ func validateRequiredFields(
 
 // handleCompanyName handles the special case for company_name to prevent drift detection.
 // This is a workaround that should be removed once the API is fixed.
-func handleCompanyName(companyName string) basetypes.StringValue {
+func handleCompanyName(companyName *string) basetypes.StringValue {
 	// WORKAROUND: Handle empty company_name specially to prevent drift detection
 	// The API returns an empty string ("") for company_name when it's not set,
 	// but Terraform represents unset optional values as null.
 	// This workaround should be removed once the API is fixed to return null for unset fields.
-	if companyName == "" {
+	v := lo.FromPtr(companyName)
+	if v == "" {
 		return types.StringNull()
 	}
-	return types.StringValue(companyName)
+	return types.StringValue(v)
 }
 
 // Create creates an organization address resource.
@@ -180,8 +179,8 @@ func (r *organizationAddressResource) Create(ctx context.Context, req resource.C
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), address.AddressId))
 	plan.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -220,8 +219,8 @@ func (r *organizationAddressResource) Read(ctx context.Context, req resource.Rea
 	state.ID = types.StringValue(fmt.Sprintf("%s/%s", state.OrganizationID.ValueString(), address.AddressId))
 	state.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -269,18 +268,7 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 		CountryCode:  plan.CountryCode.ValueStringPointer(),
 		State:        plan.State.ValueStringPointer(),
 		ZipCode:      plan.ZipCode.ValueStringPointer(),
-	}
-
-	// WORKAROUND: Handle company_name specially to prevent drift detection
-	// The API returns an empty string ("") for company_name when it's not set,
-	// but Terraform represents unset optional values as null.
-	// This workaround should be removed once the API is fixed to return null for unset fields.
-	if plan.CompanyName.IsNull() {
-		// When company_name is null in the plan, explicitly set an empty string in the API request
-		emptyString := ""
-		updateReq.CompanyName = &emptyString
-	} else {
-		updateReq.CompanyName = plan.CompanyName.ValueStringPointer()
+		CompanyName:  plan.CompanyName.ValueStringPointer(),
 	}
 
 	// Update the address
@@ -294,8 +282,8 @@ func (r *organizationAddressResource) Update(ctx context.Context, req resource.U
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s", plan.OrganizationID.ValueString(), address.AddressId))
 	plan.AddressID = types.StringValue(address.AddressId)
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

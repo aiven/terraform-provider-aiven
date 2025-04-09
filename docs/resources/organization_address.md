@@ -17,7 +17,7 @@ Creates and manages an organization address.
 
 ### Required
 
-- `address_lines` (List of String) Array of address lines.
+- `address_lines` (Set of String) Array of address lines.
 - `city` (String) City name.
 - `country_code` (String) Country code.
 - `organization_id` (String) ID of organization.

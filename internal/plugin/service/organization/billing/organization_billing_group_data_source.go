@@ -143,15 +143,15 @@ func (r *organizationBillingGroupDataSource) Read(ctx context.Context, req datas
 	state.PaymentMethodID = types.StringPointerValue(billingGroup.PaymentMethodId)
 	state.BillingGroupName = types.StringValue(billingGroup.BillingGroupName)
 
-	// Convert email lists to types.List
-	contactEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
+	// Convert email lists to types.Set
+	contactEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingContactEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	state.BillingContactEmails = contactEmailsList
 
-	billingEmailsList, diags := types.ListValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
+	billingEmailsList, diags := types.SetValueFrom(ctx, types.StringType, getEmailStrings(billingGroup.BillingEmails))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

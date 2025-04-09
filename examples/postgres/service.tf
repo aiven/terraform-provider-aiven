@@ -13,4 +13,5 @@ resource "aiven_pg" "example_pg" {
 
 output "pg_service_uri" {
   value = aiven_pg.example_pg.service_uri
+  sensitive = true
 }

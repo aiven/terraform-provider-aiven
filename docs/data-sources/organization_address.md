@@ -22,7 +22,7 @@ Gets information about an organization address.
 
 ### Read-Only
 
-- `address_lines` (List of String) Array of address lines.
+- `address_lines` (Set of String) Array of address lines.
 - `city` (String) City name.
 - `company_name` (String) Name of the company.
 - `country_code` (String) Country code.

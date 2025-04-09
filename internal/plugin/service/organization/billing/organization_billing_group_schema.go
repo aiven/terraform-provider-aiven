@@ -25,13 +25,13 @@ type OrganizationBillingGroupModel struct {
 	BillingAddressID types.String `tfsdk:"billing_address_id"`
 
 	// BillingContactEmails is the list of billing contact emails
-	BillingContactEmails types.List `tfsdk:"billing_contact_emails"`
+	BillingContactEmails types.Set `tfsdk:"billing_contact_emails"`
 
 	// BillingCurrency is the billing currency
 	BillingCurrency types.String `tfsdk:"billing_currency"`
 
 	// BillingEmails is the list of billing emails
-	BillingEmails types.List `tfsdk:"billing_emails"`
+	BillingEmails types.Set `tfsdk:"billing_emails"`
 
 	// BillingGroupName is the name of the billing group
 	BillingGroupName types.String `tfsdk:"billing_group_name"`
@@ -74,7 +74,7 @@ func ResourceSchema() map[string]schema.Attribute {
 			Description: "ID of the billing address.",
 			Required:    true,
 		},
-		"billing_contact_emails": schema.ListAttribute{
+		"billing_contact_emails": schema.SetAttribute{
 			Description: "List of billing contact emails.",
 			Required:    true,
 			ElementType: types.StringType,
@@ -86,7 +86,7 @@ func ResourceSchema() map[string]schema.Attribute {
 				stringvalidator.OneOf(account.BillingCurrencyTypeChoices()...),
 			},
 		},
-		"billing_emails": schema.ListAttribute{
+		"billing_emails": schema.SetAttribute{
 			Description: "List of billing emails.",
 			Required:    true,
 			ElementType: types.StringType,

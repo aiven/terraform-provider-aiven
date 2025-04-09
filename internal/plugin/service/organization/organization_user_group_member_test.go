@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -15,11 +14,9 @@ import (
 // TestAccOrganizationUserGroupMember tests the organization user group member resource.
 func TestAccOrganizationUserGroupMember(t *testing.T) {
 	acc.SkipIfNotBeta(t)
-	userID := acc.UserID()
 
 	name := "aiven_organization_user_group_member.foo"
-
-	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+	suffix := acc.RandStr()
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -31,6 +28,11 @@ data "aiven_organization" "foo" {
   name = "%[3]s"
 }
 
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "foo"
+}
+
 resource "aiven_organization_user_group" "foo" {
   organization_id = data.aiven_organization.foo.id
   name            = "%[1]s-usr-group-%[2]s"
@@ -40,11 +42,11 @@ resource "aiven_organization_user_group" "foo" {
 resource "aiven_organization_user_group_member" "foo" {
   organization_id = data.aiven_organization.foo.id
   group_id        = aiven_organization_user_group.foo.group_id
-  user_id         = "%[4]s"
+  user_id         = aiven_organization_application_user.foo.user_id
 }
-	`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName(), userID),
+	`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(name, "last_activity_time"),
+					resource.TestCheckResourceAttrSet(name, "id"),
 				),
 			},
 			{

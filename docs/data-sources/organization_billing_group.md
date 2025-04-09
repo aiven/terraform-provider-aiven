@@ -23,9 +23,9 @@ Gets information about a billing group.
 ### Read-Only
 
 - `billing_address_id` (String) ID of the billing address.
-- `billing_contact_emails` (List of String) List of billing contact emails.
+- `billing_contact_emails` (Set of String) List of billing contact emails.
 - `billing_currency` (String) Billing currency.
-- `billing_emails` (List of String) List of billing emails.
+- `billing_emails` (Set of String) List of billing emails.
 - `billing_group_name` (String) Name of the billing group.
 - `custom_invoice_text` (String) Custom invoice text.
 - `id` (String) Resource ID, a composite of organization_id and billing_group_id.

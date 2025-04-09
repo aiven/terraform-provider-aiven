@@ -133,8 +133,8 @@ func (r *organizationAddressDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	// Convert address lines to types.List
-	addressLines, diags := types.ListValueFrom(ctx, types.StringType, address.AddressLines)
+	// Convert address lines to types.Set
+	addressLines, diags := types.SetValueFrom(ctx, types.StringType, address.AddressLines)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -147,17 +147,7 @@ func (r *organizationAddressDataSource) Read(ctx context.Context, req datasource
 	state.AddressID = types.StringValue(address.AddressId)
 	state.AddressLines = addressLines
 	state.City = types.StringPointerValue(address.City)
-
-	// WORKAROUND: Handle empty company_name specially to prevent drift detection
-	// The API returns an empty string ("") for company_name when it's not set,
-	// but Terraform represents unset optional values as null.
-	// This workaround should be removed once the API is fixed to return null for unset fields.
-	if address.CompanyName == "" {
-		state.CompanyName = types.StringNull()
-	} else {
-		state.CompanyName = types.StringValue(address.CompanyName)
-	}
-
+	state.CompanyName = types.StringPointerValue(address.CompanyName)
 	state.CountryCode = types.StringValue(address.CountryCode)
 	state.State = types.StringPointerValue(address.State)
 	state.ZipCode = types.StringPointerValue(address.ZipCode)
