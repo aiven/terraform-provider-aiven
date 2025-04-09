@@ -52,7 +52,7 @@ jobs:
       ACC_TEST_PARALLELISM: 5
     strategy:
       max-parallel: 5
-      fail-fast: true
+      fail-fast: false
       matrix:
         pkg_path: ${{ fromJson(needs.find_tests.outputs.matrix) }}
 
