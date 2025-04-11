@@ -1,5 +1,5 @@
 data "aiven_opensearch_acl_config" "os-acl-config" {
-  project      = aiven_project.os-project.project
-  service_name = aiven_opensearch.os.service_name
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
 }
 

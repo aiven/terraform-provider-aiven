@@ -3,39 +3,28 @@
 page_title: "aiven_opensearch_security_plugin_config Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch Security Plugin Config resource allows the creation and management of AivenOpenSearch Security Plugin config.
+  Enables and manages OpenSearch Security for an Aiven for OpenSearch® service https://aiven.io/docs/products/opensearch/concepts/os-security.
+  After enabling OpenSearch Security management, you can no longer use Aiven Terraform Provider to manage access controls for that service. To manage user authentication and access control with OpenSearch Security management enabled,
+  use the OpenSearch Security Dashboard or OpenSearch Security API.
+  Once enabled, OpenSearch Security management cannot be disabled. To disable it, contact Aiven support https://aiven.io/support-services.
 ---
 
 # aiven_opensearch_security_plugin_config (Resource)
 
-The OpenSearch Security Plugin Config resource allows the creation and management of AivenOpenSearch Security Plugin config.
+Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security).
+
+After enabling OpenSearch Security management, **you can no longer use Aiven Terraform Provider to manage access controls for that service.** To manage user authentication and access control with OpenSearch Security management enabled,
+use the OpenSearch Security Dashboard or OpenSearch Security API.
+
+**Once enabled, OpenSearch Security management cannot be disabled.** To disable it, [contact Aiven support](https://aiven.io/support-services).
 
 ## Example Usage
 
 ```terraform
-data "aiven_project" "foo" {
-  project = "example_project"
-}
-
-resource "aiven_opensearch" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "example_service_name"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
-resource "aiven_opensearch_user" "foo" {
-  service_name = aiven_opensearch.bar.service_name
-  project      = data.aiven_project.foo.project
-  username     = "user-example"
-}
-
-resource "aiven_opensearch_security_plugin_config" "foo" {
-  project        = data.aiven_project.foo.project
-  service_name   = aiven_opensearch.bar.service_name
-  admin_password = "ThisIsATest123^=^"
+resource "aiven_opensearch_security_plugin_config" "main" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_opensearch.example_opensearch.service_name
+  admin_password = var.opensearch_security_admin_password
 }
 ```
 
@@ -54,7 +43,7 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether the user management with the security plugin is enabled. This is always true when the os-sec-admin password was set at least once.
+- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether OpenSearch Security management is enabled. This is always true when the os-sec-admin password was set at least once.
 - `available` (Boolean) Whether the security plugin is available. This is always true for recently created services.
 - `enabled` (Boolean) Whether the security plugin is enabled. This is always true for recently created services.
 - `id` (String) The ID of this resource.
@@ -75,5 +64,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_opensearch_security_plugin_config.foo PROJECT/SERVICE_NAME
+terraform import aiven_opensearch_security_plugin_config.main PROJECT/SERVICE_NAME
 ```

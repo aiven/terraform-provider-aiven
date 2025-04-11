@@ -12,7 +12,7 @@ func opensearchSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeOpenSearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "OpenSearch server provided values",
+		Description: "Values provided by the OpenSearch server.",
 		MaxItems:    1,
 		Optional:    true,
 		Sensitive:   true,
@@ -32,26 +32,26 @@ func opensearchSchema() map[string]*schema.Schema {
 				"opensearch_dashboards_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "URI for OpenSearch dashboard frontend",
+					Description: "URI for OpenSearch dashboard frontend.",
 					Sensitive:   true,
 				},
 				"kibana_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Sensitive:   true,
-					Description: "URI for Kibana dashboard frontend",
+					Description: "URI for Kibana dashboard frontend.",
 					Deprecated:  "This field was added by mistake and has never worked. It will be removed in future versions.",
 				},
 				"username": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Sensitive:   true,
-					Description: "OpenSearch username",
+					Description: "OpenSearch username.",
 				},
 				"password": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "OpenSearch password",
+					Description: "OpenSearch password.",
 					Sensitive:   true,
 				},
 			},
@@ -62,7 +62,7 @@ func opensearchSchema() map[string]*schema.Schema {
 
 func ResourceOpenSearch() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The OpenSearch resource allows the creation and management of Aiven OpenSearch services.",
+		Description:   "Creates and manages an [Aiven for OpenSearch®](https://aiven.io/docs/products/opensearch) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpenSearch),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

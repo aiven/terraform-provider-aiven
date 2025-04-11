@@ -3,19 +3,19 @@
 page_title: "aiven_opensearch_security_plugin_config Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch Security Plugin Config data source provides information about an existing Aiven OpenSearch Security Plugin Config.
+  Gets information about OpenSearch Security configuration for an Aiven for OpenSearch® service.
 ---
 
 # aiven_opensearch_security_plugin_config (Data Source)
 
-The OpenSearch Security Plugin Config data source provides information about an existing Aiven OpenSearch Security Plugin Config.
+Gets information about OpenSearch Security configuration for an Aiven for OpenSearch® service.
 
 ## Example Usage
 
 ```terraform
 data "aiven_opensearch_security_plugin_config" "os-sec-config" {
-  project      = aiven_project.os-project.project
-  service_name = aiven_opensearch.os.service_name
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
 }
 ```
 
@@ -29,7 +29,7 @@ data "aiven_opensearch_security_plugin_config" "os-sec-config" {
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether the user management with the security plugin is enabled. This is always true when the os-sec-admin password was set at least once.
+- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether OpenSearch Security management is enabled. This is always true when the os-sec-admin password was set at least once.
 - `admin_password` (String, Sensitive) The password for the os-sec-admin user.
 - `available` (Boolean) Whether the security plugin is available. This is always true for recently created services.
 - `enabled` (Boolean) Whether the security plugin is enabled. This is always true for recently created services.

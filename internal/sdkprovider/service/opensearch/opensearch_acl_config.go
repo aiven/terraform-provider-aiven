@@ -19,7 +19,7 @@ var aivenOpenSearchACLConfigSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
-		Description: userconfig.Desc("Enable OpenSearch ACLs. When disabled authenticated service users have unrestricted access.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("Enable OpenSearch ACLs. When disabled, authenticated service users have unrestricted access.").DefaultValue(true).Build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
@@ -31,7 +31,12 @@ var aivenOpenSearchACLConfigSchema = map[string]*schema.Schema{
 
 func ResourceOpenSearchACLConfig() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The OpenSearch ACL Config resource allows the creation and management of Aiven OpenSearch ACLs.",
+		Description: `Enables access control for an Aiven for OpenSearch® service.
+
+By default, service users are granted full access rights. To limit their access, you can enable access control and [create ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_acl_rule)
+that define permissions and patterns. Alternatively, you can [enable OpenSearch Security management](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_security_plugin_config)
+to manage users and permissions with the OpenSearch Security dashboard.
+`,
 		CreateContext: resourceOpenSearchACLConfigUpdate,
 		ReadContext:   resourceOpenSearchACLConfigRead,
 		UpdateContext: resourceOpenSearchACLConfigUpdate,

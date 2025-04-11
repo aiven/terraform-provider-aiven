@@ -3,21 +3,21 @@
 page_title: "aiven_opensearch_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch User resource allows the creation and management of Aiven OpenSearch Users.
+  Creates and manages an Aiven for OpenSearch® service user.
 ---
 
 # aiven_opensearch_user (Resource)
 
-The OpenSearch User resource allows the creation and management of Aiven OpenSearch Users.
+Creates and manages an Aiven for OpenSearch® service user.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_opensearch_user" "foo" {
-  service_name = aiven_opensearch.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_opensearch_user" "example_opensearch_user" {
+  service_name = aiven_opensearch.example_opensearch.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-opensearch-user"
+  password     = var.opensearch_user_password
 }
 ```
 
@@ -28,17 +28,17 @@ resource "aiven_opensearch_user" "foo" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the OpenSearch User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Name of the OpenSearch service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the OpenSearch User.
+- `password` (String, Sensitive) The OpenSearch service user's password.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `type` (String) User account type, such as primary or regular account.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -56,5 +56,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_opensearch_user.foo PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_opensearch_user.example_opensearch_user PROJECT/SERVICE_NAME/USERNAME
 ```

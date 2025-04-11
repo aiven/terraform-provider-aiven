@@ -34,16 +34,20 @@ var aivenOpenSearchSecurityPluginConfigSchema = map[string]*schema.Schema{
 	"admin_enabled": {
 		Type:     schema.TypeBool,
 		Computed: true,
-		Description: "Whether the os-sec-admin user is enabled. This indicates whether the user management with the" +
-			" security plugin is enabled. This is always true when the os-sec-admin password was set at least once.",
+		Description: "Whether the os-sec-admin user is enabled. This indicates whether OpenSearch Security management" +
+			" is enabled. This is always true when the os-sec-admin password was set at least once.",
 	},
 }
 
 // ResourceOpenSearchSecurityPluginConfig defines the OpenSearch Security Plugin Config resource.
 func ResourceOpenSearchSecurityPluginConfig() *schema.Resource {
 	return &schema.Resource{
-		Description: "The OpenSearch Security Plugin Config resource allows the creation and management of Aiven" +
-			"OpenSearch Security Plugin config.",
+		Description: `Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security).
+
+After enabling OpenSearch Security management, **you can no longer use Aiven Terraform Provider to manage access controls for that service.** To manage user authentication and access control with OpenSearch Security management enabled,
+use the OpenSearch Security Dashboard or OpenSearch Security API.
+
+**Once enabled, OpenSearch Security management cannot be disabled.** To disable it, [contact Aiven support](https://aiven.io/support-services).`,
 		CreateContext: resourceOpenSearchSecurityPluginConfigCreate,
 		ReadContext:   resourceOpenSearchSecurityPluginConfigRead,
 		UpdateContext: resourceOpenSearchSecurityPluginConfigUpdate,

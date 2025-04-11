@@ -1,1 +1,1 @@
-TERRAFORM IMPORT AIVEN_OPENSEARCH_ACL_CONFIG.FOO project/service_name
+terraform import aiven_opensearch_acl_config.main PROJECT/SERVICE_NAME
