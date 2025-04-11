@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
@@ -91,7 +92,7 @@ func ResourceKafka() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.",
 		CreateContext: resourceKafkaCreate,
-		ReadContext:   resourceKafkaRead,
+		ReadContext:   common.WithExport(resourceKafkaRead, "aiven_kafka"),
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		Importer: &schema.ResourceImporter{
