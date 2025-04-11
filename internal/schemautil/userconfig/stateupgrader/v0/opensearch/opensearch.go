@@ -18,13 +18,13 @@ func opensearchSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		Computed:    true,
 		Sensitive:   true,
-		Description: "OpenSearch server provided values",
+		Description: "Values provided by the OpenSearch server.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"opensearch_dashboards_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "URI for OpenSearch dashboard frontend",
+					Description: "URI for OpenSearch dashboard frontend.",
 					Sensitive:   true,
 				},
 			},
