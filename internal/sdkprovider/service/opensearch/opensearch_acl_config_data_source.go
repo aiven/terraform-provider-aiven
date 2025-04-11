@@ -13,7 +13,7 @@ import (
 func DatasourceOpenSearchACLConfig() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceOpenSearchACLConfigRead,
-		Description: "The OpenSearch ACL Config data source provides information about an existing Aiven OpenSearch ACL Config.",
+		Description: "Gets information about access control for an Aiven for OpenSearch® service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchACLConfigSchema, "project", "service_name"),
 	}
 }

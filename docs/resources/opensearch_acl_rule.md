@@ -3,31 +3,31 @@
 page_title: "aiven_opensearch_acl_rule Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.
+  Create an access control list (ACL) rule for indexes in an Aiven for OpenSearch® service. ACLs apply only to indexes and don't control access to other OpenSearch APIs such as OpenSearch Dashboards.
 ---
 
 # aiven_opensearch_acl_rule (Resource)
 
-The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.
+Create an access control list (ACL) rule for indexes in an Aiven for OpenSearch® service. ACLs apply only to indexes and don't control access to other OpenSearch APIs such as OpenSearch Dashboards.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_opensearch_user" "os_user" {
-  project      = var.aiven_project_name
-  service_name = aiven_opensearch.os_test.service_name
+resource "aiven_opensearch_user" "os_user_1" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   username     = "documentation-user-1"
 }
 
 resource "aiven_opensearch_user" "os_user_2" {
-  project      = var.aiven_project_name
-  service_name = aiven_opensearch.os_test.service_name
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   username     = "documentation-user-2"
 }
 
 resource "aiven_opensearch_acl_config" "os_acls_config" {
-  project      = var.aiven_project_name
-  service_name = aiven_opensearch.os_test.service_name
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   enabled      = true
   extended_acl = false
 }
@@ -35,17 +35,17 @@ resource "aiven_opensearch_acl_config" "os_acls_config" {
 locals {
   acl_rules = [
     {
-      username   = aiven_opensearch_user.os_user.username
+      username   = aiven_opensearch_user.os_user_1.username
       index      = "index2"
       permission = "readwrite"
     },
     {
-      username   = aiven_opensearch_user.os_user.username
+      username   = aiven_opensearch_user.os_user_1.username
       index      = "index3"
       permission = "read"
     },
     {
-      username   = aiven_opensearch_user.os_user.username
+      username   = aiven_opensearch_user.os_user_1.username
       index      = "index5"
       permission = "deny"
     },
@@ -65,8 +65,8 @@ locals {
 resource "aiven_opensearch_acl_rule" "os_acl_rule" {
   for_each = {for i, v in local.acl_rules : i => v}
 
-  project      = aiven_opensearch_acl_config.os_acls_config.project
-  service_name = aiven_opensearch_acl_config.os_acls_config.service_name
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   username     = each.value.username
   index        = each.value.index
   permission   = each.value.permission
@@ -78,11 +78,11 @@ resource "aiven_opensearch_acl_rule" "os_acl_rule" {
 
 ### Required
 
-- `index` (String) The index pattern for this ACL entry. Maximum length: `249`. Changing this property forces recreation of the resource.
-- `permission` (String) The permissions for this ACL entry. The possible values are `admin`, `deny`, `read`, `readwrite` and `write`.
+- `index` (String) The index pattern for this ACL rule. Maximum length: `249`. Changing this property forces recreation of the resource.
+- `permission` (String) The permissions for this ACL rule. The possible values are `admin`, `deny`, `read`, `readwrite` and `write`.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The username for the ACL entry. Maximum length: `40`. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The username for the OpenSearch user this ACL rule applies to. Maximum length: `40`. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 

@@ -15,8 +15,7 @@ import (
 func DatasourceOpenSearchSecurityPluginConfig() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceOpenSearchSecurityPluginConfigRead,
-		Description: "The OpenSearch Security Plugin Config data source provides information about an existing Aiven" +
-			" OpenSearch Security Plugin Config.",
+		Description: "Gets information about OpenSearch Security configuration for an Aiven for OpenSearch® service.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
 			aivenOpenSearchSecurityPluginConfigSchema, "project", "service_name",
 		),
