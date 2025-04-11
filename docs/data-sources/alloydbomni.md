@@ -111,6 +111,7 @@ Read-Only:
 - `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
 - `pg_version` (String)
+- `pgaudit` (List of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--pgaudit))
 - `pgbouncer` (List of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--pgbouncer))
 - `pglookout` (List of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--pglookout))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--private_access))
@@ -188,6 +189,27 @@ Read-Only:
 - `track_io_timing` (String)
 - `wal_sender_timeout` (Number)
 - `wal_writer_delay` (Number)
+
+
+<a id="nestedobjatt--alloydbomni_user_config--pgaudit"></a>
+### Nested Schema for `alloydbomni_user_config.pgaudit`
+
+Read-Only:
+
+- `feature_enabled` (Boolean)
+- `log` (List of String)
+- `log_catalog` (Boolean)
+- `log_client` (Boolean)
+- `log_level` (String)
+- `log_max_string_length` (Number)
+- `log_nested_statements` (Boolean)
+- `log_parameter` (Boolean)
+- `log_parameter_max_size` (Number)
+- `log_relation` (Boolean)
+- `log_rows` (Boolean)
+- `log_statement` (Boolean)
+- `log_statement_once` (Boolean)
+- `role` (String)
 
 
 <a id="nestedobjatt--alloydbomni_user_config--pgbouncer"></a>

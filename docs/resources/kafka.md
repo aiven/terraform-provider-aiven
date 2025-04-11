@@ -116,6 +116,7 @@ Optional:
 - `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean) Enable Kafka Connect service. Default: `false`.
 - `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_connect_plugin_versions` (Block List) The plugin selected by the user (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_plugin_versions))
 - `kafka_connect_secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers))
 - `kafka_rest` (Boolean) Enable Kafka-REST service. Default: `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
@@ -236,6 +237,15 @@ Optional:
 - `producer_max_request_size` (Number) This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.
 - `scheduled_rebalance_max_delay_ms` (Number) The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.
 - `session_timeout_ms` (Number) The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
+
+
+<a id="nestedblock--kafka_user_config--kafka_connect_plugin_versions"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_plugin_versions`
+
+Required:
+
+- `plugin_name` (String) The name of the plugin. Example: `debezium-connector`.
+- `version` (String) The version of the plugin. Example: `2.5.0`.
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers"></a>
