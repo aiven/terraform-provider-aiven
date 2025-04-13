@@ -34,6 +34,7 @@ data "aiven_organization_project" "example" {
 
 ### Read-Only
 
+- `base_port` (Number) Valid port number (1-65535) to use as a base for service port allocation.
 - `billing_group_id` (String) Billing group ID to assign to the project.
 - `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
 - `id` (String) The ID of this resource.

@@ -82,6 +82,9 @@ data "aiven_organization_project" "ds_test" {
 					resource.TestCheckResourceAttrPair(resourceName, "billing_group_id", "aiven_billing_group.foo", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
 
+					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttrSet(resourceName, "base_port"),
+
 					resource.TestCheckResourceAttr(resourceName, "technical_emails.#", "2"), // Check number of emails
 					resource.TestCheckTypeSetElemAttr(resourceName, "technical_emails.*", "john.doe+1@gmail.com"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "technical_emails.*", "john.doe+2@gmail.com"),
@@ -169,6 +172,7 @@ resource "aiven_organization_project" "foo" {
 					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
 
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttrSet(resourceName, "base_port"),
 
 					resource.TestCheckResourceAttr(resourceName, "technical_emails.#", "3"), // Check number of emails
 					resource.TestCheckTypeSetElemAttr(resourceName, "technical_emails.*", "john.doe+3@gmail.com"),
@@ -223,6 +227,7 @@ resource "aiven_organization_project" "foo" {
   organization_id  = aiven_organization.foo.id
   billing_group_id = aiven_billing_group.foo.id
   parent_id        = aiven_organizational_unit.foo.id
+  base_port        = 10000
 }
 `, projectID),
 				Check: resource.ComposeTestCheckFunc(
@@ -231,6 +236,7 @@ resource "aiven_organization_project" "foo" {
 					resource.TestCheckResourceAttrPair(resourceName, "billing_group_id", "aiven_billing_group.foo", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "base_port", "10000"),
 				),
 			},
 			{

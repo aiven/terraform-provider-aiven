@@ -11,9 +11,11 @@ import (
 	retryGo "github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -47,6 +49,13 @@ var aivenOrganizationProjectSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Sensitive:   true,
 		Description: "The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.",
+	},
+	"base_port": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		Description:  "Valid port number (1-65535) to use as a base for service port allocation.",
+		ValidateFunc: validation.IntBetween(1, 65535),
 	},
 	"technical_emails": {
 		Type:        schema.TypeSet,
@@ -103,10 +112,12 @@ func resourceOrganizationProjectCreate(ctx context.Context, d *schema.ResourceDa
 		billingGroupID = d.Get("billing_group_id").(string)
 		projectID      = d.Get("project_id").(string)
 		parentID       = d.Get("parent_id").(string)
+		basePort       = d.Get("base_port").(int)
 
 		req = organizationprojects.OrganizationProjectsCreateIn{
 			BillingGroupId: billingGroupID,
 			ProjectId:      projectID,
+			BasePort:       util.NilIfZero(basePort),
 			Tags:           schemautil.GetTagsFromSchema(d),
 			TechEmails:     techEmails(d.Get("technical_emails").(*schema.Set).List()),
 		}
@@ -163,6 +174,9 @@ func resourceOrganizationProjectRead(ctx context.Context, d *schema.ResourceData
 	if err = d.Set("billing_group_id", project.BillingGroupId); err != nil {
 		return err
 	}
+	if err = d.Set("base_port", project.BasePort); err != nil {
+		return err
+	}
 	if err = d.Set("tag", schemautil.SetTagsTerraformProperties(project.Tags)); err != nil {
 		return err
 	}
@@ -208,6 +222,7 @@ func resourceOrganizationProjectUpdate(ctx context.Context, d *schema.ResourceDa
 		OrganizationId: lo.ToPtr(d.Get("organization_id").(string)),
 		ParentId:       lo.ToPtr(accountID),
 		BillingGroupId: lo.ToPtr(d.Get("billing_group_id").(string)),
+		BasePort:       util.NilIfZero(d.Get("base_port").(int)),
 		Tags:           lo.ToPtr(schemautil.GetTagsFromSchema(d)),
 		TechEmails:     techEmails(d.Get("technical_emails").(*schema.Set).List()),
 	}
