@@ -63,6 +63,11 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     privilege = "DROP FUNCTION"
     database  = "*"
   }
+
+  privilege_grant {
+    privilege = "S3"
+    database = "*"
+  }
 }
 
 resource "aiven_clickhouse_user" "foo-user" {

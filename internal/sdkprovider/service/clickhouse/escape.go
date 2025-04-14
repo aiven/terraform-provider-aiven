@@ -6,6 +6,9 @@ import (
 )
 
 func escape(identifier string) string {
+	if identifier == "*" {
+		return identifier
+	}
 	return escapeBytes([]byte(identifier))
 }
 

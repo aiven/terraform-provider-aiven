@@ -20,6 +20,9 @@ nav_order: 1
 - Deprecated `is_super_admin` in the `aiven_organization_application_user` resource
 - Fixed `aiven_clickhouse_grant` when setting database to wildcard (*)
 
+- Fix aiven_clickhouse_grant allow setting S3 privilege
+- Fix aiven_clickhouse_grant when setting database to wildcard (*)
+
 ## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`
