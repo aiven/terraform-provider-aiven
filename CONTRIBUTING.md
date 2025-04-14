@@ -102,9 +102,9 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
 > github.com/aiven/terraform-provider-aiven/aiven.resourceServiceCreate() ./aiven/resource_service.go:806 (hits goroutine(326):1 total:1) (PC: 0x129667b)
    801:			return resourceServiceCreate(ctx, d, m)
    802:		}
-   803:	
+   803:
    804:	}
-   805:	
+   805:
 => 806:	func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
    807:		client := m.(*aiven.Client)
    808:		serviceType := d.Get("service_type").(string)

@@ -5,4 +5,3 @@ data "aiven_service_component" "sc1" {
   route                       = "dynamic"
   kafka_authentication_method = "certificate"
 }
-

@@ -8,7 +8,7 @@ If you have already manually created an Aiven environment, it is possible to imp
 The ID format typically is `<project_name>/<resource_name>` for resources that are directly under project level and `<project_name>/<service_name>/<resource_name>` for resources that belong to specific service.
 
 As example, to import a database called `mydb` belonging to the service `myservice` in the project `myproject`, you can run:
-```bash 
+```bash
 $ terraform import aiven_database.mydb myproject/myservice/mydb
 ```
 

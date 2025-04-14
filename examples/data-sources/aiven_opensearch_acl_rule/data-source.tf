@@ -4,4 +4,3 @@ data "aiven_opensearch_acl_rule" "os_acl_rule" {
   username     = "<USERNAME>"
   index        = "<INDEX>"
 }
-

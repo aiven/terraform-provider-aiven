@@ -23,7 +23,7 @@ To get user IDs, use the `aiven_organization_user_list` data source.
 
 ## Create your first Aiven resources
 
-1. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:  
+1. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:
 
    ```sh
    $ terraform --version

@@ -4,4 +4,3 @@ data "aiven_mirrormaker_replication_flow" "example_replication_flow" {
   source_cluster = aiven_kafka.source.service_name
   target_cluster = aiven_kafka.target.service_name
 }
-

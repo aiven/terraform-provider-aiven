@@ -3,4 +3,3 @@ data "aiven_mysql_database" "example_database" {
   service_name  = aiven_mysql.example_mysql.service_name
   database_name = "example-database"
 }
-

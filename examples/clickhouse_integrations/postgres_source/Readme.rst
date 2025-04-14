@@ -19,4 +19,3 @@ As a result, once the services are running, the three following databases will b
 - ``service_postgres-gcp-us_suppliers_dims_public``
 - ``service_postgres-gcp-us_inventory_facts_public``
 - ``service_postgres-gcp-us_order_events_public``
-

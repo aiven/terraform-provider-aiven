@@ -3,4 +3,3 @@ resource "aiven_flink_application" "example_app" {
   service_name = "example-flink-service"
   name         = "example-app"
 }
-

@@ -22,8 +22,8 @@ description: |-
 
 Adds a user as a team member.
 
-During the creation of this resource, an invite is sent to the address specified in `user_email`. 
-The user is added to the team after they accept the invite. Deleting `aiven_account_team_member` 
+During the creation of this resource, an invite is sent to the address specified in `user_email`.
+The user is added to the team after they accept the invite. Deleting `aiven_account_team_member`
 deletes the pending invite if not accepted or removes the user from the team if they already accepted the invite.
 
 
@@ -31,7 +31,7 @@ deletes the pending invite if not accepted or removes the user from the team if 
 **On 30 September 2024** the Account Owners team will transition to super admin. Super admin have full access to the organization.
 The Account Owners and super admin are synced, so the removal of the Account Owners team will have no impact on existing permissions.
 **From 4 November 2024** you won't be able to create new teams or update existing ones. Existing teams will be migrated to groups after
-this date. **On 2 December 2024** all teams will be deleted and the teams feature will be completely removed. [View the 
+this date. **On 2 December 2024** all teams will be deleted and the teams feature will be completely removed. [View the
 migration guide](https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups) for more information on the changes and migrating to groups.
 
 ~> **Important**

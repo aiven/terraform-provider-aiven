@@ -16,7 +16,7 @@ Creates and manages an Aiven project member.
 
 ~> **This resource is deprecated**
 Use `aiven_organization_permission` instead and
-[migrate existing `aiven_project_user` resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+[migrate existing `aiven_project_user` resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources)
 to the new resource. **Do not use the `aiven_project_user` and `aiven_organization_permission` resources together**.
 
 ## Example Usage

@@ -10,7 +10,7 @@ description: |-
 
 # aiven_alloydbomni (Data Source)
 
-Gets information about an Aiven for AlloyDB Omni service. 
+Gets information about an Aiven for AlloyDB Omni service.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

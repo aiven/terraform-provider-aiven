@@ -5,13 +5,13 @@ page_title: "Aiven Provider for Terraform"
 # Aiven Provider for Terraform
 The Terraform provider for [Aiven](https://aiven.io/), the trusted open source data platform for everyone.
 
-## Authentication 
-[Sign up for Aiven](https://console.aiven.io/signup?utm_source=terraformregistry&utm_medium=organic&utm_campaign=terraform&utm_content=signup) and [create a personal token](https://aiven.io/docs/platform/howto/create_authentication_token). 
+## Authentication
+[Sign up for Aiven](https://console.aiven.io/signup?utm_source=terraformregistry&utm_medium=organic&utm_campaign=terraform&utm_content=signup) and [create a personal token](https://aiven.io/docs/platform/howto/create_authentication_token).
 
 You can also create an [application user](https://aiven.io/docs/platform/howto/manage-application-users) and use its token for accessing the Aiven Provider.
 
 ## Example usage
-For Terraform v0.13 and later: 
+For Terraform v0.13 and later:
 
 ```hcl
 terraform {

@@ -3,4 +3,3 @@ data "aiven_pg_database" "main" {
   service_name  = aiven_pg.example_postgres.service_name
   database_name = "example-database"
 }
-

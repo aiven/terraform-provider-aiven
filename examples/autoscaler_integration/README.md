@@ -11,10 +11,10 @@ To enable disk autoscaling, you create an autoscaler integration endpoint and ad
 
 ## Create a PostgreSQL service with disk autoscaling
 
-1. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:  
+1. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:
 
    ```sh
-   $ terraform --version 
+   $ terraform --version
    ```
 
 2. Clone this repository.
@@ -66,13 +66,13 @@ To delete the service, integration, and integration endpoint:
 1. Preview the changes first by running:
 
    ```sh
-   $ terraform plan -destroy 
+   $ terraform plan -destroy
    ```
 
 2. To delete all resources, run:
 
    ```sh
-   $ terraform destroy 
+   $ terraform destroy
    ```
 
 3. Enter yes to confirm the changes:

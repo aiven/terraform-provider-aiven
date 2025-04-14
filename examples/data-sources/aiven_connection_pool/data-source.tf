@@ -3,4 +3,3 @@ data "aiven_connection_pool" "main" {
   service_name = aiven_pg.example_postgres.service_name
   pool_name    = "example-pool"
 }
-
