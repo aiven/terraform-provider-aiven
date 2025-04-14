@@ -104,6 +104,7 @@ Read-Only:
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
+- `kafka_connect_plugin_versions` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_plugin_versions))
 - `kafka_connect_secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers))
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
@@ -221,6 +222,15 @@ Read-Only:
 - `producer_max_request_size` (Number)
 - `scheduled_rebalance_max_delay_ms` (Number)
 - `session_timeout_ms` (Number)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_plugin_versions"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_plugin_versions`
+
+Read-Only:
+
+- `plugin_name` (String)
+- `version` (String)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers"></a>

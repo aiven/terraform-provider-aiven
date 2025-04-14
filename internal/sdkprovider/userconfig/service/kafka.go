@@ -441,6 +441,23 @@ func kafkaUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"kafka_connect_plugin_versions": {
+				Description: "The plugin selected by the user",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"plugin_name": {
+						Description: "The name of the plugin. Example: `debezium-connector`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"version": {
+						Description: "The version of the plugin. Example: `2.5.0`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"kafka_connect_secret_providers": {
 				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
