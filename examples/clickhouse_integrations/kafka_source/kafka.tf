@@ -27,9 +27,9 @@ resource "aiven_kafka_topic" "edge_measurements" {
   termination_protection = false
 
   config {
-    flush_ms                       = 10
-    cleanup_policy                 = "delete"
-    retention_bytes                = "134217728" # 10 GiB
-    retention_ms                   = "604800000" # 1 week
+    flush_ms        = 10
+    cleanup_policy  = "delete"
+    retention_bytes = "134217728" # 10 GiB
+    retention_ms    = "604800000" # 1 week
   }
 }

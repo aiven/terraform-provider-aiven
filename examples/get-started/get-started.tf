@@ -41,7 +41,7 @@ resource "aiven_organization_user_group" "developers" {
 resource "aiven_organization_user_group_member" "developers" {
   group_id        = aiven_organization_user_group.developers.group_id
   organization_id = data.aiven_organization.main.id
-  user_id = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "EMAIL_ADDRESS"])
+  user_id         = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "EMAIL_ADDRESS"])
 }
 
 # Grant the group the developer role and
