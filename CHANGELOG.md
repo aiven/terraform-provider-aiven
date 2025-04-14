@@ -10,6 +10,8 @@ nav_order: 1
 
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+- Added `base_port` to the `aiven_organization_project` resource
+
 ## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`
