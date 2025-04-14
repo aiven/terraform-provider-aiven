@@ -300,10 +300,10 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 	for i := range data {
 		column := data[i].([]interface{})
 
-		getMaybeString := func(columnName string) string {
+		getMaybeString := func(columnName string, defaultValue string) string {
 			f := column[columnNameMap[columnName]]
 			if f == nil {
-				return ""
+				return defaultValue
 			}
 			s, ok := f.(string)
 			if !ok {
@@ -329,13 +329,13 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 
 		grants = append(grants, PrivilegeGrant{
 			Grantee: Grantee{
-				User: getMaybeString("user_name"),
-				Role: getMaybeString("role_name"),
+				User: getMaybeString("user_name", ""),
+				Role: getMaybeString("role_name", ""),
 			},
-			Database:  getMaybeString("database"),
-			Table:     getMaybeString("table"),
-			Column:    getMaybeString("column"),
-			Privilege: getMaybeString("access_type"),
+			Database:  getMaybeString("database", "*"),
+			Table:     getMaybeString("table", ""),
+			Column:    getMaybeString("column", ""),
+			Privilege: getMaybeString("access_type", ""),
 			WithGrant: getBoolean("grant_option"),
 		})
 	}

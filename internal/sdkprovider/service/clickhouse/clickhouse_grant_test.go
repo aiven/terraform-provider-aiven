@@ -52,6 +52,11 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     table     = "test-table"
     column    = "test-column"
   }
+
+  privilege_grant {
+    privilege = "CREATE TEMPORARY TABLE"
+    database = "*"
+  }
 }
 
 resource "aiven_clickhouse_user" "foo-user" {
@@ -79,11 +84,13 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 				Config: manifest,
 				Check: resource.ComposeTestCheckFunc(
 					// privilege grant checks
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.1.privilege", "INSERT"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.1.database", "test-db"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.1.table", "test-table"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.1.column", "test-column"),
 
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "CREATE TEMPORARY TABLE"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "*"),
 					// role grant checks
 					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
 				),

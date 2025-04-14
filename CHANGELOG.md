@@ -20,6 +20,8 @@ nav_order: 1
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.0-IV0`, `4.0`
 - Change `aiven_pg` field `pg_user_config.pgaudit`: remove deprecation
 
+- Fix aiven_clickhouse_grant when setting database to wildcard (*)
+
 ## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`
