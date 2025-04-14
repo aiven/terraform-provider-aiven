@@ -60,7 +60,7 @@ func (r *externalIdentityDataSource) Schema(
 	resp *datasource.SchemaResponse,
 ) {
 	resp.Schema = schema.Schema{
-		Description: userconfig.Desc("Maps an external service user to an Aiven user.").AvailabilityType(userconfig.Beta).Build(),
+		Description: userconfig.Desc("Links external usernames to Aiven users, ensuring that requesters and approvers are correctly identified for [Aiven for Apache Kafka® Governance approval workflows](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).").AvailabilityType(userconfig.Beta).Build(),
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
 				Description: "The ID of the Aiven organization that the user is part of.",
@@ -71,7 +71,7 @@ func (r *externalIdentityDataSource) Schema(
 				Required:    true,
 			},
 			"external_user_id": schema.StringAttribute{
-				Description: "The user's ID on the external service.",
+				Description: "The user's ID on the external service. For GitHub, this is their GitHub username.",
 				Required:    true,
 			},
 			"external_service_name": schema.StringAttribute{
