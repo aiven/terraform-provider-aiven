@@ -14,10 +14,10 @@ description: |-
 # aiven_organization_permission (Resource)
 
 Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)
-to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. 
+to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level.
 Unit-level permissions aren't shown in the Aiven Console.
 
-To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple `aiven_organization_permission` resources. 
+To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple `aiven_organization_permission` resources.
 Instead, use multiple permission blocks as in the example usage.
 
 **Do not use the `aiven_project_user` or `aiven_organization_group_project` resources with this resource**.
@@ -31,7 +31,7 @@ resource "aiven_organization_permission" "example_project_permissions" {
   resource_id     = data.aiven_project.example_project.project
   resource_type   = "project"
   permissions {
-    # Grant a user the operator role and 
+    # Grant a user the operator role and
     # permission to read service logs
     permissions = [
       "operator",
@@ -40,8 +40,8 @@ resource "aiven_organization_permission" "example_project_permissions" {
     principal_id   = "u123a456b7890c"
     principal_type = "user"
   }
-  # Grant a group the write project integrations 
-  # permission and the developer role 
+  # Grant a group the write project integrations
+  # permission and the developer role
   permissions {
     permissions = [
       "project:integrations:write",
@@ -58,14 +58,14 @@ resource "aiven_organization_permission" "example_org_permissions" {
   resource_id     = data.aiven_organization.main.id
   resource_type   = "organization"
 
-  # Grant a user permission to manage application 
+  # Grant a user permission to manage application
   # users and view all project audit logs
   permissions {
     permissions = [
       "organization:app_users:write",
       "project:audit_logs:read"
     ]
-    principal_id   = "u123a456b7890c" 
+    principal_id   = "u123a456b7890c"
     principal_type = "user"
   }
 

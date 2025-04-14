@@ -360,7 +360,7 @@ jobs:
                 echo "Found test for $name $type in $test_file"
                 entity_tests[$name]+="$test_file "
               done < <(find internal -type f -name '*_test.go' -exec grep -l "$pattern" {} +)
-            fi  
+            fi
           done
 
           # Compile a unique list of test files to run

@@ -16,7 +16,7 @@ const testSample = `# Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Fix  aiven_project : can't migrate from  account_id  (deprecated) to  parent_id 
+- Fix  aiven_project : can't migrate from  account_id  (deprecated) to  parent_id
 - Add  aiven_organization_user_list  beta resource
 - Add AIVEN_ALLOW_IP_FILTER_PURGE environment variable to allow purging of IP filters. This is a safety feature to
   prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
@@ -36,7 +36,7 @@ const testSample = `# Changelog
 - Remove  aiven_valkey  from beta resources
 - Remove  aiven_valkey_user  from beta resources
 - Adds aiven_organization_permission  example
-- Add 
+- Add
   capability to map external service user with internal aiven user with external_identity data source
 
 ## [1.0.0] - 2018-09-27

@@ -2,11 +2,11 @@
 
 The Aiven platform uses [organizations, organizational units, and projects](https://aiven.io/docs/platform/concepts/orgs-units-projects) to organize services.
 
-This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units. 
+This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units.
 
 Many customers use units to separate projects for different departments within their organization, so this example will create a unit for an engineering department and a finance department.
 
-In each unit, three projects will be created for production, QA, and development environments. 
+In each unit, three projects will be created for production, QA, and development environments.
 
 ## Prerequisites
 
@@ -20,10 +20,10 @@ In each unit, three projects will be created for production, QA, and development
 
 2. Rename the `./secrets.tfvars.tmp` file to `./secrets.tfvars` and add values for the variables. It's recommended to use your organization name as a prefix for the project names.
 
-3. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:  
+3. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:
 
 ```sh
-$ terraform --version 
+$ terraform --version
 ```
 
 The output is similar to the following:
@@ -101,13 +101,13 @@ aiven_organization.org: Creating...
 Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 ```
 
-## Verify the setup in the Aiven Console 
+## Verify the setup in the Aiven Console
 
 You can see your organization, organizational units, and projects in the [Aiven Console](https://console.aiven.io/):
 
 1. Select the organization from the top menu.
 
-2. Click **Admin**. 
+2. Click **Admin**.
 
 3. In the **Organizational units** section, select a unit.
 
@@ -132,7 +132,7 @@ The output shows what changes will be made when you run the `destroy` command.
 $ terraform destroy --var-file=secrets.tfvars
 ```
 
-3. Enter yes to confirm the changes:  
+3. Enter yes to confirm the changes:
 ```sh
 Plan: 0 to add, 0 to change, 9 to destroy
 ...

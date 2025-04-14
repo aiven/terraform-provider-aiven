@@ -34,7 +34,7 @@ resource "aiven_organization_user_group" "example" {
 resource "aiven_organization_user_group_member" "project_admin" {
   group_id = aiven_organization_user_group.example.group_id
   organization_id = aiven_organization.main.id
-  user_id = "u123a456b7890c" 
+  user_id = "u123a456b7890c"
 }
 
 resource "aiven_organization_group_project" "example" {

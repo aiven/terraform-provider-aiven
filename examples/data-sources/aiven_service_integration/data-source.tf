@@ -4,4 +4,3 @@ data "aiven_service_integration" "example_integration" {
   integration_type         = "metrics"
   source_service_name      = aiven_kafka.example_kafka.service_name
 }
-

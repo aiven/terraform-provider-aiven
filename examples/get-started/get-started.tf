@@ -24,13 +24,13 @@ data "aiven_organization_user_list" "users" {
   name = "ORGANIZATION_NAME"
 }
 
-# Create a project in your organization 
+# Create a project in your organization
 resource "aiven_project" "example_project" {
   project   = "ORGANIZATION_NAME-first-project" # Replace ORGANIZATION_NAME with your organization's name
   parent_id = data.aiven_organization.main.id
 }
 
-# Create a user group 
+# Create a user group
 resource "aiven_organization_user_group" "developers" {
   organization_id = data.aiven_organization.main.id
   name            = "Example user group"

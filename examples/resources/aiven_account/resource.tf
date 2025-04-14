@@ -1,4 +1,3 @@
 resource "aiven_account" "account1" {
   name = "<ACCOUNT_NAME>"
 }
-

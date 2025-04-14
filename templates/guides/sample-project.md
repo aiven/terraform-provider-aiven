@@ -7,7 +7,7 @@ There is a [sample project](https://github.com/aiven/terraform-provider-aiven/tr
 - An Aiven project (from a data source)
 - Kafka (with a topic and user)
 - PostgreSQL (with a database and user)
-- InfluxDB 
+- InfluxDB
 - Grafana (metrics and dashboard integration for the Kafka and PostgreSQL databases)
 
 Make sure you have a look at the [variables](https://github.com/aiven/terraform-provider-aiven/tree/master/sample_project/terraform.tfvars) and add your own settings.
