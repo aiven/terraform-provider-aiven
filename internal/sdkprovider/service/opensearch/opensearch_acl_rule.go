@@ -21,26 +21,26 @@ var aivenOpenSearchACLRuleSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  userconfig.Desc("The username for the ACL entry").MaxLen(40).Referenced().ForceNew().Build(),
+		Description:  userconfig.Desc("The username for the OpenSearch user this ACL rule applies to.").MaxLen(40).Referenced().ForceNew().Build(),
 	},
 	"index": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 249),
-		Description:  userconfig.Desc("The index pattern for this ACL entry.").MaxLen(249).ForceNew().Build(),
+		Description:  userconfig.Desc("The index pattern for this ACL rule.").MaxLen(249).ForceNew().Build(),
 	},
 	"permission": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice(opensearch.PermissionTypeChoices(), false),
-		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValuesString(opensearch.PermissionTypeChoices()...).Build(),
+		Description:  userconfig.Desc("The permissions for this ACL rule.").PossibleValuesString(opensearch.PermissionTypeChoices()...).Build(),
 	},
 }
 
 func ResourceOpenSearchACLRule() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.",
+		Description:   "Create an access control list (ACL) rule for indexes in an Aiven for OpenSearch® service. ACLs apply only to indexes and don't control access to other OpenSearch APIs such as OpenSearch Dashboards.",
 		CreateContext: resourceOpenSearchACLRuleUpdate,
 		ReadContext:   resourceOpenSearchACLRuleRead,
 		UpdateContext: resourceOpenSearchACLRuleUpdate,

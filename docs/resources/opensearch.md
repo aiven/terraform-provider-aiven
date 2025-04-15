@@ -3,26 +3,25 @@
 page_title: "aiven_opensearch Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
+  Creates and manages an Aiven for OpenSearch® https://aiven.io/docs/products/opensearch service.
 ---
 
 # aiven_opensearch (Resource)
 
-The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
+Creates and manages an [Aiven for OpenSearch®](https://aiven.io/docs/products/opensearch) service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_opensearch" "os1" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_opensearch" "example_opensearch" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "my-os1"
+  service_name            = "example-opensearch"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
   opensearch_user_config {
-    opensearch_version = 1
 
     opensearch_dashboards {
       enabled                    = true
@@ -53,7 +52,7 @@ resource "aiven_opensearch" "os1" {
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `opensearch` (Block List, Max: 1) OpenSearch server provided values (see [below for nested schema](#nestedblock--opensearch))
+- `opensearch` (Block List, Max: 1) Values provided by the OpenSearch server. (see [below for nested schema](#nestedblock--opensearch))
 - `opensearch_user_config` (Block List, Max: 1) Opensearch user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--opensearch_user_config))
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_integrations` (Block Set) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
@@ -88,10 +87,10 @@ Optional:
 
 Read-Only:
 
-- `kibana_uri` (String, Sensitive, Deprecated) URI for Kibana dashboard frontend
-- `opensearch_dashboards_uri` (String, Sensitive) URI for OpenSearch dashboard frontend
-- `password` (String, Sensitive) OpenSearch password
-- `username` (String, Sensitive) OpenSearch username
+- `kibana_uri` (String, Sensitive, Deprecated) URI for Kibana dashboard frontend.
+- `opensearch_dashboards_uri` (String, Sensitive) URI for OpenSearch dashboard frontend.
+- `password` (String, Sensitive) OpenSearch password.
+- `username` (String, Sensitive) OpenSearch username.
 
 
 <a id="nestedblock--opensearch_user_config"></a>
@@ -676,5 +675,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_opensearch.os1 project/service_name
+terraform import aiven_opensearch.example_opensearch PROJECT/SERVICE_NAME
 ```

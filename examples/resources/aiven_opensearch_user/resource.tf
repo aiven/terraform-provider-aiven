@@ -1,6 +1,6 @@
-resource "aiven_opensearch_user" "foo" {
-  service_name = aiven_opensearch.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_opensearch_user" "example_opensearch_user" {
+  service_name = aiven_opensearch.example_opensearch.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-opensearch-user"
+  password     = var.opensearch_user_password
 }

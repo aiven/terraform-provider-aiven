@@ -3,38 +3,26 @@
 page_title: "aiven_opensearch_acl_config Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The OpenSearch ACL Config resource allows the creation and management of Aiven OpenSearch ACLs.
+  Enables access control for an Aiven for OpenSearch® service.
+  By default, service users are granted full access rights. To limit their access, you can enable access control and create ACLs https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_acl_rule
+  that define permissions and patterns. Alternatively, you can enable OpenSearch Security management https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_security_plugin_config
+  to manage users and permissions with the OpenSearch Security dashboard.
 ---
 
 # aiven_opensearch_acl_config (Resource)
 
-The OpenSearch ACL Config resource allows the creation and management of Aiven OpenSearch ACLs.
+Enables access control for an Aiven for OpenSearch® service.
+
+By default, service users are granted full access rights. To limit their access, you can enable access control and [create ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_acl_rule)
+that define permissions and patterns. Alternatively, you can [enable OpenSearch Security management](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/opensearch_security_plugin_config)
+to manage users and permissions with the OpenSearch Security dashboard.
 
 ## Example Usage
 
 ```terraform
-data "aiven_project" "foo" {
-  project = "example_project"
-}
-
-resource "aiven_opensearch" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "example_service_name"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
-resource "aiven_opensearch_user" "foo" {
-  service_name = aiven_opensearch.bar.service_name
-  project      = data.aiven_project.foo.project
-  username     = "user-example"
-}
-
-resource "aiven_opensearch_acl_config" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_opensearch.bar.service_name
+resource "aiven_opensearch_acl_config" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_opensearch.example_opensearch.service_name
   enabled      = true
   extended_acl = false
 }
@@ -50,7 +38,7 @@ resource "aiven_opensearch_acl_config" "foo" {
 
 ### Optional
 
-- `enabled` (Boolean) Enable OpenSearch ACLs. When disabled authenticated service users have unrestricted access. The default value is `true`.
+- `enabled` (Boolean) Enable OpenSearch ACLs. When disabled, authenticated service users have unrestricted access. The default value is `true`.
 - `extended_acl` (Boolean) Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to. The default value is `true`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -74,5 +62,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-TERRAFORM IMPORT AIVEN_OPENSEARCH_ACL_CONFIG.FOO project/service_name
+terraform import aiven_opensearch_acl_config.main PROJECT/SERVICE_NAME
 ```

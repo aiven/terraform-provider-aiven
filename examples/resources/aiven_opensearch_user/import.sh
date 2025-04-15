@@ -1,1 +1,1 @@
-terraform import aiven_opensearch_user.foo PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_opensearch_user.example_opensearch_user PROJECT/SERVICE_NAME/USERNAME
