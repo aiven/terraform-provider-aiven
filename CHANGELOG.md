@@ -12,6 +12,27 @@ nav_order: 1
 
 - Added `base_port` to the `aiven_organization_project` resource
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_alloydbomni` field `alloydbomni_user_config.pgaudit`: System-wide settings for the pgaudit extension
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_plugin_versions`: The plugin selected by the user
+- Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.0-IV0`, `4.0`
+- Change `aiven_pg` field `pg_user_config.pgaudit`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.feature_enabled`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_catalog`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_client`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_level` (enum): remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_max_string_length`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_nested_statements`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_parameter`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_parameter_max_size`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_relation`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_rows`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_statement`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.log_statement_once`: remove deprecation
+- Change `aiven_pg` field `pg_user_config.pgaudit.role`: remove deprecation
+
 ## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`

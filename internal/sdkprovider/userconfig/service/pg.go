@@ -473,17 +473,14 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"pgaudit": {
-				Deprecated:  "This property is deprecated.",
 				Description: "System-wide settings for the pgaudit extension",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"feature_enabled": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Enable pgaudit extension. When enabled, pgaudit extension will be automatically installed.Otherwise, extension will be uninstalled but auditing configurations will be preserved. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies which classes of statements will be logged by session audit logging.",
 						Elem: &schema.Schema{
 							Description:  "Enum: `all`, `ddl`, `function`, `misc`, `misc_set`, `read`, `role`, `write`.",
@@ -494,74 +491,62 @@ func pgUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"log_catalog": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_client": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies whether log messages will be visible to a client process such as psql. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_level": {
-						Deprecated:   "This property is deprecated.",
-						Description:  "Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. Default: `log`.",
+						Description:  "Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `log`, `notice`, `warning`. Specifies the log level that will be used for log entries. Default: `log`.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"debug1", "debug2", "debug3", "debug4", "debug5", "info", "notice", "warning", "log"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"debug1", "debug2", "debug3", "debug4", "debug5", "info", "log", "notice", "warning"}, false),
 					},
 					"log_max_string_length": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_nested_statements": {
-						Deprecated:  "This property is deprecated.",
 						Description: "This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_parameter": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies that audit logging should include the parameters that were passed with the statement. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_parameter_max_size": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. Default: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_relation": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies whether session audit logging should create a separate log entry for each relation (TABLE, VIEW, etc.) referenced in a SELECT or DML statement. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_rows": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies that audit logging should include the rows retrieved or affected by a statement. When enabled the rows field will be included after the parameter field. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_statement": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies whether logging will include the statement text and parameters (if enabled). Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"log_statement_once": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies whether logging will include the statement text and parameters with the first log entry for a statement/substatement combination or with every entry. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"role": {
-						Deprecated:  "This property is deprecated.",
 						Description: "Specifies the master role to use for object audit logging.",
 						Optional:    true,
 						Type:        schema.TypeString,
