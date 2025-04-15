@@ -36,7 +36,7 @@ resource "aiven_organization_application_user" "tf_user" {
 
 ### Optional
 
-- `is_super_admin` (Boolean) Makes the application user a [super admin](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_application_user_token#scopes-1). The super admin role has completely unrestricted access to all organization resources and settings. This role should be limited to as few users as possible. For daily administrative tasks, assign users the organization admin role instead using the `aiven_organization_permission` resource.
+- `is_super_admin` (Boolean, Deprecated) Makes the application user a [super admin](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_application_user_token#scopes-1). The super admin role has completely unrestricted access to all organization resources and settings. This role should be limited to as few users as possible. For daily administrative tasks, assign users the organization admin role instead using the `aiven_organization_permission` resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
