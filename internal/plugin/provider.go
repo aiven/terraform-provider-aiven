@@ -192,10 +192,8 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 }
 
 // New returns a new provider factory for the Aiven provider.
-func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &AivenProvider{
-			version: version,
-		}
+func New(version string) provider.Provider {
+	return &AivenProvider{
+		version: version,
 	}
 }
