@@ -1,4 +1,4 @@
-package controller
+package adapter
 
 import (
 	"context"
@@ -13,9 +13,11 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-// NewResource returns resource.Resource but must support Configure and ImportState
-var _ resource.ResourceWithConfigure = (*resController[any])(nil)
-var _ resource.ResourceWithImportState = (*resController[any])(nil)
+// MightyResource implements additional resource methods
+type MightyResource interface {
+	resource.ResourceWithConfigure
+	resource.ResourceWithImportState
+}
 
 type resourceSchema func(context.Context) schema.Schema
 
@@ -25,8 +27,8 @@ func NewResource[T any](
 	newSchema resourceSchema,
 	newDataModel dataModelFactory[T],
 	idFields []string,
-) resource.Resource {
-	return &resController[T]{
+) MightyResource {
+	return &resourceAdapter[T]{
 		name:         name,
 		view:         view,
 		newSchema:    newSchema,
@@ -35,7 +37,7 @@ func NewResource[T any](
 	}
 }
 
-type resController[T any] struct {
+type resourceAdapter[T any] struct {
 	name         string
 	view         View[T]
 	newSchema    resourceSchema
@@ -43,7 +45,7 @@ type resController[T any] struct {
 	idFields     []string
 }
 
-func (c *resController[T]) Configure(
+func (c *resourceAdapter[T]) Configure(
 	_ context.Context,
 	req resource.ConfigureRequest,
 	rsp *resource.ConfigureResponse,
@@ -67,7 +69,7 @@ func (c *resController[T]) Configure(
 	c.view.Configure(p.GetGenClient())
 }
 
-func (c *resController[T]) Metadata(
+func (c *resourceAdapter[T]) Metadata(
 	_ context.Context,
 	_ resource.MetadataRequest,
 	rsp *resource.MetadataResponse,
@@ -75,7 +77,7 @@ func (c *resController[T]) Metadata(
 	rsp.TypeName = c.name
 }
 
-func (c *resController[T]) Schema(
+func (c *resourceAdapter[T]) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
 	rsp *resource.SchemaResponse,
@@ -83,7 +85,7 @@ func (c *resController[T]) Schema(
 	rsp.Schema = c.newSchema(ctx)
 }
 
-func (c *resController[T]) Create(
+func (c *resourceAdapter[T]) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	rsp *resource.CreateResponse,
@@ -106,7 +108,7 @@ func (c *resController[T]) Create(
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (c *resController[T]) Read(
+func (c *resourceAdapter[T]) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
 	rsp *resource.ReadResponse,
@@ -128,7 +130,7 @@ func (c *resController[T]) Read(
 	diags.Append(rsp.State.Set(ctx, state)...)
 }
 
-func (c *resController[T]) Update(
+func (c *resourceAdapter[T]) Update(
 	ctx context.Context,
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
@@ -153,7 +155,7 @@ func (c *resController[T]) Update(
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (c *resController[T]) Delete(
+func (c *resourceAdapter[T]) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
 	rsp *resource.DeleteResponse,
@@ -170,7 +172,7 @@ func (c *resController[T]) Delete(
 	diags.Append(c.view.Delete(ctx, state.DataModel())...)
 }
 
-func (c *resController[T]) ImportState(
+func (c *resourceAdapter[T]) ImportState(
 	ctx context.Context,
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,

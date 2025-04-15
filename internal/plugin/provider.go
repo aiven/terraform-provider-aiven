@@ -17,9 +17,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billing"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/org"
+	organizationaddress "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationaddress"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -161,7 +161,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
 		betaResources := []func() resource.Resource{
-			address.NewOrganizationAddressResource,
+			organizationaddress.NewOrganizationAddressResource,
 			billing.NewOrganizationBillingGroupResource,
 		}
 		resources = append(resources, betaResources...)
@@ -181,7 +181,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
 			externalidentity.NewExternalIdentityDataSource,
-			address.NewOrganizationAddressDataSource,
+			organizationaddress.NewOrganizationAddressDatasource,
 			billing.NewOrganizationBillingGroupDataSource,
 			billing.NewOrganizationBillingGroupListDataSource,
 		}

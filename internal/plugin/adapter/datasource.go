@@ -1,4 +1,4 @@
-package controller
+package adapter
 
 import (
 	"context"
@@ -11,8 +11,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 )
 
-// NewDatasource returns datasource.DataSource but must support Configure
-var _ datasource.DataSourceWithConfigure = (*dataController[any])(nil)
+// MightyDatasource implements additional datasource methods
+type MightyDatasource interface {
+	datasource.DataSourceWithConfigure
+}
 
 type datasourceSchema func(context.Context) schema.Schema
 
@@ -21,8 +23,8 @@ func NewDatasource[T any](
 	view View[T],
 	newSchema datasourceSchema,
 	newDataModel dataModelFactory[T],
-) datasource.DataSource {
-	return &dataController[T]{
+) MightyDatasource {
+	return &datasourceAdapter[T]{
 		name:         name,
 		view:         view,
 		newSchema:    newSchema,
@@ -30,7 +32,7 @@ func NewDatasource[T any](
 	}
 }
 
-type dataController[T any] struct {
+type datasourceAdapter[T any] struct {
 	// name is the name of the resource or datasource,
 	// for instance, "aiven_organization_address"
 	name string
@@ -45,7 +47,7 @@ type dataController[T any] struct {
 	newDataModel dataModelFactory[T]
 }
 
-func (c *dataController[T]) Configure(
+func (c *datasourceAdapter[T]) Configure(
 	_ context.Context,
 	req datasource.ConfigureRequest,
 	rsp *datasource.ConfigureResponse,
@@ -67,7 +69,7 @@ func (c *dataController[T]) Configure(
 	c.view.Configure(p.GetGenClient())
 }
 
-func (c *dataController[T]) Metadata(
+func (c *datasourceAdapter[T]) Metadata(
 	_ context.Context,
 	_ datasource.MetadataRequest,
 	rsp *datasource.MetadataResponse,
@@ -75,7 +77,7 @@ func (c *dataController[T]) Metadata(
 	rsp.TypeName = c.name
 }
 
-func (c *dataController[T]) Schema(
+func (c *datasourceAdapter[T]) Schema(
 	ctx context.Context,
 	_ datasource.SchemaRequest,
 	rsp *datasource.SchemaResponse,
@@ -83,7 +85,7 @@ func (c *dataController[T]) Schema(
 	rsp.Schema = c.newSchema(ctx)
 }
 
-func (c *dataController[T]) Read(
+func (c *datasourceAdapter[T]) Read(
 	ctx context.Context,
 	req datasource.ReadRequest,
 	rsp *datasource.ReadResponse,

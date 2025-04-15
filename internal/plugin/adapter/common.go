@@ -1,4 +1,4 @@
-package controller
+package adapter
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 type View[T any] interface {
 	// Configure sets the client for the view and potentially other dependencies, like logging.
 	Configure(client avngen.Client)
-	Create(ctx context.Context, plan T) diag.Diagnostics
-	Read(ctx context.Context, state T) diag.Diagnostics
-	Update(ctx context.Context, plan, state T) diag.Diagnostics
-	Delete(ctx context.Context, state T) diag.Diagnostics
+	Create(ctx context.Context, plan *T) diag.Diagnostics
+	Read(ctx context.Context, state *T) diag.Diagnostics
+	Update(ctx context.Context, plan, state *T) diag.Diagnostics
+	Delete(ctx context.Context, state *T) diag.Diagnostics
 }
 
 type DataModel[T any] interface {
 	// DataModel returns embedded dataModel instance
-	DataModel() T
+	DataModel() *T
 }
 
 type dataModelFactory[T any] func() DataModel[T]
