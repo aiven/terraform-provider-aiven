@@ -11,6 +11,7 @@ nav_order: 1
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 - Added `base_port` to the `aiven_organization_project` resource
+- Deprecated `is_super_admin` in the `aiven_organization_application_user` resource
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
