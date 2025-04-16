@@ -11,6 +11,10 @@ You can enable disk autoscaler when you create a service or on an existing servi
 an autoscaler integration endpoint using the `aiven_service_integration_endpoint` resource and integrate
 your service with it using the `aiven_service_integration` resource.
 
+~> **Warning**
+For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
+To retain the additional disk space set the service's `additional_disk_space` value manually. If the integration is managed by Terraform but not the service, the disk space is not reset.
+
 ## Enable disk autoscaler when creating a service
 
 Follow [the disk autoscaler example](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/autoscaler_integration)
