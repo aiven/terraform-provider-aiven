@@ -146,6 +146,7 @@ Optional:
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.
 - `pg_version` (String) Enum: `15`, and newer. PostgreSQL major version.
+- `pgaudit` (Block List, Max: 1) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--alloydbomni_user_config--pgaudit))
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--alloydbomni_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) System-wide settings for pglookout (see [below for nested schema](#nestedblock--alloydbomni_user_config--pglookout))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--alloydbomni_user_config--private_access))
@@ -226,6 +227,27 @@ Optional:
 - `track_io_timing` (String) Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
 - `wal_sender_timeout` (Number) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout. Example: `60000`.
 - `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance. Example: `50`.
+
+
+<a id="nestedblock--alloydbomni_user_config--pgaudit"></a>
+### Nested Schema for `alloydbomni_user_config.pgaudit`
+
+Optional:
+
+- `feature_enabled` (Boolean) Enable pgaudit extension. When enabled, pgaudit extension will be automatically installed.Otherwise, extension will be uninstalled but auditing configurations will be preserved. Default: `false`.
+- `log` (List of String) Specifies which classes of statements will be logged by session audit logging.
+- `log_catalog` (Boolean) Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. Default: `true`.
+- `log_client` (Boolean) Specifies whether log messages will be visible to a client process such as psql. Default: `false`.
+- `log_level` (String) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. Default: `log`.
+- `log_max_string_length` (Number) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.
+- `log_nested_statements` (Boolean) This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. Default: `true`.
+- `log_parameter` (Boolean) Specifies that audit logging should include the parameters that were passed with the statement. Default: `false`.
+- `log_parameter_max_size` (Number) Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. Default: `0`.
+- `log_relation` (Boolean) Specifies whether session audit logging should create a separate log entry for each relation (TABLE, VIEW, etc.) referenced in a SELECT or DML statement. Default: `false`.
+- `log_rows` (Boolean) Specifies that audit logging should include the rows retrieved or affected by a statement. When enabled the rows field will be included after the parameter field. Default: `false`.
+- `log_statement` (Boolean) Specifies whether logging will include the statement text and parameters (if enabled). Default: `true`.
+- `log_statement_once` (Boolean) Specifies whether logging will include the statement text and parameters with the first log entry for a statement/substatement combination or with every entry. Default: `false`.
+- `role` (String) Specifies the master role to use for object audit logging.
 
 
 <a id="nestedblock--alloydbomni_user_config--pgbouncer"></a>
