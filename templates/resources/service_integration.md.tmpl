@@ -12,15 +12,14 @@ description: |-
 You can set up an integration between two Aiven services or an Aiven service and an external
 service. For example, you can send metrics from a Kafka service to an M3DB service,
 send metrics from an M3DB service to a Grafana service to show dashboards, and send logs from 
-any service to OpenSearch.
+any service to OpenSearch. For external integrations, you also need an
+[integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).
 
-You can also use service integrations to enable and use the [disk autoscaler](https://aiven.io/docs/platform/howto/disk-autoscaler).
+You can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).
 
 ~> **Warning**
 For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
 To retain the additional disk space set the service's `additional_disk_space` value manually. If the integration is managed by Terraform but not the service, the disk space is not reset.
-
-For autoscaler and external integrations, you also need an [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).
 
 {{ if .HasExample -}}
 ## Example Usage
