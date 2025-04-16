@@ -12,6 +12,13 @@ nav_order: 1
 
 - Added `base_port` to the `aiven_organization_project` resource
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_alloydbomni` field `alloydbomni_user_config.pgaudit`: System-wide settings for the pgaudit extension
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_plugin_versions`: The plugin selected by the user
+- Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.0-IV0`, `4.0`
+- Change `aiven_pg` field `pg_user_config.pgaudit`: remove deprecation
+
 ## [4.38.0] - 2025-04-10
 
 - Upgraded `go` version to `1.24`
