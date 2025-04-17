@@ -178,7 +178,12 @@ func createPrivilegeGrantStatement(grant PrivilegeGrant) string {
 		b.WriteString(fmt.Sprintf("(%s)", escape(grant.Column)))
 	}
 
-	b.WriteString(fmt.Sprintf(" ON %s", escape(grant.Database)))
+	// do not escape the asterisk as it is a wildcard
+	if grant.Database == "*" {
+		b.WriteString(" ON *")
+	} else {
+		b.WriteString(fmt.Sprintf(" ON %s", escape(grant.Database)))
+	}
 
 	if len(grant.Table) > 0 {
 		b.WriteString(fmt.Sprintf(".%s", escape(grant.Table)))
@@ -206,7 +211,12 @@ func revokePrivilegeGrantStatement(grant PrivilegeGrant) string {
 		b.WriteString(fmt.Sprintf("(%s)", escape(grant.Column)))
 	}
 
-	b.WriteString(fmt.Sprintf(" ON %s", escape(grant.Database)))
+	// do not escape the asterisk as it is a wildcard
+	if grant.Database == "*" {
+		b.WriteString(" ON *")
+	} else {
+		b.WriteString(fmt.Sprintf(" ON %s", escape(grant.Database)))
+	}
 
 	if len(grant.Table) > 0 {
 		b.WriteString(fmt.Sprintf(".%s", escape(grant.Table)))
