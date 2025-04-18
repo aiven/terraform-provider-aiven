@@ -570,6 +570,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"enable_searchable_snapshots": {
+						Description: "Enable searchable snapshots.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"enable_security_audit": {
 						Description: "Enable/Disable security audit.",
 						Optional:    true,
