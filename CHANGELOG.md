@@ -19,6 +19,7 @@ nav_order: 1
 - Add `aiven_kafka` field `kafka_user_config.kafka_connect_plugin_versions`: The plugin selected by the user
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.0-IV0`, `4.0`
 - Change `aiven_pg` field `pg_user_config.pgaudit`: remove deprecation
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
 
 ## [4.38.0] - 2025-04-10
 
