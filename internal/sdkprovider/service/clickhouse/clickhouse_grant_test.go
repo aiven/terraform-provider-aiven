@@ -3,6 +3,7 @@ package clickhouse_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -52,6 +53,16 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     table     = "test-table"
     column    = "test-column"
   }
+
+  privilege_grant {
+    privilege = "CREATE TEMPORARY TABLE"
+    database = "*"
+  }
+
+  privilege_grant {
+    privilege = "DROP FUNCTION"
+    database  = "*"
+  }
 }
 
 resource "aiven_clickhouse_user" "foo-user" {
@@ -78,14 +89,48 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 			{
 				Config: manifest,
 				Check: resource.ComposeTestCheckFunc(
-					// privilege grant checks
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "INSERT",
+							"database":  "test-db",
+							"table":     "test-table",
+							"column":    "test-column",
+						},
+					),
 
-					// role grant checks
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "CREATE TEMPORARY TABLE",
+							"database":  "*",
+						},
+					),
+
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "DROP FUNCTION",
+							"database":  "*",
+						},
+					),
+
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-user-grant",
+						"user",
+						"foo-user",
+					),
+
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-user-grant",
+						"role_grant.*",
+						map[string]string{
+							"role": "foo-role",
+						},
+					),
 				),
 			},
 			{
@@ -93,6 +138,51 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 				ResourceName:      "aiven_clickhouse_grant.foo-role-grant",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccAivenClickhouseGrantInvalid tests the case where neither user nor role is specified in the grant.
+// This should fail with an error.
+func TestAccAivenClickhouseGrantInvalid(t *testing.T) {
+	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	projectName := acc.ProjectName()
+
+	invalidManifest := fmt.Sprintf(`
+resource "aiven_clickhouse" "bar" {
+  project                 = "%s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "hobbyist"
+  service_name            = "%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_clickhouse_database" "testdb" {
+  project      = aiven_clickhouse.bar.project
+  service_name = aiven_clickhouse.bar.service_name
+  name         = "test-db"
+}
+
+resource "aiven_clickhouse_grant" "invalid-grant" {
+  service_name = aiven_clickhouse.bar.service_name
+  project      = aiven_clickhouse.bar.project
+  
+  privilege_grant {
+    privilege = "SELECT"
+    database  = aiven_clickhouse_database.testdb.name
+  }
+}`, projectName, serviceName)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Test that attempting to create a grant without specifying user or role fails
+				Config:      invalidManifest,
+				ExpectError: regexp.MustCompile(`"(?:user|role)": one of ` + "`" + `role,user` + "`" + ` must be specified`),
 			},
 		},
 	})
