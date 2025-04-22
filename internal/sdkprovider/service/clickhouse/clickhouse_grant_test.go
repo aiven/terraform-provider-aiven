@@ -123,6 +123,15 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 						},
 					),
 
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "S3",
+							"database":  "*",
+						},
+					),
+
 					resource.TestCheckResourceAttr(
 						"aiven_clickhouse_grant.foo-user-grant",
 						"user",
