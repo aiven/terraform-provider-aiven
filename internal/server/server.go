@@ -27,7 +27,7 @@ func NewMuxServer(ctx context.Context, version string) (tfprotov6.ProviderServer
 		func() tfprotov6.ProviderServer {
 			return sdkProvider
 		},
-		providerserver.NewProtocol6(plugin.New(version)()),
+		providerserver.NewProtocol6(plugin.New(version)),
 	}
 
 	server, err := tf6muxserver.NewMuxServer(ctx, providers...)

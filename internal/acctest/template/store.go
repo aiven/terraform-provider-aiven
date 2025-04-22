@@ -135,7 +135,7 @@ func initTemplateStore(t testing.TB) *Store {
 	}
 
 	// Register all framework resources and data sources
-	aivenProvider := plugin.New("dev")()
+	aivenProvider := plugin.New("dev")
 
 	// Get framework resources
 	for _, resourceFunc := range aivenProvider.Resources(context.Background()) {

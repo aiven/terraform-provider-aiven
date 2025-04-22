@@ -17,24 +17,24 @@ Creates and manages an organization address.
 
 ### Required
 
-- `address_lines` (Set of String) Array of address lines.
-- `city` (String) City name.
-- `country_code` (String) Country code.
-- `organization_id` (String) ID of organization.
+- `address_lines` (Set of String) Address Lines.
+- `city` (String) City.
+- `country_code` (String) Country Code.
+- `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `company_name` (String) Name of the company.
-- `state` (String) State name.
+- `company_name` (String) Name of a company. Maximum length: `128`.
+- `state` (String) State. Maximum length: `128`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-- `zip_code` (String) Zip code.
+- `zip_code` (String) Zip Code. Maximum length: `32`.
 
 ### Read-Only
 
-- `address_id` (String) ID of the address.
-- `create_time` (String) Timestamp of the creation.
-- `id` (String) Resource ID, a composite of organization_id and address_id.
-- `update_time` (String) Timestamp of the last update.
+- `address_id` (String) Address id.
+- `create_time` (String) Create Time.
+- `id` (String) Resource ID, a composite of `organization_id` and `address_id` IDs.
+- `update_time` (String) Update Time.
 
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`

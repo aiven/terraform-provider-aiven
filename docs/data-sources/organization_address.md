@@ -17,17 +17,28 @@ Gets information about an organization address.
 
 ### Required
 
-- `address_id` (String) ID of the address.
-- `organization_id` (String) ID of organization.
+- `address_id` (String) Address id.
+- `organization_id` (String) ID of an organization.
+
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `address_lines` (Set of String) Array of address lines.
-- `city` (String) City name.
-- `company_name` (String) Name of the company.
-- `country_code` (String) Country code.
-- `create_time` (String) Timestamp of the creation.
-- `id` (String) Resource ID, a composite of organization_id and address_id.
-- `state` (String) State name.
-- `update_time` (String) Timestamp of the last update.
-- `zip_code` (String) Zip code.
+- `address_lines` (Set of String) Address Lines.
+- `city` (String) City.
+- `company_name` (String) Name of a company.
+- `country_code` (String) Country Code.
+- `create_time` (String) Create Time.
+- `id` (String) Resource ID, a composite of `organization_id` and `address_id` IDs.
+- `state` (String) State.
+- `update_time` (String) Update Time.
+- `zip_code` (String) Zip Code.
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
