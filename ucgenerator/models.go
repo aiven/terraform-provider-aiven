@@ -168,12 +168,10 @@ func (o *object) init(name string) {
 		o.Default = nil
 	}
 
-	// Sorts version enum values
-	if o.Enum != nil && strings.HasSuffix(name, "version") {
-		sort.Slice(o.Enum, func(i, j int) bool {
-			return o.Enum[i].Value < o.Enum[j].Value
-		})
-	}
+	// Sorts version enum values for consistent order
+	sort.Slice(o.Enum, func(i, j int) bool {
+		return o.Enum[i].Value < o.Enum[j].Value
+	})
 }
 
 func (o *object) isNestedBlock() bool {
