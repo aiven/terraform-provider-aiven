@@ -238,7 +238,7 @@ Optional:
 - `log` (List of String) Specifies which classes of statements will be logged by session audit logging.
 - `log_catalog` (Boolean) Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. Default: `true`.
 - `log_client` (Boolean) Specifies whether log messages will be visible to a client process such as psql. Default: `false`.
-- `log_level` (String) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. Default: `log`.
+- `log_level` (String) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `log`, `notice`, `warning`. Specifies the log level that will be used for log entries. Default: `log`.
 - `log_max_string_length` (Number) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.
 - `log_nested_statements` (Boolean) This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. Default: `true`.
 - `log_parameter` (Boolean) Specifies that audit logging should include the parameters that were passed with the statement. Default: `false`.
