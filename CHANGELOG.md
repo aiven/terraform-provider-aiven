@@ -19,6 +19,7 @@ nav_order: 1
 - Added `base_port` to the `aiven_organization_project` resource
 - Deprecated `is_super_admin` in the `aiven_organization_application_user` resource
 - Fixed `aiven_clickhouse_grant` when setting database to wildcard (*)
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
 
 ## [4.38.0] - 2025-04-10
 
