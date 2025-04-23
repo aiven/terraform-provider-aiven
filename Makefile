@@ -5,44 +5,8 @@
 #################################################
 
 GO := CGO_ENABLED=0 go
+GOTOOL := $(GO) tool
 CONTAINER_TOOL ?= podman
-
-TOOLS_DIR ?= tools
-TOOLS_BIN_DIR ?= $(TOOLS_DIR)/bin
-
-$(TOOLS_BIN_DIR):
-	mkdir -p $(TOOLS_BIN_DIR)
-
-
-GOLANGCILINT := $(TOOLS_BIN_DIR)/golangci-lint
-
-$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
-
-
-TFPLUGINDOCS := $(TOOLS_BIN_DIR)/tfplugindocs
-
-$(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/tfplugindocs github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
-
-
-TERRAFMT := $(TOOLS_BIN_DIR)/terrafmt
-
-$(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/terrafmt github.com/katbyte/terrafmt
-
-
-SELPROJ := $(TOOLS_BIN_DIR)/selproj
-
-$(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/go-utils/selproj
-
-
-MOCKERY := $(TOOLS_BIN_DIR)/mockery
-
-$(MOCKERY): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/mockery github.com/vektra/mockery/v2
-
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
 ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
@@ -53,12 +17,20 @@ $(BUILD_DEV_DIR):
 	mkdir -p $(BUILD_DEV_DIR)
 
 #################################################
+# Tools
+#################################################
+GOLANGCILINT := $(GOTOOL) golangci-lint
+TFPLUGINDOCS := $(GOTOOL) tfplugindocs
+TERRAFMT := $(GOTOOL) terrafmt
+SELPROJ := $(GOTOOL) selproj
+MOCKERY := $(GOTOOL) mockery
+
+#################################################
 # Build
 #################################################
 
 build:
 	$(GO) build
-
 
 # Example usage in Terraform configuration:
 #
@@ -91,7 +63,6 @@ test: test-unit test-acc
 test-unit:
 	$(GO) test -v --cover ./...
 
-
 PKG_PATH ?= internal
 TEST_COUNT ?= 1
 ACC_TEST_TIMEOUT ?= 180m
@@ -112,18 +83,13 @@ test-examples: build-dev clean-examples
 
 lint: lint-go lint-test lint-docs semgrep
 
-
-lint-go: $(GOLANGCILINT)
+lint-go:
 	$(GOLANGCILINT) run --build-tags all --timeout=30m ./...
 
-# Exclude files that use templates from linting
-TERRAFMT_EXCLUDE = -not -path "./internal/acctest/*" \
-	-not -path "./internal/sdkprovider/service/kafka/kafka_quota_test.go"
+lint-test:
+	$(TERRAFMT) diff ./internal -cfq
 
-lint-test: $(TERRAFMT)
-	find ./internal -type f $(TERRAFMT_EXCLUDE) -exec $(TERRAFMT) diff {} -cfq \;
-
-lint-docs: $(TFPLUGINDOCS)
+lint-docs:
 	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate --rendered-website-dir tmp
 	mv tmp/data-sources/influxdb*.md docs/data-sources/
 	mv tmp/resources/influxdb*.md docs/resources/
@@ -146,7 +112,7 @@ semgrep:
 
 fmt: fmt-test fmt-imports
 
-fmt-test: $(TERRAFMT)
+fmt-test:
 	$(TERRAFMT) fmt ./internal -fv
 
 
@@ -164,16 +130,10 @@ fmt-imports:
 # Clean
 #################################################
 
-clean: clean-tools clean-examples sweep
-
-
-clean-tools: $(TOOLS_BIN_DIR)
-	rm -rf $(TOOLS_BIN_DIR)
-
+clean: clean-examples sweep
 
 clean-examples:
 	find ./examples -type f -name '*.tfstate*' -delete
-
 
 SWEEP ?= global
 
@@ -194,7 +154,7 @@ gen-go:
 	go generate ./...;
 	$(MAKE) fmt-imports
 
-docs: $(TFPLUGINDOCS)
+docs:
 	rm -f docs/.DS_Store
 	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate
 	rm -f docs/data-sources/influxdb*.md
@@ -213,7 +173,7 @@ load-schemas:
 	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
 	go mod tidy
 
-mockery: $(MOCKERY)
+mockery:
 	$(MOCKERY) --config=./.mockery.yml
 	$(MAKE) fmt-imports
 
@@ -223,5 +183,5 @@ update-schemas: dump-schemas load-schemas generate diff-schemas mockery
 # CI
 #################################################
 
-ci-selproj: $(SELPROJ)
+ci-selproj:
 	$(SELPROJ)
