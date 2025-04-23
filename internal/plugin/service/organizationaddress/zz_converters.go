@@ -104,39 +104,39 @@ func flattenData(ctx context.Context, obj *dataModel, rsp any, modifiers ...util
 			return diags
 		}
 	}
-	if v, ok := m["address_lines"]; ok {
+	if v, ok := util.GetTyped[[]any](m, "address_lines"); ok {
 		set, diags := types.SetValueFrom(ctx, types.StringType, v)
 		if diags.HasError() {
 			return diags
 		}
 		obj.AddressLines = set
 	}
-	if v, ok := m["address_id"]; ok {
-		obj.AddressID = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "address_id"); ok {
+		obj.AddressID = types.StringPointerValue(v)
 	}
-	if v, ok := m["city"]; ok {
-		obj.City = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "city"); ok {
+		obj.City = types.StringPointerValue(v)
 	}
-	if v, ok := m["company_name"]; ok {
-		obj.CompanyName = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "company_name"); ok {
+		obj.CompanyName = types.StringPointerValue(v)
 	}
-	if v, ok := m["country_code"]; ok {
-		obj.CountryCode = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "country_code"); ok {
+		obj.CountryCode = types.StringPointerValue(v)
 	}
-	if v, ok := m["create_time"]; ok {
-		obj.CreateTime = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "create_time"); ok {
+		obj.CreateTime = types.StringPointerValue(v)
 	}
-	if v, ok := m["organization_id"]; ok {
-		obj.OrganizationID = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "organization_id"); ok {
+		obj.OrganizationID = types.StringPointerValue(v)
 	}
-	if v, ok := m["state"]; ok {
-		obj.State = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "state"); ok {
+		obj.State = types.StringPointerValue(v)
 	}
-	if v, ok := m["update_time"]; ok {
-		obj.UpdateTime = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "update_time"); ok {
+		obj.UpdateTime = types.StringPointerValue(v)
 	}
-	if v, ok := m["zip_code"]; ok {
-		obj.ZipCode = types.StringValue(v.(string))
+	if v, ok := util.GetTyped[string](m, "zip_code"); ok {
+		obj.ZipCode = types.StringPointerValue(v)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
