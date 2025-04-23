@@ -115,3 +115,30 @@ func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set 
 
 // MapModifier modifies Request and Response objects
 type MapModifier func(map[string]any) error
+
+// GetTyped safely gets a value from a map and returns it as a pointer.
+// Pointer allows supporting both Required and Nullable fields.
+// When conversion is not possible, ignores the value and returns "ok=false",
+// and let's Terraform to output the diff.
+func GetTyped[T any](m map[string]any, key string) (*T, bool) {
+	v, ok := m[key]
+	if !ok {
+		return nil, false
+	}
+
+	// Value exists in the map, but it is nil.
+	// This is a Required and Nullable field.
+	if v == nil {
+		return nil, true
+	}
+
+	// Converts value to the expected type
+	if value, ok := v.(T); ok {
+		return &value, true
+	}
+
+	// This shouldn't happen, conversion went wrong.
+	// Returns "false" so Terraform won't set it.
+	// Let terraform to output the diff.
+	return nil, false
+}
