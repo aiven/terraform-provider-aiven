@@ -46,7 +46,7 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
-					ValidateFunc: validation.StringMatch(regexp.MustCompile("^[A-Z ]+$"), "Must be a phrase of words that contain only uppercase letters."),
+					ValidateFunc: validation.StringMatch(regexp.MustCompile("^[A-Z0-9 ]+$"), "Must be a phrase of words that contain only uppercase letters and numbers."),
 				},
 				"database": {
 					Description: userconfig.Desc("The database to grant access to.").Referenced().ForceNew().Build(),

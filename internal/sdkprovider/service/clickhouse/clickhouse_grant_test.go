@@ -63,6 +63,11 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     privilege = "DROP FUNCTION"
     database  = "*"
   }
+
+  privilege_grant {
+    privilege = "S3"
+    database = "*"
+  }
 }
 
 resource "aiven_clickhouse_user" "foo-user" {
@@ -114,6 +119,15 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 						"privilege_grant.*",
 						map[string]string{
 							"privilege": "DROP FUNCTION",
+							"database":  "*",
+						},
+					),
+
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "S3",
 							"database":  "*",
 						},
 					),
