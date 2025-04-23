@@ -35,13 +35,13 @@ type dataModel struct {
 
 // expandData turns TF object into Request
 func expandData(ctx context.Context, obj *dataModel, rqs any, modifiers ...util.MapModifier) diag.Diagnostics {
-	var diags diag.Diagnostics
 	m := make(map[string]any)
 	if !obj.AddressLines.IsNull() {
-		m["address_lines"] = util.ExpandSet[string](ctx, diags, obj.AddressLines)
+		set, diags := util.ExpandSet[string](ctx, obj.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
+		m["address_lines"] = set
 	}
 	if !obj.AddressID.IsNull() {
 		m["address_id"] = obj.AddressID.ValueString()
@@ -73,37 +73,39 @@ func expandData(ctx context.Context, obj *dataModel, rqs any, modifiers ...util.
 	for _, modify := range modifiers {
 		err := modify(m)
 		if err != nil {
-			diags.AddError("Modifier error", fmt.Sprintf("Failed to modify Response: %s", err.Error()))
+			var diags diag.Diagnostics
+			diags.AddError("Modifier error", fmt.Sprintf("Failed to modify Request: %s", err.Error()))
 			return diags
 		}
 	}
 	err := util.Unmarshal(&m, rqs)
 	if err != nil {
+		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal map to Request: %s", err.Error()))
 		return diags
 	}
-	return diags
+	return nil
 }
 
 // flattenData turns Response into TF object
 func flattenData(ctx context.Context, obj *dataModel, rsp any, modifiers ...util.MapModifier) diag.Diagnostics {
-	var diags diag.Diagnostics
 	m := make(map[string]any)
 	err := util.Unmarshal(rsp, &m)
 	if err != nil {
+		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to map: %s", err.Error()))
 		return diags
 	}
 	for _, modify := range modifiers {
 		err := modify(m)
 		if err != nil {
+			var diags diag.Diagnostics
 			diags.AddError("Modifier error", fmt.Sprintf("Failed to modify Response: %s", err.Error()))
 			return diags
 		}
 	}
 	if v, ok := m["address_lines"]; ok {
-		set, d := types.SetValueFrom(ctx, types.StringType, v)
-		diags.Append(d...)
+		set, diags := types.SetValueFrom(ctx, types.StringType, v)
 		if diags.HasError() {
 			return diags
 		}
@@ -151,5 +153,5 @@ func flattenData(ctx context.Context, obj *dataModel, rsp any, modifiers ...util
 		}
 	}
 	obj.ID = types.StringValue(fmt.Sprintf("%s/%s", obj.OrganizationID.ValueString(), obj.AddressID.ValueString()))
-	return diags
+	return nil
 }

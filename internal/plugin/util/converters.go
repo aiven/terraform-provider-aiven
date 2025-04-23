@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -42,73 +41,76 @@ func CastSlice[T any](v any) ([]T, error) {
 // T - terraform object, for instance baseModelAddress
 // R - Request, for instance, a map[string]any
 // Expand recursively expands the TF object.
-type Expand[T, R any] func(ctx context.Context, diags diag.Diagnostics, obj T) R
+type Expand[T, R any] func(ctx context.Context, obj T) (R, diag.Diagnostics)
 
 // ExpandSet sets values to Request
-func ExpandSet[T any](ctx context.Context, diags diag.Diagnostics, set types.Set) (items []T) {
+func ExpandSet[T any](ctx context.Context, set types.Set) ([]T, diag.Diagnostics) {
 	if set.IsNull() {
-		return nil
+		return nil, nil
 	}
-	diags.Append(set.ElementsAs(ctx, &items, false)...)
-	return items
+
+	var items []T
+	diags := set.ElementsAs(ctx, &items, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+	return items, nil
 }
 
 // ExpandSetNested sets values to Request
-func ExpandSetNested[T, R any](ctx context.Context, diags diag.Diagnostics, expand Expand[T, R], set types.Set) []R {
+func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]R, diag.Diagnostics) {
 	// Gets TF objects from the set.
-	elements := ExpandSet[T](ctx, diags, set)
+	elements, diags := ExpandSet[T](ctx, set)
 	if elements == nil || diags.HasError() {
-		return nil
+		return nil, diags
 	}
 
 	// Goes deeper and expands each object
 	items := make([]R, 0, len(elements))
 	for _, v := range elements {
 		// Expands the object using the provided expander function.
-		m := expand(ctx, diags, v)
+		m, diags := expand(ctx, v)
 		if diags.HasError() {
-			return nil
+			return nil, diags
 		}
 		items = append(items, m)
 	}
-	return items
+	return items, nil
 }
 
 // Flatten reads values from Response for a nested attribute/block
 // T - terraform model, for instance baseModelAddress
 // R - Response, for instance a map[string]any
 // Flatten recursively flattens Response object.
-type Flatten[R, T any] func(ctx context.Context, diags diag.Diagnostics, response R) T
+type Flatten[R, T any] func(ctx context.Context, response R) (T, diag.Diagnostics)
 
 // FlattenSet reads values from Response
 // Can be used with SetNestedAttribute and SetNestedBlock
-func FlattenSet[R, T any](ctx context.Context, diags diag.Diagnostics, flatten Flatten[R, T], set []R, attrs map[string]attr.Type) types.Set {
-	oType := types.ObjectType{AttrTypes: attrs}
+func FlattenSet[R, T any](ctx context.Context, flatten Flatten[R, T], set []R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
 	empty := types.SetNull(oType)
 	if len(set) == 0 {
-		return empty
+		return empty, nil
 	}
 
 	items := make([]T, 0, len(set))
 	for _, v := range set {
-		items = append(items, flatten(ctx, diags, v))
+		item, diags := flatten(ctx, v)
 		if diags.HasError() {
-			return empty
+			return empty, diags
 		}
+		items = append(items, item)
 	}
 
-	result, d := types.SetValueFrom(ctx, oType, items)
-	diags.Append(d...)
+	result, diags := types.SetValueFrom(ctx, oType, items)
 	if diags.HasError() {
-		return empty
+		return empty, diags
 	}
-	return result
+	return result, nil
 }
 
 // FlattenSetNested reads values from Response
-// The name reserved for the SetNestedAttribute, as there is also SetNestedBlock which is different
-func FlattenSetNested[R, T any](ctx context.Context, diags diag.Diagnostics, flatten Flatten[R, T], set []R, attrs map[string]attr.Type) types.Set {
-	return FlattenSet(ctx, diags, flatten, set, attrs)
+func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+	return FlattenSet(ctx, flatten, set, oType)
 }
 
 // MapModifier modifies Request and Response objects
