@@ -64,5 +64,5 @@ to learn how to to create an Aiven for PostgreSQL® service, autoscaler endpoint
      ```
 
 5. If the service has `additional_disk_space` configured, remove the field. The additional storage will be adjusted by the autoscaler.
-   
+
    -> After removing this field with the autoscaler enabled the output of `terraform plan` shows no changes.

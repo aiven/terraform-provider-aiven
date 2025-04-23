@@ -24,7 +24,7 @@ resource "aiven_kafka_connector" "kafka-os-connector" {
   connector_name = "kafka-opensearch-connector"
 
   config = {
-    "name"                = "kafka-opensearch-connector" # Must be the same as the connector_name. 
+    "name"                = "kafka-opensearch-connector" # Must be the same as the connector_name.
     "topics"              = aiven_kafka_topic.example_topic.topic_name
     "connector.class"     = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
     "type.name"           = "os-connector"

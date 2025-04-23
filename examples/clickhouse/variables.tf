@@ -11,5 +11,5 @@ variable "aiven_project_name" {
 variable "clickhouse_service_name" {
   description = "Name of the ClickHouse service"
   type        = string
-  default     = "example-eu-clickhouse-service" 
+  default     = "example-eu-clickhouse-service"
 }

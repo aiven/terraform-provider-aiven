@@ -56,4 +56,3 @@ resource "aiven_opensearch_acl_rule" "os_acl_rule" {
   index        = each.value.index
   permission   = each.value.permission
 }
-

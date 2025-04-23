@@ -58,8 +58,8 @@ func ResourceAccountTeamMember() *schema.Resource {
 		Description: `
 Adds a user as a team member.
 
-During the creation of this resource, an invite is sent to the address specified in ` + "`user_email`" + `. 
-The user is added to the team after they accept the invite. Deleting ` + "`aiven_account_team_member`" + ` 
+During the creation of this resource, an invite is sent to the address specified in ` + "`user_email`" + `.
+The user is added to the team after they accept the invite. Deleting ` + "`aiven_account_team_member`" + `
 deletes the pending invite if not accepted or removes the user from the team if they already accepted the invite.
 `,
 		CreateContext: common.WithGenClient(resourceAccountTeamMemberCreate),

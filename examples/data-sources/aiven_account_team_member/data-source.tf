@@ -3,4 +3,3 @@ data "aiven_account_team_member" "foo" {
   team_id    = aiven_account_team.<TEAM_RESOURCE>.team_id
   user_email = "user+1@example.com"
 }
-

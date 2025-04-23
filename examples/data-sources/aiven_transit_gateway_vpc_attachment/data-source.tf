@@ -3,4 +3,3 @@ data "aiven_transit_gateway_vpc_attachment" "attachment" {
   peer_cloud_account = "<PEER_ACCOUNT_ID>"
   peer_vpc           = "google-project1"
 }
-
