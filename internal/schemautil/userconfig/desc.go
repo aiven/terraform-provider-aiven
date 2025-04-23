@@ -206,5 +206,10 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		))
 	}
 
-	return builder.String()
+	// Avoids redundant descriptions.
+	s := strings.TrimSpace(builder.String())
+	if s == "." {
+		return ""
+	}
+	return s
 }
