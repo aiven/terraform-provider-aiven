@@ -5666,6 +5666,80 @@ func (_c *MockClient_OrganizationGovernanceAccessGet_Call) RunAndReturn(run func
 	return _c
 }
 
+// OrganizationGovernanceAccessList provides a mock function with given fields: ctx, organizationId, query
+func (_m *MockClient) OrganizationGovernanceAccessList(ctx context.Context, organizationId string, query ...[2]string) (*organizationgovernance.OrganizationGovernanceAccessListOut, error) {
+	_va := make([]interface{}, len(query))
+	for _i := range query {
+		_va[_i] = query[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, organizationId)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationGovernanceAccessList")
+	}
+
+	var r0 *organizationgovernance.OrganizationGovernanceAccessListOut
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...[2]string) (*organizationgovernance.OrganizationGovernanceAccessListOut, error)); ok {
+		return rf(ctx, organizationId, query...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...[2]string) *organizationgovernance.OrganizationGovernanceAccessListOut); ok {
+		r0 = rf(ctx, organizationId, query...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationgovernance.OrganizationGovernanceAccessListOut)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...[2]string) error); ok {
+		r1 = rf(ctx, organizationId, query...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_OrganizationGovernanceAccessList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationGovernanceAccessList'
+type MockClient_OrganizationGovernanceAccessList_Call struct {
+	*mock.Call
+}
+
+// OrganizationGovernanceAccessList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - organizationId string
+//   - query ...[2]string
+func (_e *MockClient_Expecter) OrganizationGovernanceAccessList(ctx interface{}, organizationId interface{}, query ...interface{}) *MockClient_OrganizationGovernanceAccessList_Call {
+	return &MockClient_OrganizationGovernanceAccessList_Call{Call: _e.mock.On("OrganizationGovernanceAccessList",
+		append([]interface{}{ctx, organizationId}, query...)...)}
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessList_Call) Run(run func(ctx context.Context, organizationId string, query ...[2]string)) *MockClient_OrganizationGovernanceAccessList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([][2]string, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.([2]string)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessList_Call) Return(_a0 *organizationgovernance.OrganizationGovernanceAccessListOut, _a1 error) *MockClient_OrganizationGovernanceAccessList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_OrganizationGovernanceAccessList_Call) RunAndReturn(run func(context.Context, string, ...[2]string) (*organizationgovernance.OrganizationGovernanceAccessListOut, error)) *MockClient_OrganizationGovernanceAccessList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrganizationMemberGroupsList provides a mock function with given fields: ctx, organizationId, memberUserId
 func (_m *MockClient) OrganizationMemberGroupsList(ctx context.Context, organizationId string, memberUserId string) ([]user.UserGroupOut, error) {
 	ret := _m.Called(ctx, organizationId, memberUserId)
