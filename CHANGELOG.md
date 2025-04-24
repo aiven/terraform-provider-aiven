@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.39.0] - 2025-04-24
+
 - Add `aiven_alloydbomni` field `alloydbomni_user_config.pgaudit`: System-wide settings for the pgaudit extension
 - Add `aiven_kafka` field `kafka_user_config.kafka_connect_plugin_versions`: The plugin selected by the user
 - Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.0-IV0`, `4.0`

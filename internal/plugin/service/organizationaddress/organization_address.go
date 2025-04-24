@@ -6,11 +6,14 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 const resourceName = "aiven_organization_address"
@@ -19,7 +22,12 @@ func NewOrganizationAddressResource() resource.Resource {
 	return adapter.NewResource(
 		resourceName,
 		new(view),
-		resourceSchema,
+		func(ctx context.Context) schema.Schema {
+			s := resourceSchema(ctx)
+			s.Description = userconfig.Desc(s.Description).AvailabilityType(userconfig.Beta).Build()
+
+			return s
+		},
 		func() adapter.DataModel[dataModel] {
 			return new(resourceDataModel)
 		},
@@ -31,7 +39,12 @@ func NewOrganizationAddressDatasource() datasource.DataSource {
 	return adapter.NewDatasource(
 		resourceName,
 		new(view),
-		datasourceSchema,
+		func(ctx context.Context) datasource_schema.Schema {
+			s := datasourceSchema(ctx)
+			s.Description = userconfig.Desc(s.Description).AvailabilityType(userconfig.Beta).Build()
+
+			return s
+		},
 		func() adapter.DataModel[dataModel] {
 			return new(datasourceDataModel)
 		},

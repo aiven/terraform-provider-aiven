@@ -4,11 +4,16 @@ page_title: "aiven_organization_billing_group Data Source - terraform-provider-a
 subcategory: ""
 description: |-
   Gets information about a billing group.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_billing_group (Data Source)
 
-Gets information about a billing group.
+Gets information about a billing group. 
+
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 
 
