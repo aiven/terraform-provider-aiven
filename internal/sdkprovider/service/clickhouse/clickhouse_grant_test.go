@@ -56,7 +56,7 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
 
   privilege_grant {
     privilege = "CREATE TEMPORARY TABLE"
-    database = "*"
+    database  = "*"
   }
 
   privilege_grant {
@@ -66,7 +66,7 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
 
   privilege_grant {
     privilege = "S3"
-    database = "*"
+    database  = "*"
   }
 }
 
@@ -182,7 +182,7 @@ resource "aiven_clickhouse_database" "testdb" {
 resource "aiven_clickhouse_grant" "invalid-grant" {
   service_name = aiven_clickhouse.bar.service_name
   project      = aiven_clickhouse.bar.project
-  
+
   privilege_grant {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.testdb.name
