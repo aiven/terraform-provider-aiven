@@ -20,6 +20,7 @@ nav_order: 1
 - Deprecated `is_super_admin` in the `aiven_organization_application_user` resource
 - Fixed `aiven_clickhouse_grant` when setting database to wildcard (*)
 - Fixed `aiven_clickhouse_grant` allow setting S3 privilege
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
 
 ## [4.38.0] - 2025-04-10
 
