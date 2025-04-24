@@ -8,6 +8,7 @@ import (
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
@@ -86,16 +87,19 @@ func knownMissingSweepers() []string {
 
 // TestCheckSweepers checks that we have sweepers for all the resources.
 func TestCheckSweepers(t *testing.T) {
+	t.Setenv(util.AivenEnableBeta, "true") // enable beta resources
+
 	p, err := provider.Provider("test")
 	require.NoError(t, err)
 
 	resourceMap := p.ResourcesMap
 	allResources := maps.Keys(resourceMap)
 	allSweepers := sweep.GetTestSweepersResources()
+	missingSweepers := knownMissingSweepers()
 
 	var missing []string
 	for _, r := range allResources {
-		if !slices.Contains(allSweepers, r) && !slices.Contains(knownMissingSweepers(), r) {
+		if !slices.Contains(allSweepers, r) && !slices.Contains(missingSweepers, r) {
 			missing = append(missing, r)
 		}
 	}
