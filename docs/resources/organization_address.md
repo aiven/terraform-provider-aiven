@@ -4,11 +4,16 @@ page_title: "aiven_organization_address Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages an organization address.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_address (Resource)
 
-Creates and manages an organization address.
+Creates and manages an organization address. 
+
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 
 

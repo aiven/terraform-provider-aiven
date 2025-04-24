@@ -17,6 +17,7 @@ import (
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/validation"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -64,7 +65,7 @@ func (r *organizationBillingGroupDataSource) Schema(
 	resp *datasource.SchemaResponse,
 ) {
 	resp.Schema = schema.Schema{
-		Description: "Gets information about a billing group.",
+		Description: userconfig.Desc("Gets information about a billing group.").AvailabilityType(userconfig.Beta).Build(),
 		Attributes:  util.ResourceSchemaToDataSourceSchema(ResourceSchema(), []string{}, []string{"organization_id", "billing_group_id"}),
 	}
 }

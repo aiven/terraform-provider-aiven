@@ -17,6 +17,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/validation"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -74,7 +75,7 @@ func (r *organizationBillingGroupResource) Schema(ctx context.Context, _ resourc
 	})
 
 	resp.Schema = schema.Schema{
-		Description: "Creates and manages an organization billing group.",
+		Description: userconfig.Desc("Creates and manages an organization billing group.").AvailabilityType(userconfig.Beta).Build(),
 		Attributes:  resourceSchema,
 	}
 }
