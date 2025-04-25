@@ -7,11 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
-type View[T any] interface {
+type DataView[T any] interface {
 	// Configure sets the client for the view and potentially other dependencies, like logging.
 	Configure(client avngen.Client)
-	Create(ctx context.Context, plan *T) diag.Diagnostics
 	Read(ctx context.Context, state *T) diag.Diagnostics
+}
+
+type View[T any] interface {
+	DataView[T]
+	Create(ctx context.Context, plan *T) diag.Diagnostics
 	Update(ctx context.Context, plan, state *T) diag.Diagnostics
 	Delete(ctx context.Context, state *T) diag.Diagnostics
 }

@@ -22,27 +22,38 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Required
 
-- `organization_id` (String) ID of the organization.
+- `organization_id` (String) ID of an organization.
+
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `billing_groups` (Attributes List) List of billing groups. (see [below for nested schema](#nestedatt--billing_groups))
-- `id` (String) Resource ID, a composite of organization_id.
+- `billing_groups` (Block Set) A list of all billing groups belonging to the organization. (see [below for nested schema](#nestedblock--billing_groups))
+- `id` (String) Resource ID, equal to `organization_id`.
 
-<a id="nestedatt--billing_groups"></a>
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedblock--billing_groups"></a>
 ### Nested Schema for `billing_groups`
 
 Read-Only:
 
-- `billing_address_id` (String) ID of the billing address.
+- `billing_address_id` (String) Billing address ID.
 - `billing_contact_emails` (Set of String) List of billing contact emails.
-- `billing_currency` (String) Billing currency.
-- `billing_emails` (Set of String) List of billing emails.
-- `billing_group_id` (String) ID of the billing group.
-- `billing_group_name` (String) Name of the billing group.
-- `custom_invoice_text` (String) Custom invoice text.
-- `id` (String) Resource ID, a composite of organization_id and billing_group_id.
-- `organization_id` (String) ID of the organization.
-- `payment_method_id` (String) ID of the payment method.
-- `shipping_address_id` (String) ID of the shipping address.
+- `billing_currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
+- `billing_emails` (Set of String) List of billing contact emails.
+- `billing_group_id` (String) Billing group ID.
+- `billing_group_name` (String) Billing Group Name.
+- `custom_invoice_text` (String) Extra billing text.
+- `organization_id` (String) Organization ID.
+- `payment_method_id` (String) Payment method ID.
+- `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.

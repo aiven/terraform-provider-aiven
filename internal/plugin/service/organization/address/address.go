@@ -73,15 +73,12 @@ func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnost
 		return diags
 	}
 
-	rsp, err := c.client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
+	_, err := c.client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
 	}
 
-	// Read() reads the remote state using these two IDs.
-	plan.OrganizationID = types.StringValue(rsp.OrganizationId)
-	plan.AddressID = types.StringValue(rsp.AddressId)
 	return c.Read(ctx, plan)
 }
 
