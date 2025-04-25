@@ -1,4 +1,4 @@
-package organizationaddress_test
+package address_test
 
 import (
 	"testing"
