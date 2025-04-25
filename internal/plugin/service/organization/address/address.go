@@ -1,4 +1,4 @@
-package organizationaddress
+package address
 
 import (
 	"context"
@@ -6,14 +6,12 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasource_schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 const resourceName = "aiven_organization_address"
@@ -22,12 +20,7 @@ func NewOrganizationAddressResource() resource.Resource {
 	return adapter.NewResource(
 		resourceName,
 		new(view),
-		func(ctx context.Context) schema.Schema {
-			s := resourceSchema(ctx)
-			s.Description = userconfig.Desc(s.Description).AvailabilityType(userconfig.Beta).Build()
-
-			return s
-		},
+		resourceSchema,
 		func() adapter.DataModel[dataModel] {
 			return new(resourceDataModel)
 		},
@@ -39,12 +32,7 @@ func NewOrganizationAddressDatasource() datasource.DataSource {
 	return adapter.NewDatasource(
 		resourceName,
 		new(view),
-		func(ctx context.Context) datasource_schema.Schema {
-			s := datasourceSchema(ctx)
-			s.Description = userconfig.Desc(s.Description).AvailabilityType(userconfig.Beta).Build()
-
-			return s
-		},
+		datasourceSchema,
 		func() adapter.DataModel[dataModel] {
 			return new(datasourceDataModel)
 		},
@@ -72,18 +60,10 @@ func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 		return diags
 	}
 
-	return flattenData(ctx, plan, rsp)
-}
-
-func (c *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	rsp, err := c.client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
-	if err != nil {
-		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
-		return diags
-	}
-
-	return flattenData(ctx, state, rsp)
+	// Read() reads the remote state using these two IDs.
+	plan.OrganizationID = types.StringValue(rsp.OrganizationId)
+	plan.AddressID = types.StringValue(rsp.AddressId)
+	return c.Read(ctx, plan)
 }
 
 func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnostics {
@@ -99,7 +79,21 @@ func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnost
 		return diags
 	}
 
-	return flattenData(ctx, plan, rsp)
+	// Read() reads the remote state using these two IDs.
+	plan.OrganizationID = types.StringValue(rsp.OrganizationId)
+	plan.AddressID = types.StringValue(rsp.AddressId)
+	return c.Read(ctx, plan)
+}
+
+func (c *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	rsp, err := c.client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
+	if err != nil {
+		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
+		return diags
+	}
+
+	return flattenData(ctx, state, rsp)
 }
 
 func (c *view) Delete(ctx context.Context, state *dataModel) diag.Diagnostics {

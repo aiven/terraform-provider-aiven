@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Unmarshal unmarshals a value from in to out.
+// remarshal unmarshals a value from in to out.
 // A rebranded copy from SDK package to avoid circular dependency.
-func Unmarshal(in, out any) error {
+func remarshal(in, out any) error {
 	b, err := json.Marshal(in)
 	if err != nil {
 		return err
@@ -19,33 +19,50 @@ func Unmarshal(in, out any) error {
 	return json.Unmarshal(b, out)
 }
 
-// CastSlice casts a slice of any to a slice of T.
-func CastSlice[T any](v any) ([]T, error) {
-	items, ok := v.([]any)
-	if !ok {
-		return nil, fmt.Errorf("expected []any, got %T", v)
+// Unmarshal unmarshals a value from in to out, applies typed modifiers before unmarshalling to out.
+func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
+	if len(modifiers) == 0 {
+		return remarshal(in, out)
 	}
 
-	result := make([]T, 0, len(items))
-	for _, item := range items {
-		v, ok := item.(T)
-		if !ok {
-			return nil, fmt.Errorf("expected %T element, got %T", v, item)
-		}
-		result = append(result, v)
+	// To applied modifiers, we need to unmarshal into a map[string]any
+	m := make(map[string]any)
+	err := remarshal(in, &m)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal map: %w", err)
 	}
-	return result, nil
+
+	for _, modify := range modifiers {
+		err := modify(m, in)
+		if err != nil {
+			return fmt.Errorf("failed to apply modifier: %w", err)
+		}
+	}
+
+	return remarshal(&m, out)
 }
 
-// Expand sets values to Request from a nested attribute/block
-// T - terraform object, for instance baseModelAddress
-// R - Request, for instance, a map[string]any
-// Expand recursively expands the TF object.
-type Expand[T, R any] func(ctx context.Context, obj T) (R, diag.Diagnostics)
+// MapModifier modifies Request and Response objects
+// reqRsp — a map that would be used to unmarshal a Request/Response object
+// in *I — input type, for instance, a dataModel or foo.CreateIn dto.
+// Hint: to ignore "in" type and modify only the map, use `any`, for instance:
+//
+//	func foo[T any](reqRsp map[string]any, _ *T) error {
+//		reqRsp["foo"] = "bar"
+//	}
+//
+// In this case, the function can be used with any type of Request/Response object.
+type MapModifier[I any] func(reqRsp map[string]any, in *I) error
 
-// ExpandSet sets values to Request
+// Expand sets values to Request from a nested object.
+// T - terraform object, for instance baseModelAddress
+// R - Request DTO, for instance, foo.CreateIn dto.
+// Expand recursively expands the TF object (dataModel).
+type Expand[T, R any] func(ctx context.Context, obj *T) (*R, diag.Diagnostics)
+
+// ExpandSet sets values to Request for a set of objects/scalars.
 func ExpandSet[T any](ctx context.Context, set types.Set) ([]T, diag.Diagnostics) {
-	if set.IsNull() {
+	if set.IsNull() || set.IsUnknown() {
 		return nil, nil
 	}
 
@@ -57,8 +74,8 @@ func ExpandSet[T any](ctx context.Context, set types.Set) ([]T, diag.Diagnostics
 	return items, nil
 }
 
-// ExpandSetNested sets values to Request
-func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]R, diag.Diagnostics) {
+// ExpandSetNested recursively sets values to Request for a set of objects.
+func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]*R, diag.Diagnostics) {
 	// Gets TF objects from the set.
 	elements, diags := ExpandSet[T](ctx, set)
 	if elements == nil || diags.HasError() {
@@ -66,10 +83,10 @@ func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set typ
 	}
 
 	// Goes deeper and expands each object
-	items := make([]R, 0, len(elements))
+	items := make([]*R, 0, len(elements))
 	for _, v := range elements {
 		// Expands the object using the provided expander function.
-		m, diags := expand(ctx, v)
+		m, diags := expand(ctx, &v)
 		if diags.HasError() {
 			return nil, diags
 		}
@@ -78,21 +95,29 @@ func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set typ
 	return items, nil
 }
 
-// Flatten reads values from Response for a nested attribute/block
-// T - terraform model, for instance baseModelAddress
-// R - Response, for instance a map[string]any
-// Flatten recursively flattens Response object.
-type Flatten[R, T any] func(ctx context.Context, response R) (T, diag.Diagnostics)
+// ExpandSingle sets values to Request for a single object.
+func ExpandSingle[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) (*R, diag.Diagnostics) {
+	result, diags := ExpandSetNested(ctx, expand, set)
+	if diags.HasError() || len(result) == 0 {
+		return nil, diags
+	}
+	return result[0], nil
+}
 
-// FlattenSet reads values from Response
-// Can be used with SetNestedAttribute and SetNestedBlock
-func FlattenSet[R, T any](ctx context.Context, flatten Flatten[R, T], set []R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+// Flatten reads values from Response for a nested object.
+// T - terraform model, for instance baseModelAddress
+// R - Response DTO, for instance foo.GetOut.
+// Flatten recursively flattens Response object.
+type Flatten[R, T any] func(ctx context.Context, response *R) (*T, diag.Diagnostics)
+
+// FlattenSetNested reads values from Response for a set of objects.
+func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []*R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
 	empty := types.SetNull(oType)
 	if len(set) == 0 {
 		return empty, nil
 	}
 
-	items := make([]T, 0, len(set))
+	items := make([]*T, 0, len(set))
 	for _, v := range set {
 		item, diags := flatten(ctx, v)
 		if diags.HasError() {
@@ -108,37 +133,10 @@ func FlattenSet[R, T any](ctx context.Context, flatten Flatten[R, T], set []R, o
 	return result, nil
 }
 
-// FlattenSetNested reads values from Response
-func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
-	return FlattenSet(ctx, flatten, set, oType)
-}
-
-// MapModifier modifies Request and Response objects
-type MapModifier func(map[string]any) error
-
-// GetTyped safely gets a value from a map and returns it as a pointer.
-// Pointer allows supporting both Required and Nullable fields.
-// When conversion is not possible, ignores the value and returns "ok=false",
-// and let's Terraform to output the diff.
-func GetTyped[T any](m map[string]any, key string) (*T, bool) {
-	v, ok := m[key]
-	if !ok {
-		return nil, false
+// FlattenSingle reads values from Response for a single object.
+func FlattenSingle[R, T any](ctx context.Context, flatten Flatten[R, T], dto *R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+	if dto == nil {
+		return types.SetNull(oType), nil
 	}
-
-	// Value exists in the map, but it is nil.
-	// This is a Required and Nullable field.
-	if v == nil {
-		return nil, true
-	}
-
-	// Converts value to the expected type
-	if value, ok := v.(T); ok {
-		return &value, true
-	}
-
-	// This shouldn't happen, conversion went wrong.
-	// Returns "false" so Terraform won't set it.
-	// Let terraform to output the diff.
-	return nil, false
+	return FlattenSetNested(ctx, flatten, []*R{dto}, oType)
 }
