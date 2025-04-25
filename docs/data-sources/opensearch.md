@@ -232,6 +232,7 @@ Read-Only:
 - `email_sender_password` (String)
 - `email_sender_username` (String)
 - `enable_remote_backed_storage` (Boolean)
+- `enable_searchable_snapshots` (Boolean)
 - `enable_security_audit` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)

@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
+
 ## [4.39.0] - 2025-04-24
 
 - Add `aiven_alloydbomni` field `alloydbomni_user_config.pgaudit`: System-wide settings for the pgaudit extension
