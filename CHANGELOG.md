@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_organization_user_list.billing_groups` to type `Set`. The order is not guaranteed.
+
 ## [4.39.0] - 2025-04-24
 
 - Add `aiven_alloydbomni` field `alloydbomni_user_config.pgaudit`: System-wide settings for the pgaudit extension

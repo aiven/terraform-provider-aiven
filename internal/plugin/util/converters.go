@@ -60,25 +60,12 @@ type MapModifier[I any] func(reqRsp map[string]any, in *I) error
 // Expand recursively expands the TF object (dataModel).
 type Expand[T, R any] func(ctx context.Context, obj *T) (*R, diag.Diagnostics)
 
-// ExpandSet sets values to Request for a set of objects/scalars.
-func ExpandSet[T any](ctx context.Context, set types.Set) ([]T, diag.Diagnostics) {
-	if set.IsNull() || set.IsUnknown() {
-		return nil, nil
-	}
-
-	var items []T
-	diags := set.ElementsAs(ctx, &items, false)
-	if diags.HasError() {
-		return nil, diags
-	}
-	return items, nil
-}
-
 // ExpandSetNested recursively sets values to Request for a set of objects.
 func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]*R, diag.Diagnostics) {
 	// Gets TF objects from the set.
-	elements, diags := ExpandSet[T](ctx, set)
-	if elements == nil || diags.HasError() {
+	var elements []T
+	diags := set.ElementsAs(ctx, &elements, false)
+	if diags.HasError() {
 		return nil, diags
 	}
 

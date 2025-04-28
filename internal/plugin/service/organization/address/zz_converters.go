@@ -50,7 +50,8 @@ type dtoModel struct {
 func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
 	dto := new(dtoModel)
 	if !data.AddressLines.IsNull() {
-		vAddressLines, diags := util.ExpandSet[string](ctx, data.AddressLines)
+		var vAddressLines []string
+		diags := data.AddressLines.ElementsAs(ctx, &vAddressLines, false)
 		if diags.HasError() {
 			return diags
 		}
@@ -77,7 +78,7 @@ func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers .
 	err := util.Unmarshal(dto, rqs, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
-		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal map to Request: %s", err.Error()))
+		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal dtoModel to Request: %s", err.Error()))
 		return diags
 	}
 	return nil
@@ -89,15 +90,15 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 	err := util.Unmarshal(rsp, dto, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
-		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to map: %s", err.Error()))
+		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
 	if dto.AddressLines != nil {
-		AddressLines, diags := types.SetValueFrom(ctx, types.StringType, dto.AddressLines)
+		vAddressLines, diags := types.SetValueFrom(ctx, types.StringType, dto.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
-		data.AddressLines = AddressLines
+		data.AddressLines = vAddressLines
 	}
 	if dto.AddressID != nil {
 		data.AddressID = types.StringPointerValue(dto.AddressID)

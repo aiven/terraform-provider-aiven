@@ -20,7 +20,7 @@ type datasourceSchema func(context.Context) schema.Schema
 
 func NewDatasource[T any](
 	name string,
-	view View[T],
+	view DataView[T],
 	newSchema datasourceSchema,
 	newDataModel dataModelFactory[T],
 ) MightyDatasource {
@@ -37,8 +37,8 @@ type datasourceAdapter[T any] struct {
 	// for instance, "aiven_organization_address"
 	name string
 
-	// view implements CRUD functions
-	view View[T]
+	// view implements Read function
+	view DataView[T]
 
 	// newSchema returns a new instance of the generated schema.
 	newSchema datasourceSchema

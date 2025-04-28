@@ -1,4 +1,4 @@
-package billing_test
+package billinggroup_test
 
 import (
 	"os"
