@@ -21,13 +21,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - id: selproj
-        run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
+        run: echo "project_name_suffix=$(task -s ci:selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
@@ -49,6 +52,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -62,7 +69,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: make test-examples
+      - run: task test-examples
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: >-

@@ -1,0 +1,175 @@
+version: '3'
+
+includes:
+  internal:
+    taskfile: ./TaskInternal.yml
+    internal: true
+
+tasks:
+  default:
+    desc: Lists available tasks defined in this file
+    silent: true
+    cmds:
+      - task --list
+
+  #################################################
+  # Build Tasks
+  #################################################
+  build:
+    desc: Build the provider binary
+    cmds:
+      - "{{.GO_CMD}} build"
+
+  build-dev:
+    desc: Build the development version for local Terraform testing
+    cmds:
+      - mkdir -p {{.BUILD_DEV_DIR}}
+      - "{{.GO_CMD}} build -gcflags='all=-N -l' -o {{.BUILD_DEV_BIN}}"
+    sources:
+      - "**/*.go"
+    generates:
+      - "{{.BUILD_DEV_BIN}}"
+
+  #################################################
+  # Test Tasks
+  #################################################
+  test:
+    desc: Run all tests (unit, acceptance, examples)
+    deps:
+      - test-unit
+      - test-acc
+      - test-examples
+
+  test-unit:
+    desc: Run unit tests
+    aliases:
+      - unit
+    env:
+      TF_ACC: 0
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - env -u AIVEN_TOKEN
+        {{.TESTSUM}}
+        --format pkgname
+        --hide-summary=skipped
+        --
+        -json ./...
+        -cover
+        -timeout=120s
+
+  test-acc:
+    desc: "Run acceptance tests (e.g., task test:acc -- -run TestAccResourceMyThing)"
+    env:
+      TF_ACC: 1
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    vars:
+      EFFECTIVE_PKG_PATH: '{{env "PKG_PATH" | default .PKG_PATH}}'
+    cmds:
+      - cmd: "{{.GO_CMD}} test ./{{.EFFECTIVE_PKG_PATH}}/... -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} {{.CLI_ARGS}} -timeout {{.ACC_TEST_TIMEOUT}}"
+
+  test-examples:
+    desc: "Run examples tests (e.g., task test:examples -- -run TestAccExampleMyThing)"
+    deps:
+      - build-dev
+      - internal:clean-examples
+    env:
+      AIVEN_PROVIDER_PATH: "{{.BUILD_DEV_DIR}}"
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - "{{.GO_CMD}} test --tags=examples ./examples_tests/... -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} -timeout {{.ACC_TEST_TIMEOUT}}"
+
+  #################################################
+  # Code Style Tasks
+  #################################################
+  lint:
+    desc: Run all linters (Go, Tests, Docs, Semgrep)
+    deps:
+      - internal:lint-go
+      - internal:lint-test
+      - internal:lint-docs
+      - internal:semgrep
+
+  fmt:
+    desc: Run all formatters (Terraform tests, Go imports)
+    cmds:
+      - task: internal:fmt-test
+      - task: internal:fmt-imports
+
+  #################################################
+  # Utility Tasks
+  #################################################
+
+  generate:
+    desc: Generate Go code, documentation, and mocks
+    deps:
+      - internal:gen-go
+      - internal:docs-generate
+    cmds:
+      - defer: {task: internal:fmt-imports}
+      - task: internal:mockery
+
+
+  update-schemas:
+    desc: "Update Go client codegen and API schemas, regenerate mocks, and update CHANGELOG.md"
+    cmds:
+      - task: internal:dump-schemas
+      - task: internal:load-schemas
+      - task: generate
+      - task: internal:diff-schemas
+      - task: internal:mockery
+
+  update-client:
+      desc: "Update Go client codegen"
+      aliases:
+        - client
+      cmds:
+        - task: internal:load-codegen
+        - task: internal:dump-mockery
+
+  get-spec:
+    desc: "Download/Update the Aiven OpenAPI spec"
+    aliases:
+      - spec
+    preconditions:
+      - sh: command -v curl
+        msg: "'curl' command not found. Please install curl to download the OpenAPI spec."
+      - sh: command -v jq
+        msg: "'jq' command not found. Please install jq (JSON processor)."
+    cmds:
+      - curl -sL -o {{.OPENAPI_FILE}} {{.OPENAPI_URL}}
+      - jq '.' {{.OPENAPI_FILE}} > {{.OPENAPI_FILE}}.tmp && mv {{.OPENAPI_FILE}}.tmp {{.OPENAPI_FILE}}
+
+    generates:
+      - "{{.OPENAPI_FILE}}"
+
+  sweep:
+    desc: "Run resource sweepers (WARNING: Destroys infrastructure!)."
+    prompt: This will destroy infrastructure. Use only in development accounts. Do you want to continue?
+    env:
+      TF_SWEEP: 1
+    cmds:
+      - "{{.GO_CMD}} test ./internal/sweep -v -sweep={{.SWEEP}} {{.CLI_ARGS}} -timeout 15m"
+
+  debug:
+    desc: Run the development build in debug mode
+    deps:
+      - build-dev
+    cmds:
+      - "{{.BUILD_DEV_BIN}} -debug"
+
+  #################################################
+  # CI Tasks
+  #################################################
+
+  ci:selproj:
+    desc: "Run selproj tool change detection"
+    cmds:
+      - "{{.SELPROJ}}"
+  ci:sweep-check:
+    desc: "Run sweeper test checks (TestCheckSweepers) without deleting resources"
+    cmds:
+      - task: internal:sweep-check
+  ci:docs:
+    desc: "Generate Terraform provider documentation"
+    cmds:
+      - task: internal:docs-generate

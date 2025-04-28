@@ -20,8 +20,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: go install golang.org/x/tools/cmd/goimports@latest
-      - run: make update-schemas
+      - run: task update-schemas
       - id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - id: changes
