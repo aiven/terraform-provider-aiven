@@ -13,6 +13,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Change `aiven_organization_user_list.billing_groups` to type `Set`. The order is not guaranteed.
+- Fix `aiven_clickhouse_grant.privilege_grant.privilege` case validation
 
 ## [4.39.0] - 2025-04-24
 
