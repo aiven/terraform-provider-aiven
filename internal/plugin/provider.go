@@ -20,7 +20,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/org"
+	organization2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -154,7 +154,7 @@ func (p *AivenProvider) Configure(
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
-		org.NewOrganizationResource,
+		organization2.NewOrganizationResource,
 		organization.NewOrganizationUserGroupMembersResource,
 		organization.NewOrganizationGroupProjectResource,
 	}
@@ -175,7 +175,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
-		org.NewOrganizationDataSource,
+		organization2.NewOrganizationDatasource,
 	}
 
 	// Add to a list of data sources that are currently in beta.

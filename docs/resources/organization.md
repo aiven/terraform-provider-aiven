@@ -23,7 +23,7 @@ resource "aiven_organization" "main" {
 
 ### Required
 
-- `name` (String) Name of the organization.
+- `name` (String) Name of the organization. Maximum length: `128`.
 
 ### Optional
 
@@ -31,10 +31,10 @@ resource "aiven_organization" "main" {
 
 ### Read-Only
 
-- `create_time` (String) Timestamp of the creation of the organization.
-- `id` (String) ID of the organization.
-- `tenant_id` (String) Tenant ID of the organization.
-- `update_time` (String) Timestamp of the last update of the organization.
+- `create_time` (String) Timestamp in ISO 8601 format, always in UTC.
+- `id` (String) The organization ID.
+- `tenant_id` (String, Deprecated) Tenant identifier.
+- `update_time` (String) Timestamp in ISO 8601 format, always in UTC.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

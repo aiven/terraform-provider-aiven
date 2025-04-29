@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Deprecate `aiven_organization.tenant_id` field. The field is not used in the API anymore.
 - Change `aiven_organization_user_list.billing_groups` to type `Set`. The order is not guaranteed.
 - Fix `aiven_clickhouse_grant.privilege_grant.privilege` case validation
 
