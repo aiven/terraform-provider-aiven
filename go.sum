@@ -78,12 +78,6 @@ github.com/aiven/aiven-go-client/v2 v2.34.0 h1:Iq3GZVoqrAPb4XcA3pJVL8MpRtiXep+LY
 github.com/aiven/aiven-go-client/v2 v2.34.0/go.mod h1:qXBgER0dtjJa1V3l7kzpizuAGjFCkgahhHL5OpoM2ZM=
 github.com/aiven/go-api-schemas v1.120.0 h1:82yLoT+QfsbHOOgCHph3LKHzNfc5aYJXz5tF3ym4O/A=
 github.com/aiven/go-api-schemas v1.120.0/go.mod h1:GbJ2d6VqgatufjBiVQi6Q8jWJbsyhOFFuZkM22Vey8U=
-github.com/aiven/go-client-codegen v0.101.0 h1:GDLAsk0dhAkQ1m4rQRZYqcyChHwTsV1TfdZSkaIjszM=
-github.com/aiven/go-client-codegen v0.101.0/go.mod h1:F5joGW/xVBUf4CnxOidXsaLw5ZowZyhMl1Nnr/EnFEo=
-github.com/aiven/go-client-codegen v0.102.0 h1:j+Tdap/THqsqZ/SCcTtnSdaxmE7OyiP/OuZURdNoN68=
-github.com/aiven/go-client-codegen v0.102.0/go.mod h1:F5joGW/xVBUf4CnxOidXsaLw5ZowZyhMl1Nnr/EnFEo=
-github.com/aiven/go-client-codegen v0.103.0 h1:mGDhMf+ABfbSZjFdOQogLuHguBYNGnmsyg2nie2JFGw=
-github.com/aiven/go-client-codegen v0.103.0/go.mod h1:F5joGW/xVBUf4CnxOidXsaLw5ZowZyhMl1Nnr/EnFEo=
 github.com/aiven/go-client-codegen v0.104.0 h1:tLNPkVfrUz0X1fZllKtLORXxbU1wOtJrqgSt5wrsv3s=
 github.com/aiven/go-client-codegen v0.104.0/go.mod h1:F5joGW/xVBUf4CnxOidXsaLw5ZowZyhMl1Nnr/EnFEo=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
@@ -679,8 +673,8 @@ github.com/ryanrolds/sqlclosecheck v0.5.1 h1:dibWW826u0P8jNLsLN+En7+RqWWTYrjCB9f
 github.com/ryanrolds/sqlclosecheck v0.5.1/go.mod h1:2g3dUjoS6AL4huFdv6wn55WpLIDjY7ZgUR4J8HOO/XQ=
 github.com/sagikazarmark/locafero v0.7.0 h1:5MqpDsTGNDhY8sGp0Aowyf0qKsPrhewaLSsFaodPcyo=
 github.com/sagikazarmark/locafero v0.7.0/go.mod h1:2za3Cg5rMaTMoG/2Ulr9AwtFaIppKXTRYnozin4aB5k=
-github.com/samber/lo v1.49.1 h1:4BIFyVfuQSEpluc7Fua+j1NolZHiEHEpaSEKdsH0tew=
-github.com/samber/lo v1.49.1/go.mod h1:dO6KHFzUKXgP8LDhU0oI8d2hekjXnGOu0DB8Jecxd6o=
+github.com/samber/lo v1.50.0 h1:XrG0xOeHs+4FQ8gJR97zDz5uOFMW7OwFWiFVzqopKgY=
+github.com/samber/lo v1.50.0/go.mod h1:RjZyNk6WSnUFRKK6EyOhsRJMqft3G+pg7dCWHQCWvsc=
 github.com/sanposhiho/wastedassign/v2 v2.1.0 h1:crurBF7fJKIORrV85u9UUpePDYGWnwvv3+A96WvwXT0=
 github.com/sanposhiho/wastedassign/v2 v2.1.0/go.mod h1:+oSmSC+9bQ+VUAxA66nBb0Z7N8CK7mscKTDYC6aIek4=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 h1:PKK9DyHxif4LZo+uQSgXNqs0jj5+xZwwfKHgph2lxBw=
