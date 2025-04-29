@@ -25,9 +25,17 @@ data "aiven_organization" "main" {
 
 - `id` (String) ID of the organization.
 - `name` (String) Name of the organization.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `create_time` (String) Timestamp of the creation of the organization.
-- `tenant_id` (String) Tenant ID of the organization.
-- `update_time` (String) Timestamp of the last update of the organization.
+- `create_time` (String) Timestamp in ISO 8601 format, always in UTC.
+- `tenant_id` (String, Deprecated) Tenant identifier.
+- `update_time` (String) Timestamp in ISO 8601 format, always in UTC.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

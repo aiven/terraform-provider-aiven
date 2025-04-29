@@ -14,13 +14,14 @@ import (
 // MightyDatasource implements additional datasource methods
 type MightyDatasource interface {
 	datasource.DataSourceWithConfigure
+	datasource.DataSourceWithConfigValidators
 }
 
 type datasourceSchema func(context.Context) schema.Schema
 
 func NewDatasource[T any](
 	name string,
-	view DataView[T],
+	view DatView[T],
 	newSchema datasourceSchema,
 	newDataModel dataModelFactory[T],
 ) MightyDatasource {
@@ -38,7 +39,7 @@ type datasourceAdapter[T any] struct {
 	name string
 
 	// view implements Read function
-	view DataView[T]
+	view DatView[T]
 
 	// newSchema returns a new instance of the generated schema.
 	newSchema datasourceSchema
@@ -47,7 +48,7 @@ type datasourceAdapter[T any] struct {
 	newDataModel dataModelFactory[T]
 }
 
-func (c *datasourceAdapter[T]) Configure(
+func (a *datasourceAdapter[T]) Configure(
 	_ context.Context,
 	req datasource.ConfigureRequest,
 	rsp *datasource.ConfigureResponse,
@@ -66,32 +67,32 @@ func (c *datasourceAdapter[T]) Configure(
 		return
 	}
 
-	c.view.Configure(p.GetGenClient())
+	a.view.Configure(p.GetGenClient())
 }
 
-func (c *datasourceAdapter[T]) Metadata(
+func (a *datasourceAdapter[T]) Metadata(
 	_ context.Context,
 	_ datasource.MetadataRequest,
 	rsp *datasource.MetadataResponse,
 ) {
-	rsp.TypeName = c.name
+	rsp.TypeName = a.name
 }
 
-func (c *datasourceAdapter[T]) Schema(
+func (a *datasourceAdapter[T]) Schema(
 	ctx context.Context,
 	_ datasource.SchemaRequest,
 	rsp *datasource.SchemaResponse,
 ) {
-	rsp.Schema = c.newSchema(ctx)
+	rsp.Schema = a.newSchema(ctx)
 }
 
-func (c *datasourceAdapter[T]) Read(
+func (a *datasourceAdapter[T]) Read(
 	ctx context.Context,
 	req datasource.ReadRequest,
 	rsp *datasource.ReadResponse,
 ) {
 	var (
-		state = c.newDataModel()
+		state = a.newDataModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.Config.Get(ctx, state)...)
@@ -99,10 +100,18 @@ func (c *datasourceAdapter[T]) Read(
 		return
 	}
 
-	diags.Append(c.view.Read(ctx, state.DataModel())...)
+	diags.Append(a.view.Read(ctx, state.DataModel())...)
 	if diags.HasError() {
 		return
 	}
 
 	diags.Append(rsp.State.Set(ctx, state)...)
+}
+
+func (a *datasourceAdapter[T]) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {
+	v, ok := a.view.(DatViewValidators[T])
+	if !ok {
+		return nil
+	}
+	return v.DatValidators(ctx)
 }

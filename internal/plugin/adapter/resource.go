@@ -23,7 +23,7 @@ type resourceSchema func(context.Context) schema.Schema
 
 func NewResource[T any](
 	name string,
-	view View[T],
+	view ResView[T],
 	newSchema resourceSchema,
 	newDataModel dataModelFactory[T],
 	idFields []string,
@@ -39,13 +39,13 @@ func NewResource[T any](
 
 type resourceAdapter[T any] struct {
 	name         string
-	view         View[T]
+	view         ResView[T]
 	newSchema    resourceSchema
 	newDataModel dataModelFactory[T]
 	idFields     []string
 }
 
-func (c *resourceAdapter[T]) Configure(
+func (a *resourceAdapter[T]) Configure(
 	_ context.Context,
 	req resource.ConfigureRequest,
 	rsp *resource.ConfigureResponse,
@@ -66,32 +66,32 @@ func (c *resourceAdapter[T]) Configure(
 
 	// Setups the client.
 	// Configure other things, like logging, if needed.
-	c.view.Configure(p.GetGenClient())
+	a.view.Configure(p.GetGenClient())
 }
 
-func (c *resourceAdapter[T]) Metadata(
+func (a *resourceAdapter[T]) Metadata(
 	_ context.Context,
 	_ resource.MetadataRequest,
 	rsp *resource.MetadataResponse,
 ) {
-	rsp.TypeName = c.name
+	rsp.TypeName = a.name
 }
 
-func (c *resourceAdapter[T]) Schema(
+func (a *resourceAdapter[T]) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
 	rsp *resource.SchemaResponse,
 ) {
-	rsp.Schema = c.newSchema(ctx)
+	rsp.Schema = a.newSchema(ctx)
 }
 
-func (c *resourceAdapter[T]) Create(
+func (a *resourceAdapter[T]) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	rsp *resource.CreateResponse,
 ) {
 	var (
-		plan  = c.newDataModel()
+		plan  = a.newDataModel()
 		diags = &rsp.Diagnostics
 	)
 
@@ -100,7 +100,7 @@ func (c *resourceAdapter[T]) Create(
 		return
 	}
 
-	diags.Append(c.view.Create(ctx, plan.DataModel())...)
+	diags.Append(a.view.Create(ctx, plan.DataModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -108,13 +108,13 @@ func (c *resourceAdapter[T]) Create(
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (c *resourceAdapter[T]) Read(
+func (a *resourceAdapter[T]) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
 	rsp *resource.ReadResponse,
 ) {
 	var (
-		state = c.newDataModel()
+		state = a.newDataModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.State.Get(ctx, state)...)
@@ -122,7 +122,7 @@ func (c *resourceAdapter[T]) Read(
 		return
 	}
 
-	diags.Append(c.view.Read(ctx, state.DataModel())...)
+	diags.Append(a.view.Read(ctx, state.DataModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -130,14 +130,14 @@ func (c *resourceAdapter[T]) Read(
 	diags.Append(rsp.State.Set(ctx, state)...)
 }
 
-func (c *resourceAdapter[T]) Update(
+func (a *resourceAdapter[T]) Update(
 	ctx context.Context,
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
 ) {
 	var (
-		plan  = c.newDataModel()
-		state = c.newDataModel()
+		plan  = a.newDataModel()
+		state = a.newDataModel()
 		diags = &rsp.Diagnostics
 	)
 
@@ -147,7 +147,7 @@ func (c *resourceAdapter[T]) Update(
 		return
 	}
 
-	diags.Append(c.view.Update(ctx, plan.DataModel(), state.DataModel())...)
+	diags.Append(a.view.Update(ctx, plan.DataModel(), state.DataModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -155,13 +155,13 @@ func (c *resourceAdapter[T]) Update(
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (c *resourceAdapter[T]) Delete(
+func (a *resourceAdapter[T]) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
 	rsp *resource.DeleteResponse,
 ) {
 	var (
-		state = c.newDataModel()
+		state = a.newDataModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.State.Get(ctx, state)...)
@@ -169,17 +169,17 @@ func (c *resourceAdapter[T]) Delete(
 		return
 	}
 
-	diags.Append(c.view.Delete(ctx, state.DataModel())...)
+	diags.Append(a.view.Delete(ctx, state.DataModel())...)
 }
 
-func (c *resourceAdapter[T]) ImportState(
+func (a *resourceAdapter[T]) ImportState(
 	ctx context.Context,
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
-	values, err := schemautil.SplitResourceID(req.ID, len(c.idFields))
+	values, err := schemautil.SplitResourceID(req.ID, len(a.idFields))
 	if err != nil {
-		importPath := schemautil.BuildResourceID(c.idFields...)
+		importPath := schemautil.BuildResourceID(a.idFields...)
 		rsp.Diagnostics.AddError(
 			"Unexpected Read Identifier",
 			fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
@@ -187,6 +187,6 @@ func (c *resourceAdapter[T]) ImportState(
 	}
 
 	for i, v := range values {
-		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(c.idFields[i]), v)...)
+		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.idFields[i]), v)...)
 	}
 }
