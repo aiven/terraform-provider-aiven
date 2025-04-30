@@ -9,6 +9,8 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/stretchr/testify/require"
+
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/google/uuid"
@@ -181,10 +183,10 @@ func TestCreatePeeringConnection(t *testing.T) {
 			)
 
 			if tc.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, result)
 				assert.Equal(t, tc.expectedState, result.State)
 			}
@@ -439,9 +441,9 @@ func TestDeletePeeringConnection(t *testing.T) {
 			)
 
 			if tc.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			mc.AssertExpectations(t)

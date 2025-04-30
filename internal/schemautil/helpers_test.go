@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,12 +74,12 @@ func TestDetermineMixedOrganizationConstraintIDToStore(t *testing.T) {
 
 			got, err := ConvertOrganizationToAccountID(ctx, tt.input, client)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equalf(t, tt.want, got, "expected %s, got %s", tt.want, got)
 		})
 	}

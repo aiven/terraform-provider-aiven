@@ -19,8 +19,6 @@ func TestPostgresTestSuite(t *testing.T) {
 }
 
 func (s *PostgresTestSuite) TestPostgres() {
-	s.T().Parallel()
-
 	// Given
 	withPrefix := examplesRandPrefix()
 	pgName := withPrefix("pg")

@@ -29,11 +29,12 @@ func escapeBytes(identifier []byte) string {
 		b := identifier[i]
 
 		escaped, ok := escapeMap[b]
-		if ok {
+		switch {
+		case ok:
 			buf.WriteString(escaped)
-		} else if b < 0x20 || b > 0x7e {
-			buf.WriteString(fmt.Sprintf("\\x%x", b))
-		} else {
+		case b < 0x20 || b > 0x7e:
+			buf.WriteString(fmt.Sprintf("\\x%02x", b))
+		default:
 			buf.WriteByte(b)
 		}
 	}

@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
@@ -252,7 +254,7 @@ func TestGenerateSDKTemplate(t *testing.T) {
 			t.Parallel()
 
 			got, err := generator.GenerateTemplate(tt.resource, tt.resourceType, tt.kind)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")
 		})
 	}
@@ -298,7 +300,7 @@ func TestSDKGenerateTemplateWithErrors(t *testing.T) {
 
 	// Test with non-schema input
 	_, err := generator.GenerateTemplate("not a schema", "test_resource", ResourceKindResource)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "non-SDK schema")
 
 	// Create a schema that will cause extraction error by having nil schema
@@ -307,7 +309,7 @@ func TestSDKGenerateTemplateWithErrors(t *testing.T) {
 	}
 
 	_, err = generator.GenerateTemplate(badSchema, "test_resource", ResourceKindResource)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "error extracting fields")
 }
 

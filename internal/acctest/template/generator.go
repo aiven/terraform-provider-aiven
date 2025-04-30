@@ -182,7 +182,6 @@ func (r *CommonTemplateRenderer) RenderDependsOn(builder *strings.Builder, inden
 	fmt.Fprintf(builder, "%s{{- end }}\n", indentStr)
 }
 
-// RenderField renders a template field based on its properties
 func (r *CommonTemplateRenderer) RenderField(builder *strings.Builder, field TemplateField, indent int, parentPath TemplatePath) {
 	// Create a path for this field
 	var path TemplatePath
@@ -194,17 +193,18 @@ func (r *CommonTemplateRenderer) RenderField(builder *strings.Builder, field Tem
 		path = parentPath.AppendField(field.Name, field.IsCollection)
 	}
 
-	if field.IsCollection && field.IsObject && field.IsSetType {
+	switch {
+	case field.IsCollection && field.IsObject && field.IsSetType:
 		r.renderSetBlock(builder, field, path, indent)
-	} else if field.IsObject && len(field.NestedFields) > 0 {
+	case field.IsObject && len(field.NestedFields) > 0:
 		r.renderBlock(builder, field, path, indent)
-	} else if field.IsCollection && !field.IsObject {
+	case field.IsCollection && !field.IsObject:
 		r.renderCollection(builder, field, path, indent)
-	} else if field.IsMap {
+	case field.IsMap:
 		r.renderMap(builder, field, path, indent)
-	} else if field.FieldType == FieldTypeBool {
+	case field.FieldType == FieldTypeBool:
 		r.renderBool(builder, field, path, indent)
-	} else {
+	default:
 		r.renderSimple(builder, field, path, indent)
 	}
 }

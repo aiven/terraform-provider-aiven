@@ -3,6 +3,8 @@ package template
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	sdkschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,7 +18,7 @@ func TestSDKExtractFieldsWithErrors(t *testing.T) {
 
 	// Test with invalid schema type
 	_, err := sdkExtractor.ExtractFields("not a schema")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not a *schema.Resource")
 
 	// Test with nil Schema
@@ -24,7 +26,7 @@ func TestSDKExtractFieldsWithErrors(t *testing.T) {
 		Schema: nil,
 	}
 	_, err = sdkExtractor.ExtractFields(nilSchemaResource)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no fields could be extracted from SDK schema")
 
 	// Test with empty Schema
@@ -32,7 +34,7 @@ func TestSDKExtractFieldsWithErrors(t *testing.T) {
 		Schema: map[string]*sdkschema.Schema{},
 	}
 	_, err = sdkExtractor.ExtractFields(emptySchemaResource)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no fields could be extracted from SDK schema")
 }
 
@@ -43,7 +45,7 @@ func TestFrameworkExtractFieldsWithErrors(t *testing.T) {
 
 	// Test with invalid schema type
 	_, err := frameworkExtractor.ExtractFields("not a schema")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unsupported schema type")
 
 	// Test with empty resource schema
@@ -51,7 +53,7 @@ func TestFrameworkExtractFieldsWithErrors(t *testing.T) {
 		Attributes: map[string]resourceschema.Attribute{},
 	}
 	_, err = frameworkExtractor.ExtractFields(emptyResourceSchema)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no fields could be extracted from framework schema")
 
 	// Test with empty datasource schema
@@ -59,7 +61,7 @@ func TestFrameworkExtractFieldsWithErrors(t *testing.T) {
 		Attributes: map[string]datasourceschema.Attribute{},
 	}
 	_, err = frameworkExtractor.ExtractFields(emptyDataSourceSchema)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no fields could be extracted from framework schema")
 }
 
@@ -104,7 +106,7 @@ func TestProcessComplexFieldTypes(t *testing.T) {
 	extractor := NewSDKFieldExtractor()
 	fields, err := extractor.ExtractFields(resource)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, fields, 3)
 
 	// Verify map field

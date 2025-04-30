@@ -11,7 +11,7 @@ func TestTemplatePathExpression(t *testing.T) {
 
 	// Test empty path
 	emptyPath := TemplatePath{}
-	assert.Equal(t, "", emptyPath.Expression())
+	assert.Empty(t, emptyPath.Expression())
 
 	// Test simple path
 	simplePath := NewTemplatePath("field", false)

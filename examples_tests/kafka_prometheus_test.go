@@ -20,8 +20,6 @@ func TestKafkaPrometheusTestSuite(t *testing.T) {
 }
 
 func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
-	s.T().Parallel()
-
 	// Given
 	withPrefix := examplesRandPrefix()
 	kafkaServiceName := withPrefix("kafka")

@@ -71,12 +71,19 @@ tasks:
     preconditions:
       - sh: test -f .semgrep.yml
         msg: ".semgrep.yml configuration file not found."
+      - sh: "{{.CONTAINER_TOOL}} info >/dev/null 2>&1"
+        msg: "Container engine (Docker/Podman) is not running. Please start the service."
     cmds:
       - "{{.CONTAINER_TOOL}} run --rm -v \"${PWD}:/src\" semgrep/semgrep semgrep --config=\"p/auto\" --config=\".semgrep.yml\" --include=\"**\" --metrics=off --error"
 
   #-------------------------------------
   # Format Sub-Tasks
   #-------------------------------------
+  fmt-go:
+    desc: "Format go code using golangci-lint"
+    cmds:
+      - "{{.GOLANGCILINT}} fmt"
+
   fmt-test:
     desc: "Format HCL code using terrafmt"
     cmds:

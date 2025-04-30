@@ -19,8 +19,6 @@ func TestMysqlTestSuite(t *testing.T) {
 }
 
 func (s *MysqlTestSuite) TestMysql() {
-	s.T().Parallel()
-
 	// Given
 	withPrefix := examplesRandPrefix()
 	mysqlName := withPrefix("mysql")

@@ -108,7 +108,7 @@ func EmptyObjectDiffSuppressFunc(k, oldValue, newValue string, d *schema.Resourc
 func EmptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.SchemaDiffSuppressFunc {
 	var skipKeys []string
 	for key, sh := range s {
-		switch sh.Type {
+		switch sh.Type { //nolint:gocritic
 		case schema.TypeList:
 			skipKeys = append(skipKeys, key)
 		}

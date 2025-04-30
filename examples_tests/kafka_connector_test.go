@@ -19,8 +19,6 @@ func TestKafkaConnectorTestSuite(t *testing.T) {
 }
 
 func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
-	s.T().Parallel()
-
 	// Given
 	withPrefix := examplesRandPrefix()
 	kafkaServiceName := withPrefix("kafka")

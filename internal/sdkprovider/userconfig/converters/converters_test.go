@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,17 +53,17 @@ func TestFlattenSafe(t *testing.T) {
 		t.Run(opt.description, func(t *testing.T) {
 			// Converts ip filters first
 			err := convertIPFilter(opt.src)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Then flattens
 			newDto, err := flattenSafe(sch, opt.src)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			result, err := json.Marshal(&newDto)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			expected, err := json.Marshal(&opt.expected)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, expected, result)
 		})

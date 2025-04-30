@@ -178,6 +178,6 @@ func TestChangelogFile(t *testing.T) {
 	require.NoError(t, err)
 
 	result, err := updateChangelog(string(b), 80, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, result)
 }

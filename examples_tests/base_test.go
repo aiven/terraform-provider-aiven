@@ -14,7 +14,7 @@ func TestExamplesRandPrefix(t *testing.T) {
 	// Starts with prefix, ends with "-kafka", has valid length
 	assert.True(t, strings.HasPrefix(kafkaName, exampleTestsPrefix))
 	assert.True(t, strings.HasSuffix(kafkaName, "-kafka"))
-	assert.Equal(t, len(exampleTestsPrefix+"0000000-kafka"), len(kafkaName))
+	assert.Len(t, exampleTestsPrefix+"0000000-kafka", len(kafkaName))
 
 	// Equal seed for a new name
 	mysqlName := withPrefix("mysql")

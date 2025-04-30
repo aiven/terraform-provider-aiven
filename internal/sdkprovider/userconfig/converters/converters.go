@@ -41,7 +41,7 @@ const (
 
 // userConfigKey provides a single source of truth for a field naming
 func userConfigKey(kind userConfigType, name string) string {
-	switch kind {
+	switch kind { //nolint:gocritic
 	case ServiceIntegrationEndpointUserConfig:
 		switch name {
 		case "external_google_cloud_bigquery", "external_postgresql":
