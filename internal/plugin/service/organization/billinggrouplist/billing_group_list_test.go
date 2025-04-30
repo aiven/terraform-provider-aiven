@@ -36,7 +36,7 @@ func TestAccAivenOrganizationBillingGroupListDataSource(t *testing.T) {
 			"organization_id": template.Reference("data.aiven_organization.org.id"),
 			"address_lines":   []string{"123 Main St", "Suite 456"},
 			"city":            "Helsinki",
-			"company_name":    "Test Company",
+			"name":            "Test Company",
 			"country_code":    "FI",
 			"state":           "Uusimaa",
 			"zip_code":        "00100",
