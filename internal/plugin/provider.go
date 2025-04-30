@@ -16,11 +16,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
-	organization2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroup"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -154,9 +155,9 @@ func (p *AivenProvider) Configure(
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
-		organization2.NewOrganizationResource,
-		organization.NewOrganizationUserGroupMembersResource,
-		organization.NewOrganizationGroupProjectResource,
+		organization.NewOrganizationResource,
+		usergroup.NewOrganizationUserGroupMembersResource,
+		project.NewOrganizationGroupProjectResource,
 	}
 
 	// Add to a list of resources that are currently in beta.
@@ -175,7 +176,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
-		organization2.NewOrganizationDatasource,
+		organization.NewOrganizationDatasource,
 	}
 
 	// Add to a list of data sources that are currently in beta.
