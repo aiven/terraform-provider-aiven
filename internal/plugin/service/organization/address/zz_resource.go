@@ -72,7 +72,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Optional:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
-			"timeouts": timeouts.AttributesAll(ctx),
 			"update_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Update Time.",
@@ -83,6 +82,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(32)},
 			},
 		},
+		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages an organization address. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

@@ -26,14 +26,14 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Optional
 
-- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `billing_groups` (Block Set) A list of all billing groups belonging to the organization. (see [below for nested schema](#nestedblock--billing_groups))
 - `id` (String) Resource ID, equal to `organization_id`.
 
-<a id="nestedatt--timeouts"></a>
+<a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

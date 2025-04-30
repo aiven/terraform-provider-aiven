@@ -27,7 +27,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Optional
 
-- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -42,7 +42,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
 
-<a id="nestedatt--timeouts"></a>
+<a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

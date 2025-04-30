@@ -31,7 +31,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 - `company_name` (String) Name of a company. Maximum length: `128`.
 - `state` (String) State. Maximum length: `128`.
-- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `zip_code` (String) Zip Code. Maximum length: `32`.
 
 ### Read-Only
@@ -41,7 +41,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `id` (String) Resource ID, a composite of `organization_id` and `address_id` IDs.
 - `update_time` (String) Update Time.
 
-<a id="nestedatt--timeouts"></a>
+<a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
