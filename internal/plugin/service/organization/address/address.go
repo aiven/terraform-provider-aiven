@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -60,9 +59,8 @@ func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 		return diags
 	}
 
-	// Read() reads the remote state using these two IDs.
-	plan.OrganizationID = types.StringValue(rsp.OrganizationId)
-	plan.AddressID = types.StringValue(rsp.AddressId)
+	// Sets ID fields to Read() the resource
+	plan.SetID(rsp.OrganizationId, rsp.AddressId)
 	return c.Read(ctx, plan)
 }
 
@@ -73,12 +71,14 @@ func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnost
 		return diags
 	}
 
-	_, err := c.client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
+	rsp, err := c.client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
 	}
 
+	// Sets ID fields to Read() the resource
+	plan.SetID(rsp.OrganizationId, rsp.AddressId)
 	return c.Read(ctx, plan)
 }
 

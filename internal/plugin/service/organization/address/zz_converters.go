@@ -6,6 +6,7 @@ package address
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -31,6 +32,12 @@ type dataModel struct {
 	State          types.String `tfsdk:"state"`
 	UpdateTime     types.String `tfsdk:"update_time"`
 	ZipCode        types.String `tfsdk:"zip_code"`
+}
+
+func (data *dataModel) SetID(vOrganizationID string, vAddressID string) {
+	data.OrganizationID = types.StringValue(vOrganizationID)
+	data.AddressID = types.StringValue(vAddressID)
+	data.ID = types.StringValue(filepath.Join(vOrganizationID, vAddressID))
 }
 
 type dtoModel struct {
@@ -141,6 +148,6 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 			data.AddressID = types.StringValue(parts[1])
 		}
 	}
-	data.ID = types.StringValue(fmt.Sprintf("%s/%s", data.OrganizationID.ValueString(), data.AddressID.ValueString()))
+	data.SetID(data.OrganizationID.ValueString(), data.AddressID.ValueString())
 	return nil
 }

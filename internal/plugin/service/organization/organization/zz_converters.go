@@ -6,6 +6,7 @@ package organization
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,6 +25,10 @@ type dataModel struct {
 	Name       types.String `tfsdk:"name"`
 	TenantID   types.String `tfsdk:"tenant_id"`
 	UpdateTime types.String `tfsdk:"update_time"`
+}
+
+func (data *dataModel) SetID(vID string) {
+	data.ID = types.StringValue(filepath.Join(vID))
 }
 
 type dtoModel struct {

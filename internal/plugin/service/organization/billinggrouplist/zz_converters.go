@@ -6,6 +6,7 @@ package billinggrouplist
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -24,6 +25,11 @@ type dataModel struct {
 	ID             types.String `tfsdk:"id"`
 	BillingGroups  types.Set    `tfsdk:"billing_groups"`
 	OrganizationID types.String `tfsdk:"organization_id"`
+}
+
+func (data *dataModel) SetID(vOrganizationID string) {
+	data.OrganizationID = types.StringValue(vOrganizationID)
+	data.ID = types.StringValue(filepath.Join(vOrganizationID))
 }
 
 // dataBillingGroups
@@ -90,7 +96,7 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 			data.OrganizationID = types.StringValue(parts[0])
 		}
 	}
-	data.ID = types.StringValue(fmt.Sprintf("%s", data.OrganizationID.ValueString()))
+	data.SetID(data.OrganizationID.ValueString())
 	return nil
 }
 
