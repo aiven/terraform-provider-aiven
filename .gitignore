@@ -20,6 +20,7 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+Taskfile.yml
 
 # Binaries for programs and plugins
 *.exe
@@ -28,6 +29,7 @@ override.tf.json
 *.so
 *.dylib
 __debug_bin
+/.task/
 
 # Test binary, built with `go test -c`
 *.test
@@ -47,6 +49,7 @@ packrd/
 plugins/
 tools/bin
 hack/testmanifestfmt/bin
+/openapi.json
 
 # Github Pages
 _site/

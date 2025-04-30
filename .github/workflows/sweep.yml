@@ -32,13 +32,16 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: nick-invision/retry@v3
         if: always()
         with:
           timeout_minutes: 15
           max_attempts: 15
-          command: make sweep
+          command: task --yes sweep
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ matrix.aiven_project_name_suffix }}

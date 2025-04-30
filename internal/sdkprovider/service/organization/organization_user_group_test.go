@@ -141,6 +141,8 @@ func TestAccAivenOrganizationUserGroup_Import(t *testing.T) {
 		groupID      string
 	)
 
+	acc.TestAccPreCheck(t)
+
 	orgID = os.Getenv("AIVEN_ORG_ID")
 	if orgID == "" {
 		t.Skip("Skipping test due to missing AIVEN_ORG_ID environment variable")

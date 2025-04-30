@@ -776,7 +776,7 @@ func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
 	resourceName := "aiven_service_integration.test_autoscaler"
 	endpointResourceName := "aiven_service_integration_endpoint.test_endpoint"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { /* Add necessary pre-checks here */ },
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{

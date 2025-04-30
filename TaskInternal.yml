@@ -1,0 +1,163 @@
+# Contains internal implementation details, variables, and helper tasks.
+version: '3'
+
+vars:
+  # --- Basic ---
+  GO_CMD: go
+  GOTOOL_CMD: "{{.GO_CMD}} tool"
+  CONTAINER_TOOL:
+    sh: 'command -v podman || command -v docker'
+  OPENAPI_URL: https://api.aiven.io/doc/openapi.json # Source URL for the spec
+  OPENAPI_FILE: openapi.json
+
+  # --- Architecture & Build Paths ---
+  USER_HOME:
+    sh: 'echo $HOME'
+  ARCH:
+    sh: "{{.GO_CMD}} env GOOS GOARCH | tr '\n' '_' | sed 's/_$//'" # Get OS/Arch (e.g., linux_amd64)
+  BUILD_DEV_DIR: '{{.USER_HOME}}/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/{{.ARCH}}'
+  BUILD_DEV_BIN: "{{.BUILD_DEV_DIR}}/terraform-provider-aiven_v0.0.0+dev"
+
+  # --- Go Tools ---
+  GOLANGCILINT: "{{.GOTOOL_CMD}} golangci-lint"
+  TFPLUGINDOCS: "{{.GOTOOL_CMD}} tfplugindocs"
+  TERRAFMT: "{{.GOTOOL_CMD}} terrafmt"
+  SELPROJ: "{{.GOTOOL_CMD}} selproj"
+  MOCKERY: "{{.GOTOOL_CMD}} mockery"
+  TESTSUM: "{{.GOTOOL_CMD}} gotestsum"
+
+  # --- Defaults ---
+  PKG_PATH: internal                     # Default Go package path for acceptance tests
+  TEST_COUNT: 1                          # Default count for running tests
+  ACC_TEST_TIMEOUT: 180m                 # Default timeout for acceptance tests
+  ACC_TEST_PARALLELISM: 10               # Default parallelism for acceptance tests
+  SWEEP: global                          # Default scope for resource sweeper
+  OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
+  CHANGELOG_CMD: "{{.GO_CMD}} run ./changelog/..." # Command to run the internal changelog generation tool
+
+env:
+  CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
+
+tasks:
+  #-------------------------------------
+  # Lint Sub-Tasks
+  #-------------------------------------
+  lint-go:
+    desc: "Run Go static analysis using golangci-lint"
+    cmds:
+      - "{{.GOLANGCILINT}} run --build-tags all --timeout=30m ./..."
+
+  lint-test:
+    desc: "Check HCL formatting using terrafmt"
+    cmds:
+      - "{{.TERRAFMT}} diff ./internal -cfq"
+
+  lint-docs:
+    desc: "Validate provider documentation consistency"
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - "{{.TFPLUGINDOCS}} generate --rendered-website-dir tmp"
+      - mkdir -p docs/data-sources docs/resources
+      - mv tmp/data-sources/influxdb*.md docs/data-sources/ || true
+      - mv tmp/resources/influxdb*.md docs/resources/ || true
+      - rm -rf tmp
+      - "{{.TFPLUGINDOCS}} validate --provider-name aiven"
+      - rm -f docs/data-sources/influxdb*.md
+      - rm -f docs/resources/influxdb*.md
+
+  semgrep:
+    desc: "Run Semgrep static analysis security scan"
+    preconditions:
+      - sh: test -f .semgrep.yml
+        msg: ".semgrep.yml configuration file not found."
+    cmds:
+      - "{{.CONTAINER_TOOL}} run --rm -v \"${PWD}:/src\" semgrep/semgrep semgrep --config=\"p/auto\" --config=\".semgrep.yml\" --include=\"**\" --metrics=off --error"
+
+  #-------------------------------------
+  # Format Sub-Tasks
+  #-------------------------------------
+  fmt-test:
+    desc: "Format HCL code using terrafmt"
+    cmds:
+      - "{{.TERRAFMT}} fmt ./internal -fv"
+
+  fmt-imports:
+    desc: "Remove blank lines in Go import blocks and run goimports"
+    cmds:
+      - find . -type f -name '*.go' -exec sed -i '/^import ($$/,/^)/ {/^[[:space:]]*$$/d}' {} +
+      - goimports -local "github.com/aiven/terraform-provider-aiven" -w .
+
+  #-------------------------------------
+  # Generate Sub-Tasks
+  #-------------------------------------
+  gen-go:
+    desc: "Run Go code generation (`go generate ./...`)"
+    cmds:
+      - "{{.GO_CMD}} generate ./..."
+
+  docs-generate:
+    desc: "Generate Terraform provider documentation"
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - rm -f docs/.DS_Store
+      - "{{.TFPLUGINDOCS}} generate"
+      - rm -f docs/data-sources/influxdb*.md
+      - rm -f docs/resources/influxdb*.md
+
+  #-------------------------------------
+  # Schema Sub-Tasks
+  #-------------------------------------
+  dump-schemas:
+    desc: "Save current provider schemas to {{.OLD_SCHEMA}} for later diffing"
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - "{{.CHANGELOG_CMD}} -save -schema={{.OLD_SCHEMA}}"
+    generates: ["{{.OLD_SCHEMA}}"]
+
+  diff-schemas:
+    desc: "Compare current schemas against {{.OLD_SCHEMA}} and update CHANGELOG.md"
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
+    cmds:
+      - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog=CHANGELOG.md"
+      - rm {{.OLD_SCHEMA}}
+    sources: ["**/*.go"]
+    generates: ["CHANGELOG.md"]
+
+  load-codegen:
+    desc: "Update go-client-codegen module dependency"
+    cmds:
+      - "{{.GO_CMD}} get github.com/aiven/go-client-codegen@latest"
+      - "{{.GO_CMD}} mod tidy"
+
+  load-schemas:
+    desc: "Update Go client codegen and API schema module dependencies"
+    cmds:
+      - task: load-codegen
+      - "{{.GO_CMD}} get github.com/aiven/go-api-schemas@latest"
+      - "{{.GO_CMD}} mod tidy"
+
+  mockery:
+    desc: "Generate mocks for interfaces"
+    preconditions:
+      - sh: test -f .mockery.yml
+        msg: ".mockery.yml configuration file not found."
+    cmds:
+      - "{{.MOCKERY}} --config=./.mockery.yml"
+
+  #-------------------------------------
+  # CI/Utility Tasks
+  #-------------------------------------
+  sweep-check:
+    desc: "Run sweeper test checks (TestCheckSweepers) without deleting resources"
+    cmds:
+      - "{{.GO_CMD}} test ./internal/sweep -v -run TestCheckSweepers"
+
+  clean-examples:
+    internal: true
+    desc: "Remove Terraform state files (*.tfstate*) from ./examples directory"
+    cmds:
+      - find ./examples -type f \( -name '*.tfstate' -o -name '*.tfstate.backup' \) -delete

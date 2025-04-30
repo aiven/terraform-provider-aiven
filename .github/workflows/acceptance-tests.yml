@@ -27,7 +27,7 @@ jobs:
           go-version-file: go.mod
 
       - id: selproj
-        run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
+        run: echo "project_name_suffix=$(task -s ci:selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
@@ -70,6 +70,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3 #Install latest Terraform version
@@ -82,7 +86,7 @@ jobs:
         run: echo "terraform_path=$(which terraform)" >> $GITHUB_OUTPUT
 
       - name: Run Acceptance Tests
-        run: make test-acc
+        run: task test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           TF_ACC_TERRAFORM_PATH: ${{ steps.get_tf_path.outputs.terraform_path }}
@@ -110,13 +114,17 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: nick-invision/retry@v3
         if: always()
         with:
           timeout_minutes: 15
           max_attempts: 15
-          command: make sweep
+          command: task --yes sweep
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: >-

@@ -48,8 +48,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: make lint
+      - run: task lint
 
   check_docs_were_generated:
     runs-on: ubuntu-latest
@@ -61,8 +66,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: make docs
+      - run: task ci:docs
       - run: git diff --exit-code
 
   sweep_check:
@@ -75,5 +84,9 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
+    - uses: arduino/setup-task@v2
+      with:
+        version: '3.x'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - run: make sweep-check
+    - run: task ci:sweep-check

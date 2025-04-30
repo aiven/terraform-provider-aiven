@@ -207,6 +207,7 @@ func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
 func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 	resourceName := "aiven_opensearch.foo"
 	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenOpenSearchUserResourceDestroy,
 		Steps: []resource.TestStep{
