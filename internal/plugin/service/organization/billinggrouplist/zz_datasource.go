@@ -32,59 +32,61 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "ID of an organization.",
 				Required:            true,
 			},
-			"timeouts": timeouts.Attributes(ctx),
 		},
-		Blocks: map[string]schema.Block{"billing_groups": schema.SetNestedBlock{
-			MarkdownDescription: "A list of all billing groups belonging to the organization.",
-			NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
-				"billing_address_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Billing address ID.",
-				},
-				"billing_contact_emails": schema.SetAttribute{
-					Computed:            true,
-					ElementType:         types.StringType,
-					MarkdownDescription: "List of billing contact emails.",
-				},
-				"billing_currency": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-				},
-				"billing_emails": schema.SetAttribute{
-					Computed:            true,
-					ElementType:         types.StringType,
-					MarkdownDescription: "List of billing contact emails.",
-				},
-				"billing_group_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Billing group ID.",
-				},
-				"billing_group_name": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Billing Group Name.",
-				},
-				"custom_invoice_text": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Extra billing text.",
-				},
-				"organization_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Organization ID.",
-				},
-				"payment_method_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Payment method ID.",
-				},
-				"shipping_address_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "Shipping address ID.",
-				},
-				"vat_id": schema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "VAT ID.",
-				},
-			}},
-		}},
+		Blocks: map[string]schema.Block{
+			"billing_groups": schema.SetNestedBlock{
+				MarkdownDescription: "A list of all billing groups belonging to the organization.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+					"billing_address_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Billing address ID.",
+					},
+					"billing_contact_emails": schema.SetAttribute{
+						Computed:            true,
+						ElementType:         types.StringType,
+						MarkdownDescription: "List of billing contact emails.",
+					},
+					"billing_currency": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
+					},
+					"billing_emails": schema.SetAttribute{
+						Computed:            true,
+						ElementType:         types.StringType,
+						MarkdownDescription: "List of billing contact emails.",
+					},
+					"billing_group_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Billing group ID.",
+					},
+					"billing_group_name": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Billing Group Name.",
+					},
+					"custom_invoice_text": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Extra billing text.",
+					},
+					"organization_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Organization ID.",
+					},
+					"payment_method_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Payment method ID.",
+					},
+					"shipping_address_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Shipping address ID.",
+					},
+					"vat_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "VAT ID.",
+					},
+				}},
+			},
+			"timeouts": timeouts.Block(ctx),
+		},
 		MarkdownDescription: "Lists billing groups for an organization. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

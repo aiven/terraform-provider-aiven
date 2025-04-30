@@ -82,12 +82,12 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
-			"timeouts": timeouts.AttributesAll(ctx),
 			"vat_id": schema.StringAttribute{
 				MarkdownDescription: "VAT ID.",
 				Optional:            true,
 			},
 		},
+		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages an organization billing group. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

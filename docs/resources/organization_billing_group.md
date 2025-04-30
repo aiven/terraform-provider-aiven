@@ -34,7 +34,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 - `billing_currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text. Maximum length: `254`.
-- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) VAT ID.
 
 ### Read-Only
@@ -42,7 +42,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_group_id` (String) Billing group id.
 - `id` (String) Resource ID, a composite of `organization_id` and `billing_group_id` IDs.
 
-<a id="nestedatt--timeouts"></a>
+<a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
