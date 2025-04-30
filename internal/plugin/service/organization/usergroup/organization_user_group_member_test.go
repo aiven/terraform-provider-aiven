@@ -1,10 +1,9 @@
-package organization_test
+package usergroup_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -12,15 +11,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-// TestAccOrganizationGroupProject tests the organization group project relation resource.
-func TestAccOrganizationGroupProject(t *testing.T) {
-	t.Skip("Deprecated resource")
-
+// TestAccOrganizationUserGroupMember tests the organization user group member resource.
+func TestAccOrganizationUserGroupMember(t *testing.T) {
 	acc.SkipIfNotBeta(t)
 
-	name := "aiven_organization_group_project.foo"
-
-	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+	name := "aiven_organization_user_group_member.foo"
+	suffix := acc.RandStr()
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -32,31 +28,25 @@ data "aiven_organization" "foo" {
   name = "%[3]s"
 }
 
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "foo"
+}
+
 resource "aiven_organization_user_group" "foo" {
   organization_id = data.aiven_organization.foo.id
   name            = "%[1]s-usr-group-%[2]s"
   description     = "Terraform acceptance tests"
 }
 
-resource "aiven_project" "foo" {
-  project   = "%[1]s-pr-%[2]s"
-  parent_id = data.aiven_organization.foo.id
+resource "aiven_organization_user_group_member" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  group_id        = aiven_organization_user_group.foo.group_id
+  user_id         = aiven_organization_application_user.foo.user_id
 }
-
-resource "aiven_organization_group_project" "foo" {
-  project  = aiven_project.foo.project
-  group_id = aiven_organization_user_group.foo.group_id
-  role     = "admin"
-}
-`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
+	`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						name,
-						"project",
-						fmt.Sprintf("%s-pr-%s", acc.DefaultResourceNamePrefix, suffix),
-					),
-					resource.TestCheckResourceAttrSet(name, "group_id"),
-					resource.TestCheckResourceAttr(name, "role", "admin"),
+					resource.TestCheckResourceAttrSet(name, "id"),
 				),
 			},
 			{
@@ -69,7 +59,11 @@ resource "aiven_organization_group_project" "foo" {
 						return "", err
 					}
 
-					return util.ComposeID(rs.Primary.Attributes["project"], rs.Primary.Attributes["group_id"]), nil
+					return util.ComposeID(
+						rs.Primary.Attributes["organization_id"],
+						rs.Primary.Attributes["group_id"],
+						rs.Primary.Attributes["user_id"],
+					), nil
 				},
 			},
 		},
