@@ -6,6 +6,7 @@ package billinggroup
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,6 +33,12 @@ type dataModel struct {
 	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
 	ShippingAddressID    types.String `tfsdk:"shipping_address_id"`
 	VatID                types.String `tfsdk:"vat_id"`
+}
+
+func (data *dataModel) SetID(vOrganizationID string, vBillingGroupID string) {
+	data.OrganizationID = types.StringValue(vOrganizationID)
+	data.BillingGroupID = types.StringValue(vBillingGroupID)
+	data.ID = types.StringValue(filepath.Join(vOrganizationID, vBillingGroupID))
 }
 
 type dtoModel struct {
@@ -164,6 +171,6 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 			data.BillingGroupID = types.StringValue(parts[1])
 		}
 	}
-	data.ID = types.StringValue(fmt.Sprintf("%s/%s", data.OrganizationID.ValueString(), data.BillingGroupID.ValueString()))
+	data.SetID(data.OrganizationID.ValueString(), data.BillingGroupID.ValueString())
 	return nil
 }

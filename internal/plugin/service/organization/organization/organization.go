@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -99,8 +98,8 @@ func (vw *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 		return diags
 	}
 
-	// Read() reads the remote state using these two IDs.
-	plan.ID = types.StringValue(rsp.OrganizationId)
+	// Sets ID field to Read() the resource
+	plan.SetID(rsp.OrganizationId)
 	return vw.Read(ctx, plan)
 }
 
@@ -117,7 +116,7 @@ func (vw *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnos
 		return diags
 	}
 
-	_, err = vw.client.AccountUpdate(ctx, accountID, &req)
+	rsp, err := vw.client.AccountUpdate(ctx, accountID, &req)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorUpdatingResource,
@@ -126,6 +125,8 @@ func (vw *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnos
 		return diags
 	}
 
+	// Sets ID field to Read() the resource
+	plan.SetID(rsp.OrganizationId)
 	return vw.Read(ctx, plan)
 }
 
