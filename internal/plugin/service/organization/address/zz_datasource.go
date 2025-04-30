@@ -41,11 +41,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "City.",
 			},
-			"company_name": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Name of a company.",
-				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
-			},
 			"country_code": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Country Code.",
@@ -57,6 +52,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource ID, a composite of `organization_id` and `address_id` IDs.",
+			},
+			"name": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Name of a company.",
+				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization.",

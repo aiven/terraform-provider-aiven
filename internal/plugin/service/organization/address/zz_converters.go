@@ -25,9 +25,9 @@ type dataModel struct {
 	AddressID      types.String `tfsdk:"address_id"`
 	AddressLines   types.Set    `tfsdk:"address_lines"`
 	City           types.String `tfsdk:"city"`
-	CompanyName    types.String `tfsdk:"company_name"`
 	CountryCode    types.String `tfsdk:"country_code"`
 	CreateTime     types.String `tfsdk:"create_time"`
+	Name           types.String `tfsdk:"name"`
 	OrganizationID types.String `tfsdk:"organization_id"`
 	State          types.String `tfsdk:"state"`
 	UpdateTime     types.String `tfsdk:"update_time"`
@@ -44,9 +44,9 @@ type dtoModel struct {
 	AddressID      *string   `json:"address_id,omitempty"`
 	AddressLines   *[]string `json:"address_lines"`
 	City           *string   `json:"city"`
-	CompanyName    *string   `json:"company_name,omitempty"`
 	CountryCode    *string   `json:"country_code"`
 	CreateTime     *string   `json:"create_time,omitempty"`
+	Name           *string   `json:"name"`
 	OrganizationID *string   `json:"organization_id"`
 	State          *string   `json:"state,omitempty"`
 	UpdateTime     *string   `json:"update_time,omitempty"`
@@ -67,11 +67,11 @@ func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers .
 	if !data.City.IsNull() {
 		dto.City = data.City.ValueStringPointer()
 	}
-	if !data.CompanyName.IsNull() {
-		dto.CompanyName = data.CompanyName.ValueStringPointer()
-	}
 	if !data.CountryCode.IsNull() {
 		dto.CountryCode = data.CountryCode.ValueStringPointer()
+	}
+	if !data.Name.IsNull() {
+		dto.Name = data.Name.ValueStringPointer()
 	}
 	if !data.OrganizationID.IsNull() {
 		dto.OrganizationID = data.OrganizationID.ValueStringPointer()
@@ -113,14 +113,14 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 	if dto.City != nil {
 		data.City = types.StringPointerValue(dto.City)
 	}
-	if dto.CompanyName != nil {
-		data.CompanyName = types.StringPointerValue(dto.CompanyName)
-	}
 	if dto.CountryCode != nil {
 		data.CountryCode = types.StringPointerValue(dto.CountryCode)
 	}
 	if dto.CreateTime != nil {
 		data.CreateTime = types.StringPointerValue(dto.CreateTime)
+	}
+	if dto.Name != nil {
+		data.Name = types.StringPointerValue(dto.Name)
 	}
 	if dto.OrganizationID != nil {
 		data.OrganizationID = types.StringPointerValue(dto.OrganizationID)

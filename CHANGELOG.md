@@ -14,7 +14,8 @@ nav_order: 1
 
 - Deprecate `aiven_organization.tenant_id` field. The field is not used in the API anymore.
 - Change `aiven_organization_user_list.billing_groups` to type `Set`. The order is not guaranteed.
-- Fix `aiven_clickhouse_grant.privilege_grant.privilege` case validation
+- Fix `aiven_clickhouse_grant.privilege_grant.privilege` case validation.
+- Rename `aiven_organization_address` field `company_name` -> `name`, mark as required.
 
 ## [4.39.0] - 2025-04-24
 

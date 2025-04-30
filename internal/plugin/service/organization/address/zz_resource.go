@@ -43,11 +43,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "City.",
 				Required:            true,
 			},
-			"company_name": schema.StringAttribute{
-				MarkdownDescription: "Name of a company. Maximum length: `128`.",
-				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
-			},
 			"country_code": schema.StringAttribute{
 				MarkdownDescription: "Country Code.",
 				Required:            true,
@@ -60,6 +55,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Resource ID, a composite of `organization_id` and `address_id` IDs.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "Name of a company. Maximum length: `128`.",
+				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.",
