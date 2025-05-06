@@ -1,14 +1,10 @@
 ---
-page_title: "Creating static IP addresses"
+page_title: "Create static IP addresses"
 ---
 
-# Introduction
+# Create static IP addresses
 
-You can create static IP addresses for your services for an additional charge. Static IP addresses belong to a project and are created in the cloud you specify.
-
-For more information, see the article on [static IP addresses in Aiven](https://aiven.io/docs/platform/concepts/static-ips).
-
-# Example
+You can create [static IP addresses](https://aiven.io/docs/platform/concepts/static-ips) for your Aiven services for an additional charge. Static IP addresses belong to a project and are created in the cloud you specify.
 
 The following example file creates 6 static IP addresses for a PostgreSQL service in the Google Cloud europe-west-1 region. The `static_ip` user configuration option is also set to `true` to enable static IP addresses for the service.
 

@@ -1,18 +1,27 @@
 ---
-page_title: "Importing existing Aiven infrastructure"
+page_title: "Import existing Aiven infrastructure"
 ---
 
-# Importing existing Aiven infrastructure
-If you have already manually created an Aiven environment, it is possible to import all resources and start managing them with Terraform.
+# Import existing Aiven infrastructure
 
-The ID format typically is `<project_name>/<resource_name>` for resources that are directly under project level and `<project_name>/<service_name>/<resource_name>` for resources that belong to specific service.
+You can import resources that you created using the Console or another tool and start managing them with Terraform.
 
-As example, to import a database called `mydb` belonging to the service `myservice` in the project `myproject`, you can run:
+To import a resource:
+
+1. Add the resource block to your Terraform file.
+2. Import the resource using [the `terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import).
+
+The ID format for a resource is typically:
+- for resources in a project: `PROJECT_NAME/RESOURCE_NAME`
+- for resources in a service: `PROJECT_NAME/SERVICE_NAME/RESOURCE_NAME`
+
+For example, the following command imports an Aiven for PostgreSQL® service named `example-pg` in a project named `example-project`:
+
 ```bash
-$ terraform import aiven_database.mydb myproject/myservice/mydb
+terraform import aiven_pg.example_postgres example-project/example-pg
 ```
 
-In some cases the internal identifiers are not shown in the Aiven web console. In such cases the easiest way to obtain identifiers is typically to check network requests and responses with your browser's debugging tools, as the raw responses do contain the IDs.
+You can [get some resource IDs from the Aiven Console](https://aiven.io/docs/platform/reference/get-resource-IDs). For cases where the internal identifiers are not shown in the Aiven Console,
+the easiest way to get them is typically to check network requests and responses with your browser's debugging tools.
 
-## Using data sources
-Alternatively you can define already existing, or externally created and managed, resources as [data sources](../data-sources).
+Alternatively, you can define already existing, or externally created and managed, resources as [data sources](../data-sources).

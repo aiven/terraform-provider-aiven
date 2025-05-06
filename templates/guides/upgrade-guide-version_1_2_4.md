@@ -1,10 +1,8 @@
 ---
-page_title: "Upgrade Guide"
+page_title: "Upgrade from 1.2.4"
 ---
 
-# Upgrade Guide
-
-## From 1.2.4
+# Upgrade from 1.2.4
 
 If you have specified `-1` as a placeholder for unset values in user config, you will find a diff in Terraform configuration after upgrading. Even if you apply the Terraform plan, these will not disappear.
 
