@@ -1,4 +1,4 @@
-package project_test
+package groupproject_test
 
 import (
 	"fmt"

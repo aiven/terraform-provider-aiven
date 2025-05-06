@@ -19,9 +19,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroup"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -156,8 +156,8 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
-		usergroup.NewOrganizationUserGroupMembersResource,
-		project.NewOrganizationGroupProjectResource,
+		usergroupmember.NewOrganizationUserGroupMembersResource,
+		groupproject.NewOrganizationGroupProjectResource,
 	}
 
 	// Add to a list of resources that are currently in beta.

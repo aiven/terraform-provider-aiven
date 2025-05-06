@@ -1,4 +1,4 @@
-package usergroup_test
+package usergroupmember_test
 
 import (
 	"fmt"
