@@ -35,7 +35,7 @@ func TestRegistry(t *testing.T) {
 			},
 			validate: func(t *testing.T, r *registry) {
 				_, err := r.render("test", map[string]any{})
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), "required field is missing")
 			},
 		},
@@ -43,7 +43,7 @@ func TestRegistry(t *testing.T) {
 			name: "render non-existent template",
 			validate: func(t *testing.T, r *registry) {
 				_, err := r.render("non-existent", nil)
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), "does not exist for resource")
 			},
 		},
@@ -51,7 +51,7 @@ func TestRegistry(t *testing.T) {
 			name: "invalid template syntax",
 			operations: func(t *testing.T, r *registry) {
 				err := r.addTemplate("invalid", `{{ .name `)
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), "failed to parse template")
 			},
 		},
@@ -128,7 +128,6 @@ func TestRegistry(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

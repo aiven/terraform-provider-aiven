@@ -2,7 +2,6 @@ package schemautil
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -60,8 +59,8 @@ func Test_splitResourceID(t *testing.T) {
 func Test_PointerValueOrDefault(t *testing.T) {
 	var foo *string
 	bar := "bar"
-	assert.Equal(t, PointerValueOrDefault(foo, "default"), "default")
-	assert.Equal(t, PointerValueOrDefault(&bar, "default"), "bar")
+	assert.Equal(t, "default", PointerValueOrDefault(foo, "default"))
+	assert.Equal(t, "bar", PointerValueOrDefault(&bar, "default"))
 }
 
 func TestResourceDataSetAddForceNew(t *testing.T) {
@@ -112,7 +111,8 @@ func TestResourceDataSetAddForceNew(t *testing.T) {
 	// Missing force_new field
 	d := mocks.NewMockResourceData(t)
 	err := ResourceDataSet(d, dto, s)
-	require.Error(t, err, fmt.Errorf("%w: %q", errMissingForceNew, "force_new"))
+	require.ErrorIs(t, err, errMissingForceNew)
+	require.ErrorContains(t, err, "force_new")
 
 	// Expects to set all fields
 	d.EXPECT().Set("set", fieldSet).Return(nil)

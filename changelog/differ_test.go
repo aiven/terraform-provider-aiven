@@ -3,6 +3,8 @@ package main
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
@@ -122,7 +124,7 @@ func TestCompare(t *testing.T) {
 	for _, opt := range tests {
 		t.Run(opt.name, func(t *testing.T) {
 			got, err := diffItems(opt.old, opt.new)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, opt.expect, got.String())
 		})
 	}

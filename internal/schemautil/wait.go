@@ -206,7 +206,7 @@ func grafanaReady(s *service.ServiceGetOut) bool {
 	// if IP filter is anything but 0.0.0.0/0 and/or ::/0 skip Grafana service availability checks
 	if ipFilters, ok := s.UserConfig["ip_filter"]; ok {
 		list, ok := ipFilters.([]any)
-		if !(ok && diff.IsDefaultIPFilterList(list)) {
+		if !ok || !diff.IsDefaultIPFilterList(list) {
 			log.Printf("[DEBUG] grafana service has `%v` ip filters, and availability checks will be skipped", ipFilters)
 			return true
 		}

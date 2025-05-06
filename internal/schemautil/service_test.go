@@ -32,7 +32,7 @@ func TestContainsRedactedCreds(t *testing.T) {
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
 			err := ContainsRedactedCreds(opt.hash)
-			assert.Equal(t, err, opt.expected)
+			assert.Equal(t, opt.expected, err)
 		})
 	}
 }

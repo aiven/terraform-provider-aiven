@@ -29,7 +29,7 @@ provider "google" {
 }`)
 
 	builder := templateSet.NewBuilder().
-		AddDataSource("aiven_project", map[string]any{ //provide configuration for the data source
+		AddDataSource("aiven_project", map[string]any{ // provide configuration for the data source
 			"resource_name": "foo",
 			"project":       "test_project",
 		}).

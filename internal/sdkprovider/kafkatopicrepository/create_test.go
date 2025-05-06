@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,7 +51,7 @@ func TestCreateRecreateMissing(t *testing.T) {
 
 	// Creates topic
 	err := rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, client.createCalled)
 	assert.EqualValues(t, 1, client.v1ListCalled)
 	assert.EqualValues(t, 0, client.v2ListCalled)
@@ -58,13 +60,13 @@ func TestCreateRecreateMissing(t *testing.T) {
 
 	// Forgets the topic, like if it's missing
 	err = rep.forgetTopic("a", "b", "c")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, rep.seenServices["a/b"])
 	assert.False(t, rep.seenTopics["a/b/c"]) // not cached, missing
 
 	// Recreates topic
 	err = rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 2, client.createCalled) // Updated
 	assert.EqualValues(t, 1, client.v1ListCalled)
 	assert.EqualValues(t, 0, client.v2ListCalled)
@@ -110,9 +112,9 @@ func TestCreateRetries(t *testing.T) {
 			err := rep.Create(ctx, "foo", "bar", req)
 			// Check the error message using EqualError because the error is wrapped
 			if opt.expectErr == nil {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, opt.expectErr.Error())
+				require.EqualError(t, err, opt.expectErr.Error())
 			}
 			assert.Equal(t, opt.expectCalled, client.createCalled)
 		})

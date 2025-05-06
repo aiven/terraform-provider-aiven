@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -426,7 +428,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 
 					// deletes
 					err := client.KafkaTopics.Delete(ctx, project, kafkaName, topicName)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					// Makes sure topic does not exist
 					tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
@@ -463,7 +465,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 										Retryable: aiven.IsNotFound(err),
 									}
 								}
-								assert.Equal(t, tc.State, "ACTIVE")
+								assert.Equal(t, "ACTIVE", tc.State)
 								return nil
 							},
 						)
@@ -764,7 +766,7 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
 			result, err := kafkatopic.FlattenKafkaTopicConfig(&aiven.KafkaTopic{Config: opt.config})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, cmp.Diff([]map[string]any{opt.expect}, result))
 		})
 	}

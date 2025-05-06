@@ -41,11 +41,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - id: find_tests
-        run: |
-          echo "matrix=$(find ./internal -type f -name '*_test.go' -exec dirname {} \; | sort -u | jq -cnR '[inputs | select(length>0)]')" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(task ci:discover-test-matrix)" >> $GITHUB_OUTPUT
 
   test:
+    name: test (${{ matrix.pkg.name }})
     needs: [setup_aiven_project_suffix, find_tests]
     runs-on: ubuntu-latest
     env:
@@ -54,7 +58,7 @@ jobs:
       max-parallel: 5
       fail-fast: false
       matrix:
-        pkg_path: ${{ fromJson(needs.find_tests.outputs.matrix) }}
+        pkg: ${{ fromJson(needs.find_tests.outputs.matrix) }}
 
     steps:
       - uses: softprops/turnstyle@v2
@@ -95,7 +99,7 @@ jobs:
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
-          PKG_PATH: ${{ matrix.pkg_path }}
+          PKG_PATH: ${{ matrix.pkg.path }}
 
   sweep:
     if: always()

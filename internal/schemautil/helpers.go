@@ -23,7 +23,7 @@ type ResourceStateOrResourceDiff interface {
 
 func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
 	c := d.GetRawConfig()
-	return !(c.IsNull() || c.AsValueMap()[key].IsNull())
+	return !c.IsNull() && !c.AsValueMap()[key].IsNull()
 }
 
 // PlanParameters service plan aparameters

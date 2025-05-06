@@ -197,7 +197,7 @@ func (o *object) isArray() bool {
 }
 
 func (o *object) isScalar() bool {
-	return !(o.isObject() || o.isArray())
+	return !o.isObject() && !o.isArray()
 }
 
 func (o *object) path() string {

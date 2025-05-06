@@ -79,7 +79,7 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 		// Still might not detect changes for int fields, because TF stores 0 for them in the state,
 		// and the oldValue is always "0", not "".
 		// This case can be fixed with the Plugin Framework only.
-		return !(d.HasChange(k) || oldValue == "")
+		return !d.HasChange(k) && oldValue != ""
 	}
 	return false
 }

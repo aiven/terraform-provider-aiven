@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +17,7 @@ func TestDeleteDoesNotExist(t *testing.T) {
 	rep := newRepository(client)
 	ctx := context.Background()
 	err := rep.Delete(ctx, "a", "b", "c")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0, client.v1ListCalled)
 	assert.EqualValues(t, 0, client.v2ListCalled)
 	assert.EqualValues(t, 1, client.deleteCalled)
@@ -33,7 +35,7 @@ func TestDeletesAfterRetry(t *testing.T) {
 	rep := newRepository(client)
 	ctx := context.Background()
 	err := rep.Delete(ctx, "a", "b", "c")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0, client.v1ListCalled)
 	assert.EqualValues(t, 0, client.v2ListCalled)
 	assert.EqualValues(t, 1, client.deleteCalled)

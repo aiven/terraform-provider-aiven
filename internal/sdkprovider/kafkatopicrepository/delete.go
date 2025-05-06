@@ -12,7 +12,7 @@ func (rep *repository) Delete(ctx context.Context, project, service, topic strin
 	// But it speedups things a lot (no "read" performed),
 	// and if kafka has been off, it will make it easier to remove topics from state
 	err := rep.client.Delete(ctx, project, service, topic)
-	if !(err == nil || aiven.IsNotFound(err)) {
+	if err != nil && !aiven.IsNotFound(err) {
 		return err
 	}
 

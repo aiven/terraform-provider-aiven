@@ -173,3 +173,32 @@ tasks:
     desc: "Generate Terraform provider documentation"
     cmds:
       - task: internal:docs-generate
+
+  ci:discover-test-matrix:
+    desc: "Finds Go test directories under, generates a JSON matrix for GitHub Actions"
+    cmds:
+      - |
+        find ./internal -type f -name '*_test.go' -exec dirname {} \; \
+        | sort -u \
+        | jq -cnR '
+            def shortname: split("/")[-2:] | join("-");
+            [
+              inputs |
+              select(length>0) |
+              {
+                path: .,
+                name: (
+                  if (. | contains("/plugin/")) then
+                    "plugin-" + shortname  # Add plugin- prefix
+                  else
+                    if (. | contains("/sdkprovider/")) then
+                      "sdk-" + shortname
+                    else
+                      shortname
+                    end
+                  end
+                )
+              }
+            ]
+          '
+    silent: true

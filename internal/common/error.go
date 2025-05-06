@@ -9,7 +9,7 @@ import (
 
 // IsCritical returns true if the given error is critical
 func IsCritical(err error) bool {
-	return !(err == nil || aiven.IsNotFound(err) || avngen.IsNotFound(err))
+	return err != nil && !aiven.IsNotFound(err) && !avngen.IsNotFound(err)
 }
 
 const (

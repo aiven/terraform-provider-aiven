@@ -60,7 +60,7 @@ func (s *BaseTestSuite) setupSuite() error {
 
 func (s *BaseTestSuite) TearDownSuite() {
 	// Uncomment when fixed https://github.com/stretchr/testify/issues/934
-	//_ = os.Remove(s.tfConfigPath)
+	// _ = os.Remove(s.tfConfigPath)
 }
 
 // withDefaults adds default options for terraform test

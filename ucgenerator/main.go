@@ -244,7 +244,7 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	}
 
 	// Doesn't mark with required or optional scalar elements of arrays
-	if !(o.isScalar() && o.parent.isArray()) {
+	if !o.isScalar() || !o.parent.isArray() {
 		if o.Required {
 			values[jen.Id("Required")] = jen.True()
 		} else {

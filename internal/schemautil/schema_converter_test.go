@@ -59,7 +59,7 @@ func Test_resourceSchemaAsDatasourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ResourceSchemaAsDatasourceSchema(tt.args.d, tt.args.required...); !assert.Equal(t, got, tt.want) {
+			if got := ResourceSchemaAsDatasourceSchema(tt.args.d, tt.args.required...); !assert.Equal(t, tt.want, got) {
 				t.Errorf("resourceSchemaAsDatasourceSchema() = %v, want %v", got, tt.want)
 			}
 		})

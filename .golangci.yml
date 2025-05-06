@@ -1,36 +1,66 @@
+version: "2"
+
 linters:
-  disable-all: true
+  run:
+    timeout: 5m
+  default: none
   enable:
+    - copyloopvar
     - errcheck
-    - gofmt
-    - goimports
-    - gosimple
+    - errorlint
+    - gocritic
     - govet
     - ineffassign
     - makezero
     - misspell
     - nakedret
     - nilerr
-    - revive # TODO: Configure according to https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md.
+    - prealloc
+    - revive
     - staticcheck
     - unconvert
     - unused
-    - stylecheck
-    - errorlint
-    - prealloc
-
-issues:
-  exclude-rules:
-    - path: "internal/sdkprovider/service/account/account_team.*"
-      linters:
-        - staticcheck
-    - path: "internal/sdkprovider/service/account/sweep.go"
-      linters:
-        - staticcheck
-      text: "SA1019: (.*) is deprecated"
-  exclude:
-    # TODO: We can have a whitelist for revive's var-naming rule.
-    - 'var-naming: .*'
-
-    # TODO: We probably should add comments to all exported functions and methods.
-    - 'exported: .*'
+    - testifylint
+  settings:
+    lll:
+      line-length: 140
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - staticcheck
+        path: internal/sdkprovider/service/account/account_team.*
+      - linters:
+          - staticcheck
+        path: internal/sdkprovider/service/account/sweep.go
+        text: 'SA1019: (.*) is deprecated'
+      - linters:
+         - staticcheck
+        text: 'QF1012: (.*)'
+      - path: (.+)\.go$
+        text: 'var-naming: .*'
+      - path: (.+)\.go$
+        text: 'exported: .*'
+      - linters:
+          - testifylint
+        path: examples_tests/.*_test\.go$
+        text: 'require-error: for error assertions use require'
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

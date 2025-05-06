@@ -219,7 +219,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
+		for _, s := range schemaList.Subjects {
 			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
 			if err != nil {
 				var e aiven.Error

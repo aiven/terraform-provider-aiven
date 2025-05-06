@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -251,7 +253,7 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 			t.Parallel()
 
 			got, err := generator.GenerateTemplate(tt.schema, tt.resourceType, tt.kind)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, normalizeHCL(tt.want), normalizeHCL(got), "Generated template mismatch")
 		})
 	}
@@ -262,10 +264,9 @@ func TestFrameworkGenerateTemplateWithInvalidSchema(t *testing.T) {
 
 	// Test with an invalid schema type
 	got, err := generator.GenerateTemplate("invalid schema", "test_resource", ResourceKindResource)
-
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unsupported schema type")
-	assert.Equal(t, "", got)
+	assert.Empty(t, got)
 }
 
 func TestFrameworkTimeoutsRendering(t *testing.T) {

@@ -61,25 +61,21 @@ func (s *Store) AddTemplate(name, templateStr string) *Store {
 
 // AddExternalTemplate adds an external template to the store with the appropriate prefix
 func (s *Store) AddExternalTemplate(name, templateStr string) *Store {
-	// Determine the template key based on the name prefix
 	var tk string
 
-	if strings.HasPrefix(name, "data.") {
-		// Data source template
-		dataSourceName := strings.TrimPrefix(name, "data.")
-		tk = fmt.Sprintf("data.%s", dataSourceName)
-	} else if strings.HasPrefix(name, "provider.") {
-		// Provider template - keep name as is
+	switch {
+	case strings.HasPrefix(name, "data."), // e.g., "data.my_source"
+		strings.HasPrefix(name, "provider."), // e.g., "provider.aws"
+		strings.HasSuffix(name, "_provider"): // e.g., "google_beta_provider"
 		tk = name
-	} else if strings.HasSuffix(name, "_provider") {
-		// Provider template with _provider suffix - keep name as is
-		tk = name
-	} else {
-		// Default to resource template
+
+	default:
+		// e.g., "my_resource" becomes "resource.my_resource"
 		tk = fmt.Sprintf("resource.%s", name)
 	}
 
 	s.registry.mustAddTemplate(tk, templateStr)
+
 	return s
 }
 
