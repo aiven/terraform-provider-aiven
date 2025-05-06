@@ -90,6 +90,27 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 				),
 			},
 			{
+				// Test update: remove optional fields.
+				// State field can be omitted when the country code is not US.
+				Config: templBuilder().AddResource("aiven_organization_address", map[string]any{
+					"resource_name":   "address",
+					"organization_id": template.Reference("data.aiven_organization.org.id"),
+					"address_lines":   []string{"456 Market St", "Floor 3"},
+					"city":            "Berlin",
+					"name":            "Updated Company Deutschland",
+					"country_code":    "DE",
+					// "state":           "BE",
+					// "zip_code":        "10117".
+				}).MustRender(t),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "city", "Berlin"),
+					resource.TestCheckResourceAttr(name, "name", "Updated Company Deutschland"),
+					resource.TestCheckResourceAttr(name, "country_code", "DE"),
+					resource.TestCheckNoResourceAttr(name, "state"),
+					resource.TestCheckNoResourceAttr(name, "zip_code"),
+				),
+			},
+			{
 				// Test import functionality
 				ResourceName:      name,
 				ImportState:       true,

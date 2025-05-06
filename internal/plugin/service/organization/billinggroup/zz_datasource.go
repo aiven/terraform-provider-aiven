@@ -47,7 +47,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of billing contact emails.",
 			},
 			"billing_group_id": schema.StringAttribute{
-				MarkdownDescription: "Billing group id.",
+				MarkdownDescription: "Billing group ID.",
 				Required:            true,
 			},
 			"billing_group_name": schema.StringAttribute{

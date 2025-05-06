@@ -42,61 +42,69 @@ func (data *dataModel) SetID(vOrganizationID string, vBillingGroupID string) {
 }
 
 type dtoModel struct {
-	BillingAddressID     *string   `json:"billing_address_id"`
-	BillingContactEmails *[]string `json:"billing_contact_emails"`
+	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
+	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
 	BillingCurrency      *string   `json:"billing_currency,omitempty"`
-	BillingEmails        *[]string `json:"billing_emails"`
+	BillingEmails        *[]string `json:"billing_emails,omitempty"`
 	BillingGroupID       *string   `json:"billing_group_id,omitempty"`
-	BillingGroupName     *string   `json:"billing_group_name"`
+	BillingGroupName     *string   `json:"billing_group_name,omitempty"`
 	CustomInvoiceText    *string   `json:"custom_invoice_text,omitempty"`
-	OrganizationID       *string   `json:"organization_id"`
-	PaymentMethodID      *string   `json:"payment_method_id"`
-	ShippingAddressID    *string   `json:"shipping_address_id"`
+	OrganizationID       *string   `json:"organization_id,omitempty"`
+	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
+	ShippingAddressID    *string   `json:"shipping_address_id,omitempty"`
 	VatID                *string   `json:"vat_id,omitempty"`
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
+func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
 	dto := new(dtoModel)
-	if !data.BillingContactEmails.IsNull() {
-		var vBillingContactEmails []string
-		diags := data.BillingContactEmails.ElementsAs(ctx, &vBillingContactEmails, false)
+	if !plan.BillingContactEmails.IsNull() || state != nil && !state.BillingContactEmails.IsNull() {
+		vBillingContactEmails := make([]string, 0)
+		diags := plan.BillingContactEmails.ElementsAs(ctx, &vBillingContactEmails, false)
 		if diags.HasError() {
 			return diags
 		}
 		dto.BillingContactEmails = &vBillingContactEmails
 	}
-	if !data.BillingEmails.IsNull() {
-		var vBillingEmails []string
-		diags := data.BillingEmails.ElementsAs(ctx, &vBillingEmails, false)
+	if !plan.BillingEmails.IsNull() || state != nil && !state.BillingEmails.IsNull() {
+		vBillingEmails := make([]string, 0)
+		diags := plan.BillingEmails.ElementsAs(ctx, &vBillingEmails, false)
 		if diags.HasError() {
 			return diags
 		}
 		dto.BillingEmails = &vBillingEmails
 	}
-	if !data.BillingAddressID.IsNull() {
-		dto.BillingAddressID = data.BillingAddressID.ValueStringPointer()
+	if !plan.BillingAddressID.IsNull() || state != nil && !state.BillingAddressID.IsNull() {
+		vBillingAddressID := plan.BillingAddressID.ValueString()
+		dto.BillingAddressID = &vBillingAddressID
 	}
-	if !data.BillingCurrency.IsNull() {
-		dto.BillingCurrency = data.BillingCurrency.ValueStringPointer()
+	if !plan.BillingCurrency.IsNull() || state != nil && !state.BillingCurrency.IsNull() {
+		vBillingCurrency := plan.BillingCurrency.ValueString()
+		dto.BillingCurrency = &vBillingCurrency
 	}
-	if !data.BillingGroupName.IsNull() {
-		dto.BillingGroupName = data.BillingGroupName.ValueStringPointer()
+	if !plan.BillingGroupName.IsNull() || state != nil && !state.BillingGroupName.IsNull() {
+		vBillingGroupName := plan.BillingGroupName.ValueString()
+		dto.BillingGroupName = &vBillingGroupName
 	}
-	if !data.CustomInvoiceText.IsNull() {
-		dto.CustomInvoiceText = data.CustomInvoiceText.ValueStringPointer()
+	if !plan.CustomInvoiceText.IsNull() || state != nil && !state.CustomInvoiceText.IsNull() {
+		vCustomInvoiceText := plan.CustomInvoiceText.ValueString()
+		dto.CustomInvoiceText = &vCustomInvoiceText
 	}
-	if !data.OrganizationID.IsNull() {
-		dto.OrganizationID = data.OrganizationID.ValueStringPointer()
+	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+		vOrganizationID := plan.OrganizationID.ValueString()
+		dto.OrganizationID = &vOrganizationID
 	}
-	if !data.PaymentMethodID.IsNull() {
-		dto.PaymentMethodID = data.PaymentMethodID.ValueStringPointer()
+	if !plan.PaymentMethodID.IsNull() || state != nil && !state.PaymentMethodID.IsNull() {
+		vPaymentMethodID := plan.PaymentMethodID.ValueString()
+		dto.PaymentMethodID = &vPaymentMethodID
 	}
-	if !data.ShippingAddressID.IsNull() {
-		dto.ShippingAddressID = data.ShippingAddressID.ValueStringPointer()
+	if !plan.ShippingAddressID.IsNull() || state != nil && !state.ShippingAddressID.IsNull() {
+		vShippingAddressID := plan.ShippingAddressID.ValueString()
+		dto.ShippingAddressID = &vShippingAddressID
 	}
-	if !data.VatID.IsNull() {
-		dto.VatID = data.VatID.ValueStringPointer()
+	if !plan.VatID.IsNull() || state != nil && !state.VatID.IsNull() {
+		vVatID := plan.VatID.ValueString()
+		dto.VatID = &vVatID
 	}
 	err := util.Unmarshal(dto, rqs, modifiers...)
 	if err != nil {
@@ -108,7 +116,7 @@ func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers .
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
 	dto := new(dtoModel)
 	err := util.Unmarshal(rsp, dto, modifiers...)
 	if err != nil {
@@ -116,61 +124,61 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.BillingContactEmails != nil {
+	if dto.BillingContactEmails != nil && (len(*dto.BillingContactEmails) > 0 || !state.BillingContactEmails.IsNull()) {
 		vBillingContactEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingContactEmails)
 		if diags.HasError() {
 			return diags
 		}
-		data.BillingContactEmails = vBillingContactEmails
+		state.BillingContactEmails = vBillingContactEmails
 	}
-	if dto.BillingEmails != nil {
+	if dto.BillingEmails != nil && (len(*dto.BillingEmails) > 0 || !state.BillingEmails.IsNull()) {
 		vBillingEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingEmails)
 		if diags.HasError() {
 			return diags
 		}
-		data.BillingEmails = vBillingEmails
+		state.BillingEmails = vBillingEmails
 	}
-	if dto.BillingAddressID != nil {
-		data.BillingAddressID = types.StringPointerValue(dto.BillingAddressID)
+	if dto.BillingAddressID != nil && (*dto.BillingAddressID != "" || !state.BillingAddressID.IsNull()) {
+		state.BillingAddressID = types.StringPointerValue(dto.BillingAddressID)
 	}
-	if dto.BillingCurrency != nil {
-		data.BillingCurrency = types.StringPointerValue(dto.BillingCurrency)
+	if dto.BillingCurrency != nil && (*dto.BillingCurrency != "" || !state.BillingCurrency.IsNull()) {
+		state.BillingCurrency = types.StringPointerValue(dto.BillingCurrency)
 	}
-	if dto.BillingGroupID != nil {
-		data.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
+	if dto.BillingGroupID != nil && (*dto.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
+		state.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
 	}
-	if dto.BillingGroupName != nil {
-		data.BillingGroupName = types.StringPointerValue(dto.BillingGroupName)
+	if dto.BillingGroupName != nil && (*dto.BillingGroupName != "" || !state.BillingGroupName.IsNull()) {
+		state.BillingGroupName = types.StringPointerValue(dto.BillingGroupName)
 	}
-	if dto.CustomInvoiceText != nil {
-		data.CustomInvoiceText = types.StringPointerValue(dto.CustomInvoiceText)
+	if dto.CustomInvoiceText != nil && (*dto.CustomInvoiceText != "" || !state.CustomInvoiceText.IsNull()) {
+		state.CustomInvoiceText = types.StringPointerValue(dto.CustomInvoiceText)
 	}
-	if dto.OrganizationID != nil {
-		data.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
 	}
-	if dto.PaymentMethodID != nil {
-		data.PaymentMethodID = types.StringPointerValue(dto.PaymentMethodID)
+	if dto.PaymentMethodID != nil && (*dto.PaymentMethodID != "" || !state.PaymentMethodID.IsNull()) {
+		state.PaymentMethodID = types.StringPointerValue(dto.PaymentMethodID)
 	}
-	if dto.ShippingAddressID != nil {
-		data.ShippingAddressID = types.StringPointerValue(dto.ShippingAddressID)
+	if dto.ShippingAddressID != nil && (*dto.ShippingAddressID != "" || !state.ShippingAddressID.IsNull()) {
+		state.ShippingAddressID = types.StringPointerValue(dto.ShippingAddressID)
 	}
-	if dto.VatID != nil {
-		data.VatID = types.StringPointerValue(dto.VatID)
+	if dto.VatID != nil && (*dto.VatID != "" || !state.VatID.IsNull()) {
+		state.VatID = types.StringPointerValue(dto.VatID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
-	if data.ID.ValueString() != "" {
+	if state.ID.ValueString() != "" {
 		var parts [2]string
-		for i, v := range strings.SplitN(data.ID.ValueString(), "/", 2) {
+		for i, v := range strings.SplitN(state.ID.ValueString(), "/", 2) {
 			parts[i] = v
 		}
-		if data.OrganizationID.ValueString() == "" {
-			data.OrganizationID = types.StringValue(parts[0])
+		if state.OrganizationID.ValueString() == "" {
+			state.OrganizationID = types.StringValue(parts[0])
 		}
-		if data.BillingGroupID.ValueString() == "" {
-			data.BillingGroupID = types.StringValue(parts[1])
+		if state.BillingGroupID.ValueString() == "" {
+			state.BillingGroupID = types.StringValue(parts[1])
 		}
 	}
-	data.SetID(data.OrganizationID.ValueString(), data.BillingGroupID.ValueString())
+	state.SetID(state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
 	return nil
 }

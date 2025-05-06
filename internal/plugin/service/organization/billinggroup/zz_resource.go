@@ -50,7 +50,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Billing group id.",
+				MarkdownDescription: "Billing group ID.",
 			},
 			"billing_group_name": schema.StringAttribute{
 				MarkdownDescription: "Billing Group Name. Maximum length: `128`.",
