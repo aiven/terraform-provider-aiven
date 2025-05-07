@@ -3,11 +3,10 @@ package main
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCompare(t *testing.T) {
