@@ -1,8 +1,8 @@
 ---
-page_title: "Creating a Syslog Service Integration"
+page_title: "Create a Syslog Service Integration"
 ---
 
-# Creating a Syslog Service Integration
+# Create a Syslog Service Integration
 Let's say you have a project in your account and a Kafka service that is throwing all sorts of errors. The Aiven web console has logs built in, you cry! Sure, but you likely need the search power of OpenSearch or the power of logging services, such as Datadog or Rsyslog servers.
 
 In Terraform, we support adding these service integrations and it can be broken down into 2 steps:
