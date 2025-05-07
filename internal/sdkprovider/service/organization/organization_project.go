@@ -25,11 +25,11 @@ var aivenOrganizationProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: "Unique identifier for the project that also serves as the project name.",
+		Description: userconfig.Desc("The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix.").ForceNew().Build(),
 	},
 	"organization_id": {
 		Type:        schema.TypeString,
-		Description: "ID of an organization. Changing this property forces recreation of the resource.",
+		Description: userconfig.Desc("ID of an organization.").ForceNew().Build(),
 		Required:    true,
 	},
 	"billing_group_id": {
