@@ -360,13 +360,17 @@ func staticIpsForServiceFromSchema(d ResourceData) []string {
 
 // WaitUntilNotFound retries the given retryableFunc until it returns 404
 // To stop the retrying, the function should return retryGo.Unrecoverable
-func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc) error {
+func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc, opts ...retryGo.Option) error {
+	options := []retryGo.Option{
+		retryGo.Context(ctx),
+		retryGo.Attempts(5),
+		retryGo.Delay(common.DefaultStateChangeDelay),
+	}
 	return retryGo.Do(
 		func() error {
 			return OmitNotFound(retryableFunc())
 		},
-		retryGo.Context(ctx),
-		retryGo.Delay(common.DefaultStateChangeDelay),
+		append(options, opts...)...,
 	)
 }
 

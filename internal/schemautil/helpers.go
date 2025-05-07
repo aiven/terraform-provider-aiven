@@ -169,7 +169,7 @@ func ConvertOrganizationToAccountID(ctx context.Context, id string, client organ
 	if IsOrganizationID(id) {
 		resp, err := client.OrganizationGet(ctx, id)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("error converting organization ID %q to account ID: %w", id, err)
 		}
 
 		return resp.AccountId, nil

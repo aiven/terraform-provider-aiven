@@ -1,4 +1,4 @@
-package organization_test
+package project_test
 
 import (
 	"context"
@@ -352,8 +352,8 @@ resource "aiven_organization_project" "foo" {
   billing_group_id = aiven_billing_group.bar.id
   parent_id        = aiven_organizational_unit.foo.id
 }
-`, projectID),
-				ExpectError: regexp.MustCompile(`failed to update project attributes`),
+			`, projectID),
+				ExpectError: regexp.MustCompile(`Can't assign project to a billing group\s+belonging to a different org`),
 			},
 			{
 				// update parent_id group which belongs to a different organization, should fail
@@ -365,7 +365,7 @@ resource "aiven_organization_project" "foo" {
   parent_id        = aiven_organizational_unit.bar.id
 }
 `, projectID),
-				ExpectError: regexp.MustCompile(`failed to update project attributes`),
+				ExpectError: regexp.MustCompile(`Resources must belong to the same`),
 			},
 			{
 				// update project_id leads to new resource creation
@@ -460,6 +460,55 @@ resource "aiven_organization_project" "foo" {
 					resource.TestCheckResourceAttrPair(resourceName, "billing_group_id", "aiven_billing_group.foo", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "tag.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "tag.*", map[string]string{
+						"key":   "key1",
+						"value": "value1",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "tag.*", map[string]string{
+						"key":   "key2",
+						"value": "value2",
+					}),
+				),
+			},
+			{
+				// Removes tags
+				Config: baseConfig + fmt.Sprintf(`
+resource "aiven_organization_project" "foo" {
+  project_id       = "%s"
+  organization_id  = aiven_organization.foo.id
+  billing_group_id = aiven_billing_group.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+}
+`, projectID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
+					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "aiven_organization.foo", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "billing_group_id", "aiven_billing_group.foo", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
+					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "tag.#", "0"),
+				),
+			},
+			{
+				// Brings tags back
+				Config: baseConfig + fmt.Sprintf(`
+resource "aiven_organization_project" "foo" {
+  project_id       = "%s"
+  organization_id  = aiven_organization.foo.id
+  billing_group_id = aiven_billing_group.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+  tag {
+    key   = "key1"
+    value = "value1"
+  }
+  tag {
+    key   = "key2"
+    value = "value2"
+  }
+}
+`, projectID),
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "tag.#", "2"),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "tag.*", map[string]string{
 						"key":   "key1",
