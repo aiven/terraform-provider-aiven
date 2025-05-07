@@ -9,8 +9,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/stretchr/testify/require"
-
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/google/uuid"
@@ -18,6 +16,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/mocks"
 )

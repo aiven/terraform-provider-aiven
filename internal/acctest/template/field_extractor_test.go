@@ -3,12 +3,11 @@ package template
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	sdkschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSDKExtractFieldsWithErrors(t *testing.T) {
