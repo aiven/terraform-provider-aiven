@@ -30,7 +30,7 @@ data "aiven_organization_project" "example" {
 ### Required
 
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `project_id` (String) Unique identifier for the project that also serves as the project name.
+- `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource.
 
 ### Read-Only
 

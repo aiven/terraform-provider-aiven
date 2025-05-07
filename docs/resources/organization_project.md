@@ -18,16 +18,32 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ## Example Usage
 
 ```terraform
-resource "aiven_organization_project" "foo" {
-  project_id = "example-project"
+# Define a random_string resource to generate a suffix
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+  numeric = true
+}
 
-  organization_id = aiven_organization.foo.id
-  billing_group_id = aiven_billing_group.foo.id
+# Create a project within an organization
+resource "aiven_organization_project" "example_project" {
+  project_id       = "example-project-${random_string.suffix.result}"
+  organization_id  = aiven_organization.main.id
+  billing_group_id = aiven_billing_group.main.id
 
   tag {
-    key = "key_1"
-    value = "value_1"
+    key   = "env"
+    value = "prod"
   }
+}
+
+# Create a project within an organizational unit
+resource "aiven_organization_project" "example_project" {
+  project_id       = "example-project-in-unit-${random_string.suffix.result}"
+  organization_id  = aiven_organization.main.id
+  parent_id        = data.aiven_organizational_unit.example_unit.id
+  billing_group_id = aiven_billing_group.main.id
 }
 ```
 
@@ -39,7 +55,7 @@ resource "aiven_organization_project" "foo" {
 - `billing_group_id` (String) Billing group ID to assign to the project.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `project_id` (String) Unique identifier for the project that also serves as the project name.
+- `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -78,5 +94,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization.main ORGANIZATION_ID/PROJECT_ID
+terraform import aiven_organization_project.example_project ORGANIZATION_ID/PROJECT_ID
 ```
