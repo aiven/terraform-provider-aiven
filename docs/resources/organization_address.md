@@ -36,7 +36,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Read-Only
 
-- `address_id` (String) Address id.
+- `address_id` (String) Address ID.
 - `create_time` (String) Create Time.
 - `id` (String) Resource ID, a composite of `organization_id` and `address_id` IDs.
 - `update_time` (String) Update Time.

@@ -67,7 +67,7 @@ type dtoBillingGroups struct {
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
 	dto := new(dtoModel)
 	err := util.Unmarshal(rsp, dto, modifiers...)
 	if err != nil {
@@ -80,70 +80,70 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 		if diags.HasError() {
 			return diags
 		}
-		data.BillingGroups = vBillingGroups
+		state.BillingGroups = vBillingGroups
 	}
-	if dto.OrganizationID != nil {
-		data.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
-	if data.ID.ValueString() != "" {
+	if state.ID.ValueString() != "" {
 		var parts [1]string
-		for i, v := range strings.SplitN(data.ID.ValueString(), "/", 1) {
+		for i, v := range strings.SplitN(state.ID.ValueString(), "/", 1) {
 			parts[i] = v
 		}
-		if data.OrganizationID.ValueString() == "" {
-			data.OrganizationID = types.StringValue(parts[0])
+		if state.OrganizationID.ValueString() == "" {
+			state.OrganizationID = types.StringValue(parts[0])
 		}
 	}
-	data.SetID(data.OrganizationID.ValueString())
+	state.SetID(state.OrganizationID.ValueString())
 	return nil
 }
 
 func flattenBillingGroups(ctx context.Context, dto *dtoBillingGroups) (*dataBillingGroups, diag.Diagnostics) {
-	data := new(dataBillingGroups)
+	state := new(dataBillingGroups)
 	if dto.BillingContactEmails != nil {
 		vBillingContactEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingContactEmails)
 		if diags.HasError() {
 			return nil, diags
 		}
-		data.BillingContactEmails = vBillingContactEmails
+		state.BillingContactEmails = vBillingContactEmails
 	}
 	if dto.BillingEmails != nil {
 		vBillingEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingEmails)
 		if diags.HasError() {
 			return nil, diags
 		}
-		data.BillingEmails = vBillingEmails
+		state.BillingEmails = vBillingEmails
 	}
 	if dto.BillingAddressID != nil {
-		data.BillingAddressID = types.StringPointerValue(dto.BillingAddressID)
+		state.BillingAddressID = types.StringPointerValue(dto.BillingAddressID)
 	}
 	if dto.BillingCurrency != nil {
-		data.BillingCurrency = types.StringPointerValue(dto.BillingCurrency)
+		state.BillingCurrency = types.StringPointerValue(dto.BillingCurrency)
 	}
 	if dto.BillingGroupID != nil {
-		data.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
+		state.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
 	}
 	if dto.BillingGroupName != nil {
-		data.BillingGroupName = types.StringPointerValue(dto.BillingGroupName)
+		state.BillingGroupName = types.StringPointerValue(dto.BillingGroupName)
 	}
 	if dto.CustomInvoiceText != nil {
-		data.CustomInvoiceText = types.StringPointerValue(dto.CustomInvoiceText)
+		state.CustomInvoiceText = types.StringPointerValue(dto.CustomInvoiceText)
 	}
 	if dto.OrganizationID != nil {
-		data.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
 	}
 	if dto.PaymentMethodID != nil {
-		data.PaymentMethodID = types.StringPointerValue(dto.PaymentMethodID)
+		state.PaymentMethodID = types.StringPointerValue(dto.PaymentMethodID)
 	}
 	if dto.ShippingAddressID != nil {
-		data.ShippingAddressID = types.StringPointerValue(dto.ShippingAddressID)
+		state.ShippingAddressID = types.StringPointerValue(dto.ShippingAddressID)
 	}
 	if dto.VatID != nil {
-		data.VatID = types.StringPointerValue(dto.VatID)
+		state.VatID = types.StringPointerValue(dto.VatID)
 	}
-	return data, nil
+	return state, nil
 }
 
 func attrsBillingGroups() types.ObjectType {

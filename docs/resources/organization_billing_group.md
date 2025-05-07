@@ -39,7 +39,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Read-Only
 
-- `billing_group_id` (String) Billing group id.
+- `billing_group_id` (String) Billing group ID.
 - `id` (String) Resource ID, a composite of `organization_id` and `billing_group_id` IDs.
 
 <a id="nestedblock--timeouts"></a>

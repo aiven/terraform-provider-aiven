@@ -31,7 +31,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"address_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Address id.",
+				MarkdownDescription: "Address ID.",
 			},
 			"address_lines": schema.SetAttribute{
 				ElementType:         types.StringType,

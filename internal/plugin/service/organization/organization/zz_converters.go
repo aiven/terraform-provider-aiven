@@ -34,16 +34,17 @@ func (data *dataModel) SetID(vID string) {
 type dtoModel struct {
 	CreateTime *string `json:"create_time,omitempty"`
 	ID         *string `json:"organization_id,omitempty"`
-	Name       *string `json:"account_name"`
+	Name       *string `json:"account_name,omitempty"`
 	TenantID   *string `json:"tenant_id,omitempty"`
 	UpdateTime *string `json:"update_time,omitempty"`
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
+func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
 	dto := new(dtoModel)
-	if !data.Name.IsNull() {
-		dto.Name = data.Name.ValueStringPointer()
+	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
+		vName := plan.Name.ValueString()
+		dto.Name = &vName
 	}
 	err := util.Unmarshal(dto, rqs, modifiers...)
 	if err != nil {
@@ -55,7 +56,7 @@ func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers .
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
 	dto := new(dtoModel)
 	err := util.Unmarshal(rsp, dto, modifiers...)
 	if err != nil {
@@ -63,20 +64,20 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.CreateTime != nil {
-		data.CreateTime = types.StringPointerValue(dto.CreateTime)
+	if dto.CreateTime != nil && (*dto.CreateTime != "" || !state.CreateTime.IsNull()) {
+		state.CreateTime = types.StringPointerValue(dto.CreateTime)
 	}
-	if dto.ID != nil {
-		data.ID = types.StringPointerValue(dto.ID)
+	if dto.ID != nil && (*dto.ID != "" || !state.ID.IsNull()) {
+		state.ID = types.StringPointerValue(dto.ID)
 	}
-	if dto.Name != nil {
-		data.Name = types.StringPointerValue(dto.Name)
+	if dto.Name != nil && (*dto.Name != "" || !state.Name.IsNull()) {
+		state.Name = types.StringPointerValue(dto.Name)
 	}
-	if dto.TenantID != nil {
-		data.TenantID = types.StringPointerValue(dto.TenantID)
+	if dto.TenantID != nil && (*dto.TenantID != "" || !state.TenantID.IsNull()) {
+		state.TenantID = types.StringPointerValue(dto.TenantID)
 	}
-	if dto.UpdateTime != nil {
-		data.UpdateTime = types.StringPointerValue(dto.UpdateTime)
+	if dto.UpdateTime != nil && (*dto.UpdateTime != "" || !state.UpdateTime.IsNull()) {
+		state.UpdateTime = types.StringPointerValue(dto.UpdateTime)
 	}
 	return nil
 }

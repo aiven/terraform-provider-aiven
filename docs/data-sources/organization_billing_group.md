@@ -22,7 +22,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Required
 
-- `billing_group_id` (String) Billing group id.
+- `billing_group_id` (String) Billing group ID.
 - `organization_id` (String) ID of an organization.
 
 ### Optional

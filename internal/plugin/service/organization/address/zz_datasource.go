@@ -28,7 +28,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address_id": schema.StringAttribute{
-				MarkdownDescription: "Address id.",
+				MarkdownDescription: "Address ID.",
 				Required:            true,
 			},
 			"address_lines": schema.SetAttribute{

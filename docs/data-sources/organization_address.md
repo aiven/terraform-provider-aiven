@@ -22,7 +22,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Required
 
-- `address_id` (String) Address id.
+- `address_id` (String) Address ID.
 - `organization_id` (String) ID of an organization.
 
 ### Optional

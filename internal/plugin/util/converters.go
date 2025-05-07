@@ -52,6 +52,7 @@ func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 //	}
 //
 // In this case, the function can be used with any type of Request/Response object.
+// The map's keys are equal to original API keys, not TF schema fields.
 type MapModifier[I any] func(reqRsp map[string]any, in *I) error
 
 // Expand sets values to Request from a nested object.

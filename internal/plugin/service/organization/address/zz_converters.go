@@ -42,45 +42,51 @@ func (data *dataModel) SetID(vOrganizationID string, vAddressID string) {
 
 type dtoModel struct {
 	AddressID      *string   `json:"address_id,omitempty"`
-	AddressLines   *[]string `json:"address_lines"`
-	City           *string   `json:"city"`
-	CountryCode    *string   `json:"country_code"`
+	AddressLines   *[]string `json:"address_lines,omitempty"`
+	City           *string   `json:"city,omitempty"`
+	CountryCode    *string   `json:"country_code,omitempty"`
 	CreateTime     *string   `json:"create_time,omitempty"`
-	Name           *string   `json:"name"`
-	OrganizationID *string   `json:"organization_id"`
+	Name           *string   `json:"name,omitempty"`
+	OrganizationID *string   `json:"organization_id,omitempty"`
 	State          *string   `json:"state,omitempty"`
 	UpdateTime     *string   `json:"update_time,omitempty"`
 	ZipCode        *string   `json:"zip_code,omitempty"`
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
+func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
 	dto := new(dtoModel)
-	if !data.AddressLines.IsNull() {
-		var vAddressLines []string
-		diags := data.AddressLines.ElementsAs(ctx, &vAddressLines, false)
+	if !plan.AddressLines.IsNull() || state != nil && !state.AddressLines.IsNull() {
+		vAddressLines := make([]string, 0)
+		diags := plan.AddressLines.ElementsAs(ctx, &vAddressLines, false)
 		if diags.HasError() {
 			return diags
 		}
 		dto.AddressLines = &vAddressLines
 	}
-	if !data.City.IsNull() {
-		dto.City = data.City.ValueStringPointer()
+	if !plan.City.IsNull() || state != nil && !state.City.IsNull() {
+		vCity := plan.City.ValueString()
+		dto.City = &vCity
 	}
-	if !data.CountryCode.IsNull() {
-		dto.CountryCode = data.CountryCode.ValueStringPointer()
+	if !plan.CountryCode.IsNull() || state != nil && !state.CountryCode.IsNull() {
+		vCountryCode := plan.CountryCode.ValueString()
+		dto.CountryCode = &vCountryCode
 	}
-	if !data.Name.IsNull() {
-		dto.Name = data.Name.ValueStringPointer()
+	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
+		vName := plan.Name.ValueString()
+		dto.Name = &vName
 	}
-	if !data.OrganizationID.IsNull() {
-		dto.OrganizationID = data.OrganizationID.ValueStringPointer()
+	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+		vOrganizationID := plan.OrganizationID.ValueString()
+		dto.OrganizationID = &vOrganizationID
 	}
-	if !data.State.IsNull() {
-		dto.State = data.State.ValueStringPointer()
+	if !plan.State.IsNull() || state != nil && !state.State.IsNull() {
+		vState := plan.State.ValueString()
+		dto.State = &vState
 	}
-	if !data.ZipCode.IsNull() {
-		dto.ZipCode = data.ZipCode.ValueStringPointer()
+	if !plan.ZipCode.IsNull() || state != nil && !state.ZipCode.IsNull() {
+		vZipCode := plan.ZipCode.ValueString()
+		dto.ZipCode = &vZipCode
 	}
 	err := util.Unmarshal(dto, rqs, modifiers...)
 	if err != nil {
@@ -92,7 +98,7 @@ func expandData[R any](ctx context.Context, data *dataModel, rqs *R, modifiers .
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
 	dto := new(dtoModel)
 	err := util.Unmarshal(rsp, dto, modifiers...)
 	if err != nil {
@@ -100,54 +106,54 @@ func flattenData[R any](ctx context.Context, data *dataModel, rsp *R, modifiers 
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.AddressLines != nil {
+	if dto.AddressLines != nil && (len(*dto.AddressLines) > 0 || !state.AddressLines.IsNull()) {
 		vAddressLines, diags := types.SetValueFrom(ctx, types.StringType, dto.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
-		data.AddressLines = vAddressLines
+		state.AddressLines = vAddressLines
 	}
-	if dto.AddressID != nil {
-		data.AddressID = types.StringPointerValue(dto.AddressID)
+	if dto.AddressID != nil && (*dto.AddressID != "" || !state.AddressID.IsNull()) {
+		state.AddressID = types.StringPointerValue(dto.AddressID)
 	}
-	if dto.City != nil {
-		data.City = types.StringPointerValue(dto.City)
+	if dto.City != nil && (*dto.City != "" || !state.City.IsNull()) {
+		state.City = types.StringPointerValue(dto.City)
 	}
-	if dto.CountryCode != nil {
-		data.CountryCode = types.StringPointerValue(dto.CountryCode)
+	if dto.CountryCode != nil && (*dto.CountryCode != "" || !state.CountryCode.IsNull()) {
+		state.CountryCode = types.StringPointerValue(dto.CountryCode)
 	}
-	if dto.CreateTime != nil {
-		data.CreateTime = types.StringPointerValue(dto.CreateTime)
+	if dto.CreateTime != nil && (*dto.CreateTime != "" || !state.CreateTime.IsNull()) {
+		state.CreateTime = types.StringPointerValue(dto.CreateTime)
 	}
-	if dto.Name != nil {
-		data.Name = types.StringPointerValue(dto.Name)
+	if dto.Name != nil && (*dto.Name != "" || !state.Name.IsNull()) {
+		state.Name = types.StringPointerValue(dto.Name)
 	}
-	if dto.OrganizationID != nil {
-		data.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
 	}
-	if dto.State != nil {
-		data.State = types.StringPointerValue(dto.State)
+	if dto.State != nil && (*dto.State != "" || !state.State.IsNull()) {
+		state.State = types.StringPointerValue(dto.State)
 	}
-	if dto.UpdateTime != nil {
-		data.UpdateTime = types.StringPointerValue(dto.UpdateTime)
+	if dto.UpdateTime != nil && (*dto.UpdateTime != "" || !state.UpdateTime.IsNull()) {
+		state.UpdateTime = types.StringPointerValue(dto.UpdateTime)
 	}
-	if dto.ZipCode != nil {
-		data.ZipCode = types.StringPointerValue(dto.ZipCode)
+	if dto.ZipCode != nil && (*dto.ZipCode != "" || !state.ZipCode.IsNull()) {
+		state.ZipCode = types.StringPointerValue(dto.ZipCode)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
-	if data.ID.ValueString() != "" {
+	if state.ID.ValueString() != "" {
 		var parts [2]string
-		for i, v := range strings.SplitN(data.ID.ValueString(), "/", 2) {
+		for i, v := range strings.SplitN(state.ID.ValueString(), "/", 2) {
 			parts[i] = v
 		}
-		if data.OrganizationID.ValueString() == "" {
-			data.OrganizationID = types.StringValue(parts[0])
+		if state.OrganizationID.ValueString() == "" {
+			state.OrganizationID = types.StringValue(parts[0])
 		}
-		if data.AddressID.ValueString() == "" {
-			data.AddressID = types.StringValue(parts[1])
+		if state.AddressID.ValueString() == "" {
+			state.AddressID = types.StringValue(parts[1])
 		}
 	}
-	data.SetID(data.OrganizationID.ValueString(), data.AddressID.ValueString())
+	state.SetID(state.OrganizationID.ValueString(), state.AddressID.ValueString())
 	return nil
 }

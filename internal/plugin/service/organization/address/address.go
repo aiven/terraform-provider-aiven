@@ -48,7 +48,7 @@ func (c *view) Configure(client avngen.Client) {
 
 func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 	var req organization.OrganizationAddressCreateIn
-	diags := expandData(ctx, plan, &req)
+	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
@@ -66,7 +66,7 @@ func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 
 func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnostics {
 	var req organization.OrganizationAddressUpdateIn
-	diags := expandData(ctx, plan, &req)
+	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
 		return diags
 	}
