@@ -21,6 +21,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -165,6 +166,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		betaResources := []func() resource.Resource{
 			address.NewOrganizationAddressResource,
 			billinggroup.NewOrganizationBillingGroupResource,
+			project.NewOrganizationProjectResource,
 		}
 		resources = append(resources, betaResources...)
 	}
@@ -186,6 +188,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 			address.NewOrganizationAddressDatasource,
 			billinggroup.NewOrganizationBillingGroupDatasource,
 			billinggrouplist.NewOrganizationBillingGroupListDatasource,
+			project.NewOrganizationProjectDatasource,
 		}
 		dataSources = append(dataSources, betaDataSources...)
 	}

@@ -29,23 +29,35 @@ data "aiven_organization_project" "example" {
 
 ### Required
 
-- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
+- `organization_id` (String) ID of an organization.
 - `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `base_port` (Number) Valid port number (1-65535) to use as a base for service port allocation.
-- `billing_group_id` (String) Billing group ID to assign to the project.
-- `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
-- `id` (String) The ID of this resource.
+- `billing_group_id` (String) Billing group ID to assign to the project. It's required when moving projects between organizations.
+- `ca_cert` (String, Sensitive) PEM encoded certificate.
+- `id` (String) Resource ID, a composite of `organization_id` and `project_id` IDs.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `tag` (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.
 
-<a id="nestedatt--tag"></a>
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedblock--tag"></a>
 ### Nested Schema for `tag`
 
 Read-Only:
 
-- `key` (String)
-- `value` (String)
+- `key` (String) Project tag key.
+- `value` (String) Project tag value.

@@ -52,10 +52,10 @@ resource "aiven_organization_project" "example_project" {
 
 ### Required
 
-- `billing_group_id` (String) Billing group ID to assign to the project.
-- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
+- `billing_group_id` (String) Billing group ID to assign to the project. It's required when moving projects between organizations.
+- `organization_id` (String) ID of an organization. Maximum length: `36`.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource.
+- `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -66,8 +66,8 @@ resource "aiven_organization_project" "example_project" {
 
 ### Read-Only
 
-- `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
-- `id` (String) The ID of this resource.
+- `ca_cert` (String, Sensitive) PEM encoded certificate.
+- `id` (String) Resource ID, a composite of `organization_id` and `project_id` IDs.
 
 <a id="nestedblock--tag"></a>
 ### Nested Schema for `tag`
@@ -83,11 +83,10 @@ Required:
 
 Optional:
 
-- `create` (String)
-- `default` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 

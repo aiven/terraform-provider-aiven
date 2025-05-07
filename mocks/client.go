@@ -5736,6 +5736,64 @@ func (_c *MockClient_OrganizationProjectsDelete_Call) RunAndReturn(run func(ctx 
 	return _c
 }
 
+// OrganizationProjectsGet provides a mock function for the type MockClient
+func (_mock *MockClient) OrganizationProjectsGet(ctx context.Context, organizationId string, projectId string) (*organizationprojects.OrganizationProjectsGetOut, error) {
+	ret := _mock.Called(ctx, organizationId, projectId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationProjectsGet")
+	}
+
+	var r0 *organizationprojects.OrganizationProjectsGetOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*organizationprojects.OrganizationProjectsGetOut, error)); ok {
+		return returnFunc(ctx, organizationId, projectId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *organizationprojects.OrganizationProjectsGetOut); ok {
+		r0 = returnFunc(ctx, organizationId, projectId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizationprojects.OrganizationProjectsGetOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, organizationId, projectId)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_OrganizationProjectsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationProjectsGet'
+type MockClient_OrganizationProjectsGet_Call struct {
+	*mock.Call
+}
+
+// OrganizationProjectsGet is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - projectId
+func (_e *MockClient_Expecter) OrganizationProjectsGet(ctx interface{}, organizationId interface{}, projectId interface{}) *MockClient_OrganizationProjectsGet_Call {
+	return &MockClient_OrganizationProjectsGet_Call{Call: _e.mock.On("OrganizationProjectsGet", ctx, organizationId, projectId)}
+}
+
+func (_c *MockClient_OrganizationProjectsGet_Call) Run(run func(ctx context.Context, organizationId string, projectId string)) *MockClient_OrganizationProjectsGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsGet_Call) Return(organizationProjectsGetOut *organizationprojects.OrganizationProjectsGetOut, err error) *MockClient_OrganizationProjectsGet_Call {
+	_c.Call.Return(organizationProjectsGetOut, err)
+	return _c
+}
+
+func (_c *MockClient_OrganizationProjectsGet_Call) RunAndReturn(run func(ctx context.Context, organizationId string, projectId string) (*organizationprojects.OrganizationProjectsGetOut, error)) *MockClient_OrganizationProjectsGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrganizationProjectsList provides a mock function for the type MockClient
 func (_mock *MockClient) OrganizationProjectsList(ctx context.Context, organizationId string) (*organizationprojects.OrganizationProjectsListOut, error) {
 	ret := _mock.Called(ctx, organizationId)
