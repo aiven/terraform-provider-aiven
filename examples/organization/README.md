@@ -2,19 +2,19 @@
 
 The Aiven platform uses [organizations, organizational units, and projects](https://aiven.io/docs/platform/concepts/orgs-units-projects) to organize services.
 
-This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units.
+This example shows you how to use the Aiven Provider for Terraform to create organizational units within your organization, and add projects to those units.
 
 Many customers use units to separate projects for different departments within their organization, so this example will create a unit for an engineering department and a finance department.
 
-In each unit, three projects will be created for production, QA, and development environments.
+In each unit, three projects will be created for production, quality assurance (QA), and development environments.
 
 ## Prerequisites
 
-* [Install Terraform](https://www.terraform.io/downloads)
-* [Sign up for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=devportal&utm_content=repo)
-* [Create an authentication token](https://aiven.io/docs/platform/howto/create_authentication_token)
+* [Install Terraform](https://www.terraform.io/downloads).
+* [Sign up for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=devportal&utm_content=repo).
+* [Create a token](https://aiven.io/docs/platform/howto/create_authentication_token).
 
-## Set up the Terraform project
+## Set up your organization using Terraform
 
 1. Clone this repository.
 
@@ -87,6 +87,7 @@ Terraform will perform the following actions:
 ...
 Plan: 9 to add, 0 to change, 0 to destroy.
 ```
+
 7. Enter yes to confirm. The output will be similar to the following:
 
 ```sh
@@ -105,13 +106,11 @@ Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 
 You can see your organization, organizational units, and projects in the [Aiven Console](https://console.aiven.io/):
 
-1. Select the organization from the top menu.
+1. In your organization, click **Admin**.
 
-2. Click **Admin**.
+2. In the **Organizational units** section, select a unit.
 
-3. In the **Organizational units** section, select a unit.
-
-4. On the unit's page, you can see a list of the projects.
+3. On the unit's page, you can see a list of the projects.
 
 
 ## Clean up
@@ -150,5 +149,5 @@ The output will be similar to the following:
 ...
 aiven_organization.org: Destruction complete after 0s
 
-Destroy complete! Resources: 9 destroyed.
+Destroy complete! Resources: 8 destroyed.
 ```
