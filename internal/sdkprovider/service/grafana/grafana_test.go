@@ -784,3 +784,65 @@ resource "aiven_grafana" "bar" {
 }
 `, project, cloudName, grafanaName)
 }
+
+// TestAccAiven_dynamic_field_doesnt_panic proves dynamic blocks do not panic because of an unknown value
+func TestAccAiven_dynamic_field_doesnt_panic(t *testing.T) {
+	project := acc.ProjectName()
+	resourceName := "aiven_grafana.foo"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				Source:            "hashicorp/random",
+				VersionConstraint: "3.7.2",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter_object.#", "5"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "true"),
+				),
+				Config: fmt.Sprintf(`
+resource "random_integer" "ip_filters" {
+  min = 5
+  max = 5
+}
+
+resource "random_integer" "plublic_access" {
+  min = 1
+  max = 1
+}
+
+resource "aiven_grafana" "foo" {
+  project                 = %[1]q
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "test-acc-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  grafana_user_config {
+    dynamic "ip_filter_object" {
+      for_each = range(random_integer.ip_filters.result)
+      content {
+        description = "Test object ${ip_filter_object.value}"
+        network     = "192.168.${ip_filter_object.value}.0/24"
+      }
+    }
+
+    dynamic "public_access" {
+      for_each = random_integer.plublic_access.result == 1 ? [1] : []
+      content {
+        grafana = true
+      }
+    }
+  }
+}
+`, project, acc.RandStr()),
+			},
+		},
+	})
+}
