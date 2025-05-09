@@ -8,8 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/types"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -55,12 +54,9 @@ func (a *resourceAdapter[T]) Configure(
 		return
 	}
 
-	p, ok := req.ProviderData.(types.AivenClientProvider)
-	if !ok {
-		rsp.Diagnostics.AddError(
-			errmsg.SummaryUnexpectedProviderDataType,
-			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
-		)
+	p, diags := providerdata.FromRequest(req.ProviderData)
+	if diags.HasError() {
+		rsp.Diagnostics.Append(diags...)
 		return
 	}
 

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/organizationuser"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -26,7 +26,7 @@ func NewExternalIdentityDataSource() datasource.DataSource {
 }
 
 type externalIdentityDataSource struct {
-	client   *aiven.Client
+	client   avngen.Client
 	typeName string
 }
 
@@ -92,16 +92,12 @@ func (r *externalIdentityDataSource) Configure(
 		return
 	}
 
-	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
-	if !ok {
-		resp.Diagnostics.AddError(
-			errmsg.SummaryUnexpectedProviderDataType,
-			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
-		)
+	p, diags := providerdata.FromRequest(req.ProviderData)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	r.client = p.GetClient()
+	r.client = p.GetGenClient()
 }
 
 // Read reads an external_identity data source.
@@ -118,15 +114,15 @@ func (r *externalIdentityDataSource) Read(ctx context.Context, req datasource.Re
 	externalUserID := state.ExternalUserID.ValueString()
 	externalServiceName := state.ExternalServiceName.ValueString()
 
-	responseData, err := r.client.OrganizationUser.List(ctx, organizationID)
+	users, err := r.client.OrganizationUserList(ctx, organizationID)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 		return
 	}
 
-	var user *aiven.OrganizationMemberInfo
-	for _, member := range responseData.Users {
-		if member.UserID == internalUserID {
+	var user *organizationuser.UserOut
+	for _, member := range users {
+		if member.UserId == internalUserID {
 			user = &member
 			break
 		}
