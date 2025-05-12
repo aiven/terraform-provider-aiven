@@ -102,7 +102,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_user_list":        organization.DatasourceOrganizationUserList(),
 			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
 			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
-			"aiven_organization_project":          organization.DatasourceOrganizationProject(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -222,7 +221,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
 			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
 			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
-			"aiven_organization_project":                organization.ResourceOrganizationProject(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
@@ -315,7 +313,6 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_flink_jar_application",
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
-		"aiven_organization_project",
 		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",
@@ -327,7 +324,6 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_alloydbomni",
 		"aiven_alloydbomni_user",
 		"aiven_alloydbomni_database",
-		"aiven_organization_project",
 		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",

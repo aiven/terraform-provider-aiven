@@ -309,10 +309,6 @@ func TestCollectionBlocks(t *testing.T) {
 		"organization_id":  Reference("aiven_organization.foo.id"),
 		"billing_group_id": Reference("aiven_billing_group.foo.id"),
 		"parent_id":        Reference("aiven_organizational_unit.foo.id"),
-		"tag": []map[string]interface{}{
-			{"key": "key1", "value": "value1"},
-			{"key": "key2", "value": "value2"},
-		},
 	}).Render(t)
 	require.NoError(t, err, "failed to render HCL")
 
@@ -321,14 +317,6 @@ func TestCollectionBlocks(t *testing.T) {
   organization_id  = aiven_organization.foo.id
   parent_id        = aiven_organizational_unit.foo.id
   project_id       = "test-acc-pr-ilvqhrtmdy"
-  tag {
-    key   = "key1"
-    value = "value1"
-  }
-  tag {
-    key   = "key2"
-    value = "value2"
-  }
 }`
 
 	assert.Equal(t, normalizeHCL(expected), normalizeHCL(res))

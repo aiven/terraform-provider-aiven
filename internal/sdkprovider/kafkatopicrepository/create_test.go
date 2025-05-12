@@ -9,10 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestCreateConflict tests that one goroutine out of 100 creates the topic, while others get errAlreadyExists
