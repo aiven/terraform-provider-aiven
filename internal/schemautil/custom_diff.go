@@ -215,7 +215,7 @@ func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.Res
 // It returns an error if multiple values are set for 'ip_filter' or 'namespaces'
 func checkForMultipleValues(v cty.Value) error {
 	// If v is null or empty, do not continue
-	if v.IsNull() || len(v.AsValueSlice()) == 0 {
+	if v.IsNull() || !v.IsKnown() || len(v.AsValueSlice()) == 0 {
 		return nil
 	}
 
@@ -227,7 +227,7 @@ func checkForMultipleValues(v cty.Value) error {
 
 	ipFilterSetBy, namespacesSetBy := "", ""
 	for k, v := range val[0].AsValueMap() {
-		if v.IsNull() {
+		if v.IsNull() || !v.IsKnown() {
 			continue
 		}
 
