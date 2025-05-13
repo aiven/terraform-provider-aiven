@@ -28,147 +28,148 @@ var (
 	errLocalRetentionBytesDependency = fmt.Errorf("local_retention_bytes can't be set without retention_bytes")
 )
 
-var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
-	"cleanup_policy": {
-		Type:         schema.TypeString,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(kafkatopic.CleanupPolicyTypeChoices(), false),
-		Description:  userconfig.Desc("cleanup.policy value").PossibleValuesString(kafkatopic.CleanupPolicyTypeChoices()...).Build(),
-	},
-	"compression_type": {
-		Type:         schema.TypeString,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(kafkatopic.CompressionTypeChoices(), false),
-		Description:  userconfig.Desc("compression.type value").PossibleValuesString(kafkatopic.CompressionTypeChoices()...).Build(),
-	},
-	"delete_retention_ms": {
-		Type:        schema.TypeString,
-		Description: "delete.retention.ms value",
-		Optional:    true,
-	},
-	"file_delete_delay_ms": {
-		Type:        schema.TypeString,
-		Description: "file.delete.delay.ms value",
-		Optional:    true,
-	},
-	"flush_messages": {
-		Type:        schema.TypeString,
-		Description: "flush.messages value",
-		Optional:    true,
-	},
-	"flush_ms": {
-		Type:        schema.TypeString,
-		Description: "flush.ms value",
-		Optional:    true,
-	},
-	"index_interval_bytes": {
-		Type:        schema.TypeString,
-		Description: "index.interval.bytes value",
-		Optional:    true,
-	},
-	"max_compaction_lag_ms": {
-		Type:        schema.TypeString,
-		Description: "max.compaction.lag.ms value",
-		Optional:    true,
-	},
-	"max_message_bytes": {
-		Type:        schema.TypeString,
-		Description: "max.message.bytes value",
-		Optional:    true,
-	},
-	"message_downconversion_enable": {
-		Type:        schema.TypeBool,
-		Description: "message.downconversion.enable value",
-		Optional:    true,
-	},
-	"message_format_version": {
-		Type:         schema.TypeString,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
-		Description:  userconfig.Desc("message.format.version value").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
-	},
-	"message_timestamp_difference_max_ms": {
-		Type:        schema.TypeString,
-		Description: "message.timestamp.difference.max.ms value",
-		Optional:    true,
-	},
-	"message_timestamp_type": {
-		Type:         schema.TypeString,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(kafkatopic.MessageTimestampTypeChoices(), false),
-		Description:  userconfig.Desc("message.timestamp.type value").PossibleValuesString(kafkatopic.MessageTimestampTypeChoices()...).Build(),
-	},
-	"min_cleanable_dirty_ratio": {
-		Type:        schema.TypeFloat,
-		Description: "min.cleanable.dirty.ratio value",
-		Optional:    true,
-	},
-	"min_compaction_lag_ms": {
-		Type:        schema.TypeString,
-		Description: "min.compaction.lag.ms value",
-		Optional:    true,
-	},
-	"min_insync_replicas": {
-		Type:        schema.TypeString,
-		Description: "min.insync.replicas value",
-		Optional:    true,
-	},
-	"preallocate": {
-		Type:        schema.TypeBool,
-		Description: "preallocate value",
-		Optional:    true,
-	},
-	"retention_bytes": {
-		Type:        schema.TypeString,
-		Description: "retention.bytes value",
-		Optional:    true,
-	},
-	"retention_ms": {
-		Type:        schema.TypeString,
-		Description: "retention.ms value",
-		Optional:    true,
-	},
-	"segment_bytes": {
-		Type:        schema.TypeString,
-		Description: "segment.bytes value",
-		Optional:    true,
-	},
-	"segment_index_bytes": {
-		Type:        schema.TypeString,
-		Description: "segment.index.bytes value",
-		Optional:    true,
-	},
-	"segment_jitter_ms": {
-		Type:        schema.TypeString,
-		Description: "segment.jitter.ms value",
-		Optional:    true,
-	},
-	"segment_ms": {
-		Type:        schema.TypeString,
-		Description: "segment.ms value",
-		Optional:    true,
-	},
-	"unclean_leader_election_enable": {
-		Type:        schema.TypeBool,
-		Description: "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
-		Optional:    true,
-		Deprecated:  "This field is deprecated and no longer functional.",
-	},
-	"remote_storage_enable": {
-		Type:        schema.TypeBool,
-		Description: "remote.storage.enable value",
-		Optional:    true,
-	},
-	"local_retention_bytes": {
-		Type:        schema.TypeString,
-		Description: "local.retention.bytes value",
-		Optional:    true,
-	},
-	"local_retention_ms": {
-		Type:        schema.TypeString,
-		Description: "local.retention.ms value",
-		Optional:    true,
-	},
+func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"cleanup_policy": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(kafkatopic.CleanupPolicyTypeChoices(), false),
+			Description:  userconfig.Desc("The retention policy to use on old segments. Possible values include 'delete', 'compact', or a comma-separated list of them. The default policy ('delete') will discard old segments when their retention time or size limit has been reached. The 'compact' setting will enable log compaction on the topic.").PossibleValuesString(kafkatopic.CleanupPolicyTypeChoices()...).Build(),
+		},
+		"compression_type": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(kafkatopic.CompressionTypeChoices(), false),
+			Description:  userconfig.Desc("Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.").PossibleValuesString(kafkatopic.CompressionTypeChoices()...).Build(),
+		},
+		"delete_retention_ms": {
+			Type:        schema.TypeString,
+			Description: "The amount of time to retain delete tombstone markers for log compacted topics. This setting also gives a bound on the time in which a consumer must complete a read if they begin from offset 0 to ensure that they get a valid snapshot of the final stage (otherwise delete tombstones may be collected before they complete their scan).",
+			Optional:    true,
+		},
+		"file_delete_delay_ms": {
+			Type:        schema.TypeString,
+			Description: "The time to wait before deleting a file from the filesystem.",
+			Optional:    true,
+		},
+		"flush_messages": {
+			Type:        schema.TypeString,
+			Description: "This setting allows specifying an interval at which we will force an fsync of data written to the log. For example if this was set to 1 we would fsync after every message; if it were 5 we would fsync after every five messages. In general we recommend you not set this and use replication for durability and allow the operating system's background flush capabilities as it is more efficient.",
+			Optional:    true,
+		},
+		"flush_ms": {
+			Type:        schema.TypeString,
+			Description: "This setting allows specifying a time interval at which we will force an fsync of data written to the log. For example if this was set to 1000 we would fsync after 1000 ms had passed. In general we recommend you not set this and use replication for durability and allow the operating system's background flush capabilities as it is more efficient.",
+			Optional:    true,
+		},
+		"index_interval_bytes": {
+			Type:        schema.TypeString,
+			Description: "This setting controls how frequently Kafka adds an index entry to its offset index. The default setting ensures that we index a message roughly every 4096 bytes. More indexing allows reads to jump closer to the exact position in the log but makes the index larger. You probably don't need to change this.",
+			Optional:    true,
+		},
+		"max_compaction_lag_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum time a message will remain ineligible for compaction in the log. Only applicable for logs that are being compacted.",
+			Optional:    true,
+		},
+		"max_message_bytes": {
+			Type:        schema.TypeString,
+			Description: "The largest record batch size allowed by Kafka (after compression if compression is enabled). If this is increased and there are consumers older than 0.10.2, the consumers' fetch size must also be increased so that the they can fetch record batches this large. In the latest message format version, records are always grouped into batches for efficiency. In previous message format versions, uncompressed records are not grouped into batches and this limit only applies to a single record in that case.",
+			Optional:    true,
+		},
+		"message_downconversion_enable": {
+			Type:        schema.TypeBool,
+			Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. When set to false, broker will not perform down-conversion for consumers expecting an older message format. The broker responds with UNSUPPORTED_VERSION error for consume requests from such older clients. This configuration does not apply to any message format conversion that might be required for replication to followers.",
+			Optional:    true,
+		},
+		"message_format_version": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
+			Description:  userconfig.Desc("Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand.").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
+		},
+		"message_timestamp_difference_max_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if message.timestamp.type=LogAppendTime.",
+			Optional:    true,
+		},
+		"message_timestamp_type": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(kafkatopic.MessageTimestampTypeChoices(), false),
+			Description:  userconfig.Desc("Define whether the timestamp in the message is message create time or log append time.").PossibleValuesString(kafkatopic.MessageTimestampTypeChoices()...).Build(),
+		},
+		"min_cleanable_dirty_ratio": {
+			Type:        schema.TypeFloat,
+			Description: "This configuration controls how frequently the log compactor will attempt to clean the log (assuming log compaction is enabled). By default we will avoid cleaning a log where more than 50% of the log has been compacted. This ratio bounds the maximum space wasted in the log by duplicates (at 50% at most 50% of the log could be duplicates). A higher ratio will mean fewer, more efficient cleanings but will mean more wasted space in the log. If the max.compaction.lag.ms or the min.compaction.lag.ms configurations are also specified, then the log compactor considers the log to be eligible for compaction as soon as either: (i) the dirty ratio threshold has been met and the log has had dirty (uncompacted) records for at least the min.compaction.lag.ms duration, or (ii) if the log has had dirty (uncompacted) records for at most the max.compaction.lag.ms period.",
+			Optional:    true,
+		},
+		"min_compaction_lag_ms": {
+			Type:        schema.TypeString,
+			Description: "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
+			Optional:    true,
+		},
+		"min_insync_replicas": {
+			Type:        schema.TypeString,
+			Description: "When a producer sets acks to 'all' (or '-1'), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks of 'all'. This will ensure that the producer raises an exception if a majority of replicas do not receive a write.",
+			Optional:    true,
+		},
+		"preallocate": {
+			Type:        schema.TypeBool,
+			Description: "True if we should preallocate the file on disk when creating a new log segment.",
+			Optional:    true,
+		},
+		"retention_bytes": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the 'delete' retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.",
+			Optional:    true,
+		},
+		"retention_ms": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the maximum time we will retain a log before we will discard old log segments to free up space if we are using the 'delete' retention policy. This represents an SLA on how soon consumers must read their data. If set to -1, no time limit is applied.",
+			Optional:    true,
+		},
+		"segment_bytes": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the size of the index that maps offsets to file positions. We preallocate this index file and shrink it only after log rolls. You generally should not need to change this setting.",
+			Optional:    true,
+		},
+		"segment_index_bytes": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the size of the index that maps offsets to file positions. We preallocate this index file and shrink it only after log rolls. You generally should not need to change this setting.",
+			Optional:    true,
+		},
+		"segment_jitter_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum random jitter subtracted from the scheduled segment roll time to avoid thundering herds of segment rolling",
+			Optional:    true,
+		},
+		"segment_ms": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the period of time after which Kafka will force the log to roll even if the segment file isn't full to ensure that retention can delete or compact old data. Setting this to a very low value has consequences, and the Aiven management plane ignores values less than 10 seconds.",
+			Optional:    true,
+		},
+		"unclean_leader_election_enable": {
+			Type:        schema.TypeBool,
+			Description: "Indicates whether to enable replicas not in the ISR set to be elected as leader as a last resort, even though doing so may result in data loss.",
+			Optional:    true,
+		},
+		"remote_storage_enable": {
+			Type:        schema.TypeBool,
+			Description: "Indicates whether tiered storage should be enabled.",
+			Optional:    true,
+		},
+		"local_retention_bytes": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the maximum bytes tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the limit is equal to overall retention time. If set to -1, no limit is applied but it's possible only if overall retention is also -1.",
+			Optional:    true,
+		},
+		"local_retention_ms": {
+			Type:        schema.TypeString,
+			Description: "This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1.",
+			Optional:    true,
+		},
+	}
 }
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -235,7 +236,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		MaxItems:         1,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
-			Schema: aivenKafkaTopicConfigSchema,
+			Schema: aivenKafkaTopicConfigSchema(),
 		},
 	},
 }
@@ -380,9 +381,10 @@ func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
 // getKafkaTopicConfig converts schema.ResourceData into aiven.KafkaTopicConfig
 // Takes manifest values only
 func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error) {
+	empty := aiven.KafkaTopicConfig{}
 	configs := d.GetRawConfig().AsValueMap()[configField]
 	if configs.IsNull() || len(configs.AsValueSlice()) == 0 {
-		return aiven.KafkaTopicConfig{}, nil
+		return empty, nil
 	}
 
 	config := make(map[string]any)
@@ -391,37 +393,18 @@ func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error)
 			continue
 		}
 
-		// Converts values to types that are expected by the API
-		kind := aivenKafkaTopicConfigSchema[k].Type
-		value := d.Get(fmt.Sprintf("%s.0.%s", configField, k))
-
-		// These are known types
-		switch kind {
-		case schema.TypeBool, schema.TypeInt, schema.TypeFloat:
-			config[k] = value
-			continue
-		}
-
-		// These are known string types.
-		// Add here new string fields
-		switch k {
-		case "cleanup_policy", "compression_type", "message_format_version", "message_timestamp_type":
-			config[k] = value
-			continue
-		}
-
-		// Legacy integer fields
-		var err error
-		config[k], err = strconv.ParseInt(value.(string), 10, 64)
+		key := fmt.Sprintf("%s.0.%s", configField, k)
+		value, err := typedConfigValue(k, d.Get(key))
 		if err != nil {
-			return aiven.KafkaTopicConfig{}, err
+			return empty, fmt.Errorf("error converting config field %q: %w", k, err)
 		}
+		config[k] = value
 	}
 
 	// Converts to json and loads values to the struct
 	b, err := json.Marshal(config)
 	if err != nil {
-		return aiven.KafkaTopicConfig{}, err
+		return empty, err
 	}
 
 	var result aiven.KafkaTopicConfig
@@ -599,8 +582,9 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, err
 	}
 
 	config := make(map[string]any)
+	configSchema := aivenKafkaTopicConfigSchema()
 	for k, v := range source {
-		if aivenKafkaTopicConfigSchema[k].Type == schema.TypeString {
+		if configSchema[k].Type == schema.TypeString {
 			config[k] = schemautil.ToOptionalString(v.Value)
 		} else {
 			config[k] = v.Value
