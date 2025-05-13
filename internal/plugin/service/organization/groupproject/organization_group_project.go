@@ -17,7 +17,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -144,15 +144,11 @@ func (r *organizationGroupProjectResource) Configure(
 		return
 	}
 
-	p, ok := req.ProviderData.(providertypes.AivenClientProvider)
-	if !ok {
-		resp.Diagnostics.AddError(
-			errmsg.SummaryUnexpectedProviderDataType,
-			fmt.Sprintf(errmsg.DetailUnexpectedProviderDataType, req.ProviderData),
-		)
+	p, diags := providerdata.FromRequest(req.ProviderData)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	r.client = p.GetClient()
 }
 

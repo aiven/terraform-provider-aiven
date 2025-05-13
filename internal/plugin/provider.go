@@ -15,6 +15,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
@@ -23,7 +24,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
-	providertypes "github.com/aiven/terraform-provider-aiven/internal/plugin/types"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -50,8 +50,8 @@ func (p *AivenProvider) GetGenClient() avngen.Client {
 }
 
 var (
-	_ provider.Provider                 = &AivenProvider{}
-	_ providertypes.AivenClientProvider = &AivenProvider{}
+	_ provider.Provider         = &AivenProvider{}
+	_ providerdata.ProviderData = &AivenProvider{}
 )
 
 // AivenProviderModel is the configuration for the Aiven provider.
