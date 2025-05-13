@@ -100,6 +100,7 @@ func ResourceClickhouseGrant() *schema.Resource {
 
 **Note:**
 * Users cannot have the same name as roles.
+* Global privileges cannot be granted on the database level. To grant global privileges, use ` + "`database=\"*\"`" + `.
 * To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use ` + "`table=\"*\"`" + `.
 * Changes first revoke all grants and then reissue the remaining grants for convergence.
 `,
