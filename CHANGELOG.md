@@ -17,6 +17,7 @@ nav_order: 1
 - Fix `aiven_clickhouse_grant.privilege_grant.privilege` case validation.
 - Rename `aiven_organization_address` field `company_name` -> `name`, mark as required.
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
+- Remove `aiven_kafka_topic.config.unclean_leader_election_enable` deprecation
 - Fix the provider crash when `*_user_config` dynamic block values are known during the apply phase.
 
 ## [4.39.0] - 2025-04-24

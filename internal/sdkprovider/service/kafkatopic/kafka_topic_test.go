@@ -44,6 +44,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
+					resource.TestCheckResourceAttr(resourceName, "config.0.segment_bytes", "1610612736"),
 					resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
 					resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
 				),
@@ -176,6 +177,7 @@ resource "aiven_kafka_topic" "foo" {
     min_cleanable_dirty_ratio = 0.01
     delete_retention_ms       = 50000
     retention_bytes           = 1234
+    segment_bytes             = 1610612736
   }
 }
 
@@ -754,10 +756,12 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 			expect: map[string]any{
 				"local_retention_bytes": "1",
 				"retention_bytes":       "2",
+				"segment_bytes":         "10",
 			},
 			config: aiven.KafkaTopicConfigResponse{
 				LocalRetentionBytes: &aiven.KafkaTopicConfigResponseInt{Value: 1},
 				RetentionBytes:      &aiven.KafkaTopicConfigResponseInt{Value: 2},
+				SegmentBytes:        &aiven.KafkaTopicConfigResponseInt{Value: 10},
 			},
 		},
 	}
