@@ -1,8 +1,13 @@
 package clickhouse
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"hash/fnv"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -39,6 +44,39 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		Type:        schema.TypeSet,
 		Optional:    true,
 		ForceNew:    true,
+		Set: func(v any) int {
+			m, ok := v.(map[string]any)
+			if !ok {
+				return 0 // this should not happen
+			}
+
+			var buf bytes.Buffer
+
+			// get keys from the map and sort them to ensure a canonical processing order
+			keys := make([]string, 0, len(m))
+			for k := range m {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				value := m[k]
+
+				if k == "privilege" {
+					privilegeValue := value.(string)
+					// canonicalize to UpperCase for hashing consistency
+					buf.WriteString(fmt.Sprintf("privilege:%s;", strings.ToUpper(privilegeValue)))
+					continue
+				}
+
+				buf.WriteString(fmt.Sprintf("%s:%v;", k, value))
+			}
+
+			h := fnv.New32a()
+			_, _ = h.Write(buf.Bytes())
+
+			return int(h.Sum32())
+		},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"privilege": {
