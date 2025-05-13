@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
   Note:
-  Users cannot have the same name as roles.To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use table="*".Changes first revoke all grants and then reissue the remaining grants for convergence.
+  Users cannot have the same name as roles.Global privileges cannot be granted on the database level. To grant global privileges, use database="*".To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use table="*".Changes first revoke all grants and then reissue the remaining grants for convergence.
 ---
 
 # aiven_clickhouse_grant (Resource)
@@ -14,6 +14,7 @@ Creates and manages ClickHouse grants to give users and roles privileges to a Cl
 
 **Note:**
 * Users cannot have the same name as roles.
+* Global privileges cannot be granted on the database level. To grant global privileges, use `database="*"`.
 * To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use `table="*"`.
 * Changes first revoke all grants and then reissue the remaining grants for convergence.
 
@@ -41,6 +42,17 @@ resource "aiven_clickhouse_grant" "role_privileges" {
   privilege_grant {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.example_db.name
+  }
+
+  # Global privileges
+    privilege_grant {
+    privilege = "CREATE TEMPORARY TABLE"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "SYSTEM DROP CACHE"
+    database  = "*"
   }
 }
 

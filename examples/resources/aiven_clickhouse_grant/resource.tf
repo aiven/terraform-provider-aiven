@@ -20,6 +20,17 @@ resource "aiven_clickhouse_grant" "role_privileges" {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.example_db.name
   }
+
+  # Global privileges
+    privilege_grant {
+    privilege = "CREATE TEMPORARY TABLE"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "SYSTEM DROP CACHE"
+    database  = "*"
+  }
 }
 
 # Grant the role to the user.
