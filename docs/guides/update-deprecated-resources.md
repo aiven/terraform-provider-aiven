@@ -84,6 +84,10 @@ To replace resources that are deprecated:
 The `aiven_project_user` and `aiven_organization_group_project` resources have been replaced by
 [the `aiven_organization_permission` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
 
+~> **Important**
+Do not use the `aiven_project_user` or `aiven_organization_group_project` resource with `aiven_organization_permission`.
+All of these resources manage organization-level permissions and using them together can cause conflicts and unexpected behavior.
+
 This example shows you how to migrate to the new permission resource. The following file has a user assigned to a project with the
 read only role and a group assigned to the same project with the operator role.
 
@@ -155,10 +159,6 @@ resource "aiven_organization_group_project" "example" {
         }
       }
       ```
-
-      ~> **Important**
-      Do not use the `aiven_project_user` or `aiven_organization_group_project` resource with `aiven_organization_permission`.
-      All of these resources manage organization-level permissions and using them together can cause conflicts and unexpected behavior.
 
 2. Remove the deprecated resources from Terraform's control by running:
 
