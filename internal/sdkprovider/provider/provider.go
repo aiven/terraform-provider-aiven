@@ -12,7 +12,6 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/alloydbomni"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
@@ -408,7 +407,7 @@ func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
 		}
 
 		if isBeta {
-			v.Description = userconfig.Desc(v.Description).AvailabilityType(userconfig.Beta).Build()
+			v.Description = "BETA" //TODO: add a beta callout
 		} else {
 			delete(m, k)
 		}

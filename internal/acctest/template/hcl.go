@@ -7,23 +7,21 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 )
 
-// normalizeHCL uses the official HCL library to parse and format HCL with consistent ordering
+// normalizeHCL uses the official HCL library to parse and format HCL with consistent formatting
 func normalizeHCL(input string) string {
 	f, diags := hclwrite.ParseConfig([]byte(input), "", hcl.Pos{Line: 1, Column: 1})
 	if diags.HasErrors() {
-		return input
+		return input // Return original if there are parsing errors
 	}
 
-	// Start with a new file
+	// Create a new file with consistent formatting
 	newFile := hclwrite.NewEmptyFile()
-
-	// Sort and rewrite the body
 	sortAndRewriteBody(f.Body(), newFile.Body())
 
 	return string(newFile.Bytes())
 }
 
-// sortAndRewriteBody sorts and copies all attributes and blocks from src to dst
+// sortAndRewriteBody sorts and copies all attributes and blocks from src to dst with proper indentation
 func sortAndRewriteBody(src, dst *hclwrite.Body) {
 	// Get all attributes and sort them
 	attrs := src.Attributes()
@@ -55,7 +53,7 @@ func sortAndRewriteBody(src, dst *hclwrite.Body) {
 		return len(iLabels) < len(jLabels)
 	})
 
-	// Write sorted blocks
+	// Write sorted blocks with proper indentation
 	for _, block := range blocks {
 		newBlock := dst.AppendNewBlock(block.Type(), block.Labels())
 		sortAndRewriteBody(block.Body(), newBlock.Body())
