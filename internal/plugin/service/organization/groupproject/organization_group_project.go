@@ -250,7 +250,7 @@ func (r *organizationGroupProjectResource) Delete(
 		ctx,
 		plan.Project.ValueString(),
 		plan.GroupID.ValueString(),
-	); err != nil {
+	); err != nil && !aiven.IsNotFound(err) {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
