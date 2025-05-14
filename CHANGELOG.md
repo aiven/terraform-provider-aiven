@@ -19,6 +19,7 @@ nav_order: 1
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_searchable_snapshots`: Enable searchable snapshots.
 - Remove `aiven_kafka_topic.config.unclean_leader_election_enable` deprecation
 - Fix the provider crash when `*_user_config` dynamic block values are known during the apply phase.
+- Ignores case sensitive privileges in `aiven_clickhouse_grant.privilege_grant.privilege` resource.
 
 ## [4.39.0] - 2025-04-24
 
