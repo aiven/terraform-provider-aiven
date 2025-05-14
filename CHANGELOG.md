@@ -20,6 +20,7 @@ nav_order: 1
 - Remove `aiven_kafka_topic.config.unclean_leader_election_enable` deprecation
 - Fix the provider crash when `*_user_config` dynamic block values are known during the apply phase.
 - Ignores case sensitive privileges in `aiven_clickhouse_grant.privilege_grant.privilege` resource.
+- Ignore 404 error when deleting `aiven_organization_group_project` resource.
 
 ## [4.39.0] - 2025-04-24
 
