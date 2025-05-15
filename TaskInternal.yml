@@ -109,7 +109,7 @@ tasks:
       PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - rm -f docs/.DS_Store
-      - "{{.TFPLUGINDOCS}} generate"
+      - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
       - rm -f docs/data-sources/influxdb*.md
       - rm -f docs/resources/influxdb*.md
 
