@@ -92,6 +92,7 @@ tasks:
   fmt:
     desc: Run all formatters (Terraform tests, Go imports)
     cmds:
+      - task: internal:fmt-go
       - task: internal:fmt-test
       - task: internal:fmt-imports
 

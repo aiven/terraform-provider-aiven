@@ -301,7 +301,7 @@ func TestPostgresResource(t *testing.T) {
 func TestCollectionBlocks(t *testing.T) {
 	t.Parallel()
 
-	var builder = InitializeTemplateStore(t).NewBuilder()
+	builder := InitializeTemplateStore(t).NewBuilder()
 
 	res, err := builder.AddResource("aiven_organization_project", map[string]any{
 		"resource_name":    "foo",

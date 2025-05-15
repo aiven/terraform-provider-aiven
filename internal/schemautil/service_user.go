@@ -97,7 +97,6 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		retry.Delay(time.Second),
 		retry.LastErrorOnly(true), // retry returns a list of errors by default
 	)
-
 	if err != nil {
 		return diag.FromErr(ResourceReadHandleNotFound(err, d))
 	}

@@ -10,18 +10,16 @@ func escape(identifier string) string {
 }
 
 func escapeBytes(identifier []byte) string {
-	var (
-		escapeMap = map[byte]string{
-			0:    "\\0",
-			'\b': "\\b",
-			'\f': "\\f",
-			'\r': "\\r",
-			'\n': "\\n",
-			'\t': "\\t",
-			'\\': "\\\\",
-			'`':  "\\`",
-		}
-	)
+	escapeMap := map[byte]string{
+		0:    "\\0",
+		'\b': "\\b",
+		'\f': "\\f",
+		'\r': "\\r",
+		'\n': "\\n",
+		'\t': "\\t",
+		'\\': "\\\\",
+		'`':  "\\`",
+	}
 	buf := new(bytes.Buffer)
 	buf.WriteByte('`')
 

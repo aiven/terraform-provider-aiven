@@ -15,8 +15,7 @@ var (
 )
 
 // kafkaACLCache type
-type kafkaACLCache struct {
-}
+type kafkaACLCache struct{}
 
 // Read populates the cache if it doesn't exist, and reads the required acl. An aiven.Error with status
 // 404 is returned upon cache miss
@@ -44,7 +43,7 @@ func (a kafkaACLCache) Read(
 			}
 		}
 	} else {
-		//TODO: returning a 404 here provides no extra value, as the ACL is then treated as if it
+		// TODO: returning a 404 here provides no extra value, as the ACL is then treated as if it
 		// doesn't exist (which may not be the case here).
 		err = aiven.Error{
 			Status:  404,

@@ -82,13 +82,15 @@ func WithGenClientDiag(f func(context.Context, *schema.ResourceData, avngen.Clie
 	}
 }
 
-type ClientOpt func(o *clientOpts)
-type clientOpts struct {
-	token        string
-	tfVersion    string // User-Agent part: TF CLI version
-	buildVersion string // User-Agent part: Aiven Provider build version
-	userAgent    string
-}
+type (
+	ClientOpt  func(o *clientOpts)
+	clientOpts struct {
+		token        string
+		tfVersion    string // User-Agent part: TF CLI version
+		buildVersion string // User-Agent part: Aiven Provider build version
+		userAgent    string
+	}
+)
 
 func newClientOpts(opts ...ClientOpt) (*clientOpts, error) {
 	o := &clientOpts{

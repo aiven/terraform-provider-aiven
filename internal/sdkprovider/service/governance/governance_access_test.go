@@ -12,7 +12,6 @@ import (
 
 // TestGovernanceAccess tests the aiven_governance_access resource.
 func TestGovernanceAccess(t *testing.T) {
-
 	organizationName := acc.OrganizationName()
 	userGroupName := fmt.Sprintf("test-acc-governance-ug-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	projectName := acc.ProjectName()

@@ -117,7 +117,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, c
 }
 
 func resourceOrganizationUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	var invitationFound = true
+	invitationFound := true
 
 	organizationID, userEmail, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {

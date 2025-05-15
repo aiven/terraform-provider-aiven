@@ -15,11 +15,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-var (
-	quotaFieldsAliases = map[string]string{
-		"client_id": "client-id",
-	}
-)
+var quotaFieldsAliases = map[string]string{
+	"client_id": "client-id",
+}
 
 var aivenKafkaQuotaSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -126,9 +124,7 @@ func resourceKafkaQuotaCreate(ctx context.Context, d *schema.ResourceData, clien
 }
 
 func resourceKafkaQuotaUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	var (
-		req kafka.ServiceKafkaQuotaCreateIn
-	)
+	var req kafka.ServiceKafkaQuotaCreateIn
 
 	project, service, _, _, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {

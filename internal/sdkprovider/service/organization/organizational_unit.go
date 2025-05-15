@@ -143,7 +143,7 @@ func determineMixedOrganizationConstraintIDToStore(
 }
 
 func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	var name = d.Get("name").(string)
+	name := d.Get("name").(string)
 
 	resp, err := client.AccountUpdate(ctx, d.Id(), &account.AccountUpdateIn{
 		AccountName: &name,

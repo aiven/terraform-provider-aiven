@@ -103,7 +103,7 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 	commands := schemautil.FlattenToString(d.Get("valkey_acl_commands").([]interface{}))
 	keys := schemautil.FlattenToString(d.Get("valkey_acl_keys").([]interface{}))
 	channels := schemautil.FlattenToString(d.Get("valkey_acl_channels").([]interface{}))
-	var req = service.ServiceUserCreateIn{
+	req := service.ServiceUserCreateIn{
 		Username: username,
 		AccessControl: &service.AccessControlIn{
 			ValkeyAclCategories: &categories,
@@ -124,8 +124,10 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		var req = service.ServiceUserCredentialsModifyIn{NewPassword: schemautil.OptionalStringPointer(d, "password"),
-			Operation: service.ServiceUserCredentialsModifyOperationTypeResetCredentials}
+		req := service.ServiceUserCredentialsModifyIn{
+			NewPassword: schemautil.OptionalStringPointer(d, "password"),
+			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+		}
 		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &req)
 		if err != nil {
 			return err

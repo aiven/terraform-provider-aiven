@@ -20,9 +20,7 @@ func (c *mockAvngenClient) OrganizationGet(ctx context.Context, id string) (*org
 func TestDetermineMixedOrganizationConstraintIDToStore(t *testing.T) {
 	t.Parallel()
 
-	var (
-		ctx = context.Background()
-	)
+	ctx := context.Background()
 
 	type testCase struct {
 		name    string
@@ -82,5 +80,4 @@ func TestDetermineMixedOrganizationConstraintIDToStore(t *testing.T) {
 			assert.Equalf(t, tt.want, got, "expected %s, got %s", tt.want, got)
 		})
 	}
-
 }

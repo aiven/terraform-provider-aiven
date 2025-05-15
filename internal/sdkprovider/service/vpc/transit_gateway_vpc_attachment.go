@@ -105,7 +105,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	// prepare a list of new transit gateway vpc attachment that needs to be added
 	add := make([]aiven.TransitGatewayVPCAttachment, 0)
 	for _, fresh := range cidrs {
-		var isNew = true
+		isNew := true
 
 		for _, old := range peeringConnection.UserPeerNetworkCIDRs {
 			if fresh == old {
@@ -131,7 +131,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	// prepare a list of old cirds for deletion
 	deleteCIDRs := make([]string, 0)
 	for _, old := range peeringConnection.UserPeerNetworkCIDRs {
-		var forDeletion = true
+		forDeletion := true
 
 		for _, fresh := range cidrs {
 			if old == fresh {

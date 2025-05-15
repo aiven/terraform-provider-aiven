@@ -98,7 +98,6 @@ func SweepServices(ctx context.Context, t string) error {
 				TerminationProtection: false,
 				UserConfig:            s.UserConfig,
 			})
-
 			if err != nil {
 				return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %w", s.Name, err)
 			}

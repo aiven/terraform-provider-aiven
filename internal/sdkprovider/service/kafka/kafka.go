@@ -151,7 +151,7 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
 		}
 
-		var defaultSchemaACLLs = []string{
+		defaultSchemaACLLs := []string{
 			defaultSchemaRegistryACLConfig,
 			defaultSchemaRegistryACLSubject,
 		}

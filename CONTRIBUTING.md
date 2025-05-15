@@ -11,7 +11,8 @@ Contributions are very welcome on terraform-provider-aiven. When contributing pl
 ### Local environment
 
 [Go](https://go.dev/doc/install) >=1.22 \
-[Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=1.2
+[Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=1.2 \
+[Task](https://taskfile.dev/#/installation) >=3.20.0
 
 #### Alternative command to build/test inside a container
 
@@ -21,14 +22,14 @@ In case you would like to avoid Go dependency on your local machine or CI, you c
 podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven golang:latest <command>
 ```
 
-> _**N.B.** You need to be in the root of terraform-provider-aiven repository and replace the _&lt;command&gt;_ placeholder with your desired make target, e.g. `make docs`._
+> _**N.B.** You need to be in the root of terraform-provider-aiven repository and replace the _&lt;command&gt;_ placeholder with your desired task command, e.g. `task ci:docs`._
 
 ### Tests
 
 Run the tests with the command below:
 
 ```bash
-make test
+task test
 ```
 
 Acceptance tests interact with the real Aiven API and require an API token and existing project and organization on Aiven to create resources in. A non-default API URL can be used by setting the `AIVEN_WEB_URL` environment variable to e.g. `https://your.custom.api:443`.
@@ -42,10 +43,10 @@ export AIVEN_ORGANIZATION_NAME="your-existing-org-name"
 export AIVEN_ACCOUNT_NAME="$AIVEN_ORGANIZATION_NAME"
 
 # run all acceptance tests
-make test-acc
+task test-acc
 
 # or run a specific acceptance test
-make test-acc TESTARGS="-run=TestAccAiven_kafka"
+task test-acc -- -run=TestAccAivenOrganizationUserDataSource_using_email
 ```
 
 > _**N.B.** Acceptance tests create real resources, and often cost money to run._
@@ -60,7 +61,7 @@ Run example tests with the following commands:
 export AIVEN_TOKEN="your-token"
 export AIVEN_PROJECT_NAME="your-project-name"
 
-make test-examples
+task test-examples
 ```
 
 

@@ -174,5 +174,4 @@ func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	return nil
-
 }

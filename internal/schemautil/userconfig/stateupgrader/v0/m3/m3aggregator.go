@@ -27,6 +27,7 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 
 	return schemaM3
 }
+
 func ResourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The M3 Aggregator resource allows the creation and management of Aiven M3 Aggregator services.",

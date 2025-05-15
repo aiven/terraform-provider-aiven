@@ -30,7 +30,8 @@ func getDiagnosticsFromState(pc peeringConnectionState) diag.Diagnostics {
 				"peer successfully in the cloud, but the connection is not active until the user "+
 				"completes the setup in their cloud account. The steps needed in the user cloud "+
 				"account depend on the used cloud provider. Find more in the state info: %s",
-				stateInfoToString(pc.GetStateInfo()))}}
+				stateInfoToString(pc.GetStateInfo())),
+		}}
 	case organizationvpc.VpcPeeringConnectionStateTypeDeleted, organizationvpc.VpcPeeringConnectionStateTypeDeleting:
 		return diag.Errorf("A user has deleted the peering connection through the Aiven " +
 			"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +

@@ -35,7 +35,6 @@ func init() {
 			"aiven_redis",
 		},
 	})
-
 }
 
 func sweepStaticIPs(ctx context.Context) func(region string) error {

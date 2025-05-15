@@ -266,7 +266,6 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 			Retryable: aiven.IsNotFound(err), // retries 404 only
 		}
 	})
-
 	if err != nil {
 		log.Printf("[DEBUG] Kafka Connectors create err %s", err.Error())
 		return diag.FromErr(fmt.Errorf("kafka connector create error: %w", err))

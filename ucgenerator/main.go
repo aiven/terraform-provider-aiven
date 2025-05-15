@@ -126,7 +126,7 @@ func generate(kind string, data []byte, exclude []string) error {
 		}
 
 		// Saves file
-		err = os.WriteFile(filepath.Join(dirPath, key+".go"), b, 0644)
+		err = os.WriteFile(filepath.Join(dirPath, key+".go"), b, 0o644)
 		if err != nil {
 			return err
 		}

@@ -197,6 +197,7 @@ func (s *stateCompose) objectProperties() map[string]*stateCompose {
 	}
 	return props
 }
+
 func (s *stateCompose) valueType() schema.ValueType {
 	return s.schema.Type
 }

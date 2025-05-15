@@ -102,7 +102,7 @@ func randPrefix() func(string) string {
 
 const exampleTestsPrefix = "test-examples-"
 
-// examplesRandPrefix same as randPrefix but adds examples test prefix so "make sweep" command can delete them
+// examplesRandPrefix same as randPrefix but adds examples test prefix so "task sweep" command can delete them
 func examplesRandPrefix() func(string) string {
 	format := randPrefix()
 	return func(s string) string {

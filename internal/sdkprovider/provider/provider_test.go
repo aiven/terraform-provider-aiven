@@ -19,6 +19,6 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProviderImpl(t *testing.T) {
-	var _, err = Provider(version)
+	_, err := Provider(version)
 	assert.NoError(t, err)
 }

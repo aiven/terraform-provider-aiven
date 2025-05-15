@@ -80,7 +80,6 @@ func sweepAccountAuthentications(ctx context.Context) func(region string) error 
 		}
 
 		accounts, err := listTestAccounts(ctx)
-
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
