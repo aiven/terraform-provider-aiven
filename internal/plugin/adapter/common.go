@@ -9,6 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
+// Model implements resource or datasource model with a shared fields model.
+type Model[T any] interface {
+	// SharedModel returns shared fields model between resource and datasource.
+	SharedModel() *T
+}
+
+// newModel returns a new instance of the Model.
+type newModel[T any] func() Model[T]
+
 // DatView datasource view interface
 type DatView[T any] interface {
 	// Configure sets the client for the view and potentially other dependencies, like logging.
@@ -38,10 +47,11 @@ type ResViewValidators[T any] interface {
 	ResValidators(ctx context.Context) []resource.ConfigValidator
 }
 
-// DataModel returns core the (API) model common for resource and datasource models
-type DataModel[T any] interface {
-	// DataModel returns embedded dataModel instance
-	DataModel() *T
+// View base view that contains the client and potentially other dependencies
+type View struct {
+	Client avngen.Client
 }
 
-type dataModelFactory[T any] func() DataModel[T]
+func (v *View) Configure(client avngen.Client) {
+	v.Client = client
+}

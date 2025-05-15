@@ -9,19 +9,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// datasourceDataModel with specific datasource timeouts
-type datasourceDataModel struct {
-	dataModel
+func newDatasourceModel() adapter.Model[tfModel] {
+	return new(datasourceModel)
+}
+
+// datasourceModel with specific datasource timeouts
+type datasourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *datasourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *datasourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func datasourceSchema(ctx context.Context) schema.Schema {
+func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

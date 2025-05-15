@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -18,32 +17,15 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-const resourceName = "aiven_organization"
-
-func NewOrganizationResource() resource.Resource {
-	return adapter.NewResource(
-		resourceName,
-		new(view),
-		resourceSchema,
-		func() adapter.DataModel[dataModel] {
-			return new(resourceDataModel)
-		},
-		idFields(),
-	)
+func NewResource() resource.Resource {
+	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
 }
 
-func NewOrganizationDatasource() datasource.DataSource {
-	return adapter.NewDatasource(
-		resourceName,
-		new(view),
-		getPatchedDataSchema,
-		func() adapter.DataModel[dataModel] {
-			return new(datasourceDataModel)
-		},
-	)
+func NewDatasource() datasource.DataSource {
+	return adapter.NewDatasource(aivenName, new(view), datasourceSchemaPatched, newDatasourceModel)
 }
 
-func getPatchedDataSchema(ctx context.Context) dataschema.Schema {
+func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
 	patch := dataschema.Schema{
 		Attributes: map[string]dataschema.Attribute{
 			"id": dataschema.StringAttribute{
@@ -56,22 +38,16 @@ func getPatchedDataSchema(ctx context.Context) dataschema.Schema {
 			},
 		},
 	}
-	result := datasourceSchema(ctx)
+	result := newDatasourceSchema(ctx)
 	for k, v := range patch.Attributes {
 		result.Attributes[k] = v
 	}
 	return result
 }
 
-var _ adapter.DatViewValidators[dataModel] = (*view)(nil)
+var _ adapter.DatViewValidators[tfModel] = (*view)(nil)
 
-type view struct {
-	client avngen.Client
-}
-
-func (vw *view) Configure(client avngen.Client) {
-	vw.client = client
-}
+type view struct{ adapter.View }
 
 func (vw *view) DatValidators(_ context.Context) []datasource.ConfigValidator {
 	validatable := path.Expressions{
@@ -85,14 +61,14 @@ func (vw *view) DatValidators(_ context.Context) []datasource.ConfigValidator {
 	}
 }
 
-func (vw *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
+func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 	var req account.AccountCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.client.AccountCreate(ctx, &req)
+	rsp, err := vw.Client.AccountCreate(ctx, &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -103,7 +79,7 @@ func (vw *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 	return vw.Read(ctx, plan)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnostics {
+func (vw *view) Update(ctx context.Context, plan, state *tfModel) diag.Diagnostics {
 	var req account.AccountUpdateIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
@@ -116,7 +92,7 @@ func (vw *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnos
 		return diags
 	}
 
-	rsp, err := vw.client.AccountUpdate(ctx, accountID, &req)
+	rsp, err := vw.Client.AccountUpdate(ctx, accountID, &req)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorUpdatingResource,
@@ -130,7 +106,7 @@ func (vw *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnos
 	return vw.Read(ctx, plan)
 }
 
-func (vw *view) Delete(ctx context.Context, state *dataModel) diag.Diagnostics {
+func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	accountID, err := vw.getAccountID(ctx, state)
 	if err != nil {
@@ -138,7 +114,7 @@ func (vw *view) Delete(ctx context.Context, state *dataModel) diag.Diagnostics {
 		return diags
 	}
 
-	err = vw.client.AccountDelete(ctx, accountID)
+	err = vw.Client.AccountDelete(ctx, accountID)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorDeletingResource,
@@ -150,7 +126,7 @@ func (vw *view) Delete(ctx context.Context, state *dataModel) diag.Diagnostics {
 	return nil
 }
 
-func (vw *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
+func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	accountID, err := vw.getAccountID(ctx, state)
 	if err != nil {
@@ -158,7 +134,7 @@ func (vw *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
 		return diags
 	}
 
-	rsp, err := vw.client.AccountGet(ctx, accountID)
+	rsp, err := vw.Client.AccountGet(ctx, accountID)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorReadingResource,
@@ -171,12 +147,12 @@ func (vw *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
 }
 
 // getAccountID is a helper function that returns the account ID to use for API calls.
-func (vw *view) getAccountID(ctx context.Context, state *dataModel) (string, error) {
+func (vw *view) getAccountID(ctx context.Context, state *tfModel) (string, error) {
 	id := state.ID.ValueString()
 	switch {
 	case strings.HasPrefix(id, "org"):
 		// This is an organization ID (org123456) format
-		org, err := vw.client.OrganizationGet(ctx, id)
+		org, err := vw.Client.OrganizationGet(ctx, id)
 		if err != nil {
 			return "", fmt.Errorf("faild to resolve organization id %q", id)
 		}
@@ -191,7 +167,7 @@ func (vw *view) getAccountID(ctx context.Context, state *dataModel) (string, err
 		return "", fmt.Errorf("no Organization ID or name provided")
 	}
 
-	list, err := vw.client.AccountList(ctx)
+	list, err := vw.Client.AccountList(ctx)
 	if err != nil {
 		return "", err
 	}

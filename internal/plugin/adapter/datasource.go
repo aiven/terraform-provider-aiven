@@ -15,35 +15,35 @@ type MightyDatasource interface {
 	datasource.DataSourceWithConfigValidators
 }
 
-type datasourceSchema func(context.Context) schema.Schema
+type newDatasourceSchema func(context.Context) schema.Schema
 
 func NewDatasource[T any](
 	name string,
 	view DatView[T],
-	newSchema datasourceSchema,
-	newDataModel dataModelFactory[T],
+	newSchema newDatasourceSchema,
+	newModel newModel[T],
 ) MightyDatasource {
 	return &datasourceAdapter[T]{
-		name:         name,
-		view:         view,
-		newSchema:    newSchema,
-		newDataModel: newDataModel,
+		name:      name,
+		view:      view,
+		newSchema: newSchema,
+		newModel:  newModel,
 	}
 }
 
 type datasourceAdapter[T any] struct {
-	// name is the name of the resource or datasource,
+	// name is the name of datasource,
 	// for instance, "aiven_organization_address"
 	name string
 
 	// view implements Read function
 	view DatView[T]
 
-	// newSchema returns a new instance of the generated schema.
-	newSchema datasourceSchema
+	// newSchema returns a new instance of the generated datasource Schema.
+	newSchema newDatasourceSchema
 
-	// newDataModel returns a new instance of the generated dataModel.
-	newDataModel dataModelFactory[T]
+	// newModel returns a new instance of the generated datasource newModel.
+	newModel newModel[T]
 }
 
 func (a *datasourceAdapter[T]) Configure(
@@ -52,7 +52,7 @@ func (a *datasourceAdapter[T]) Configure(
 	rsp *datasource.ConfigureResponse,
 ) {
 	if req.ProviderData == nil {
-		// TF calls Configure many times, it might not contain the provider data yet.
+		// DF calls Configure many times, it might not contain the provider data yet.
 		return
 	}
 
@@ -87,7 +87,7 @@ func (a *datasourceAdapter[T]) Read(
 	rsp *datasource.ReadResponse,
 ) {
 	var (
-		state = a.newDataModel()
+		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.Config.Get(ctx, state)...)
@@ -95,7 +95,7 @@ func (a *datasourceAdapter[T]) Read(
 		return
 	}
 
-	diags.Append(a.view.Read(ctx, state.DataModel())...)
+	diags.Append(a.view.Read(ctx, state.SharedModel())...)
 	if diags.HasError() {
 		return
 	}

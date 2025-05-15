@@ -11,25 +11,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// datasourceDataModel with specific datasource timeouts
-type datasourceDataModel struct {
-	dataModel
+func newDatasourceModel() adapter.Model[tfModel] {
+	return new(datasourceModel)
+}
+
+// datasourceModel with specific datasource timeouts
+type datasourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *datasourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *datasourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func datasourceSchema(ctx context.Context) schema.Schema {
+func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"billing_address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing address ID.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"billing_contact_emails": schema.SetAttribute{
 				Computed:            true,
@@ -39,7 +44,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_currency": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-				Validators:          []validator.String{stringvalidator.OneOf("AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "SGD", "USD")},
 			},
 			"billing_emails": schema.SetAttribute{
 				Computed:            true,
@@ -53,12 +57,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing Group Name.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Extra billing text.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(254)},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -76,7 +78,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"shipping_address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Shipping address ID.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"vat_id": schema.StringAttribute{
 				Computed:            true,

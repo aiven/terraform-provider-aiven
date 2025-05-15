@@ -16,24 +16,20 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func idFields() []string {
-	return []string{"organization_id"}
-}
+const aivenName = "aiven_organization_billing_group_list"
 
-// dataModel Lists billing groups for an organization.
-type dataModel struct {
+type tfModel struct {
 	ID             types.String `tfsdk:"id"`
 	BillingGroups  types.Set    `tfsdk:"billing_groups"`
 	OrganizationID types.String `tfsdk:"organization_id"`
 }
 
-func (data *dataModel) SetID(vOrganizationID string) {
-	data.OrganizationID = types.StringValue(vOrganizationID)
-	data.ID = types.StringValue(filepath.Join(vOrganizationID))
+func (tf *tfModel) SetID(vOrganizationID string) {
+	tf.OrganizationID = types.StringValue(vOrganizationID)
+	tf.ID = types.StringValue(filepath.Join(vOrganizationID))
 }
 
-// dataBillingGroups
-type dataBillingGroups struct {
+type tfModelBillingGroups struct {
 	BillingAddressID     types.String `tfsdk:"billing_address_id"`
 	BillingContactEmails types.Set    `tfsdk:"billing_contact_emails"`
 	BillingCurrency      types.String `tfsdk:"billing_currency"`
@@ -47,12 +43,12 @@ type dataBillingGroups struct {
 	VatID                types.String `tfsdk:"vat_id"`
 }
 
-type dtoModel struct {
-	BillingGroups  *[]*dtoBillingGroups `json:"billing_groups,omitempty"`
-	OrganizationID *string              `json:"organization_id,omitempty"`
+type apiModel struct {
+	BillingGroups  *[]*apiModelBillingGroups `json:"billing_groups,omitempty"`
+	OrganizationID *string                   `json:"organization_id,omitempty"`
 }
 
-type dtoBillingGroups struct {
+type apiModelBillingGroups struct {
 	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
 	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
 	BillingCurrency      *string   `json:"billing_currency,omitempty"`
@@ -67,23 +63,23 @@ type dtoBillingGroups struct {
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
-	dto := new(dtoModel)
-	err := util.Unmarshal(rsp, dto, modifiers...)
+func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+	api := new(apiModel)
+	err := util.Unmarshal(rsp, api, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.BillingGroups != nil {
-		vBillingGroups, diags := util.FlattenSetNested(ctx, flattenBillingGroups, *dto.BillingGroups, attrsBillingGroups())
+	if api.BillingGroups != nil {
+		vBillingGroups, diags := util.FlattenSetNested(ctx, flattenBillingGroups, *api.BillingGroups, attrsBillingGroups())
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingGroups = vBillingGroups
 	}
-	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -100,48 +96,48 @@ func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers
 	return nil
 }
 
-func flattenBillingGroups(ctx context.Context, dto *dtoBillingGroups) (*dataBillingGroups, diag.Diagnostics) {
-	state := new(dataBillingGroups)
-	if dto.BillingContactEmails != nil {
-		vBillingContactEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingContactEmails)
+func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfModelBillingGroups, diag.Diagnostics) {
+	state := new(tfModelBillingGroups)
+	if api.BillingContactEmails != nil {
+		vBillingContactEmails, diags := types.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.BillingContactEmails = vBillingContactEmails
 	}
-	if dto.BillingEmails != nil {
-		vBillingEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.BillingEmails)
+	if api.BillingEmails != nil {
+		vBillingEmails, diags := types.SetValueFrom(ctx, types.StringType, api.BillingEmails)
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.BillingEmails = vBillingEmails
 	}
-	if dto.BillingAddressID != nil {
-		state.BillingAddressID = types.StringPointerValue(dto.BillingAddressID)
+	if api.BillingAddressID != nil {
+		state.BillingAddressID = types.StringPointerValue(api.BillingAddressID)
 	}
-	if dto.BillingCurrency != nil {
-		state.BillingCurrency = types.StringPointerValue(dto.BillingCurrency)
+	if api.BillingCurrency != nil {
+		state.BillingCurrency = types.StringPointerValue(api.BillingCurrency)
 	}
-	if dto.BillingGroupID != nil {
-		state.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
+	if api.BillingGroupID != nil {
+		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
 	}
-	if dto.BillingGroupName != nil {
-		state.BillingGroupName = types.StringPointerValue(dto.BillingGroupName)
+	if api.BillingGroupName != nil {
+		state.BillingGroupName = types.StringPointerValue(api.BillingGroupName)
 	}
-	if dto.CustomInvoiceText != nil {
-		state.CustomInvoiceText = types.StringPointerValue(dto.CustomInvoiceText)
+	if api.CustomInvoiceText != nil {
+		state.CustomInvoiceText = types.StringPointerValue(api.CustomInvoiceText)
 	}
-	if dto.OrganizationID != nil {
-		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
 	}
-	if dto.PaymentMethodID != nil {
-		state.PaymentMethodID = types.StringPointerValue(dto.PaymentMethodID)
+	if api.PaymentMethodID != nil {
+		state.PaymentMethodID = types.StringPointerValue(api.PaymentMethodID)
 	}
-	if dto.ShippingAddressID != nil {
-		state.ShippingAddressID = types.StringPointerValue(dto.ShippingAddressID)
+	if api.ShippingAddressID != nil {
+		state.ShippingAddressID = types.StringPointerValue(api.ShippingAddressID)
 	}
-	if dto.VatID != nil {
-		state.VatID = types.StringPointerValue(dto.VatID)
+	if api.VatID != nil {
+		state.VatID = types.StringPointerValue(api.VatID)
 	}
 	return state, nil
 }

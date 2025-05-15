@@ -156,17 +156,17 @@ func (p *AivenProvider) Configure(
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
-		organization.NewOrganizationResource,
-		usergroupmember.NewOrganizationUserGroupMembersResource,
-		groupproject.NewOrganizationGroupProjectResource,
+		organization.NewResource,
+		usergroupmember.NewResource,
+		groupproject.NewResource,
 	}
 
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
 		betaResources := []func() resource.Resource{
-			address.NewOrganizationAddressResource,
-			billinggroup.NewOrganizationBillingGroupResource,
-			project.NewOrganizationProjectResource,
+			address.NewResource,
+			billinggroup.NewResource,
+			project.NewResource,
 		}
 		resources = append(resources, betaResources...)
 	}
@@ -178,17 +178,17 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
-		organization.NewOrganizationDatasource,
+		organization.NewDatasource,
 	}
 
 	// Add to a list of data sources that are currently in beta.
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
-			externalidentity.NewExternalIdentityDataSource,
-			address.NewOrganizationAddressDatasource,
-			billinggroup.NewOrganizationBillingGroupDatasource,
-			billinggrouplist.NewOrganizationBillingGroupListDatasource,
-			project.NewOrganizationProjectDatasource,
+			externalidentity.NewDatasource,
+			address.NewDatasource,
+			billinggroup.NewDatasource,
+			billinggrouplist.NewDatasource,
+			project.NewDatasource,
 		}
 		dataSources = append(dataSources, betaDataSources...)
 	}

@@ -7,35 +7,40 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// datasourceDataModel with specific datasource timeouts
-type datasourceDataModel struct {
-	dataModel
+func newDatasourceModel() adapter.Model[tfModel] {
+	return new(datasourceModel)
+}
+
+// datasourceModel with specific datasource timeouts
+type datasourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *datasourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *datasourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func datasourceSchema(ctx context.Context) schema.Schema {
+func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address_id": schema.StringAttribute{
 				MarkdownDescription: "Address ID.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"address_lines": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
 				MarkdownDescription: "Address Lines.",
-				Validators:          []validator.Set{setvalidator.SizeBetween(1, 5)},
 			},
 			"city": schema.StringAttribute{
 				Computed:            true,
@@ -56,7 +61,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Name of a company.",
-				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization.",
@@ -66,7 +70,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"state": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "State.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"update_time": schema.StringAttribute{
 				Computed:            true,
@@ -75,7 +78,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"zip_code": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Zip Code.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(32)},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},

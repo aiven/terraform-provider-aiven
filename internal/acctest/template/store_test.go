@@ -198,7 +198,7 @@ func TestOrganizationResource(t *testing.T) {
 	ts := NewStore(t)
 	ts.registerFrameworkComponent(
 		"aiven_organization",
-		org.NewOrganizationResource(),
+		org.NewResource(),
 		ResourceKindResource,
 	)
 

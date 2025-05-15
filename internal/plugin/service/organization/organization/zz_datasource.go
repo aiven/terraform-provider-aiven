@@ -7,22 +7,26 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// datasourceDataModel with specific datasource timeouts
-type datasourceDataModel struct {
-	dataModel
+func newDatasourceModel() adapter.Model[tfModel] {
+	return new(datasourceModel)
+}
+
+// datasourceModel with specific datasource timeouts
+type datasourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *datasourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *datasourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func datasourceSchema(ctx context.Context) schema.Schema {
+func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"create_time": schema.StringAttribute{
@@ -36,7 +40,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Name of the organization.",
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,
