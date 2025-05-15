@@ -3,7 +3,6 @@ package address
 import (
 	"context"
 
-	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -13,47 +12,24 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-const resourceName = "aiven_organization_address"
-
-func NewOrganizationAddressResource() resource.Resource {
-	return adapter.NewResource(
-		resourceName,
-		new(view),
-		resourceSchema,
-		func() adapter.DataModel[dataModel] {
-			return new(resourceDataModel)
-		},
-		idFields(),
-	)
+func NewResource() resource.Resource {
+	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
 }
 
-func NewOrganizationAddressDatasource() datasource.DataSource {
-	return adapter.NewDatasource(
-		resourceName,
-		new(view),
-		datasourceSchema,
-		func() adapter.DataModel[dataModel] {
-			return new(datasourceDataModel)
-		},
-	)
+func NewDatasource() datasource.DataSource {
+	return adapter.NewDatasource(aivenName, new(view), newDatasourceSchema, newDatasourceModel)
 }
 
-type view struct {
-	client avngen.Client
-}
+type view struct{ adapter.View }
 
-func (c *view) Configure(client avngen.Client) {
-	c.client = client
-}
-
-func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
+func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 	var req organization.OrganizationAddressCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := c.client.OrganizationAddressCreate(ctx, plan.OrganizationID.ValueString(), &req)
+	rsp, err := vw.Client.OrganizationAddressCreate(ctx, plan.OrganizationID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -61,17 +37,17 @@ func (c *view) Create(ctx context.Context, plan *dataModel) diag.Diagnostics {
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.AddressId)
-	return c.Read(ctx, plan)
+	return vw.Read(ctx, plan)
 }
 
-func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnostics {
+func (vw *view) Update(ctx context.Context, plan, state *tfModel) diag.Diagnostics {
 	var req organization.OrganizationAddressUpdateIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := c.client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
+	rsp, err := vw.Client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
@@ -79,12 +55,12 @@ func (c *view) Update(ctx context.Context, plan, state *dataModel) diag.Diagnost
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.AddressId)
-	return c.Read(ctx, plan)
+	return vw.Read(ctx, plan)
 }
 
-func (c *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
+func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := c.client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
+	rsp, err := vw.Client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags
@@ -93,9 +69,9 @@ func (c *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
 	return flattenData(ctx, state, rsp)
 }
 
-func (c *view) Delete(ctx context.Context, state *dataModel) diag.Diagnostics {
+func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	err := c.client.OrganizationAddressDelete(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
+	err := vw.Client.OrganizationAddressDelete(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags

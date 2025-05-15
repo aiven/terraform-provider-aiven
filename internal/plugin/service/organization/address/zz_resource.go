@@ -14,19 +14,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// resourceDataModel with specific resource timeouts
-type resourceDataModel struct {
-	dataModel
+func newResourceModel() adapter.Model[tfModel] {
+	return new(resourceModel)
+}
+
+// resourceModel with specific resource timeouts
+type resourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *resourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *resourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func resourceSchema(ctx context.Context) schema.Schema {
+func newResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address_id": schema.StringAttribute{

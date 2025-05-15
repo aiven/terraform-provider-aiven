@@ -25,8 +25,8 @@ var (
 	_ resource.ResourceWithImportState = &organizationUserGroupMembersResource{}
 )
 
-// NewOrganizationUserGroupMembersResource is a constructor for the organization user group member resource.
-func NewOrganizationUserGroupMembersResource() resource.Resource {
+// NewResource is a constructor for the organization user group member resource.
+func NewResource() resource.Resource {
 	return &organizationUserGroupMembersResource{}
 }
 

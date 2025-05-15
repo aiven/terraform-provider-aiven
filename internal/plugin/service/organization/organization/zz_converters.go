@@ -14,12 +14,13 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func idFields() []string {
+const aivenName = "aiven_organization"
+
+func composeID() []string {
 	return []string{"id"}
 }
 
-// dataModel Gets information about an organization.
-type dataModel struct {
+type tfModel struct {
 	ID         types.String `tfsdk:"id"`
 	CreateTime types.String `tfsdk:"create_time"`
 	Name       types.String `tfsdk:"name"`
@@ -27,11 +28,11 @@ type dataModel struct {
 	UpdateTime types.String `tfsdk:"update_time"`
 }
 
-func (data *dataModel) SetID(vID string) {
-	data.ID = types.StringValue(filepath.Join(vID))
+func (tf *tfModel) SetID(vID string) {
+	tf.ID = types.StringValue(filepath.Join(vID))
 }
 
-type dtoModel struct {
+type apiModel struct {
 	CreateTime *string `json:"create_time,omitempty"`
 	ID         *string `json:"organization_id,omitempty"`
 	Name       *string `json:"account_name,omitempty"`
@@ -40,13 +41,13 @@ type dtoModel struct {
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
-	dto := new(dtoModel)
+func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[apiModel]) diag.Diagnostics {
+	api := new(apiModel)
 	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
 		vName := plan.Name.ValueString()
-		dto.Name = &vName
+		api.Name = &vName
 	}
-	err := util.Unmarshal(dto, rqs, modifiers...)
+	err := util.Unmarshal(api, req, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal dtoModel to Request: %s", err.Error()))
@@ -56,28 +57,28 @@ func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modi
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
-	dto := new(dtoModel)
-	err := util.Unmarshal(rsp, dto, modifiers...)
+func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+	api := new(apiModel)
+	err := util.Unmarshal(rsp, api, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.CreateTime != nil && (*dto.CreateTime != "" || !state.CreateTime.IsNull()) {
-		state.CreateTime = types.StringPointerValue(dto.CreateTime)
+	if api.CreateTime != nil && (*api.CreateTime != "" || !state.CreateTime.IsNull()) {
+		state.CreateTime = types.StringPointerValue(api.CreateTime)
 	}
-	if dto.ID != nil && (*dto.ID != "" || !state.ID.IsNull()) {
-		state.ID = types.StringPointerValue(dto.ID)
+	if api.ID != nil && (*api.ID != "" || !state.ID.IsNull()) {
+		state.ID = types.StringPointerValue(api.ID)
 	}
-	if dto.Name != nil && (*dto.Name != "" || !state.Name.IsNull()) {
-		state.Name = types.StringPointerValue(dto.Name)
+	if api.Name != nil && (*api.Name != "" || !state.Name.IsNull()) {
+		state.Name = types.StringPointerValue(api.Name)
 	}
-	if dto.TenantID != nil && (*dto.TenantID != "" || !state.TenantID.IsNull()) {
-		state.TenantID = types.StringPointerValue(dto.TenantID)
+	if api.TenantID != nil && (*api.TenantID != "" || !state.TenantID.IsNull()) {
+		state.TenantID = types.StringPointerValue(api.TenantID)
 	}
-	if dto.UpdateTime != nil && (*dto.UpdateTime != "" || !state.UpdateTime.IsNull()) {
-		state.UpdateTime = types.StringPointerValue(dto.UpdateTime)
+	if api.UpdateTime != nil && (*api.UpdateTime != "" || !state.UpdateTime.IsNull()) {
+		state.UpdateTime = types.StringPointerValue(api.UpdateTime)
 	}
 	return nil
 }

@@ -18,30 +18,40 @@ type MightyResource interface {
 	resource.ResourceWithImportState
 }
 
-type resourceSchema func(context.Context) schema.Schema
+type newResourceSchema func(context.Context) schema.Schema
 
 func NewResource[T any](
 	name string,
 	view ResView[T],
-	newSchema resourceSchema,
-	newDataModel dataModelFactory[T],
-	idFields []string,
+	newSchema newResourceSchema,
+	newModel newModel[T],
+	composeID []string,
 ) MightyResource {
 	return &resourceAdapter[T]{
-		name:         name,
-		view:         view,
-		newSchema:    newSchema,
-		newDataModel: newDataModel,
-		idFields:     idFields,
+		name:      name,
+		view:      view,
+		newSchema: newSchema,
+		newModel:  newModel,
+		composeID: composeID,
 	}
 }
 
 type resourceAdapter[T any] struct {
-	name         string
-	view         ResView[T]
-	newSchema    resourceSchema
-	newDataModel dataModelFactory[T]
-	idFields     []string
+	// name is the name of resource,
+	// for instance, "aiven_organization_address"
+	name string
+
+	// view implements CRUD functions
+	view ResView[T]
+
+	// newSchema returns a new instance of the generated resource Schema.
+	newSchema newResourceSchema
+
+	// newModel returns a new instance of the generated datasource newModel.
+	newModel newModel[T]
+
+	// composeID is the list of identifiers used to compose the resource ID.
+	composeID []string
 }
 
 func (a *resourceAdapter[T]) Configure(
@@ -87,7 +97,7 @@ func (a *resourceAdapter[T]) Create(
 	rsp *resource.CreateResponse,
 ) {
 	var (
-		plan  = a.newDataModel()
+		plan  = a.newModel()
 		diags = &rsp.Diagnostics
 	)
 
@@ -96,7 +106,7 @@ func (a *resourceAdapter[T]) Create(
 		return
 	}
 
-	diags.Append(a.view.Create(ctx, plan.DataModel())...)
+	diags.Append(a.view.Create(ctx, plan.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -110,7 +120,7 @@ func (a *resourceAdapter[T]) Read(
 	rsp *resource.ReadResponse,
 ) {
 	var (
-		state = a.newDataModel()
+		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.State.Get(ctx, state)...)
@@ -118,7 +128,7 @@ func (a *resourceAdapter[T]) Read(
 		return
 	}
 
-	diags.Append(a.view.Read(ctx, state.DataModel())...)
+	diags.Append(a.view.Read(ctx, state.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -132,8 +142,8 @@ func (a *resourceAdapter[T]) Update(
 	rsp *resource.UpdateResponse,
 ) {
 	var (
-		plan  = a.newDataModel()
-		state = a.newDataModel()
+		plan  = a.newModel()
+		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
 
@@ -143,7 +153,7 @@ func (a *resourceAdapter[T]) Update(
 		return
 	}
 
-	diags.Append(a.view.Update(ctx, plan.DataModel(), state.DataModel())...)
+	diags.Append(a.view.Update(ctx, plan.SharedModel(), state.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -157,7 +167,7 @@ func (a *resourceAdapter[T]) Delete(
 	rsp *resource.DeleteResponse,
 ) {
 	var (
-		state = a.newDataModel()
+		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
 	diags.Append(req.State.Get(ctx, state)...)
@@ -165,7 +175,7 @@ func (a *resourceAdapter[T]) Delete(
 		return
 	}
 
-	diags.Append(a.view.Delete(ctx, state.DataModel())...)
+	diags.Append(a.view.Delete(ctx, state.SharedModel())...)
 }
 
 func (a *resourceAdapter[T]) ImportState(
@@ -173,9 +183,9 @@ func (a *resourceAdapter[T]) ImportState(
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
-	values, err := schemautil.SplitResourceID(req.ID, len(a.idFields))
+	values, err := schemautil.SplitResourceID(req.ID, len(a.composeID))
 	if err != nil {
-		importPath := schemautil.BuildResourceID(a.idFields...)
+		importPath := schemautil.BuildResourceID(a.composeID...)
 		rsp.Diagnostics.AddError(
 			"Unexpected Read Identifier",
 			fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
@@ -183,6 +193,14 @@ func (a *resourceAdapter[T]) ImportState(
 	}
 
 	for i, v := range values {
-		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.idFields[i]), v)...)
+		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.composeID[i]), v)...)
 	}
+}
+
+func (a *resourceAdapter[T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	v, ok := a.view.(ResViewValidators[T])
+	if !ok {
+		return nil
+	}
+	return v.ResValidators(ctx)
 }

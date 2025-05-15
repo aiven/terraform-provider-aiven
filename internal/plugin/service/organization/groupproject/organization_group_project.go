@@ -32,8 +32,8 @@ var (
 	deprecationMessage = "This resource is deprecated. Use aiven_organization_permission instead."
 )
 
-// NewOrganizationGroupProjectResource is a constructor for the organization group project relation resource.
-func NewOrganizationGroupProjectResource() resource.Resource {
+// NewResource is a constructor for the organization group project relation resource.
+func NewResource() resource.Resource {
 	return &organizationGroupProjectResource{}
 }
 

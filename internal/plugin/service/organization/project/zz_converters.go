@@ -16,12 +16,13 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func idFields() []string {
+const aivenName = "aiven_organization_project"
+
+func composeID() []string {
 	return []string{"organization_id", "project_id"}
 }
 
-// dataModel Gets information about an Aiven project.
-type dataModel struct {
+type tfModel struct {
 	ID              types.String `tfsdk:"id"`
 	BasePort        types.Int64  `tfsdk:"base_port"`
 	BillingGroupID  types.String `tfsdk:"billing_group_id"`
@@ -33,43 +34,42 @@ type dataModel struct {
 	TechnicalEmails types.Set    `tfsdk:"technical_emails"`
 }
 
-func (data *dataModel) SetID(vOrganizationID string, vProjectID string) {
-	data.OrganizationID = types.StringValue(vOrganizationID)
-	data.ProjectID = types.StringValue(vProjectID)
-	data.ID = types.StringValue(filepath.Join(vOrganizationID, vProjectID))
+func (tf *tfModel) SetID(vOrganizationID string, vProjectID string) {
+	tf.OrganizationID = types.StringValue(vOrganizationID)
+	tf.ProjectID = types.StringValue(vProjectID)
+	tf.ID = types.StringValue(filepath.Join(vOrganizationID, vProjectID))
 }
 
-// dataTag
-type dataTag struct {
+type tfModelTag struct {
 	Key   types.String `tfsdk:"key"`
 	Value types.String `tfsdk:"value"`
 }
 
-type dtoModel struct {
-	BasePort        *int64     `json:"base_port,omitempty"`
-	BillingGroupID  *string    `json:"billing_group_id,omitempty"`
-	CaCert          *string    `json:"certificate,omitempty"`
-	OrganizationID  *string    `json:"organization_id,omitempty"`
-	ParentID        *string    `json:"parent_id,omitempty"`
-	ProjectID       *string    `json:"project_id,omitempty"`
-	Tag             *[]*dtoTag `json:"tags,omitempty"`
-	TechnicalEmails *[]string  `json:"tech_emails,omitempty"`
+type apiModel struct {
+	BasePort        *int64          `json:"base_port,omitempty"`
+	BillingGroupID  *string         `json:"billing_group_id,omitempty"`
+	CaCert          *string         `json:"certificate,omitempty"`
+	OrganizationID  *string         `json:"organization_id,omitempty"`
+	ParentID        *string         `json:"parent_id,omitempty"`
+	ProjectID       *string         `json:"project_id,omitempty"`
+	Tag             *[]*apiModelTag `json:"tags,omitempty"`
+	TechnicalEmails *[]string       `json:"tech_emails,omitempty"`
 }
 
-type dtoTag struct {
+type apiModelTag struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
-	dto := new(dtoModel)
+func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[apiModel]) diag.Diagnostics {
+	api := new(apiModel)
 	if !plan.Tag.IsNull() || state != nil && !state.Tag.IsNull() {
 		vTag, diags := util.ExpandSetNested(ctx, expandTag, plan.Tag)
 		if diags.HasError() {
 			return diags
 		}
-		dto.Tag = &vTag
+		api.Tag = &vTag
 	}
 	if !plan.TechnicalEmails.IsNull() || state != nil && !state.TechnicalEmails.IsNull() {
 		vTechnicalEmails := make([]string, 0)
@@ -77,29 +77,29 @@ func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modi
 		if diags.HasError() {
 			return diags
 		}
-		dto.TechnicalEmails = &vTechnicalEmails
+		api.TechnicalEmails = &vTechnicalEmails
 	}
 	if !plan.BasePort.IsNull() && !plan.BasePort.IsUnknown() {
 		vBasePort := plan.BasePort.ValueInt64()
-		dto.BasePort = &vBasePort
+		api.BasePort = &vBasePort
 	}
 	if !plan.BillingGroupID.IsNull() || state != nil && !state.BillingGroupID.IsNull() {
 		vBillingGroupID := plan.BillingGroupID.ValueString()
-		dto.BillingGroupID = &vBillingGroupID
+		api.BillingGroupID = &vBillingGroupID
 	}
 	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
-		dto.OrganizationID = &vOrganizationID
+		api.OrganizationID = &vOrganizationID
 	}
 	if !plan.ParentID.IsNull() || state != nil && !state.ParentID.IsNull() {
 		vParentID := plan.ParentID.ValueString()
-		dto.ParentID = &vParentID
+		api.ParentID = &vParentID
 	}
 	if !plan.ProjectID.IsNull() || state != nil && !state.ProjectID.IsNull() {
 		vProjectID := plan.ProjectID.ValueString()
-		dto.ProjectID = &vProjectID
+		api.ProjectID = &vProjectID
 	}
-	err := util.Unmarshal(dto, rqs, modifiers...)
+	err := util.Unmarshal(api, req, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal dtoModel to Request: %s", err.Error()))
@@ -108,59 +108,59 @@ func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modi
 	return nil
 }
 
-func expandTag(ctx context.Context, plan *dataTag) (*dtoTag, diag.Diagnostics) {
-	dto := new(dtoTag)
+func expandTag(ctx context.Context, plan *tfModelTag) (*apiModelTag, diag.Diagnostics) {
+	api := new(apiModelTag)
 	if !plan.Key.IsNull() {
 		vKey := plan.Key.ValueString()
-		dto.Key = &vKey
+		api.Key = &vKey
 	}
 	if !plan.Value.IsNull() {
 		vValue := plan.Value.ValueString()
-		dto.Value = &vValue
+		api.Value = &vValue
 	}
-	return dto, nil
+	return api, nil
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
-	dto := new(dtoModel)
-	err := util.Unmarshal(rsp, dto, modifiers...)
+func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+	api := new(apiModel)
+	err := util.Unmarshal(rsp, api, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.Tag != nil {
-		vTag, diags := util.FlattenSetNested(ctx, flattenTag, *dto.Tag, attrsTag())
+	if api.Tag != nil {
+		vTag, diags := util.FlattenSetNested(ctx, flattenTag, *api.Tag, attrsTag())
 		if diags.HasError() {
 			return diags
 		}
 		state.Tag = vTag
 	}
-	if dto.TechnicalEmails != nil && (len(*dto.TechnicalEmails) > 0 || !state.TechnicalEmails.IsNull()) {
-		vTechnicalEmails, diags := types.SetValueFrom(ctx, types.StringType, dto.TechnicalEmails)
+	if api.TechnicalEmails != nil && (len(*api.TechnicalEmails) > 0 || !state.TechnicalEmails.IsNull()) {
+		vTechnicalEmails, diags := types.SetValueFrom(ctx, types.StringType, api.TechnicalEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.TechnicalEmails = vTechnicalEmails
 	}
-	if dto.BasePort != nil {
-		state.BasePort = types.Int64PointerValue(dto.BasePort)
+	if api.BasePort != nil {
+		state.BasePort = types.Int64PointerValue(api.BasePort)
 	}
-	if dto.BillingGroupID != nil && (*dto.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
-		state.BillingGroupID = types.StringPointerValue(dto.BillingGroupID)
+	if api.BillingGroupID != nil && (*api.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
+		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
 	}
-	if dto.CaCert != nil && (*dto.CaCert != "" || !state.CaCert.IsNull()) {
-		state.CaCert = types.StringPointerValue(dto.CaCert)
+	if api.CaCert != nil && (*api.CaCert != "" || !state.CaCert.IsNull()) {
+		state.CaCert = types.StringPointerValue(api.CaCert)
 	}
-	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
 	}
-	if dto.ParentID != nil && (*dto.ParentID != "" || !state.ParentID.IsNull()) {
-		state.ParentID = types.StringPointerValue(dto.ParentID)
+	if api.ParentID != nil && (*api.ParentID != "" || !state.ParentID.IsNull()) {
+		state.ParentID = types.StringPointerValue(api.ParentID)
 	}
-	if dto.ProjectID != nil && (*dto.ProjectID != "" || !state.ProjectID.IsNull()) {
-		state.ProjectID = types.StringPointerValue(dto.ProjectID)
+	if api.ProjectID != nil && (*api.ProjectID != "" || !state.ProjectID.IsNull()) {
+		state.ProjectID = types.StringPointerValue(api.ProjectID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -180,13 +180,13 @@ func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers
 	return nil
 }
 
-func flattenTag(ctx context.Context, dto *dtoTag) (*dataTag, diag.Diagnostics) {
-	state := new(dataTag)
-	if dto.Key != nil {
-		state.Key = types.StringPointerValue(dto.Key)
+func flattenTag(ctx context.Context, api *apiModelTag) (*tfModelTag, diag.Diagnostics) {
+	state := new(tfModelTag)
+	if api.Key != nil {
+		state.Key = types.StringPointerValue(api.Key)
 	}
-	if dto.Value != nil {
-		state.Value = types.StringPointerValue(dto.Value)
+	if api.Value != nil {
+		state.Value = types.StringPointerValue(api.Value)
 	}
 	return state, nil
 }

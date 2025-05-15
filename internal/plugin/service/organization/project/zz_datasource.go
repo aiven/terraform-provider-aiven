@@ -7,35 +7,38 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-// datasourceDataModel with specific datasource timeouts
-type datasourceDataModel struct {
-	dataModel
+func newDatasourceModel() adapter.Model[tfModel] {
+	return new(datasourceModel)
+}
+
+// datasourceModel with specific datasource timeouts
+type datasourceModel struct {
+	tfModel
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-func (obj *datasourceDataModel) DataModel() *dataModel {
-	return &obj.dataModel
+func (tf *datasourceModel) SharedModel() *tfModel {
+	return &tf.tfModel
 }
 
-func datasourceSchema(ctx context.Context) schema.Schema {
+func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"base_port": schema.Int64Attribute{
 				Computed:            true,
 				MarkdownDescription: "Valid port number (1-65535) to use as a base for service port allocation.",
-				Validators:          []validator.Int64{int64validator.Between(1, 65535)},
 			},
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing group ID to assign to the project. It's required when moving projects between organizations.",
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
 			"ca_cert": schema.StringAttribute{
 				Computed:            true,

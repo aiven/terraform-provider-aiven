@@ -15,12 +15,13 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func idFields() []string {
+const aivenName = "aiven_organization_address"
+
+func composeID() []string {
 	return []string{"organization_id", "address_id"}
 }
 
-// dataModel Gets information about an organization address.
-type dataModel struct {
+type tfModel struct {
 	ID             types.String `tfsdk:"id"`
 	AddressID      types.String `tfsdk:"address_id"`
 	AddressLines   types.Set    `tfsdk:"address_lines"`
@@ -34,13 +35,13 @@ type dataModel struct {
 	ZipCode        types.String `tfsdk:"zip_code"`
 }
 
-func (data *dataModel) SetID(vOrganizationID string, vAddressID string) {
-	data.OrganizationID = types.StringValue(vOrganizationID)
-	data.AddressID = types.StringValue(vAddressID)
-	data.ID = types.StringValue(filepath.Join(vOrganizationID, vAddressID))
+func (tf *tfModel) SetID(vOrganizationID string, vAddressID string) {
+	tf.OrganizationID = types.StringValue(vOrganizationID)
+	tf.AddressID = types.StringValue(vAddressID)
+	tf.ID = types.StringValue(filepath.Join(vOrganizationID, vAddressID))
 }
 
-type dtoModel struct {
+type apiModel struct {
 	AddressID      *string   `json:"address_id,omitempty"`
 	AddressLines   *[]string `json:"address_lines,omitempty"`
 	City           *string   `json:"city,omitempty"`
@@ -54,41 +55,41 @@ type dtoModel struct {
 }
 
 // expandData turns TF object into Request
-func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modifiers ...util.MapModifier[dtoModel]) diag.Diagnostics {
-	dto := new(dtoModel)
+func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[apiModel]) diag.Diagnostics {
+	api := new(apiModel)
 	if !plan.AddressLines.IsNull() || state != nil && !state.AddressLines.IsNull() {
 		vAddressLines := make([]string, 0)
 		diags := plan.AddressLines.ElementsAs(ctx, &vAddressLines, false)
 		if diags.HasError() {
 			return diags
 		}
-		dto.AddressLines = &vAddressLines
+		api.AddressLines = &vAddressLines
 	}
 	if !plan.City.IsNull() || state != nil && !state.City.IsNull() {
 		vCity := plan.City.ValueString()
-		dto.City = &vCity
+		api.City = &vCity
 	}
 	if !plan.CountryCode.IsNull() || state != nil && !state.CountryCode.IsNull() {
 		vCountryCode := plan.CountryCode.ValueString()
-		dto.CountryCode = &vCountryCode
+		api.CountryCode = &vCountryCode
 	}
 	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
 		vName := plan.Name.ValueString()
-		dto.Name = &vName
+		api.Name = &vName
 	}
 	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
-		dto.OrganizationID = &vOrganizationID
+		api.OrganizationID = &vOrganizationID
 	}
 	if !plan.State.IsNull() || state != nil && !state.State.IsNull() {
 		vState := plan.State.ValueString()
-		dto.State = &vState
+		api.State = &vState
 	}
 	if !plan.ZipCode.IsNull() || state != nil && !state.ZipCode.IsNull() {
 		vZipCode := plan.ZipCode.ValueString()
-		dto.ZipCode = &vZipCode
+		api.ZipCode = &vZipCode
 	}
-	err := util.Unmarshal(dto, rqs, modifiers...)
+	err := util.Unmarshal(api, req, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal dtoModel to Request: %s", err.Error()))
@@ -98,47 +99,47 @@ func expandData[R any](ctx context.Context, plan, state *dataModel, rqs *R, modi
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, state *dataModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
-	dto := new(dtoModel)
-	err := util.Unmarshal(rsp, dto, modifiers...)
+func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+	api := new(apiModel)
+	err := util.Unmarshal(rsp, api, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if dto.AddressLines != nil && (len(*dto.AddressLines) > 0 || !state.AddressLines.IsNull()) {
-		vAddressLines, diags := types.SetValueFrom(ctx, types.StringType, dto.AddressLines)
+	if api.AddressLines != nil && (len(*api.AddressLines) > 0 || !state.AddressLines.IsNull()) {
+		vAddressLines, diags := types.SetValueFrom(ctx, types.StringType, api.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
 		state.AddressLines = vAddressLines
 	}
-	if dto.AddressID != nil && (*dto.AddressID != "" || !state.AddressID.IsNull()) {
-		state.AddressID = types.StringPointerValue(dto.AddressID)
+	if api.AddressID != nil && (*api.AddressID != "" || !state.AddressID.IsNull()) {
+		state.AddressID = types.StringPointerValue(api.AddressID)
 	}
-	if dto.City != nil && (*dto.City != "" || !state.City.IsNull()) {
-		state.City = types.StringPointerValue(dto.City)
+	if api.City != nil && (*api.City != "" || !state.City.IsNull()) {
+		state.City = types.StringPointerValue(api.City)
 	}
-	if dto.CountryCode != nil && (*dto.CountryCode != "" || !state.CountryCode.IsNull()) {
-		state.CountryCode = types.StringPointerValue(dto.CountryCode)
+	if api.CountryCode != nil && (*api.CountryCode != "" || !state.CountryCode.IsNull()) {
+		state.CountryCode = types.StringPointerValue(api.CountryCode)
 	}
-	if dto.CreateTime != nil && (*dto.CreateTime != "" || !state.CreateTime.IsNull()) {
-		state.CreateTime = types.StringPointerValue(dto.CreateTime)
+	if api.CreateTime != nil && (*api.CreateTime != "" || !state.CreateTime.IsNull()) {
+		state.CreateTime = types.StringPointerValue(api.CreateTime)
 	}
-	if dto.Name != nil && (*dto.Name != "" || !state.Name.IsNull()) {
-		state.Name = types.StringPointerValue(dto.Name)
+	if api.Name != nil && (*api.Name != "" || !state.Name.IsNull()) {
+		state.Name = types.StringPointerValue(api.Name)
 	}
-	if dto.OrganizationID != nil && (*dto.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(dto.OrganizationID)
+	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
+		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
 	}
-	if dto.State != nil && (*dto.State != "" || !state.State.IsNull()) {
-		state.State = types.StringPointerValue(dto.State)
+	if api.State != nil && (*api.State != "" || !state.State.IsNull()) {
+		state.State = types.StringPointerValue(api.State)
 	}
-	if dto.UpdateTime != nil && (*dto.UpdateTime != "" || !state.UpdateTime.IsNull()) {
-		state.UpdateTime = types.StringPointerValue(dto.UpdateTime)
+	if api.UpdateTime != nil && (*api.UpdateTime != "" || !state.UpdateTime.IsNull()) {
+		state.UpdateTime = types.StringPointerValue(api.UpdateTime)
 	}
-	if dto.ZipCode != nil && (*dto.ZipCode != "" || !state.ZipCode.IsNull()) {
-		state.ZipCode = types.StringPointerValue(dto.ZipCode)
+	if api.ZipCode != nil && (*api.ZipCode != "" || !state.ZipCode.IsNull()) {
+		state.ZipCode = types.StringPointerValue(api.ZipCode)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.

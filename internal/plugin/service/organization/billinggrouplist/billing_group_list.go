@@ -3,7 +3,6 @@ package billinggrouplist
 import (
 	"context"
 
-	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationbilling"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,30 +11,15 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-const resourceName = "aiven_organization_billing_group_list"
-
-func NewOrganizationBillingGroupListDatasource() datasource.DataSource {
-	return adapter.NewDatasource(
-		resourceName,
-		new(view),
-		datasourceSchema,
-		func() adapter.DataModel[dataModel] {
-			return new(datasourceDataModel)
-		},
-	)
+func NewDatasource() datasource.DataSource {
+	return adapter.NewDatasource(aivenName, new(view), newDatasourceSchema, newDatasourceModel)
 }
 
-type view struct {
-	client avngen.Client
-}
+type view struct{ adapter.View }
 
-func (c *view) Configure(client avngen.Client) {
-	c.client = client
-}
-
-func (c *view) Read(ctx context.Context, state *dataModel) diag.Diagnostics {
+func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := c.client.OrganizationBillingGroupList(ctx, state.OrganizationID.ValueString())
+	rsp, err := vw.Client.OrganizationBillingGroupList(ctx, state.OrganizationID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags

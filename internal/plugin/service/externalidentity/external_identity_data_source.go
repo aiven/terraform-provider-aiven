@@ -21,7 +21,7 @@ var (
 	_ util.TypeNameable                  = &externalIdentityDataSource{}
 )
 
-func NewExternalIdentityDataSource() datasource.DataSource {
+func NewDatasource() datasource.DataSource {
 	return &externalIdentityDataSource{}
 }
 
