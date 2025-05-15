@@ -153,7 +153,6 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 				list = rspList
 				return nil
 			}, retry.Context(ctx), retry.Delay(rep.v2ListRetryDelay))
-
 			if err != nil {
 				// Send errors
 				// Flattens error to a string, because it might go really completed for testing

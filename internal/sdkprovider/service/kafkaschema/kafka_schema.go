@@ -154,7 +154,6 @@ func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, m in
 				SchemaType: d.Get("schema_type").(string),
 			},
 		)
-
 		if err != nil {
 			return diag.Errorf("unable to add schema: %s", err)
 		}
@@ -179,7 +178,6 @@ func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, m in
 			subjectName,
 			compatibility.(string),
 		)
-
 		if err != nil {
 			return diag.Errorf("unable to update configuration: %s", err)
 		}
@@ -313,7 +311,6 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 			SchemaType: schemaType,
 		},
 	)
-
 	if err != nil {
 		return fmt.Errorf("unable to check schema validity: %w", err)
 	}

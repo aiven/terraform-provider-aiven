@@ -53,8 +53,8 @@ func ResourceGCPPrivatelink() *schema.Resource {
 func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
 
 	_, err := client.GCPPrivatelink.Create(ctx, project, serviceName)
 	if err != nil {

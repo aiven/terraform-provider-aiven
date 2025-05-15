@@ -67,10 +67,10 @@ func ResourceAzurePrivatelink() *schema.Resource {
 func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
 
-	var subscriptionIDsSet = d.Get("user_subscription_ids").(*schema.Set)
+	subscriptionIDsSet := d.Get("user_subscription_ids").(*schema.Set)
 	subscriptionIDs := make([]string, subscriptionIDsSet.Len())
 
 	for i, s := range subscriptionIDsSet.List() {
@@ -139,6 +139,7 @@ func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m
 
 	return nil
 }
+
 func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -147,7 +148,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	var subscriptionIDsSet = d.Get("user_subscription_ids").(*schema.Set)
+	subscriptionIDsSet := d.Get("user_subscription_ids").(*schema.Set)
 	subscriptionIDs := make([]string, subscriptionIDsSet.Len())
 
 	for i, s := range subscriptionIDsSet.List() {

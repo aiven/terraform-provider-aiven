@@ -420,7 +420,6 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	client := m.(*aiven.Client)
 	topic, err := kafkatopicrepository.New(client.KafkaTopics).Read(ctx, project, serviceName, topicName)
-
 	// Topics are destroyed when kafka is off
 	// https://aiven.io/docs/platform/concepts/service-power-cycle
 	// So it's better to recreate them, than make user to clear the state manually

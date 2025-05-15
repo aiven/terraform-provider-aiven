@@ -156,7 +156,7 @@ func writeChangelog(filePath string, reformat bool, entries []string) error {
 		return fmt.Errorf("failed to format changelog: %w", err)
 	}
 
-	return os.WriteFile(filePath, []byte(s), 0644)
+	return os.WriteFile(filePath, []byte(s), 0o644)
 }
 
 func fromProvider(p *schema.Provider) (ItemMap, error) {

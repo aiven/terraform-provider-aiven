@@ -39,7 +39,6 @@ func datasourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, clie
 
 			return resourceAccountTeamRead(ctx, d, client)
 		}
-
 	}
 
 	return fmt.Errorf("account team %q not found", name)

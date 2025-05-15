@@ -93,9 +93,9 @@ func waitForAzureConnectionState(
 func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
-	var endpointIPAddress = d.Get("endpoint_ip_address").(string)
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	endpointIPAddress := d.Get("endpoint_ip_address").(string)
 
 	err := client.AzurePrivatelink.Refresh(ctx, project, serviceName)
 	if err != nil {

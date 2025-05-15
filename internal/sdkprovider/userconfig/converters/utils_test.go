@@ -265,18 +265,23 @@ type resourceDataMock struct {
 func (r *resourceDataMock) Get(_ string) any {
 	panic("implement me")
 }
+
 func (r *resourceDataMock) GetRawConfig() cty.Value {
 	panic("implement me")
 }
+
 func (r *resourceDataMock) HasChange(_ string) bool {
 	panic("implement me")
 }
+
 func (r *resourceDataMock) IsNewResource() bool {
 	panic("implement me")
 }
+
 func (r *resourceDataMock) Set(_ string, _ any) error {
 	panic("implement me")
 }
+
 func (r *resourceDataMock) GetOk(k string) (any, bool) {
 	v, ok := r.m[k]
 	return v, ok

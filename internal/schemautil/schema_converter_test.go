@@ -37,7 +37,8 @@ func Test_resourceSchemaAsDatasourceSchema(t *testing.T) {
 						Type:        schema.TypeString,
 						Optional:    true,
 						Description: "Cloud the service runs in",
-					}},
+					},
+				},
 				required: []string{"project"},
 			},
 			map[string]*schema.Schema{
@@ -54,7 +55,8 @@ func Test_resourceSchemaAsDatasourceSchema(t *testing.T) {
 					Optional:    false,
 					Computed:    true,
 					Description: "Cloud the service runs in",
-				}},
+				},
+			},
 		},
 	}
 	for _, tt := range tests {

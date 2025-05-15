@@ -19,7 +19,6 @@ func validateServiceAccountCredentials(i interface{}, p cty.Path) diag.Diagnosti
 		gojsonschema.NewStringLoader(serviceAccountCredentialsSchema),
 		gojsonschema.NewStringLoader(s),
 	)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}

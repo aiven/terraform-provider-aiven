@@ -82,9 +82,7 @@ func ResourceAccount() *schema.Resource {
 }
 
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	var (
-		req account.AccountCreateIn
-	)
+	var req account.AccountCreateIn
 
 	if err := schemautil.ResourceDataGet(
 		d,

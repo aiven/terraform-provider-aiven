@@ -108,7 +108,6 @@ func flinkJarApplicationVersionCreate(ctx context.Context, d *schema.ResourceDat
 		retry.Context(ctx),
 		retry.Delay(time.Second*5),
 	)
-
 	if err != nil {
 		return fmt.Errorf("failed to wait for jar application version: %w", err)
 	}

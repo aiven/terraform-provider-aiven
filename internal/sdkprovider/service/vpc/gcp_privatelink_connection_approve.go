@@ -104,8 +104,8 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 ) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
 
 	err := client.GCPPrivatelink.Refresh(ctx, project, serviceName)
 	if err != nil {

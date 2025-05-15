@@ -109,6 +109,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 	}
 	return s
 }
+
 func ResourceMySQL() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) service.",

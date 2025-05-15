@@ -7,11 +7,9 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 )
 
-var (
-	// this mutex is needed to serialize calls to modify the remote config
-	// since it's an abstraction that first GETs, modifies and then PUTs again
-	resourceOpenSearchACLModifierMutex sync.Mutex
-)
+// this mutex is needed to serialize calls to modify the remote config
+// since it's an abstraction that first GETs, modifies and then PUTs again
+var resourceOpenSearchACLModifierMutex sync.Mutex
 
 // GETs the remote config, applies the modifiers and PUTs it again
 // The Config that is passed to the modifiers is guaranteed to be not nil

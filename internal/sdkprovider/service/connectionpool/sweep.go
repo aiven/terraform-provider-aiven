@@ -19,7 +19,6 @@ func init() {
 		Name: "aiven_connection_pool",
 		F:    sweepConnectionPoll(ctx),
 	})
-
 }
 
 func sweepConnectionPoll(ctx context.Context) func(string) error {

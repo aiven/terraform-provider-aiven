@@ -10,6 +10,7 @@ import (
 func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaMirrormaker)
 }
+
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) service.",
