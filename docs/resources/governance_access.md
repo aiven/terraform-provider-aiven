@@ -45,19 +45,19 @@ resource "aiven_governance_access" "example_access" {
 
 ### Required
 
-- `access_data` (Block List, Min: 1, Max: 1) Details of the access. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--access_data))
-- `access_name` (String) The name to describe the access. Maximum length: `54`. Changing this property forces recreation of the resource.
-- `access_type` (String) The type of access. The possible value is `KAFKA`. Changing this property forces recreation of the resource.
-- `organization_id` (String) The ID of the organization. Changing this property forces recreation of the resource.
+- `access_name` (String) Label to describe the access. Changing this property forces recreation of the resource.
+- `access_type` (String) An enumeration. The possible value is `KAFKA`. Changing this property forces recreation of the resource.
+- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `owner_user_group_id` (String) The ID of the user group that owns the access. Maximum length: `54`. Changing this property forces recreation of the resource.
+- `access_data` (Block List) Required property. access type specific data. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--access_data))
+- `owner_user_group_id` (String) The ID of the group that will own the access. Maximum length: `36`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID, a composite of `organization_id` and `susbcription_id` IDs.
 - `susbcription_id` (String) The ID of the access.
 
 <a id="nestedblock--access_data"></a>
@@ -65,23 +65,23 @@ resource "aiven_governance_access" "example_access" {
 
 Required:
 
-- `acls` (Block Set, Min: 1, Max: 10) The permissions granted to the assigned service user. Maximum length: `54`. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--access_data--acls))
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
 
 Optional:
 
-- `username` (String) The name for the new service user given access. If not provided, the name is automatically generated. Maximum length: `54`. Changing this property forces recreation of the resource.
+- `acls` (Block Set) Required property. Acls. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--access_data--acls))
+- `username` (String) The service username assigned to the access. Changing this property forces recreation of the resource.
 
 <a id="nestedblock--access_data--acls"></a>
 ### Nested Schema for `access_data.acls`
 
 Required:
 
-- `operation` (String) The action that will be allowed for the service user. The possible values are `Read` and `Write`. Changing this property forces recreation of the resource.
-- `permission_type` (String) Explicitly allows or denies the action for the service user on the specified resource. The possible value is `ALLOW`. Changing this property forces recreation of the resource.
-- `resource_name` (String) The name of the resource the permission applies to, such as the topic name or group ID in the Kafka service. Maximum length: `256`. Changing this property forces recreation of the resource.
-- `resource_type` (String) The type of resource. The possible value is `Topic`. Changing this property forces recreation of the resource.
+- `operation` (String) An enumeration. The possible values are `Read` and `Write`. Changing this property forces recreation of the resource.
+- `permission_type` (String) An enumeration. The possible value is `ALLOW`. Changing this property forces recreation of the resource.
+- `resource_name` (String) Acl resource name. Maximum length: `256`. Changing this property forces recreation of the resource.
+- `resource_type` (String) An enumeration. The possible value is `Topic`. Changing this property forces recreation of the resource.
 
 Optional:
 
@@ -89,9 +89,9 @@ Optional:
 
 Read-Only:
 
-- `id` (String) The ACL ID.
-- `pattern_type` (String) Pattern used to match specified resources. The possible value is `LITERAL`.
-- `principal` (String) Identities in `user:name` format that the permissions apply to.
+- `id` (String) Acl ID.
+- `pattern_type` (String) An enumeration. The possible value is `LITERAL`.
+- `principal` (String) Acl principal.
 
 
 
@@ -100,8 +100,7 @@ Read-Only:
 
 Optional:
 
-- `create` (String)
-- `default` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

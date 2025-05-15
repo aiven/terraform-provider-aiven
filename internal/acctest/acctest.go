@@ -222,3 +222,7 @@ const (
 func RandStr() string {
 	return acctest.RandStringFromCharSet(DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 }
+
+func RandName(name string) string {
+	return fmt.Sprintf("%s-%s-%s", DefaultResourceNamePrefix, name, RandStr())
+}

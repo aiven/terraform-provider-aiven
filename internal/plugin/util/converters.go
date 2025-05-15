@@ -61,18 +61,10 @@ type MapModifier[I any] func(reqRsp map[string]any, in *I) error
 // Expand recursively expands the TF object (dataModel).
 type Expand[T, R any] func(ctx context.Context, obj *T) (*R, diag.Diagnostics)
 
-// ExpandSetNested recursively sets values to Request for a set of objects.
-func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]*R, diag.Diagnostics) {
-	// Gets TF objects from the set.
-	var elements []T
-	diags := set.ElementsAs(ctx, &elements, false)
-	if diags.HasError() {
-		return nil, diags
-	}
-
+func expandEach[T, R any](ctx context.Context, expand Expand[T, R], target []T) ([]*R, diag.Diagnostics) {
 	// Goes deeper and expands each object
-	items := make([]*R, 0, len(elements))
-	for _, v := range elements {
+	items := make([]*R, 0, len(target))
+	for _, v := range target {
 		// Expands the object using the provided expander function.
 		m, diags := expand(ctx, &v)
 		if diags.HasError() {
@@ -83,13 +75,30 @@ func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set typ
 	return items, nil
 }
 
-// ExpandSingle sets values to Request for a single object.
-func ExpandSingle[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) (*R, diag.Diagnostics) {
-	result, diags := ExpandSetNested(ctx, expand, set)
-	if diags.HasError() || len(result) == 0 {
+// ExpandSetNested recursively sets values to Request for a set of objects.
+func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set types.Set) ([]*R, diag.Diagnostics) {
+	var target []T
+	diags := set.ElementsAs(ctx, &target, false)
+	if diags.HasError() {
 		return nil, diags
 	}
-	return result[0], nil
+	return expandEach(ctx, expand, target)
+}
+
+// ExpandSingleNested sets values to Request for a single object.
+func ExpandSingleNested[T, R any](ctx context.Context, expand Expand[T, R], list types.List) (*R, diag.Diagnostics) {
+	var target []T
+	diags := list.ElementsAs(ctx, &target, false)
+	if diags.HasError() || len(target) == 0 {
+		return nil, diags
+	}
+
+	items, diags := expandEach(ctx, expand, target)
+	if diags.HasError() || len(items) == 0 {
+		return nil, diags
+	}
+
+	return items[0], nil
 }
 
 // Flatten reads values from Response for a nested object.
@@ -100,31 +109,42 @@ type Flatten[R, T any] func(ctx context.Context, response *R) (*T, diag.Diagnost
 
 // FlattenSetNested reads values from Response for a set of objects.
 func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []*R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
-	empty := types.SetNull(oType)
+	null := types.SetNull(oType)
 	if len(set) == 0 {
-		return empty, nil
+		return null, nil
 	}
 
 	items := make([]*T, 0, len(set))
 	for _, v := range set {
 		item, diags := flatten(ctx, v)
 		if diags.HasError() {
-			return empty, diags
+			return null, diags
 		}
 		items = append(items, item)
 	}
 
 	result, diags := types.SetValueFrom(ctx, oType, items)
 	if diags.HasError() {
-		return empty, diags
+		return null, diags
 	}
 	return result, nil
 }
 
-// FlattenSingle reads values from Response for a single object.
-func FlattenSingle[R, T any](ctx context.Context, flatten Flatten[R, T], dto *R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+// FlattenSingleNested reads values from Response for a single object.
+func FlattenSingleNested[R, T any](ctx context.Context, flatten Flatten[R, T], dto *R, oType types.ObjectType) (types.List, diag.Diagnostics) {
+	null := types.ListNull(oType)
 	if dto == nil {
-		return types.SetNull(oType), nil
+		return null, nil
 	}
-	return FlattenSetNested(ctx, flatten, []*R{dto}, oType)
+
+	item, diags := flatten(ctx, dto)
+	if diags.HasError() {
+		return null, diags
+	}
+
+	result, diags := types.ListValueFrom(ctx, oType, []*T{item})
+	if diags.HasError() {
+		return null, diags
+	}
+	return result, nil
 }
