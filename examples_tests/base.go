@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/gruntwork-io/terratest/modules/logger"
+
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
@@ -75,6 +77,7 @@ func (s *BaseTestSuite) withDefaults(opts *terraform.Options) *terraform.Options
 		opts.EnvVars = make(map[string]string)
 	}
 	opts.EnvVars["TF_CLI_CONFIG_FILE"] = s.tfConfigPath
+	opts.Logger = logger.Discard
 	return terraform.WithDefaultRetryableErrors(s.T(), opts)
 }
 

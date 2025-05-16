@@ -58,7 +58,7 @@ tasks:
         -timeout=120s
 
   test-acc:
-    desc: "Run acceptance tests (e.g., task test:acc -- -run TestAccResourceMyThing)"
+    desc: "Run acceptance tests (e.g., task test-acc -- -run TestAccResourceMyThing)"
     env:
       TF_ACC: 1
       PROVIDER_AIVEN_ENABLE_BETA: 1
@@ -68,7 +68,7 @@ tasks:
       - cmd: "{{.GO_CMD}} test ./{{.EFFECTIVE_PKG_PATH}}/... -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} {{.CLI_ARGS}} -timeout {{.ACC_TEST_TIMEOUT}}"
 
   test-examples:
-    desc: "Run examples tests (e.g., task test:examples -- -run TestAccExampleMyThing)"
+    desc: "Run examples tests (e.g., task test-examples -- -run TestAccExampleMyThing)"
     deps:
       - build-dev
       - internal:clean-examples
@@ -76,7 +76,17 @@ tasks:
       AIVEN_PROVIDER_PATH: "{{.BUILD_DEV_DIR}}"
       PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
-      - "{{.GO_CMD}} test --tags=examples ./examples_tests/... -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} -timeout {{.ACC_TEST_TIMEOUT}}"
+      - "{{.TESTSUM}}
+        --format testname
+        --hide-summary=skipped
+        --
+        --tags=examples
+        -json ./examples_tests/...
+        -v
+        -count {{.TEST_COUNT}}
+        -parallel {{.ACC_TEST_PARALLELISM}}
+        -timeout {{.ACC_TEST_TIMEOUT}}
+        {{.CLI_ARGS}}"
 
   #################################################
   # Code Style Tasks
@@ -106,7 +116,7 @@ tasks:
       - internal:gen-go
       - internal:docs-generate
     cmds:
-      - defer: {task: internal:fmt-imports}
+      - defer: { task: internal:fmt-imports }
       - task: internal:mockery
 
 
@@ -120,12 +130,12 @@ tasks:
       - task: internal:mockery
 
   update-client:
-      desc: "Update Go client codegen"
-      aliases:
-        - client
-      cmds:
-        - task: internal:load-codegen
-        - task: internal:dump-mockery
+    desc: "Update Go client codegen"
+    aliases:
+      - client
+    cmds:
+      - task: internal:load-codegen
+      - task: internal:dump-mockery
 
   get-spec:
     desc: "Download/Update the Aiven OpenAPI spec"

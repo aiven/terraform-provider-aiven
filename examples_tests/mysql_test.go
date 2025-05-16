@@ -25,11 +25,11 @@ func (s *MysqlTestSuite) TestMysql() {
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/mysql",
 		Vars: map[string]interface{}{
-			"aiven_token":    s.config.Token,
-			"avn_project":    s.config.Project,
-			"mysql_name":     mysqlName,
-			"mysql_username": "username" + uniqueID(),
-			"mysql_password": "password" + uniqueID(),
+			"aiven_token":        s.config.Token,
+			"aiven_project_name": s.config.Project,
+			"mysql_name":         mysqlName,
+			"mysql_username":     "username" + uniqueID(),
+			"mysql_password":     "password" + uniqueID(),
 		},
 	})
 
