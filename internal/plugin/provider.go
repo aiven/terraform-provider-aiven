@@ -17,6 +17,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
@@ -159,6 +160,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		organization.NewResource,
 		usergroupmember.NewResource,
 		groupproject.NewResource,
+		access.NewResource,
 	}
 
 	// Add to a list of resources that are currently in beta.

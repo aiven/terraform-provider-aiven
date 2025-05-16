@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
-// Model implements resource or datasource model with a shared fields model.
+// Model implements resource or datasource model with the shared fields model.
 type Model[T any] interface {
-	// SharedModel returns shared fields model between resource and datasource.
+	// SharedModel returns the shared fields model between resource and datasource.
 	SharedModel() *T
 }
 
