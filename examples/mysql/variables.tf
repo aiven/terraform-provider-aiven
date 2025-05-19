@@ -8,7 +8,7 @@ variable "aiven_project_name" {
   type        = string
 }
 
-variable "mysql__name" {
+variable "mysql_name" {
   description = "Name of the MySQL service"
   type        = string
   default     = "example-mysql-service"
