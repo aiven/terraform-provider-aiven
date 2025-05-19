@@ -1,5 +1,10 @@
 package util
 
+import (
+	"os"
+	"strconv"
+)
+
 // This file contains helper functions that are more generic and can be used in multiple places.
 // These functions are not specific to the Aiven plugin. If you are looking for Aiven plugin specific helpers,
 // please see the pluginhelpers.go file instead.
@@ -17,4 +22,18 @@ func NilIfZero[T comparable](v T) *T {
 	}
 
 	return &v
+}
+
+func EnvBool(key string, defaultValue bool) bool {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+
+	b, err := strconv.ParseBool(value)
+	if err != nil {
+		return defaultValue
+	}
+
+	return b
 }
