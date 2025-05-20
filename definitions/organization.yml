@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/organization
+operations:
+  AccountCreate: create
+  AccountDelete: delete
+  AccountGet: read
+  AccountUpdate: update
+objectKey: account
+resource:
+  description: Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).
+datasource:
+  description: Gets information about an organization.
+idAttribute:
+  compose:
+    - id
+  description: The organization ID.
+patch:
+  account_name:
+    rename: name
+    description: Name of the organization.
+  organization_id:
+    rename: id
+  tenant_id:
+    deprecationMessage: This field is deprecated and will be removed in the next major release.
+  features:
+    delete: true
+  access_source:
+    delete: true
+  account_owner_team_id:
+    delete: true
+  is_account_member:
+    delete: true
+  is_account_owner:
+    delete: true
+  parent_account_id:
+    delete: true
+  primary_billing_group_id:
+    delete: true
+  root_account_id:
+    delete: true
+  account_id:
+    delete: true

@@ -17,10 +17,6 @@ import (
 
 const aivenName = "aiven_organization_address"
 
-func composeID() []string {
-	return []string{"organization_id", "address_id"}
-}
-
 type tfModel struct {
 	ID             types.String `tfsdk:"id"`
 	AddressID      types.String `tfsdk:"address_id"`
@@ -52,6 +48,12 @@ type apiModel struct {
 	State          *string   `json:"state,omitempty"`
 	UpdateTime     *string   `json:"update_time,omitempty"`
 	ZipCode        *string   `json:"zip_code,omitempty"`
+}
+
+// composeID the ID attribute fields, i.e.:
+// terraform import aiven_organization_address.foo ORGANIZATION_ID/ADDRESS_ID
+func composeID() []string {
+	return []string{"organization_id", "address_id"}
 }
 
 // expandData turns TF object into Request

@@ -74,7 +74,7 @@ data "aiven_organization_project" "ds_test" {
   project_id      = aiven_organization_project.foo.project_id
   organization_id = aiven_organization_project.foo.organization_id
 }
-				`, rName, projectID),
+`, rName, projectID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
 
@@ -155,7 +155,7 @@ resource "aiven_organization_project" "foo" {
     value = "value4"
   }
 }
-				`, rName,
+`, rName,
 					projectID,
 				),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -352,7 +352,7 @@ resource "aiven_organization_project" "foo" {
   billing_group_id = aiven_billing_group.bar.id
   parent_id        = aiven_organizational_unit.foo.id
 }
-			`, projectID),
+`, projectID),
 				ExpectError: regexp.MustCompile(`Can't assign project to a billing group\s+belonging to a different org`),
 			},
 			{

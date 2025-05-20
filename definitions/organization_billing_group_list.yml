@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/organization/billinggrouplist
+datasource:
+  description: Lists billing groups for an organization.
+idAttribute:
+  compose:
+    - organization_id
+operations:
+  OrganizationBillingGroupList: read

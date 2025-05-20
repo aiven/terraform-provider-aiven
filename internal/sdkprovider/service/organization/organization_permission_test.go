@@ -111,7 +111,7 @@ func TestAccAivenOrganizationPermission_conflict(t *testing.T) {
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectError: regexp.MustCompile("already has permissions set"),
+				ExpectError: regexp.MustCompile("already has permissions configured"),
 				Config: fmt.Sprintf(`
 data "aiven_organization" "org" {
   name = %[1]q

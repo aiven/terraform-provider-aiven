@@ -17,10 +17,6 @@ import (
 
 const aivenName = "aiven_organization_billing_group"
 
-func composeID() []string {
-	return []string{"organization_id", "billing_group_id"}
-}
-
 type tfModel struct {
 	ID                   types.String `tfsdk:"id"`
 	BillingAddressID     types.String `tfsdk:"billing_address_id"`
@@ -54,6 +50,12 @@ type apiModel struct {
 	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
 	ShippingAddressID    *string   `json:"shipping_address_id,omitempty"`
 	VatID                *string   `json:"vat_id,omitempty"`
+}
+
+// composeID the ID attribute fields, i.e.:
+// terraform import aiven_organization_billing_group.foo ORGANIZATION_ID/BILLING_GROUP_ID
+func composeID() []string {
+	return []string{"organization_id", "billing_group_id"}
 }
 
 // expandData turns TF object into Request

@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+type: object
+properties:
+  beta:
+    type: boolean
+  location:
+    type: string
+  patch:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/Patch'
+  objectKey:
+    type: string
+  resource:
+    $ref: '#/definitions/ResDat'
+  datasource:
+    $ref: '#/definitions/ResDat'
+  idAttribute:
+    $ref: '#/definitions/IDAttribute'
+  operations:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/Operation'
+required:
+  - location
+  - idAttribute
+  - operations
+additionalProperties: false
+definitions:
+  Operation:
+    type: string
+    enum:
+      - create
+      - read
+      - update
+      - delete
+  ResDat:
+    type: object
+    properties:
+      description:
+        type: string
+      deprecationMessage:
+        type: string
+    required:
+      - description
+  IDAttribute:
+    type: object
+    properties:
+      compose:
+        type: array
+        items:
+          type: string
+      description:
+        type: string
+      mutable:
+        type: boolean
+    required:
+      - compose
+    additionalProperties: false
+  Patch:
+    type: object
+    properties:
+      rename:
+        type: string
+      description:
+        type: string
+      deprecationMessage:
+        type: string
+      sensitive:
+        type: boolean
+      optional:
+        type: boolean
+      required:
+        type: boolean
+      computed:
+        type: boolean
+      delete:
+        type: boolean
+    additionalProperties: false

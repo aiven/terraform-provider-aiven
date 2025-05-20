@@ -114,9 +114,10 @@ tasks:
     desc: Generate Go code, documentation, and mocks
     deps:
       - internal:gen-go
-      - internal:docs-generate
+      - internal:gen-plugin
+      - internal:gen-docs
     cmds:
-      - defer: { task: internal:fmt-imports }
+      - defer: { task: fmt }
       - task: internal:mockery
 
 
@@ -136,22 +137,6 @@ tasks:
     cmds:
       - task: internal:load-codegen
       - task: internal:dump-mockery
-
-  get-spec:
-    desc: "Download/Update the Aiven OpenAPI spec"
-    aliases:
-      - spec
-    preconditions:
-      - sh: command -v curl
-        msg: "'curl' command not found. Please install curl to download the OpenAPI spec."
-      - sh: command -v jq
-        msg: "'jq' command not found. Please install jq (JSON processor)."
-    cmds:
-      - curl -sL -o {{.OPENAPI_FILE}} {{.OPENAPI_URL}}
-      - jq '.' {{.OPENAPI_FILE}} > {{.OPENAPI_FILE}}.tmp && mv {{.OPENAPI_FILE}}.tmp {{.OPENAPI_FILE}}
-
-    generates:
-      - "{{.OPENAPI_FILE}}"
 
   sweep:
     desc: "Run resource sweepers (WARNING: Destroys infrastructure!)."
@@ -183,7 +168,7 @@ tasks:
   ci:docs:
     desc: "Generate Terraform provider documentation"
     cmds:
-      - task: internal:docs-generate
+      - task: internal:gen-docs
 
   ci:discover-test-matrix:
     desc: "Finds Go test directories under, generates a JSON matrix for GitHub Actions"

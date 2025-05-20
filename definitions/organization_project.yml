@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/organization/project
+resource:
+  description: Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
+datasource:
+  description: Gets information about an Aiven project.
+idAttribute:
+  compose:
+    - organization_id
+    - project_id
+  mutable: true
+operations:
+  OrganizationProjectsCreate: create
+  OrganizationProjectsDelete: delete
+  OrganizationProjectsGet: read
+  OrganizationProjectsUpdate: update
+  ProjectKmsGetCA: read
+patch:
+  base_port:
+    description: Valid port number (1-65535) to use as a base for service port allocation.
+    computed: true
+  certificate:
+    rename: ca_cert
+    sensitive: true
+  parent_id:
+    description: |
+      Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID.
+      To set up proper dependencies please refer to this variable as a reference.
+    required: true
+  project_id:
+    description: |
+      The name of the project. Names must be globally unique among all Aiven customers. 
+      Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. 
+      It's recommended to use a random string or your organization name as a prefix or suffix. 
+      Changing this property forces recreation of the resource.
+  tags:
+    rename: tag
+    # The API spec is wrong, this is an optional field
+    optional: true
+  tech_emails:
+    rename: technical_emails
+  end_of_life_extension:
+    delete: true
+  features:
+    delete: true
+  account_id:
+    delete: true
+  project:
+    # comes from ProjectKmsGetCA
+    delete: true
