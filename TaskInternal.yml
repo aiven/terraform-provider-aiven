@@ -33,7 +33,7 @@ vars:
   ACC_TEST_PARALLELISM: 10               # Default parallelism for acceptance tests
   SWEEP: global                          # Default scope for resource sweeper
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
-  CHANGELOG_CMD: "{{.GO_CMD}} run ./changelog/..." # Command to run the internal changelog generation tool
+  CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
 
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
