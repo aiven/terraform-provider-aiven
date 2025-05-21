@@ -3,6 +3,7 @@ package organization_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/aiven/go-client-codegen/handler/organization"
@@ -102,4 +103,56 @@ resource "aiven_organization_permission" "permission" {
 	}
 
 	return config
+}
+
+func TestAccAivenOrganizationPermission_conflict(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				ExpectError: regexp.MustCompile("already has permissions set"),
+				Config: fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %[1]q
+}
+
+resource "aiven_project" "project" {
+  parent_id = data.aiven_organization.org.id
+  project   = "test-proj-%[2]s"
+}
+
+resource "aiven_organization_user_group" "group" {
+  organization_id = data.aiven_organization.org.id
+  name            = "test-group-%[2]s"
+  description     = "test group description"
+}
+
+resource "aiven_organization_permission" "first" {
+  organization_id = data.aiven_organization.org.id
+  resource_type   = "project"
+  resource_id     = aiven_project.project.id
+
+  permissions {
+    principal_type = "user_group"
+    principal_id   = aiven_organization_user_group.group.group_id
+    permissions    = ["developer"]
+  }
+}
+
+resource "aiven_organization_permission" "second_conflicting" {
+  organization_id = data.aiven_organization.org.id
+  resource_type   = "project"
+  resource_id     = aiven_project.project.id
+
+  permissions {
+    principal_type = "user_group"
+    principal_id   = aiven_organization_user_group.group.group_id
+    permissions    = ["developer"]
+  }
+}
+`, acc.OrganizationName(), acc.RandStr()),
+			},
+		},
+	})
 }

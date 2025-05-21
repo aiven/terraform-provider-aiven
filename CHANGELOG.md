@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_organization_permission` conflict validation for newly created resources
+
 ## [4.40.0] - 2025-05-14
 
 - Deprecate `aiven_organization.tenant_id` field. The field is not used in the API anymore.
