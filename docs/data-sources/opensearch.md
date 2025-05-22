@@ -234,6 +234,7 @@ Read-Only:
 - `enable_remote_backed_storage` (Boolean)
 - `enable_searchable_snapshots` (Boolean)
 - `enable_security_audit` (Boolean)
+- `enable_snapshot_api` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)
 - `http_max_initial_line_length` (Number)

@@ -13,6 +13,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `aiven_organization_permission` conflict validation for newly created resources
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_snapshot_api`: Enable/Disable snapshot
+  API for custom repositories, this requires security management to be enabled.
 
 ## [4.40.0] - 2025-05-14
 

@@ -257,6 +257,7 @@ Optional:
 - `enable_remote_backed_storage` (Boolean) Enable remote-backed storage.
 - `enable_searchable_snapshots` (Boolean) Enable searchable snapshots.
 - `enable_security_audit` (Boolean) Enable/Disable security audit.
+- `enable_snapshot_api` (Boolean) Enable/Disable snapshot API for custom repositories, this requires security management to be enabled.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes. Example: `8192`.
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes. Example: `4096`.
