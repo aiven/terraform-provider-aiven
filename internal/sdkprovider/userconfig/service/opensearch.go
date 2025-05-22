@@ -580,6 +580,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"enable_snapshot_api": {
+						Description: "Enable/Disable snapshot API for custom repositories, this requires security management to be enabled.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"http_max_content_length": {
 						Description: "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
 						Optional:    true,
