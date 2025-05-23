@@ -54,21 +54,12 @@ type IDAttribute struct {
 	Mutable     bool     `yaml:"mutable,omitempty"` // Negative for UseStateForUnknown
 }
 
-type Patch struct {
-	Rename             string `yaml:"rename,omitempty"`
-	Description        string `yaml:"description,omitempty"`
-	DeprecationMessage string `yaml:"deprecationMessage,omitempty"`
-	Sensitive          bool   `yaml:"sensitive,omitempty"`
-	Optional           bool   `yaml:"optional,omitempty"`
-	Required           bool   `yaml:"required,omitempty"`
-	Computed           bool   `yaml:"computed,omitempty"`
-	Delete             bool   `yaml:"delete,omitempty"`
-}
-
 type Definition struct {
 	Beta        bool                 `yaml:"beta"`
 	Location    string               `yaml:"location"`
-	Patch       map[string]Patch     `yaml:"patch,omitempty"`
+	Schema      map[string]Item      `yaml:"schema,omitempty"`
+	Delete      []string             `yaml:"delete,omitempty"`
+	Rename      map[string]string    `yaml:"rename,omitempty"`
 	ObjectKey   string               `yaml:"objectKey,omitempty"`
 	Resource    *SchemaMeta          `yaml:"resource,omitempty"`
 	Datasource  *SchemaMeta          `yaml:"datasource,omitempty"`
@@ -77,32 +68,33 @@ type Definition struct {
 }
 
 type Item struct {
-	Parent               *Item
-	Name                 string
-	JSONName             string
-	Type                 SchemaType
-	Description          string
-	DeprecationMessage   string
-	Required             bool
-	Properties           map[string]*Item
-	Element              *Item // Array item or Map item, "element" is a TF naming convention
-	InIDAttribute        bool  // If field is part of ID attribute
-	IDAttributePosition  int   // Position in the ID field
-	ForceNew             bool
-	Computed             bool
-	Optional             bool
-	Sensitive            bool
-	Nullable             bool
-	Enum                 []any
-	Default              any
-	MinItems             int
-	MaxItems             int
-	MinLength            int
-	MaxLength            int
-	Minimum              int
-	Maximum              int
-	AppearsIn            AppearsIn
-	AdditionalProperties *Item
+	Parent              *Item
+	AppearsIn           AppearsIn
+	Name                string
+	InIDAttribute       bool // If field is part of ID attribute
+	IDAttributePosition int  // Position in the ID field
+
+	// Tagged fields are exposed to the Definition.yaml
+	JSONName           string           `yaml:"jsonName,omitempty"`
+	Type               SchemaType       `yaml:"type,omitempty"`
+	Description        string           `yaml:"description,omitempty"`
+	DeprecationMessage string           `yaml:"deprecationMessage,omitempty"`
+	Properties         map[string]*Item `yaml:"properties,omitempty"`
+	Items              *Item            `yaml:"items,omitempty"` // Array item or Map item
+	Required           bool             `yaml:"required,omitempty"`
+	Computed           bool             `yaml:"computed,omitempty"`
+	Nullable           bool             `yaml:"nullable,omitempty"`
+	Optional           bool             `yaml:"optional,omitempty"`
+	Sensitive          bool             `yaml:"sensitive,omitempty"`
+	Default            any              `yaml:"default,omitempty"`
+	Enum               []any            `yaml:"enum,omitempty"`
+	ForceNew           bool             `yaml:"forceNew,omitempty"`
+	MinLength          int              `yaml:"minLength,omitempty"`
+	MaxLength          int              `yaml:"maxLength,omitempty"`
+	MinItems           int              `yaml:"minItems,omitempty"`
+	MaxItems           int              `yaml:"maxItems,omitempty"`
+	Minimum            int              `yaml:"minimum,omitempty"`
+	Maximum            int              `yaml:"maximum,omitempty"`
 }
 
 // UniqueName generates unique name by composing all ancestor names
@@ -143,8 +135,8 @@ func (item *Item) ApiType() string {
 	}
 
 	if item.IsArray() {
-		v := item.Element.ApiType()
-		if item.Element.IsScalar() {
+		v := item.Items.ApiType()
+		if item.Items.IsScalar() {
 			// Remove the pointer for scalar types
 			v = v[1:]
 		}
@@ -152,7 +144,7 @@ func (item *Item) ApiType() string {
 	}
 
 	if item.IsMap() {
-		return "map[string]" + item.Element.ApiType()
+		return "map[string]" + item.Items.ApiType()
 	}
 
 	return "*" + strings.ToLower(item.TFType())
@@ -220,11 +212,11 @@ func (item *Item) IsScalar() bool {
 
 // IsNested is an object (not map) or an array with complex objects
 func (item *Item) IsNested() bool {
-	return item.IsObject() || item.IsArray() && item.Element.IsObject()
+	return item.IsObject() || item.IsArray() && item.Items.IsObject()
 }
 
 func (item *Item) IsMap() bool {
-	return item.Type == SchemaTypeObject && item.Element != nil
+	return item.Type == SchemaTypeObject && item.Items != nil
 }
 
 func (item *Item) IsArray() bool {
@@ -232,7 +224,7 @@ func (item *Item) IsArray() bool {
 }
 
 func (item *Item) IsObject() bool {
-	return item.Type == SchemaTypeObject && item.Element == nil
+	return item.Type == SchemaTypeObject && item.Items == nil
 }
 
 func (item *Item) IsRoot() bool {
@@ -258,7 +250,7 @@ func (item *Item) GetIDFields() []*Item {
 }
 
 // mergeItems merges b into a
-func mergeItems(a, b *Item) error {
+func mergeItems(a, b *Item, override bool) error {
 	if a == nil {
 		return nil
 	}
@@ -267,20 +259,57 @@ func mergeItems(a, b *Item) error {
 		return nil
 	}
 
-	if a.Type != b.Type {
-		return fmt.Errorf("field %q types do not match: %s != %s ", a.Path(), a.Type, b.Type)
+	// JSON names are not allowed to be different, until it's not in the definition.yaml
+	if a.JSONName != b.JSONName && len(a.JSONName)*len(b.JSONName) > 0 {
+		return fmt.Errorf("field %q JSON names do not match: %s != %s", a.Path(), a.JSONName, b.JSONName)
 	}
 
-	// Enums can be different for request and response
-	a.Enum = mergeSlices(a.Enum, b.Enum)
+	switch {
+	case override:
+		// The definition.yaml has priority over the API spec
+		a.Type = or(b.Type, a.Type)
+
+		// Invalidates the fields that are not compatible with the new type
+		switch a.Type {
+		case SchemaTypeObject:
+			a.Items = nil
+		case SchemaTypeArray:
+			a.Properties = nil
+		default:
+			a.Items = nil
+			a.Properties = nil
+		}
+
+		// Sets the required and optional fields
+		// Can't be both required and optional
+		if b.Required || b.Optional {
+			a.Required = b.Required || !b.Optional
+			a.Optional = b.Optional || !b.Required
+		}
+	case a.Type != b.Type:
+		return fmt.Errorf("field %q types do not match: %s != %s ", a.Path(), a.Type, b.Type)
+	default:
+		// Enums can be different for request and response
+		a.Enum = mergeSlices(a.Enum, b.Enum)
+		a.Required = a.Required || b.Required
+		a.Optional = a.Optional || b.Optional
+	}
 
 	// Copies properties
+	// TODO: there is no way to set Sensitive false, or Computed false, and so on.
+	a.Description = or(a.Description, b.Description)
+	a.DeprecationMessage = or(a.DeprecationMessage, b.DeprecationMessage)
 	a.AppearsIn |= b.AppearsIn
 	a.Nullable = a.Nullable || b.Nullable
-	a.Required = a.Required || b.Required
 	a.ForceNew = a.ForceNew || b.ForceNew
 	a.Sensitive = a.Sensitive || b.Sensitive
 	a.Computed = a.Computed || b.Computed
+
+	// Validate that a field cannot be both computed and required
+	if a.Computed && a.Required {
+		return fmt.Errorf("field %q cannot be both computed and required", a.Path())
+	}
+
 	a.MinItems = or(a.MinItems, b.MinItems)
 	a.MaxItems = or(a.MaxItems, b.MaxItems)
 	a.MinLength = or(a.MinLength, b.MinLength)
@@ -294,37 +323,32 @@ func mergeItems(a, b *Item) error {
 	}
 
 	var err error
-	a.Properties, err = mergeItemProperties(a.Properties, b.Properties)
+	err = mergeItemProperties(a.Properties, b.Properties, override)
 	if err != nil {
 		return err
 	}
 
-	err = mergeItems(a.Element, b.Element)
+	err = mergeItems(a.Items, b.Items, override)
 	if err != nil {
 		return err
 	}
 
+	// Sometimes OperationIDs have different descriptions.
+	// In that case, there is a good chance that the longest one has the most details.
 	if len(b.Description) > len(a.Description) {
 		a.Description = b.Description
 	}
 	return nil
 }
 
-func mergeItemProperties(a, b map[string]*Item) (map[string]*Item, error) {
-	result := make(map[string]*Item)
-	for k, v := range a {
-		result[k] = v
-	}
-
+func mergeItemProperties(a, b map[string]*Item, override bool) error {
 	for k, v := range b {
-		if _, ok := result[k]; ok {
-			err := mergeItems(result[k], v)
+		if vv, ok := a[k]; ok {
+			err := mergeItems(vv, v, override)
 			if err != nil {
-				return nil, err
+				return err
 			}
-		} else {
-			result[k] = v
 		}
 	}
-	return result, nil
+	return nil
 }

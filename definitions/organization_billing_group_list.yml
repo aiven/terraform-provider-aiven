@@ -8,3 +8,19 @@ idAttribute:
     - organization_id
 operations:
   OrganizationBillingGroupList: read
+schema:
+  billing_groups:
+    items:
+      properties:
+        billing_contact_emails:
+          required: true
+          type: array
+          items:
+            type: string
+          description: List of billing contact emails.
+        billing_emails:
+          required: true
+          type: array
+          items:
+            type: string
+          description: List of billing contact emails.

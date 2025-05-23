@@ -50,9 +50,10 @@ func exec() error {
 	// Generates files
 	for _, fileName := range definitions {
 		log.Info().Str("file", fileName).Msg("generating")
-		err := genDefinition(doc, filepath.Join(definitionsPath, fileName))
+		fullPath := filepath.Join(definitionsPath, fileName)
+		err := genDefinition(doc, fullPath)
 		if err != nil {
-			return fmt.Errorf("could not generate package %s: %w", fileName, err)
+			return fmt.Errorf("could not generate package %q: %w", fullPath, err)
 		}
 	}
 
@@ -261,7 +262,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 
 	// Removes the fields that should not be in the schema
 	for k, v := range root.Properties {
-		if p, ok := scope.Definition.Patch[v.JSONPath()]; ok && p.Delete {
+		if slices.Contains(scope.Definition.Delete, v.JSONPath()) {
 			delete(root.Properties, k)
 		}
 	}
@@ -270,6 +271,32 @@ func createRootItem(scope *Scope) (*Item, error) {
 	if scope.CurrentMeta != nil {
 		root.Description = or(scope.CurrentMeta.Description, root.Description)
 		root.DeprecationMessage = or(scope.CurrentMeta.DeprecationMessage, root.DeprecationMessage)
+	}
+
+	// Sets values from the definition.Schema
+	err := setEditAttrs(scope, root)
+	if err != nil {
+		return nil, err
+	}
+
+	// Creates new items from the definition.Schema
+	for k, item := range scope.Definition.Schema {
+		if item.Type == "" {
+			// todo: validate property exists
+			// The field can't be created
+			continue
+		}
+
+		// In case of overriding, removes the original field from the schema
+		delete(root.Properties, k)
+		err := fromDefinition(root, &item, k)
+		if err != nil {
+			return nil, err
+		}
+		err = addProperty(root, &item)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Marks ID fields
@@ -282,11 +309,36 @@ func createRootItem(scope *Scope) (*Item, error) {
 		root.Properties[v].IDAttributePosition = i
 	}
 
-	err := setEditAttrs(scope, root)
-	if err != nil {
-		return nil, err
-	}
 	return root, nil
+}
+
+func fromDefinition(parent, item *Item, name string) error {
+	item.Name = name
+	item.JSONName = or(item.JSONName, name)
+	item.Parent = parent
+
+	if !item.Required && !item.Computed {
+		item.Optional = true
+	}
+
+	for k, v := range item.Properties {
+		err := fromDefinition(item, v, k)
+		if err != nil {
+			return err
+		}
+		err = addProperty(parent, item)
+		if err != nil {
+			return err
+		}
+	}
+
+	if item.Items != nil {
+		err := fromDefinition(item, item.Items, name)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // setEditAttrs marks the fields as computed, optional, required or forceNew
@@ -302,15 +354,10 @@ func setEditAttrs(scope *Scope, item *Item) error {
 	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
 
 	// Applies patch
-	if p, ok := scope.Definition.Patch[item.JSONPath()]; ok {
-		item.Computed = p.Computed || item.Computed
-		item.Sensitive = p.Sensitive || item.Sensitive
-
-		// Sets the required and optional fields
-		// Can't be both required and optional
-		if p.Required || p.Optional {
-			item.Required = p.Required || !p.Optional
-			item.Optional = p.Optional || !p.Required
+	if p, ok := scope.Definition.Schema[item.Path()]; ok {
+		err := mergeItems(item, &p, true)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -321,8 +368,8 @@ func setEditAttrs(scope *Scope, item *Item) error {
 		}
 	}
 
-	if item.Element != nil {
-		err := setEditAttrs(scope, item.Element)
+	if item.Items != nil {
+		err := setEditAttrs(scope, item.Items)
 		if err != nil {
 			return err
 		}
@@ -422,15 +469,12 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, appearsIn App
 		AppearsIn: parent.AppearsIn | appearsIn,
 	}
 
-	if p, ok := scope.Definition.Patch[item.JSONPath()]; ok {
-		item.Name = or(p.Rename, item.Name)
-		item.Description = or(p.Description, item.Description)
-		item.DeprecationMessage = or(p.DeprecationMessage, item.DeprecationMessage)
+	if v, ok := scope.Definition.Rename[item.JSONPath()]; ok {
+		item.Name = v
 	} else {
 		// Keeps TF names consistent
 		item.Name = reTFName.ReplaceAllString(item.Name, "_")
 	}
-
 	return item
 }
 
@@ -486,8 +530,8 @@ func fromSchema(scope *Scope, item *Item, itemSchema *OASchema, appearsIn Appear
 
 		// Either array item or additional properties
 		if elementSchema != nil {
-			childItem.Element = newItem(scope, childItem, childName, elementSchema, appearsIn, false)
-			err := fromSchema(scope, childItem.Element, elementSchema, appearsIn)
+			childItem.Items = newItem(scope, childItem, childName, elementSchema, appearsIn, false)
+			err := fromSchema(scope, childItem.Items, elementSchema, appearsIn)
 			if err != nil {
 				return err
 			}
@@ -548,18 +592,19 @@ func getOperationID(scope *Scope, operationID string) (*OAPath, error) {
 func addProperty(parent, prop *Item) error {
 	// CRUD fields often intersect with each other
 	// Merges duplicated fields
+	prop.Parent = parent
 	other, ok := parent.Properties[prop.Name]
 	if ok {
-		if prop.Type != other.Type {
-			return fmt.Errorf("type mismatch for field %q: %q != %q", prop.Path(), other.Type, prop.Type)
-		}
-
-		err := mergeItems(prop, other)
+		err := mergeItems(prop, other, false)
 		if err != nil {
 			return err
 		}
 	}
 
+	// Definition items have nil properties
+	if parent.Properties == nil {
+		parent.Properties = make(map[string]*Item)
+	}
 	parent.Properties[prop.Name] = prop
 	return nil
 }

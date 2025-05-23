@@ -108,8 +108,8 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 		)
 		block = append(block, val, ifHasError(rootLevel), value)
 	case item.IsArray(), item.IsMap():
-		if !item.Element.IsScalar() {
-			return nil, fmt.Errorf("unsupported type %s for %s", item.Element.Type, item.Path())
+		if !item.Items.IsScalar() {
+			return nil, fmt.Errorf("unsupported type %s for %s", item.Items.Type, item.Path())
 		}
 
 		varVal := jen.Id(item.GoVarName()).Op(":=").Make(jen.Id(item.ApiType()), jen.Lit(0))

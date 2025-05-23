@@ -14,7 +14,7 @@ import (
 
 // distinct doesn't preserve the order of the input arguments.
 func distinct[T any](args ...T) []T {
-	seen := make(map[string]T)
+	seen := make(map[string]T, len(args))
 	for _, v := range args {
 		seen[fmt.Sprint(v)] = v
 	}
@@ -57,6 +57,7 @@ func fmtDescription(isResource bool, item *Item) string {
 	if isResource && item.Required && item.IsNested() {
 		// The documentation generator renders required nested blocks as optional.
 		// https://github.com/hashicorp/terraform-plugin-docs/issues/363
+		// fixme: remove this once the we render the docs on our own
 		description = "Required property. " + description
 	}
 

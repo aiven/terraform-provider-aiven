@@ -5,23 +5,31 @@ resource:
   description: Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 datasource:
   description: Gets information about an Aiven project.
-idAttribute:
-  compose:
-    - organization_id
-    - project_id
-  mutable: true
 operations:
   OrganizationProjectsCreate: create
   OrganizationProjectsDelete: delete
   OrganizationProjectsGet: read
   OrganizationProjectsUpdate: update
   ProjectKmsGetCA: read
-patch:
+idAttribute:
+  compose:
+    - organization_id
+    - project_id
+  mutable: true
+delete:
+  - end_of_life_extension
+  - features
+  - account_id
+  - project # comes from ProjectKmsGetCA
+  - tags # replaced by tag
+  - tech_emails # replaced by technical_emails
+rename:
+  certificate: ca_cert
+schema:
   base_port:
     description: Valid port number (1-65535) to use as a base for service port allocation.
     computed: true
-  certificate:
-    rename: ca_cert
+  ca_cert:
     sensitive: true
   parent_id:
     description: |
@@ -34,18 +42,29 @@ patch:
       Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. 
       It's recommended to use a random string or your organization name as a prefix or suffix. 
       Changing this property forces recreation of the resource.
-  tags:
-    rename: tag
-    # The API spec is wrong, this is an optional field
-    optional: true
-  tech_emails:
-    rename: technical_emails
-  end_of_life_extension:
-    delete: true
-  features:
-    delete: true
-  account_id:
-    delete: true
-  project:
-    # comes from ProjectKmsGetCA
-    delete: true
+  tag:
+    jsonName: tags
+    type: array
+    description: Tags are key-value pairs that allow you to categorize projects.
+    items:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Project tag key.
+          required: true
+        value:
+          type: string
+          description: Project tag value.
+          required: true
+  technical_emails:
+    jsonName: tech_emails
+    type: array
+    description: |
+      The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), 
+      who will receive important alerts and updates about this project and its services. 
+      You can also set email contacts at the service level. 
+      It's good practice to keep these up-to-date to be aware of any potential issues with your project.
+    items:
+      type: string
+      description: Technical contact email.

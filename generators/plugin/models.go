@@ -76,7 +76,7 @@ func collectModels(item *Item) []*Item {
 
 	items := make([]*Item, 0)
 	if item.IsArray() {
-		items = append(items, collectModels(item.Element)...)
+		items = append(items, collectModels(item.Items)...)
 	} else {
 		// Object properties
 		items = append(items, item)

@@ -108,7 +108,7 @@ func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, 
 			var value *jen.Statement
 			switch v.Type {
 			case SchemaTypeArray, SchemaTypeObject:
-				value = jen.Qual(typesPackage, v.Element.TFType()+"Type")
+				value = jen.Qual(typesPackage, v.Items.TFType()+"Type")
 			}
 
 			values, err := genAttributeValues(isResource, v)
@@ -152,7 +152,7 @@ func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
 	}
 
 	// Renders item or array item
-	elem := item.Element
+	elem := item.Items
 	if elem == nil {
 		elem = item
 	}

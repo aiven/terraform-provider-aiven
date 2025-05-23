@@ -10,13 +10,15 @@ func genValidators(item *Item) ([]jen.Code, error) {
 	codes := make([]jen.Code, 0)
 
 	// Integers
-	switch {
-	case item.Minimum > 0 && item.Maximum > 0:
-		codes = append(codes, jen.Qual(pkg, "Between").Call(jen.Lit(item.Minimum), jen.Lit(item.Maximum)))
-	case item.Minimum > 0:
-		codes = append(codes, jen.Qual(pkg, "AtLeast").Call(jen.Lit(item.Minimum)))
-	case item.Maximum > 0:
-		codes = append(codes, jen.Qual(pkg, "AtMost").Call(jen.Lit(item.Maximum)))
+	if item.Type == SchemaTypeInteger {
+		switch {
+		case item.Minimum > 0 && item.Maximum > 0:
+			codes = append(codes, jen.Qual(pkg, "Between").Call(jen.Lit(item.Minimum), jen.Lit(item.Maximum)))
+		case item.Minimum > 0:
+			codes = append(codes, jen.Qual(pkg, "AtLeast").Call(jen.Lit(item.Minimum)))
+		case item.Maximum > 0:
+			codes = append(codes, jen.Qual(pkg, "AtMost").Call(jen.Lit(item.Maximum)))
+		}
 	}
 
 	// Strings

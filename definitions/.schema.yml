@@ -1,79 +1,225 @@
 # yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+
 type: object
+$comment: |
+  This schema defines the structure for configuring Terraform provider resources and datasources.
+  Use this file to specify how your provider's resources and datasources should behave.
 properties:
   beta:
     type: boolean
-  location:
-    type: string
-  patch:
-    type: object
-    additionalProperties:
-      $ref: '#/definitions/Patch'
-  objectKey:
-    type: string
-  resource:
-    $ref: '#/definitions/ResDat'
+    $comment: |
+      Set to true if this resource/datasource is in beta and may have breaking changes.
   datasource:
-    $ref: '#/definitions/ResDat'
+    $ref: '#/definitions/SchemaMeta'
+    $comment: |
+      Documentation and configuration specific to this datasource.
+      Use this to provide clear descriptions for your datasource in the Terraform registry.
+  delete:
+    $ref: '#/definitions/Delete'
+    $comment: |
+      List of attributes to delete from the resource/datasource.
+      Example: delete: ["openapi_name1", "openapi_name2"]
   idAttribute:
     $ref: '#/definitions/IDAttribute'
+    $comment: |
+      Defines how the unique identifier (`id` field) for this resource is constructed.
+      This ID is used by Terraform to import the resource.
+  location:
+    type: string
+    $comment: |
+      Specifies the file path where the resource package is located.
+      Example: location: "internal/plugin/service/organization"
+  objectKey:
+    type: string
+    $comment: |
+      The unique key that identifies this resource in the provider.
+      Example: objectKey: "postgresql"
   operations:
     type: object
+    $comment: |
+      Specify which CRUD operations this resource supports.
+      Only include operations that are fully implemented in your provider.
     additionalProperties:
       $ref: '#/definitions/Operation'
+  rename:
+    $ref: '#/definitions/Rename'
+    $comment: |
+      List of attributes to rename in the resource/datasource.
+      Example: rename: {"old_openapi_name": "new_terraform_name"}
+  resource:
+    $ref: '#/definitions/SchemaMeta'
+    $comment: |
+      Documentation and configuration specific to this resource type.
+      Use this to provide clear descriptions for your resource in the Terraform registry.
+  schema:
+    $ref: '#/definitions/Schema'
+    $comment: |
+      Configuration for the resource/datasource schema.
+      Use this to override the schema from the OpenAPI spec or add new fields.
+
 required:
   - location
   - idAttribute
   - operations
+$comment: These fields must be specified for every resource/datasource
 additionalProperties: false
+
 definitions:
-  Operation:
-    type: string
-    enum:
-      - create
-      - read
-      - update
-      - delete
-  ResDat:
-    type: object
-    properties:
-      description:
-        type: string
-      deprecationMessage:
-        type: string
-    required:
-      - description
+  Delete:
+    type: array
+    items:
+      type: string
+      $comment: The attribute to delete
+
   IDAttribute:
     type: object
+    $comment: Configuration for how resource IDs are structured and managed
     properties:
       compose:
         type: array
         items:
           type: string
+        $comment: |
+          List of resource attributes that form the unique identifier.
+          Example: ["project_id", "instance_name"] would create an ID like "project-123/instance-456"
       description:
         type: string
+        $comment: |
+          Explains how the ID is formatted and what each part represents.
+          Set if the default (generated) description is not enough.
+          Example: The organization ID.
       mutable:
         type: boolean
+        $comment: |
+          Set to true if the ID components can be changed after resource creation.
+          Most resources should not set this.
+          When set to true, it doesn't generate the `UseStateForUnknown` plan modifier. 
     required:
       - compose
     additionalProperties: false
-  Patch:
+
+  Operation:
+    type: string
+    $comment: |
+      Aiven OperationID and CRUD operation pairs.
+    enum:
+      - create
+      - delete
+      - read
+      - update
+    $comment: |
+      - create: The OperationID is used to create the resource
+      - read: The OperationID is used to read the resource
+      - update: The OperationID is used to update the resource
+      - delete: The OperationID is used to delete the resource
+
+  SchemaMeta:
     type: object
+    $comment: Metadata for the resource/datasource
+    properties:
+      deprecationMessage:
+        type: string
+        $comment: |
+          Message to inform users that this resource/datasource will be removed in a future version.
+          Example: "This resource will be removed in version 3.0.0. Use postgresql_v2 instead."
+      description:
+        type: string
+        $comment: |
+          Detailed description of what this resource/datasource does and how to use it.
+          This appears in the Terraform registry documentation.
+          Example: "Manages PostgreSQL database instance"
+    required:
+      - description
+
+  Rename:
+    type: object
+    $comment: Configuration for renaming OpenAPI schema attributes
     properties:
       rename:
         type: string
-      description:
+        $comment: New name for the attribute
+
+  Schema:
+    type: object
+    $comment: Configuration for modifying resource attributes
+    properties:
+      jsonName:
         type: string
-      deprecationMessage:
-        type: string
-      sensitive:
-        type: boolean
-      optional:
-        type: boolean
-      required:
-        type: boolean
+        $comment: The name of the attribute in the JSON schema
       computed:
         type: boolean
-      delete:
+        $comment: |
+          Set to true if this attribute's value is determined by the provider/API.
+          
+      default:
+        type: any
+        $comment: Default value for this attribute
+      deprecationMessage:
+        type: string
+        $comment: |
+          Message indicating this attribute will be removed in a future version.
+          Example: "Use 'new_attribute' instead"
+      description:
+        type: string
+        $comment: |
+          Updated description for the attribute.
+          Example: "The size of the instance in GB"
+      items:
+        type: object
+        $comment: Array item or Map item configuration
+      enum:
+        type: array
+        items:
+          type: any
+        $comment: List of allowed values for this attribute
+      forceNew:
         type: boolean
+        $comment: Set to true if changes to this attribute destroy the resource
+      maximum:
+        type: integer
+        $comment: Maximum allowed value for numeric attributes
+      maxItems:
+        type: integer
+        $comment: Maximum number of items allowed in an array/list
+      maxLength:
+        type: integer
+        $comment: Maximum length allowed for string attributes
+      minimum:
+        type: integer
+        $comment: Minimum allowed value for numeric attributes
+      minItems:
+        type: integer
+        $comment: Minimum number of items required in an array/list
+      minLength:
+        type: integer
+        $comment: Minimum length required for string attributes
+      nullable:
+        type: boolean
+        $comment: Set to true if this attribute can be null. It can't be both nullable and optional.
+      optional:
+        type: boolean
+        $comment: Set to true if this attribute is optional
+      properties:
+        type: object
+        additionalProperties:
+          $ref: "#/definitions/Schema"
+        $comment: Nested attributes for object types
+      required:
+        type: boolean
+        $comment: Set to true if this attribute must be specified by the user
+      sensitive:
+        type: boolean
+        $comment: |
+          Set to true if this attribute contains sensitive data (passwords, tokens).
+          Sensitive attributes are masked in console output.
+      type:
+        type: string
+        $comment: The data type of this attribute
+        enum:
+          - string
+          - integer
+          - number
+          - boolean
+          - array
+          - object
     additionalProperties: false

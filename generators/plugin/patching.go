@@ -45,7 +45,7 @@ func readOpenAPIPatched(oaFile, patchFile string) ([]byte, error) {
 	dest = bytes.ReplaceAll(dest, []byte(`\\-`), []byte(`-`))
 
 	patch, err := os.ReadFile(filepath.Clean(patchFile))
-	if errors.Is(err, os.ErrExist) {
+	if errors.Is(err, os.ErrNotExist) {
 		// No patch found, exits
 		return dest, nil
 	}

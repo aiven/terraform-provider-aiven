@@ -107,7 +107,7 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 	switch {
 	case item.IsScalar():
 		value.Qual(typesPackage, item.TFType()+"PointerValue").Call(dtoField.Clone())
-		if item.Parent.IsRoot() && !item.Nullable && item.Type == SchemaTypeString {
+		if item.IsRootProperty() && !item.Nullable && item.Type == SchemaTypeString {
 			// Adds (*dto.State != "" || !state.State.IsNull())
 			// Ignores empty strings if user hasn't explicitly set it in the state.
 			notNil.Op("&&").Parens(
@@ -138,9 +138,9 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		}
 		block = append(block, val, ifHasError(rootLevel))
 	case item.IsArray(), item.IsMap():
-		if !item.Element.IsScalar() {
+		if !item.Items.IsScalar() {
 			// This is a map with non-scalar values
-			return nil, fmt.Errorf("unsupported type %s for %s", item.Element.Type, item.Path())
+			return nil, fmt.Errorf("unsupported type %s for %s", item.Items.Type, item.Path())
 		}
 
 		// 1. If the API returns an empty list, while the field is nil, TF will output an error.
@@ -158,7 +158,7 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 			Qual(typesPackage, item.TFType()+"ValueFrom").
 			Call(
 				jen.Id("ctx"),
-				jen.Qual(typesPackage, item.Element.TFType()+"Type"),
+				jen.Qual(typesPackage, item.Items.TFType()+"Type"),
 				dtoField.Clone(),
 			)
 		block = append(block, val, ifHasError(rootLevel))
@@ -291,7 +291,7 @@ func genAttrFieldType(item *Item) *jen.Statement {
 		return jen.Id(attrPrefix + item.UniqueName()).Call()
 	case item.IsArray():
 		return jen.Qual(typesPackage, "SetType").Values(jen.Dict{
-			jen.Id("ElemType"): genAttrFieldType(item.Element),
+			jen.Id("ElemType"): genAttrFieldType(item.Items),
 		})
 	default:
 		panic(fmt.Sprintf("genAttrFieldType, unknown item type: %s", item.TFType()))
