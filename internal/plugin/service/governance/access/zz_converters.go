@@ -18,10 +18,6 @@ import (
 
 const aivenName = "aiven_governance_access"
 
-func composeID() []string {
-	return []string{"organization_id", "susbcription_id"}
-}
-
 type tfModel struct {
 	ID               types.String `tfsdk:"id"`
 	AccessData       types.List   `tfsdk:"access_data"`
@@ -81,6 +77,12 @@ type apiModelAccessDataAcls struct {
 	Principal      *string `json:"principal,omitempty"`
 	ResourceName   *string `json:"resource_name,omitempty"`
 	ResourceType   *string `json:"resource_type,omitempty"`
+}
+
+// composeID the ID attribute fields, i.e.:
+// terraform import aiven_governance_access.foo ORGANIZATION_ID/SUSBCRIPTION_ID
+func composeID() []string {
+	return []string{"organization_id", "susbcription_id"}
 }
 
 // expandData turns TF object into Request

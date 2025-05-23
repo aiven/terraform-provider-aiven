@@ -44,7 +44,7 @@ resource "aiven_organization_user_group_member" "foo" {
   group_id        = aiven_organization_user_group.foo.group_id
   user_id         = aiven_organization_application_user.foo.user_id
 }
-	`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
+`, acc.DefaultResourceNamePrefix, suffix, acc.OrganizationName()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(name, "id"),
 				),

@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/governance/access
+objectKey: access
+operations:
+  OrganizationGovernanceAccessCreate: create
+  OrganizationGovernanceAccessDelete: delete
+  OrganizationGovernanceAccessGet: read
+resource:
+  description: |
+    Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. 
+    [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. 
+    You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
+idAttribute:
+  compose:
+    - organization_id
+    - susbcription_id
+rename:
+  access_id: susbcription_id
+  access_data/project_name: project
+delete:
+  - credentials_user_id
+  - credentials_consumed
+  - created_by
+  - create_time
+schema:
+  access_data/username:
+    optional: true
+    computed: true
+  access_data/acls/host:
+    description: The IP address from which a principal is allowed or denied access to the resource. Use `*` for all hosts.
+    computed: true # has default value "*"
+    optional: true

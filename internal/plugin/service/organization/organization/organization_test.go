@@ -237,7 +237,7 @@ data "aiven_organization" "test" {
   id   = "test-id"
   name = "test-name"
 }
-				`,
+`,
 				ExpectError: regexp.MustCompile(
 					`These attributes cannot be configured together: \[id,name\]`,
 				),
@@ -248,7 +248,7 @@ data "aiven_organization" "test" {
 data "aiven_organization" "test" {
   id = ""
 }
-				`,
+`,
 				ExpectError: regexp.MustCompile(
 					`no Organization ID or name provided`,
 				),

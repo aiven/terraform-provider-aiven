@@ -619,7 +619,7 @@ resource "aiven_alloydbomni" "alloydbomni" {
     admin_password = "%[1]s-password"
   }
 }
-	`, prefix, project)
+`, prefix, project)
 }
 
 // AlloyDBOmni service tests

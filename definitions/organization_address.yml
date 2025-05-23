@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/organization/address
+resource:
+  description: Creates and manages an organization address.
+datasource:
+  description: Gets information about an organization address.
+idAttribute:
+  compose:
+    - organization_id
+    - address_id
+operations:
+  OrganizationAddressCreate: create
+  OrganizationAddressDelete: delete
+  OrganizationAddressGet: read
+  OrganizationAddressUpdate: update

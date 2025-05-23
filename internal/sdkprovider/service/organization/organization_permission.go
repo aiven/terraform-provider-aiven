@@ -137,8 +137,8 @@ func resourceOrganizationalPermissionUpsert(ctx context.Context, d *schema.Resou
 		case util.EnvBool(envPermissionValidateConflict, true):
 			// The remote state is not empty and the validation is enabled.
 			return fmt.Errorf(
-				"resource %q already has permissions set. "+
-					"Probably there is another `aiven_organization_permission` managing it. "+
+				"resource conflict: The target %q already has permissions configured. "+
+					"This likely indicates another `aiven_organization_permission` resource is managing these permissions "+
 					"Please follow the [instructions](%s)",
 				composeID,
 				permissionRegistryDocsURL,

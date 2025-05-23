@@ -646,7 +646,7 @@ resource "aiven_pg" "pg" {
     admin_password = "%[1]s-password"
   }
 }
-	`, prefix, project)
+`, prefix, project)
 }
 
 // PG service tests

@@ -44,7 +44,7 @@ resource "aiven_pg_user" "foo" {
   service_name = %q
   username     = "user-1"
 }
-				`, projectName, serviceName),
+`, projectName, serviceName),
 				ResourceName:      "aiven_pg_user.foo",
 				ImportStateId:     util.ComposeID(projectName, serviceName, "user-1"),
 				ImportState:       true,

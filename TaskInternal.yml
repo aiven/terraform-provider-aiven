@@ -33,7 +33,7 @@ vars:
   ACC_TEST_PARALLELISM: 10               # Default parallelism for acceptance tests
   SWEEP: global                          # Default scope for resource sweeper
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
-  CHANGELOG_CMD: "{{.GO_CMD}} run ./changelog/..." # Command to run the internal changelog generation tool
+  CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
 
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
@@ -87,7 +87,7 @@ tasks:
   fmt-test:
     desc: "Format HCL code using terrafmt"
     cmds:
-      - "{{.TERRAFMT}} fmt ./internal -fv"
+      - "{{.TERRAFMT}} fmt ./internal -fq --fix-finish-lines"
 
   fmt-imports:
     desc: "Remove blank lines in Go import blocks and run goimports"
@@ -98,12 +98,31 @@ tasks:
   #-------------------------------------
   # Generate Sub-Tasks
   #-------------------------------------
+  get-spec:
+    desc: "Download/Update the Aiven OpenAPI spec"
+    aliases:
+      - spec
+    preconditions:
+      - sh: command -v curl
+        msg: "'curl' command not found. Please install curl to download the OpenAPI spec."
+    cmds:
+      - "curl -sL -o {{.OPENAPI_FILE}} {{.OPENAPI_URL}}"
+
+    generates:
+      - "{{.OPENAPI_FILE}}"
+
   gen-go:
     desc: "Run Go code generation (`go generate ./...`)"
     cmds:
       - "{{.GO_CMD}} generate ./..."
 
-  docs-generate:
+  gen-plugin:
+    desc: "Generate Terraform Plugin Framework resources"
+    cmds:
+      - task: get-spec
+      - "{{.GO_CMD}} run ./generators/plugin/..."
+
+  gen-docs:
     desc: "Generate Terraform provider documentation"
     env:
       PROVIDER_AIVEN_ENABLE_BETA: 1

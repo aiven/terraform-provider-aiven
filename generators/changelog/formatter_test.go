@@ -174,7 +174,7 @@ func TestLineWrapping(t *testing.T) {
 }
 
 func TestChangelogFile(t *testing.T) {
-	b, err := os.ReadFile("../CHANGELOG.md")
+	b, err := os.ReadFile("../../CHANGELOG.md")
 	require.NoError(t, err)
 
 	result, err := updateChangelog(string(b), 80, true)

@@ -898,5 +898,5 @@ resource "aiven_service_integration" "kafka_to_thanos" {
   destination_service_name    = aiven_thanos.thanos.service_name       // project "metrics"
   destination_service_project = aiven_thanos.thanos.project
 }
-	`, projectMetrics, projectService, acc.RandStr())
+`, projectMetrics, projectService, acc.RandStr())
 }

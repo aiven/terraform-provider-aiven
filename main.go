@@ -11,7 +11,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
-//go:generate go run ./ucgenerator/...
+//go:generate go run ./generators/userconfig/...
 
 // registryPrefix is the registry prefix for the provider.
 const registryPrefix = "registry.terraform.io/"
