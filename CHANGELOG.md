@@ -15,6 +15,12 @@ nav_order: 1
 - Add `aiven_organization_permission` conflict validation for newly created resources
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.enable_snapshot_api`: Enable/Disable snapshot
   API for custom repositories, this requires security management to be enabled.
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.pg.default_toast_compression` (enum)
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.pg.pg_stat_statements__dot__track` (enum)
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.pg.track_io_timing` (enum)
+- Change `aiven_pg` field `pg_user_config.pg.default_toast_compression` (enum)
+- Change `aiven_pg` field `pg_user_config.pg.pg_stat_statements__dot__track` (enum)
+- Change `aiven_pg` field `pg_user_config.pg.track_io_timing` (enum)
 
 ## [4.40.0] - 2025-05-14
 

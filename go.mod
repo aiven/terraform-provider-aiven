@@ -19,6 +19,7 @@ require (
 	github.com/hashicorp/terraform-plugin-mux v0.19.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.50.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.10.0
@@ -193,7 +194,6 @@ require (
 	github.com/raeperd/recvcheck v0.2.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/ryancurrah/gomodguard v1.4.1 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
@@ -261,7 +261,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.123.0
+	github.com/aiven/go-api-schemas v1.124.0
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.18.0 // indirect
