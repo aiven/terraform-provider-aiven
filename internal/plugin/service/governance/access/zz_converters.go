@@ -80,7 +80,7 @@ type apiModelAccessDataAcls struct {
 }
 
 // composeID the ID attribute fields, i.e.:
-// terraform import aiven_governance_access.foo ORGANIZATION_ID/SUSBCRIPTION_ID
+// terraform import aiven_governance_access.foo ORGANIZATION_ID\SUSBCRIPTION_ID
 func composeID() []string {
 	return []string{"organization_id", "susbcription_id"}
 }

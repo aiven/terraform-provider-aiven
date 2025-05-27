@@ -51,7 +51,7 @@ type apiModel struct {
 }
 
 // composeID the ID attribute fields, i.e.:
-// terraform import aiven_organization_address.foo ORGANIZATION_ID/ADDRESS_ID
+// terraform import aiven_organization_address.foo ORGANIZATION_ID\ADDRESS_ID
 func composeID() []string {
 	return []string{"organization_id", "address_id"}
 }

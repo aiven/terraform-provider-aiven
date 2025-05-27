@@ -30,6 +30,7 @@ resource "random_string" "suffix" {
 resource "aiven_organization_project" "example_project" {
   project_id       = "example-project-${random_string.suffix.result}"
   organization_id  = aiven_organization.main.id
+  parent_id        = aiven_organization.main.id
   billing_group_id = aiven_billing_group.main.id
 
   tag {
