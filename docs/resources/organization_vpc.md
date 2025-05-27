@@ -10,7 +10,7 @@ description: |-
 
 # aiven_organization_vpc (Resource)
 
-Creates and manages a VPC for an Aiven organization.
+Creates and manages a VPC for an Aiven organization. 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -20,8 +20,8 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ```terraform
 resource "aiven_organization_vpc" "example_vpc" {
   organization_id = data.aiven_organization.example.id
-  cloud_name     = "aws-eu-central-1"
-  network_cidr   = "10.0.0.0/24"
+  cloud_name      = "aws-eu-central-1"
+  network_cidr    = "10.0.0.0/24"
 }
 ```
 

@@ -14,7 +14,7 @@ Gets information about an existing user group in an organization.
 
 ```terraform
 data "aiven_organization_user_group" "example" {
-  name = "Example group"
+  name            = "Example group"
   organization_id = aiven_organization.main.id
 }
 ```

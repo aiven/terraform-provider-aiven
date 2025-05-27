@@ -10,7 +10,7 @@ description: |-
 
 # aiven_governance_access (Resource)
 
-Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
+Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals). 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -19,24 +19,24 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ```terraform
 resource "aiven_governance_access" "example_access" {
- organization_id = data.aiven_organization.main.id
- access_name     = "example-topic-access"
- access_type     = "KAFKA"
+  organization_id = data.aiven_organization.main.id
+  access_name     = "example-topic-access"
+  access_type     = "KAFKA"
 
- access_data {
-   project      = data.aiven_project.example_project.project
-   service_name = aiven_kafka.example_kafka.service_name
+  access_data {
+    project      = data.aiven_project.example_project.project
+    service_name = aiven_kafka.example_kafka.service_name
 
-   acls {
-     resource_name   = "example-topic"
-     resource_type   = "Topic"
-     operation       = "Read"
-     permission_type = "ALLOW"
-     host            = "*"
-   }
- }
+    acls {
+      resource_name   = "example-topic"
+      resource_type   = "Topic"
+      operation       = "Read"
+      permission_type = "ALLOW"
+      host            = "*"
+    }
+  }
 
- owner_user_group_id = aiven_organization_user_group.example.group_id
+  owner_user_group_id = aiven_organization_user_group.example.group_id
 }
 ```
 
