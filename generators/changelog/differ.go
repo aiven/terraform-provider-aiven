@@ -53,6 +53,9 @@ func diffItems(was, have *Item) (*Diff, error) {
 
 		var entry string
 		switch k {
+		case "description":
+			// No need to log description changes
+			continue
 		case "deprecated":
 			entry = "remove deprecation"
 			if have.Deprecated != "" {
