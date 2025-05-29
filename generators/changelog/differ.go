@@ -76,13 +76,15 @@ func diffItems(was, have *Item) (*Diff, error) {
 		entries = append(entries, entry)
 	}
 
-	if len(entries) == 0 {
+	// Nothing has changed
+	description := strings.Join(entries, ", ")
+	if description == "" {
 		return nil, nil
 	}
 
 	return &Diff{
 		Action:      ChangeDiffAction,
-		Description: strings.Join(entries, ", "),
+		Description: description,
 		Item:        have,
 	}, nil
 }

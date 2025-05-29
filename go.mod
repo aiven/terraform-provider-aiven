@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/aiven/aiven-go-client/v2 v2.34.0
-	github.com/aiven/go-client-codegen v0.108.0
+	github.com/aiven/go-client-codegen v0.109.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
@@ -261,7 +261,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.123.0
+	github.com/aiven/go-api-schemas v1.124.0
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.18.0 // indirect
