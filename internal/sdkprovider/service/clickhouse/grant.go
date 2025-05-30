@@ -7,6 +7,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
 	"github.com/aiven/aiven-go-client/v2"
 )
 
@@ -136,9 +138,29 @@ func ReadPrivilegeGrants(
 		if !grant.Grantee.equals(grantee) {
 			continue
 		}
+
+		if isNamedCollectionPrivilege(grant) {
+			tflog.Debug(ctx, "Skipping named collection privilege grant", map[string]any{
+				"grantee":   grantee,
+				"database":  grant.Database,
+				"privilege": grant.Privilege,
+			})
+
+			continue
+		}
+
 		res = append(res, grant)
 	}
 	return res, err
+}
+
+// isNamedCollectionPrivilege checks if the privilege grant is for a named collection.
+// Named collections in ClickHouse are not supported by the current implementation, so we skip them.
+// This is a workaround to avoid issues with named collections.
+// We can't support named collections because they are not part of the standard SQL privileges and are specific to ClickHouse.
+// @see https://github.com/ClickHouse/ClickHouse/issues/80853
+func isNamedCollectionPrivilege(grant PrivilegeGrant) bool {
+	return grant.Database == ""
 }
 
 func RevokePrivilegeGrant(
