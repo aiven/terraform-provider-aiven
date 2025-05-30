@@ -335,6 +335,127 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 	})
 }
 
+// TestAccAivenClickhouseGrantRole demonstrates the creation of a ClickHouse grant for a role
+// with overlapping privileges. It leads to non-empty plan output.
+func TestAccAivenClickhouseOverlappingGrants(t *testing.T) {
+	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	projectName := acc.ProjectName()
+
+	baseConfig := fmt.Sprintf(`
+resource "aiven_clickhouse" "bar" {
+  project                 = "%s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "hobbyist"
+  service_name            = "%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_clickhouse_database" "testdb" {
+  project      = aiven_clickhouse.bar.project
+  service_name = aiven_clickhouse.bar.service_name
+  name         = "test-db"
+}
+
+resource "aiven_clickhouse_user" "foo-user" {
+  service_name = aiven_clickhouse.bar.service_name
+  project      = aiven_clickhouse.bar.project
+  username     = "foo-user"
+}
+
+variable "database_privileges_list" {
+  description = "List of privileges to grant on the main database"
+  type        = list(string)
+  default = [
+    "SELECT",
+    "INSERT",
+    "DELETE", # overlapping with ALTER DELETE
+    "ALTER UPDATE",
+    "ALTER VIEW",
+    "ALTER INDEX",
+    "ALTER DELETE",
+    "ALTER ADD PROJECTION", # overlapping with ALTER PROJECTION
+    "ALTER COLUMN",
+    "ALTER CONSTRAINT",
+    "ALTER FETCH PARTITION",
+    "ALTER MATERIALIZE TTL",
+    "ALTER MOVE PARTITION",
+    "ALTER SETTINGS",
+    "ALTER TTL",
+    "ALTER MODIFY COMMENT",
+    "ALTER PROJECTION",
+    "CREATE TABLE",
+    "CREATE VIEW",
+    "CREATE DICTIONARY",
+    "DROP TABLE",
+    "DROP VIEW",
+    "DROP DICTIONARY",
+    "dictGet",
+    "TRUNCATE",
+    "SHOW"
+  ]
+}
+
+resource "aiven_clickhouse_grant" "foo" {
+  project      = aiven_clickhouse.bar.project
+  service_name = aiven_clickhouse.bar.service_name
+  user         = aiven_clickhouse_user.foo-user.username
+
+  # Dynamically grant privileges from the list to main_db
+  dynamic "privilege_grant" {
+    for_each = toset(var.database_privileges_list)
+    content {
+      privilege = privilege_grant.value
+      database  = aiven_clickhouse_database.testdb.name
+    }
+  }
+
+  # Privileges on all databases ("*")
+  privilege_grant {
+    privilege = "CREATE TEMPORARY TABLE"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "CREATE FUNCTION"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "DROP FUNCTION"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "POSTGRES"
+    database  = "*"
+  }
+}
+`, projectName, serviceName)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenClickhouseGrantResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: baseConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "SELECT",
+							"database":  "test-db",
+						},
+					),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 // TestAccAivenClickhouseGrantInvalid tests the case where neither user nor role is specified in the grant.
 // This should fail with an error.
 func TestAccAivenClickhouseGrantInvalid(t *testing.T) {
