@@ -133,12 +133,21 @@ func ReadPrivilegeGrants(
 	}
 	res := make([]PrivilegeGrant, 0)
 	for _, grant := range privilegeGrants {
-		if !grant.Grantee.equals(grantee) {
+		if !grant.Grantee.equals(grantee) || isNamedCollectionPrivilege(grant) {
 			continue
 		}
 		res = append(res, grant)
 	}
 	return res, err
+}
+
+// isNamedCollectionPrivilege checks if the privilege grant is for a named collection.
+// Named collections in ClickHouse are not supported by the current implementation, so we skip them.
+// This is a workaround to avoid issues with named collections.
+// We can't support named collections because they are not part of the standard SQL privileges and are specific to ClickHouse.
+// @see https://github.com/ClickHouse/ClickHouse/issues/80853
+func isNamedCollectionPrivilege(grant PrivilegeGrant) bool {
+	return grant.Database == ""
 }
 
 func RevokePrivilegeGrant(
