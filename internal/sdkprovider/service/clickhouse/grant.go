@@ -7,6 +7,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
 	"github.com/aiven/aiven-go-client/v2"
 )
 
@@ -133,9 +135,20 @@ func ReadPrivilegeGrants(
 	}
 	res := make([]PrivilegeGrant, 0)
 	for _, grant := range privilegeGrants {
-		if !grant.Grantee.equals(grantee) || isNamedCollectionPrivilege(grant) {
+		if !grant.Grantee.equals(grantee) {
 			continue
 		}
+
+		if isNamedCollectionPrivilege(grant) {
+			tflog.Debug(ctx, "Skipping named collection privilege grant", map[string]any{
+				"grantee":   grantee,
+				"database":  grant.Database,
+				"privilege": grant.Privilege,
+			})
+
+			continue
+		}
+
 		res = append(res, grant)
 	}
 	return res, err
