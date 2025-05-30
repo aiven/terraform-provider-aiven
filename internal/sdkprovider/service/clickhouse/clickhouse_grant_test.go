@@ -365,7 +365,7 @@ resource "aiven_clickhouse_user" "foo-user" {
 
 variable "database_privileges_list" {
   description = "List of privileges to grant on the main database"
-  type = list(string)
+  type        = list(string)
   default = [
     "SELECT",
     "INSERT",
@@ -428,7 +428,7 @@ resource "aiven_clickhouse_grant" "foo" {
 
   privilege_grant {
     privilege = "POSTGRES"
-    database = "*"
+    database  = "*"
   }
 }
 `, projectName, serviceName)
