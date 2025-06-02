@@ -26,6 +26,10 @@ vars:
   MOCKERY: "{{.GOTOOL_CMD}} mockery"
   TESTSUM: "{{.GOTOOL_CMD}} gotestsum"
 
+  # --- Pre-commit ---
+  PRECOMMIT_IMAGE: "ghcr.io/antonbabenko/pre-commit-terraform:v1.99.1"
+  PRECOMMIT_CONFIG: ".pre-commit-config.yaml"
+
   # --- Defaults ---
   PKG_PATH: internal                     # Default Go package path for acceptance tests
   TEST_COUNT: 1                          # Default count for running tests
@@ -94,6 +98,16 @@ tasks:
     cmds:
       - find . -type f -name '*.go' -exec sed -i '/^import ($$/,/^)/ {/^[[:space:]]*$$/d}' {} +
       - goimports -local "github.com/aiven/terraform-provider-aiven" -w .
+
+  fmt-precommit:
+    desc: "Run pre-commit hooks using Docker"
+    preconditions:
+      - sh: "test -f {{.PRECOMMIT_CONFIG}}"
+        msg: "Pre-commit configuration file '{{.PRECOMMIT_CONFIG}}' not found."
+      - sh: "{{.CONTAINER_TOOL}} info >/dev/null 2>&1"
+        msg: "Container engine (Docker/Podman) is not running. Please start the service."
+    cmds:
+      - "{{.CONTAINER_TOOL}} run --rm -v \"{{.ROOT_DIR}}:/lint\" -w /lint {{.PRECOMMIT_IMAGE}} run -a"
 
   #-------------------------------------
   # Generate Sub-Tasks

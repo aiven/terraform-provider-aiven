@@ -12,10 +12,6 @@ variable "aiven_api_token" {
   type = string
 }
 
-variable "aiven_card_id" {
-  type = string
-}
-
 provider "aiven" {
   api_token = var.aiven_api_token
 }

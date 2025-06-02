@@ -38,9 +38,9 @@ schema:
     required: true
   project_id:
     description: |
-      The name of the project. Names must be globally unique among all Aiven customers. 
-      Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. 
-      It's recommended to use a random string or your organization name as a prefix or suffix. 
+      The name of the project. Names must be globally unique among all Aiven customers.
+      Names must begin with a letter (a-z), and consist of letters, numbers, and dashes.
+      It's recommended to use a random string or your organization name as a prefix or suffix.
       Changing this property forces recreation of the resource.
   tag:
     jsonName: tags
@@ -61,9 +61,9 @@ schema:
     jsonName: tech_emails
     type: array
     description: |
-      The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), 
-      who will receive important alerts and updates about this project and its services. 
-      You can also set email contacts at the service level. 
+      The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails),
+      who will receive important alerts and updates about this project and its services.
+      You can also set email contacts at the service level.
       It's good practice to keep these up-to-date to be aware of any potential issues with your project.
     items:
       type: string

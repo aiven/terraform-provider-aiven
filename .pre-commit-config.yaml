@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+        exclude: ^definitions/.schema.yml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: ^definitions/.schema.yml
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.99.1
+    hooks:
+      - id: terraform_fmt
+        files: ^examples/.*\.tf$
+        exclude: ^examples/(data-sources|resources)/.*\.tf$
+      - id: terraform_tflint
+        files: ^examples/.*\.tf$
+        exclude: ^examples/(data-sources|resources)/.*\.tf$
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl

@@ -22,7 +22,7 @@ resource "aiven_clickhouse_grant" "role_privileges" {
   }
 
   # Global privileges
-    privilege_grant {
+  privilege_grant {
     privilege = "CREATE TEMPORARY TABLE"
     database  = "*"
   }

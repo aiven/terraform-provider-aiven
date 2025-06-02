@@ -1,5 +1,5 @@
 output "mysql_service_uri" {
-  value = aiven_mysql.example_mysql.service_uri
+  value     = aiven_mysql.example_mysql.service_uri
   sensitive = true
 }
 

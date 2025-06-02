@@ -1,7 +1,7 @@
 variable "aiven_token" {
   description = "Aiven API token"
   type        = string
-  sensitive = true
+  sensitive   = true
 }
 
 variable "aiven_project_name" {
@@ -31,16 +31,16 @@ variable "external_postgres_service_name" {
 
 variable "s3_bucket_access_key" {
   default = "AKIAIOSFODNN7EXAMPLE"
-  type        = string
+  type    = string
 }
 
 variable "s3_bucket_secret_key" {
-  default = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-  type        = string
+  default   = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  type      = string
   sensitive = true
 }
 
 variable "s3_bucket_url" {
   default = "https://mybucket.s3-myregion.amazonaws.com/mydataset/"
-  type        = string
+  type    = string
 }

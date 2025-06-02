@@ -104,6 +104,7 @@ tasks:
     cmds:
       - task: internal:fmt-go
       - task: internal:fmt-test
+      - task: internal:fmt-precommit
       - task: internal:fmt-imports
 
   #################################################

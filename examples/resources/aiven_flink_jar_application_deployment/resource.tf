@@ -19,15 +19,15 @@ resource "aiven_flink_jar_application" "example" {
 }
 
 resource "aiven_flink_jar_application_version" "example" {
-  project      = aiven_flink.example.project
-  service_name = aiven_flink.example.service_name
+  project        = aiven_flink.example.project
+  service_name   = aiven_flink.example.service_name
   application_id = aiven_flink_jar_application.example.application_id
   source         = "./example.jar"
 }
 
 resource "aiven_flink_jar_application_deployment" "example" {
-  project      = aiven_flink.example.project
-  service_name = aiven_flink.example.service_name
+  project        = aiven_flink.example.project
+  service_name   = aiven_flink.example.service_name
   application_id = aiven_flink_jar_application.example.application_id
   version_id     = aiven_flink_jar_application_version.example.application_version_id
 }

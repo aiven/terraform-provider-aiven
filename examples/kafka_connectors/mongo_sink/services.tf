@@ -31,15 +31,3 @@ resource "aiven_kafka_topic" "kafka-topic1" {
   partitions   = 3
   replication  = 2
 }
-
-data "aiven_kafka_user" "kafka_admin" {
-  project      = aiven_project.kafka-con-project1.project
-  service_name = aiven_kafka.kafka-service1.service_name
-
-  # default admin user that is automatically created each Aiven service
-  username = "avnadmin"
-
-  depends_on = [
-    aiven_kafka.kafka-service1
-  ]
-}

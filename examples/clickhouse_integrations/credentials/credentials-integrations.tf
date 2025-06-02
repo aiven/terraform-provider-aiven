@@ -29,4 +29,3 @@ resource "aiven_service_integration" "external_clickhouse_managed_credentials" {
   source_endpoint_id       = aiven_service_integration_endpoint.external_clickhouse.id
   destination_service_name = aiven_clickhouse.clickhouse.service_name
 }
-

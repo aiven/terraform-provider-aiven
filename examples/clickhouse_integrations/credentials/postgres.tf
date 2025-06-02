@@ -18,4 +18,3 @@ resource "aiven_service_integration_endpoint" "external_postgres" {
     password = aiven_pg.external_postgres.service_password
   }
 }
-
