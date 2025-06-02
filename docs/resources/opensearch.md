@@ -246,8 +246,10 @@ Optional:
 - `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true.
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
 - `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
+- `cluster_filecache_remote_data_ratio` (Number) Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 0.
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
-- `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.
+- `cluster_remote_store` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_remote_store))
+- `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
 - `cluster_search_request_slowlog` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog))
 - `disk_watermarks` (Block List, Max: 1) Watermark settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--disk_watermarks))
@@ -277,9 +279,11 @@ Optional:
 - `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Example: `30`.
 - `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
 - `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size.
+- `node_search_cache_size` (String) Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 5gb. Requires restarting all OpenSearch nodes.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
+- `remote_store` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--remote_store))
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
 - `search_backpressure` (Block List, Max: 1) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
 - `search_insights_top_queries` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries))
@@ -334,6 +338,17 @@ Optional:
 
 
 
+<a id="nestedblock--opensearch_user_config--opensearch--cluster_remote_store"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_remote_store`
+
+Optional:
+
+- `state_global_metadata_upload_timeout` (String) The amount of time to wait for the cluster state upload to complete. Defaults to 20s.
+- `state_metadata_manifest_upload_timeout` (String) The amount of time to wait for the manifest file upload to complete. The manifest file contains the details of each of the files uploaded for a single cluster state, both index metadata files and global metadata files. Defaults to 20s.
+- `translog_buffer_interval` (String) The default value of the translog buffer interval used when performing periodic translog updates. This setting is only effective when the index setting `index.remote_store.translog.buffer_interval` is not present. Defaults to 650ms.
+- `translog_max_readers` (Number) Sets the maximum number of open translog files for remote-backed indexes. This limits the total number of translog files per shard. After reaching this limit, the remote store flushes the translog files. Default is 1000. The minimum required is 100. Example: `1000`.
+
+
 <a id="nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog"></a>
 ### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog`
 
@@ -362,6 +377,17 @@ Required:
 - `flood_stage` (Number) The flood stage watermark for disk usage. Example: `95`.
 - `high` (Number) The high watermark for disk usage. Example: `90`.
 - `low` (Number) The low watermark for disk usage. Example: `85`.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--remote_store"></a>
+### Nested Schema for `opensearch_user_config.opensearch.remote_store`
+
+Optional:
+
+- `segment_pressure_bytes_lag_variance_factor` (Number) The variance factor that is used together with the moving average to calculate the dynamic bytes lag threshold for activating remote segment backpressure. Defaults to 10.
+- `segment_pressure_consecutive_failures_limit` (Number) The minimum consecutive failure count for activating remote segment backpressure. Defaults to 5.
+- `segment_pressure_enabled` (Boolean) Enables remote segment backpressure. Default is `true`.
+- `segment_pressure_time_lag_variance_factor` (Number) The variance factor that is used together with the moving average to calculate the dynamic time lag threshold for activating remote segment backpressure. Defaults to 10.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--search_backpressure"></a>

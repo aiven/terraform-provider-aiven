@@ -743,7 +743,7 @@ func pgUserConfig() *schema.Schema {
 			"timescaledb": {
 				Description: "System-wide settings for the timescaledb extension",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_background_workers": {
-					Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. Default: `16`.",
+					Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. Changing this parameter causes a service restart. Default: `16`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				}}},

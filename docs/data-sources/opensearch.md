@@ -223,7 +223,9 @@ Read-Only:
 - `action_auto_create_index_enabled` (Boolean)
 - `action_destructive_requires_name` (Boolean)
 - `auth_failure_listeners` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners))
+- `cluster_filecache_remote_data_ratio` (Number)
 - `cluster_max_shards_per_node` (Number)
+- `cluster_remote_store` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--cluster_remote_store))
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `cluster_search_request_slowlog` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog))
@@ -254,9 +256,11 @@ Read-Only:
 - `ism_history_rollover_retention_period` (Number)
 - `knn_memory_circuit_breaker_enabled` (Boolean)
 - `knn_memory_circuit_breaker_limit` (Number)
+- `node_search_cache_size` (String)
 - `override_main_response_version` (Boolean)
 - `plugins_alerting_filter_by_backend_roles` (Boolean)
 - `reindex_remote_whitelist` (List of String)
+- `remote_store` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--remote_store))
 - `script_max_compilations_rate` (String)
 - `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
 - `search_insights_top_queries` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries))
@@ -311,6 +315,17 @@ Read-Only:
 
 
 
+<a id="nestedobjatt--opensearch_user_config--opensearch--cluster_remote_store"></a>
+### Nested Schema for `opensearch_user_config.opensearch.cluster_remote_store`
+
+Read-Only:
+
+- `state_global_metadata_upload_timeout` (String)
+- `state_metadata_manifest_upload_timeout` (String)
+- `translog_buffer_interval` (String)
+- `translog_max_readers` (Number)
+
+
 <a id="nestedobjatt--opensearch_user_config--opensearch--cluster_search_request_slowlog"></a>
 ### Nested Schema for `opensearch_user_config.opensearch.cluster_search_request_slowlog`
 
@@ -339,6 +354,17 @@ Read-Only:
 - `flood_stage` (Number)
 - `high` (Number)
 - `low` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--remote_store"></a>
+### Nested Schema for `opensearch_user_config.opensearch.remote_store`
+
+Read-Only:
+
+- `segment_pressure_bytes_lag_variance_factor` (Number)
+- `segment_pressure_consecutive_failures_limit` (Number)
+- `segment_pressure_enabled` (Boolean)
+- `segment_pressure_time_lag_variance_factor` (Number)
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure"></a>

@@ -32,10 +32,10 @@ func (tf *tfModel) SetID(vOrganizationID string) {
 type tfModelBillingGroups struct {
 	BillingAddressID     types.String `tfsdk:"billing_address_id"`
 	BillingContactEmails types.Set    `tfsdk:"billing_contact_emails"`
-	BillingCurrency      types.String `tfsdk:"billing_currency"`
 	BillingEmails        types.Set    `tfsdk:"billing_emails"`
 	BillingGroupID       types.String `tfsdk:"billing_group_id"`
 	BillingGroupName     types.String `tfsdk:"billing_group_name"`
+	Currency             types.String `tfsdk:"currency"`
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
 	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
@@ -51,10 +51,10 @@ type apiModel struct {
 type apiModelBillingGroups struct {
 	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
 	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
-	BillingCurrency      *string   `json:"billing_currency,omitempty"`
 	BillingEmails        *[]string `json:"billing_emails,omitempty"`
 	BillingGroupID       *string   `json:"billing_group_id,omitempty"`
 	BillingGroupName     *string   `json:"billing_group_name,omitempty"`
+	Currency             *string   `json:"currency,omitempty"`
 	CustomInvoiceText    *string   `json:"custom_invoice_text,omitempty"`
 	OrganizationID       *string   `json:"organization_id,omitempty"`
 	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
@@ -115,14 +115,14 @@ func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfM
 	if api.BillingAddressID != nil {
 		state.BillingAddressID = types.StringPointerValue(api.BillingAddressID)
 	}
-	if api.BillingCurrency != nil {
-		state.BillingCurrency = types.StringPointerValue(api.BillingCurrency)
-	}
 	if api.BillingGroupID != nil {
 		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
 	}
 	if api.BillingGroupName != nil {
 		state.BillingGroupName = types.StringPointerValue(api.BillingGroupName)
+	}
+	if api.Currency != nil {
+		state.Currency = types.StringPointerValue(api.Currency)
 	}
 	if api.CustomInvoiceText != nil {
 		state.CustomInvoiceText = types.StringPointerValue(api.CustomInvoiceText)
@@ -146,10 +146,10 @@ func attrsBillingGroups() types.ObjectType {
 	return types.ObjectType{AttrTypes: map[string]attr.Type{
 		"billing_address_id":     types.StringType,
 		"billing_contact_emails": types.SetType{ElemType: types.StringType},
-		"billing_currency":       types.StringType,
 		"billing_emails":         types.SetType{ElemType: types.StringType},
 		"billing_group_id":       types.StringType,
 		"billing_group_name":     types.StringType,
+		"currency":               types.StringType,
 		"custom_invoice_text":    types.StringType,
 		"organization_id":        types.StringType,
 		"payment_method_id":      types.StringType,

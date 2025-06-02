@@ -10,6 +10,15 @@ nav_order: 1
 
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_filecache_remote_data_ratio`: Defines a limit
+  of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_remote_store`
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.node_search_cache_size`: Defines a limit of how much
+  total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.remote_store`
+
 ## [4.41.0] - 2025-05-30
 
 - Add `aiven_organization_permission` conflict validation for newly created resources
