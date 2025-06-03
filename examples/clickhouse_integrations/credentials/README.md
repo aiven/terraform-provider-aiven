@@ -2,7 +2,7 @@
 
 This example creates an Aiven for ClickHouse® cluster and integrates it with credentials stored as service integration endpoints.
 
-The integration endpoint with your S3 bucket is defined by the S3 URL and access keys stored in Terraform variables. 
+The integration endpoint with your S3 bucket is defined by the S3 URL and access keys stored in Terraform variables.
 The endpoint is made available to the ClickHouse cluster through a [managed credentials integration](https://aiven.io/docs/products/clickhouse/concepts/data-integration-overview#managed-credentials-integration).
 
 Aiven for PostgreSQL®, MySQL, and ClickHouse services are created to show how remote databases would be integrated.

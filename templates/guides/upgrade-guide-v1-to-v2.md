@@ -54,7 +54,7 @@ have the older syntax, update it:
 
 4.  To see other fixes recommended by HashiCorp, run `terraform 0.13upgrade` .
 
-5.  Run `terraform init -upgrade`. 
+5.  Run `terraform init -upgrade`.
 
 6.  Remove the old Terraform folder by running `rm -rf ~/.terraform.d`.
 

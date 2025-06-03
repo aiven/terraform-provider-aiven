@@ -27,7 +27,7 @@ resource "aiven_kafka" "kafka-service" {
 resource "aiven_aws_privatelink" "aws_pl" {
   project      = data.aiven_project.pr1.project
   service_name = aiven_kafka.kafka-service.service_name
-  principals   = [
+  principals = [
     "arn:aws:iam::012345678901:role/my-privatelink-role",
   ]
 }

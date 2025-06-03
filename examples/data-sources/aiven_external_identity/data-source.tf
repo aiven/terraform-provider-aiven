@@ -17,4 +17,3 @@ data "aiven_external_identity" "external_id_mapping" {
   internal_user_id      = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "EMAIL_ADDRESS"])
   organization_id       = data.aiven_organization.main.id
 }
-

@@ -80,7 +80,7 @@ resource "azuread_service_principal" "app_principal" {
   client_id = azuread_application.example_app.client_id
 }
 
-# Set a password for the application object. 
+# Set a password for the application object.
 resource "azuread_application_password" "app_password" {
   application_id = azuread_application.example_app.application_id
 }

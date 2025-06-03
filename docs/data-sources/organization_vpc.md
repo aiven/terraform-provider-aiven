@@ -10,7 +10,7 @@ description: |-
 
 # aiven_organization_vpc (Data Source)
 
-Gets information about an existing VPC in an Aiven organization. 
+Gets information about an existing VPC in an Aiven organization.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

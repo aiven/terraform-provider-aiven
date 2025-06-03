@@ -18,4 +18,3 @@ resource "aiven_service_integration_endpoint" "external_mysql" {
     password = aiven_mysql.external_mysql.service_password
   }
 }
-

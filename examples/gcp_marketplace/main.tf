@@ -32,7 +32,7 @@ data "aiven_organization" "org" {
 }
 
 resource "aiven_project" "new_project" {
-  project    = "new-project"
+  project   = "new-project"
   parent_id = data.aiven_organization.org.id # This is required for new marketplace projects
 }
 

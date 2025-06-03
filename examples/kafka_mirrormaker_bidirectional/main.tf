@@ -12,9 +12,3 @@ terraform {
 provider "aiven" {
   api_token = var.aiven_api_token
 }
-
-# # Project
-# resource "aiven_project" "prj" {
-#   project = var.aiven_api_project
-#   card_id = var.aiven_card_id
-# }
