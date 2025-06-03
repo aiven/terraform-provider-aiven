@@ -41,10 +41,6 @@ func newDatasourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "List of billing contact emails.",
 			},
-			"billing_currency": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-			},
 			"billing_emails": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -57,6 +53,10 @@ func newDatasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing Group Name.",
+			},
+			"currency": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				Computed:            true,

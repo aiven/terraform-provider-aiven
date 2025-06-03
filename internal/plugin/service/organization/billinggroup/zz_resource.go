@@ -44,11 +44,6 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of billing contact emails.",
 				Required:            true,
 			},
-			"billing_currency": schema.StringAttribute{
-				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-				Optional:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "SGD", "USD")},
-			},
 			"billing_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "List of billing contact emails.",
@@ -62,6 +57,11 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Billing Group Name. Maximum length: `128`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
+			},
+			"currency": schema.StringAttribute{
+				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.OneOf("AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "SGD", "USD")},
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `254`.",
