@@ -471,13 +471,45 @@ func opensearchUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"cluster_filecache_remote_data_ratio": {
+						Description: "Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 0.",
+						Optional:    true,
+						Type:        schema.TypeFloat,
+					},
 					"cluster_max_shards_per_node": {
 						Description: "Controls the number of shards allowed in the cluster per data node. Example: `1000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"cluster_remote_store": {
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"state_global_metadata_upload_timeout": {
+								Description: "The amount of time to wait for the cluster state upload to complete. Defaults to 20s.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"state_metadata_manifest_upload_timeout": {
+								Description: "The amount of time to wait for the manifest file upload to complete. The manifest file contains the details of each of the files uploaded for a single cluster state, both index metadata files and global metadata files. Defaults to 20s.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"translog_buffer_interval": {
+								Description: "The default value of the translog buffer interval used when performing periodic translog updates. This setting is only effective when the index setting `index.remote_store.translog.buffer_interval` is not present. Defaults to 650ms.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"translog_max_readers": {
+								Description: "Sets the maximum number of open translog files for remote-backed indexes. This limits the total number of translog files per shard. After reaching this limit, the remote store flushes the translog files. Default is 1000. The minimum required is 100. Example: `1000`.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"cluster_routing_allocation_balance_prefer_primary": {
-						Description: "When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.",
+						Description: "When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -680,6 +712,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"node_search_cache_size": {
+						Description: "Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 5gb. Requires restarting all OpenSearch nodes.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"override_main_response_version": {
 						Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 						Optional:    true,
@@ -697,6 +734,33 @@ func opensearchUserConfig() *schema.Schema {
 							Type:        schema.TypeString,
 						},
 						MaxItems: 32,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"remote_store": {
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"segment_pressure_bytes_lag_variance_factor": {
+								Description: "The variance factor that is used together with the moving average to calculate the dynamic bytes lag threshold for activating remote segment backpressure. Defaults to 10.",
+								Optional:    true,
+								Type:        schema.TypeFloat,
+							},
+							"segment_pressure_consecutive_failures_limit": {
+								Description: "The minimum consecutive failure count for activating remote segment backpressure. Defaults to 5.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"segment_pressure_enabled": {
+								Description: "Enables remote segment backpressure. Default is `true`.",
+								Optional:    true,
+								Type:        schema.TypeBool,
+							},
+							"segment_pressure_time_lag_variance_factor": {
+								Description: "The variance factor that is used together with the moving average to calculate the dynamic time lag threshold for activating remote segment backpressure. Defaults to 10.",
+								Optional:    true,
+								Type:        schema.TypeFloat,
+							},
+						}},
+						MaxItems: 1,
 						Optional: true,
 						Type:     schema.TypeList,
 					},

@@ -21,10 +21,10 @@ type tfModel struct {
 	ID                   types.String `tfsdk:"id"`
 	BillingAddressID     types.String `tfsdk:"billing_address_id"`
 	BillingContactEmails types.Set    `tfsdk:"billing_contact_emails"`
-	BillingCurrency      types.String `tfsdk:"billing_currency"`
 	BillingEmails        types.Set    `tfsdk:"billing_emails"`
 	BillingGroupID       types.String `tfsdk:"billing_group_id"`
 	BillingGroupName     types.String `tfsdk:"billing_group_name"`
+	Currency             types.String `tfsdk:"currency"`
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
 	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
@@ -41,10 +41,10 @@ func (tf *tfModel) SetID(vOrganizationID string, vBillingGroupID string) {
 type apiModel struct {
 	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
 	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
-	BillingCurrency      *string   `json:"billing_currency,omitempty"`
 	BillingEmails        *[]string `json:"billing_emails,omitempty"`
 	BillingGroupID       *string   `json:"billing_group_id,omitempty"`
 	BillingGroupName     *string   `json:"billing_group_name,omitempty"`
+	Currency             *string   `json:"currency,omitempty"`
 	CustomInvoiceText    *string   `json:"custom_invoice_text,omitempty"`
 	OrganizationID       *string   `json:"organization_id,omitempty"`
 	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
@@ -81,13 +81,13 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		vBillingAddressID := plan.BillingAddressID.ValueString()
 		api.BillingAddressID = &vBillingAddressID
 	}
-	if !plan.BillingCurrency.IsNull() || state != nil && !state.BillingCurrency.IsNull() {
-		vBillingCurrency := plan.BillingCurrency.ValueString()
-		api.BillingCurrency = &vBillingCurrency
-	}
 	if !plan.BillingGroupName.IsNull() || state != nil && !state.BillingGroupName.IsNull() {
 		vBillingGroupName := plan.BillingGroupName.ValueString()
 		api.BillingGroupName = &vBillingGroupName
+	}
+	if !plan.Currency.IsNull() || state != nil && !state.Currency.IsNull() {
+		vCurrency := plan.Currency.ValueString()
+		api.Currency = &vCurrency
 	}
 	if !plan.CustomInvoiceText.IsNull() || state != nil && !state.CustomInvoiceText.IsNull() {
 		vCustomInvoiceText := plan.CustomInvoiceText.ValueString()
@@ -144,14 +144,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.BillingAddressID != nil && (*api.BillingAddressID != "" || !state.BillingAddressID.IsNull()) {
 		state.BillingAddressID = types.StringPointerValue(api.BillingAddressID)
 	}
-	if api.BillingCurrency != nil && (*api.BillingCurrency != "" || !state.BillingCurrency.IsNull()) {
-		state.BillingCurrency = types.StringPointerValue(api.BillingCurrency)
-	}
 	if api.BillingGroupID != nil && (*api.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
 		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
 	}
 	if api.BillingGroupName != nil && (*api.BillingGroupName != "" || !state.BillingGroupName.IsNull()) {
 		state.BillingGroupName = types.StringPointerValue(api.BillingGroupName)
+	}
+	if api.Currency != nil && (*api.Currency != "" || !state.Currency.IsNull()) {
+		state.Currency = types.StringPointerValue(api.Currency)
 	}
 	if api.CustomInvoiceText != nil && (*api.CustomInvoiceText != "" || !state.CustomInvoiceText.IsNull()) {
 		state.CustomInvoiceText = types.StringPointerValue(api.CustomInvoiceText)
