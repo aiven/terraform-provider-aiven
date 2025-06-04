@@ -140,6 +140,7 @@ func ResourceClickhouseGrant() *schema.Resource {
 * Users cannot have the same name as roles.
 * Global privileges cannot be granted on the database level. To grant global privileges, use ` + "`database=\"*\"`" + `.
 * To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use ` + "`table=\"*\"`" + `.
+* Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them.
 * Changes first revoke all grants and then reissue the remaining grants for convergence.
 `,
 		CreateContext: resourceClickhouseGrantCreate,

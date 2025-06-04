@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted on ClickHouse Named Collections. This prevents potential errors when such grants are managed externally.
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_filecache_remote_data_ratio`: Defines a limit
   of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_remote_store`
