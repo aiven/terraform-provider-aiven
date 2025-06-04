@@ -22,7 +22,7 @@ nav_order: 1
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.node_search_cache_size`: Defines a limit of how much
   total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.remote_store`
-- Change `organization_billing_group` and `organization_billing_group_list`: field `billing_currency` renamed to `currency`
+- Change `aiven_organization_billing_group` and `aiven_organization_billing_group_list`: field `billing_currency` renamed to `currency`
 
 ## [4.41.0] - 2025-05-30
 

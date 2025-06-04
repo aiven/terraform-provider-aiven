@@ -28,9 +28,8 @@ const (
 	envProjectName      = "AIVEN_PROJECT_NAME"
 	envOrganizationName = "AIVEN_ORGANIZATION_NAME"
 	envBetaFeatures     = "PROVIDER_AIVEN_ENABLE_BETA"
-	envUserID           = "AIVEN_ORGANIZATION_USER_ID"
-	envAccountID        = "AIVEN_ORGANIZATION_ACCOUNT_ID"
 	envAccountName      = "AIVEN_ACCOUNT_NAME"
+	envPaymentMethodID  = "AIVEN_PAYMENT_METHOD_ID"
 )
 
 var TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
@@ -74,11 +73,6 @@ func SkipIfNotBeta(t *testing.T) {
 	}
 }
 
-// Token returns the Aiven API token
-func Token() string {
-	return getEnvVar(envToken)
-}
-
 // ProjectName returns the Aiven project name
 func ProjectName() string {
 	return getEnvVar(envProjectName)
@@ -92,6 +86,10 @@ func OrganizationName() string {
 // AccountName returns the Aiven account name
 func AccountName() string {
 	return getEnvVar(envAccountName)
+}
+
+func PaymentMethodID() string {
+	return getEnvVar(envPaymentMethodID)
 }
 
 // TestAccPreCheck validates the necessary test API keys exist in the testing environment
