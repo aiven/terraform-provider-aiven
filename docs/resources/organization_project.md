@@ -10,7 +10,7 @@ description: |-
 
 # aiven_organization_project (Resource)
 
-Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects). 
+Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

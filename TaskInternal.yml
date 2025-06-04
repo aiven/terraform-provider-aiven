@@ -146,6 +146,15 @@ tasks:
       - rm -f docs/data-sources/influxdb*.md
       - rm -f docs/resources/influxdb*.md
 
+  generate:
+    desc: "Run all code generation tasks"
+    deps:
+      - gen-go
+      - gen-plugin
+      - gen-docs
+    cmds:
+      - task: mockery
+
   #-------------------------------------
   # Schema Sub-Tasks
   #-------------------------------------
@@ -201,3 +210,8 @@ tasks:
     desc: "Remove Terraform state files (*.tfstate*) from ./examples directory"
     cmds:
       - find ./examples -type f \( -name '*.tfstate' -o -name '*.tfstate.backup' \) -delete
+
+  nothing:
+    silent: true
+    cmds:
+      - true
