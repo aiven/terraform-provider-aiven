@@ -63,7 +63,7 @@ locals {
 }
 
 resource "aiven_opensearch_acl_rule" "os_acl_rule" {
-  for_each = {for i, v in local.acl_rules : i => v}
+  for_each = { for i, v in local.acl_rules : i => v }
 
   project      = data.aiven_project.example_project.project
   service_name = aiven_opensearch.example_opensearch.service_name

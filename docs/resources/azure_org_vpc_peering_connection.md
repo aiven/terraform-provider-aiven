@@ -10,7 +10,7 @@ description: |-
 
 # aiven_azure_org_vpc_peering_connection (Resource)
 
-Creates and manages an Azure VPC peering connection with an Aiven VPC.
+Creates and manages an Azure VPC peering connection with an Aiven VPC. 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -20,14 +20,14 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ```terraform
 resource "aiven_organization_vpc" "example_vpc" {
   organization_id = data.aiven_organization.example.id
-  cloud_name     = "azure-germany-westcentral"
-  network_cidr   = "10.0.0.0/24"
+  cloud_name      = "azure-germany-westcentral"
+  network_cidr    = "10.0.0.0/24"
 }
 
 resource "aiven_azure_org_vpc_peering_connection" "example_peering" {
-  organization_id                 = aiven_organization_vpc.example_vpc.organization_id
-  organization_vpc_id                = aiven_organization_vpc.example_vpc.organization_vpc_id
-  azure_subscription_id  = "12345678-1234-1234-1234-123456789012"
+  organization_id       = aiven_organization_vpc.example_vpc.organization_id
+  organization_vpc_id   = aiven_organization_vpc.example_vpc.organization_vpc_id
+  azure_subscription_id = "12345678-1234-1234-1234-123456789012"
   vnet_name             = "my-vnet"
   peer_resource_group   = "my-resource-group"
   peer_azure_app_id     = "87654321-4321-4321-4321-210987654321"

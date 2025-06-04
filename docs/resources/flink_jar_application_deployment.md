@@ -10,7 +10,7 @@ description: |-
 
 # aiven_flink_jar_application_deployment (Resource)
 
-Creates and manages the deployment of an Aiven for Apache Flink® application.
+Creates and manages the deployment of an Aiven for Apache Flink® application. 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -39,15 +39,15 @@ resource "aiven_flink_jar_application" "example" {
 }
 
 resource "aiven_flink_jar_application_version" "example" {
-  project      = aiven_flink.example.project
-  service_name = aiven_flink.example.service_name
+  project        = aiven_flink.example.project
+  service_name   = aiven_flink.example.service_name
   application_id = aiven_flink_jar_application.example.application_id
   source         = "./example.jar"
 }
 
 resource "aiven_flink_jar_application_deployment" "example" {
-  project      = aiven_flink.example.project
-  service_name = aiven_flink.example.service_name
+  project        = aiven_flink.example.project
+  service_name   = aiven_flink.example.service_name
   application_id = aiven_flink_jar_application.example.application_id
   version_id     = aiven_flink_jar_application_version.example.application_version_id
 }
