@@ -24,7 +24,7 @@ resource "aiven_kafka_native_acl" "example_acl" {
   resource_type   = "Topic"
   resource_name   = "example-topic"
   principal       = "User:example-user"
-  operation      = "Read"
+  operation       = "Read"
   pattern_type    = "LITERAL"
   permission_type = "ALLOW"
   host            = "198.51.100.0"

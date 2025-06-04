@@ -33,7 +33,7 @@ resource "aiven_service_integration" "example_integration" {
 
 # Use disk autoscaler with a PostgreSQL service
 resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
-  project                  = data.aiven_project.example_project.project
+  project       = data.aiven_project.example_project.project
   endpoint_name = "disk-autoscaler-200GiB"
   endpoint_type = "autoscaler"
 
@@ -46,8 +46,8 @@ resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
 }
 
 resource "aiven_service_integration" "autoscaler_integration" {
-  project                  = data.aiven_project.example_project.project
-  integration_type         = "autoscaler"
+  project                 = data.aiven_project.example_project.project
+  integration_type        = "autoscaler"
   source_service_name     = aiven_pg.example_pg.service_name
   destination_endpoint_id = aiven_service_integration_endpoint.autoscaler_endpoint.id
 }

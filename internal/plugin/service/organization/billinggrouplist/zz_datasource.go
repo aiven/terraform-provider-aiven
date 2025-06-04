@@ -5,12 +5,10 @@ package billinggrouplist
 
 import (
 	"context"
-
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
 func newDatasourceModel() adapter.Model[tfModel] {
