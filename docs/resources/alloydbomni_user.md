@@ -10,7 +10,7 @@ description: |-
 
 # aiven_alloydbomni_user (Resource)
 
-Creates and manages an Aiven for AlloyDB Omni service user. 
+Creates and manages an Aiven for AlloyDB Omni service user.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

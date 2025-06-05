@@ -101,11 +101,14 @@ tasks:
 
   fmt:
     desc: Run all formatters (Terraform tests, Go imports)
+    vars:
+      SKIP_PRECOMMIT: '{{default "false" .SKIP_PRECOMMIT}}'
     cmds:
+      - defer:
+          task: internal:fmt-imports
       - task: internal:fmt-go
       - task: internal:fmt-test
-      - task: internal:fmt-precommit
-      - task: internal:fmt-imports
+      - task: '{{if ne .SKIP_PRECOMMIT "true"}}internal:fmt-precommit{{else}}internal:nothing{{end}}'
 
   #################################################
   # Utility Tasks
@@ -113,23 +116,20 @@ tasks:
 
   generate:
     desc: Generate Go code, documentation, and mocks
-    deps:
-      - internal:gen-go
-      - internal:gen-plugin
-      - internal:gen-docs
     cmds:
-      - defer: { task: fmt }
-      - task: internal:mockery
-
+      - defer:
+          task: fmt
+      - task: internal:generate
 
   update-schemas:
     desc: "Update Go client codegen and API schemas, regenerate mocks, and update CHANGELOG.md"
     cmds:
+      - defer:
+          task: fmt
       - task: internal:dump-schemas
       - task: internal:load-schemas
-      - task: generate
+      - task: internal:generate
       - task: internal:diff-schemas
-      - task: internal:mockery
 
   update-client:
     desc: "Update Go client codegen"
