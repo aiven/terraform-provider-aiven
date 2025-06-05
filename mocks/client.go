@@ -4999,6 +4999,61 @@ func (_c *MockClient_OrganizationBillingGroupUpdate_Call) RunAndReturn(run func(
 	return _c
 }
 
+// OrganizationDelete provides a mock function for the type MockClient
+func (_mock *MockClient) OrganizationDelete(ctx context.Context, organizationId string, query ...[2]string) error {
+	var tmpRet mock.Arguments
+	if len(query) > 0 {
+		tmpRet = _mock.Called(ctx, organizationId, query)
+	} else {
+		tmpRet = _mock.Called(ctx, organizationId)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrganizationDelete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...[2]string) error); ok {
+		r0 = returnFunc(ctx, organizationId, query...)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_OrganizationDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationDelete'
+type MockClient_OrganizationDelete_Call struct {
+	*mock.Call
+}
+
+// OrganizationDelete is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - query
+func (_e *MockClient_Expecter) OrganizationDelete(ctx interface{}, organizationId interface{}, query ...interface{}) *MockClient_OrganizationDelete_Call {
+	return &MockClient_OrganizationDelete_Call{Call: _e.mock.On("OrganizationDelete",
+		append([]interface{}{ctx, organizationId}, query...)...)}
+}
+
+func (_c *MockClient_OrganizationDelete_Call) Run(run func(ctx context.Context, organizationId string, query ...[2]string)) *MockClient_OrganizationDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := args[2].([][2]string)
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_OrganizationDelete_Call) Return(err error) *MockClient_OrganizationDelete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_OrganizationDelete_Call) RunAndReturn(run func(ctx context.Context, organizationId string, query ...[2]string) error) *MockClient_OrganizationDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrganizationDomainAdd provides a mock function for the type MockClient
 func (_mock *MockClient) OrganizationDomainAdd(ctx context.Context, organizationId string, in *domain.OrganizationDomainAddIn) (*domain.OrganizationDomainAddOut, error) {
 	ret := _mock.Called(ctx, organizationId, in)
@@ -9758,6 +9813,64 @@ func (_c *MockClient_ServiceClickHouseDatabaseList_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// ServiceClickHousePasswordReset provides a mock function for the type MockClient
+func (_mock *MockClient) ServiceClickHousePasswordReset(ctx context.Context, project1 string, serviceName string, userUuid string, in *clickhouse.ServiceClickHousePasswordResetIn) (string, error) {
+	ret := _mock.Called(ctx, project1, serviceName, userUuid, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ServiceClickHousePasswordReset")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *clickhouse.ServiceClickHousePasswordResetIn) (string, error)); ok {
+		return returnFunc(ctx, project1, serviceName, userUuid, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *clickhouse.ServiceClickHousePasswordResetIn) string); ok {
+		r0 = returnFunc(ctx, project1, serviceName, userUuid, in)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, *clickhouse.ServiceClickHousePasswordResetIn) error); ok {
+		r1 = returnFunc(ctx, project1, serviceName, userUuid, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_ServiceClickHousePasswordReset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceClickHousePasswordReset'
+type MockClient_ServiceClickHousePasswordReset_Call struct {
+	*mock.Call
+}
+
+// ServiceClickHousePasswordReset is a helper method to define mock.On call
+//   - ctx
+//   - project1
+//   - serviceName
+//   - userUuid
+//   - in
+func (_e *MockClient_Expecter) ServiceClickHousePasswordReset(ctx interface{}, project1 interface{}, serviceName interface{}, userUuid interface{}, in interface{}) *MockClient_ServiceClickHousePasswordReset_Call {
+	return &MockClient_ServiceClickHousePasswordReset_Call{Call: _e.mock.On("ServiceClickHousePasswordReset", ctx, project1, serviceName, userUuid, in)}
+}
+
+func (_c *MockClient_ServiceClickHousePasswordReset_Call) Run(run func(ctx context.Context, project1 string, serviceName string, userUuid string, in *clickhouse.ServiceClickHousePasswordResetIn)) *MockClient_ServiceClickHousePasswordReset_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(*clickhouse.ServiceClickHousePasswordResetIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHousePasswordReset_Call) Return(s string, err error) *MockClient_ServiceClickHousePasswordReset_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHousePasswordReset_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, userUuid string, in *clickhouse.ServiceClickHousePasswordResetIn) (string, error)) *MockClient_ServiceClickHousePasswordReset_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ServiceClickHouseQuery provides a mock function for the type MockClient
 func (_mock *MockClient) ServiceClickHouseQuery(ctx context.Context, project1 string, serviceName string, in *clickhouse.ServiceClickHouseQueryIn) (*clickhouse.ServiceClickHouseQueryOut, error) {
 	ret := _mock.Called(ctx, project1, serviceName, in)
@@ -9938,6 +10051,171 @@ func (_c *MockClient_ServiceClickHouseTieredStorageSummary_Call) Return(serviceC
 }
 
 func (_c *MockClient_ServiceClickHouseTieredStorageSummary_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string) (*clickhouse.ServiceClickHouseTieredStorageSummaryOut, error)) *MockClient_ServiceClickHouseTieredStorageSummary_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ServiceClickHouseUserCreate provides a mock function for the type MockClient
+func (_mock *MockClient) ServiceClickHouseUserCreate(ctx context.Context, project1 string, serviceName string, in *clickhouse.ServiceClickHouseUserCreateIn) (*clickhouse.ServiceClickHouseUserCreateOut, error) {
+	ret := _mock.Called(ctx, project1, serviceName, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ServiceClickHouseUserCreate")
+	}
+
+	var r0 *clickhouse.ServiceClickHouseUserCreateOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *clickhouse.ServiceClickHouseUserCreateIn) (*clickhouse.ServiceClickHouseUserCreateOut, error)); ok {
+		return returnFunc(ctx, project1, serviceName, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *clickhouse.ServiceClickHouseUserCreateIn) *clickhouse.ServiceClickHouseUserCreateOut); ok {
+		r0 = returnFunc(ctx, project1, serviceName, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*clickhouse.ServiceClickHouseUserCreateOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *clickhouse.ServiceClickHouseUserCreateIn) error); ok {
+		r1 = returnFunc(ctx, project1, serviceName, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_ServiceClickHouseUserCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceClickHouseUserCreate'
+type MockClient_ServiceClickHouseUserCreate_Call struct {
+	*mock.Call
+}
+
+// ServiceClickHouseUserCreate is a helper method to define mock.On call
+//   - ctx
+//   - project1
+//   - serviceName
+//   - in
+func (_e *MockClient_Expecter) ServiceClickHouseUserCreate(ctx interface{}, project1 interface{}, serviceName interface{}, in interface{}) *MockClient_ServiceClickHouseUserCreate_Call {
+	return &MockClient_ServiceClickHouseUserCreate_Call{Call: _e.mock.On("ServiceClickHouseUserCreate", ctx, project1, serviceName, in)}
+}
+
+func (_c *MockClient_ServiceClickHouseUserCreate_Call) Run(run func(ctx context.Context, project1 string, serviceName string, in *clickhouse.ServiceClickHouseUserCreateIn)) *MockClient_ServiceClickHouseUserCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*clickhouse.ServiceClickHouseUserCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserCreate_Call) Return(serviceClickHouseUserCreateOut *clickhouse.ServiceClickHouseUserCreateOut, err error) *MockClient_ServiceClickHouseUserCreate_Call {
+	_c.Call.Return(serviceClickHouseUserCreateOut, err)
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserCreate_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, in *clickhouse.ServiceClickHouseUserCreateIn) (*clickhouse.ServiceClickHouseUserCreateOut, error)) *MockClient_ServiceClickHouseUserCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ServiceClickHouseUserDelete provides a mock function for the type MockClient
+func (_mock *MockClient) ServiceClickHouseUserDelete(ctx context.Context, project1 string, serviceName string, userUuid string) error {
+	ret := _mock.Called(ctx, project1, serviceName, userUuid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ServiceClickHouseUserDelete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
+		r0 = returnFunc(ctx, project1, serviceName, userUuid)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_ServiceClickHouseUserDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceClickHouseUserDelete'
+type MockClient_ServiceClickHouseUserDelete_Call struct {
+	*mock.Call
+}
+
+// ServiceClickHouseUserDelete is a helper method to define mock.On call
+//   - ctx
+//   - project1
+//   - serviceName
+//   - userUuid
+func (_e *MockClient_Expecter) ServiceClickHouseUserDelete(ctx interface{}, project1 interface{}, serviceName interface{}, userUuid interface{}) *MockClient_ServiceClickHouseUserDelete_Call {
+	return &MockClient_ServiceClickHouseUserDelete_Call{Call: _e.mock.On("ServiceClickHouseUserDelete", ctx, project1, serviceName, userUuid)}
+}
+
+func (_c *MockClient_ServiceClickHouseUserDelete_Call) Run(run func(ctx context.Context, project1 string, serviceName string, userUuid string)) *MockClient_ServiceClickHouseUserDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserDelete_Call) Return(err error) *MockClient_ServiceClickHouseUserDelete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserDelete_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, userUuid string) error) *MockClient_ServiceClickHouseUserDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ServiceClickHouseUserList provides a mock function for the type MockClient
+func (_mock *MockClient) ServiceClickHouseUserList(ctx context.Context, project1 string, serviceName string) ([]clickhouse.UserOut, error) {
+	ret := _mock.Called(ctx, project1, serviceName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ServiceClickHouseUserList")
+	}
+
+	var r0 []clickhouse.UserOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) ([]clickhouse.UserOut, error)); ok {
+		return returnFunc(ctx, project1, serviceName)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) []clickhouse.UserOut); ok {
+		r0 = returnFunc(ctx, project1, serviceName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]clickhouse.UserOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, project1, serviceName)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_ServiceClickHouseUserList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceClickHouseUserList'
+type MockClient_ServiceClickHouseUserList_Call struct {
+	*mock.Call
+}
+
+// ServiceClickHouseUserList is a helper method to define mock.On call
+//   - ctx
+//   - project1
+//   - serviceName
+func (_e *MockClient_Expecter) ServiceClickHouseUserList(ctx interface{}, project1 interface{}, serviceName interface{}) *MockClient_ServiceClickHouseUserList_Call {
+	return &MockClient_ServiceClickHouseUserList_Call{Call: _e.mock.On("ServiceClickHouseUserList", ctx, project1, serviceName)}
+}
+
+func (_c *MockClient_ServiceClickHouseUserList_Call) Run(run func(ctx context.Context, project1 string, serviceName string)) *MockClient_ServiceClickHouseUserList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserList_Call) Return(userOuts []clickhouse.UserOut, err error) *MockClient_ServiceClickHouseUserList_Call {
+	_c.Call.Return(userOuts, err)
+	return _c
+}
+
+func (_c *MockClient_ServiceClickHouseUserList_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string) ([]clickhouse.UserOut, error)) *MockClient_ServiceClickHouseUserList_Call {
 	_c.Call.Return(run)
 	return _c
 }

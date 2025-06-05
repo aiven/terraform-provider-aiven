@@ -6,14 +6,12 @@ package access
 import (
 	"context"
 	"fmt"
-	"path/filepath"
-	"strings"
-
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"path/filepath"
+	"strings"
 )
 
 const aivenName = "aiven_governance_access"

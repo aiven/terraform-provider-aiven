@@ -6,12 +6,10 @@ package organization
 import (
 	"context"
 	"fmt"
-	"path/filepath"
-
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"path/filepath"
 )
 
 const aivenName = "aiven_organization"

@@ -5,15 +5,13 @@ package organization
 
 import (
 	"context"
-
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
 func newResourceModel() adapter.Model[tfModel] {
