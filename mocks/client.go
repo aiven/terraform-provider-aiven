@@ -13481,7 +13481,7 @@ func (_c *MockClient_ServiceKafkaAclList_Call) RunAndReturn(run func(ctx context
 }
 
 // ServiceKafkaConnectCreateConnector provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceKafkaConnectCreateConnector(ctx context.Context, project1 string, serviceName string, in *kafkaconnect.ServiceKafkaConnectCreateConnectorIn) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error) {
+func (_mock *MockClient) ServiceKafkaConnectCreateConnector(ctx context.Context, project1 string, serviceName string, in map[string]any) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error) {
 	ret := _mock.Called(ctx, project1, serviceName, in)
 
 	if len(ret) == 0 {
@@ -13490,17 +13490,17 @@ func (_mock *MockClient) ServiceKafkaConnectCreateConnector(ctx context.Context,
 
 	var r0 *kafkaconnect.ServiceKafkaConnectCreateConnectorOut
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *kafkaconnect.ServiceKafkaConnectCreateConnectorIn) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, map[string]any) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error)); ok {
 		return returnFunc(ctx, project1, serviceName, in)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *kafkaconnect.ServiceKafkaConnectCreateConnectorIn) *kafkaconnect.ServiceKafkaConnectCreateConnectorOut); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, map[string]any) *kafkaconnect.ServiceKafkaConnectCreateConnectorOut); ok {
 		r0 = returnFunc(ctx, project1, serviceName, in)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*kafkaconnect.ServiceKafkaConnectCreateConnectorOut)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *kafkaconnect.ServiceKafkaConnectCreateConnectorIn) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, map[string]any) error); ok {
 		r1 = returnFunc(ctx, project1, serviceName, in)
 	} else {
 		r1 = ret.Error(1)
@@ -13522,9 +13522,9 @@ func (_e *MockClient_Expecter) ServiceKafkaConnectCreateConnector(ctx interface{
 	return &MockClient_ServiceKafkaConnectCreateConnector_Call{Call: _e.mock.On("ServiceKafkaConnectCreateConnector", ctx, project1, serviceName, in)}
 }
 
-func (_c *MockClient_ServiceKafkaConnectCreateConnector_Call) Run(run func(ctx context.Context, project1 string, serviceName string, in *kafkaconnect.ServiceKafkaConnectCreateConnectorIn)) *MockClient_ServiceKafkaConnectCreateConnector_Call {
+func (_c *MockClient_ServiceKafkaConnectCreateConnector_Call) Run(run func(ctx context.Context, project1 string, serviceName string, in map[string]any)) *MockClient_ServiceKafkaConnectCreateConnector_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*kafkaconnect.ServiceKafkaConnectCreateConnectorIn))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(map[string]any))
 	})
 	return _c
 }
@@ -13534,7 +13534,7 @@ func (_c *MockClient_ServiceKafkaConnectCreateConnector_Call) Return(serviceKafk
 	return _c
 }
 
-func (_c *MockClient_ServiceKafkaConnectCreateConnector_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, in *kafkaconnect.ServiceKafkaConnectCreateConnectorIn) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error)) *MockClient_ServiceKafkaConnectCreateConnector_Call {
+func (_c *MockClient_ServiceKafkaConnectCreateConnector_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, in map[string]any) (*kafkaconnect.ServiceKafkaConnectCreateConnectorOut, error)) *MockClient_ServiceKafkaConnectCreateConnector_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -13588,7 +13588,7 @@ func (_c *MockClient_ServiceKafkaConnectDeleteConnector_Call) RunAndReturn(run f
 }
 
 // ServiceKafkaConnectEditConnector provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceKafkaConnectEditConnector(ctx context.Context, project1 string, serviceName string, connectorName string, in *kafkaconnect.ServiceKafkaConnectEditConnectorIn) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error) {
+func (_mock *MockClient) ServiceKafkaConnectEditConnector(ctx context.Context, project1 string, serviceName string, connectorName string, in map[string]any) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error) {
 	ret := _mock.Called(ctx, project1, serviceName, connectorName, in)
 
 	if len(ret) == 0 {
@@ -13597,17 +13597,17 @@ func (_mock *MockClient) ServiceKafkaConnectEditConnector(ctx context.Context, p
 
 	var r0 *kafkaconnect.ServiceKafkaConnectEditConnectorOut
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *kafkaconnect.ServiceKafkaConnectEditConnectorIn) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, map[string]any) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error)); ok {
 		return returnFunc(ctx, project1, serviceName, connectorName, in)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *kafkaconnect.ServiceKafkaConnectEditConnectorIn) *kafkaconnect.ServiceKafkaConnectEditConnectorOut); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, map[string]any) *kafkaconnect.ServiceKafkaConnectEditConnectorOut); ok {
 		r0 = returnFunc(ctx, project1, serviceName, connectorName, in)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*kafkaconnect.ServiceKafkaConnectEditConnectorOut)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, *kafkaconnect.ServiceKafkaConnectEditConnectorIn) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, map[string]any) error); ok {
 		r1 = returnFunc(ctx, project1, serviceName, connectorName, in)
 	} else {
 		r1 = ret.Error(1)
@@ -13630,9 +13630,9 @@ func (_e *MockClient_Expecter) ServiceKafkaConnectEditConnector(ctx interface{},
 	return &MockClient_ServiceKafkaConnectEditConnector_Call{Call: _e.mock.On("ServiceKafkaConnectEditConnector", ctx, project1, serviceName, connectorName, in)}
 }
 
-func (_c *MockClient_ServiceKafkaConnectEditConnector_Call) Run(run func(ctx context.Context, project1 string, serviceName string, connectorName string, in *kafkaconnect.ServiceKafkaConnectEditConnectorIn)) *MockClient_ServiceKafkaConnectEditConnector_Call {
+func (_c *MockClient_ServiceKafkaConnectEditConnector_Call) Run(run func(ctx context.Context, project1 string, serviceName string, connectorName string, in map[string]any)) *MockClient_ServiceKafkaConnectEditConnector_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(*kafkaconnect.ServiceKafkaConnectEditConnectorIn))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(map[string]any))
 	})
 	return _c
 }
@@ -13642,7 +13642,7 @@ func (_c *MockClient_ServiceKafkaConnectEditConnector_Call) Return(serviceKafkaC
 	return _c
 }
 
-func (_c *MockClient_ServiceKafkaConnectEditConnector_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, connectorName string, in *kafkaconnect.ServiceKafkaConnectEditConnectorIn) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error)) *MockClient_ServiceKafkaConnectEditConnector_Call {
+func (_c *MockClient_ServiceKafkaConnectEditConnector_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, connectorName string, in map[string]any) (*kafkaconnect.ServiceKafkaConnectEditConnectorOut, error)) *MockClient_ServiceKafkaConnectEditConnector_Call {
 	_c.Call.Return(run)
 	return _c
 }
