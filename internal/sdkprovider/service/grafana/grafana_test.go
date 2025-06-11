@@ -727,7 +727,7 @@ func TestAccAiven_grafana_and_default_vpc(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				// STEP 1: Creates default VPC and Grafana service
+				// Creates default VPC and Grafana service
 				Config: testAccGrafanaResourceAndDefaultVPC(project, cloudName, grafanaName),
 				Check: resource.ComposeTestCheckFunc(
 					// VPC
@@ -737,7 +737,7 @@ func TestAccAiven_grafana_and_default_vpc(t *testing.T) {
 					// Grafana
 					resource.TestCheckResourceAttr(grafanaResource, "project", project),
 					resource.TestCheckResourceAttr(grafanaResource, "cloud_name", cloudName),
-					resource.TestCheckNoResourceAttr(grafanaResource, "project_vpc_id"),
+					resource.TestCheckResourceAttr(grafanaResource, "project_vpc_id", ""),
 
 					// Proves the remote state
 					func(_ *terraform.State) error {
