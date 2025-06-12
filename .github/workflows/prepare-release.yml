@@ -103,9 +103,9 @@ jobs:
             release
           draft: false
 
-      - name: Trigger Acceptance Tests
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: release-tests
-          client-payload: '{"branch": "${{ env.RELEASE_BRANCH }}", "version": "${{ inputs.version }}"}'
+#      - name: Trigger Acceptance Tests
+#        uses: peter-evans/repository-dispatch@v2
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          event-type: release-tests
+#          client-payload: '{"branch": "${{ env.RELEASE_BRANCH }}", "version": "${{ inputs.version }}"}'
