@@ -9,6 +9,7 @@ vars:
     sh: 'command -v podman || command -v docker'
   OPENAPI_URL: https://api.aiven.io/doc/openapi.json # Source URL for the spec
   OPENAPI_FILE: openapi.json
+  OPA: opa # Open Policy Agent binary for policy checks
 
   # --- Architecture & Build Paths ---
   USER_HOME:
