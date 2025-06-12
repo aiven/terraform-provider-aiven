@@ -141,10 +141,14 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Aiven internal service type code",
 		},
 		"project_vpc_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Computed:    true,
-			Description: "Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "Specifies the VPC the service should run in. " +
+				"If the value is not set, the service runs on the Public Internet. " +
+				"When set, the value should be given as a reference to set up dependencies correctly, " +
+				"and the VPC must be in the same cloud and region as the service itself. " +
+				"The service can be freely moved to and from VPC after creation, but doing so triggers migration to new servers, " +
+				"so the operation can take a significant amount of time to complete if the service has a lot of data.",
 		},
 		"maintenance_window_dow": {
 			Type:        schema.TypeString,
@@ -768,7 +772,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	if s.ProjectVpcId != "" {
+		// Historically, the project VPC ID was stored as a full resource ID.
 		if err := d.Set("project_vpc_id", BuildResourceID(project, s.ProjectVpcId)); err != nil {
+			return err
+		}
+	} else {
+		if err := d.Set("project_vpc_id", nil); err != nil {
 			return err
 		}
 	}

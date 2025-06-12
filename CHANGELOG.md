@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `project_vpc_id`, remove `Computed` attribute:
+  a service can't be deployed on the public Internet after it has been deployed in a VPC.
+  WARNING: removing this field deploys a service on the Public Internet!
 - `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted on ClickHouse Named Collections. This prevents potential errors when such grants are managed externally.
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_filecache_remote_data_ratio`: Defines a limit
   of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
