@@ -49,10 +49,9 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create release branch
+      - name: Setup release branch
         run: |
           BRANCH_NAME="${{ inputs.release_branch_prefix }}-release-v${{ inputs.version }}"
-          git checkout -b "$BRANCH_NAME"
           echo "RELEASE_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update CHANGELOG.md
