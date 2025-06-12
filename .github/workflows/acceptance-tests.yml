@@ -4,47 +4,40 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches:
-      - '*-release-v*'
-  repository_dispatch:
-    types: [release-tests]
+      - test-release-workflow
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # Check if this is a release-related run
-  check_release:
+  # This job acts as a gatekeeper for the entire test suite
+  gatekeeper:
     runs-on: ubuntu-latest
     outputs:
-      is_release: ${{ steps.check.outputs.is_release }}
+      should_run: ${{ steps.check_label.outputs.should_run }}
     steps:
-      - name: Check if release-related
-        id: check
+      - name: Check for 'release' label
+        id: check_label
         run: |
-          # Check if it's a release branch push
-          if [[ "${{ github.ref }}" =~ -release-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
-          # Check if it's a PR with release label
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'release') }}" == "true" ]]; then
-              echo "is_release=true" >> $GITHUB_OUTPUT
-            else
-              echo "is_release=false" >> $GITHUB_OUTPUT
-            fi
-          # Check if it's a repository dispatch for release tests
-          elif [[ "${{ github.event_name }}" == "repository_dispatch" && "${{ github.event.action }}" == "release-tests" ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
+          if ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
+            echo "Pull request has the 'release' label. Running tests."
+            echo "should_run=true" >> $GITHUB_OUTPUT
           else
-            echo "is_release=true" >> $GITHUB_OUTPUT  # For schedule and manual runs
+            echo "Pull request does not have the 'release' label. Skipping tests."
+            echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
   setup_aiven_project_suffix:
+    needs: [ gatekeeper ]
+    if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
@@ -64,6 +57,8 @@ jobs:
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
   find_tests:
+    needs: [ gatekeeper ]
+    if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.find_tests.outputs.matrix }}
@@ -132,9 +127,27 @@ jobs:
           AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
           PKG_PATH: ${{ matrix.pkg.path }}
 
+  tests-summary:
+    name: All Tests Passed
+    runs-on: ubuntu-latest
+    # It must run after the 'test' matrix and it must always run,
+    # even if some matrix jobs fail, so we can check the outcome.
+    needs: [ test ]
+    if: always() && needs.test.result != 'skipped'
+
+    steps:
+      - name: Check matrix outcome
+        run: |
+          if [[ "${{ needs.test.result }}" == "success" ]]; then
+            echo "All tests passed successfully!"
+          else
+            echo "One or more tests in the matrix failed. Result: ${{ needs.test.result }}"
+            exit 1
+          fi
+
   sweep:
-    if: always()
-    needs: [test, setup_aiven_project_suffix]
+    needs: [ gatekeeper, test, setup_aiven_project_suffix ]
+    if: always() && needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: softprops/turnstyle@v2
@@ -166,32 +179,3 @@ jobs:
             ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-
-    # Update PR with test status
-  update_pr_status:
-    if: always() && github.event_name == 'repository_dispatch'
-    needs: [test, check_release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update PR with test results
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${{ github.event.client_payload.branch }}`,
-              state: 'open'
-            });
-
-            if (prs.length > 0) {
-              const pr = prs[0];
-              const status = '${{ needs.test.result }}' === 'success' ? '✅' : '❌';
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: `${status} Acceptance tests for release v${{ github.event.client_payload.version }} have completed with status: **${{ needs.test.result }}**`
-              });
-            }
