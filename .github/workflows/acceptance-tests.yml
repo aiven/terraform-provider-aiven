@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - test-release-workflow
 
 permissions:
   contents: read
