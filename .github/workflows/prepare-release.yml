@@ -27,17 +27,18 @@ jobs:
             echo "Error: Version must be in format X.Y.Z (e.g., 3.10.0)"
             exit 1
           fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Check if version already exists
         run: |
           if git tag -l "v${{ inputs.version }}" | grep -q "v${{ inputs.version }}"; then
             echo "Error: Version v${{ inputs.version }} already exists"
             exit 1
           fi
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
