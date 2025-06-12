@@ -4,47 +4,38 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-  push:
-    branches:
-      - '*-release-v*'
-  repository_dispatch:
-    types: [release-tests]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # Check if this is a release-related run
-  check_release:
+  # This job acts as a gatekeeper for the entire test suite
+  gatekeeper:
     runs-on: ubuntu-latest
     outputs:
-      is_release: ${{ steps.check.outputs.is_release }}
+      should_run: ${{ steps.check_label.outputs.should_run }}
     steps:
-      - name: Check if release-related
-        id: check
+      - name: Check for 'release' label
+        id: check_label
         run: |
-          # Check if it's a release branch push
-          if [[ "${{ github.ref }}" =~ -release-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
-          # Check if it's a PR with release label
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'release') }}" == "true" ]]; then
-              echo "is_release=true" >> $GITHUB_OUTPUT
-            else
-              echo "is_release=false" >> $GITHUB_OUTPUT
-            fi
-          # Check if it's a repository dispatch for release tests
-          elif [[ "${{ github.event_name }}" == "repository_dispatch" && "${{ github.event.action }}" == "release-tests" ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
+          if ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
+            echo "Pull request has the 'release' label. Running tests."
+            echo "should_run=true" >> $GITHUB_OUTPUT
           else
-            echo "is_release=true" >> $GITHUB_OUTPUT  # For schedule and manual runs
+            echo "Pull request does not have the 'release' label. Skipping tests."
+            echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
   setup_aiven_project_suffix:
+    needs: [ gatekeeper ]
+    if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
@@ -64,6 +55,8 @@ jobs:
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
   find_tests:
+    needs: [ gatekeeper ]
+    if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.find_tests.outputs.matrix }}
