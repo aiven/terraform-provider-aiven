@@ -39,7 +39,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -56,13 +57,11 @@ jobs:
 
       - name: Update CHANGELOG.md
         run: |
-          # Use task to update changelog
           task ci:changelog-update VERSION="${{ inputs.version }}"
 
       - name: Extract changelog content for PR
         id: changelog
         run: |
-          # Use task to extract changelog content
           CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
           
           # Store in GitHub env for PR body
@@ -84,10 +83,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.RELEASE_BRANCH }}
           base: test-release-workflow #TODO: Adjust base branch to main
-          title: "Release v${{ inputs.version }}"
+          title: "ci(release): v${{ inputs.version }}"
           body: |
-            ## About this change—what it does
-            Release v${{ inputs.version }}
+            ## Release v${{ inputs.version }}
 
             ### Changelog
             ${{ env.CHANGELOG_CONTENT }}

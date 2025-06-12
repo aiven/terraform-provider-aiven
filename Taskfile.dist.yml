@@ -239,16 +239,14 @@ tasks:
           fi
           echo "✓ Version {{.VERSION}} is new"
         silent: false
-
       # Step 2: Create backup
       - cmd: |
           cp "{{.CHANGELOG_FILE}}" "{{.CHANGELOG_BACKUP}}"
           echo "✓ Created backup at {{.CHANGELOG_BACKUP}}"
         silent: false
-
       # Step 3: Setup cleanup on exit
       - defer: |
-          # Cleanup on exit (success or failure)
+          # Cleanup on exit
           if [ -f "{{.CHANGELOG_BACKUP}}" ]; then
             if [ ! -s "{{.CHANGELOG_FILE}}" ]; then
               echo "Restoring from backup due to error..."
@@ -258,7 +256,6 @@ tasks:
             fi
           fi
           rm -f /tmp/changelog_*.tmp
-
       # Step 4: Determine the date
       - cmd: |
           if [ -n "{{.DATE}}" ]; then
@@ -267,15 +264,12 @@ tasks:
             RELEASE_DATE=$(date +%Y-%m-%d)
           fi
           echo "RELEASE_DATE=${RELEASE_DATE}" > /tmp/changelog_vars.tmp
-          echo "✓ Using date: ${RELEASE_DATE}"
         silent: false
-
       # Step 5: Update the changelog
       - cmd: |
           # Source the variables
           source /tmp/changelog_vars.tmp
 
-          # Create awk script for clarity
           cat > /tmp/changelog_update.awk << 'EOF'
           BEGIN {
             printed = 0
@@ -311,7 +305,6 @@ tasks:
             exit 1
           fi
         silent: false
-
       # Step 6: Verify the update
       - cmd: |
           if ! grep -q "## \[{{.VERSION}}\] -" "{{.CHANGELOG_FILE}}"; then
@@ -329,7 +322,6 @@ tasks:
 
           echo "✓ Successfully verified version {{.VERSION}} in changelog"
         silent: false
-
       # Step 7: Show the changes
       - cmd: |
           echo ""
@@ -337,7 +329,6 @@ tasks:
           diff -u "{{.CHANGELOG_BACKUP}}" "{{.CHANGELOG_FILE}}" || true
           echo ""
         silent: false
-
       # Step 8: Final success message
       - cmd: |
           echo "✅ CHANGELOG.md updated successfully"
