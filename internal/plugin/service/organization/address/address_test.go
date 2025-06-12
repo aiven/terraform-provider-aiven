@@ -1,27 +1,19 @@
 package address_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 )
 
 func TestAccAivenOrganizationAddress(t *testing.T) {
 	var (
 		name             = "aiven_organization_address.address"
 		organizationName = acc.OrganizationName()
-		templateStore    = template.InitializeTemplateStore(t)
 	)
-
-	// Create a template builder factory with the org data source already configured
-	templBuilder := templateStore.NewBuilder().
-		AddDataSource("aiven_organization", map[string]interface{}{
-			"resource_name": "org",
-			"name":          organizationName,
-		}).Factory()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -29,16 +21,20 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test creation with all fields
-				Config: templBuilder().AddResource("aiven_organization_address", map[string]any{
-					"resource_name":   "address",
-					"organization_id": template.Reference("data.aiven_organization.org.id"),
-					"address_lines":   []string{"123 Main St", "Suite 456"},
-					"city":            "Helsinki",
-					"name":            "Test Company",
-					"country_code":    "FI",
-					"state":           "Uusimaa",
-					"zip_code":        "00100",
-				}).MustRender(t),
+				Config: fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %q
+}
+
+resource "aiven_organization_address" "address" {
+  organization_id = data.aiven_organization.org.id
+  address_lines   = ["123 Main St", "Suite 456"]
+  city            = "Helsinki"
+  name            = "Test Company"
+  country_code    = "FI"
+  state           = "Uusimaa"
+  zip_code        = "00100"
+}`, organizationName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check computed fields are set
 					resource.TestCheckResourceAttrSet(name, "id"),
@@ -64,16 +60,20 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 			},
 			{
 				// Test update
-				Config: templBuilder().AddResource("aiven_organization_address", map[string]any{
-					"resource_name":   "address",
-					"organization_id": template.Reference("data.aiven_organization.org.id"),
-					"address_lines":   []string{"456 Market St", "Floor 3"},
-					"city":            "San Francisco",
-					"name":            "Updated Company",
-					"country_code":    "US",
-					"state":           "CA",
-					"zip_code":        "94105",
-				}).MustRender(t),
+				Config: fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %q
+}
+
+resource "aiven_organization_address" "address" {
+  organization_id = data.aiven_organization.org.id
+  address_lines   = ["456 Market St", "Floor 3"]
+  city            = "San Francisco"
+  name            = "Updated Company"
+  country_code    = "US"
+  state           = "CA"
+  zip_code        = "94105"
+}`, organizationName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check ID remains the same
 					resource.TestCheckResourceAttrSet(name, "id"),
@@ -92,16 +92,18 @@ func TestAccAivenOrganizationAddress(t *testing.T) {
 			{
 				// Test update: remove optional fields.
 				// State field can be omitted when the country code is not US.
-				Config: templBuilder().AddResource("aiven_organization_address", map[string]any{
-					"resource_name":   "address",
-					"organization_id": template.Reference("data.aiven_organization.org.id"),
-					"address_lines":   []string{"456 Market St", "Floor 3"},
-					"city":            "Berlin",
-					"name":            "Updated Company Deutschland",
-					"country_code":    "DE",
-					// "state":           "BE",
-					// "zip_code":        "10117".
-				}).MustRender(t),
+				Config: fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %q
+}
+
+resource "aiven_organization_address" "address" {
+  organization_id = data.aiven_organization.org.id
+  address_lines   = ["456 Market St", "Floor 3"]
+  city            = "Berlin"
+  name            = "Updated Company Deutschland"
+  country_code    = "DE"
+}`, organizationName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "city", "Berlin"),
 					resource.TestCheckResourceAttr(name, "name", "Updated Company Deutschland"),
@@ -125,11 +127,6 @@ func TestAccAivenOrganizationAddressDataSource(t *testing.T) {
 		organizationName = acc.OrganizationName()
 		dataSourceName   = "data.aiven_organization_address.ds"
 		resourceName     = "aiven_organization_address.address"
-		templBuilder     = template.InitializeTemplateStore(t).NewBuilder().
-					AddDataSource("aiven_organization", map[string]interface{}{
-				"resource_name": "org",
-				"name":          organizationName,
-			}).Factory()
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -138,22 +135,25 @@ func TestAccAivenOrganizationAddressDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create a resource and read it with data source
-				Config: templBuilder().
-					AddResource("aiven_organization_address", map[string]any{
-						"resource_name":   "address",
-						"organization_id": template.Reference("data.aiven_organization.org.id"),
-						"address_lines":   []string{"123 Main St", "Suite 456"},
-						"city":            "Helsinki",
-						"name":            "Test Company",
-						"country_code":    "FI",
-						"state":           "Uusimaa",
-						"zip_code":        "00100",
-					}).
-					AddDataSource("aiven_organization_address", map[string]any{
-						"resource_name":   "ds",
-						"organization_id": template.Reference("data.aiven_organization.org.id"),
-						"address_id":      template.Reference("aiven_organization_address.address.address_id"),
-					}).MustRender(t),
+				Config: fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %q
+}
+
+resource "aiven_organization_address" "address" {
+  organization_id = data.aiven_organization.org.id
+  address_lines   = ["123 Main St", "Suite 456"]
+  city            = "Helsinki"
+  name            = "Test Company"
+  country_code    = "FI"
+  state           = "Uusimaa"
+  zip_code        = "00100"
+}
+
+data "aiven_organization_address" "ds" {
+  organization_id = data.aiven_organization.org.id
+  address_id      = aiven_organization_address.address.address_id
+}`, organizationName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check computed fields are set
 					resource.TestCheckResourceAttrSet(dataSourceName, "id"),

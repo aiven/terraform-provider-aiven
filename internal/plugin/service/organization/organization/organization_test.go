@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
 )
 
 func TestAccAivenOrganizationResource(t *testing.T) {
@@ -21,7 +20,6 @@ func TestAccAivenOrganizationResource(t *testing.T) {
 		suffix       = acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 		orgName      = acc.DefaultResourceNamePrefix + "-org-" + suffix
 		updatedName  = acc.DefaultResourceNamePrefix + "-org-" + suffix + "-1"
-		templStore   = template.InitializeTemplateStore(t)
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -29,11 +27,11 @@ func TestAccAivenOrganizationResource(t *testing.T) {
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: templStore.NewBuilder().
-					AddResource("aiven_organization", map[string]interface{}{
-						"resource_name": "test",
-						"name":          orgName,
-					}).MustRender(t),
+				// Initial configuration creates an organization with basic name
+				Config: fmt.Sprintf(`
+resource "aiven_organization" "test" {
+  name = %q
+}`, orgName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check computed fields are set
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
@@ -46,11 +44,11 @@ func TestAccAivenOrganizationResource(t *testing.T) {
 				),
 			},
 			{
-				Config: templStore.NewBuilder().
-					AddResource("aiven_organization", map[string]interface{}{
-						"resource_name": "test",
-						"name":          updatedName,
-					}).MustRender(t),
+				// Updated configuration changes the organization name
+				Config: fmt.Sprintf(`
+resource "aiven_organization" "test" {
+  name = %q
+}`, updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check name was updated
 					resource.TestCheckResourceAttr(resourceName, "name", updatedName),
@@ -72,7 +70,6 @@ func TestAccAivenOrganizationImport(t *testing.T) {
 		resourceName = "aiven_organization.test"
 		suffix       = acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 		orgName      = acc.DefaultResourceNamePrefix + "-org-" + suffix
-		templStore   = template.InitializeTemplateStore(t)
 		orgID        string
 		accountID    string
 	)
@@ -83,11 +80,10 @@ func TestAccAivenOrganizationImport(t *testing.T) {
 		Steps: []resource.TestStep{
 			// First create the organization
 			{
-				Config: templStore.NewBuilder().
-					AddResource("aiven_organization", map[string]interface{}{
-						"resource_name": "test",
-						"name":          orgName,
-					}).MustRender(t),
+				Config: fmt.Sprintf(`
+resource "aiven_organization" "test" {
+  name = %q
+}`, orgName),
 				Check: resource.ComposeTestCheckFunc(
 					// Basic attribute checks
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
@@ -168,7 +164,6 @@ func TestAccAivenOrganizationDataSource(t *testing.T) {
 		dsNameByName = "data.aiven_organization.by_name"
 		suffix       = acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 		orgName      = acc.DefaultResourceNamePrefix + "-org-" + suffix
-		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -176,19 +171,19 @@ func TestAccAivenOrganizationDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: templBuilder.
-					AddResource("aiven_organization", map[string]interface{}{
-						"resource_name": "test",
-						"name":          orgName,
-					}).
-					AddDataSource("aiven_organization", map[string]interface{}{
-						"resource_name": "by_id",
-						"id":            template.Reference("aiven_organization.test.id"),
-					}).
-					AddDataSource("aiven_organization", map[string]interface{}{
-						"resource_name": "by_name",
-						"name":          template.Reference("aiven_organization.test.name"),
-					}).MustRender(t),
+				// Configuration creates an organization and two data sources to test lookup by ID and name
+				Config: fmt.Sprintf(`
+resource "aiven_organization" "test" {
+  name = %q
+}
+
+data "aiven_organization" "by_id" {
+  id = aiven_organization.test.id
+}
+
+data "aiven_organization" "by_name" {
+  name = aiven_organization.test.name
+}`, orgName),
 				Check: resource.ComposeTestCheckFunc(
 					// Check computed fields are set
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
