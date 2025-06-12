@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+  push:
+    branches:
+      - '*-release-v*'
+  repository_dispatch:
+    types: [release-tests]
 
 permissions:
   contents: read
@@ -13,6 +18,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Check if this is a release-related run
+  check_release:
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.check.outputs.is_release }}
+    steps:
+      - name: Check if release-related
+        id: check
+        run: |
+          # Check if it's a release branch push
+          if [[ "${{ github.ref }}" =~ -release-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          # Check if it's a PR with release label
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'release') }}" == "true" ]]; then
+              echo "is_release=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_release=false" >> $GITHUB_OUTPUT
+            fi
+          # Check if it's a repository dispatch for release tests
+          elif [[ "${{ github.event_name }}" == "repository_dispatch" && "${{ github.event.action }}" == "release-tests" ]]; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=true" >> $GITHUB_OUTPUT  # For schedule and manual runs
+          fi
+
   setup_aiven_project_suffix:
     runs-on: ubuntu-latest
     outputs:
@@ -135,3 +166,32 @@ jobs:
             ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+
+    # Update PR with test status
+  update_pr_status:
+    if: always() && github.event_name == 'repository_dispatch'
+    needs: [test, check_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR with test results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${{ github.event.client_payload.branch }}`,
+              state: 'open'
+            });
+
+            if (prs.length > 0) {
+              const pr = prs[0];
+              const status = '${{ needs.test.result }}' === 'success' ? '✅' : '❌';
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `${status} Acceptance tests for release v${{ github.event.client_payload.version }} have completed with status: **${{ needs.test.result }}**`
+              });
+            }

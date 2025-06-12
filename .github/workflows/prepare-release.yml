@@ -1,0 +1,130 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 3.10.0)'
+        required: true
+        type: string
+      release_branch_prefix:
+        description: 'Release branch prefix (default: automation)'
+        required: true
+        type: string
+        default: 'automation'
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Version must be in format X.Y.Z (e.g., 3.10.0)"
+            exit 1
+          fi
+      - name: Check if version already exists
+        run: |
+          if git tag -l "v${{ inputs.version }}" | grep -q "v${{ inputs.version }}"; then
+            echo "Error: Version v${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release branch
+        run: |
+          BRANCH_NAME="${{ inputs.release_branch_prefix }}-release-v${{ inputs.version }}"
+          git checkout -b "$BRANCH_NAME"
+          echo "RELEASE_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Update CHANGELOG.md
+        run: |
+          # Use task to update changelog
+          task release:update-changelog VERSION="${{ inputs.version }}"
+
+      - name: Extract changelog content for PR
+        id: changelog
+        run: |
+          # Extract content between the new version header and the next version header
+          VERSION="${{ inputs.version }}"
+
+          # Use awk to extract the section
+          CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
+            BEGIN { capture = 0; content = "" }
+            /^## \['"$VERSION"'\]/ { capture = 1; next }
+            /^## \[/ && capture { exit }
+            capture && NF { content = content $0 "\n" }
+            END { print content }
+          ' CHANGELOG.md)
+
+          # If no content found, get everything after the version header until next header
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
+              BEGIN { capture = 0 }
+              /^## \['"$VERSION"'\]/ { capture = 1; next }
+              /^## \[/ && capture { exit }
+              capture { print }
+            ' CHANGELOG.md | sed '/^$/d')
+          fi
+
+          # Store in GitHub env for PR body
+          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add CHANGELOG.md
+          git commit -m "ci(release): v${{ inputs.version }}"
+
+      - name: Push release branch
+        run: |
+          git push origin "${{ env.RELEASE_BRANCH }}"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.RELEASE_BRANCH }}
+          base: test-release-workflow # Adjust base branch to main
+          title: "Release v${{ inputs.version }}"
+          body: |
+            ## About this change—what it does
+            Release v${{ inputs.version }}
+
+            ### Changelog
+            ${{ env.CHANGELOG_CONTENT }}
+
+            ---
+
+            *This PR was created automatically by the release preparation workflow.*
+          labels: |
+            release
+          draft: false
+
+      - name: Trigger Acceptance Tests
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: release-tests
+          client-payload: '{"branch": "${{ env.RELEASE_BRANCH }}", "version": "${{ inputs.version }}"}'
