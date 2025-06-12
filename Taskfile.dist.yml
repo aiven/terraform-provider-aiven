@@ -5,6 +5,11 @@ includes:
     taskfile: ./TaskInternal.yml
     internal: true
 
+vars:
+  CHANGELOG_FILE: CHANGELOG.md
+  CHANGELOG_BACKUP: CHANGELOG.md.bak
+  VERSION_PATTERN: '^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$'
+
 tasks:
   default:
     desc: Lists available tasks defined in this file
@@ -212,3 +217,180 @@ tasks:
             ]
           '
     silent: true
+
+  ci:changelog-update:
+    desc: Update CHANGELOG.md with new version entry
+    vars:
+      VERSION: '{{.VERSION}}'
+      DATE: '{{.DATE | default ""}}'
+    preconditions:
+      - sh: test -f "{{.CHANGELOG_FILE}}"
+        msg: "{{.CHANGELOG_FILE}} not found"
+      - sh: test -n "{{.VERSION}}"
+        msg: "VERSION is required"
+      - sh: echo "{{.VERSION}}" | grep -E "{{.VERSION_PATTERN}}"
+        msg: "Version must be in format X.Y.Z or X.Y.Z-suffix"
+    cmds:
+      # Step 1: Check if version already exists
+      - cmd: |
+          if grep -q "## \[{{.VERSION}}\]" "{{.CHANGELOG_FILE}}"; then
+            echo "Error: Version {{.VERSION}} already exists in {{.CHANGELOG_FILE}}"
+            exit 1
+          fi
+          echo "✓ Version {{.VERSION}} is new"
+        silent: false
+
+      # Step 2: Create backup
+      - cmd: |
+          cp "{{.CHANGELOG_FILE}}" "{{.CHANGELOG_BACKUP}}"
+          echo "✓ Created backup at {{.CHANGELOG_BACKUP}}"
+        silent: false
+
+      # Step 3: Setup cleanup on exit
+      - defer: |
+          # Cleanup on exit (success or failure)
+          if [ -f "{{.CHANGELOG_BACKUP}}" ]; then
+            if [ ! -s "{{.CHANGELOG_FILE}}" ]; then
+              echo "Restoring from backup due to error..."
+              mv "{{.CHANGELOG_BACKUP}}" "{{.CHANGELOG_FILE}}"
+            else
+              rm -f "{{.CHANGELOG_BACKUP}}"
+            fi
+          fi
+          rm -f /tmp/changelog_*.tmp
+
+      # Step 4: Determine the date
+      - cmd: |
+          if [ -n "{{.DATE}}" ]; then
+            RELEASE_DATE="{{.DATE}}"
+          else
+            RELEASE_DATE=$(date +%Y-%m-%d)
+          fi
+          echo "RELEASE_DATE=${RELEASE_DATE}" > /tmp/changelog_vars.tmp
+          echo "✓ Using date: ${RELEASE_DATE}"
+        silent: false
+
+      # Step 5: Update the changelog
+      - cmd: |
+          # Source the variables
+          source /tmp/changelog_vars.tmp
+
+          # Create awk script for clarity
+          cat > /tmp/changelog_update.awk << 'EOF'
+          BEGIN {
+            printed = 0
+            template_found = 0
+          }
+          /^## \[MAJOR\.MINOR\.PATCH\] - YYYY-MM-DD/ {
+            template_found = 1
+            print $0
+            print ""
+            print "## [" version "] - " date
+            printed = 1
+            next
+          }
+          { print }
+          END {
+            if (!template_found) {
+              print "Error: Template header '## [MAJOR.MINOR.PATCH] - YYYY-MM-DD' not found" > "/dev/stderr"
+              exit 1
+            }
+          }
+          EOF
+
+          # Run the update
+          awk -v version="{{.VERSION}}" -v date="${RELEASE_DATE}" \
+            -f /tmp/changelog_update.awk "{{.CHANGELOG_BACKUP}}" > "{{.CHANGELOG_FILE}}.tmp"
+
+          if [ $? -eq 0 ]; then
+            mv "{{.CHANGELOG_FILE}}.tmp" "{{.CHANGELOG_FILE}}"
+            echo "✓ Updated changelog with version {{.VERSION}}"
+          else
+            echo "Error: Failed to update changelog - template header not found"
+            echo "Expected: ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD"
+            exit 1
+          fi
+        silent: false
+
+      # Step 6: Verify the update
+      - cmd: |
+          if ! grep -q "## \[{{.VERSION}}\] -" "{{.CHANGELOG_FILE}}"; then
+            echo "Error: Failed to add version {{.VERSION}} to {{.CHANGELOG_FILE}}"
+            mv "{{.CHANGELOG_BACKUP}}" "{{.CHANGELOG_FILE}}"
+            exit 1
+          fi
+
+          # Check that date was added
+          if grep -q "## \[{{.VERSION}}\] - $" "{{.CHANGELOG_FILE}}"; then
+            echo "Error: Date was not added properly"
+            mv "{{.CHANGELOG_BACKUP}}" "{{.CHANGELOG_FILE}}"
+            exit 1
+          fi
+
+          echo "✓ Successfully verified version {{.VERSION}} in changelog"
+        silent: false
+
+      # Step 7: Show the changes
+      - cmd: |
+          echo ""
+          echo "=== CHANGELOG.md changes ==="
+          diff -u "{{.CHANGELOG_BACKUP}}" "{{.CHANGELOG_FILE}}" || true
+          echo ""
+        silent: false
+
+      # Step 8: Final success message
+      - cmd: |
+          echo "✅ CHANGELOG.md updated successfully"
+          echo "   Version: {{.VERSION}}"
+          source /tmp/changelog_vars.tmp
+          echo "   Date: ${RELEASE_DATE}"
+        silent: false
+
+  ci:changelog-extract:
+    desc: Extract changelog content for a specific version
+    silent: true
+    vars:
+      VERSION: '{{.VERSION | default "0.0.0"}}'
+    preconditions:
+      - sh: test -f "{{.CHANGELOG_FILE}}"
+        msg: "{{.CHANGELOG_FILE}} not found"
+      - sh: test -n "{{.VERSION}}"
+        msg: "VERSION is required"
+    cmds:
+      - cmd: |
+          VERSION="{{.VERSION}}"
+          
+          # Check if version exists
+          if ! grep -q "## \[{{.VERSION}}\]" "{{.CHANGELOG_FILE}}"; then
+            echo "Error: Version {{.VERSION}} not found in {{.CHANGELOG_FILE}}" >&2
+            echo "Available versions:" >&2
+            grep "^## \[" "{{.CHANGELOG_FILE}}" | head -5 >&2
+            exit 1
+          fi
+          
+          CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
+            BEGIN { capture = 0; content = "" }
+            /^## \['"$VERSION"'\]/ { capture = 1; next }
+            /^## \[/ && capture { exit }
+            capture && NF { content = content $0 "\n" }
+            END { print content }
+          ' "{{.CHANGELOG_FILE}}")
+          
+          # If no content found, try without empty line filtering
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
+              BEGIN { capture = 0 }
+              /^## \['"$VERSION"'\]/ { capture = 1; next }
+              /^## \[/ && capture { exit }
+              capture { print }
+            ' "{{.CHANGELOG_FILE}}" | sed '/^$/d')
+          fi
+          
+          # Final check
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            echo "Warning: No content found for version {{.VERSION}}" >&2
+            echo "(Version exists but has no content below it)" >&2
+            exit 0
+          fi
+          
+          echo "$CHANGELOG_CONTENT"
