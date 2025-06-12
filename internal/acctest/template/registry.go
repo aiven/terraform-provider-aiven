@@ -10,17 +10,19 @@ import (
 
 // registry holds templates for a specific resource type
 type registry struct {
-	t         testing.TB
-	templates map[string]*template.Template
-	funcs     *templateFunctions
+	t            testing.TB
+	templates    map[string]*template.Template
+	funcs        *templateFunctions
+	rawTemplates map[string]string
 }
 
 // newTemplateRegistry creates a new template registry for a resource
 func newTemplateRegistry(t testing.TB) *registry {
 	return &registry{
-		t:         t,
-		templates: make(map[string]*template.Template),
-		funcs:     newTemplateFunctions(),
+		t:            t,
+		templates:    make(map[string]*template.Template),
+		rawTemplates: make(map[string]string),
+		funcs:        newTemplateFunctions(),
 	}
 }
 
@@ -28,6 +30,7 @@ func newTemplateRegistry(t testing.TB) *registry {
 func (r *registry) addTemplate(name, templateStr string) error {
 	r.t.Helper()
 
+	r.rawTemplates[name] = templateStr
 	tmpl := template.New(name).Funcs(r.funcs.getFuncMap())
 
 	parsed, err := tmpl.Parse(templateStr)
@@ -83,4 +86,9 @@ func (r *registry) getAvailableTemplates() []string {
 	sort.Strings(templates)
 
 	return templates
+}
+
+// getRawTemplates returns all raw template strings
+func (r *registry) getRawTemplates() map[string]string {
+	return r.rawTemplates
 }
