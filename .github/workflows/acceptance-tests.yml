@@ -147,8 +147,8 @@ jobs:
           fi
 
   sweep:
-    if: always()
-    needs: [test, setup_aiven_project_suffix]
+    needs: [ gatekeeper, test, setup_aiven_project_suffix ]
+    if: always() && needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: softprops/turnstyle@v2
