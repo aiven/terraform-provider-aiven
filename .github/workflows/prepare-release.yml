@@ -77,10 +77,6 @@ jobs:
           git add CHANGELOG.md
           git commit -m "ci(release): v${{ inputs.version }}"
 
-      - name: Push release branch
-        run: |
-          git push origin "${{ env.RELEASE_BRANCH }}"
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
