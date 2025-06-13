@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, labeled ]
     branches:
+      - main
       - test-release-workflow
   schedule:
     - cron: "0 0 * * *"
