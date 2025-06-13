@@ -10,6 +10,16 @@ on:
       - reopened
       - labeled
       - unlabeled
+  workflow_call:
+    inputs:
+      head_ref:
+        description: 'The git ref to run checks against (head)'
+        required: true
+        type: string
+      base_ref:
+        description: 'The git ref to compare against (base)'
+        required: true
+        type: string
 
 # TODO: This is currently not supported, see https://github.com/actions/dependency-review-action/issues/30.
 #  push:
@@ -20,11 +30,39 @@ permissions:
   contents: read
 
 jobs:
-  dependency-review:
+  gatekeeper:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Determine if tests should run based on trigger and labels
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Check if the 'skip workflows' label is present on the PR.
+            if ${{ contains(github.event.pull_request.labels.*.name, 'skip workflows') }}; then
+              echo "INFO: Pull request has 'skip workflows' label"
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            else
+              echo "INFO: Pull request is valid"
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For all other events like 'workflow_call' or 'push', always run.
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
+
+  dependency-review:
+    needs: gatekeeper
+    if: needs.gatekeeper.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.head_ref || github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - uses: actions/dependency-review-action@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          base-ref: ${{ inputs.base_ref || github.event.pull_request.base.ref }}
+          head-ref: ${{ inputs.head_ref || github.event.pull_request.head.ref }}

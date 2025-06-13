@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 3.10.0)'
+        description: 'Release version (e.g., 4.10.0)'
         required: true
         type: string
       release_branch_prefix:
@@ -12,6 +12,15 @@ on:
         required: true
         type: string
         default: 'automation'
+      run_acceptance_tests:
+        description: 'Run the acceptance tests? (Uncheck to skip, only if you are sure)'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.version }}
+  cancel-in-progress: true
 
 jobs:
   create_release_pr:
@@ -19,9 +28,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      statuses: write
     outputs:
-      release_branch: ${{ env.RELEASE_BRANCH }}
-      pr_created: ${{ job.status == 'success' }}
+      pr_head_sha: ${{ steps.create-pr.outputs.pull-request-head-sha }}
+      pr_created: ${{ steps.create-pr.outputs.pull-request-number != '' }}
 
     steps:
       - name: Validate version format
@@ -67,7 +77,7 @@ jobs:
         id: changelog
         run: |
           CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
-          
+
           # Store in GitHub env for PR body
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
@@ -102,10 +112,102 @@ jobs:
             release
           draft: false
 
-  run_acceptance_tests:
+  # Run all linting-related checks
+  run_lint_checks:
     needs: create_release_pr
     if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/lint.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+
+  # Run unit tests
+  run_unit_tests:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+
+  # Run dependency review
+  run_dependency_review:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/dependency-review.yml
+    with:
+      head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+      base_ref: test-release-workflow
+
+  # Run acceptance tests
+  run_acceptance_tests:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created && inputs.run_acceptance_tests
     uses: ./.github/workflows/reusable-acceptance-tests.yml
     with:
-      ref: ${{ needs.create_release_pr.outputs.release_branch }}
-    secrets: inherit # Pass all required secrets to the reusable workflow
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+    secrets: inherit
+
+
+  report_all_statuses:
+    needs:
+      - create_release_pr
+      - run_lint_checks
+      - run_unit_tests
+      - run_dependency_review
+      - run_acceptance_tests
+    runs-on: ubuntu-latest
+    if: always() && needs.create_release_pr.outputs.pr_created == 'true'
+    permissions:
+      statuses: write
+    steps:
+      - name: Report status of all required checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head_sha = '${{ needs.create_release_pr.outputs.pr_head_sha }}';
+            if (!head_sha) {
+              console.log('Could not find PR head SHA. Skipping status reporting.');
+              return;
+            }
+
+            async function postStatus(checkName, result, default_description) {
+              let state = 'failure';
+              let description = default_description;
+
+              if (result === 'success') {
+                state = 'success';
+                description = `${checkName} passed`;
+              } else if (result === 'skipped') {
+                state = 'success';
+                description = `${checkName} was skipped`;
+              }
+
+              console.log(`Reporting status for context: ${checkName}, state: ${state}`);
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: head_sha,
+                state: state,
+                context: checkName,
+                description: description,
+                target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
+            }
+
+            const lintResult = '${{ needs.run_lint_checks.result }}';
+            for (const check of ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']) {
+              await postStatus(check, lintResult, 'Linting checks failed');
+            }
+
+            await postStatus('go_test', '${{ needs.run_unit_tests.result }}', 'Unit tests failed');
+            await postStatus('dependency-review', '${{ needs.run_dependency_review.result }}', 'Dependency review failed');
+            await postStatus('Acceptance Tests', '${{ needs.run_acceptance_tests.result }}', 'Acceptance tests failed');
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: head_sha,
+              state: 'success',
+              context: 'changelog-enforcer',
+              description: 'Changelog updated by automated release process.',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
