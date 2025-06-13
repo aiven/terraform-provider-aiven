@@ -1,13 +1,13 @@
 name: Acceptance Tests
 
 on:
+  pull_request:
+    types: [ opened, synchronize, reopened, labeled ]
+    branches:
+      - test-release-workflow
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled]
-    branches:
-      - test-release-workflow
 
 permissions:
   contents: read
@@ -130,8 +130,7 @@ jobs:
   tests-summary:
     name: All Tests Passed
     runs-on: ubuntu-latest
-    # It must run after the 'test' matrix and it must always run,
-    # even if some matrix jobs fail, so we can check the outcome.
+    # it must always run even if some matrix jobs fail, so we can check the outcome
     needs: [ test ]
     if: always() && needs.test.result != 'skipped'
 
