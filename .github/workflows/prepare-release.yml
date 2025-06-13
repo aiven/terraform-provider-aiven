@@ -27,6 +27,12 @@ jobs:
             echo "Error: Version must be in format X.Y.Z (e.g., 3.10.0)"
             exit 1
           fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Check if version already exists
         run: |
           if git tag -l "v${{ inputs.version }}" | grep -q "v${{ inputs.version }}"; then
@@ -34,12 +40,8 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -49,42 +51,20 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create release branch
+      - name: Setup release branch
         run: |
           BRANCH_NAME="${{ inputs.release_branch_prefix }}-release-v${{ inputs.version }}"
-          git checkout -b "$BRANCH_NAME"
           echo "RELEASE_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update CHANGELOG.md
         run: |
-          # Use task to update changelog
-          task release:update-changelog VERSION="${{ inputs.version }}"
+          task ci:changelog-update VERSION="${{ inputs.version }}"
 
       - name: Extract changelog content for PR
         id: changelog
         run: |
-          # Extract content between the new version header and the next version header
-          VERSION="${{ inputs.version }}"
-
-          # Use awk to extract the section
-          CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
-            BEGIN { capture = 0; content = "" }
-            /^## \['"$VERSION"'\]/ { capture = 1; next }
-            /^## \[/ && capture { exit }
-            capture && NF { content = content $0 "\n" }
-            END { print content }
-          ' CHANGELOG.md)
-
-          # If no content found, get everything after the version header until next header
-          if [ -z "$CHANGELOG_CONTENT" ]; then
-            CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
-              BEGIN { capture = 0 }
-              /^## \['"$VERSION"'\]/ { capture = 1; next }
-              /^## \[/ && capture { exit }
-              capture { print }
-            ' CHANGELOG.md | sed '/^$/d')
-          fi
-
+          CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
+          
           # Store in GitHub env for PR body
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
@@ -97,20 +77,16 @@ jobs:
           git add CHANGELOG.md
           git commit -m "ci(release): v${{ inputs.version }}"
 
-      - name: Push release branch
-        run: |
-          git push origin "${{ env.RELEASE_BRANCH }}"
-
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
+          author: GitHub <noreply@github.com>
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.RELEASE_BRANCH }}
-          base: test-release-workflow # Adjust base branch to main
-          title: "Release v${{ inputs.version }}"
+          base: test-release-workflow #TODO: Adjust base branch to main
+          title: "ci(release): v${{ inputs.version }}"
           body: |
-            ## About this change—what it does
-            Release v${{ inputs.version }}
+            ## Release v${{ inputs.version }}
 
             ### Changelog
             ${{ env.CHANGELOG_CONTENT }}
@@ -121,10 +97,3 @@ jobs:
           labels: |
             release
           draft: false
-
-      - name: Trigger Acceptance Tests
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: release-tests
-          client-payload: '{"branch": "${{ env.RELEASE_BRANCH }}", "version": "${{ inputs.version }}"}'
