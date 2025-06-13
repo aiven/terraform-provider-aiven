@@ -8,12 +8,19 @@ on:
     workflows: ["Prepare Release"]
     types:
       - completed
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - test-release-workflow
+  repository_dispatch:
+    types: [release-tests]
 
 permissions:
   contents: read
   statuses: write
   pull-requests: read
   actions: read
+  checks: write
 
 concurrency:
   group: ci-${{ github.head_ref || github.ref || github.event.client_payload.pr_number }}

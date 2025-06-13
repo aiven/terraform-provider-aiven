@@ -98,3 +98,45 @@ jobs:
           labels: |
             release
           draft: false
+
+      - name: Get PR information
+        id: pr-info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Wait a bit for the PR to be fully created
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Find the PR we just created
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${{ env.RELEASE_BRANCH }}`,
+              state: 'open'
+            });
+            
+            if (prs.length === 0) {
+              throw new Error('Could not find the created PR');
+            }
+            
+            const pr = prs[0];
+            console.log(`Found PR #${pr.number}`);
+            
+            core.setOutput('pr_number', pr.number);
+            core.setOutput('pr_sha', pr.head.sha);
+
+      - name: Trigger acceptance tests
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'release-tests',
+              client_payload: {
+                pr_number: '${{ steps.pr-info.outputs.pr_number }}',
+                pr_branch: '${{ env.RELEASE_BRANCH }}',
+                pr_sha: '${{ steps.pr-info.outputs.pr_sha }}',
+                version: '${{ inputs.version }}'
+              }
+            });
