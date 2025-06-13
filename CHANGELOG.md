@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.42.1] - 2025-06-13
+
 - Fix `project_vpc_id`, remove `Computed` attribute:
   a service can't be deployed on the public Internet after it has been deployed in a VPC.
   WARNING: removing this field deploys a service on the Public Internet!
