@@ -359,7 +359,7 @@ tasks:
     cmds:
       - cmd: |
           VERSION="{{.VERSION}}"
-          
+
           # Check if version exists
           if ! grep -q "## \[{{.VERSION}}\]" "{{.CHANGELOG_FILE}}"; then
             echo "Error: Version {{.VERSION}} not found in {{.CHANGELOG_FILE}}" >&2
@@ -367,7 +367,7 @@ tasks:
             grep "^## \[" "{{.CHANGELOG_FILE}}" | head -5 >&2
             exit 1
           fi
-          
+
           CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
             BEGIN { capture = 0; content = "" }
             /^## \['"$VERSION"'\]/ { capture = 1; next }
@@ -375,7 +375,7 @@ tasks:
             capture && NF { content = content $0 "\n" }
             END { print content }
           ' "{{.CHANGELOG_FILE}}")
-          
+
           # If no content found, try without empty line filtering
           if [ -z "$CHANGELOG_CONTENT" ]; then
             CHANGELOG_CONTENT=$(awk -v version="$VERSION" '
@@ -385,12 +385,12 @@ tasks:
               capture { print }
             ' "{{.CHANGELOG_FILE}}" | sed '/^$/d')
           fi
-          
+
           # Final check
           if [ -z "$CHANGELOG_CONTENT" ]; then
             echo "Warning: No content found for version {{.VERSION}}" >&2
             echo "(Version exists but has no content below it)" >&2
             exit 0
           fi
-          
+
           echo "$CHANGELOG_CONTENT"
