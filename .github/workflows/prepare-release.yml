@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 3.10.0)'
+        description: 'Release version (e.g., 4.10.0)'
         required: true
         type: string
       release_branch_prefix:
@@ -13,15 +13,20 @@ on:
         type: string
         default: 'automation'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.version }}
+  cancel-in-progress: true
+
 jobs:
   create_release_pr:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+      statuses: write
     outputs:
-      release_branch: ${{ env.RELEASE_BRANCH }}
-      pr_created: ${{ job.status == 'success' }}
+      pr_head_sha: ${{ steps.create-pr.outputs.pull-request-head-sha }}
+      pr_created: ${{ steps.create-pr.outputs.pull-request-number != '' }}
 
     steps:
       - name: Validate version format
@@ -67,7 +72,7 @@ jobs:
         id: changelog
         run: |
           CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
-          
+
           # Store in GitHub env for PR body
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
@@ -107,5 +112,41 @@ jobs:
     if: needs.create_release_pr.outputs.pr_created
     uses: ./.github/workflows/reusable-acceptance-tests.yml
     with:
-      ref: ${{ needs.create_release_pr.outputs.release_branch }}
-    secrets: inherit # Pass all required secrets to the reusable workflow
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+    secrets: inherit
+
+  report_test_status:
+    needs: [create_release_pr, run_acceptance_tests]
+    runs-on: ubuntu-latest
+    # 'if: always()' ensures this job runs even if the run_acceptance_tests job fails
+    if: always() && needs.create_release_pr.outputs.pr_created == 'true'
+    steps:
+      - name: Report status based on test outcome
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conclusion = '${{ needs.run_acceptance_tests.result }}';
+            let state;
+            let description;
+
+            if (conclusion === 'success') {
+              state = 'success';
+              description = 'All acceptance tests passed!';
+            } else if (conclusion === 'failure') {
+              state = 'failure';
+              description = 'One or more acceptance tests failed.';
+            } else {
+              state = 'error';
+              description = 'The test workflow was cancelled or had an error.';
+            }
+
+            // Post the status check to the PR's head commit SHA
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ needs.create_release_pr.outputs.pr_head_sha }}',
+              state: state,
+              context: 'Acceptance Tests',
+              description: description,
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
