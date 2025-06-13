@@ -14,11 +14,14 @@ on:
         default: 'automation'
 
 jobs:
-  prepare-release:
+  create_release_pr:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      release_branch: ${{ env.RELEASE_BRANCH }}
+      pr_created: ${{ job.status == 'success' }}
 
     steps:
       - name: Validate version format
@@ -98,3 +101,11 @@ jobs:
           labels: |
             release
           draft: false
+
+  run_acceptance_tests:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/reusable-acceptance-tests.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.release_branch }}
+    secrets: inherit # Pass all required secrets to the reusable workflow

@@ -4,10 +4,11 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Prepare Release"]
-    types:
-      - completed
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - main
+      - test-release-workflow
 
 permissions:
   contents: read
@@ -16,192 +17,42 @@ permissions:
   actions: read
 
 concurrency:
-  group: ci-${{ github.head_ref || github.ref || github.event.client_payload.pr_number }}
+  group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # This job acts as a gatekeeper for the entire test suite
   gatekeeper:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ steps.check_label.outputs.should_run }}
+      should_run: ${{ steps.check.outputs.should_run }}
+      ref_to_test: ${{ steps.check.outputs.ref_to_test }}
     steps:
-      - name: Check for 'release' label or dispatch event
-        id: check_label
+      - id: check
+        name: Check if tests should run
         run: |
-          # For repository_dispatch with release-tests type, always run
-          if [[ "${{ github.event_name }}" == "repository_dispatch" ]] && [[ "${{ github.event.action }}" == "release-tests" ]]; then
-            echo "Repository dispatch for release tests. Running tests."
+          # For scheduled or manual runs, test the main branch
+          if [[ "${{ github.event_name }}" == "schedule" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Scheduled or manual run. Testing main branch."
             echo "should_run=true" >> $GITHUB_OUTPUT
-          # For scheduled runs and workflow_dispatch, always run
-          elif [[ "${{ github.event_name }}" == "schedule" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "Scheduled or manual run. Running tests."
-            echo "should_run=true" >> $GITHUB_OUTPUT
-          # For pull requests, check for the release label
+            echo "ref_to_test=refs/heads/main" >> $GITHUB_OUTPUT
+          # For pull requests, check for the 'release' label
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             if ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
-              echo "Pull request has the 'release' label. Running tests."
+              echo "Pull request has 'release' label. Testing PR branch."
               echo "should_run=true" >> $GITHUB_OUTPUT
+              echo "ref_to_test=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
             else
-              echo "Pull request does not have the 'release' label. Skipping tests."
+              echo "Pull request does not have 'release' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
             fi
           else
-            echo "Unexpected event type. Skipping tests."
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-  setup_context:
+  call-tests:
     needs: [gatekeeper]
-    if: needs.gatekeeper.outputs.should_run == 'true' && github.event_name == 'repository_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.ref }}
-          fetch-depth: 0
-
-  setup_aiven_project_suffix:
-    needs: [ gatekeeper ]
     if: needs.gatekeeper.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - id: selproj
-        run: echo "project_name_suffix=$(task -s ci:selproj | tr -d '\n')" >> $GITHUB_OUTPUT
-        env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
-
-  find_tests:
-    needs: [ gatekeeper ]
-    if: needs.gatekeeper.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.find_tests.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: arduino/setup-task@v2
-        with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - id: find_tests
-        run: echo "matrix=$(task ci:discover-test-matrix)" >> $GITHUB_OUTPUT
-
-  test:
-    name: test (${{ matrix.pkg.name }})
-    needs: [setup_aiven_project_suffix, find_tests]
-    runs-on: ubuntu-latest
-    env:
-      ACC_TEST_PARALLELISM: 5
-    strategy:
-      max-parallel: 5
-      fail-fast: false
-      matrix:
-        pkg: ${{ fromJson(needs.find_tests.outputs.matrix) }}
-
-    steps:
-      - uses: softprops/turnstyle@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          same-branch-only: true
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: arduino/setup-task@v2
-        with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3 #Install latest Terraform version
-        with:
-          terraform_wrapper: false
-
-      # Get the path to the installed Terraform binary
-      - id: get_tf_path
-        name: Get Terraform Path
-        run: echo "terraform_path=$(which terraform)" >> $GITHUB_OUTPUT
-
-      - name: Run Acceptance Tests
-        run: task test-acc
-        env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          TF_ACC_TERRAFORM_PATH: ${{ steps.get_tf_path.outputs.terraform_path }}
-          AIVEN_PROJECT_NAME: >-
-            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
-          AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-          AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-          AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
-          PKG_PATH: ${{ matrix.pkg.path }}
-
-  tests-summary:
-    name: All Tests Passed
-    runs-on: ubuntu-latest
-    # it must always run even if some matrix jobs fail, so we can check the outcome
-    needs: [ test ]
-    if: always() && needs.test.result != 'skipped'
-
-    steps:
-      - name: Check matrix outcome
-        run: |
-          if [[ "${{ needs.test.result }}" == "success" ]]; then
-            echo "All tests passed successfully!"
-          else
-            echo "One or more tests in the matrix failed. Result: ${{ needs.test.result }}"
-            exit 1
-          fi
-
-  sweep:
-    needs: [ gatekeeper, test, setup_aiven_project_suffix ]
-    if: always() && needs.gatekeeper.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: softprops/turnstyle@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          same-branch-only: true
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: arduino/setup-task@v2
-        with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: nick-invision/retry@v3
-        if: always()
-        with:
-          timeout_minutes: 15
-          max_attempts: 15
-          command: task --yes sweep
-        env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: >-
-            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
-          AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
-          AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+    uses: ./.github/workflows/reusable-acceptance-tests.yml
+    with:
+      ref: ${{ needs.gatekeeper.outputs.ref_to_test }}
+    secrets: inherit
