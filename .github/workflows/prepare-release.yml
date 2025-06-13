@@ -75,16 +75,17 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add CHANGELOG.md
-          git commit -m "ci(release): v${{ inputs.version }}"
+          git commit -m "chore(release): v${{ inputs.version }}"
 
       - name: Create Pull Request
+        id: create-pr
         uses: peter-evans/create-pull-request@v7
         with:
           author: GitHub <noreply@github.com>
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.RELEASE_BRANCH }}
           base: test-release-workflow #TODO: Adjust base branch to main
-          title: "ci(release): v${{ inputs.version }}"
+          title: "chore(release): v${{ inputs.version }}"
           body: |
             ## Release v${{ inputs.version }}
 
