@@ -13,6 +13,12 @@ on:
   push:
     branches:
       - main
+  workflow_call:
+    inputs:
+      ref:
+        description: 'The git ref to run checks against'
+        required: true
+        type: string
 
 permissions:
   contents: read
