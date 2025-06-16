@@ -134,7 +134,8 @@ jobs:
     if: needs.create_release_pr.outputs.pr_created
     uses: ./.github/workflows/dependency-review.yml
     with:
-      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+      head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+      base_ref: test-release-workflow
 
   run_acceptance_tests:
     needs: create_release_pr
