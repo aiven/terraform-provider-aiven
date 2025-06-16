@@ -24,18 +24,44 @@ permissions:
   contents: read
 
 jobs:
-  go_test:
+  # This job's only purpose is to decide if the next job should run.
+  # The output `should_run` will be simple 'true' or 'false'.
+  gatekeeper:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - uses: actions/setup-go@v5
-      with:
-        go-version-file: go.mod
-    - uses: arduino/setup-task@v2
-      with:
-        version: '3.x'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - run: task test-unit
+      - name: Determine if tests should run based on trigger and labels
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Check if the 'skip workflows' label is present on the PR.
+            if ${{ contains(github.event.pull_request.labels.*.name, 'skip workflows') }}; then
+              echo "INFO: Pull request has 'skip workflows' label"
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            else
+              echo "INFO: Pull request is valid"
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For all other events like 'workflow_call' or 'push', always run.
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
+
+  go_test:
+    needs: gatekeeper
+    if: needs.gatekeeper.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task test-unit

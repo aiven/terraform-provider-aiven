@@ -26,9 +26,32 @@ permissions:
   contents: read
 
 jobs:
+  gatekeeper:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Determine if tests should run based on trigger and labels
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Check if the 'skip workflows' label is present on the PR.
+            if ${{ contains(github.event.pull_request.labels.*.name, 'skip workflows') }}; then
+              echo "INFO: Pull request has 'skip workflows' label"
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            else
+              echo "INFO: Pull request is valid"
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For all other events like 'workflow_call' or 'push', always run.
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
+
   dependency-review:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
+    needs: gatekeeper
+    if: needs.gatekeeper.outputs.should_run == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
