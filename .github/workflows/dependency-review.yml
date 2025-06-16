@@ -12,8 +12,12 @@ on:
       - unlabeled
   workflow_call:
     inputs:
-      ref:
-        description: 'The git ref to run checks against'
+      head_ref:
+        description: 'The git ref to run checks against (head)'
+        required: true
+        type: string
+      base_ref:
+        description: 'The git ref to compare against (base)'
         required: true
         type: string
 
@@ -55,6 +59,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
+          ref: ${{ inputs.head_ref || github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - uses: actions/dependency-review-action@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          base-ref: ${{ inputs.base_ref || github.event.pull_request.base.ref }}
+          head-ref: ${{ inputs.head_ref || github.event.pull_request.head.ref }}
