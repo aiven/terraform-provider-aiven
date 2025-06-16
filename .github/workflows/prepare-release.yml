@@ -107,6 +107,30 @@ jobs:
             release
           draft: false
 
+  # Job to run all linting-related checks
+  run_lint_checks:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/lint.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+
+  # Job to run all unit tests
+  run_unit_tests:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+
+  # Job to run dependency review
+  run_dependency_review:
+    needs: create_release_pr
+    if: needs.create_release_pr.outputs.pr_created
+    uses: ./.github/workflows/dependency-review.yml
+    with:
+      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
+
   run_acceptance_tests:
     needs: create_release_pr
     if: needs.create_release_pr.outputs.pr_created
@@ -115,38 +139,66 @@ jobs:
       ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
     secrets: inherit
 
-  report_test_status:
-    needs: [create_release_pr, run_acceptance_tests]
+  # The MASTER job to report all statuses back to the Pull Request
+  report_all_statuses:
+    needs:
+      - create_release_pr
+      - run_lint_checks
+      - run_unit_tests
+      - run_dependency_review
+      - run_acceptance_tests
     runs-on: ubuntu-latest
-    # 'if: always()' ensures this job runs even if the run_acceptance_tests job fails
     if: always() && needs.create_release_pr.outputs.pr_created == 'true'
+    permissions:
+      statuses: write
     steps:
-      - name: Report status based on test outcome
+      - name: Report status of all required checks
         uses: actions/github-script@v7
         with:
           script: |
-            const conclusion = '${{ needs.run_acceptance_tests.result }}';
-            let state;
-            let description;
-
-            if (conclusion === 'success') {
-              state = 'success';
-              description = 'All acceptance tests passed!';
-            } else if (conclusion === 'failure') {
-              state = 'failure';
-              description = 'One or more acceptance tests failed.';
-            } else {
-              state = 'error';
-              description = 'The test workflow was cancelled or had an error.';
+            const head_sha = '${{ needs.create_release_pr.outputs.pr_head_sha }}';
+            if (!head_sha) {
+              console.log('Could not find PR head SHA. Skipping status reporting.');
+              return;
             }
 
-            // Post the status check to the PR's head commit SHA
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: '${{ needs.create_release_pr.outputs.pr_head_sha }}',
-              state: state,
-              context: 'Acceptance Tests',
-              description: description,
-              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-            });
+            const checkRuns = {
+              // Linting checks
+              'lint.yml': {
+                result: '${{ needs.run_lint_checks.result }}',
+                contexts: ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']
+              },
+              // Unit test checks
+              'unit-tests.yml': {
+                result: '${{ needs.run_unit_tests.result }}',
+                contexts: ['go_test']
+              },
+              // Dependency review checks
+              'dependency-review.yml': {
+                result: '${{ needs.run_dependency_review.result }}',
+                contexts: ['dependency-review']
+              },
+              // Acceptance test checks
+              'reusable-acceptance-tests.yml': {
+                result: '${{ needs.run_acceptance_tests.result }}',
+                contexts: ['Acceptance Tests']
+              }
+            };
+
+            for (const [workflow, { result, contexts }] of Object.entries(checkRuns)) {
+              const state = result === 'success' ? 'success' : 'failure';
+              const description = result === 'success' ? 'Checks passed' : `Checks failed (workflow: ${workflow})`;
+
+              for (const context of contexts) {
+                console.log(`Reporting status for context: ${context}, state: ${state}`);
+                await github.rest.repos.createCommitStatus({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  sha: head_sha,
+                  state: state,
+                  context: context,
+                  description: description,
+                  target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+                });
+              }
+            }

@@ -20,7 +20,7 @@ permissions:
 jobs:
   go_test:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
     steps:
     - uses: actions/checkout@v4
       with:

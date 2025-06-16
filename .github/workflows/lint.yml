@@ -13,6 +13,12 @@ on:
   push:
     branches:
       - main
+  workflow_call:
+    inputs:
+      ref:
+        description: 'The git ref to run checks against'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -28,7 +34,7 @@ jobs:
 
   semgrep:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
     container:
       image: semgrep/semgrep
     steps:
@@ -40,7 +46,7 @@ jobs:
 
   make_lint:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,7 +64,7 @@ jobs:
 
   check_docs_were_generated:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,7 +82,7 @@ jobs:
 
   sweep_check:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push' || github.event_name == 'workflow_call'
     steps:
     - uses: actions/checkout@v4
       with:
