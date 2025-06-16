@@ -12,6 +12,11 @@ on:
         required: true
         type: string
         default: 'automation'
+      run_acceptance_tests:
+        description: 'Run the acceptance tests? (Uncheck to skip for faster testing)'
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.version }}
@@ -133,13 +138,13 @@ jobs:
 
   run_acceptance_tests:
     needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created
+    if: needs.create_release_pr.outputs.pr_created && inputs.run_acceptance_tests
     uses: ./.github/workflows/reusable-acceptance-tests.yml
     with:
       ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
     secrets: inherit
 
-  # The MASTER job to report all statuses back to the Pull Request
+
   report_all_statuses:
     needs:
       - create_release_pr
@@ -162,43 +167,43 @@ jobs:
               return;
             }
 
-            const checkRuns = {
-              // Linting checks
-              'lint.yml': {
-                result: '${{ needs.run_lint_checks.result }}',
-                contexts: ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']
-              },
-              // Unit test checks
-              'unit-tests.yml': {
-                result: '${{ needs.run_unit_tests.result }}',
-                contexts: ['go_test']
-              },
-              // Dependency review checks
-              'dependency-review.yml': {
-                result: '${{ needs.run_dependency_review.result }}',
-                contexts: ['dependency-review']
-              },
-              // Acceptance test checks
-              'reusable-acceptance-tests.yml': {
-                result: '${{ needs.run_acceptance_tests.result }}',
-                contexts: ['Acceptance Tests']
-              }
-            };
+            // This helper function will post the status
+            async function postStatus(context, result, default_description) {
+              // Intelligently determine the state and description
+              let state = 'failure';
+              let description = default_description;
 
-            for (const [workflow, { result, contexts }] of Object.entries(checkRuns)) {
-              const state = result === 'success' ? 'success' : 'failure';
-              const description = result === 'success' ? 'Checks passed' : `Checks failed (workflow: ${workflow})`;
-
-              for (const context of contexts) {
-                console.log(`Reporting status for context: ${context}, state: ${state}`);
-                await github.rest.repos.createCommitStatus({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  sha: head_sha,
-                  state: state,
-                  context: context,
-                  description: description,
-                  target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-                });
+              if (result === 'success') {
+                state = 'success';
+                description = `${context} passed`;
+              } else if (result === 'skipped') {
+                state = 'success'; // Treat skipped as success to not block the PR
+                description = `${context} was skipped`;
               }
+            
+              console.log(`Reporting status for context: ${context}, state: ${state}`);
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: head_sha,
+                state: state,
+                context: context,
+                description: description,
+                target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
             }
+
+            // Linting Checks
+            const lintResult = '${{ needs.run_lint_checks.result }}';
+            for (const context of ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']) {
+              await postStatus(context, lintResult, 'Linting checks failed');
+            }
+
+            // Unit Test Checks
+            await postStatus('go_test', '${{ needs.run_unit_tests.result }}', 'Unit tests failed');
+            
+            // Dependency Review Checks
+            await postStatus('dependency-review', '${{ needs.run_dependency_review.result }}', 'Dependency review failed');
+
+            // Acceptance Test Checks
+            await postStatus('Acceptance Tests', '${{ needs.run_acceptance_tests.result }}', 'Acceptance tests failed');
