@@ -49,11 +49,12 @@ jobs:
           fi
 
   dependency-review:
-    runs-on: ubuntu-latest
     needs: gatekeeper
     if: needs.gatekeeper.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
       - uses: actions/dependency-review-action@v4
