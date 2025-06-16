@@ -203,3 +203,13 @@ jobs:
             await postStatus('go_test', '${{ needs.run_unit_tests.result }}', 'Unit tests failed');
             await postStatus('dependency-review', '${{ needs.run_dependency_review.result }}', 'Dependency review failed');
             await postStatus('Acceptance Tests', '${{ needs.run_acceptance_tests.result }}', 'Acceptance tests failed');
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: head_sha,
+              state: 'success',
+              context: 'changelog-enforcer', // This MUST exactly match the name of the required check in your branch protection rules
+              description: 'Changelog updated by automated release process.',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
