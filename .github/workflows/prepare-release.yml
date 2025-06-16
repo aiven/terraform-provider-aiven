@@ -168,43 +168,38 @@ jobs:
               return;
             }
 
-            // This helper function will post the status
-            async function postStatus(context, result, default_description) {
-              // Intelligently determine the state and description
+            // `github` and `context` are global objects available in github-script.
+            // We will use the global `context` for repo owner information.
+            async function postStatus(checkName, result, default_description) { // <-- FIX: Renamed parameter from 'context' to 'checkName'
               let state = 'failure';
               let description = default_description;
 
               if (result === 'success') {
                 state = 'success';
-                description = `${context} passed`;
+                description = `${checkName} passed`;
               } else if (result === 'skipped') {
-                state = 'success'; // Treat skipped as success to not block the PR
-                description = `${context} was skipped`;
+                state = 'success';
+                description = `${checkName} was skipped`;
               }
             
-              console.log(`Reporting status for context: ${context}, state: ${state}`);
+              console.log(`Reporting status for context: ${checkName}, state: ${state}`);
               await github.rest.repos.createCommitStatus({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: context.repo.owner, // <-- This now correctly uses the global 'context'
+                repo: context.repo.repo,   // <-- This now correctly uses the global 'context'
                 sha: head_sha,
                 state: state,
-                context: context,
+                context: checkName, // <-- This correctly uses our function parameter
                 description: description,
                 target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
               });
             }
 
-            // Linting Checks
+            // No changes needed below, the logic is sound.
             const lintResult = '${{ needs.run_lint_checks.result }}';
-            for (const context of ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']) {
-              await postStatus(context, lintResult, 'Linting checks failed');
+            for (const check of ['commitlint', 'semgrep', 'make_lint', 'check_docs_were_generated']) {
+              await postStatus(check, lintResult, 'Linting checks failed');
             }
 
-            // Unit Test Checks
             await postStatus('go_test', '${{ needs.run_unit_tests.result }}', 'Unit tests failed');
-            
-            // Dependency Review Checks
             await postStatus('dependency-review', '${{ needs.run_dependency_review.result }}', 'Dependency review failed');
-
-            // Acceptance Test Checks
             await postStatus('Acceptance Tests', '${{ needs.run_acceptance_tests.result }}', 'Acceptance tests failed');
