@@ -1,0 +1,38 @@
+# This reusable workflow acts as a conditional gate for CI jobs.
+#
+# - On pull requests, it outputs `should_run: 'false'` if a `skip workflows` label is present.
+# - For all other events (including pushes), it defaults to `should_run: 'true'`.
+
+name: Reusable Gatekeeper
+
+on:
+  workflow_call:
+    outputs:
+      should_run:
+        description: "A boolean ('true' or 'false') indicating if subsequent jobs should run."
+        value: ${{ jobs.check.outputs.should_run }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run || steps.default_check.outputs.should_run }}
+    steps:
+      - name: Determine if workflows should run based on labels (Pull Requests)
+        id: check
+        if: github.event_name == 'pull_request'
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'skip workflows') }}; then
+            echo "INFO: Pull request has 'skip workflows' label. Skipping..."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "INFO: Pull request does not have 'skip workflows' label. Proceeding..."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Default for non-PR triggers
+        id: default_check
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "INFO: Trigger is not a pull request. Proceeding..."
+          echo "should_run=true" >> "$GITHUB_OUTPUT"

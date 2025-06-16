@@ -1,3 +1,4 @@
+# Workflow builds and publishes the official release artifacts.
 name: Release Artifacts
 
 on:
