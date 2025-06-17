@@ -31,16 +31,27 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - id: selproj
         run: echo "project_name_suffix=$(task -s ci:selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
+  # This job discovers all Go test packages and partitions them into two groups:
+  # 'normal' and 'slow'.
+  # The 'normal' tests are numerous and relatively fast.
+  # Isolating them prevents bottlenecks and
+  # allows us to apply different parallelism strategies to manage CI duration.
   find_tests:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.find_tests.outputs.matrix }}
+      matrix: ${{ steps.get_matrix.outputs.matrix }}
+      has_normal_tests: ${{ steps.get_matrix.outputs.has_normal_tests }}
+      has_slow_tests: ${{ steps.get_matrix.outputs.has_slow_tests }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,12 +64,23 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - id: find_tests
-        run: echo "matrix=$(task ci:discover-test-matrix)" >> $GITHUB_OUTPUT
+      - id: get_matrix
+        name: Discover test matrix
+        run: |
+          task ci:discover-test-matrix  SLOW_TESTS_CSV=sdk-service-vpc,sdk-service-kafka,sdk-service-kafkatopic | jq -cr '
+            # The input from the pipe is the correct JSON: {"slow":[...], "normal":[...]}
+            {
+              "matrix": tostring,
+              "has_normal_tests": (.normal | length > 0),
+              "has_slow_tests": (.slow | length > 0)
+            } |
+            to_entries[] | "\(.key)=\(.value)"
+          ' >> $GITHUB_OUTPUT
 
-  test:
-    name: test (${{ matrix.pkg.name }})
+  test-normal:
+    name: test-normal (${{ matrix.pkg.name }})
     needs: [setup_aiven_project_suffix, find_tests]
+    if: needs.find_tests.outputs.has_normal_tests == 'true'
     runs-on: ubuntu-latest
     env:
       ACC_TEST_PARALLELISM: 5
@@ -66,7 +88,55 @@ jobs:
       max-parallel: 5
       fail-fast: false
       matrix:
-        pkg: ${{ fromJson(needs.find_tests.outputs.matrix) }}
+        pkg: ${{ fromJson(needs.find_tests.outputs.matrix).normal }}
+    steps:
+      - uses: softprops/turnstyle@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          same-branch-only: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - id: get_tf_path
+        name: Get Terraform Path
+        run: echo "terraform_path=$(which terraform)" >> $GITHUB_OUTPUT
+      - name: Run Acceptance Tests
+        run: task test-acc
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          TF_ACC_TERRAFORM_PATH: ${{ steps.get_tf_path.outputs.terraform_path }}
+          AIVEN_PROJECT_NAME: >-
+            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}
+          AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+          AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+          AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
+          PKG_PATH: ${{ matrix.pkg.path }}
+
+  test-slow:
+    name: test-slow (${{ matrix.pkg.name }})
+    needs: [setup_aiven_project_suffix, find_tests]
+    if: needs.find_tests.outputs.has_slow_tests == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ACC_TEST_PARALLELISM: 3 # this amount of slow tests should <= then the number of parallel jobs
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        pkg: ${{ fromJson(needs.find_tests.outputs.matrix).slow }}
     steps:
       - uses: softprops/turnstyle@v2
         env:
@@ -106,20 +176,22 @@ jobs:
   tests-summary:
     name: All Tests Passed
     runs-on: ubuntu-latest
-    needs: [test]
-    if: always() && needs.test.result != 'skipped'
+    needs: [test-normal, test-slow]
+    if: always()
     steps:
       - name: Check matrix outcome
         run: |
-          if [[ "${{ needs.test.result }}" == "success" ]]; then
+          if [[ "${{ needs.test-normal.result }}" == "success" && ("${{ needs.test-slow.result }}" == "success" || "${{ needs.test-slow.result }}" == "skipped") ]]; then
             echo "All tests passed successfully!"
           else
-            echo "One or more tests in the matrix failed. Result: ${{ needs.test.result }}"
+            echo "One or more test jobs failed."
+            echo "Normal tests result: ${{ needs.test-normal.result }}"
+            echo "Slow tests result: ${{ needs.test-slow.result }}"
             exit 1
           fi
 
   sweep:
-    needs: [test, setup_aiven_project_suffix]
+    needs: [test-normal, test-slow, setup_aiven_project_suffix]
     if: always()
     runs-on: ubuntu-latest
     steps:

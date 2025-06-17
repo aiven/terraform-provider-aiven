@@ -29,22 +29,27 @@ jobs:
       - id: check
         name: Check if tests should run
         run: |
-          # For scheduled or manual runs, test the main branch
-          if [[ "${{ github.event_name }}" == "schedule" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "Scheduled or manual run. Testing main branch."
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "Scheduled run. Testing main branch."
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "ref_to_test=refs/heads/main" >> $GITHUB_OUTPUT
-          # For pull requests, check for the 'release' label
+
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual run from UI. Testing the triggered commit."
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "ref_to_test=${{ github.sha }}" >> $GITHUB_OUTPUT
+
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             if ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
-              echo "Pull request has 'release' label. Testing PR branch."
+              echo "Pull request has 'release' label. Testing PR commit."
               echo "should_run=true" >> $GITHUB_OUTPUT
-              echo "ref_to_test=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+              echo "ref_to_test=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
             else
               echo "Pull request does not have 'release' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
             fi
           else
+            echo "Event not configured to run tests. Skipping."
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 

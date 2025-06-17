@@ -190,33 +190,13 @@ tasks:
       - task: internal:gen-docs
 
   ci:discover-test-matrix:
-    desc: "Finds Go test directories under, generates a JSON matrix for GitHub Actions"
+    desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2"
+    vars:
+      SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV | default "sdk-service-vpc"}}'
     cmds:
-      - |
-        find ./internal -type f -name '*_test.go' -exec dirname {} \; \
-        | sort -u \
-        | jq -cnR '
-            def shortname: split("/")[-2:] | join("-");
-            [
-              inputs |
-              select(length>0) |
-              {
-                path: .,
-                name: (
-                  if (. | contains("/plugin/")) then
-                    "plugin-" + shortname  # Add plugin- prefix
-                  else
-                    if (. | contains("/sdkprovider/")) then
-                      "sdk-" + shortname
-                    else
-                      shortname
-                    end
-                  end
-                )
-              }
-            ]
-          '
-    silent: true
+      - task: internal:discover-test-matrix
+        vars:
+          SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV}}'
 
   ci:changelog-update:
     desc: Update CHANGELOG.md with new version entry
