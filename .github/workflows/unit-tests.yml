@@ -8,8 +8,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - labeled
-      - unlabeled
   push:
     branches:
       - main
@@ -24,29 +22,8 @@ permissions:
   contents: read
 
 jobs:
-  # This job's only purpose is to decide if the next job should run.
-  # The output `should_run` will be simple 'true' or 'false'.
   gatekeeper:
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
-    steps:
-      - name: Determine if tests should run based on trigger and labels
-        id: check
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Check if the 'skip workflows' label is present on the PR.
-            if ${{ contains(github.event.pull_request.labels.*.name, 'skip workflows') }}; then
-              echo "INFO: Pull request has 'skip workflows' label"
-              echo "should_run=false" >> $GITHUB_OUTPUT
-            else
-              echo "INFO: Pull request is valid"
-              echo "should_run=true" >> $GITHUB_OUTPUT
-            fi
-          else
-            # For all other events like 'workflow_call' or 'push', always run.
-            echo "should_run=true" >> $GITHUB_OUTPUT
-          fi
+    uses: ./.github/workflows/reusable-gatekeeper.yml
 
   go_test:
     needs: gatekeeper

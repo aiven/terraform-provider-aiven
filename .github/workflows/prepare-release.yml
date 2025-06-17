@@ -97,7 +97,7 @@ jobs:
           author: GitHub <noreply@github.com>
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.RELEASE_BRANCH }}
-          base: test-release-workflow #TODO: Adjust base branch to main
+          base: main
           title: "chore(release): v${{ inputs.version }}"
           body: |
             ## Release v${{ inputs.version }}
@@ -135,7 +135,7 @@ jobs:
     uses: ./.github/workflows/dependency-review.yml
     with:
       head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
-      base_ref: test-release-workflow
+      base_ref: main
 
   # Run acceptance tests
   run_acceptance_tests:
