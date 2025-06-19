@@ -73,6 +73,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
+- `enable_ipv6` (Boolean)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
