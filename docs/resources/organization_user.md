@@ -14,7 +14,7 @@ description: |-
 
 # aiven_organization_user (Resource)
 
-Creates and manages an Aiven Organization user.
+Creates and manages an Aiven Organization user. 
 
 ~> **This resource is deprecated**
 Users cannot be invited to an organization using Terraform.

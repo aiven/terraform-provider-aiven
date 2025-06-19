@@ -10,7 +10,7 @@ description: |-
 
 # aiven_gcp_org_vpc_peering_connection (Data Source)
 
-The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
+The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection. 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
