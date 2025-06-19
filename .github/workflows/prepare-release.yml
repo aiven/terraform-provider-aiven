@@ -7,11 +7,6 @@ on:
         description: 'Release version (e.g., 4.10.0)'
         required: true
         type: string
-      release_branch_prefix:
-        description: 'Release branch prefix (default: automation)'
-        required: true
-        type: string
-        default: 'automation'
       run_acceptance_tests:
         description: 'Run the acceptance tests? (Uncheck to skip, only if you are sure)'
         required: true
@@ -34,24 +29,10 @@ jobs:
       pr_created: ${{ steps.create-pr.outputs.pull-request-number != '' }}
 
     steps:
-      - name: Validate version format
-        run: |
-          if ! echo "${{ inputs.version }}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "Error: Version must be in format X.Y.Z (e.g., 3.10.0)"
-            exit 1
-          fi
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Check if version already exists
-        run: |
-          if git tag -l "v${{ inputs.version }}" | grep -q "v${{ inputs.version }}"; then
-            echo "Error: Version v${{ inputs.version }} already exists"
-            exit 1
-          fi
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -64,9 +45,12 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify release version
+        run: task verify-version VERSION=${{ inputs.version }}
+
       - name: Setup release branch
         run: |
-          BRANCH_NAME="${{ inputs.release_branch_prefix }}-release-v${{ inputs.version }}"
+          BRANCH_NAME="release-v${{ inputs.version }}"
           echo "RELEASE_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update CHANGELOG.md

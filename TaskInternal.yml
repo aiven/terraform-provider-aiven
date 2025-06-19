@@ -250,6 +250,71 @@ tasks:
           '
     silent: true
 
+  verify-version:
+    desc: "Verifies the new version doesn't exist and is a sequential semantic version bump."
+    vars:
+      VERSION: '{{.VERSION}}'
+    preconditions:
+      - sh: 'test -n "{{.VERSION}}"'
+        msg: |
+          Error: VERSION must be provided as an argument.
+          Usage: task verify-version VERSION=x.y.z
+      - sh: 'echo "{{.VERSION}}" | grep -E -q "^[0-9]+\.[0-9]+\.[0-9]+$"'
+        msg: 'Error: Version {{.VERSION}} must be in the format X.Y.Z'
+    cmds:
+      - |
+        set -e
+        NEW_VERSION_TAG="v{{.VERSION}}"
+        echo "--- Verifying version ${NEW_VERSION_TAG} ---"
+
+        echo "🔍 Fetching latest tags from remote..."
+        git fetch --all --tags
+
+        # Check if the tag already exists.
+        if git rev-parse "${NEW_VERSION_TAG}" >/dev/null 2>&1; then
+          echo "❌ Error: Tag ${NEW_VERSION_TAG} already exists."
+          exit 1
+        fi
+
+        # Find the latest existing semantic version tag.
+        LATEST_TAG=$(git tag -l 'v*.*.*' --sort='-version:refname' | head -n 1)
+
+        # Handle the edge case of the very first release.
+        if [[ -z "$LATEST_TAG" ]]; then
+          echo "✅ No previous semver tag found. First release is valid."
+          echo "--- Verification Successful ---"
+          exit 0
+        fi
+
+        echo "🔍 Latest tag is ${LATEST_TAG}. Comparing with ${NEW_VERSION_TAG}."
+
+        if awk -v latest="${LATEST_TAG#v}" -v new="${NEW_VERSION_TAG#v}" '
+          BEGIN {
+            split(latest, l, ".");
+            split(new, n, ".");
+
+            # Valid Major bump: X+1.0.0
+            if (n[1] == l[1]+1 && n[2] == 0 && n[3] == 0) { exit 0; }
+            # Valid Minor bump: X.Y+1.0
+            if (n[1] == l[1] && n[2] == l[2]+1 && n[3] == 0) { exit 0; }
+            # Valid Patch bump: X.Y.Z+1
+            if (n[1] == l[1] && n[2] == l[2] && n[3] == l[3]+1) { exit 0; }
+
+            # If no condition was met, it is an invalid bump.
+            exit 1;
+          }
+        '; then
+          echo "✅ Version bump is sequential and valid."
+        else
+          # The error reporting part is excellent, no changes needed here.
+          IFS='.' read -r LX LY LZ <<< "${LATEST_TAG#v}"
+          echo "❌ Error: Invalid version gap detected." >&2
+          echo "   New version '${NEW_VERSION_TAG}' is not a sequential increment from latest '${LATEST_TAG}'." >&2
+          printf "   Valid next versions would be: v%d.0.0, v%d.%d.0, or v%d.%d.%d\n" "$((LX + 1))" "$LX" "$((LY + 1))" "$LX" "$LY" "$((LZ + 1))" >&2
+          exit 1
+        fi
+    silent: true
+
   nothing:
     silent: true
     cmds:

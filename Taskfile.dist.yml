@@ -365,3 +365,12 @@ tasks:
           fi
 
           echo "$CHANGELOG_CONTENT"
+
+  ci:verify-version:
+    desc: "Verifies the new version doesn't exist and is a sequential bump. Usage: task ci:verify-version VERSION=x.y.z"
+    cmds:
+      - task: internal:verify-version
+        vars:
+          VERSION: '{{.VERSION}}'
+    requires:
+      vars: [VERSION]
