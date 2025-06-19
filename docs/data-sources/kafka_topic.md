@@ -52,6 +52,7 @@ Read-Only:
 - `flush_messages` (String)
 - `flush_ms` (String)
 - `index_interval_bytes` (String)
+- `inkless_enable` (Boolean)
 - `local_retention_bytes` (String)
 - `local_retention_ms` (String)
 - `max_compaction_lag_ms` (String)

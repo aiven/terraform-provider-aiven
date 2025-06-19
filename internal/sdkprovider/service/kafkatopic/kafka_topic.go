@@ -169,6 +169,11 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 			Description: "This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1.",
 			Optional:    true,
 		},
+		"inkless_enable": {
+			Type:        schema.TypeBool,
+			Description: "Indicates whether inkless should be enabled. This is only available for BYOC services with Inkless feature enabled.",
+			Optional:    true,
+		},
 	}
 }
 
