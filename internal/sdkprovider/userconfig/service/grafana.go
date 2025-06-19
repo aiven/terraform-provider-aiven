@@ -510,7 +510,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"oauth_allow_insecure_email_lookup": {
-				Description: "Enforce user lookup based on email instead of the unique ID provided by the IdP.",
+				Description: "Enforce user lookup based on email instead of the unique ID provided by the IdP. This setup introduces significant security risks, such as potential phishing, spoofing, and other data breaches.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},

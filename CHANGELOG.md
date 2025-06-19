@@ -12,10 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Fix `project_vpc_id`, remove `Computed` attribute:
-  a service can't be deployed on the public Internet after it has been deployed in a VPC.
-  WARNING: removing this field deploys a service on the Public Internet!
-- `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted on ClickHouse Named Collections. This prevents potential errors when such grants are managed externally.
+- Fix `project_vpc_id`, remove `Computed` attribute: a service can't be deployed on the public Internet after it has been
+  deployed in a VPC. WARNING: removing this field deploys a service on the Public Internet!
+- `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted
+  on ClickHouse Named Collections. This prevents potential errors when such grants are managed externally.
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_filecache_remote_data_ratio`: Defines a limit
   of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.cluster_remote_store`
@@ -23,6 +23,8 @@ nav_order: 1
   total remote data can be referenced as a ratio of the size of the disk reserved for the file cache
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.remote_store`
 - Change `aiven_organization_billing_group` and `aiven_organization_billing_group_list`: field `billing_currency` renamed to `currency`
+- Add `aiven_clickhouse` field `clickhouse_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow
+  IPv6 packets to service ports.
 
 ## [4.41.0] - 2025-05-30
 

@@ -34,6 +34,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"enable_ipv6": {
+				Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
