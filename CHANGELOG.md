@@ -25,6 +25,60 @@ nav_order: 1
 - Change `aiven_organization_billing_group` and `aiven_organization_billing_group_list`: field `billing_currency` renamed to `currency`
 - Add `aiven_clickhouse` field `clickhouse_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow
   IPv6 packets to service ports.
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_alloydbomni` field `alloydbomni_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_cassandra` field `cassandra_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_cassandra` field `cassandra_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_cassandra` field `cassandra_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_clickhouse` field `clickhouse_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_clickhouse` field `clickhouse_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_clickhouse` field `clickhouse_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_dragonfly` field `dragonfly_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_dragonfly` field `dragonfly_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_dragonfly` field `dragonfly_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_flink` field `flink_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_flink` field `flink_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_flink` field `flink_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_grafana` field `grafana_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_grafana` field `grafana_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_grafana` field `grafana_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_influxdb` field `influxdb_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_influxdb` field `influxdb_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_influxdb` field `influxdb_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_connect` field `kafka_connect_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_connect` field `kafka_connect_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_connect` field `kafka_connect_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3aggregator` field `m3aggregator_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3aggregator` field `m3aggregator_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3aggregator` field `m3aggregator_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3db` field `m3db_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3db` field `m3db_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_m3db` field `m3db_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_mysql` field `mysql_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_mysql` field `mysql_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_mysql` field `mysql_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_opensearch` field `opensearch_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_opensearch` field `opensearch_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_opensearch` field `opensearch_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_pg` field `pg_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_pg` field `pg_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_pg` field `pg_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_redis` field `redis_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_redis` field `redis_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_redis` field `redis_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_thanos` field `thanos_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_thanos` field `thanos_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_thanos` field `thanos_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_valkey` field `valkey_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_valkey` field `valkey_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_valkey` field `valkey_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
 
 ## [4.41.0] - 2025-05-30
 
