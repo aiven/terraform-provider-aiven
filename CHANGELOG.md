@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka_topic` field `config.inkless_enable`: Indicates whether inkless should be enabled. This is only available for BYOC services with Inkless feature enabled.
 - Fix `project_vpc_id`, remove `Computed` attribute: a service can't be deployed on the public Internet after it has been
   deployed in a VPC. WARNING: removing this field deploys a service on the Public Internet!
 - `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted
