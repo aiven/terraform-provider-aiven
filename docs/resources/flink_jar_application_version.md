@@ -10,7 +10,7 @@ description: |-
 
 # aiven_flink_jar_application_version (Resource)
 
-Creates and manages an Aiven for Apache Flink® jar application version.
+Creates and manages an Aiven for Apache Flink® jar application version. 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
