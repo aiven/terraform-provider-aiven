@@ -359,9 +359,9 @@ tasks:
 
           # Final check
           if [ -z "$CHANGELOG_CONTENT" ]; then
-            echo "Warning: No content found for version {{.VERSION}}" >&2
-            echo "(Version exists but has no content below it)" >&2
-            exit 0
+            echo "Error: No content found for version {{.VERSION}}" >&2
+            echo "(The version header exists in CHANGELOG.md, but there are no content lines below it.)" >&2
+            exit 1
           fi
 
           echo "$CHANGELOG_CONTENT"

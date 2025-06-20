@@ -1,0 +1,84 @@
+# This workflow is triggered AUTOMATICALLY when a release PR is merged into the MAIN branch.
+# It tags the release, builds the artifacts and populate the GitHub Release with changelog notes.
+name: Automated Release Publisher
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  tag-and-publish:
+    if: >
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.head.ref, 'release-v') &&
+      contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Extract version from branch name
+        id: get_version
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH_NAME##*-v}"
+          # Check if version extraction was successful
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from branch name '$BRANCH_NAME' using prefix '-v'."
+            exit 1
+          fi
+          # Validate that the extracted string looks like a version number
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "Error: Extracted value '$VERSION' from branch '$BRANCH_NAME' is not a valid version number."
+            exit 1
+          fi
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Extract Changelog for Release Notes
+        id: changelog_extractor
+        uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          NOTES=$(task -s ci:changelog-extract VERSION="${{ steps.get_version.outputs.version }}")
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        id: extract_notes
+      - name: Create and push tag
+        run: |
+          echo "Creating and pushing tag ${{ steps.get_version.outputs.tag }}"
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git tag ${{ steps.get_version.outputs.tag }}
+          git push origin ${{ steps.get_version.outputs.tag }}
+      - uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
+      - name: Run GoReleaser to create release and artifacts
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add Changelog to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ steps.get_version.outputs.tag }}" \
+            --notes "${{ steps.extract_notes.outputs.notes }}"
