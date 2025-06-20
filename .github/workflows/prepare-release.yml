@@ -46,7 +46,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release version
-        run: task verify-version VERSION=${{ inputs.version }}
+        run: task ci:verify-version VERSION=${{ inputs.version }}
 
       - name: Setup release branch
         run: |

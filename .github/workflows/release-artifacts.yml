@@ -1,13 +1,18 @@
-# Workflow builds and publishes the official release artifacts.
-name: Release Artifacts
+# This job serves as the manual release fallback process. It is triggered
+# whenever a developer manually pushes a new git tag directly to the repository.
+#
+# This workflow's responsibility is to build artifacts and create a draft release.
+# The changelog notes must be added manually as the final step of this process.
+name: Manual Artifacts Release
 
 on:
  push:
     tags:
-      - v*
+      - 'v*'
 
 jobs:
   build_and_upload_artifacts:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
 
