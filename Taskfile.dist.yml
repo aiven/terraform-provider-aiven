@@ -188,6 +188,7 @@ tasks:
     desc: "Generate Terraform provider documentation"
     cmds:
       - task: internal:gen-docs
+      - task: internal:fmt-precommit
 
   ci:discover-test-matrix:
     desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2"
