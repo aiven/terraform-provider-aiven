@@ -6,9 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/gruntwork-io/terratest/modules/logger"
-
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"

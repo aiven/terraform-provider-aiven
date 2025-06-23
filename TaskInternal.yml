@@ -97,7 +97,7 @@ tasks:
   fmt-imports:
     desc: "Remove blank lines in Go import blocks and run goimports"
     cmds:
-      - find . -type f -name '*.go' -exec sed -i '/^import ($$/,/^)/ {/^[[:space:]]*$$/d}' {} +
+      - find . -type f -name '*.go' -exec sed -i'' -e '/^import ($/,/^)$/{/^[[:space:]]*$/d;}' {} +
       - goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
   fmt-precommit:

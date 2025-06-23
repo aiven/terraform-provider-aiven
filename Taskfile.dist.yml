@@ -126,6 +126,13 @@ tasks:
           task: fmt
       - task: internal:generate
 
+  docs:
+    desc: Generate documentation for the provider
+    cmds:
+      - defer:
+          task: fmt
+      - task: internal:gen-docs
+
   update-schemas:
     desc: "Update Go client codegen and API schemas, regenerate mocks, and update CHANGELOG.md"
     cmds:
@@ -185,10 +192,9 @@ tasks:
     cmds:
       - task: internal:sweep-check
   ci:docs:
-    desc: "Generate Terraform provider documentation"
+    desc: "Generate Terraform provider documentation (only for CI usage, does not run fmt afterwards)"
     cmds:
       - task: internal:gen-docs
-      - task: internal:fmt-precommit
 
   ci:discover-test-matrix:
     desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2"

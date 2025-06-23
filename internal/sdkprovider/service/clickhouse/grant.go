@@ -7,9 +7,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Grantee struct {
