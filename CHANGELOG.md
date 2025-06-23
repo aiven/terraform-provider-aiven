@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.42.0] - 2025-06-23
+
 - Fix `project_vpc_id` bug where it could not be set to null due to incorrect `Computed` attribute configuration (PR #1846). ⚠️ **Warning:** When upgrading, verify your service VPC settings are correct - services without this field will be deployed to the public internet as expected.
 - Add `aiven_kafka_topic` field `config.inkless_enable`: Indicates whether inkless should be enabled. This is only available for BYOC services with Inkless feature enabled.
 - `aiven_clickhouse_grant`: The resource will no longer attempt to manage or interfere with privileges granted
