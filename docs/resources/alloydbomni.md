@@ -140,7 +140,7 @@ Optional:
 - `google_columnar_engine_enabled` (Boolean) Enables or disables the columnar engine. When enabled, it accelerates SQL query processing. Default: `true`.
 - `google_columnar_engine_memory_size_percentage` (Number) Allocate the amount of RAM to store columnar data. Default: `10`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--alloydbomni_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--alloydbomni_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--alloydbomni_user_config--pg))
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).

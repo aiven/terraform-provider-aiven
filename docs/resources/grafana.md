@@ -112,7 +112,7 @@ Optional:
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID. Example: `UA-123456-4`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `ip_filter_object` (Block Set, Max: 2048) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `metrics_enabled` (Boolean) Enable Grafana's /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP. This setup introduces significant security risks, such as potential phishing, spoofing, and other data breaches.

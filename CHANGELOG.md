@@ -25,6 +25,9 @@ nav_order: 1
 - Change `aiven_organization_billing_group` and `aiven_organization_billing_group_list`: field `billing_currency` renamed to `currency`
 - Add `aiven_clickhouse` field `clickhouse_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow
   IPv6 packets to service ports.
+- Change service field `ip_filter`: max items ~~`2048`~~ → `8000`
+- Change service field `ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change service field `ip_filter_string`: max items ~~`2048`~~ → `8000`
 
 ## [4.41.0] - 2025-05-30
 
