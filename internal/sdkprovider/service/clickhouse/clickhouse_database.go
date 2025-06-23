@@ -31,7 +31,7 @@ func ResourceClickhouseDatabase() *schema.Resource {
 	return &schema.Resource{
 		Description: `Creates and manages an Aiven for ClickHouse® database.
 
--> Tables cannot be created using Aiven Operator. To create a table,
+-> Tables cannot be created using Aiven Terraform Provider. To create a table,
 use the [Aiven Console or CLI](https://aiven.io/docs/products/clickhouse/howto/manage-databases-tables#create-a-table).`,
 		CreateContext: resourceClickhouseDatabaseCreate,
 		ReadContext:   resourceClickhouseDatabaseRead,
