@@ -78,7 +78,7 @@ jobs:
           ' >> $GITHUB_OUTPUT
 
   test-normal:
-    name: test-normal (${{ matrix.pkg.name }})
+    name: ${{ matrix.pkg.name }} (${{ matrix.pkg.type }}, normal)
     needs: [setup_aiven_project_suffix, find_tests]
     if: needs.find_tests.outputs.has_normal_tests == 'true'
     runs-on: ubuntu-latest
@@ -126,7 +126,7 @@ jobs:
           PKG_PATH: ${{ matrix.pkg.path }}
 
   test-slow:
-    name: test-slow (${{ matrix.pkg.name }})
+    name: ${{ matrix.pkg.name }} (${{ matrix.pkg.type }}, slow)
     needs: [setup_aiven_project_suffix, find_tests]
     if: needs.find_tests.outputs.has_slow_tests == 'true'
     runs-on: ubuntu-latest

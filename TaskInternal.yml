@@ -217,37 +217,7 @@ tasks:
     vars:
       SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV}}'
     cmds:
-      - |
-        find ./internal -type f -name '*_test.go' -exec dirname {} \; \
-        | sort -u \
-        | jq --arg slow_tests_csv '{{.SLOW_TESTS_CSV}}' -cnR '
-            # Parse the CSV string into an array.
-            ($slow_tests_csv | split(",") | map(select(length > 0))) as $slow_tests |
-
-            def create_test_object:
-              ( sub("./internal/"; "") ) as $base |
-              {
-                path: .,
-                name: (
-                  if ($base | startswith("plugin/")) then "plugin-" + ($base | sub("plugin/"; "") | gsub("/"; "-"))
-                  elif ($base | startswith("sdkprovider/")) then "sdk-" + ($base | sub("sdkprovider/"; "") | gsub("/"; "-"))
-                  else ($base | gsub("/"; "-"))
-                  end
-                )
-              };
-
-            def all_tests: [
-              inputs | select(length > 0) | sub("\r$"; "") | create_test_object
-            ];
-
-            # Build the lookup table from the parsed array.
-            def slow_test_lookup: ($slow_tests | map({(.): true}) | add);
-
-            all_tests | {
-              slow:   map(select(.name as $name | slow_test_lookup | has($name))),
-              normal: map(select(.name as $name | slow_test_lookup | has($name) | not))
-            }
-          '
+        - "{{.GO_CMD}} run ./tools/main.go tests matrix --slow-tests-csv {{.SLOW_TESTS_CSV}}"
     silent: true
 
   verify-version:
