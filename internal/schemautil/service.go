@@ -557,21 +557,31 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	powered := true
 	terminationProtection := d.Get("termination_protection").(bool)
 
-	// Sends disk size only when there is no autoscaler enabled
-	var diskSpaceMb *int
 	s, err := avnGen.ServiceGet(ctx, projectName, serviceName)
 	if err != nil {
 		return nil
 	}
 
-	if len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
-		diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
-		if err != nil {
-			return diag.Errorf("error getting default disc space: %s", err)
-		}
+	// Sends disk size only when there is no autoscaler enabled.
+	// Both `additional_disk_space` and `disk_space` are optional + computed.
+	var diskSpaceMb *int
+	noAutscaler := len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0
+	if noAutscaler {
+		// Only send disk_space_mb if user explicitly configured disk space values.
+		// This prevents issues when removing an autoscaler and updating the service simultaneously:
+		// 1. terraform plan won't show disk size changes while autoscaler exists
+		// 2. terraform apply may remove autoscaler first, then update service
+		// 3. Without autoscaler, disk size would revert to plan default if sent
+		// By not sending disk_space_mb when unconfigured, we maintain existing size
+		if HasConfigValue(d, "additional_disk_space") || HasConfigValue(d, "disk_space") {
+			diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+			if err != nil {
+				return diag.Errorf("error getting default disc space: %s", err)
+			}
 
-		if diskSpace > 0 {
-			diskSpaceMb = &diskSpace
+			if diskSpace > 0 {
+				diskSpaceMb = &diskSpace
+			}
 		}
 	}
 

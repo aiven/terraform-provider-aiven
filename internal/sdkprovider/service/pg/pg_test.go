@@ -30,7 +30,7 @@ func TestAccAivenPG_no_existing_project(t *testing.T) {
 	})
 }
 
-func TestAccAivenPG_invalid_disk_size(t *testing.T) {
+func TestAccAivenPG_invalid_disk_space(t *testing.T) {
 	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -227,7 +227,7 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 	})
 }
 
-func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
+func TestAccAivenPG_deleting_additional_disk_space(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -272,7 +272,7 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 	})
 }
 
-func TestAccAivenPG_deleting_disk_size(t *testing.T) {
+func TestAccAivenPG_deleting_disk_space(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -316,7 +316,7 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 	})
 }
 
-func TestAccAivenPG_changing_disk_size(t *testing.T) {
+func TestAccAivenPG_changing_disk_space(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
