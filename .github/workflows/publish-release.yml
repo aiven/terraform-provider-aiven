@@ -44,18 +44,21 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Extract Changelog for Release Notes
-        id: changelog_extractor
+      - name: Setup Task
         uses: arduino/setup-task@v2
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          NOTES=$(task -s ci:changelog-extract VERSION="${{ steps.get_version.outputs.version }}")
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        id: extract_notes
+      - name: Generate Release Notes
+        id: generate_notes
+        run: |
+          NOTES_FILE="ci-release-notes.md"
+          task -s ci:changelog-extract VERSION="${{ steps.get_version.outputs.version }}" > $NOTES_FILE
+          if [ ! -s $NOTES_FILE ]; then
+            echo "::error::Failed to extract changelog notes using 'task'. The notes file is empty."
+            exit 1
+          fi
+          echo "notes_path=$NOTES_FILE" >> "$GITHUB_OUTPUT"
       - name: Create and push tag
         run: |
           echo "Creating and pushing tag ${{ steps.get_version.outputs.tag }}"
@@ -81,4 +84,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release edit "${{ steps.get_version.outputs.tag }}" \
-            --notes "${{ steps.extract_notes.outputs.notes }}"
+            --notes-file "${{ steps.generate_notes.outputs.notes_path }}"

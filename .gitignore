@@ -50,6 +50,7 @@ plugins/
 tools/bin
 hack/testmanifestfmt/bin
 /openapi.json
+ci-release-notes.md
 
 # Github Pages
 _site/
