@@ -11,6 +11,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/exp/slices"
@@ -269,6 +270,11 @@ var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, addit
 // 1. checks that additional_disk_space is not set if autoscaler is enabled
 // 2. outputs a diff for a computed field, which otherwise would be suppressed when removed
 func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, m interface{}) error {
+	tflog.Info(ctx, "CustomizeDiffAdditionalDiskSpace: function called", map[string]interface{}{
+		"service_name": diff.Get("service_name").(string),
+		"resource_id":  diff.Id(),
+	})
+
 	genClient, err := common.GenClient()
 	if err != nil {
 		return err
@@ -315,6 +321,9 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	// handle the additional_disk_space computation. This prevents the inconsistent
 	// plan error when removing autoscaler integrations.
 	if isAutoscalerCurrentlyEnabled {
+		tflog.Info(ctx, "CustomizeDiffAdditionalDiskSpace: autoscaler enabled, skipping custom diff", map[string]interface{}{
+			"service_name": diff.Get("service_name").(string),
+		})
 		return nil
 	}
 
@@ -328,12 +337,28 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 		currentDiskSpaceMB = *s.DiskSpaceMb
 	}
 
+	// Log the values for debugging
+	tflog.Info(ctx, "CustomizeDiffAdditionalDiskSpace: computing additional disk space", map[string]interface{}{
+		"currentDiskSpaceMB":               currentDiskSpaceMB,
+		"planDefaultDiskSpaceMB":           servicePlanParams.DiskSizeMBDefault,
+		"service_name":                     diff.Get("service_name").(string),
+		"autoscaler_enabled":               isAutoscalerCurrentlyEnabled,
+		"has_config_additional_disk_space": HasConfigValue(diff, "additional_disk_space"),
+		"has_config_disk_space":            HasConfigValue(diff, "disk_space"),
+	})
+
 	additionalDiskSpaceMB := currentDiskSpaceMB - servicePlanParams.DiskSizeMBDefault
 	if additionalDiskSpaceMB < 0 {
 		additionalDiskSpaceMB = 0
 	}
 
 	additionalDiskSpaceStr := HumanReadableByteSize(additionalDiskSpaceMB * units.MiB)
+
+	tflog.Info(ctx, "CustomizeDiffAdditionalDiskSpace: setting additional_disk_space", map[string]interface{}{
+		"calculatedAdditionalDiskSpaceMB": additionalDiskSpaceMB,
+		"additionalDiskSpaceStr":          additionalDiskSpaceStr,
+		"service_name":                    diff.Get("service_name").(string),
+	})
 
 	return diff.SetNew(k, additionalDiskSpaceStr)
 }

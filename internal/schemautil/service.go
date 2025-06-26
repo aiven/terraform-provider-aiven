@@ -17,6 +17,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -397,7 +398,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to get service plan parameters: %s", err)
 	}
 
-	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
+	err = copyServicePropertiesFromAPIResponseToTerraform(ctx, d, s, servicePlanParams, projectName)
 	if err != nil {
 		return diag.Errorf("unable to copy api response into terraform schema: %s", err)
 	}
@@ -565,13 +566,17 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	if len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
-		diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
-		if err != nil {
-			return diag.Errorf("error getting default disc space: %s", err)
-		}
+		// Only send disk space if explicitly configured by user
+		// Don't automatically resize service when autoscaler is removed
+		if HasConfigValue(d, "disk_space") || HasConfigValue(d, "additional_disk_space") {
+			diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+			if err != nil {
+				return diag.Errorf("error getting default disc space: %s", err)
+			}
 
-		if diskSpace > 0 {
-			diskSpaceMb = &diskSpace
+			if diskSpace > 0 {
+				diskSpaceMb = &diskSpace
+			}
 		}
 	}
 
@@ -587,6 +592,17 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		UserConfig:            &cuc,
 		TechEmails:            technicalEmails,
 	}
+
+	// log what disk space we're sending to the API
+	diskSpaceStr := "nil (not set)"
+	if diskSpaceMb != nil {
+		diskSpaceStr = fmt.Sprintf("%d MB", *diskSpaceMb)
+	}
+	tflog.Info(ctx, "ServiceUpdate: sending disk space to API", map[string]interface{}{
+		"service_name":   serviceName,
+		"disk_space_mb":  diskSpaceStr,
+		"has_autoscaler": len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) > 0,
+	})
 
 	if _, err := avnGen.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
@@ -696,6 +712,7 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func copyServicePropertiesFromAPIResponseToTerraform(
+	ctx context.Context,
 	d ResourceData,
 	s *service.ServiceGetOut,
 	servicePlanParams PlanParameters,
@@ -737,6 +754,17 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
+
+	// Add logging to debug the issue
+	if serviceType := d.Get("service_type").(string); serviceType == "pg" {
+		tflog.Info(ctx, "copyServicePropertiesFromAPIResponseToTerraform: setting additional_disk_space", map[string]interface{}{
+			"diskSpace":                    diskSpace,
+			"servicePlanDiskSizeMBDefault": servicePlanParams.DiskSizeMBDefault,
+			"additionalDiskSpace":          additionalDiskSpace,
+			"service_name":                 s.ServiceName,
+		})
+	}
+
 	if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
 		return err
 	}
