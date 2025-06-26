@@ -61,6 +61,7 @@ resource "aiven_organization_project" "example_project" {
 ### Optional
 
 - `base_port` (Number) Valid port number (1-65535) to use as a base for service port allocation.
+- `project_name` (String) Project name. Maximum length: `63`.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
