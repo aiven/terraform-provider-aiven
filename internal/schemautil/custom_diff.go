@@ -268,13 +268,15 @@ var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, addit
 // CustomizeDiffAdditionalDiskSpace
 // 1. checks that additional_disk_space is not set if autoscaler is enabled
 // 2. outputs a diff for a computed field, which otherwise would be suppressed when removed
-func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	client, err := common.GenClient()
+func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, m interface{}) error {
+	genClient, err := common.GenClient()
 	if err != nil {
 		return err
 	}
 
-	s, err := client.ServiceGet(ctx, diff.Get("project").(string), diff.Get("service_name").(string))
+	aivenClient := m.(*aiven.Client)
+
+	s, err := genClient.ServiceGet(ctx, diff.Get("project").(string), diff.Get("service_name").(string))
 	if avngen.IsNotFound(err) {
 		// The service does not exist, so we cannot check if autoscaler is enabled
 		return nil
@@ -284,10 +286,11 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 		return err
 	}
 
-	isAutoscalerEnabled := false
+	// check current autoscaler state from API
+	isAutoscalerCurrentlyEnabled := false
 	for _, i := range s.ServiceIntegrations {
 		if i.IntegrationType == service.IntegrationTypeAutoscaler {
-			isAutoscalerEnabled = true
+			isAutoscalerCurrentlyEnabled = true
 			break
 		}
 	}
@@ -299,7 +302,7 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	// 2. Computed: disk_space - plan.disk_space = additional_disk_space
 	// 3. Computed: autoscaler is enabled, so additional_disk_space is managed by the autoscaler
 	if HasConfigValue(diff, k) || HasConfigValue(diff, "disk_space") {
-		if isAutoscalerEnabled {
+		if isAutoscalerCurrentlyEnabled {
 			// Autoscaler is enabled, so we cannot set additional_disk_space
 			return ErrAutoscalerConflict
 		}
@@ -308,15 +311,29 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 		return nil
 	}
 
-	if isAutoscalerEnabled {
-		// If the autoscaler is enabled, we don't need to manage the field,
-		// it will change its value automatically
+	// if the autoscaler is currently enabled, we let the normal service read logic
+	// handle the additional_disk_space computation. This prevents the inconsistent
+	// plan error when removing autoscaler integrations.
+	if isAutoscalerCurrentlyEnabled {
 		return nil
 	}
 
-	// It is not set but has a value (ShouldNotBeEmpty proves it has).
-	// That means the value is being removed.
-	// We must output a diff for the computed field,
-	// which otherwise will be suppressed by TF
-	return diff.SetNew(k, "0B")
+	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, aivenClient, diff.Get("project").(string), s)
+	if err != nil {
+		return err
+	}
+
+	currentDiskSpaceMB := 0
+	if s.DiskSpaceMb != nil {
+		currentDiskSpaceMB = *s.DiskSpaceMb
+	}
+
+	additionalDiskSpaceMB := currentDiskSpaceMB - servicePlanParams.DiskSizeMBDefault
+	if additionalDiskSpaceMB < 0 {
+		additionalDiskSpaceMB = 0
+	}
+
+	additionalDiskSpaceStr := HumanReadableByteSize(additionalDiskSpaceMB * units.MiB)
+
+	return diff.SetNew(k, additionalDiskSpaceStr)
 }
