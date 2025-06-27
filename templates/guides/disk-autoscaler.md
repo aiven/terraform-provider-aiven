@@ -49,7 +49,7 @@ to learn how to to create an Aiven for PostgreSQL® service, autoscaler endpoint
       }
       ```
 
-    Where `SERVICE_NAME` is the name of the service to scale.
+   Where `SERVICE_NAME` is the name of the service to scale.
 
 3. To preview your configuration changes, run:
 
@@ -70,38 +70,35 @@ to learn how to to create an Aiven for PostgreSQL® service, autoscaler endpoint
 
    -> After removing this field with the autoscaler enabled the output of `terraform plan` shows no changes.
 
-### Why it takes two runs?
+### Why does it take two runs?
 
-The ingration can't be created without a running service, and the `additional_disk_space` can't be removed without a running autoscaler. This produces a cycular dependency.
-Terraform doesn't share the changes graph with the Aiven Provider. All resources are managed individually, making it impossible affect the plan of resource A depending on the plan of B.
+The integration can't be created without a running service, and the `additional_disk_space` can't be removed without a running autoscaler. This produces a circular dependency.
+Terraform doesn't share the changes graph with the Aiven Provider. All resources are managed individually, making it impossible to affect the plan of one resource depending on the plan of another.
 
 ### How can I adjust the disk space when the autoscaler is enabled?
 
 Terraform is not designed for single-run operations. It would reset the disk size again and again on each run. That's why you can't set `additional_disk_space` while the autoscaler is running.
 
-The Console, on other hand can do this:
+You can, however, adjust the disk space in the Aiven Console by [following the steps in the documentation](https://aiven.io/docs/platform/howto/add-storage-space).
 
-1. Go to your service page
-2. Find the "Service plan usage" section
-3. Click on three dots, and "Manage additional storage"
-4. Adjust the disk space
-
-## Remove the autoscaler
+## Remove the autoscaler on services with additional disk storage
 
 When you remove the autoscaler integration, the service's disk space will be reset to the default size specified in the service plan. To prevent this automatic resizing:
 
 1. Remove the `aiven_service_integration_endpoint` and `aiven_service_integration` autoscaler resources from your TF files.
 
-    ~> Do not make any changes to the managed service. The `terraform plan` command must show no changes for it.
+   ~> Do not make any changes to the managed service. The `terraform plan` command must show no changes for it.
 
 2. Apply the changes:
 
     ```bash
     terraform apply
     ```
-3. Now the autoscaler doesn't manage the service's disk. The `terraform plan` will show that the `additional_disk_space` will be set to `0B` (default value). Set the value you need and apply your changes.
+3. Run `terraform plan` to confirm that autoscaler is no longer managing the service's disk storage. The output should show the `additional_disk_space` set to `0B` (the default value).
 
-### Why I can not update the service in the same run?
+4. Set the `additional_disk_space` to the new value and apply your changes.
 
-When the autoscaler exists, the `additional_disk_space` can't be managed by user.
-When it is destroyed during the `apply` command, the field is not set, hence it has no value (zero additional space). Terraform might return an `Provider produced inconsistent final plan` or even worse — trigger the disk resize.
+### Why can't I update the service in the same run?
+
+When the autoscaler exists, the `additional_disk_space` can't be managed by users.
+When it is destroyed during the `apply` command, the field is not set, hence it has no value (zero additional space). Terraform might return a `Provider produced inconsistent final plan` message or trigger the disk resize.
