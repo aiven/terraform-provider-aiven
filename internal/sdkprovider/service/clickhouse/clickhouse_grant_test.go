@@ -24,7 +24,7 @@ func TestAccAivenClickhouseGrant(t *testing.T) {
 resource "aiven_clickhouse" "bar" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "hobbyist"
+  plan                    = "startup-v2-8"
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -345,7 +345,7 @@ func TestAccAivenClickhouseOverlappingGrants(t *testing.T) {
 resource "aiven_clickhouse" "bar" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "hobbyist"
+  plan                    = "startup-v2-8"
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -466,7 +466,7 @@ func TestAccAivenClickhouseGrantInvalid(t *testing.T) {
 resource "aiven_clickhouse" "bar" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "hobbyist"
+  plan                    = "startup-v2-8"
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
