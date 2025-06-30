@@ -19,7 +19,7 @@ You can also use service integrations to enable and use the [disk autoscaler](ht
 
 ~> **Warning**
 For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
-To retain the additional disk space set the service's `additional_disk_space` value manually. If the integration is managed by Terraform but not the service, the disk space is not reset.
+See [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.
 
 ## Example Usage
 ```terraform
