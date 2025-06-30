@@ -43,6 +43,7 @@ data "aiven_organization_project" "example" {
 - `ca_cert` (String, Sensitive) PEM encoded certificate.
 - `id` (String) Resource ID, a composite of `organization_id` and `project_id` IDs.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `project_name` (String) Project name.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.
 

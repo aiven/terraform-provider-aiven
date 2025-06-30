@@ -69,6 +69,11 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 			},
+			"project_name": schema.StringAttribute{
+				MarkdownDescription: "Project name. Maximum length: `63`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(63)},
+			},
 			"technical_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.",
