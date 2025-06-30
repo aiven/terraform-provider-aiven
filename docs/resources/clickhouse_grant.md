@@ -4,20 +4,23 @@ page_title: "aiven_clickhouse_grant Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
-  Note:
-  Users cannot have the same name as roles.Global privileges cannot be granted on the database level. To grant global privileges, use database="*".To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use table="*".Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them.Changes first revoke all grants and then reissue the remaining grants for convergence.
+  There are some limitations and considerations to be aware of when using this resource:
+  Users cannot have the same name as roles.Global privileges cannot be granted on the database level. To grant global privileges, use database="*".To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use table="*".Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them.Changes first revoke all grants and then reissue the remaining grants for convergence.Some grants overlap, which can cause the Aiven Terraform Provider to detect a change even if you haven't made modifications. For example, using both DELETE and ALTER DELETE together might cause this issue.
+  The ClickHouse grant privileges documentation https://clickhouse.com/docs/sql-reference/statements/grant has a list of ClickHouse privileges.
 ---
 
 # aiven_clickhouse_grant (Resource)
 
 Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
 
-**Note:**
+There are some limitations and considerations to be aware of when using this resource:
 * Users cannot have the same name as roles.
 * Global privileges cannot be granted on the database level. To grant global privileges, use `database="*"`.
 * To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use `table="*"`.
 * Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them.
 * Changes first revoke all grants and then reissue the remaining grants for convergence.
+* Some grants overlap, which can cause the Aiven Terraform Provider to detect a change even if you haven't made modifications. For example, using both `DELETE` and `ALTER DELETE` together might cause this issue.
+  The [ClickHouse grant privileges documentation](https://clickhouse.com/docs/sql-reference/statements/grant) has a list of ClickHouse privileges.
 
 ## Example Usage
 
