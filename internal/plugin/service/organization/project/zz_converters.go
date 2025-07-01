@@ -26,6 +26,7 @@ type tfModel struct {
 	OrganizationID  types.String `tfsdk:"organization_id"`
 	ParentID        types.String `tfsdk:"parent_id"`
 	ProjectID       types.String `tfsdk:"project_id"`
+	ProjectName     types.String `tfsdk:"project_name"`
 	Tag             types.Set    `tfsdk:"tag"`
 	TechnicalEmails types.Set    `tfsdk:"technical_emails"`
 }
@@ -48,6 +49,7 @@ type apiModel struct {
 	OrganizationID  *string         `json:"organization_id,omitempty"`
 	ParentID        *string         `json:"parent_id,omitempty"`
 	ProjectID       *string         `json:"project_id,omitempty"`
+	ProjectName     *string         `json:"project_name,omitempty"`
 	Tag             *[]*apiModelTag `json:"tags,omitempty"`
 	TechnicalEmails *[]string       `json:"tech_emails,omitempty"`
 }
@@ -100,6 +102,10 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 	if !plan.ProjectID.IsNull() || state != nil && !state.ProjectID.IsNull() {
 		vProjectID := plan.ProjectID.ValueString()
 		api.ProjectID = &vProjectID
+	}
+	if !plan.ProjectName.IsNull() || state != nil && !state.ProjectName.IsNull() {
+		vProjectName := plan.ProjectName.ValueString()
+		api.ProjectName = &vProjectName
 	}
 	err := util.Unmarshal(api, req, modifiers...)
 	if err != nil {
@@ -163,6 +169,9 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	}
 	if api.ProjectID != nil && (*api.ProjectID != "" || !state.ProjectID.IsNull()) {
 		state.ProjectID = types.StringPointerValue(api.ProjectID)
+	}
+	if api.ProjectName != nil && (*api.ProjectName != "" || !state.ProjectName.IsNull()) {
+		state.ProjectName = types.StringPointerValue(api.ProjectName)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
