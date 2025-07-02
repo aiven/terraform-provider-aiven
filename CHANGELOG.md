@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka` field `kafka_user_config.single_zone.availability_zone`: The availability zone to use for the service.
+  This is only used when enabled is set to true
+- Add `aiven_service_integration` field `clickhouse_credentials_user_config`: ClickhouseCredentials user configurable settings
+
 ## [4.42.0] - 2025-06-23
 
 - Fix `project_vpc_id` bug where it could not be set to null due to incorrect `Computed` attribute configuration (PR #1846). ⚠️ **Warning:** When upgrading, verify your service VPC settings are correct - services without this field will be deployed to the public internet as expected.

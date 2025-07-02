@@ -347,6 +347,7 @@ Read-Only:
 
 Read-Only:
 
+- `availability_zone` (String)
 - `enabled` (Boolean)
 
 

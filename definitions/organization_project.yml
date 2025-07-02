@@ -23,6 +23,7 @@ delete:
   - project # comes from ProjectKmsGetCA
   - tags # replaced by tag
   - tech_emails # replaced by technical_emails
+  - project_name
 rename:
   certificate: ca_cert
 schema:
