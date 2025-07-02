@@ -33,6 +33,7 @@ data "aiven_service_integration" "example_integration" {
 
 ### Read-Only
 
+- `clickhouse_credentials_user_config` (List of Object) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (List of Object) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--datadog_user_config))
@@ -53,6 +54,22 @@ data "aiven_service_integration" "example_integration" {
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_project` (String) Source service project name
+
+<a id="nestedatt--clickhouse_credentials_user_config"></a>
+### Nested Schema for `clickhouse_credentials_user_config`
+
+Read-Only:
+
+- `grants` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_credentials_user_config--grants))
+
+<a id="nestedobjatt--clickhouse_credentials_user_config--grants"></a>
+### Nested Schema for `clickhouse_credentials_user_config.grants`
+
+Read-Only:
+
+- `user` (String)
+
+
 
 <a id="nestedatt--clickhouse_kafka_user_config"></a>
 ### Nested Schema for `clickhouse_kafka_user_config`

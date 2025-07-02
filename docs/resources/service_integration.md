@@ -62,6 +62,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 ### Optional
 
+- `clickhouse_credentials_user_config` (Block List, Max: 1) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--datadog_user_config))
@@ -88,6 +89,22 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 - `id` (String) The ID of this resource.
 - `integration_id` (String) The ID of the Aiven service integration.
+
+<a id="nestedblock--clickhouse_credentials_user_config"></a>
+### Nested Schema for `clickhouse_credentials_user_config`
+
+Optional:
+
+- `grants` (Block List, Max: 64) Grants to assign (see [below for nested schema](#nestedblock--clickhouse_credentials_user_config--grants))
+
+<a id="nestedblock--clickhouse_credentials_user_config--grants"></a>
+### Nested Schema for `clickhouse_credentials_user_config.grants`
+
+Required:
+
+- `user` (String) User or role to assign the grant to. Example: `alice`.
+
+
 
 <a id="nestedblock--clickhouse_kafka_user_config"></a>
 ### Nested Schema for `clickhouse_kafka_user_config`

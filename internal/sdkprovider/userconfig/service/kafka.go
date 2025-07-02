@@ -789,11 +789,18 @@ func kafkaUserConfig() *schema.Schema {
 			},
 			"single_zone": {
 				Description: "Single-zone configuration",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
-					Description: "Whether to allocate nodes on the same Availability Zone or spread across zones available. By default service nodes are spread across different AZs. The single AZ support is best-effort and may temporarily allocate nodes in different AZs e.g. in case of capacity limitations in one AZ.",
-					Optional:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"availability_zone": {
+						Description: "The availability zone to use for the service. This is only used when enabled is set to true. If not set the service will be allocated in random AZ.The AZ is not guaranteed, and the service may be allocated in a different AZ if the selected AZ is not available. Zones will not be validated and invalid zones will be ignored, falling back to random AZ selection. Common availability zones include: AWS (euc1-az1, euc1-az2, euc1-az3), GCP (europe-west1-a, europe-west1-b, europe-west1-c), Azure (germanywestcentral/1, germanywestcentral/2, germanywestcentral/3). Example: `euc1-az1`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"enabled": {
+						Description: "Whether to allocate nodes on the same Availability Zone or spread across zones available. By default service nodes are spread across different AZs. The single AZ support is best-effort and may temporarily allocate nodes in different AZs e.g. in case of capacity limitations in one AZ.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
