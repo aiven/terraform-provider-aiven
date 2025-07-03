@@ -37,7 +37,7 @@ provider "aiven" {
 The list of options in this document is not comprehensive. However, most map directly to the [Aiven REST API](https://api.aiven.io/doc/) properties.
 
 ## Examples
-Try the [sample project](guides/sample-project.md) or the [other examples](guides/examples.md) to learn how to use the Aiven resources.
+Try the [examples](guides/examples.md) to learn how to use the Aiven resources.
 
 ## Warning
 Recreating a stateful service with Terraform may cause it to be recreated, meaning the service and all its data is **deleted** before being created again. Changing some properties, like project and resource name, triggers a replacement.
