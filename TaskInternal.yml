@@ -237,3 +237,13 @@ tasks:
     silent: true
     cmds:
       - true
+
+
+  #-------------------------------------
+  # OPA Tasks
+  #-------------------------------------
+  opa:verify:
+    desc: Verify OPA installed
+    preconditions:
+      - sh: command -v "{{.OPA}}"
+        msg: "OPA is not installed. Please install it manually."

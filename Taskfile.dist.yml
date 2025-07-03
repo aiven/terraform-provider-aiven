@@ -171,12 +171,29 @@ tasks:
   #################################################
 
   opa:test:
-    desc: "Run OPA policy tests"
+    desc: Run OPA policy tests
+    deps:
+      - internal:opa:verify
+    cmds:
+      - "{{.OPA}} test ./opa/policies"
+
+  opa:bundle:
+    desc: "Build OPA bundle for distribution"
+    deps:
+      - internal:opa:verify
+      - opa:test
+    cmds:
+      - mkdir -p dist
+      - task: opa:fmt
+      - "{{.OPA}} build ./opa/policies/ --bundle --output ./dist/aiven-terraform-policies.tar.gz"
+
+  opa:fmt:
+    desc: "Format OPA policy files"
     preconditions:
       - sh: command -v {{.OPA}} >/dev/null 2>&1
         msg: "OPA is not installed. Please run install it manually."
     cmds:
-      - "{{.OPA}} test ./opa/policies"
+      - "{{.OPA}} fmt --write ./opa/policies"
 
 
   #################################################
