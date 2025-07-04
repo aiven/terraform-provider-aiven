@@ -26,7 +26,7 @@ func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
 	kafkaTopicName := withPrefix("kafka-topic")
 	osServiceName := withPrefix("os")
 	opts := s.withDefaults(&terraform.Options{
-		TerraformDir: "../examples/kafka_connectors/os_sink",
+		TerraformDir: "../examples/kafka/kafka_connectors/os_sink",
 		Vars: map[string]interface{}{
 			"aiven_token":          s.config.Token,
 			"avn_project":          s.config.Project,

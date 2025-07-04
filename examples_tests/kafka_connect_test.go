@@ -24,7 +24,7 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 	kafkaServiceName := withPrefix("kafka")
 	kafkaConnectName := withPrefix("kafka-connect")
 	opts := s.withDefaults(&terraform.Options{
-		TerraformDir: "../examples/kafka_connect",
+		TerraformDir: "../examples/kafka/kafka_connect",
 		Vars: map[string]interface{}{
 			"aiven_token":        s.config.Token,
 			"aiven_project_name": s.config.Project,
