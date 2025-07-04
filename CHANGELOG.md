@@ -15,6 +15,9 @@ nav_order: 1
 - Add `aiven_kafka` field `kafka_user_config.single_zone.availability_zone`: The availability zone to use for the service.
   This is only used when enabled is set to true
 - Add `aiven_service_integration` field `clickhouse_credentials_user_config`: ClickhouseCredentials user configurable settings
+- Change `aiven_account_team_project` field `team_type` (enum): remove `organization:idps:write`
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): remove `organization:idps:write`
+- Change `aiven_project_user` field `member_type` (enum): remove `organization:idps:write`
 
 ## [4.42.0] - 2025-06-23
 

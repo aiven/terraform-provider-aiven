@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/aiven/aiven-go-client/v2 v2.34.0
-	github.com/aiven/go-client-codegen v0.113.1
+	github.com/aiven/go-client-codegen v0.113.3
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
@@ -127,7 +127,7 @@ require (
 	github.com/hashicorp/cli v1.1.7 // indirect
 	github.com/hashicorp/go-getter/v2 v2.2.3 // indirect
 	github.com/hashicorp/go-immutable-radix/v2 v2.1.0 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/terraform-plugin-docs v0.21.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
