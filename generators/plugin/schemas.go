@@ -70,8 +70,15 @@ func genIDField(isResource bool, idField *IDAttribute) jen.Code {
 
 	attrs := jen.Dict{
 		jen.Id("MarkdownDescription"): jen.Lit(description),
-		jen.Id("Computed"):            jen.True(),
 	}
+
+	if !isResource && len(idField.Compose) == 1 && idField.Compose[0] == "id" {
+		// If datasource id is literally "id", it is required.
+		attrs[jen.Id("Required")] = jen.True()
+	} else {
+		attrs[jen.Id("Computed")] = jen.True()
+	}
+
 	if isResource && !idField.Mutable {
 		// Make ID field plan modifier to use state for unknown
 		// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#usestateforunknown
