@@ -34,8 +34,8 @@ func newDatasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Timestamp in ISO 8601 format, always in UTC.",
 			},
 			"id": schema.StringAttribute{
-				Computed:            true,
 				MarkdownDescription: "The organization ID.",
+				Required:            true,
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,

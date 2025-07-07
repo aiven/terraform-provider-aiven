@@ -18,6 +18,7 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): remove `organization:idps:write`
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum): remove `organization:idps:write`
 - Change `aiven_project_user` field `member_type` (enum): remove `organization:idps:write`
+- Fix datasource `aiven_organization`: mark `id` field as required since the datasource cannot be read with computed-only fields
 
 ## [4.42.0] - 2025-06-23
 
