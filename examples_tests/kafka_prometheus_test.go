@@ -25,7 +25,7 @@ func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
 	kafkaServiceName := withPrefix("kafka")
 	prometheusEndpointName := withPrefix("prom-endpoint")
 	opts := s.withDefaults(&terraform.Options{
-		TerraformDir: "../examples/kafka_prometheus",
+		TerraformDir: "../examples/kafka/kafka_prometheus",
 		Vars: map[string]interface{}{
 			"aiven_token":              s.config.Token,
 			"avn_project":              s.config.Project,
