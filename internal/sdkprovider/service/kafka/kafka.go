@@ -18,7 +18,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 	aivenKafkaSchema["karapace"] = &schema.Schema{
 		Type:             schema.TypeBool,
 		Optional:         true,
-		Description:      "Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.",
+		Description:      "Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy. This attribute is deprecated, use `schema_registry` and `kafka_rest` instead.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Deprecated:       "Usage of this field is discouraged.",
 	}
