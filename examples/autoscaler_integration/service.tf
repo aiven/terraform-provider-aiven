@@ -1,5 +1,5 @@
 resource "aiven_pg" "example_postgres" {
-  project                 = var.aiven_project.example_project.project
+  project                 = var.aiven_project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
   service_name            = "example-postgres-service"
