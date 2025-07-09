@@ -121,10 +121,14 @@ tasks:
 
   generate:
     desc: Generate Go code, documentation, and mocks
+    vars:
+      no_spec: '{{.no_spec | default "false"}}'
     cmds:
       - defer:
           task: fmt
       - task: internal:generate
+        vars:
+          no_spec: '{{.no_spec}}'
 
   docs:
     desc: Generate documentation for the provider
