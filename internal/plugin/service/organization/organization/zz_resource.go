@@ -30,6 +30,19 @@ func (tf *resourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+/*
+newResourceSchema:
+
+	resource "aiven_organization" "example" {
+	  name = "test"
+
+	  // COMPUTED FIELDS
+	  create_time = "foo"
+	  id          = "foo"
+	  tenant_id   = "foo"
+	  update_time = "foo"
+	}
+*/
 func newResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

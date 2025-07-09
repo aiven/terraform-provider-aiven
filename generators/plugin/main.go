@@ -115,7 +115,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			return err
 		}
 
-		root.Name = string(entity)
+		root.Name = resName
 		isResource := entity == resourceType
 		schema, err := genSchema(def.Beta, isResource, root, def.IDAttribute)
 		if err != nil {
@@ -511,6 +511,9 @@ func fromSchema(scope *Scope, item *Item, itemSchema *OASchema, appearsIn Appear
 				if err != nil {
 					return err
 				}
+			} else {
+				// A special case for maps with invalid schema
+				elementSchema = &OASchema{Type: SchemaTypeString}
 			}
 
 			// ANY is a special case is additional properties

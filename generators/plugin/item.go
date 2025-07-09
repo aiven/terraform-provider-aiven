@@ -197,9 +197,13 @@ func (item *Item) Path() string {
 	return strings.Join(chunks[1:], "/")
 }
 
-func (item *Item) IsReadOnly() bool {
-	// XOR, they both can be false, but only one can be true
-	return item.Required == item.Optional
+func (item *Item) IsReadOnly(isResource bool) bool {
+	if isResource {
+		return !item.Required && !item.Optional
+	}
+
+	// ID attributes are not read-only in data sources
+	return !item.InIDAttribute
 }
 
 func (item *Item) IsScalar() bool {
@@ -224,7 +228,7 @@ func (item *Item) IsArray() bool {
 }
 
 func (item *Item) IsObject() bool {
-	return item.Type == SchemaTypeObject && item.Items == nil
+	return item.Type == SchemaTypeObject && item.Items == nil && len(item.Properties) > 0
 }
 
 func (item *Item) IsRoot() bool {
@@ -233,6 +237,10 @@ func (item *Item) IsRoot() bool {
 
 func (item *Item) IsRootProperty() bool {
 	return !item.IsRoot() && item.Parent.IsRoot()
+}
+
+func (item *Item) IsEnum() bool {
+	return len(item.Enum) > 0
 }
 
 func (item *Item) GetIDFields() []*Item {

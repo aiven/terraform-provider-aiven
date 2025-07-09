@@ -66,7 +66,7 @@ func genExpandModelProperties(item *Item, rootLevel bool) ([]jen.Code, error) {
 
 	for _, k := range nestedFirst(item.Properties) {
 		v := item.Properties[k]
-		if !v.IsReadOnly() {
+		if !v.IsReadOnly(true) {
 			value, err := genExpandField(v, rootLevel)
 			if err != nil {
 				return nil, err
