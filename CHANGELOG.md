@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_byoc_aws_entity` beta resource: todo: add description
+
 ## [4.43.0] - 2025-07-22
 
 - Improve `aiven_pg_database`: check if database exists before creation to prevent conflicts during API retries

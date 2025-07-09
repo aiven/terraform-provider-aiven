@@ -130,7 +130,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			return fmt.Errorf("could not create directory %s: %w", def.Location, err)
 		}
 
-		pkgName := filepath.Base(def.Location)
+		pkgName := strings.ReplaceAll(filepath.Base(def.Location), "_", "")
 		if doOnce {
 			doOnce = false
 			hasResource := def.Resource != nil
