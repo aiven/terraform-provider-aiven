@@ -29,6 +29,25 @@ func (tf *datasourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+/*
+newDatasourceSchema:
+
+	data "aiven_organization_project" "example" {
+	  organization_id = "org1a23f456789"
+	  project_id      = "foo"
+
+	  // COMPUTED FIELDS
+	  base_port        = 42
+	  billing_group_id = "foo"
+	  ca_cert          = "foo"
+	  parent_id        = "foo"
+	  tag {
+	    key   = "foo"
+	    value = "foo"
+	  }
+	  technical_emails = ["test@example.com"]
+	}
+*/
 func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -32,6 +32,34 @@ func (tf *resourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+/*
+newResourceSchema:
+
+	resource "aiven_governance_access" "example" {
+	  access_data {
+	    acls {
+	      host            = "foo" // Force new
+	      operation       = "Read" // Force new
+	      permission_type = "ALLOW" // Force new
+	      resource_name   = "test" // Force new
+	      resource_type   = "Topic" // Force new
+	      id              = "foo"
+	      pattern_type    = "LITERAL"
+	      principal       = "foo"
+	    }
+	    project      = "foo" // Force new
+	    service_name = "test" // Force new
+	    username     = "test" // Force new
+	  }
+	  access_name         = "test" // Force new
+	  access_type         = "KAFKA" // Force new
+	  organization_id     = "org1a23f456789" // Force new
+	  owner_user_group_id = "foo" // Force new
+
+	  // COMPUTED FIELDS
+	  susbcription_id = "foo"
+	}
+*/
 func newResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

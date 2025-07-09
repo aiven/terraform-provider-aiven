@@ -27,6 +27,28 @@ func (tf *datasourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+/*
+newDatasourceSchema:
+
+	data "aiven_organization_billing_group_list" "example" {
+	  organization_id = "org1a23f456789"
+
+	  // COMPUTED FIELDS
+	  billing_groups {
+	    billing_address_id     = "foo"
+	    billing_contact_emails = ["test@example.com"]
+	    billing_emails         = ["test@example.com"]
+	    billing_group_id       = "foo"
+	    billing_group_name     = "test"
+	    currency               = "AUD"
+	    custom_invoice_text    = "foo"
+	    organization_id        = "org1a23f456789"
+	    payment_method_id      = "foo"
+	    shipping_address_id    = "foo"
+	    vat_id                 = "foo"
+	  }
+	}
+*/
 func newDatasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

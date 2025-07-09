@@ -31,6 +31,25 @@ func (tf *resourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+/*
+newResourceSchema:
+
+	resource "aiven_organization_billing_group" "example" {
+	  organization_id        = "org1a23f456789" // Force new
+	  billing_address_id     = "foo"
+	  billing_contact_emails = ["test@example.com"]
+	  billing_emails         = ["test@example.com"]
+	  billing_group_name     = "test"
+	  currency               = "AUD"
+	  custom_invoice_text    = "foo"
+	  payment_method_id      = "foo"
+	  shipping_address_id    = "foo"
+	  vat_id                 = "foo"
+
+	  // COMPUTED FIELDS
+	  billing_group_id = "foo"
+	}
+*/
 func newResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

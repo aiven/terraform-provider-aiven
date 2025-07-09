@@ -68,7 +68,7 @@ func fmtDescription(isResource bool, item *Item) string {
 
 	if !isResource {
 		b.MarkAsDataSource()
-	} else if !item.IsReadOnly() {
+	} else if !item.IsReadOnly(isResource) {
 		if item.ForceNew {
 			b.ForceNew()
 		}

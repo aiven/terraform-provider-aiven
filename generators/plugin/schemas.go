@@ -2,9 +2,16 @@ package main
 
 import (
 	"fmt"
+	"maps"
+	"slices"
+	"sort"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/samber/lo"
+	"github.com/zclconf/go-cty/cty"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -31,10 +38,18 @@ func genSchema(isBeta, isResource bool, item *Item, idField *IDAttribute) (jen.C
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
 
+	example, err := exampleRoot(isResource, item)
+	if err != nil {
+		return nil, fmt.Errorf("example error: %w", err)
+	}
+
 	// Schema package depends on the entity type.
 	pkg := fmtImport(isResource, schemaPackageFmt)
 	funcName := "new" + firstUpper(boolEntity(isResource)) + "Schema"
-	return jen.Func().
+	return jen.
+		Comment(funcName+":\n"+example).
+		Line().
+		Func().
 		Id(funcName).
 		Params(jen.Id("ctx").Qual("context", "Context")).
 		Qual(pkg, "Schema").
@@ -221,7 +236,7 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 		}
 	}
 
-	if isResource && !item.IsReadOnly() || !isResource && item.InIDAttribute {
+	if !item.IsReadOnly(isResource) {
 		validators, err := genValidators(item)
 		if err != nil {
 			return nil, err
@@ -233,4 +248,179 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 	}
 
 	return values, nil
+}
+
+// exampleRoot generates example usage for the TF resource or data source.
+func exampleRoot(isResource bool, item *Item) (string, error) {
+	t := "data"
+	if isResource {
+		t = "resource"
+	}
+
+	f := hclwrite.NewEmptyFile()
+	rootBody := f.Body().AppendNewBlock(t, []string{"aiven_" + item.Name, "example"}).Body()
+	err := exampleObjectItem(isResource, item, rootBody)
+	if err != nil {
+		return "", err
+	}
+
+	return string(f.Bytes()), nil
+}
+
+func sortedKeysPriority(isResource bool, m map[string]*Item) []string {
+	keys := slices.Collect(maps.Keys(m))
+	sort.Slice(keys, func(i, j int) bool {
+		itemI := m[keys[i]]
+		itemJ := m[keys[j]]
+
+		priorityI := getExampleItemPriority(isResource, itemI)
+		priorityJ := getExampleItemPriority(isResource, itemJ)
+
+		if priorityI != priorityJ {
+			return priorityI < priorityJ
+		}
+
+		// If both items are ID attributes, sort by position
+		if itemI.IDAttributePosition != itemJ.IDAttributePosition {
+			return itemI.IDAttributePosition < itemJ.IDAttributePosition
+		}
+
+		// Same priority, sort alphabetically by name
+		return strings.Compare(itemI.Name, itemJ.Name) < 0
+	})
+	return keys
+}
+
+func getExampleItemPriority(isResource bool, item *Item) int {
+	switch {
+	case item.IsReadOnly(isResource):
+		return 2
+	case item.InIDAttribute, item.ForceNew:
+		return 0
+	}
+	return 1
+}
+
+func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
+	var seenComputed bool
+
+	for _, k := range sortedKeysPriority(isResource, item.Properties) {
+		v := item.Properties[k]
+
+		// Renders COMPUTED FIELDS title before the first computed field
+		if v.IsReadOnly(isResource) && item.IsRoot() && !seenComputed {
+			seenComputed = true
+			comment := hclwrite.Tokens{
+				&hclwrite.Token{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("// COMPUTED FIELDS"),
+					SpacesBefore: 0,
+				},
+			}
+			body.AppendNewline()
+			body.AppendUnstructuredTokens(comment)
+			body.AppendNewline()
+		}
+
+		if v.IsNested() {
+			if v.IsArray() {
+				v = v.Items
+			}
+
+			valBlock := body.AppendNewBlock(k, nil)
+			err := exampleObjectItem(isResource, v, valBlock.Body())
+			if err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		var val cty.Value
+		switch v.Type {
+		case SchemaTypeString, SchemaTypeBoolean, SchemaTypeInteger, SchemaTypeNumber:
+			value, err := exampleScalarItem(v)
+			if err != nil {
+				return err
+			}
+			val = value
+		case SchemaTypeArray:
+			// An array with scalar elements
+			value, err := exampleScalarItem(v.Items)
+			if err != nil {
+				return err
+			}
+			val = cty.ListVal([]cty.Value{value})
+		case SchemaTypeObject:
+			value, err := exampleScalarItem(v.Items)
+			if err != nil {
+				return err
+			}
+			val = cty.ObjectVal(map[string]cty.Value{
+				"foo": value,
+			})
+		default:
+			return fmt.Errorf("unsupported type %s for %s", v.Type, v.Path())
+		}
+
+		tokens := hclwrite.TokensForValue(val)
+		if isResource && v.ForceNew {
+			tokens = append(tokens, &hclwrite.Token{
+				Type:  hclsyntax.TokenComment,
+				Bytes: []byte("// Force new"),
+			})
+		}
+		body.SetAttributeRaw(k, tokens)
+	}
+
+	return nil
+}
+
+func exampleScalarItem(item *Item) (cty.Value, error) {
+	var anyValue any
+	if item.Default != nil {
+		anyValue = item.Default
+	} else if item.IsEnum() {
+		anyValue = item.Enum[0]
+	}
+
+	switch item.Type {
+	case SchemaTypeString:
+		if anyValue == nil {
+			// Some placeholders that can improve the example
+			placeholders := map[string]any{
+				"cidr":            "10.0.0.0/24",
+				"email":           "test@example.com",
+				"password":        "password",
+				"role":            "admin",
+				"name":            "test",
+				"description":     "test",
+				"organization_id": "org1a23f456789",
+			}
+			anyValue = "foo" // default
+			for pattern, example := range placeholders {
+				if strings.Contains(item.Name, pattern) {
+					anyValue = example
+					break
+				}
+			}
+		}
+		return cty.StringVal(anyValue.(string)), nil
+	case SchemaTypeBoolean:
+		if anyValue == nil {
+			anyValue = true
+		}
+		return cty.BoolVal(anyValue.(bool)), nil
+	case SchemaTypeInteger:
+		if anyValue == nil {
+			anyValue = int64(42)
+		}
+		return cty.NumberIntVal(anyValue.(int64)), nil
+	case SchemaTypeNumber:
+		if anyValue == nil {
+			anyValue = 3.14
+		}
+		return cty.NumberFloatVal(anyValue.(float64)), nil
+	}
+	return cty.NilVal, fmt.Errorf("unsupported type %s for %s", item.Type, item.Path())
 }
