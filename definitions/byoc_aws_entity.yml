@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/aws_entity
+resource:
+  description: byoc
+operations:
+  CustomCloudEnvironmentCreate: create
+  CustomCloudEnvironmentGet: read
+  CustomCloudEnvironmentUpdate: update
+  CustomCloudEnvironmentDelete: delete
+idAttribute:
+  compose:
+    - organization_id
+    - display_name
+  mutable: true
+objectKey: custom_cloud_environment
+delete:
+  - aiven_google_account_principal
+  - google_bastion_cidr
+  - google_privilege_bearing_service_account_id
+  - google_workload_cidr
+  - oracle_compartment_id
+  - oracle_subnet_bastion
+  - oracle_subnet_workload
+  - tags
+rename:
+  aws_subnets_bastion: subnets_bastion
+  aws_subnets_workload: subnets_workload
+  aiven_aws_assume_role_external_id: aiven_assume_role_external_id
+  aiven_aws_object_storage_user_arn: aiven_object_storage_user_arn
+  byoc_resource_tags: custom_tags
+  byoc_unique_name: byoc_name
