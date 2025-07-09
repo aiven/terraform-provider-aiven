@@ -1,5 +1,5 @@
 resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
-  project       = var.aiven_project.example_project.project
+  project       = var.aiven_project
   endpoint_name = "disk-autoscaler-200GiB"
   endpoint_type = "autoscaler"
 
@@ -12,7 +12,7 @@ resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
 }
 
 resource "aiven_service_integration" "autoscaler_integration" {
-  project                 = var.aiven_project.example_project.project
+  project                 = var.aiven_project
   integration_type        = "autoscaler"
   source_service_name     = aiven_pg.example_postgres.service_name
   destination_endpoint_id = aiven_service_integration_endpoint.autoscaler_endpoint.id
