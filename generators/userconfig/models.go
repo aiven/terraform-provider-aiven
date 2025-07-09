@@ -279,6 +279,11 @@ func unwrapArrayMultipleTypes(o *object) {
 				continue
 			}
 
+			// Prioritizes scalar types.
+			sort.Slice(strTypes, func(i, j int) bool {
+				return cmpObjectLowPriority(strTypes[i], strTypes[j])
+			})
+
 			// Multiple types.
 			// This ArrayItems object is composite:
 			// it has properties for the object type, and MaxLength for the string type.
@@ -296,12 +301,11 @@ func unwrapArrayMultipleTypes(o *object) {
 			fields[key] = p
 
 		} else if len(p.ArrayItems.OneOf) != 0 {
-			// Usually it starts with a scalar type and then evolves to object
 			// Prioritizes scalar types
 			sort.Slice(p.ArrayItems.OneOf, func(i, j int) bool {
 				it := p.ArrayItems.OneOf[i].OrigType.(string)
 				jt := p.ArrayItems.OneOf[j].OrigType.(string)
-				return it != "object" || it < jt
+				return cmpObjectLowPriority(it, jt)
 			})
 
 			// Unwraps multiple _type objects_, e.g. [{type:string}, {type: object}]
@@ -326,4 +330,12 @@ func unwrapArrayMultipleTypes(o *object) {
 			o.Properties[k] = c
 		}
 	}
+}
+
+// cmpObjectLowPriority
+// When sorting multiple types, we want to prioritize scalar types.
+// Usually it starts with a string/integer, then evolves to object.
+// Sorts: [object, string] -> [string, object]
+func cmpObjectLowPriority(a, b string) bool {
+	return a != "object" && (b == "object" || a < b)
 }
