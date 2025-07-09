@@ -14,6 +14,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/alloydbomni"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
 	"github.com/aiven/go-client-codegen/handler/billinggroup"
+	"github.com/aiven/go-client-codegen/handler/byoc"
 	"github.com/aiven/go-client-codegen/handler/clickhouse"
 	"github.com/aiven/go-client-codegen/handler/cloud"
 	"github.com/aiven/go-client-codegen/handler/domain"
@@ -3713,6 +3714,393 @@ func (_c *MockClient_CheckPasswordStrengthNewUser_Call) Return(checkPasswordStre
 }
 
 func (_c *MockClient_CheckPasswordStrengthNewUser_Call) RunAndReturn(run func(ctx context.Context, in *user.CheckPasswordStrengthNewUserIn) (*user.CheckPasswordStrengthNewUserOut, error)) *MockClient_CheckPasswordStrengthNewUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentCreate provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentCreate(ctx context.Context, organizationId string, in *byoc.CustomCloudEnvironmentCreateIn) (*byoc.CustomCloudEnvironmentCreateOut, error) {
+	ret := _mock.Called(ctx, organizationId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentCreate")
+	}
+
+	var r0 *byoc.CustomCloudEnvironmentCreateOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *byoc.CustomCloudEnvironmentCreateIn) (*byoc.CustomCloudEnvironmentCreateOut, error)); ok {
+		return returnFunc(ctx, organizationId, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *byoc.CustomCloudEnvironmentCreateIn) *byoc.CustomCloudEnvironmentCreateOut); ok {
+		r0 = returnFunc(ctx, organizationId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*byoc.CustomCloudEnvironmentCreateOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, *byoc.CustomCloudEnvironmentCreateIn) error); ok {
+		r1 = returnFunc(ctx, organizationId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_CustomCloudEnvironmentCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentCreate'
+type MockClient_CustomCloudEnvironmentCreate_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentCreate is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - in
+func (_e *MockClient_Expecter) CustomCloudEnvironmentCreate(ctx interface{}, organizationId interface{}, in interface{}) *MockClient_CustomCloudEnvironmentCreate_Call {
+	return &MockClient_CustomCloudEnvironmentCreate_Call{Call: _e.mock.On("CustomCloudEnvironmentCreate", ctx, organizationId, in)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentCreate_Call) Run(run func(ctx context.Context, organizationId string, in *byoc.CustomCloudEnvironmentCreateIn)) *MockClient_CustomCloudEnvironmentCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*byoc.CustomCloudEnvironmentCreateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentCreate_Call) Return(customCloudEnvironmentCreateOut *byoc.CustomCloudEnvironmentCreateOut, err error) *MockClient_CustomCloudEnvironmentCreate_Call {
+	_c.Call.Return(customCloudEnvironmentCreateOut, err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentCreate_Call) RunAndReturn(run func(ctx context.Context, organizationId string, in *byoc.CustomCloudEnvironmentCreateIn) (*byoc.CustomCloudEnvironmentCreateOut, error)) *MockClient_CustomCloudEnvironmentCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentDelete provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentDelete(ctx context.Context, organizationId string, customCloudEnvironmentId string) error {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentDelete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_CustomCloudEnvironmentDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentDelete'
+type MockClient_CustomCloudEnvironmentDelete_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentDelete is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+func (_e *MockClient_Expecter) CustomCloudEnvironmentDelete(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}) *MockClient_CustomCloudEnvironmentDelete_Call {
+	return &MockClient_CustomCloudEnvironmentDelete_Call{Call: _e.mock.On("CustomCloudEnvironmentDelete", ctx, organizationId, customCloudEnvironmentId)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentDelete_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string)) *MockClient_CustomCloudEnvironmentDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentDelete_Call) Return(err error) *MockClient_CustomCloudEnvironmentDelete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentDelete_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string) error) *MockClient_CustomCloudEnvironmentDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentGet provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentGet(ctx context.Context, organizationId string, customCloudEnvironmentId string) (*byoc.CustomCloudEnvironmentGetOut, error) {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentGet")
+	}
+
+	var r0 *byoc.CustomCloudEnvironmentGetOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*byoc.CustomCloudEnvironmentGetOut, error)); ok {
+		return returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *byoc.CustomCloudEnvironmentGetOut); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*byoc.CustomCloudEnvironmentGetOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_CustomCloudEnvironmentGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentGet'
+type MockClient_CustomCloudEnvironmentGet_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentGet is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+func (_e *MockClient_Expecter) CustomCloudEnvironmentGet(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}) *MockClient_CustomCloudEnvironmentGet_Call {
+	return &MockClient_CustomCloudEnvironmentGet_Call{Call: _e.mock.On("CustomCloudEnvironmentGet", ctx, organizationId, customCloudEnvironmentId)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentGet_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string)) *MockClient_CustomCloudEnvironmentGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentGet_Call) Return(customCloudEnvironmentGetOut *byoc.CustomCloudEnvironmentGetOut, err error) *MockClient_CustomCloudEnvironmentGet_Call {
+	_c.Call.Return(customCloudEnvironmentGetOut, err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentGet_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string) (*byoc.CustomCloudEnvironmentGetOut, error)) *MockClient_CustomCloudEnvironmentGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentPermissionsGet provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentPermissionsGet(ctx context.Context, organizationId string, customCloudEnvironmentId string) (*byoc.CustomCloudEnvironmentPermissionsGetOut, error) {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentPermissionsGet")
+	}
+
+	var r0 *byoc.CustomCloudEnvironmentPermissionsGetOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*byoc.CustomCloudEnvironmentPermissionsGetOut, error)); ok {
+		return returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *byoc.CustomCloudEnvironmentPermissionsGetOut); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*byoc.CustomCloudEnvironmentPermissionsGetOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, organizationId, customCloudEnvironmentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_CustomCloudEnvironmentPermissionsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentPermissionsGet'
+type MockClient_CustomCloudEnvironmentPermissionsGet_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentPermissionsGet is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+func (_e *MockClient_Expecter) CustomCloudEnvironmentPermissionsGet(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}) *MockClient_CustomCloudEnvironmentPermissionsGet_Call {
+	return &MockClient_CustomCloudEnvironmentPermissionsGet_Call{Call: _e.mock.On("CustomCloudEnvironmentPermissionsGet", ctx, organizationId, customCloudEnvironmentId)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsGet_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string)) *MockClient_CustomCloudEnvironmentPermissionsGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsGet_Call) Return(customCloudEnvironmentPermissionsGetOut *byoc.CustomCloudEnvironmentPermissionsGetOut, err error) *MockClient_CustomCloudEnvironmentPermissionsGet_Call {
+	_c.Call.Return(customCloudEnvironmentPermissionsGetOut, err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsGet_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string) (*byoc.CustomCloudEnvironmentPermissionsGetOut, error)) *MockClient_CustomCloudEnvironmentPermissionsGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentPermissionsSet provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentPermissionsSet(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentPermissionsSetIn) error {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentPermissionsSet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentPermissionsSetIn) error); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_CustomCloudEnvironmentPermissionsSet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentPermissionsSet'
+type MockClient_CustomCloudEnvironmentPermissionsSet_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentPermissionsSet is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+//   - in
+func (_e *MockClient_Expecter) CustomCloudEnvironmentPermissionsSet(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}, in interface{}) *MockClient_CustomCloudEnvironmentPermissionsSet_Call {
+	return &MockClient_CustomCloudEnvironmentPermissionsSet_Call{Call: _e.mock.On("CustomCloudEnvironmentPermissionsSet", ctx, organizationId, customCloudEnvironmentId, in)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsSet_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentPermissionsSetIn)) *MockClient_CustomCloudEnvironmentPermissionsSet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*byoc.CustomCloudEnvironmentPermissionsSetIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsSet_Call) Return(err error) *MockClient_CustomCloudEnvironmentPermissionsSet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentPermissionsSet_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentPermissionsSetIn) error) *MockClient_CustomCloudEnvironmentPermissionsSet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentProvision provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentProvision(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentProvisionIn) (*byoc.CustomCloudEnvironmentProvisionOut, error) {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentProvision")
+	}
+
+	var r0 *byoc.CustomCloudEnvironmentProvisionOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentProvisionIn) (*byoc.CustomCloudEnvironmentProvisionOut, error)); ok {
+		return returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentProvisionIn) *byoc.CustomCloudEnvironmentProvisionOut); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*byoc.CustomCloudEnvironmentProvisionOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentProvisionIn) error); ok {
+		r1 = returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_CustomCloudEnvironmentProvision_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentProvision'
+type MockClient_CustomCloudEnvironmentProvision_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentProvision is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+//   - in
+func (_e *MockClient_Expecter) CustomCloudEnvironmentProvision(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}, in interface{}) *MockClient_CustomCloudEnvironmentProvision_Call {
+	return &MockClient_CustomCloudEnvironmentProvision_Call{Call: _e.mock.On("CustomCloudEnvironmentProvision", ctx, organizationId, customCloudEnvironmentId, in)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentProvision_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentProvisionIn)) *MockClient_CustomCloudEnvironmentProvision_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*byoc.CustomCloudEnvironmentProvisionIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentProvision_Call) Return(customCloudEnvironmentProvisionOut *byoc.CustomCloudEnvironmentProvisionOut, err error) *MockClient_CustomCloudEnvironmentProvision_Call {
+	_c.Call.Return(customCloudEnvironmentProvisionOut, err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentProvision_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentProvisionIn) (*byoc.CustomCloudEnvironmentProvisionOut, error)) *MockClient_CustomCloudEnvironmentProvision_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CustomCloudEnvironmentUpdate provides a mock function for the type MockClient
+func (_mock *MockClient) CustomCloudEnvironmentUpdate(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentUpdateIn) (*byoc.CustomCloudEnvironmentUpdateOut, error) {
+	ret := _mock.Called(ctx, organizationId, customCloudEnvironmentId, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CustomCloudEnvironmentUpdate")
+	}
+
+	var r0 *byoc.CustomCloudEnvironmentUpdateOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentUpdateIn) (*byoc.CustomCloudEnvironmentUpdateOut, error)); ok {
+		return returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentUpdateIn) *byoc.CustomCloudEnvironmentUpdateOut); ok {
+		r0 = returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*byoc.CustomCloudEnvironmentUpdateOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *byoc.CustomCloudEnvironmentUpdateIn) error); ok {
+		r1 = returnFunc(ctx, organizationId, customCloudEnvironmentId, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_CustomCloudEnvironmentUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CustomCloudEnvironmentUpdate'
+type MockClient_CustomCloudEnvironmentUpdate_Call struct {
+	*mock.Call
+}
+
+// CustomCloudEnvironmentUpdate is a helper method to define mock.On call
+//   - ctx
+//   - organizationId
+//   - customCloudEnvironmentId
+//   - in
+func (_e *MockClient_Expecter) CustomCloudEnvironmentUpdate(ctx interface{}, organizationId interface{}, customCloudEnvironmentId interface{}, in interface{}) *MockClient_CustomCloudEnvironmentUpdate_Call {
+	return &MockClient_CustomCloudEnvironmentUpdate_Call{Call: _e.mock.On("CustomCloudEnvironmentUpdate", ctx, organizationId, customCloudEnvironmentId, in)}
+}
+
+func (_c *MockClient_CustomCloudEnvironmentUpdate_Call) Run(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentUpdateIn)) *MockClient_CustomCloudEnvironmentUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*byoc.CustomCloudEnvironmentUpdateIn))
+	})
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentUpdate_Call) Return(customCloudEnvironmentUpdateOut *byoc.CustomCloudEnvironmentUpdateOut, err error) *MockClient_CustomCloudEnvironmentUpdate_Call {
+	_c.Call.Return(customCloudEnvironmentUpdateOut, err)
+	return _c
+}
+
+func (_c *MockClient_CustomCloudEnvironmentUpdate_Call) RunAndReturn(run func(ctx context.Context, organizationId string, customCloudEnvironmentId string, in *byoc.CustomCloudEnvironmentUpdateIn) (*byoc.CustomCloudEnvironmentUpdateOut, error)) *MockClient_CustomCloudEnvironmentUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
