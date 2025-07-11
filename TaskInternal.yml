@@ -100,8 +100,37 @@ tasks:
       - find . -type f -name '*.go' -exec sed -i'' -e '/^import ($/,/^)$/{/^[[:space:]]*$/d;}' {} +
       - goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
+  #-------------------------------------
+  # Format Sub-Tasks
+  #-------------------------------------
+  # Two formatting approaches available:
+  #
+  # fmt-fast: Custom Go implementation for quick development workflow
+  #   - Removes trailing whitespace (spaces/tabs)
+  #   - Normalizes file endings (preserves original newline behavior)
+  #   - Processes .go, .yml, .yaml, .md, .json files
+  #   - Concurrent processing for performance
+  #   - No Docker dependency
+  #   - Use after code generation or during development
+  #
+  # fmt-precommit: Comprehensive Docker-based validation
+  #   - All fmt-fast functionality plus additional checks
+  #   - YAML validation, Terraform fmt/lint, file structure checks
+  #   - Slower but more thorough
+  #   - Use before commits for complete validation
+  #
+  # Usage:
+  #   FAST_FORMAT=true task fmt  # Uses fmt-fast
+  #   task fmt                   # Uses fmt-precommit (default)
+  #   go run ./tools/... format  # Direct fmt-fast usage
+
+  fmt-fast:
+    desc: "Fast formatting for basic whitespace cleanup (no Docker). Custom Go implementation that performs the core formatting tasks of fmt-precommit (trailing whitespace removal, file ending normalization) without Docker overhead. Ideal for development workflow and post-generation cleanup."
+    cmds:
+      - "{{.GO_CMD}} run ./tools/... format --root {{.ROOT_DIR}}"
+
   fmt-precommit:
-    desc: "Run pre-commit hooks using Docker"
+    desc: "Run comprehensive pre-commit hooks using Docker. Includes all formatting checks (YAML validation, trailing whitespace, file endings, Terraform fmt/lint). More thorough than fmt-fast but slower due to Docker overhead. Use for final validation before commits."
     preconditions:
       - sh: "test -f {{.PRECOMMIT_CONFIG}}"
         msg: "Pre-commit configuration file '{{.PRECOMMIT_CONFIG}}' not found."
