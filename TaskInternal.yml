@@ -133,8 +133,18 @@ tasks:
 
   gen-plugin:
     desc: "Generate Terraform Plugin Framework resources"
+    vars:
+      no_spec: '{{.no_spec | default "false"}}'
     cmds:
-      - task: get-spec
+      - task: '{{if eq .no_spec "true"}}nothing{{else}}get-spec{{end}}'
+      - task: gen-plugin-generator
+
+  gen-plugin-generator:
+    desc: "Run the plugin generator (requires openapi.json to exist)"
+    preconditions:
+      - sh: test -f {{.OPENAPI_FILE}}
+        msg: "{{.OPENAPI_FILE}} not found. Run 'task get-spec' to download it."
+    cmds:
       - "{{.GO_CMD}} run ./generators/plugin/..."
 
   gen-docs:
@@ -149,9 +159,13 @@ tasks:
 
   generate:
     desc: "Run all code generation tasks"
+    vars:
+      no_spec: '{{.no_spec | default "false"}}'
     deps:
       - gen-go
-      - gen-plugin
+      - task: gen-plugin
+        vars:
+          no_spec: '{{.no_spec}}'
       - gen-docs
     cmds:
       - task: mockery
