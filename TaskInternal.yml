@@ -110,6 +110,12 @@ tasks:
     cmds:
       - "{{.CONTAINER_TOOL}} run --rm -v \"{{.ROOT_DIR}}:/lint\" -w /lint {{.PRECOMMIT_IMAGE}} run -a"
 
+  fmt-fast:
+    desc: "Fast formatting for docs/ after generation, removes trailing whitespace and empty lines from markdown files"
+    cmds:
+      - find docs -name "*.md" -type f -exec sed -i'' -e 's/[[:space:]]*$//' {} +
+      - find docs -name "*.md" -type f -exec sed -i'' -e '${/^$/d}' {} +
+
   #-------------------------------------
   # Generate Sub-Tasks
   #-------------------------------------
