@@ -105,15 +105,15 @@ tasks:
       - internal:semgrep
 
   fmt:
-    desc: Run all formatters (Terraform tests, Go imports)
+    desc: "Run all formatters (Go, Terraform, whitespace). Use FAST_FORMAT=true for quick formatting"
     vars:
-      SKIP_PRECOMMIT: '{{default "false" .SKIP_PRECOMMIT}}'
+      FAST_FORMAT: '{{default "false" .FAST_FORMAT}}'
     cmds:
       - defer:
           task: internal:fmt-imports
       - task: internal:fmt-go
       - task: internal:fmt-test
-      - task: '{{if ne .SKIP_PRECOMMIT "true"}}internal:fmt-precommit{{else}}internal:nothing{{end}}'
+      - task: '{{if ne .FAST_FORMAT "true"}}internal:fmt-precommit{{else}}internal:fmt-fast{{end}}'
 
   #################################################
   # Utility Tasks
@@ -126,6 +126,8 @@ tasks:
     cmds:
       - defer:
           task: fmt
+          vars:
+            FAST_FORMAT: true
       - task: internal:generate
         vars:
           no_spec: '{{.no_spec}}'
