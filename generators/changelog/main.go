@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
@@ -37,15 +38,28 @@ func exec() error {
 		return err
 	}
 
-	p, err := loadProvider()
+	sdkProvider, err := loadSDKProvider()
 	if err != nil {
-		return fmt.Errorf("failed to load provider: %w", err)
+		return fmt.Errorf("failed to load SDK provider: %w", err)
 	}
 
-	newMap, err := fromProvider(p)
+	pluginProvider, err := loadPluginProvider()
 	if err != nil {
-		return fmt.Errorf("failed to process provider schema: %w", err)
+		return fmt.Errorf("failed to load Plugin Framework provider: %w", err)
 	}
+
+	sdkMap, err := fromProvider(sdkProvider)
+	if err != nil {
+		return fmt.Errorf("failed to process SDK provider schema: %w", err)
+	}
+
+	pluginMap, err := fromPluginFrameworkProvider(pluginProvider)
+	if err != nil {
+		return fmt.Errorf("failed to process Plugin Framework provider schema: %w", err)
+	}
+
+	// merge both providers
+	newMap := mergeItemMaps(sdkMap, pluginMap)
 
 	if flags.save {
 		return saveSchema(flags.schemaFile, newMap)
@@ -81,12 +95,17 @@ func parseFlags() (*flags, error) {
 	return f, nil
 }
 
-func loadProvider() (*schema.Provider, error) {
+func loadSDKProvider() (*schema.Provider, error) {
 	p, err := provider.Provider("dev")
 	if err != nil {
 		return nil, err
 	}
 	return p, nil
+}
+
+func loadPluginProvider() (*plugin.AivenProvider, error) {
+	p := plugin.New("dev")
+	return p.(*plugin.AivenProvider), nil
 }
 
 func saveSchema(filePath string, schema ItemMap) error {
@@ -189,6 +208,27 @@ func fromProvider(p *schema.Provider) (ItemMap, error) {
 		}
 	}
 	return items, nil
+}
+
+func mergeItemMaps(sdkMap, pluginMap ItemMap) ItemMap {
+	merged := make(ItemMap)
+
+	merged[ResourceRootKind] = make(map[string]*Item)
+	merged[DataSourceRootKind] = make(map[string]*Item)
+
+	for kind, items := range sdkMap {
+		for path, item := range items {
+			merged[kind][path] = item
+		}
+	}
+
+	for kind, items := range pluginMap {
+		for path, item := range items {
+			merged[kind][path] = item
+		}
+	}
+
+	return merged
 }
 
 func walkSchema(name string, this *schema.Schema, parent *Item) []*Item {
