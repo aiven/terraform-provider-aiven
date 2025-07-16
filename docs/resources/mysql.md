@@ -122,6 +122,7 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--mysql_user_config--migration))
 - `mysql` (Block List, Max: 1) mysql.conf configuration values (see [below for nested schema](#nestedblock--mysql_user_config--mysql))
+- `mysql_incremental_backup` (Block List, Max: 1) MySQL incremental backup configuration (see [below for nested schema](#nestedblock--mysql_user_config--mysql_incremental_backup))
 - `mysql_version` (String) Enum: `8`, and newer. MySQL major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--mysql_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--mysql_user_config--privatelink_access))
@@ -199,6 +200,18 @@ Optional:
 - `sql_require_primary_key` (Boolean) Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.
 - `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M). Example: `16777216`.
 - `wait_timeout` (Number) The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.
+
+
+<a id="nestedblock--mysql_user_config--mysql_incremental_backup"></a>
+### Nested Schema for `mysql_user_config.mysql_incremental_backup`
+
+Required:
+
+- `enabled` (Boolean) Enable periodic incremental backups. When enabled, full_backup_week_schedule must be set. Incremental backups only store changes since the last backup, making them faster and more storage-efficient than full backups. This is particularly useful for large databases where daily full backups would be too time-consuming or expensive.
+
+Optional:
+
+- `full_backup_week_schedule` (String) Comma-separated list of days of the week when full backups should be created. Valid values: mon, tue, wed, thu, fri, sat, sun. Example: `sun,wed`.
 
 
 <a id="nestedblock--mysql_user_config--private_access"></a>

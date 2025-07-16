@@ -114,6 +114,7 @@ Read-Only:
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
 - `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
+- `mysql_incremental_backup` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql_incremental_backup))
 - `mysql_version` (String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--privatelink_access))
@@ -185,6 +186,15 @@ Read-Only:
 - `sql_require_primary_key` (Boolean)
 - `tmp_table_size` (Number)
 - `wait_timeout` (Number)
+
+
+<a id="nestedobjatt--mysql_user_config--mysql_incremental_backup"></a>
+### Nested Schema for `mysql_user_config.mysql_incremental_backup`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `full_backup_week_schedule` (String)
 
 
 <a id="nestedobjatt--mysql_user_config--private_access"></a>

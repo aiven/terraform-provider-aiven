@@ -224,6 +224,7 @@ Optional:
 - `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
+- `max_connections` (Number) PostgreSQL maximum number of concurrent connections to the database server. Changing this parameter causes a service restart.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process. The default is `1000` (upstream default). Changing this parameter causes a service restart.
 - `max_locks_per_transaction` (Number) PostgreSQL maximum locks per transaction. Changing this parameter causes a service restart.
 - `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers). The default is `4` (upstream default). Changing this parameter causes a service restart.
@@ -236,6 +237,7 @@ Optional:
 - `max_stack_depth` (Number) Maximum depth of the stack in bytes. The default is `2097152` (upstream default).
 - `max_standby_archive_delay` (Number) Max standby archive delay in milliseconds. The default is `30000` (upstream default).
 - `max_standby_streaming_delay` (Number) Max standby streaming delay in milliseconds. The default is `30000` (upstream default).
+- `max_sync_workers_per_subscription` (Number) Maximum number of synchronization workers per subscription. The default is `2`.
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders. The default is `20`. Changing this parameter causes a service restart.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support. The default is `8`. Changing this parameter causes a service restart.
 - `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.

@@ -175,6 +175,7 @@ Read-Only:
 - `max_stack_depth` (Number)
 - `max_standby_archive_delay` (Number)
 - `max_standby_streaming_delay` (Number)
+- `max_sync_workers_per_subscription` (Number)
 - `max_wal_senders` (Number)
 - `max_worker_processes` (Number)
 - `password_encryption` (String)

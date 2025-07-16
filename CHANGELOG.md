@@ -19,6 +19,12 @@ nav_order: 1
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum): remove `organization:idps:write`
 - Change `aiven_project_user` field `member_type` (enum): remove `organization:idps:write`
 - Fix datasource `aiven_organization`: mark `id` field as required since the datasource cannot be read with computed-only fields
+- Add `aiven_alloydbomni` field `alloydbomni_user_config.pg.max_sync_workers_per_subscription`: Maximum number
+  of synchronization workers per subscription
+- Add `aiven_mysql` field `mysql_user_config.mysql_incremental_backup`: MySQL incremental backup configuration
+- Add `aiven_pg` field `pg_user_config.pg.max_connections`: PostgreSQL maximum number of concurrent connections
+  to the database server
+- Add `aiven_pg` field `pg_user_config.pg.max_sync_workers_per_subscription`: Maximum number of synchronization workers per subscription
 
 ## [4.42.0] - 2025-06-23
 
