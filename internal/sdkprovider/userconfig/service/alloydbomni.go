@@ -282,6 +282,11 @@ func alloydbomniUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"max_sync_workers_per_subscription": {
+						Description: "Maximum number of synchronization workers per subscription. The default is `2`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"max_wal_senders": {
 						Description: "PostgreSQL maximum WAL senders. The default is `20`. Changing this parameter causes a service restart.",
 						Optional:    true,

@@ -262,6 +262,11 @@ func pgUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"max_connections": {
+						Description: "PostgreSQL maximum number of concurrent connections to the database server. Changing this parameter causes a service restart.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"max_files_per_process": {
 						Description: "PostgreSQL maximum number of files that can be open per process. The default is `1000` (upstream default). Changing this parameter causes a service restart.",
 						Optional:    true,
@@ -319,6 +324,11 @@ func pgUserConfig() *schema.Schema {
 					},
 					"max_standby_streaming_delay": {
 						Description: "Max standby streaming delay in milliseconds. The default is `30000` (upstream default).",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"max_sync_workers_per_subscription": {
+						Description: "Maximum number of synchronization workers per subscription. The default is `2`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

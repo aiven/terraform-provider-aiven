@@ -213,6 +213,7 @@ Optional:
 - `max_stack_depth` (Number) Maximum depth of the stack in bytes. The default is `2097152` (upstream default).
 - `max_standby_archive_delay` (Number) Max standby archive delay in milliseconds. The default is `30000` (upstream default).
 - `max_standby_streaming_delay` (Number) Max standby streaming delay in milliseconds. The default is `30000` (upstream default).
+- `max_sync_workers_per_subscription` (Number) Maximum number of synchronization workers per subscription. The default is `2`.
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders. The default is `20`. Changing this parameter causes a service restart.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support. The default is `8`. Changing this parameter causes a service restart.
 - `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.
