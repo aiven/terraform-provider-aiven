@@ -85,3 +85,15 @@ jobs:
         run: |
           gh release edit "${{ steps.get_version.outputs.tag }}" \
             --notes-file "${{ steps.generate_notes.outputs.notes_path }}"
+
+  notify-slack-failure:
+    needs: [tag-and-publish]
+    if: failure()
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'failure'
+      workflow_name: 'Automated Release Publisher'
+      custom_message: 'Release publishing failed'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

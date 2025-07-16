@@ -195,3 +195,37 @@ jobs:
               description: 'Changelog updated by automated release process.',
               target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             });
+
+  notify-slack-success:
+    needs:
+      - create_release_pr
+      - run_lint_checks
+      - run_unit_tests
+      - run_dependency_review
+      - run_acceptance_tests
+    if: success() && needs.create_release_pr.outputs.pr_created == 'true'
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'success'
+      workflow_name: 'Prepare Release'
+      custom_message: 'Release v${{ inputs.version }} preparation completed successfully'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+
+  notify-slack-failure:
+    needs:
+      - create_release_pr
+      - run_lint_checks
+      - run_unit_tests
+      - run_dependency_review
+      - run_acceptance_tests
+    if: failure() && needs.create_release_pr.outputs.pr_created == 'true'
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'failure'
+      workflow_name: 'Prepare Release'
+      custom_message: 'Release v${{ inputs.version }} preparation failed'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

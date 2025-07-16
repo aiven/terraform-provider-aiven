@@ -1,0 +1,130 @@
+name: Slack Notification
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        description: 'Status of the workflow (success or failure)'
+        required: true
+        type: string
+      workflow_name:
+        description: 'Name of the workflow'
+        required: true
+        type: string
+      custom_message:
+        description: 'Custom message to include'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      SLACK_WEBHOOK_URL:
+        description: 'Slack webhook URL'
+        required: true
+      SLACK_CHANNEL:
+        description: 'Slack channel'
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack on success
+        if: inputs.status == 'success'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ ${{ inputs.custom_message || inputs.workflow_name }} Succeeded"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n<${{ github.server_url }}/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}|${{ github.head_ref || github.ref_name }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Event:*\n${{ github.event_name }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
+
+      - name: Notify Slack on failure
+        if: inputs.status == 'failure'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ ${{ inputs.custom_message || inputs.workflow_name }} Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "The workflow has failed and requires attention."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n<${{ github.server_url }}/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}|${{ github.head_ref || github.ref_name }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Event:*\n${{ github.event_name }}"
+                    },
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
