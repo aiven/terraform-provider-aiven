@@ -30,7 +30,7 @@ var aivenOrganizationApplicationUserSchema = map[string]*schema.Schema{
 		Description: "Makes the application user a [super admin](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_application_user_token#scopes-1). The super admin role has completely unrestricted access to all organization resources and settings. " +
 			"This role should be limited to as few users as possible. For daily administrative tasks, assign users the organization admin role instead using the `aiven_organization_permission` resource.",
 		Optional:   true,
-		Deprecated: "This field is deprecated and will be removed in the next major release. For administrative tasks, assign application users the organization admin role instead using the aiven_organization_permission resource.",
+		Deprecated: "This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the aiven_organization_permission resource.",
 	},
 	"user_id": {
 		Type:        schema.TypeString,
@@ -71,6 +71,8 @@ func resourceOrganizationApplicationUserCreate(ctx context.Context, d *schema.Re
 	if err != nil {
 		return err
 	}
+
+	req.IsSuperAdmin = nil // The API does not accept this field
 
 	orgID := d.Get("organization_id").(string)
 	user, err := client.ApplicationUserCreate(ctx, orgID, &req)
@@ -130,6 +132,8 @@ func resourceOrganizationApplicationUserUpdate(ctx context.Context, d *schema.Re
 	if err != nil {
 		return err
 	}
+
+	req.IsSuperAdmin = nil // The API does not accept this field
 
 	_, err = client.ApplicationUserUpdate(ctx, orgID, userID, &req)
 	if err != nil {

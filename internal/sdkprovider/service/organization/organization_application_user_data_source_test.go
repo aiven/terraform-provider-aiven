@@ -34,7 +34,6 @@ data "aiven_organization_application_user" "foo" {
 `, acc.OrganizationName(), suffix),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(dataUserFoo, "name", "test-acc-org-app-user-"+suffix),
-					resource.TestCheckResourceAttr(dataUserFoo, "is_super_admin", "false"),
 					resource.TestCheckResourceAttrSet(dataUserFoo, "email"),
 				),
 			},
