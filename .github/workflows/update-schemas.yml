@@ -52,3 +52,14 @@ jobs:
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-slack-failure:
+    needs: [updater]
+    if: failure()
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'failure'
+      workflow_name: 'Update Schemas'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

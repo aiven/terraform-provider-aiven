@@ -60,3 +60,25 @@ jobs:
     with:
       ref: ${{ needs.gatekeeper.outputs.ref_to_test }}
     secrets: inherit
+
+  notify-slack-success:
+    needs: [call-tests, gatekeeper]
+    if: success() && needs.gatekeeper.outputs.should_run == 'true'
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'success'
+      workflow_name: 'Acceptance Tests'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+
+  notify-slack-failure:
+    needs: [call-tests, gatekeeper]
+    if: failure() && needs.gatekeeper.outputs.should_run == 'true'
+    uses: ./.github/workflows/slack-notify.yml
+    with:
+      status: 'failure'
+      workflow_name: 'Acceptance Tests'
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
