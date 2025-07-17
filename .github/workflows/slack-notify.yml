@@ -54,11 +54,11 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*Branch:*\n<${{ github.server_url }}/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}|${{ github.head_ref || github.ref_name }}>"
-                    },
-                    {
+                    }${{ github.event_name != 'schedule' && format(',
+                    {{
                       "type": "mrkdwn",
-                      "text": "*Author:*\n<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>"
-                    },
+                      "text": "*Author:*\n<{0}/{1}|{1}>"
+                    }}', github.server_url, github.actor) || '' }},
                     {
                       "type": "mrkdwn",
                       "text": "*Event:*\n${{ github.event_name }}"
@@ -108,15 +108,15 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*Branch:*\n<${{ github.server_url }}/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}|${{ github.head_ref || github.ref_name }}>"
-                    },
-                    {
+                    }${{ github.event_name != 'schedule' && format(',
+                    {{
                       "type": "mrkdwn",
-                      "text": "*Author:*\n<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>"
-                    },
+                      "text": "*Author:*\n<{0}/{1}|{1}>"
+                    }}', github.server_url, github.actor) || '' }},
                     {
                       "type": "mrkdwn",
                       "text": "*Event:*\n${{ github.event_name }}"
-                    },
+                    }
                   ]
                 },
                 {

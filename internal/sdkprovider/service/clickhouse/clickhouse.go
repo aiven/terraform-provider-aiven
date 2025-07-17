@@ -31,6 +31,9 @@ func clickhouseSchema() map[string]*schema.Schema {
 			},
 		},
 	}
+
+	s["service_uri"].Description = "The service URI for the ClickHouse service, which contains the hostname and port (e.g., 'service-name.h.aivencloud.com:16539') used to connect to the service. For protocol-specific connections, see the [ClickHouse service example](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse/clickhouse_service)."
+
 	return s
 }
 

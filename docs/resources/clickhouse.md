@@ -61,7 +61,7 @@ resource "aiven_clickhouse" "example_clickhouse" {
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
-- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_uri` (String, Sensitive) The service URI for the ClickHouse service, which contains the hostname and port (e.g., 'service-name.h.aivencloud.com:16539') used to connect to the service. For protocol-specific connections, see the [ClickHouse service example](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse/clickhouse_service).
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. Possible values are `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle).
 

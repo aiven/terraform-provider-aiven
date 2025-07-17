@@ -7,7 +7,7 @@ data "aiven_project" "main" {
 resource "aiven_clickhouse" "dev" {
   project                 = data.aiven_project.main.project
   cloud_name              = "google-europe-west1"
-  plan                    = "hobbyist"
+  plan                    = "startup-16"
   service_name            = var.clickhouse_service_name
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"

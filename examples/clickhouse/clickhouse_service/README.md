@@ -8,6 +8,7 @@ and gives these users access by:
 - creating writer and reader roles with the `aiven_clickhouse_role` resource
 - granting granular privileges to each role using `aiven_clickhouse_grant`
 - using `aiven_clickhouse_grant` to assign each role to one service user
+- demonstrates how to access ClickHouse HTTPS connection through protocol-specific output
 
 For a more complex example that deals with grants at both the global and database levels while avoiding conflicts, see the
 [example for managing multiple grants for a user or role](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse/grants).
