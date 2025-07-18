@@ -64,8 +64,72 @@ export AIVEN_PROJECT_NAME="your-project-name"
 task test-examples
 ```
 
+### Linting and formatting
 
-### Static checking and linting
+Before pushing your changes, run the following commands to ensure code quality:
+
+```bash
+task lint
+task fmt
+```
+
+### Using a dev build
+
+To test local changes during development, you can create and use a development build of the provider.
+
+1. Build the provider and show the installation path by running:
+
+```bash
+task build-dev
+task: [build-dev] mkdir -p /Users/<USERNAME>/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/darwin_arm64
+```
+
+2. Create the `~/.terraformrc` file with the path using the output from the previous step:
+
+```hcl
+provider_installation {
+  dev_overrides {
+    "registry.terraform.io/aiven-dev/aiven" = "/Users/<USERNAME>/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/darwin_arm64/"
+  }
+
+  direct {}
+}
+```
+
+3. Update your Terraform configuration to use the development provider by changing the source to `aiven-dev/aiven`:
+
+```hcl
+terraform {
+  required_providers {
+    aiven = {
+      source = "aiven-dev/aiven"
+    }
+  }
+}
+
+resource "aiven_pg" "example" {
+  // ...
+}
+```
+
+4. To test your changes directly, run the following command. You can skip the `terraform init` step.
+
+```bash
+terraform plan
+```
+
+After making code changes, rebuild by running `task build-dev`.
+
+For more information, see [Development Overrides for Provider Developers](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers).
+
+
+### Using a custom Aiven API endpoint
+
+To use a custom Aiven API endpoint, set the `AIVEN_WEB_URL` environment variable:
+
+```bash
+export AIVEN_WEB_URL="your-custom-url"
+```
 
 ### Debugging
 
