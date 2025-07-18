@@ -2,11 +2,14 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -57,10 +60,10 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 func ResourcePGDatabase() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages a database in an Aiven for PostgreSQL® service.",
-		CreateContext: resourcePGDatabaseCreate,
-		ReadContext:   resourcePGDatabaseRead,
-		DeleteContext: resourcePGDatabaseDelete,
-		UpdateContext: resourcePGDatabaseUpdate,
+		CreateContext: common.WithGenClient(resourcePGDatabaseCreate),
+		ReadContext:   common.WithGenClient(resourcePGDatabaseRead),
+		DeleteContext: common.WithGenClient(resourcePGDatabaseDelete),
+		UpdateContext: common.WithGenClient(resourcePGDatabaseUpdate),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -70,93 +73,98 @@ func ResourcePGDatabase() *schema.Resource {
 	}
 }
 
-func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
-	_, err := client.Databases.Create(
+	err := client.ServiceDatabaseCreate(
 		ctx,
 		projectName,
 		serviceName,
-		aiven.CreateDatabaseRequest{
+		&service.ServiceDatabaseCreateIn{
 			Database:  databaseName,
-			LcCollate: d.Get("lc_collate").(string),
-			LcType:    d.Get("lc_ctype").(string),
+			LcCollate: util.NilIfZero(d.Get("lc_collate").(string)),
+			LcCtype:   util.NilIfZero(d.Get("lc_ctype").(string)),
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
-
-	return resourcePGDatabaseRead(ctx, d, m)
+	return resourcePGDatabaseRead(ctx, d, client)
 }
 
-func resourcePGDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourcePGDatabaseRead(ctx, d, m)
+// resourcePGDatabaseUpdate update is not really possible, except for the virtual field "termination_protection"
+func resourcePGDatabaseUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	return resourcePGDatabaseRead(ctx, d, client)
 }
 
-func resourcePGDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourcePGDatabaseRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	database, err := client.Databases.Get(ctx, projectName, serviceName, databaseName)
+	database, err := getDatabaseByName(ctx, client, projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	if err := d.Set("database_name", database.DatabaseName); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("project", projectName); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("lc_collate", database.LcCollate); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
-	if err := d.Set("lc_ctype", database.LcType); err != nil {
-		return diag.FromErr(err)
+	if err := d.Set("lc_ctype", database.LcCtype); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if d.Get("termination_protection").(bool) {
-		return diag.Errorf("cannot delete a database termination_protection is enabled")
+		return fmt.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	waiter := schemautil.DatabaseDeleteWaiter{
-		Context:     ctx,
-		Client:      client,
-		ProjectName: projectName,
-		ServiceName: serviceName,
-		Database:    databaseName,
-	}
-
-	timeout := d.Timeout(schema.TimeoutDelete)
-
-	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
+	err = client.ServiceDatabaseDelete(ctx, projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)
+		return err
 	}
 
-	return nil
+	return schemautil.WaitUntilNotFound(ctx, func() error {
+		_, err := getDatabaseByName(ctx, client, projectName, serviceName, databaseName)
+		return err
+	})
+}
+
+func getDatabaseByName(ctx context.Context, client avngen.Client, project, serviceName, dbName string) (*service.DatabaseOut, error) {
+	err := schemautil.CheckServiceIsPowered(ctx, client, project, serviceName)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := client.ServiceDatabaseList(ctx, project, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	for _, db := range list {
+		if db.DatabaseName == dbName {
+			return &db, nil
+		}
+	}
+	return nil, schemautil.NewNotFound("database %q not found", dbName)
 }

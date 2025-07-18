@@ -4,13 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -21,6 +26,8 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 	projectName := acc.ProjectName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	serviceName := fmt.Sprintf("test-acc-sr-%s", rName)
+	config := testAccPGDatabaseResource(projectName, rName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -28,7 +35,7 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenPGDatabaseResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGDatabaseResource(projectName, rName),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
@@ -51,7 +58,7 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:       testAccPGDatabaseResource(projectName, rName),
+				Config:       config,
 				ResourceName: resourceName,
 				ImportState:  true,
 				ImportStateIdFunc: func(s *terraform.State) (string, error) {
@@ -89,8 +96,66 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 					return nil
 				},
 			},
+			{
+				// Powers off the service to get ErrServicePoweredOff
+				Config: config,
+				PreConfig: func() {
+					err := servicePowerOn(projectName, serviceName, false)
+					require.NoError(t, err)
+				},
+				ExpectError: regexp.MustCompile(schemautil.ErrServicePoweredOff.Error()),
+			},
+			{
+				// The database can't be destroyed while the service is powered off:
+				// Error: [409 ServiceDatabaseDelete]: Service 'foo' needs to be powered on.
+				// Powers on the service to test the database delete operation.
+				Config: config,
+				PreConfig: func() {
+					err := servicePowerOn(projectName, serviceName, true)
+					require.NoError(t, err)
+				},
+			},
 		},
 	})
+}
+
+// servicePowerOn powers on or off a service.
+// Waits for the service to be powered on.
+func servicePowerOn(projectName, serviceName string, on bool) error {
+	// Each test step should start with a clean service powered map
+	schemautil.ClearServicePoweredMap()
+
+	client, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	req := &service.ServiceUpdateIn{Powered: lo.ToPtr(on)}
+	_, err = client.ServiceUpdate(ctx, projectName, serviceName, req)
+	if err != nil || !on {
+		// Powering off happens immediately, so we don't need to wait.
+		return err
+	}
+
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			s, err := client.ServiceGet(ctx, projectName, serviceName)
+			if err != nil {
+				return err
+			}
+
+			if s.State == service.ServiceStateTypeRunning {
+				return nil
+			}
+		}
+	}
 }
 
 func testAccCheckAivenPGDatabaseResourceDestroy(s *terraform.State) error {

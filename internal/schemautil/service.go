@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -1110,6 +1112,43 @@ func ContainsRedactedCreds(config map[string]any) error {
 
 	if bytes.Contains(b, []byte(redactedSubstr)) {
 		return errContainsRedactedCreds
+	}
+	return nil
+}
+
+var (
+	servicePoweredMap    sync.Map
+	servicePoweredMutex  sync.Mutex
+	ErrServicePoweredOff = fmt.Errorf("the service is powered off")
+)
+
+// ClearServicePoweredMap for test purposes only.
+func ClearServicePoweredMap() {
+	servicePoweredMap.Clear()
+}
+
+// CheckServiceIsPowered checks if a service is powered on before performing operations that require it.
+// Some operations like database management require the service to be running.
+// For example, `ServiceDatabaseList` returns a generic 503 error when the service is powered off:
+// "503: An error occurred. Please try again later."
+// This function provides a clearer error message by explicitly checking the service power state first.
+func CheckServiceIsPowered(ctx context.Context, client avngen.Client, project, serviceName string) error {
+	serviceKey := filepath.Join(project, serviceName)
+	value, ok := servicePoweredMap.Load(serviceKey)
+	if !ok {
+		servicePoweredMutex.Lock()
+		defer servicePoweredMutex.Unlock()
+		s, err := client.ServiceGet(ctx, project, serviceName)
+		if err != nil {
+			return err
+		}
+
+		value = s.State != service.ServiceStateTypePoweroff
+		servicePoweredMap.Store(serviceKey, value)
+	}
+
+	if !value.(bool) {
+		return ErrServicePoweredOff
 	}
 	return nil
 }
