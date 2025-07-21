@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -48,21 +49,17 @@ func TestCheckDbConflict(t *testing.T) {
 		},
 	}
 
-	// Adds randomness, because functions use global state.
-	const projectName = "test-project"
-	const serviceName = "test-service"
-
-	ctx := context.Background()
-	mockClient := mocks.NewMockClient(t)
-
-	// This one for CheckServiceIsPowered. Called once per service.
-	mockClient.EXPECT().
-		ServiceGet(ctx, projectName, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
-		Once()
-
-	for _, tt := range tests {
+	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			projectName := fmt.Sprintf("test-project-db-conflict-%d", i)
+			serviceName := fmt.Sprintf("test-service-db-conflict-%d", i)
+
+			ctx := context.Background()
+			mockClient := mocks.NewMockClient(t)
+			mockClient.EXPECT().
+				ServiceGet(ctx, projectName, serviceName).
+				Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+				Once()
 			mockClient.EXPECT().
 				ServiceDatabaseList(ctx, projectName, serviceName).
 				Return(tt.remoteDBs, nil).
@@ -79,8 +76,8 @@ func TestCheckDbConflict(t *testing.T) {
 
 func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	// Adds randomness, because functions use global state.
-	const projectName = "test-project-a7b3c9d"
-	const serviceName = "test-service-f8e2d4m"
+	const projectName = "test-project-concurrent-calls"
+	const serviceName = "test-service-concurrent-calls"
 	const dbName = "test-db"
 
 	ctx := context.Background()

@@ -10,7 +10,6 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
@@ -50,15 +49,15 @@ func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeCon
 
 var (
 	initialDatabases     sync.Map
-	initialDatabasesCall singleflight.Group
+	initialDatabasesCall DoOnce
 	ErrDbAlreadyExists   = fmt.Errorf("database already exists")
 )
 
 func ForgetDatabase(projectName, serviceName, dbName string) {
 	serviceKey := filepath.Join(projectName, serviceName)
 	dbKey := filepath.Join(serviceKey, dbName)
-	initialDatabases.Delete(dbKey)
 	initialDatabasesCall.Forget(serviceKey)
+	initialDatabases.Delete(dbKey)
 }
 
 // CheckDbConflict sometimes the API might return 5xx, but it actually creates the database.
@@ -66,17 +65,17 @@ func ForgetDatabase(projectName, serviceName, dbName string) {
 // This function can prove the database does not exist before creating it.
 // It also prevents users from creating a database with the same name.
 func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, serviceName, dbName string) error {
+	err := CheckServiceIsPowered(ctx, client, projectName, serviceName)
+	if err != nil {
+		return err
+	}
+
 	// First loads the remote state to share this data across all resources.
 	serviceKey := filepath.Join(projectName, serviceName)
-	_, err, _ := initialDatabasesCall.Do(serviceKey, func() (interface{}, error) {
-		err := CheckServiceIsPowered(ctx, client, projectName, serviceName)
-		if err != nil {
-			return nil, err
-		}
-
+	err = initialDatabasesCall.Do(serviceKey, func() error {
 		list, err := client.ServiceDatabaseList(ctx, projectName, serviceName)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		for _, db := range list {
@@ -84,9 +83,8 @@ func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, ser
 			initialDatabases.Store(k, true)
 		}
 
-		return nil, nil
+		return nil
 	})
-
 	if err != nil {
 		// Super important to override this error: ServiceDatabaseList is widely used in the provider,
 		// we need to ensure where the error comes from.
