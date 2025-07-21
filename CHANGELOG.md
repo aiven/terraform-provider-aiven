@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Improve `aiven_pg_database`: check if database exists before creation to prevent conflicts during API retries
 - Refactor `aiven_pg_database`: use generated client, validate service power state during database operations
 - Add `aiven_kafka` field `kafka_user_config.single_zone.availability_zone`: The availability zone to use for the service.
   This is only used when enabled is set to true
