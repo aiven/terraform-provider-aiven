@@ -49,8 +49,8 @@ func TestCheckDbConflict(t *testing.T) {
 	}
 
 	// Adds randomness, because functions use global state.
-	const projectName = "test-project"
-	const serviceName = "test-service"
+	const projectName = "test-db-conflict-project-b4k9m2p"
+	const serviceName = "test-db-conflict-service-n7h5x3w"
 
 	ctx := context.Background()
 	mockClient := mocks.NewMockClient(t)
@@ -79,8 +79,8 @@ func TestCheckDbConflict(t *testing.T) {
 
 func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	// Adds randomness, because functions use global state.
-	const projectName = "test-project-a7b3c9d"
-	const serviceName = "test-service-f8e2d4m"
+	const projectName = "test-concurrent-calls-project-a7b3c9d"
+	const serviceName = "test-concurrent-calls-service-f8e2d4m"
 	const dbName = "test-db"
 
 	ctx := context.Background()
