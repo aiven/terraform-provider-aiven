@@ -77,7 +77,14 @@ func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, clien
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
-	err := client.ServiceDatabaseCreate(
+
+	// Proves the database does not exist before creating it.
+	err := schemautil.CheckDbConflict(ctx, client, projectName, serviceName, databaseName)
+	if err != nil {
+		return err
+	}
+
+	err = client.ServiceDatabaseCreate(
 		ctx,
 		projectName,
 		serviceName,
@@ -87,7 +94,12 @@ func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, clien
 			LcCtype:   util.NilIfZero(d.Get("lc_ctype").(string)),
 		},
 	)
-	if err != nil {
+
+	switch {
+	case avngen.IsAlreadyExists(err):
+		// We have already checked for the existence of the database.
+		// Getting a conflict here means the client retried the request.
+	case err != nil:
 		return err
 	}
 
@@ -145,10 +157,16 @@ func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, clien
 		return err
 	}
 
-	return schemautil.WaitUntilNotFound(ctx, func() error {
+	err = schemautil.WaitUntilNotFound(ctx, func() error {
 		_, err := getDatabaseByName(ctx, client, projectName, serviceName, databaseName)
 		return err
 	})
+	if err != nil {
+		return err
+	}
+
+	schemautil.ForgetDatabase(projectName, serviceName, databaseName)
+	return nil
 }
 
 func getDatabaseByName(ctx context.Context, client avngen.Client, project, serviceName, dbName string) (*service.DatabaseOut, error) {
