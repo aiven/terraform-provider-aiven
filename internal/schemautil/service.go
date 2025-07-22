@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -1119,7 +1118,7 @@ func ContainsRedactedCreds(config map[string]any) error {
 
 var (
 	servicePoweredMap    sync.Map
-	servicePoweredGroup  singleflight.Group
+	servicePoweredGroup  DoOnce
 	ErrServicePoweredOff = fmt.Errorf("the service is powered off")
 )
 
@@ -1137,26 +1136,18 @@ func ServicePoweredForget(project, serviceName string) {
 // This function provides a clearer error message by explicitly checking the service power state first.
 func CheckServiceIsPowered(ctx context.Context, client avngen.Client, project, serviceName string) error {
 	key := filepath.Join(project, serviceName)
-	isOn, ok := servicePoweredMap.Load(key)
-	if !ok {
-		var err error
-		isOn, err, _ = servicePoweredGroup.Do(key, func() (any, error) {
-			s, err := client.ServiceGet(ctx, project, serviceName)
-			if err == nil {
-				isOn = s.State != service.ServiceStateTypePoweroff
-				servicePoweredMap.Store(key, isOn)
-			}
-			return isOn, err
-		})
-
-		if err != nil {
-			// If the first request returns an error or panics, that same error will propagate
-			// to all goroutines waiting for the result. This is acceptable since Terraform
-			// runs as a CLI tool rather than a long-running daemon.
-			return err
+	err := servicePoweredGroup.Do(key, func() error {
+		s, err := client.ServiceGet(ctx, project, serviceName)
+		if err == nil {
+			servicePoweredMap.Store(key, s.State != service.ServiceStateTypePoweroff)
 		}
+		return err
+	})
+	if err != nil {
+		return err
 	}
 
+	isOn, _ := servicePoweredMap.Load(key)
 	if !isOn.(bool) {
 		return ErrServicePoweredOff
 	}

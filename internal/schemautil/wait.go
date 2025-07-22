@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -376,3 +377,33 @@ func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc,
 
 // RetryNotFoundAttempts just a random number
 const RetryNotFoundAttempts = 10
+
+// DoOnce provides functionality similar to sync.Once but supports multiple keys.
+// It caches the result of each function call (either error or nil).
+type DoOnce struct {
+	mutexes sync.Map
+	results sync.Map
+}
+
+func (d *DoOnce) Do(key string, fn func() error) error {
+	mtx, _ := d.mutexes.LoadOrStore(key, &sync.Mutex{})
+	m := mtx.(*sync.Mutex)
+	m.Lock()
+	defer m.Unlock()
+
+	v, ok := d.results.Load(key)
+	if ok {
+		if v == nil {
+			return nil
+		}
+		return v.(error)
+	}
+
+	err := fn()
+	d.results.Store(key, err)
+	return err
+}
+
+func (d *DoOnce) Forget(key string) {
+	d.results.Delete(key)
+}
