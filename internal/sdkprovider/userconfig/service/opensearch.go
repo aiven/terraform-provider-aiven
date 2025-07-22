@@ -1030,7 +1030,7 @@ func opensearchUserConfig() *schema.Schema {
 								Type:        schema.TypeBool,
 							},
 							"enforced": {
-								Description: "Run shard indexing backpressure in shadow mode or enforced mode.\n            In shadow mode (value set as false), shard indexing backpressure tracks all granular-level metrics,\n            but it doesn’t actually reject any indexing requests.\n            In enforced mode (value set as true),\n            shard indexing backpressure rejects any requests to the cluster that might cause a dip in its performance.\n            Default is false.",
+								Description: "Run shard indexing backpressure in shadow mode or enforced mode. In shadow mode (value set as false), shard indexing backpressure tracks all granular-level metrics, but it doesn’t actually reject any indexing requests. In enforced mode (value set as true), shard indexing backpressure rejects any requests to the cluster that might cause a dip in its performance. Default is false.",
 								Optional:    true,
 								Type:        schema.TypeBool,
 							},
@@ -1038,17 +1038,17 @@ func opensearchUserConfig() *schema.Schema {
 								Description: "Operating factor",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"lower": {
-										Description: "Specify the lower occupancy limit of the allocated quota of memory for the shard.\n                    If the total memory usage of a shard is below this limit,\n                    shard indexing backpressure decreases the current allocated memory for that shard.\n                    Default is 0.75.",
+										Description: "Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is 0.75.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"optimal": {
-										Description: "Specify the optimal occupancy of the allocated quota of memory for the shard.\n                    If the total memory usage of a shard is at this level,\n                    shard indexing backpressure doesn’t change the current allocated memory for that shard.\n                    Default is 0.85.",
+										Description: "Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is 0.85.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"upper": {
-										Description: "Specify the upper occupancy limit of the allocated quota of memory for the shard.\n                    If the total memory usage of a shard is above this limit,\n                    shard indexing backpressure increases the current allocated memory for that shard.\n                    Default is 0.95.",
+										Description: "Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is 0.95.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -1062,7 +1062,7 @@ func opensearchUserConfig() *schema.Schema {
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"node": {
 										Elem: &schema.Resource{Schema: map[string]*schema.Schema{"soft_limit": {
-											Description: "Define the percentage of the node-level memory\n                            threshold that acts as a soft indicator for strain on a node.\n                            Default is 0.7.",
+											Description: "Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is 0.7.",
 											Optional:    true,
 											Type:        schema.TypeFloat,
 										}}},
@@ -1072,7 +1072,7 @@ func opensearchUserConfig() *schema.Schema {
 									},
 									"shard": {
 										Elem: &schema.Resource{Schema: map[string]*schema.Schema{"min_limit": {
-											Description: "Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica).\n                            Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard.\n                            Default is 0.001.",
+											Description: "Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is 0.001.",
 											Optional:    true,
 											Type:        schema.TypeFloat,
 										}}},

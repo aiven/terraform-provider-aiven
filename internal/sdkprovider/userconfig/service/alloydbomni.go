@@ -402,7 +402,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"log_catalog": {
-						Description: "Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. Default: `true`.",
+						Description: "Specifies that session logging should be enabled in the case where all relations in a statement are in pg_catalog. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -443,7 +443,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"log_rows": {
-						Description: "Specifies that audit logging should include the rows retrieved or affected by a statement. When enabled the rows field will be included after the parameter field. Default: `false`.",
+						Description: "Log Rows. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
