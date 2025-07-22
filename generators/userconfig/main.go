@@ -322,7 +322,10 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	return values, nil
 }
 
-var reCode = regexp.MustCompile(`'([^'\s]+)'`)
+var (
+	reCode       = regexp.MustCompile(`'([^'\s]+)'`)
+	reWhitespace = regexp.MustCompile(`\s+`)
+)
 
 func getDescription(o *object) string {
 	desc := make([]string, 0)
@@ -340,7 +343,8 @@ func getDescription(o *object) string {
 		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
 	}
 
-	d := o.Description
+	// Normalizes whitespaces
+	d := reWhitespace.ReplaceAllString(o.Description, " ")
 	if len(d) < len(o.Title) {
 		d = o.Title
 	}
