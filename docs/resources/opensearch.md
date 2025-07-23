@@ -500,7 +500,7 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Enable or disable shard indexing backpressure. Default is false.
-- `enforced` (Boolean) Run shard indexing backpressure in shadow mode or enforced mode.            In shadow mode (value set as false), shard indexing backpressure tracks all granular-level metrics,            but it doesn’t actually reject any indexing requests.            In enforced mode (value set as true),            shard indexing backpressure rejects any requests to the cluster that might cause a dip in its performance.            Default is false.
+- `enforced` (Boolean) Run shard indexing backpressure in shadow mode or enforced mode. In shadow mode (value set as false), shard indexing backpressure tracks all granular-level metrics, but it doesn’t actually reject any indexing requests. In enforced mode (value set as true), shard indexing backpressure rejects any requests to the cluster that might cause a dip in its performance. Default is false.
 - `operating_factor` (Block List, Max: 1) Operating factor (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor))
 - `primary_parameter` (Block List, Max: 1) Primary parameter (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter))
 
@@ -509,9 +509,9 @@ Optional:
 
 Optional:
 
-- `lower` (Number) Specify the lower occupancy limit of the allocated quota of memory for the shard.                    If the total memory usage of a shard is below this limit,                    shard indexing backpressure decreases the current allocated memory for that shard.                    Default is 0.75.
-- `optimal` (Number) Specify the optimal occupancy of the allocated quota of memory for the shard.                    If the total memory usage of a shard is at this level,                    shard indexing backpressure doesn’t change the current allocated memory for that shard.                    Default is 0.85.
-- `upper` (Number) Specify the upper occupancy limit of the allocated quota of memory for the shard.                    If the total memory usage of a shard is above this limit,                    shard indexing backpressure increases the current allocated memory for that shard.                    Default is 0.95.
+- `lower` (Number) Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is 0.75.
+- `optimal` (Number) Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is 0.85.
+- `upper` (Number) Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is 0.95.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter"></a>
@@ -527,7 +527,7 @@ Optional:
 
 Optional:
 
-- `soft_limit` (Number) Define the percentage of the node-level memory                            threshold that acts as a soft indicator for strain on a node.                            Default is 0.7.
+- `soft_limit` (Number) Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is 0.7.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard"></a>
@@ -535,7 +535,7 @@ Optional:
 
 Optional:
 
-- `min_limit` (Number) Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica).                            Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard.                            Default is 0.001.
+- `min_limit` (Number) Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is 0.001.
 
 
 
