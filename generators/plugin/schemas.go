@@ -44,7 +44,7 @@ func genSchema(isBeta, isResource bool, item *Item, idField *IDAttribute) (jen.C
 	}
 
 	// Schema package depends on the entity type.
-	pkg := fmtImport(isResource, schemaPackageFmt)
+	pkg := entityImport(isResource, schemaPackageFmt)
 	funcName := "new" + firstUpper(boolEntity(isResource)) + "Schema"
 	return jen.
 		Comment(funcName+":\n"+example).
@@ -63,7 +63,7 @@ func genTimeoutsField(isResource bool) jen.Code {
 	if isResource {
 		timeoutsMethod = "BlockAll"
 	}
-	return jen.Qual(fmtImport(isResource, timeoutsPackageFmt), timeoutsMethod).Call(jen.Id("ctx"))
+	return jen.Qual(entityImport(isResource, timeoutsPackageFmt), timeoutsMethod).Call(jen.Id("ctx"))
 }
 
 // genIDField generates the ID field for the schema.
@@ -100,15 +100,15 @@ func genIDField(isResource bool, idField *IDAttribute) jen.Code {
 		// todo: some resources might change the ID after apply, like aiven_organization_project
 		//  in that case, we should not probably use this plan modifier
 		attrs[jen.Id("PlanModifiers")] = jen.Index().
-			Qual(fmtImport(isResource, planmodifierPackageFmt), "String").
-			Values(jen.Qual(getTypedPlanmodifier(SchemaTypeString), "UseStateForUnknown").Call())
+			Qual(entityImport(isResource, planmodifierPackageFmt), "String").
+			Values(jen.Qual(getTypedImport(SchemaTypeString, planmodifierTypedImport), "UseStateForUnknown").Call())
 	}
-	return jen.Qual(fmtImport(isResource, schemaPackageFmt), "StringAttribute").Values(attrs)
+	return jen.Qual(entityImport(isResource, schemaPackageFmt), "StringAttribute").Values(attrs)
 }
 
 // genAttributes generates the Attributes field value (map).
 func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, error) {
-	pkg := fmtImport(isResource, schemaPackageFmt)
+	pkg := entityImport(isResource, schemaPackageFmt)
 	attrs := make(jen.Dict)
 	blocks := make(jen.Dict)
 
@@ -167,7 +167,7 @@ func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, 
 }
 
 func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
-	pkg := fmtImport(isResource, schemaPackageFmt)
+	pkg := entityImport(isResource, schemaPackageFmt)
 	values, err := genAttributeValues(isResource, item)
 	if err != nil {
 		return nil, err
@@ -211,8 +211,8 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 	if !item.IsNested() {
 		if isResource {
 			if item.ForceNew {
-				typedPlanmodifier := getTypedPlanmodifier(item.Type)
-				values[jen.Id("PlanModifiers")] = jen.Index().Qual(fmtImport(isResource, planmodifierPackageFmt), item.TFType()).
+				typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+				values[jen.Id("PlanModifiers")] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
 					Values(jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
 			}
 
@@ -244,6 +244,10 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 
 		if len(validators) > 0 {
 			values[jen.Id("Validators")] = jen.Index().Qual(validatorPackage, item.TFType()).Values(validators...)
+		}
+
+		if item.Default != nil {
+			values[jen.Id("Default")] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "String").Call(jen.Lit(item.Default))
 		}
 	}
 
