@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-// resDatType TF entity type
-type resDatType string
+// entityType TF entity type
+type entityType string
 
 const (
-	resourceType   resDatType = "resource"
-	datasourceType resDatType = "datasource"
+	resourceType   entityType = "resource"
+	datasourceType entityType = "datasource"
 )
 
-func boolEntity(isResource bool) resDatType {
+func boolEntity(isResource bool) entityType {
 	if isResource {
 		return resourceType
 	}
@@ -30,16 +30,27 @@ const (
 	adapterPackage   = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
+func getUntypedImports() []string {
+	return []string{
+		attrPackage,
+		diagPackage,
+		typesPackage,
+		validatorPackage,
+		utilPackage,
+		adapterPackage,
+	}
+}
+
 // Read strings to be formatted with the entity type
-type importFmt string
+type entityImportType string
 
 const (
-	schemaPackageFmt       importFmt = "github.com/hashicorp/terraform-plugin-framework/%s/schema"
-	planmodifierPackageFmt importFmt = "github.com/hashicorp/terraform-plugin-framework/%s/schema/planmodifier"
-	timeoutsPackageFmt     importFmt = "github.com/hashicorp/terraform-plugin-framework-timeouts/%s/timeouts"
+	schemaPackageFmt       entityImportType = "github.com/hashicorp/terraform-plugin-framework/%s/schema"
+	planmodifierPackageFmt entityImportType = "github.com/hashicorp/terraform-plugin-framework/%s/schema/planmodifier"
+	timeoutsPackageFmt     entityImportType = "github.com/hashicorp/terraform-plugin-framework-timeouts/%s/timeouts"
 )
 
-func fmtImport(isResource bool, importString importFmt) string {
+func entityImport(isResource bool, importString entityImportType) string {
 	return fmt.Sprintf(string(importString), boolEntity(isResource))
 }
 
@@ -55,14 +66,24 @@ func typingMapping() map[SchemaType]string {
 	}
 }
 
-// getTypedPlanmodifier each plan modifier type has its own package
-func getTypedPlanmodifier(kind SchemaType) string {
-	suffix := strings.ToLower(typingMapping()[kind])
-	return fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework/resource/schema/%splanmodifier", suffix)
+// typedImport import that depends on type (string
+type typedImport string
+
+const (
+	planmodifierTypedImport typedImport = "github.com/hashicorp/terraform-plugin-framework/resource/schema/%splanmodifier"
+	validatorTypedImport    typedImport = "github.com/hashicorp/terraform-plugin-framework-validators/%svalidator"
+	defaultsTypedImport     typedImport = "github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults/%sdefault"
+)
+
+func getTypedImports() []typedImport {
+	return []typedImport{
+		planmodifierTypedImport,
+		validatorTypedImport,
+		defaultsTypedImport,
+	}
 }
 
-// getTypedValidator each validator type has its own package
-func getTypedValidator(kind SchemaType) string {
+func getTypedImport(kind SchemaType, imp typedImport) string {
 	suffix := strings.ToLower(typingMapping()[kind])
-	return fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%svalidator", suffix)
+	return fmt.Sprintf(string(imp), suffix)
 }

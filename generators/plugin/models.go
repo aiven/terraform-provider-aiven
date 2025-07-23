@@ -38,7 +38,7 @@ func genTFModel(isResource bool, item *Item) []jen.Code {
 
 		// Timeouts
 		jen.Id("Timeouts").
-			Qual(fmtImport(isResource, timeoutsPackageFmt), "Value").
+			Qual(entityImport(isResource, timeoutsPackageFmt), "Value").
 			Tag(genFieldTag("tfsdk", "timeouts")),
 	}
 

@@ -6,7 +6,7 @@ import (
 )
 
 func genValidators(item *Item) ([]jen.Code, error) {
-	pkg := getTypedValidator(item.Type)
+	pkg := getTypedImport(item.Type, validatorTypedImport)
 	codes := make([]jen.Code, 0)
 
 	// Integers
