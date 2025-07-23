@@ -306,7 +306,7 @@ Optional:
 - `ssl_client_key` (String, Sensitive) Client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----`.
-- `ssl_mode` (String) Enum: `allow`, `disable`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.
+- `ssl_mode` (String) Enum: `allow`, `disable`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection. Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.
 - `ssl_root_cert` (String) SSL Root Cert. Example: `-----BEGIN CERTIFICATE-----
 ...
 -----END CERTIFICATE-----
