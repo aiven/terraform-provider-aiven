@@ -140,7 +140,7 @@ There are some limitations and considerations to be aware of when using this res
 * Users cannot have the same name as roles.
 * Global privileges cannot be granted on the database level. To grant global privileges, use ` + "`database=\"*\"`" + `.
 * To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use ` + "`table=\"*\"`" + `.
-* Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them.
+* Privileges granted on ClickHouse Named Collections are not currently managed by this resource and will be ignored. If you have grants on Named Collections managed outside of Terraform, this resource will not attempt to alter them. For an example showing how to set up Named Collection access with S3 integration, see the [ClickHouse S3 Integration example](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse/clickhouse_integrations/s3).
 * Changes first revoke all grants and then reissue the remaining grants for convergence.
 * Some grants overlap, which can cause the Aiven Terraform Provider to detect a change even if you haven't made modifications. For example, using both ` + "`DELETE`" + ` and ` + "`ALTER DELETE`" + ` together might cause this issue.
   The [ClickHouse grant privileges documentation](https://clickhouse.com/docs/sql-reference/statements/grant) has a list of ClickHouse privileges.
