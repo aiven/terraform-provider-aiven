@@ -138,14 +138,9 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		}
 		block = append(block, val, ifHasError(rootLevel))
 	case item.IsArray(), item.IsMap():
-		if !item.Items.IsScalar() {
-			// This is a map with non-scalar values
-			return nil, fmt.Errorf("unsupported type %s for %s", item.Items.Type, item.Path())
-		}
-
-		// 1. If the API returns an empty list, while the field is nil, TF will output an error.
-		//    Checks the length of the slice to not set empty array.
-		// 2. But if we have sent the empty array to the API, it is OK to get it back.
+		// 1. If the API returns an empty list/map, while the field is nil, TF will output an error.
+		//    Checks the length of the list/map to not set empty array/map.
+		// 2. But if we have sent the empty array to the API, it is OK to get it back — checks the state for nil.
 		if item.Parent.IsRoot() {
 			notNil.Op("&&").Parens(
 				jen.Len(jen.Op("*").Add(dtoField.Clone())).Op(">").Lit(0).
@@ -154,14 +149,31 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		}
 
 		value.Id(item.GoVarName())
-		val := jen.List(jen.Id(item.GoVarName()), jen.Id("diags")).Op(":=").
-			Qual(typesPackage, item.TFType()+"ValueFrom").
-			Call(
-				jen.Id("ctx"),
-				jen.Qual(typesPackage, item.Items.TFType()+"Type"),
-				dtoField.Clone(),
-			)
-		block = append(block, val, ifHasError(rootLevel))
+		switch {
+		case item.Items.IsScalar():
+			// A list or a map of scalars.
+			val := jen.List(jen.Id(item.GoVarName()), jen.Id("diags")).Op(":=").
+				Qual(typesPackage, item.TFType()+"ValueFrom").
+				Call(
+					jen.Id("ctx"),
+					jen.Qual(typesPackage, item.Items.TFType()+"Type"),
+					dtoField.Clone(),
+				)
+			block = append(block, val, ifHasError(rootLevel))
+		case item.IsMapNested():
+			// This is a map with non-scalar values
+			val := jen.List(jen.Id(item.GoVarName()), jen.Id("diags")).Op(":=")
+			val.Qual(utilPackage, "FlattenMapNested").
+				Call(
+					jen.Id("ctx"),
+					jen.Id("flatten"+item.UniqueName()),
+					jen.Op("*").Add(dtoField.Clone()),
+					jen.Id(attrPrefix+item.UniqueName()).Call(),
+				)
+			block = append(block, val, ifHasError(rootLevel))
+		default:
+			return nil, fmt.Errorf("unsupported items type map/array %s for %s", item.Items.Type, item.Path())
+		}
 	default:
 		return nil, fmt.Errorf("unsupported type %s for %s", item.Type, item.Path())
 	}

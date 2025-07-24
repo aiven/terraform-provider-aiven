@@ -101,6 +101,25 @@ func ExpandSingleNested[T, R any](ctx context.Context, expand Expand[T, R], list
 	return items[0], nil
 }
 
+func ExpandMapNested[T, R any](ctx context.Context, expand Expand[T, R], dict types.Map) (map[string]*R, diag.Diagnostics) {
+	target := make(map[string]T)
+	diags := dict.ElementsAs(ctx, &target, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	elements := make(map[string]*R, len(target))
+	for k, v := range target {
+		// Expands the object using the provided expander function.
+		m, diags := expand(ctx, &v)
+		if diags.HasError() {
+			return nil, diags
+		}
+		elements[k] = m
+	}
+	return elements, nil
+}
+
 // Flatten reads values from Response for a nested object.
 // T - terraform model, for instance baseModelAddress
 // R - Response DTO, for instance foo.GetOut.
@@ -143,6 +162,28 @@ func FlattenSingleNested[R, T any](ctx context.Context, flatten Flatten[R, T], d
 	}
 
 	result, diags := types.ListValueFrom(ctx, oType, []*T{item})
+	if diags.HasError() {
+		return null, diags
+	}
+	return result, nil
+}
+
+func FlattenMapNested[R, T any](ctx context.Context, flatten Flatten[R, T], dict map[string]*R, oType types.ObjectType) (types.Map, diag.Diagnostics) {
+	null := types.MapNull(oType)
+	if len(dict) == 0 {
+		return null, nil
+	}
+
+	elements := make(map[string]*T, len(dict))
+	for k, v := range dict {
+		item, diags := flatten(ctx, v)
+		if diags.HasError() {
+			return null, diags
+		}
+		elements[k] = item
+	}
+
+	result, diags := types.MapValueFrom(ctx, oType, elements)
 	if diags.HasError() {
 		return null, diags
 	}

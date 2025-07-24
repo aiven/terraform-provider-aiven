@@ -64,6 +64,9 @@ const (
 	// aivenNameConst resource and datasource name, e.g. aivenName = "aiven_foo_bar"
 	aivenNameConst = "aivenName"
 
+	// aivenNamePrefix is a prefix for the resource and datasource names: aiven_pg, aiven_kafka, etc.
+	aivenNamePrefix = "aiven_"
+
 	// convertersFileName contains expandData and flattenData functions
 	convertersFileName = "converters"
 )
@@ -134,7 +137,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			var codes []jen.Code
 
 			// Renders the resourceName constant
-			avnName := "aiven_" + resName
+			avnName := aivenNamePrefix + resName
 			codes = append(codes, jen.Const().Id(aivenNameConst).Op("=").Lit(avnName))
 
 			// Generates TF and API models
@@ -499,7 +502,15 @@ func fromSchema(scope *Scope, item *Item, itemSchema *OASchema, appearsIn Appear
 				elementSchema = childSchema.Items
 			}
 		case SchemaTypeObject:
-			if len(childSchema.Properties) > 0 {
+			// If additional properties
+			if childSchema.AdditionalProperties != nil {
+				elementSchema = childSchema.AdditionalProperties
+				childSchema.AdditionalProperties = nil
+			} else if v, ok := childSchema.Properties[anyField]; ok {
+				// ANY is a special case is additional properties
+				delete(childSchema.Properties, anyField)
+				elementSchema = v
+			} else if len(childSchema.Properties) > 0 {
 				err := fromSchema(scope, childItem, childSchema, appearsIn)
 				if err != nil {
 					return err
@@ -507,20 +518,6 @@ func fromSchema(scope *Scope, item *Item, itemSchema *OASchema, appearsIn Appear
 			} else {
 				// A special case for maps with invalid schema
 				elementSchema = &OASchema{Type: SchemaTypeString}
-			}
-
-			// ANY is a special case is additional properties
-			if childSchema.AdditionalProperties == nil {
-				v, ok := childSchema.Properties["ANY"]
-				if ok {
-					delete(childSchema.Properties, "ANY")
-					childSchema.AdditionalProperties = v
-				}
-			}
-
-			// If additional properties
-			if childSchema.AdditionalProperties != nil {
-				elementSchema = childSchema.AdditionalProperties
 			}
 		}
 
