@@ -298,6 +298,11 @@ func mergeItems(a, b *Item, override bool) error {
 			a.Required = b.Required || !b.Optional
 			a.Optional = b.Optional || !b.Required
 		}
+
+		if b.Items != nil {
+			a.Items = b.Items
+			a.Items.Parent = a
+		}
 	case a.Type != b.Type:
 		return fmt.Errorf("field %q types do not match: %s != %s ", a.Path(), a.Type, b.Type)
 	default:
@@ -305,6 +310,15 @@ func mergeItems(a, b *Item, override bool) error {
 		a.Enum = mergeSlices(a.Enum, b.Enum)
 		a.Required = a.Required || b.Required
 		a.Optional = a.Optional || b.Optional
+
+		if a.Items == nil && b.Items != nil {
+			a.Items = b.Items
+			a.Items.Parent = a
+		}
+	}
+
+	if b.Default != nil {
+		a.Default = b.Default
 	}
 
 	// Copies properties
@@ -329,14 +343,6 @@ func mergeItems(a, b *Item, override bool) error {
 	a.Minimum = or(a.Minimum, b.Minimum)
 	a.Maximum = or(a.Maximum, b.Maximum)
 	a.JSONName = or(a.JSONName, b.JSONName)
-
-	if a.Default == nil {
-		a.Default = b.Default
-	}
-
-	if a.Items == nil {
-		a.Items = b.Items
-	}
 
 	var err error
 	err = mergeItemProperties(a.Properties, b.Properties, override)
