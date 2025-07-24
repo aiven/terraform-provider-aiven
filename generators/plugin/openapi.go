@@ -134,3 +134,6 @@ type OASchema struct {
 	Nullable             bool                 `json:"nullable"`
 	name                 string               // json field name
 }
+
+// anyField The Aiven spec uses "any" as a property to render the "additionalProperties".
+const anyField = "ANY"

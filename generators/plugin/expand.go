@@ -91,12 +91,17 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 			value.Op("&").Id(item.GoVarName())
 			block = append(block, val, value)
 		}
-	case item.IsNested():
+	case item.IsNested(), item.IsMapNested():
 		f := "ExpandSingleNested"
-		if item.IsArray() {
+		switch {
+		case item.IsArray():
 			f = "ExpandSetNested"
 			value.Op("&")
+		case item.IsMap():
+			f = "ExpandMapNested"
+			value.Op("&")
 		}
+
 		value.Id(item.GoVarName())
 
 		val := jen.List(jen.Id(item.GoVarName()), jen.Id("diags")).Op(":=")
@@ -107,11 +112,7 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 			dataField.Clone(),
 		)
 		block = append(block, val, ifHasError(rootLevel), value)
-	case item.IsArray(), item.IsMap():
-		if !item.Items.IsScalar() {
-			return nil, fmt.Errorf("unsupported type %s for %s", item.Items.Type, item.Path())
-		}
-
+	case item.Items != nil && item.Items.IsScalar():
 		varVal := jen.Id(item.GoVarName()).Op(":=").Make(jen.Id(item.ApiType()), jen.Lit(0))
 		val := jen.Id("diags").Op(":=").
 			Add(dataField.Clone()).

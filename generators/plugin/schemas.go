@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -114,22 +113,30 @@ func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, 
 
 	for _, k := range sortedKeys(item.Properties) {
 		if k == "id" && item.IsRoot() {
-			// The id field is add by genIDField
+			// The id field is added by genIDField
 			continue
 		}
 
 		v := item.Properties[k]
 		key := jen.Lit(k)
-		if v.IsNested() {
+		switch {
+		case v.IsMapNested():
+			// There is no Map Block thing, only Map Attribute.
+			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
+			value, err := genMapNestedAttribute(isResource, v)
+			if err != nil {
+				return nil, err
+			}
+			attrs[key] = value
+		case v.IsNested():
 			value, err := genSetNestedBlock(isResource, v)
 			if err != nil {
 				return nil, err
 			}
 			blocks[key] = value
-		} else {
+		default:
 			var value *jen.Statement
-			switch v.Type {
-			case SchemaTypeArray, SchemaTypeObject:
+			if v.Items != nil {
 				value = jen.Qual(typesPackage, v.Items.TFType()+"Type")
 			}
 
@@ -164,6 +171,21 @@ func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, 
 	}
 
 	return nested, nil
+}
+
+func genMapNestedAttribute(isResource bool, item *Item) (jen.Code, error) {
+	pkg := entityImport(isResource, schemaPackageFmt)
+	values, err := genAttributeValues(isResource, item)
+	if err != nil {
+		return nil, err
+	}
+
+	nested, err := genAttributes(isResource, item.Items, nil)
+	if err != nil {
+		return nil, err
+	}
+	values[jen.Id("NestedObject")] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
+	return jen.Qual(pkg, "MapNestedAttribute").Values(values), nil
 }
 
 func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
@@ -262,7 +284,7 @@ func exampleRoot(isResource bool, item *Item) (string, error) {
 	}
 
 	f := hclwrite.NewEmptyFile()
-	rootBody := f.Body().AppendNewBlock(t, []string{"aiven_" + item.Name, "example"}).Body()
+	rootBody := f.Body().AppendNewBlock(t, []string{aivenNamePrefix + item.Name, "example"}).Body()
 	err := exampleObjectItem(isResource, item, rootBody)
 	if err != nil {
 		return "", err
@@ -273,25 +295,31 @@ func exampleRoot(isResource bool, item *Item) (string, error) {
 
 func sortedKeysPriority(isResource bool, m map[string]*Item) []string {
 	keys := slices.Collect(maps.Keys(m))
-	sort.Slice(keys, func(i, j int) bool {
-		itemI := m[keys[i]]
-		itemJ := m[keys[j]]
+
+	slices.SortFunc(keys, func(i, j string) int {
+		itemI := m[i]
+		itemJ := m[j]
 
 		priorityI := getExampleItemPriority(isResource, itemI)
 		priorityJ := getExampleItemPriority(isResource, itemJ)
 
-		if priorityI != priorityJ {
-			return priorityI < priorityJ
+		if priorityI < priorityJ {
+			return -1
+		} else if priorityI != priorityJ {
+			return 1
 		}
 
 		// If both items are ID attributes, sort by position
-		if itemI.IDAttributePosition != itemJ.IDAttributePosition {
-			return itemI.IDAttributePosition < itemJ.IDAttributePosition
+		if itemI.IDAttributePosition < itemJ.IDAttributePosition {
+			return -1
+		} else if itemI.IDAttributePosition != itemJ.IDAttributePosition {
+			return 1
 		}
 
 		// Same priority, sort alphabetically by name
-		return strings.Compare(itemI.Name, itemJ.Name) < 0
+		return strings.Compare(i, j)
 	})
+
 	return keys
 }
 
@@ -341,30 +369,50 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 		}
 
 		var val cty.Value
-		switch v.Type {
-		case SchemaTypeString, SchemaTypeBoolean, SchemaTypeInteger, SchemaTypeNumber:
+		switch {
+		case v.IsScalar():
 			value, err := exampleScalarItem(v)
 			if err != nil {
 				return err
 			}
 			val = value
-		case SchemaTypeArray:
+		case v.IsArray():
 			// An array with scalar elements
 			value, err := exampleScalarItem(v.Items)
 			if err != nil {
 				return err
 			}
 			val = cty.ListVal([]cty.Value{value})
-		case SchemaTypeObject:
-			value, err := exampleScalarItem(v.Items)
-			if err != nil {
-				return err
+		case v.IsMapNested():
+			// There is no Map Block thing, only Map Attribute.
+			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
+			// Currently we support scalars only in map's objects,
+			// because otherwise we need to learn to generate nested attributes.
+			attrs := make(map[string]cty.Value)
+			for kk, vv := range v.Items.Properties {
+				if !vv.IsScalar() {
+					return fmt.Errorf("unsupported type %s for map %s", vv.Type, v.Path())
+				}
+				value, err := exampleScalarItem(vv)
+				if err != nil {
+					return err
+				}
+				attrs[kk] = value
 			}
+			val = cty.ObjectVal(map[string]cty.Value{
+				"foo": cty.ObjectVal(attrs),
+			})
+		case v.IsMap():
+			value, err := exampleScalarItem(v.Items)
 			val = cty.ObjectVal(map[string]cty.Value{
 				"foo": value,
 			})
+
+			if err != nil {
+				return err
+			}
 		default:
-			return fmt.Errorf("unsupported type %s for %s", v.Type, v.Path())
+			return fmt.Errorf("unknown type %s for %s", v.Type, v.Path())
 		}
 
 		tokens := hclwrite.TokensForValue(val)
@@ -426,5 +474,5 @@ func exampleScalarItem(item *Item) (cty.Value, error) {
 		}
 		return cty.NumberFloatVal(anyValue.(float64)), nil
 	}
-	return cty.NilVal, fmt.Errorf("unsupported type %s for %s", item.Type, item.Path())
+	return cty.NilVal, fmt.Errorf("unknown scalar type %s for %s", item.Type, item.Path())
 }

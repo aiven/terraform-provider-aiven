@@ -163,38 +163,37 @@ func (item *Item) TFType() string {
 	return typingMapping()[item.Type]
 }
 
-func (item *Item) JSONPath() string {
-	parent := item.Parent
-	chunks := []string{item.JSONName}
-	for parent != nil {
-		if !parent.IsArray() {
-			chunks = append(chunks, parent.JSONName)
+func (item *Item) ancestors() []*Item {
+	items := make([]*Item, 0)
+	for v := item; v.Parent != nil; {
+		// 1. Removes the root node, because it is the same for all items,
+		//    and makes an unnecessary prefixing
+		// 2. Ignores parent node when it is a map or array — they must have the same name,
+		//    or the last part in the name will be duplicated
+		if v.Parent.Items == nil {
+			items = append(items, v)
 		}
-		parent = parent.Parent
+		v = v.Parent
 	}
 
-	slices.Reverse(chunks)
+	slices.Reverse(items)
+	return items
+}
 
-	// Removes the root node, because it is the same for all items,
-	// and makes an unnecessary prefixing
-	return strings.Join(chunks[1:], "/")
+func (item *Item) JSONPath() string {
+	chunks := make([]string, 0)
+	for _, v := range item.ancestors() {
+		chunks = append(chunks, v.JSONName)
+	}
+	return strings.Join(chunks, "/")
 }
 
 func (item *Item) Path() string {
-	parent := item.Parent
-	chunks := []string{item.Name}
-	for parent != nil {
-		if !parent.IsArray() {
-			chunks = append(chunks, parent.Name)
-		}
-		parent = parent.Parent
+	chunks := make([]string, 0)
+	for _, v := range item.ancestors() {
+		chunks = append(chunks, v.Name)
 	}
-
-	slices.Reverse(chunks)
-
-	// Removes the root node, because it is the same for all items,
-	// and makes an unnecessary prefixing
-	return strings.Join(chunks[1:], "/")
+	return strings.Join(chunks, "/")
 }
 
 func (item *Item) IsReadOnly(isResource bool) bool {
@@ -208,15 +207,20 @@ func (item *Item) IsReadOnly(isResource bool) bool {
 
 func (item *Item) IsScalar() bool {
 	switch item.Type {
-	case SchemaTypeArray, SchemaTypeObject:
-		return false
+	case SchemaTypeString, SchemaTypeInteger, SchemaTypeNumber, SchemaTypeBoolean:
+		return true
 	}
-	return true
+	return false
 }
 
 // IsNested is an object (not map) or an array with complex objects
 func (item *Item) IsNested() bool {
-	return item.IsObject() || item.IsArray() && item.Items.IsObject()
+	return item.IsObject() || item.IsArray() && item.Items.IsNested()
+}
+
+// IsMapNested returns true if the item is a map with complex objects
+func (item *Item) IsMapNested() bool {
+	return item.IsMap() && item.Items.IsNested()
 }
 
 func (item *Item) IsMap() bool {
@@ -328,6 +332,10 @@ func mergeItems(a, b *Item, override bool) error {
 
 	if a.Default == nil {
 		a.Default = b.Default
+	}
+
+	if a.Items == nil {
+		a.Items = b.Items
 	}
 
 	var err error

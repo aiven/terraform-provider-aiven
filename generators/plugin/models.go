@@ -70,12 +70,14 @@ func genTFModel(isResource bool, item *Item) []jen.Code {
 
 // collectModels collects Item which must have a data model
 func collectModels(item *Item) []*Item {
-	if !item.IsNested() {
+	if item.IsScalar() || item.Items != nil && item.Items.IsScalar() {
+		// Scalars and maps/arrays with scalar items do not need models.
 		return nil
 	}
 
 	items := make([]*Item, 0)
-	if item.IsArray() {
+	if item.Items != nil {
+		// Array of objects or a map of objects
 		items = append(items, collectModels(item.Items)...)
 	} else {
 		// Object properties
