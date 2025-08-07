@@ -1,6 +1,11 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/goreleaser/goreleaser/v2.3.2/www/docs/static/schema.json
 version: 2
 
+before:
+  hooks:
+    # build OPA policy bundle
+    - task opa:bundle VERSION={{ .Version }}
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -24,7 +29,7 @@ builds:
         goarch: '386'
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
-  - format: zip
+  - formats: [zip]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
@@ -41,5 +46,7 @@ signs:
       - "${artifact}"
 release:
   draft: true
+  extra_files:
+    - glob: ./opa/dist/aiven-terraform-provider-policies-{{ .Version }}.tar.gz
 changelog:
   disable: true
