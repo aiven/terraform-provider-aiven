@@ -263,7 +263,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_connections": {
-						Description: "PostgreSQL maximum number of concurrent connections to the database server. Changing this parameter causes a service restart.",
+						Description: "Sets the PostgreSQL maximum number of concurrent connections to the database server. This is a limited-release parameter. Contact your account team to confirm your eligibility. You cannot decrease this parameter value when set. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -343,7 +343,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"password_encryption": {
-						Description:  "Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.",
+						Description:  "Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"md5", "scram-sha-256"}, false),

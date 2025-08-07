@@ -17,12 +17,12 @@ aiven_clickhouse_grants contains resource if {
 	change := tf.all_changes[_]
 	change.type == "aiven_clickhouse_grant"
 	change.change.after
-	
+
 	# include if values are not available in planned_values
 	planned_resource := tf.all_resources[_]
 	planned_resource.address == change.address
 	planned_resource.values.project == null
-	
+
 	resource := {
 		"address": change.address,
 		"type": change.type,
@@ -93,8 +93,8 @@ deny contains msg if {
 deny contains msg if {
 	# use config detection if planned_values don't have usable data
 	not has_usable_planned_values
-	
-	configs := [c | 
+
+	configs := [c |
 		c := input.configuration.root_module.resources[_]
 		c.type == "aiven_clickhouse_grant"
 	]
@@ -107,7 +107,7 @@ deny contains msg if {
 
 	key1 := config_entity_key(config1)
 	key2 := config_entity_key(config2)
-	
+
 	key1 == key2
 
 	msg := sprintf(

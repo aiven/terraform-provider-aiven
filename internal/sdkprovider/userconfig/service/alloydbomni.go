@@ -298,7 +298,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"password_encryption": {
-						Description:  "Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.",
+						Description:  "Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"md5", "scram-sha-256"}, false),
