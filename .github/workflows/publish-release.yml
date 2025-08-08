@@ -49,6 +49,10 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
       - name: Generate Release Notes
         id: generate_notes
         run: |
@@ -74,7 +78,7 @@ jobs:
       - name: Run GoReleaser to create release and artifacts
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
+          version: ~> v2
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
