@@ -93,6 +93,47 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"producer_batch_num_messages": {
+					Description: "The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. Default: `10000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_batch_size": {
+					Description: "The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Default: `1000000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_compression_codec": {
+					Description:  "Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. The compression codec to use when sending a batch of messages to Kafka. Default: `none`.",
+					Optional:     true,
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
+				},
+				"producer_compression_level": {
+					Description: "The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. Default: `-1`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_linger_ms": {
+					Description: "The time in milliseconds to wait for additional messages before sending a batch. If the time is exceeded, the batch is sent. Default: `5`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_queue_buffering_max_kbytes": {
+					Description: "The maximum size of the buffer in kilobytes before sending. Default: `1048576`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_queue_buffering_max_messages": {
+					Description: "The maximum number of messages to buffer before sending. Default: `100000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_request_required_acks": {
+					Description: "The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). Default: `-1`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"skip_broken_messages": {
 					Description: "Skip at least this number of broken messages from Kafka topic per block. Default: `0`.",
 					Optional:    true,

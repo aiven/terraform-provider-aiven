@@ -224,7 +224,7 @@ Optional:
 - `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
-- `max_connections` (Number) PostgreSQL maximum number of concurrent connections to the database server. Changing this parameter causes a service restart.
+- `max_connections` (Number) Sets the PostgreSQL maximum number of concurrent connections to the database server. This is a limited-release parameter. Contact your account team to confirm your eligibility. You cannot decrease this parameter value when set. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process. The default is `1000` (upstream default). Changing this parameter causes a service restart.
 - `max_locks_per_transaction` (Number) PostgreSQL maximum locks per transaction. Changing this parameter causes a service restart.
 - `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers). The default is `4` (upstream default). Changing this parameter causes a service restart.
@@ -240,7 +240,7 @@ Optional:
 - `max_sync_workers_per_subscription` (Number) Maximum number of synchronization workers per subscription. The default is `2`.
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders. The default is `20`. Changing this parameter causes a service restart.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support. The default is `8`. Changing this parameter causes a service restart.
-- `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.
+- `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords.
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval in seconds to run pg_partman's scheduled tasks. The default is `3600`. Example: `3600`.
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring. Changing this parameter causes a service restart. Only available for PostgreSQL 13+.

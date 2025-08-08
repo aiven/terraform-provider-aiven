@@ -12,6 +12,25 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_m3aggregator` resource field `m3aggregator_user_config`: deprecate: This property is deprecated
+- Change `aiven_m3db` resource field `m3db_user_config`: deprecate: This property is deprecated
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_batch_num_messages`: The maximum
+  number of messages in a batch sent to Kafka
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_batch_size`: The maximum size
+  in bytes of a batch of messages sent to Kafka
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_compression_codec` (enum)
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_compression_level`: The compression
+  level to use when sending a batch of messages to Kafka
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_linger_ms`: The time in milliseconds
+  to wait for additional messages before sending a batch
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_queue_buffering_max_kbytes`:
+  The maximum size of the buffer in kilobytes before sending
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_queue_buffering_max_messages`:
+  The maximum number of messages to buffer before sending
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_request_required_acks`: The number
+  of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does
+  not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs)
+
 ## [4.43.0] - 2025-07-22
 
 - Improve `aiven_pg_database`: check if database exists before creation to prevent conflicts during API retries
