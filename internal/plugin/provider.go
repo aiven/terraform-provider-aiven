@@ -16,6 +16,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
+	awsentity "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_entity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
@@ -169,6 +170,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 			address.NewResource,
 			billinggroup.NewResource,
 			project.NewResource,
+			awsentity.NewResource,
 		}
 		resources = append(resources, betaResources...)
 	}
