@@ -1,14 +1,14 @@
 # Kafka service with tiered storage enabled
 resource "aiven_kafka" "kafka" {
-  project                 = var.aiven_project
-  cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
-  service_name            = var.kafka_service_name
+  project      = var.aiven_project
+  cloud_name   = "google-europe-west1"
+  plan         = "business-4"
+  service_name = var.kafka_service_name
 
   kafka_user_config {
     // Enables tiered storage
     tiered_storage {
-        enabled = true
+      enabled = true
     }
   }
 }
@@ -24,7 +24,7 @@ resource "aiven_kafka_topic" "sample_topic" {
     // Enables tiered storage for the topic
     remote_storage_enable = true
     // Configures the retention time for the topic
-    local_retention_ms = 300000 # 5 minutes
-    segment_bytes = 1000000 # 1 Mb
+    local_retention_ms = 300000  # 5 minutes
+    segment_bytes      = 1000000 # 1 Mb
   }
 }
