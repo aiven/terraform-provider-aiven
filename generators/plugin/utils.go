@@ -44,6 +44,20 @@ func or[T comparable](a, b T) T {
 	return b
 }
 
+func orLonger[T ~string](a, b T) T {
+	if len(a) > len(b) {
+		return a
+	}
+	return b
+}
+
+func orDefault[T any](v *T, def T) T {
+	if v == nil {
+		return def
+	}
+	return *v
+}
+
 func sortedKeys[K cmp.Ordered, V any](m map[K]V) []K {
 	keys := slices.Collect(maps.Keys(m))
 	slices.Sort(keys)
@@ -54,7 +68,7 @@ var reNewline = regexp.MustCompile(`\s*\n+\s*`)
 
 func fmtDescription(isResource bool, item *Item) string {
 	description := strings.TrimSpace(reNewline.ReplaceAllString(item.Description, " "))
-	if isResource && item.Required && item.IsNested() {
+	if isResource && !item.IsRoot() && item.Required && item.IsNested() {
 		// The documentation generator renders required nested blocks as optional.
 		// https://github.com/hashicorp/terraform-plugin-docs/issues/363
 		// fixme: remove this once the we render the docs on our own

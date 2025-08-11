@@ -256,43 +256,28 @@ func createRootItem(scope *Scope) (*Item, error) {
 		}
 	}
 
-	// Removes the fields that should not be in the schema
-	for k, v := range root.Properties {
-		if slices.Contains(scope.Definition.Delete, v.JSONPath()) {
-			delete(root.Properties, k)
-		}
-	}
-
 	// Overwrites the fields with the ones from the config
 	if scope.CurrentMeta != nil {
 		root.Description = or(scope.CurrentMeta.Description, root.Description)
 		root.DeprecationMessage = or(scope.CurrentMeta.DeprecationMessage, root.DeprecationMessage)
 	}
 
-	// Sets values from the definition.Schema
-	err := setEditAttrs(scope, root)
-	if err != nil {
-		return nil, err
+	// Patches the schema and creates new properties
+	var err error
+	for k, v := range scope.Definition.Schema {
+		err = fillOptionalFields(root, v, k)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", k, err)
+		}
+		root.Properties[k], err = mergeItem(root, root.Properties[k], v)
+		if err != nil {
+			return nil, fmt.Errorf("can't create item %q: %w", k, err)
+		}
 	}
 
-	// Creates new items from the definition.Schema
-	for k, item := range scope.Definition.Schema {
-		if item.Type == "" {
-			// todo: validate property exists
-			// The field can't be created
-			continue
-		}
-
-		// In case of overriding, removes the original field from the schema
-		delete(root.Properties, k)
-		err := fromDefinition(root, &item, k)
-		if err != nil {
-			return nil, err
-		}
-		err = addProperty(root, &item)
-		if err != nil {
-			return nil, err
-		}
+	err = recalcDeep(root)
+	if err != nil {
+		return nil, err
 	}
 
 	// Marks ID fields
@@ -308,80 +293,14 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-func fromDefinition(parent, item *Item, name string) error {
-	item.Name = name
-	item.JSONName = or(item.JSONName, name)
-	item.Parent = parent
-
-	if !item.Required && !item.Computed {
-		item.Optional = true
-	}
-
-	for k, v := range item.Properties {
-		err := fromDefinition(item, v, k)
-		if err != nil {
-			return err
-		}
-		err = addProperty(parent, item)
-		if err != nil {
-			return err
-		}
-	}
-
-	if item.Items != nil {
-		err := fromDefinition(item, item.Items, name)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// setEditAttrs marks the fields as computed, optional, required or forceNew
-func setEditAttrs(scope *Scope, item *Item) error {
-	// When a field doesn't appear in the Create request and not in the path
-	in := func(a AppearsIn) bool {
-		return item.AppearsIn&a > 0
-	}
-
-	item.Required = in(CreatePathParameter) || item.Required && in(CreateRequestBody) // Sometimes field required in GET
-	item.Optional = item.Optional || !item.Required && in(RequestBody)
-	item.Computed = item.Computed || item.Default != nil || !item.Required && !in(RequestBody)
-	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
-
-	// Applies patch
-	if p, ok := scope.Definition.Schema[item.Path()]; ok {
-		err := mergeItems(item, &p, true)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, v := range item.Properties {
-		err := setEditAttrs(scope, v)
-		if err != nil {
-			return err
-		}
-	}
-
-	if item.Items != nil {
-		err := setEditAttrs(scope, item.Items)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func fromOperationID(scope *Scope, parent *Item, appearsIn AppearsIn, operationID string) error {
+func fromOperationID(scope *Scope, root *Item, appearsIn AppearsIn, operationID string) error {
 	path, err := getOperationID(scope, operationID)
 	if err != nil {
 		return err
 	}
 
-	parent.Description = path.Summary
-	err = fromParameter(scope, parent, path, appearsIn|PathParameter)
+	root.Description = path.Summary
+	err = fromParameter(scope, root, path, appearsIn|PathParameter)
 	if err != nil {
 		return err
 	}
@@ -395,16 +314,13 @@ func fromOperationID(scope *Scope, parent *Item, appearsIn AppearsIn, operationI
 		ap := appearsIn | RequestBody
 		if ap&CreateHandler > 0 {
 			ap |= CreateRequestBody
-		} else {
-			// Often we have fields marked required in Update and other handlers
-			request.Required = nil
 		}
 
 		if ap&UpdateHandler > 0 {
 			ap |= UpdateRequestBody
 		}
 
-		err = fromSchema(scope, parent, request, ap)
+		err = fromSchema(scope, root, request, ap)
 		if err != nil {
 			return err
 		}
@@ -425,11 +341,7 @@ func fromOperationID(scope *Scope, parent *Item, appearsIn AppearsIn, operationI
 			ap |= CreateResponseBody
 		}
 
-		// Response should not have required fields.
-		// They mess up the schema.
-		response.Required = nil
-
-		err = fromSchema(scope, parent, response, ap)
+		err = fromSchema(scope, root, response, ap)
 		if err != nil {
 			return err
 		}
@@ -440,10 +352,16 @@ func fromOperationID(scope *Scope, parent *Item, appearsIn AppearsIn, operationI
 // reTFName allows only TF acceptable characters
 var reTFName = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 
-func newItem(scope *Scope, parent *Item, name string, s *OASchema, appearsIn AppearsIn, required bool) *Item {
+func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool, appearsIn AppearsIn) *Item {
 	item := &Item{
-		Parent:      parent,
-		Name:        name,
+		Parent: parent,
+		// Adds "AppearsIn" from the parent to the item.
+		// A field appears in the parent, and must inherit its properties.
+		// So a ForceNew field won't be Computed at the same time.
+		AppearsIn: parent.AppearsIn | appearsIn,
+
+		// Keeps TF names consistent
+		Name:        reTFName.ReplaceAllString(name, "_"),
 		JSONName:    name,
 		Type:        s.Type,
 		Description: s.Description,
@@ -460,77 +378,75 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, appearsIn App
 		Nullable:    s.Nullable,
 		Required:    required,
 		Properties:  make(map[string]*Item),
-		// A field appears in the parent, and must inherit its properties.
-		// So a ForceNew field won't be Computed at the same time.
-		AppearsIn: parent.AppearsIn | appearsIn,
 	}
 
-	if v, ok := scope.Definition.Rename[item.JSONPath()]; ok {
-		item.Name = v
-	} else {
-		// Keeps TF names consistent
-		item.Name = reTFName.ReplaceAllString(item.Name, "_")
+	// Renames it to match the definition.
+	newName, ok := scope.Definition.Rename[item.JSONPath()]
+	if ok {
+		item.Name = newName
 	}
+
 	return item
 }
 
-func fromSchema(scope *Scope, item *Item, itemSchema *OASchema, appearsIn AppearsIn) error {
-	if p, ok := itemSchema.Properties[scope.Definition.ObjectKey]; ok {
+func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
+	if p, ok := parentSchema.Properties[scope.Definition.ObjectKey]; ok {
 		// The object is hidden on the root level
 		if p.Type == SchemaTypeArray {
-			return fromSchema(scope, item, p.Items, appearsIn)
+			return fromSchema(scope, parent, p.Items, appearsIn)
 		}
-		return fromSchema(scope, item, p, appearsIn)
+		return fromSchema(scope, parent, p, appearsIn)
 	}
 
-	for _, childName := range sortedKeys(itemSchema.Properties) {
-		childSchema := itemSchema.Properties[childName]
+	for _, thisName := range sortedKeys(parentSchema.Properties) {
+		thisSchema := parentSchema.Properties[thisName]
 
 		// Some fields are marked as required, because they are required for the Response.
-		// Additionally checks if the field is required for the Request.
+		// Additionally, checks if the field is required for the Request.
 		// If there is only one field, it is always required
-		required := appearsIn&RequestBody > 0 && slices.Contains(itemSchema.Required, childName) || len(itemSchema.Properties) == 1
-		childItem := newItem(scope, item, childName, childSchema, appearsIn, required)
+		required := appearsIn&RequestBody > 0 && slices.Contains(parentSchema.Required, thisName) || len(parentSchema.Properties) == 1
+		thisItem := newItem(scope, parent, thisName, thisSchema, required, appearsIn)
 
 		// With the patching workaround we have,
 		// it is important to not rely on the schema,
 		// but on the type explicitly.
-		var elementSchema *OASchema
-		switch childSchema.Type {
+		var thisItemsSchema *OASchema
+		switch thisSchema.Type {
 		case SchemaTypeArray:
-			if childSchema.Items != nil {
-				elementSchema = childSchema.Items
+			if thisSchema.Items != nil {
+				thisItemsSchema = thisSchema.Items
 			}
 		case SchemaTypeObject:
-			// If additional properties
-			if childSchema.AdditionalProperties != nil {
-				elementSchema = childSchema.AdditionalProperties
-				childSchema.AdditionalProperties = nil
-			} else if v, ok := childSchema.Properties[anyField]; ok {
+			if thisSchema.AdditionalProperties != nil {
+				// If additional properties for maps
+				thisItemsSchema = thisSchema.AdditionalProperties
+			} else if v, ok := thisSchema.Properties[anyField]; ok {
 				// ANY is a special case is additional properties
-				delete(childSchema.Properties, anyField)
-				elementSchema = v
-			} else if len(childSchema.Properties) > 0 {
-				err := fromSchema(scope, childItem, childSchema, appearsIn)
+				thisItemsSchema = v
+			} else if len(thisSchema.Properties) > 0 {
+				// A regular object with properties
+				err := fromSchema(scope, thisItem, thisSchema, appearsIn)
 				if err != nil {
 					return err
 				}
 			} else {
 				// A special case for maps with invalid schema
-				elementSchema = &OASchema{Type: SchemaTypeString}
+				thisItemsSchema = &OASchema{Type: SchemaTypeString}
 			}
 		}
 
 		// Either array item or additional properties
-		if elementSchema != nil {
-			childItem.Items = newItem(scope, childItem, childName, elementSchema, appearsIn, false)
-			err := fromSchema(scope, childItem.Items, elementSchema, appearsIn)
+		if thisItemsSchema != nil {
+			// Array or Map items
+			items := newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
+			err := fromSchema(scope, items, thisItemsSchema, appearsIn)
 			if err != nil {
 				return err
 			}
+			thisItem.Items = items
 		}
 
-		err := addProperty(item, childItem)
+		err := addProperty(scope, parent, thisItem)
 		if err != nil {
 			return err
 		}
@@ -551,16 +467,8 @@ func fromParameter(scope *Scope, parent *Item, path *OAPath, appearsIn AppearsIn
 		}
 
 		p.Schema.Description = p.Description
-		prop := newItem(
-			scope,
-			parent,
-			p.Name,
-			p.Schema,
-			appearsIn,
-			p.Required,
-		)
-
-		err = addProperty(parent, prop)
+		prop := newItem(scope, parent, p.Name, p.Schema, p.Required, appearsIn)
+		err = addProperty(scope, parent, prop)
 		if err != nil {
 			return err
 		}
@@ -582,24 +490,21 @@ func getOperationID(scope *Scope, operationID string) (*OAPath, error) {
 	return nil, fmt.Errorf("operationID %s not found", operationID)
 }
 
-func addProperty(parent, prop *Item) error {
-	// CRUD fields often intersect with each other
-	// Merges duplicated fields
-	prop.Parent = parent
-	other, ok := parent.Properties[prop.Name]
-	if ok {
-		err := mergeItems(prop, other, false)
-		if err != nil {
-			return err
-		}
+func addProperty(scope *Scope, parent, prop *Item) error {
+	if slices.Contains(scope.Definition.Delete, prop.JSONPath()) {
+		return nil
 	}
 
 	// Definition items have nil properties
 	if parent.Properties == nil {
 		parent.Properties = make(map[string]*Item)
 	}
-	parent.Properties[prop.Name] = prop
-	return nil
+
+	// CRUD fields often intersect with each other
+	// Merges duplicated fields
+	var err error
+	parent.Properties[prop.Name], err = mergeItem(parent, parent.Properties[prop.Name], prop)
+	return err
 }
 
 // listDefinitionFiles returns go file names
@@ -619,4 +524,152 @@ func listDefinitionFiles(dir string) ([]string, error) {
 		list = append(list, name)
 	}
 	return list, nil
+}
+
+func mergeItem(parent, a, b *Item) (*Item, error) {
+	switch {
+	case a == nil && b == nil:
+		return nil, nil // Both are nil, nothing to merge
+	case b == nil:
+		a.Parent = parent
+		return a, nil
+	case a == nil:
+		// For creating items from the definition
+		a = &Item{
+			Name:       b.Name,
+			JSONName:   b.JSONName,
+			Type:       b.Type,
+			Properties: make(map[string]*Item),
+		}
+	}
+
+	var err error
+	for k, v := range b.Properties {
+		a.Properties[k], err = mergeItem(a, a.Properties[k], v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	a.Items, err = mergeItem(a, a.Items, b.Items)
+	if err != nil {
+		return nil, err
+	}
+
+	a.Parent = parent
+	a.AppearsIn |= b.AppearsIn
+	a.Type = or(b.Type, a.Type) // In case user overrides the type
+	a.Required = a.Required || b.Required
+	a.Optional = a.Optional || b.Optional
+	a.Computed = a.Computed || b.Computed
+	a.ForceNew = a.ForceNew || b.ForceNew
+	a.Sensitive = a.Sensitive || b.Sensitive
+	a.Description = orLonger(a.Description, b.Description)
+	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
+	a.Enum = mergeSlices(a.Enum, b.Enum)
+	a.Default = or(b.Default, a.Default)
+	a.MinItems = max(a.MinItems, b.MinItems)
+	a.MaxItems = max(a.MaxItems, b.MaxItems)
+	a.MinLength = max(a.MinLength, b.MinLength)
+	a.MaxLength = max(a.MaxLength, b.MaxLength)
+	a.Minimum = max(a.Minimum, b.Minimum)
+	a.Maximum = max(a.Maximum, b.Maximum)
+
+	// User overrides that can set "false" values
+	a.UserSensitive = or(b.UserSensitive, a.UserSensitive)
+	a.UserRequired = or(b.UserRequired, a.UserRequired)
+	a.UserComputed = or(b.UserComputed, a.UserComputed)
+	a.UserOptional = or(b.UserOptional, a.UserOptional)
+	a.UserForceNew = or(b.UserForceNew, a.UserForceNew)
+
+	if a.Name == "" {
+		return nil, fmt.Errorf("node doesn't have name set, parent: %q", parent.Name)
+	}
+
+	if a.Type == "" {
+		return nil, fmt.Errorf("node doesn't have type set, parent: %q", parent.Name)
+	}
+
+	return a, nil
+}
+
+// recalcDeep sets Computed, Required, Optional, ForceNew, and Sensitive fields
+// WARNING: never re-inherit Item.AppearsIn - a parent might exist both in Request and Response.
+// But the child might appear only in the Response (as computed field).
+// It is OK to inherit AppearsIn from the parent when you create a child node.
+// But shouldn't do that after all nodes are merged.
+func recalcDeep(item *Item) error {
+	in := func(a AppearsIn) bool {
+		return item.AppearsIn&a > 0
+	}
+
+	item.Required = in(CreatePathParameter) || item.Required && in(CreateRequestBody) // Sometimes field required in GET
+	item.Optional = item.Optional || !item.Required && in(RequestBody)
+	item.Computed = item.Computed || item.Default != nil || !item.Required && !in(RequestBody) && in(ResponseBody)
+	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
+
+	// Overrides that come from the user config
+	item.Optional = orDefault(item.UserOptional, item.Optional)
+	item.Required = orDefault(item.UserRequired, item.Required)
+
+	// Optional field can't be required
+	// If user has set both Required and Optional, TF will complain about it.
+	if item.Optional && item.UserRequired == nil {
+		item.Required = false
+	}
+
+	if item.Required {
+		// Required field can't be optional
+		if item.UserOptional == nil {
+			item.Optional = false
+		}
+
+		// Required field can't be computed
+		if item.UserComputed == nil {
+			item.Computed = false
+		}
+	}
+
+	item.Sensitive = orDefault(item.UserSensitive, item.Sensitive)
+	item.Computed = orDefault(item.UserComputed, item.Computed)
+	item.ForceNew = orDefault(item.UserForceNew, item.ForceNew)
+
+	for k, v := range item.Properties {
+		err := recalcDeep(v)
+		if err != nil {
+			return fmt.Errorf("%s property: %w", k, err)
+		}
+	}
+
+	if item.Items != nil {
+		err := recalcDeep(item.Items)
+		if err != nil {
+			return fmt.Errorf("%s items: %w", item.Name, err)
+		}
+	}
+
+	return nil
+}
+
+// fillOptionalFields the definition files have most of the fields optional.
+// Fills the gaps.
+func fillOptionalFields(parent *Item, item *Item, name string) error {
+	item.Parent = parent
+	item.Name = or(item.Name, name)
+	item.JSONName = or(item.JSONName, name)
+
+	for k, v := range item.Properties {
+		err := fillOptionalFields(item, v, k)
+		if err != nil {
+			return fmt.Errorf("%s: %w", k, err)
+		}
+	}
+
+	if item.Items != nil {
+		err := fillOptionalFields(item, item.Items, name)
+		if err != nil {
+			return fmt.Errorf("%s items: %w", item.Name, err)
+		}
+	}
+	return nil
 }

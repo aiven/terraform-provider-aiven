@@ -143,6 +143,7 @@ tasks:
       no_spec: '{{.no_spec | default "false"}}'
     cmds:
       - task: '{{if eq .no_spec "true"}}nothing{{else}}get-spec{{end}}'
+      - task: gen-plugin-generator
 
   gen-plugin-generator:
     desc: "Run the plugin generator (requires openapi.json to exist)"

@@ -24,10 +24,15 @@ delete:
   - created_by
   - create_time
 schema:
-  access_data/username:
-    optional: true
-    computed: true
-  access_data/acls/host:
-    description: The IP address from which a principal is allowed or denied access to the resource. Use `*` for all hosts.
-    computed: true # has default value "*"
-    optional: true
+  access_data:
+    properties:
+      username:
+        optional: true
+        computed: true
+      acls:
+        items:
+          properties:
+            host:
+              description: The IP address from which a principal is allowed or denied access to the resource. Use `*` for all hosts.
+              computed: true # has default value "*"
+              optional: true
