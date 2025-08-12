@@ -18,7 +18,7 @@ jobs:
       pr_head_sha: ${{ steps.create_pr.outputs.pull-request-head-sha }}
       pr_created: ${{ steps.create_pr.outputs.pull-request-number != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v5
