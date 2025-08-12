@@ -23,7 +23,7 @@ func (s *PostgresTestSuite) TestPostgres() {
 	withPrefix := examplesRandPrefix()
 	pgName := withPrefix("pg")
 	opts := s.withDefaults(&terraform.Options{
-		TerraformDir: "../examples/postgres",
+		TerraformDir: "../examples/postgres/postgres_service",
 		Vars: map[string]interface{}{
 			"aiven_token":           s.config.Token,
 			"aiven_project_name":    s.config.Project,
