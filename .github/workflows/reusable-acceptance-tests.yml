@@ -24,7 +24,7 @@ jobs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -54,7 +54,7 @@ jobs:
       has_slow_tests: ${{ steps.get_matrix.outputs.has_slow_tests }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
       - uses: actions/setup-go@v5
@@ -96,7 +96,7 @@ jobs:
         with:
           same-branch-only: true
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -144,7 +144,7 @@ jobs:
         with:
           same-branch-only: true
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -200,7 +200,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           same-branch-only: true
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0

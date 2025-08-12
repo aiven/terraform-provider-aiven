@@ -30,7 +30,7 @@ jobs:
     if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
@@ -48,7 +48,7 @@ jobs:
     if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0

@@ -18,7 +18,7 @@ jobs:
     outputs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v5
@@ -45,7 +45,7 @@ jobs:
         with:
           same-branch-only: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
