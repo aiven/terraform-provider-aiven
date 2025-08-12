@@ -97,7 +97,7 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 			valBlock := body.AppendNewBlock(k, nil)
 			err := exampleObjectItem(isResource, v, valBlock.Body())
 			if err != nil {
-				return err
+				return fmt.Errorf("example items error: %w", err)
 			}
 
 			continue
@@ -147,7 +147,7 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 				return err
 			}
 		default:
-			return fmt.Errorf("unknown type %s for %s", v.Type, v.Path())
+			return fmt.Errorf("unknown property type %q for %s", v.Type, v.Path())
 		}
 
 		tokens := hclwrite.TokensForValue(val)

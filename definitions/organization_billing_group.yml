@@ -17,14 +17,8 @@ operations:
   OrganizationBillingGroupUpdate: update
 schema:
   billing_contact_emails:
-    required: true
-    type: array
     items:
       type: string
-    description: List of billing contact emails.
   billing_emails:
-    required: true
-    type: array
     items:
       type: string
-    description: List of billing contact emails.

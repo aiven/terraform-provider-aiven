@@ -57,7 +57,7 @@ type IDAttribute struct {
 type Definition struct {
 	Beta        bool                 `yaml:"beta"`
 	Location    string               `yaml:"location"`
-	Schema      map[string]Item      `yaml:"schema,omitempty"`
+	Schema      map[string]*Item     `yaml:"schema,omitempty"`
 	Delete      []string             `yaml:"delete,omitempty"`
 	Rename      map[string]string    `yaml:"rename,omitempty"`
 	ObjectKey   string               `yaml:"objectKey,omitempty"`
@@ -68,33 +68,41 @@ type Definition struct {
 }
 
 type Item struct {
-	Parent              *Item
-	AppearsIn           AppearsIn
-	Name                string
-	InIDAttribute       bool // If field is part of ID attribute
-	IDAttributePosition int  // Position in the ID field
+	Parent              *Item     `yaml:"-"`
+	AppearsIn           AppearsIn `yaml:"appearsIn"`
+	Name                string    `yaml:"name"`
+	InIDAttribute       bool      `yaml:"inIDAttribute"`       // If field is part of ID attribute
+	IDAttributePosition int       `yaml:"idAttributePosition"` // Position in the ID field
 
 	// Tagged fields are exposed to the Definition.yaml
-	JSONName           string           `yaml:"jsonName,omitempty"`
-	Type               SchemaType       `yaml:"type,omitempty"`
-	Description        string           `yaml:"description,omitempty"`
-	DeprecationMessage string           `yaml:"deprecationMessage,omitempty"`
-	Properties         map[string]*Item `yaml:"properties,omitempty"`
-	Items              *Item            `yaml:"items,omitempty"` // Array item or Map item
-	Required           bool             `yaml:"required,omitempty"`
-	Computed           bool             `yaml:"computed,omitempty"`
-	Nullable           bool             `yaml:"nullable,omitempty"`
-	Optional           bool             `yaml:"optional,omitempty"`
-	Sensitive          bool             `yaml:"sensitive,omitempty"`
-	Default            any              `yaml:"default,omitempty"`
-	Enum               []any            `yaml:"enum,omitempty"`
-	ForceNew           bool             `yaml:"forceNew,omitempty"`
-	MinLength          int              `yaml:"minLength,omitempty"`
-	MaxLength          int              `yaml:"maxLength,omitempty"`
-	MinItems           int              `yaml:"minItems,omitempty"`
-	MaxItems           int              `yaml:"maxItems,omitempty"`
-	Minimum            int              `yaml:"minimum,omitempty"`
-	Maximum            int              `yaml:"maximum,omitempty"`
+	Properties map[string]*Item `yaml:"properties"`
+	Items      *Item            `yaml:"items"` // Array item or Map item
+
+	// User-defined fields for YAML generation
+	UserRequired  *bool `yaml:"required"`
+	UserComputed  *bool `yaml:"computed"`
+	UserOptional  *bool `yaml:"optional"`
+	UserSensitive *bool `yaml:"sensitive"`
+	UserForceNew  *bool `yaml:"forceNew"`
+
+	JSONName           string     `yaml:"jsonName"`
+	Type               SchemaType `yaml:"type"`
+	Description        string     `yaml:"description"`
+	DeprecationMessage string     `yaml:"deprecationMessage"`
+	Required           bool       `yaml:"-"`
+	Computed           bool       `yaml:"-"`
+	Nullable           bool       `yaml:"-"`
+	Optional           bool       `yaml:"-"`
+	Sensitive          bool       `yaml:"-"`
+	ForceNew           bool       `yaml:"-"`
+	Default            any        `yaml:"default"`
+	Enum               []any      `yaml:"enum"`
+	MinLength          int        `yaml:"minLength"`
+	MaxLength          int        `yaml:"maxLength"`
+	MinItems           int        `yaml:"minItems"`
+	MaxItems           int        `yaml:"maxItems"`
+	Minimum            int        `yaml:"minimum"`
+	Maximum            int        `yaml:"maximum"`
 }
 
 // UniqueName generates unique name by composing all ancestor names
@@ -164,10 +172,18 @@ func (item *Item) TFType() string {
 }
 
 func (item *Item) ancestors() []*Item {
+	seen := make(map[string]int)
 	items := make([]*Item, 0)
 	for v := item; v.Parent != nil; {
+		// Duplicate check
+		k := fmt.Sprint(v)
+		seen[k]++
+		if seen[k] > 1 {
+			panic("Duplicate ancestor item found: " + v.Name)
+		}
+
 		// 1. Removes the root node, because it is the same for all items,
-		//    and makes an unnecessary prefixing
+		//    and makes an unnecessary prefixing (v.Parent != nil)
 		// 2. Ignores parent node when it is a map or array — they must have the same name,
 		//    or the last part in the name will be duplicated
 		if v.Parent.Items == nil {
@@ -259,118 +275,4 @@ func (item *Item) GetIDFields() []*Item {
 		return fields[i].IDAttributePosition < fields[j].IDAttributePosition
 	})
 	return fields
-}
-
-// mergeItems merges b into a
-func mergeItems(a, b *Item, override bool) error {
-	if a == nil {
-		return nil
-	}
-
-	if b == nil {
-		return nil
-	}
-
-	// JSON names are not allowed to be different, until it's not in the definition.yaml
-	if a.JSONName != b.JSONName && len(a.JSONName)*len(b.JSONName) > 0 {
-		return fmt.Errorf("field %q JSON names do not match: %s != %s", a.Path(), a.JSONName, b.JSONName)
-	}
-
-	switch {
-	case override:
-		// The definition.yaml has priority over the API spec
-		a.Type = or(b.Type, a.Type)
-
-		// Invalidates the fields that are not compatible with the new type
-		switch a.Type {
-		case SchemaTypeObject:
-			a.Items = nil
-		case SchemaTypeArray:
-			a.Properties = nil
-		default:
-			a.Items = nil
-			a.Properties = nil
-		}
-
-		// Sets the required and optional fields
-		// Can't be both required and optional
-		if b.Required || b.Optional {
-			a.Required = b.Required || !b.Optional
-			a.Optional = b.Optional || !b.Required
-		}
-
-		if b.Items != nil {
-			a.Items = b.Items
-			a.Items.Parent = a
-		}
-	case a.Type != b.Type:
-		return fmt.Errorf("field %q types do not match: %s != %s ", a.Path(), a.Type, b.Type)
-	default:
-		// Enums can be different for request and response
-		a.Enum = mergeSlices(a.Enum, b.Enum)
-		a.Required = a.Required || b.Required
-		a.Optional = a.Optional || b.Optional
-
-		if a.Items == nil && b.Items != nil {
-			a.Items = b.Items
-			a.Items.Parent = a
-		}
-	}
-
-	if b.Default != nil {
-		a.Default = b.Default
-	}
-
-	// Copies properties
-	// TODO: there is no way to set Sensitive false, or Computed false, and so on.
-	a.Description = or(a.Description, b.Description)
-	a.DeprecationMessage = or(a.DeprecationMessage, b.DeprecationMessage)
-	a.AppearsIn |= b.AppearsIn
-	a.Nullable = a.Nullable || b.Nullable
-	a.ForceNew = a.ForceNew || b.ForceNew
-	a.Sensitive = a.Sensitive || b.Sensitive
-	a.Computed = a.Computed || b.Computed
-
-	// Validate that a field cannot be both computed and required
-	if a.Computed && a.Required {
-		return fmt.Errorf("field %q cannot be both computed and required", a.Path())
-	}
-
-	a.MinItems = or(a.MinItems, b.MinItems)
-	a.MaxItems = or(a.MaxItems, b.MaxItems)
-	a.MinLength = or(a.MinLength, b.MinLength)
-	a.MaxLength = or(a.MaxLength, b.MaxLength)
-	a.Minimum = or(a.Minimum, b.Minimum)
-	a.Maximum = or(a.Maximum, b.Maximum)
-	a.JSONName = or(a.JSONName, b.JSONName)
-
-	var err error
-	err = mergeItemProperties(a.Properties, b.Properties, override)
-	if err != nil {
-		return err
-	}
-
-	err = mergeItems(a.Items, b.Items, override)
-	if err != nil {
-		return err
-	}
-
-	// Sometimes OperationIDs have different descriptions.
-	// In that case, there is a good chance that the longest one has the most details.
-	if len(b.Description) > len(a.Description) {
-		a.Description = b.Description
-	}
-	return nil
-}
-
-func mergeItemProperties(a, b map[string]*Item, override bool) error {
-	for k, v := range b {
-		if vv, ok := a[k]; ok {
-			err := mergeItems(vv, v, override)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
