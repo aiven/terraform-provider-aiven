@@ -186,12 +186,19 @@ tasks:
   opa:bundle:
     desc: "Build OPA bundle for distribution"
     deps:
-      - internal:opa:verify
       - opa:test
+    vars:
+      VERSION: '{{.VERSION | default "dev"}}'
+      BUNDLE_NAME: "aiven-terraform-provider-policies"
+      OUTPUT_FILE: "./opa/dist/{{.BUNDLE_NAME}}-{{.VERSION}}.tar.gz"
     cmds:
-      - mkdir -p dist
       - task: opa:fmt
-      - "{{.OPA}} build ./opa/policies/ --bundle --output ./dist/aiven-terraform-policies.tar.gz"
+      - mkdir -p opa/dist
+      - |
+        {{.OPA}} build --bundle ./opa/policies \
+        --output {{.OUTPUT_FILE}} \
+        --revision {{.VERSION}} \
+        --ignore "*_test.rego"
 
   opa:fmt:
     desc: "Format OPA policy files"
