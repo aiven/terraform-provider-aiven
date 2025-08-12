@@ -134,6 +134,14 @@ Optional:
 - `num_consumers` (Number) The number of consumers per table per replica. Default: `1`.
 - `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.
 - `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Default: `0`.
+- `producer_batch_num_messages` (Number) The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. Default: `10000`.
+- `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Default: `1000000`.
+- `producer_compression_codec` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. The compression codec to use when sending a batch of messages to Kafka. Default: `none`.
+- `producer_compression_level` (Number) The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. Default: `-1`.
+- `producer_linger_ms` (Number) The time in milliseconds to wait for additional messages before sending a batch. If the time is exceeded, the batch is sent. Default: `5`.
+- `producer_queue_buffering_max_kbytes` (Number) The maximum size of the buffer in kilobytes before sending. Default: `1048576`.
+- `producer_queue_buffering_max_messages` (Number) The maximum number of messages to buffer before sending. Default: `100000`.
+- `producer_request_required_acks` (Number) The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). Default: `-1`.
 - `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. Default: `0`.
 - `thread_per_consumer` (Boolean) Provide an independent thread for each consumer. All consumers run in the same thread by default. Default: `false`.
 
