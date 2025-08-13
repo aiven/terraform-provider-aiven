@@ -1,4 +1,4 @@
-# Use Grafana Metrics Dashboard to view Kafka metrics
+# View Kafka metrics with Grafana Metrics Dashboard
 
 This example shows you how to create and integrate these services:
 

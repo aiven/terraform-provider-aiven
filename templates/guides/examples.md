@@ -26,6 +26,7 @@ Use these examples to create services and integrate them:
 - [Dragonfly](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/dragonfly)
 - [Grafana](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/grafana)
 - [Kafka, Kafka Connect, and Mirrormaker](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka)
+- [Karapace schema registry for Kafka](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/kafka/karapace_schema_registry)
 - [MySQL](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/mysql)
 - [OpenSearch](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/opensearch)
 - [PostgreSQL](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/postgres)
@@ -38,10 +39,18 @@ Timescale users can also follow an example to [deploy a PostgreSQL and Grafana s
 
 ### Configure services
 
-Dive deeper into configuring your services with these examples:
+Dive deeper into configuring your services with these examples.
 
-- [Create static IP addresses](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/static_ips).
-- [Use disk autoscaler](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/autoscaler_integration) to [automatically increase storage](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).
+- [Create static IP addresses](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/static_ips)
+- [Use disk autoscaler](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/autoscaler_integration) to automatically increase storage
+
+### Integrations
+
+Integrate your Aiven services for monitoring, logging, and data integration.
+
+- [Use Debezium as a source connector to integrate Aiven for PostgreSQL® and Aiven for Apache Kafka®](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/postgres/postgres_debezium_kafka)
+- [View Kafka metrics with Grafana Metrics Dashboard](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/integrations/kafka_pg_grafana)
+- [Use Thanos to create metrics dashboards for Kafka and PostgreSQL](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/integrations/kafka_pg_metrics_dashboard)
 
 ## Run an example
 
@@ -111,3 +120,8 @@ To delete the resources you created:
 
      Enter a value: yes
    ```
+
+# Request an example or report a bug
+
+If you encounter issues with any of the examples, have feedback for improvements, or want to request an example for a specific use case,
+let the team know by [creating a GitHub issue](https://github.com/aiven/terraform-provider-aiven/issues/new/choose).

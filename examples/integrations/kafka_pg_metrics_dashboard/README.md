@@ -1,6 +1,4 @@
----
-page_title: "Use Thanos to create metrics dashboards for Kafka and PostgreSQL"
----
+# Use Thanos to create metrics dashboards for Kafka and PostgreSQL
 
 This example creates an Aiven for Apache Kafka® service with a topic and a service user, and an Aiven for PostgreSQL® service with a database and service user.
 It uses the `aiven_service_integration` resource to send metrics from both services to an Aiven for Metrics (Thanos) service. The metrics are sent from Thanos
