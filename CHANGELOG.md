@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.44.0] - 2025-08-14
+
 - Change `aiven_m3aggregator` resource field `m3aggregator_user_config`: deprecate: This property is deprecated
 - Change `aiven_m3db` resource field `m3db_user_config`: deprecate: This property is deprecated
 - Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.producer_batch_num_messages`: The maximum
