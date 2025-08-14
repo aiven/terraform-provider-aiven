@@ -25,3 +25,7 @@ To view the autoscaler endpoint:
 1. In the [Aiven Console](https://console.aiven.io), go to your project.
 2. Click **Integration endpoints**.
 3. Click **Aiven Autoscaler**.
+
+## Next steps
+
+Learn more about how to [manage disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler) for your services.
