@@ -8,7 +8,6 @@ terraform {
   }
 }
 
-# Initialize provider
 provider "aiven" {
-  api_token = var.aiven_api_token
+  api_token = var.aiven_token
 }
