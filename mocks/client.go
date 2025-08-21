@@ -16201,8 +16201,8 @@ func (_c *MockClient_ServiceOpenSearchAclUpdate_Call) RunAndReturn(run func(ctx 
 }
 
 // ServiceOpenSearchIndexDelete provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceOpenSearchIndexDelete(ctx context.Context, project1 string, serviceName string, indexName string) error {
-	ret := _mock.Called(ctx, project1, serviceName, indexName)
+func (_mock *MockClient) ServiceOpenSearchIndexDelete(ctx context.Context, project1 string, serviceName string, indexPattern string) error {
+	ret := _mock.Called(ctx, project1, serviceName, indexPattern)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServiceOpenSearchIndexDelete")
@@ -16210,7 +16210,7 @@ func (_mock *MockClient) ServiceOpenSearchIndexDelete(ctx context.Context, proje
 
 	var r0 error
 	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
-		r0 = returnFunc(ctx, project1, serviceName, indexName)
+		r0 = returnFunc(ctx, project1, serviceName, indexPattern)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -16226,12 +16226,12 @@ type MockClient_ServiceOpenSearchIndexDelete_Call struct {
 //   - ctx
 //   - project1
 //   - serviceName
-//   - indexName
-func (_e *MockClient_Expecter) ServiceOpenSearchIndexDelete(ctx interface{}, project1 interface{}, serviceName interface{}, indexName interface{}) *MockClient_ServiceOpenSearchIndexDelete_Call {
-	return &MockClient_ServiceOpenSearchIndexDelete_Call{Call: _e.mock.On("ServiceOpenSearchIndexDelete", ctx, project1, serviceName, indexName)}
+//   - indexPattern
+func (_e *MockClient_Expecter) ServiceOpenSearchIndexDelete(ctx interface{}, project1 interface{}, serviceName interface{}, indexPattern interface{}) *MockClient_ServiceOpenSearchIndexDelete_Call {
+	return &MockClient_ServiceOpenSearchIndexDelete_Call{Call: _e.mock.On("ServiceOpenSearchIndexDelete", ctx, project1, serviceName, indexPattern)}
 }
 
-func (_c *MockClient_ServiceOpenSearchIndexDelete_Call) Run(run func(ctx context.Context, project1 string, serviceName string, indexName string)) *MockClient_ServiceOpenSearchIndexDelete_Call {
+func (_c *MockClient_ServiceOpenSearchIndexDelete_Call) Run(run func(ctx context.Context, project1 string, serviceName string, indexPattern string)) *MockClient_ServiceOpenSearchIndexDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
 	})
@@ -16243,29 +16243,29 @@ func (_c *MockClient_ServiceOpenSearchIndexDelete_Call) Return(err error) *MockC
 	return _c
 }
 
-func (_c *MockClient_ServiceOpenSearchIndexDelete_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, indexName string) error) *MockClient_ServiceOpenSearchIndexDelete_Call {
+func (_c *MockClient_ServiceOpenSearchIndexDelete_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, indexPattern string) error) *MockClient_ServiceOpenSearchIndexDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ServiceOpenSearchIndexList provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceOpenSearchIndexList(ctx context.Context, project1 string, serviceName string) (*opensearch.ServiceOpenSearchIndexListOut, error) {
+func (_mock *MockClient) ServiceOpenSearchIndexList(ctx context.Context, project1 string, serviceName string) ([]opensearch.IndexeOut, error) {
 	ret := _mock.Called(ctx, project1, serviceName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServiceOpenSearchIndexList")
 	}
 
-	var r0 *opensearch.ServiceOpenSearchIndexListOut
+	var r0 []opensearch.IndexeOut
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*opensearch.ServiceOpenSearchIndexListOut, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) ([]opensearch.IndexeOut, error)); ok {
 		return returnFunc(ctx, project1, serviceName)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *opensearch.ServiceOpenSearchIndexListOut); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) []opensearch.IndexeOut); ok {
 		r0 = returnFunc(ctx, project1, serviceName)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*opensearch.ServiceOpenSearchIndexListOut)
+			r0 = ret.Get(0).([]opensearch.IndexeOut)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
@@ -16296,12 +16296,12 @@ func (_c *MockClient_ServiceOpenSearchIndexList_Call) Run(run func(ctx context.C
 	return _c
 }
 
-func (_c *MockClient_ServiceOpenSearchIndexList_Call) Return(serviceOpenSearchIndexListOut *opensearch.ServiceOpenSearchIndexListOut, err error) *MockClient_ServiceOpenSearchIndexList_Call {
-	_c.Call.Return(serviceOpenSearchIndexListOut, err)
+func (_c *MockClient_ServiceOpenSearchIndexList_Call) Return(indexeOuts []opensearch.IndexeOut, err error) *MockClient_ServiceOpenSearchIndexList_Call {
+	_c.Call.Return(indexeOuts, err)
 	return _c
 }
 
-func (_c *MockClient_ServiceOpenSearchIndexList_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string) (*opensearch.ServiceOpenSearchIndexListOut, error)) *MockClient_ServiceOpenSearchIndexList_Call {
+func (_c *MockClient_ServiceOpenSearchIndexList_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string) ([]opensearch.IndexeOut, error)) *MockClient_ServiceOpenSearchIndexList_Call {
 	_c.Call.Return(run)
 	return _c
 }

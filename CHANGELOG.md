@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_service_integration` field `integration_type` (enum): add `autoscaler_service`
+- Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `autoscaler_service`
+
 ## [4.44.0] - 2025-08-14
 
 - Change `aiven_m3aggregator` resource field `m3aggregator_user_config`: deprecate: This property is deprecated
