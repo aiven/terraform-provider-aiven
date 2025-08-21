@@ -14,6 +14,7 @@ nav_order: 1
 
 - Change `aiven_service_integration` field `integration_type` (enum): add `autoscaler_service`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `autoscaler_service`
+- Change field `disk_space_used`: remove deprecation notice as this field is a computed read-only field that shows current disk usage
 
 ## [4.44.0] - 2025-08-14
 

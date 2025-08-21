@@ -110,6 +110,8 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 	return list
 }
 
+const diskSpaceDeprecation = "Please use `additional_disk_space` to specify the space to be added to the default disk space defined by the plan."
+
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
@@ -181,16 +183,15 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"disk_space": {
 			Type:          schema.TypeString,
 			Optional:      true,
-			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.",
+			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing. " + diskSpaceDeprecation,
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"additional_disk_space"},
-			Deprecated:    "This will be removed in v5.0.0. Please use `additional_disk_space` to specify the space to be added to the default `disk_space` defined by the plan.",
+			Deprecated:    diskSpaceDeprecation,
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Disk space that service is currently using",
-			Deprecated:  "This will be removed in v5.0.0. Please use `additional_disk_space` to specify the space to be added to the default `disk_space` defined by the plan.",
+			Description: "The disk space that the service is currently using. This is the sum of `disk_space` and `additional_disk_space` in human-readable format (for example: `90GiB`).",
 		},
 		"disk_space_default": {
 			Type:        schema.TypeString,
