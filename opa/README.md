@@ -1,4 +1,4 @@
-# Open Policy Agent policies for Aiven Terraform Provider 
+# Open Policy Agent policies for Aiven Terraform Provider
 
 This directory contains Open Policy Agent (OPA) policies designed to help prevent common configuration issues and conflicts when using the Aiven Terraform Provider.
 
@@ -47,7 +47,7 @@ export AIVEN_PROVIDER_VERSION="4.44.0"
 ```
 
 2. Download the policy bundle:
-```bash 
+```bash
 curl -L -o aiven-tf-policies.tar.gz "https://github.com/aiven/terraform-provider-aiven/releases/download/v${AIVEN_PROVIDER_VERSION}/aiven-terraform-provider-policies-${AIVEN_PROVIDER_VERSION}.tar.gz"
 ```
 
@@ -97,11 +97,11 @@ jobs:
   validate:
     name: 'Validate Terraform Plan with OPA'
     runs-on: ubuntu-latest
-    
+
     # Specify the version of the Aiven provider you are using.
     env:
       AIVEN_PROVIDER_VERSION: '4.44.0'
-      
+
     steps:
       - name: 'Checkout Code'
         uses: actions/checkout@v4
@@ -115,7 +115,7 @@ jobs:
           curl -sL -o conftest.tar.gz "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_linux_amd64.tar.gz"
           tar -xzf conftest.tar.gz
           sudo mv conftest /usr/local/bin/
-          
+
       - name: 'Download Aiven OPA Policies'
         run: |
           curl -sL -o aiven-tf-policies.tar.gz "https://github.com/aiven/terraform-provider-aiven/releases/download/v${AIVEN_PROVIDER_VERSION}/aiven-terraform-provider-policies-${AIVEN_PROVIDER_VERSION}.tar.gz"
