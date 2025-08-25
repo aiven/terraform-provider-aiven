@@ -83,9 +83,9 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.OneOf("AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "SGD", "USD")},
 			},
 			"custom_invoice_text": schema.StringAttribute{
-				MarkdownDescription: "Extra billing text. Maximum length: `254`.",
+				MarkdownDescription: "Extra billing text. Maximum length: `256`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(254)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
