@@ -111,28 +111,28 @@ Required:
 
 Optional:
 
-- `tables` (Block List, Max: 400) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
+- `tables` (Block List, Max: 400) Array of table configurations that define how Kafka topics are mapped to ClickHouse tables. Each table configuration specifies the table structure, associated Kafka topics, and read/write settings (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables`
 
 Required:
 
-- `columns` (Block List, Min: 1, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. Message data format. Default: `JSONEachRow`.
-- `group_name` (String) Kafka consumers group. Default: `clickhouse`.
-- `name` (String) Name of the table. Example: `events`.
-- `topics` (Block List, Min: 1, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
+- `columns` (Block List, Min: 1, Max: 100) Array of column definitions that specify the structure of the ClickHouse table. Each column maps to a field in the Kafka messages (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
+- `data_format` (String) Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. The format of the messages in the Kafka topics. Determines how ClickHouse parses and serializes the data (e.g., JSON, CSV, Avro). Default: `JSONEachRow`.
+- `group_name` (String) The Kafka consumer group name. Multiple consumers with the same group name will share the workload and maintain offset positions. Default: `clickhouse`.
+- `name` (String) The name of the ClickHouse table to be created. This table can consume data from and write data to the specified Kafka topics. Example: `events`.
+- `topics` (Block List, Min: 1, Max: 100) Array of Kafka topics that this table will read data from or write data to. Messages from all specified topics will be inserted into this table, and data inserted into this table will be published to the topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 Optional:
 
-- `auto_offset_reset` (String) Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.
-- `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.
-- `handle_error_mode` (String) Enum: `default`, `stream`. How to handle errors for Kafka engine. Default: `default`.
-- `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. Default: `0`.
-- `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. Default: `1`.
-- `num_consumers` (Number) The number of consumers per table per replica. Default: `1`.
-- `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.
+- `auto_offset_reset` (String) Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Determines where to start reading from Kafka when no offset is stored or the stored offset is out of range. `earliest` starts from the beginning, `latest` starts from the end. Default: `earliest`.
+- `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Specifies how ClickHouse should parse DateTime values from text-based input formats. `basic` uses simple parsing, `best_effort` attempts more flexible parsing. Default: `basic`.
+- `handle_error_mode` (String) Enum: `default`, `stream`. Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors. Default: `default`.
+- `max_block_size` (Number) Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Default: `0`.
+- `max_rows_per_message` (Number) Maximum number of rows that can be processed from a single Kafka message for row-based formats. Useful for controlling memory usage. Default: `1`.
+- `num_consumers` (Number) Number of Kafka consumers to run per table per replica. Increasing this can improve throughput but may increase resource usage. Default: `1`.
+- `poll_max_batch_size` (Number) Maximum number of messages to fetch in a single Kafka poll operation for reading. Default: `0`.
 - `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Default: `0`.
 - `producer_batch_num_messages` (Number) The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. Default: `10000`.
 - `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Default: `1000000`.
@@ -142,16 +142,16 @@ Optional:
 - `producer_queue_buffering_max_kbytes` (Number) The maximum size of the buffer in kilobytes before sending. Default: `1048576`.
 - `producer_queue_buffering_max_messages` (Number) The maximum number of messages to buffer before sending. Default: `100000`.
 - `producer_request_required_acks` (Number) The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). Default: `-1`.
-- `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. Default: `0`.
-- `thread_per_consumer` (Boolean) Provide an independent thread for each consumer. All consumers run in the same thread by default. Default: `false`.
+- `skip_broken_messages` (Number) Number of broken messages to skip before stopping processing when reading from Kafka. Useful for handling corrupted data without failing the entire integration. Default: `0`.
+- `thread_per_consumer` (Boolean) When enabled, each consumer runs in its own thread, providing better isolation and potentially better performance for high-throughput scenarios. Default: `false`.
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
 
 Required:
 
-- `name` (String) Column name. Example: `key`.
-- `type` (String) Column type. Example: `UInt64`.
+- `name` (String) The name of the column in the ClickHouse table. This should match the field names in your Kafka message format. Example: `key`.
+- `type` (String) The ClickHouse data type for this column. Must be a valid ClickHouse data type that can handle the data format. Example: `UInt64`.
 
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--topics"></a>
@@ -159,7 +159,7 @@ Required:
 
 Required:
 
-- `name` (String) Name of the topic. Example: `topic_name`.
+- `name` (String) The name of the Kafka topic to read messages from or write messages to. The topic must exist in the Kafka cluster. Example: `topic_name`.
 
 
 

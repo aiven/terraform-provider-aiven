@@ -14,24 +14,24 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 		Description:      "ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"tables": {
-			Description: "Tables to create",
+			Description: "Array of table configurations that define how Kafka topics are mapped to ClickHouse tables. Each table configuration specifies the table structure, associated Kafka topics, and read/write settings",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_offset_reset": {
-					Description:  "Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.",
+					Description:  "Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Determines where to start reading from Kafka when no offset is stored or the stored offset is out of range. `earliest` starts from the beginning, `latest` starts from the end. Default: `earliest`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"beginning", "earliest", "end", "largest", "latest", "smallest"}, false),
 				},
 				"columns": {
-					Description: "Table columns",
+					Description: "Array of column definitions that specify the structure of the ClickHouse table. Each column maps to a field in the Kafka messages",
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 						"name": {
-							Description: "Column name. Example: `key`.",
+							Description: "The name of the column in the ClickHouse table. This should match the field names in your Kafka message format. Example: `key`.",
 							Required:    true,
 							Type:        schema.TypeString,
 						},
 						"type": {
-							Description: "Column type. Example: `UInt64`.",
+							Description: "The ClickHouse data type for this column. Must be a valid ClickHouse data type that can handle the data format. Example: `UInt64`.",
 							Required:    true,
 							Type:        schema.TypeString,
 						},
@@ -41,50 +41,50 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"data_format": {
-					Description:  "Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. Message data format. Default: `JSONEachRow`.",
+					Description:  "Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. The format of the messages in the Kafka topics. Determines how ClickHouse parses and serializes the data (e.g., JSON, CSV, Avro). Default: `JSONEachRow`.",
 					Required:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"Avro", "AvroConfluent", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "Parquet", "RawBLOB", "TSKV", "TSV", "TabSeparated"}, false),
 				},
 				"date_time_input_format": {
-					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.",
+					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Specifies how ClickHouse should parse DateTime values from text-based input formats. `basic` uses simple parsing, `best_effort` attempts more flexible parsing. Default: `basic`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"basic", "best_effort", "best_effort_us"}, false),
 				},
 				"group_name": {
-					Description: "Kafka consumers group. Default: `clickhouse`.",
+					Description: "The Kafka consumer group name. Multiple consumers with the same group name will share the workload and maintain offset positions. Default: `clickhouse`.",
 					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"handle_error_mode": {
-					Description:  "Enum: `default`, `stream`. How to handle errors for Kafka engine. Default: `default`.",
+					Description:  "Enum: `default`, `stream`. Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors. Default: `default`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"default", "stream"}, false),
 				},
 				"max_block_size": {
-					Description: "Number of row collected by poll(s) for flushing data from Kafka. Default: `0`.",
+					Description: "Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_rows_per_message": {
-					Description: "The maximum number of rows produced in one kafka message for row-based formats. Default: `1`.",
+					Description: "Maximum number of rows that can be processed from a single Kafka message for row-based formats. Useful for controlling memory usage. Default: `1`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"name": {
-					Description: "Name of the table. Example: `events`.",
+					Description: "The name of the ClickHouse table to be created. This table can consume data from and write data to the specified Kafka topics. Example: `events`.",
 					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"num_consumers": {
-					Description: "The number of consumers per table per replica. Default: `1`.",
+					Description: "Number of Kafka consumers to run per table per replica. Increasing this can improve throughput but may increase resource usage. Default: `1`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"poll_max_batch_size": {
-					Description: "Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.",
+					Description: "Maximum number of messages to fetch in a single Kafka poll operation for reading. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -135,19 +135,19 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"skip_broken_messages": {
-					Description: "Skip at least this number of broken messages from Kafka topic per block. Default: `0`.",
+					Description: "Number of broken messages to skip before stopping processing when reading from Kafka. Useful for handling corrupted data without failing the entire integration. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"thread_per_consumer": {
-					Description: "Provide an independent thread for each consumer. All consumers run in the same thread by default. Default: `false`.",
+					Description: "When enabled, each consumer runs in its own thread, providing better isolation and potentially better performance for high-throughput scenarios. Default: `false`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"topics": {
-					Description: "Kafka topics",
+					Description: "Array of Kafka topics that this table will read data from or write data to. Messages from all specified topics will be inserted into this table, and data inserted into this table will be published to the topics",
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"name": {
-						Description: "Name of the topic. Example: `topic_name`.",
+						Description: "The name of the Kafka topic to read messages from or write messages to. The topic must exist in the Kafka cluster. Example: `topic_name`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					}}},
