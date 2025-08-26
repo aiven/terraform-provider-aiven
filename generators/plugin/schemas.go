@@ -263,7 +263,7 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 		}
 
 		if item.Default != nil {
-			values[jen.Id("Default")] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "String").Call(jen.Lit(item.Default))
+			values[jen.Id("Default")] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
 		}
 	}
 

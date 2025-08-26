@@ -45,11 +45,11 @@ func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
 	return result
 }
 
-var _ adapter.DatViewValidators[tfModel] = (*view)(nil)
+var _ adapter.DatConfigValidators = (*view)(nil)
 
 type view struct{ adapter.View }
 
-func (vw *view) DatValidators(_ context.Context) []datasource.ConfigValidator {
+func (vw *view) DatConfigValidators(_ context.Context) []datasource.ConfigValidator {
 	validatable := path.Expressions{
 		path.MatchRoot("id"),
 		path.MatchRoot("name"),

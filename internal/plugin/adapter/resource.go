@@ -198,9 +198,9 @@ func (a *resourceAdapter[T]) ImportState(
 }
 
 func (a *resourceAdapter[T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	v, ok := a.view.(ResViewValidators[T])
+	v, ok := a.view.(ResConfigValidators)
 	if !ok {
 		return nil
 	}
-	return v.ResValidators(ctx)
+	return v.ResConfigValidators(ctx)
 }

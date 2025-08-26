@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/application_user
+resource:
+  description: |
+    Creates and manages an organization application user.
+    [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for programmatic access to the platform using a token created with the `aiven_organization_application_user_token` resource.
+    You give application users access to your organization, projects, and services using the `aiven_organization_permission` resource.
+    You can also add application users to groups using the `aiven_organization_user_group_member` resource.`
+datasource:
+  description: Gets information about an application user.
+idAttribute:
+  compose:
+    - organization_id
+    - user_id
+operations:
+  ApplicationUserCreate: create
+  ApplicationUserDelete: delete
+  ApplicationUserGet: read
+  ApplicationUserUpdate: update
+rename:
+  user_email: email
+schema:
+  is_super_admin:
+    default: false
+    deprecationMessage: This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the aiven_organization_permission resource.

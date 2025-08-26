@@ -72,7 +72,7 @@ type typedImport string
 const (
 	planmodifierTypedImport typedImport = "github.com/hashicorp/terraform-plugin-framework/resource/schema/%splanmodifier"
 	validatorTypedImport    typedImport = "github.com/hashicorp/terraform-plugin-framework-validators/%svalidator"
-	defaultsTypedImport     typedImport = "github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults/%sdefault"
+	defaultsTypedImport     typedImport = "github.com/hashicorp/terraform-plugin-framework/resource/schema/%sdefault"
 )
 
 func getTypedImports() []typedImport {
