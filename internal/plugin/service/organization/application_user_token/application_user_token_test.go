@@ -1,4 +1,4 @@
-package organization_test
+package applicationusertoken_test
 
 import (
 	"fmt"

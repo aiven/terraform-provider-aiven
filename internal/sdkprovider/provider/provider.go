@@ -213,11 +213,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":                 organization.ResourceOrganizationalUnit(),
-			"aiven_organization_user":                   organization.ResourceOrganizationUser(),
-			"aiven_organization_user_group":             organization.ResourceOrganizationUserGroup(),
-			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
-			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
+			"aiven_organizational_unit":     organization.ResourceOrganizationalUnit(),
+			"aiven_organization_user":       organization.ResourceOrganizationUser(),
+			"aiven_organization_user_group": organization.ResourceOrganizationUserGroup(),
+			"aiven_organization_permission": organization.ResourceOrganizationalPermission(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),

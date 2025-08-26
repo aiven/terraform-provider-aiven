@@ -30,42 +30,41 @@ resource "aiven_organization_application_user_token" "example" {
 
 ### Required
 
-- `organization_id` (String) The ID of the organization the application user belongs to.
-- `user_id` (String) The ID of the application user the token is created for.
+- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
+- `user_id` (String) User ID. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `description` (String) Description of the token.
-- `extend_when_used` (Boolean) Extends the token session duration when the token is used. Only applicable if a value is set for `max_age_seconds`.
-- `ip_allowlist` (Set of String) List of allowed IP ranges.
-- `max_age_seconds` (Number) The number of hours after which a token expires. If not set, it never expires.
-- `scopes` (Set of String) Limits access to specific resources by granting read or write privileges to them. For example: `billing:read`. Available scopes are: `authentication`, `billing`, `payments` for [payment methods](https://aiven.io/docs/platform/howto/list-billing), `privatelink`, `projects`, `services`, `static_ips`, and `user`.
+- `description` (String) Description. Maximum length: `1000`. Changing this property forces recreation of the resource.
+- `extend_when_used` (Boolean) Extend token expiration time when token is used. Only applicable if max_age_seconds is specified. The default value is `false`. Changing this property forces recreation of the resource.
+- `ip_allowlist` (Set of String) List of allowed IP ranges. Changing this property forces recreation of the resource.
+- `max_age_seconds` (Number) Time the token remains valid since creation (or since last use if extend_when_used is true). Changing this property forces recreation of the resource.
+- `scopes` (Set of String) Scopes this token is restricted to if specified. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `create_time` (String) Time when the token was created.
-- `created_manually` (Boolean) True for tokens explicitly created using the `access_tokens` API. False for tokens created when a user logs in.
-- `currently_active` (Boolean) True if the API request was made with this token.
-- `expiry_time` (String) Timestamp when the access token will expire unless extended.
-- `full_token` (String, Sensitive) Full token.
-- `id` (String) The ID of this resource.
-- `last_ip` (String) IP address of the last request made with this token.
-- `last_used_time` (String) Timestamp when the access token was last used.
-- `last_user_agent` (String) User agent of the last request made with this token.
-- `last_user_agent_human_readable` (String) User agent of the last request made with this token in human-readable format.
-- `token_prefix` (String) Prefix of the token.
+- `create_time` (String) Create Time.
+- `created_manually` (Boolean) True for tokens explicitly created via the access_tokens API, false for tokens created via login.
+- `currently_active` (Boolean) true if API request was made with this access token.
+- `expiry_time` (String) Timestamp when the access token will expire unless extended, if ever.
+- `full_token` (String, Sensitive) Full Token.
+- `id` (String) Resource ID, a composite of `organization_id`, `user_id` and `token_prefix` IDs.
+- `last_ip` (String) IP address the access token was last used from in case it has ever been used.
+- `last_used_time` (String) Timestamp when the access token was last used, if ever.
+- `last_user_agent` (String) User agent string of the client that last used the token in case it has ever been used.
+- `last_user_agent_human_readable` (String) Human readable user agent string of the client that last used the token in case user agent is known.
+- `token_prefix` (String) First characters of the actual token value. Full value is only exposed after creation. This value is used when updating or revoking tokens. Note that the value may contain /, + and = characters and must be URL encoded when used (/ =&gt; %2F, + =&gt; %2B, = =&gt; %3D).
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 

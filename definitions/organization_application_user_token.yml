@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/application_user_token
+resource:
+  description: |
+    Creates and manages an application user token.
+    Review the [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.
+idAttribute:
+  compose:
+    - organization_id
+    - user_id
+    - token_prefix
+operations:
+  ApplicationUserAccessTokenCreate: create
+  ApplicationUserAccessTokenDelete: delete
+  ApplicationUserAccessTokensList: read
+objectKey: tokens
+schema:
+  full_token:
+    sensitive: true
+  description:
+    optional: true
+  extend_when_used:
+    default: false
