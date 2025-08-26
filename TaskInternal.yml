@@ -167,13 +167,12 @@ tasks:
     desc: "Run all code generation tasks"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
-    deps:
-      - gen-go
+    cmds:
+      - task: gen-go
       - task: gen-plugin
         vars:
           no_spec: '{{.no_spec}}'
-      - gen-docs
-    cmds:
+      - task: gen-docs
       - task: mockery
 
   #-------------------------------------
