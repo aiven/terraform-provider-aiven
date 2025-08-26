@@ -1,7 +1,8 @@
-package organization_test
+package applicationuser_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -41,13 +42,8 @@ func TestAccOrganizationApplicationUserResource(t *testing.T) {
 				),
 			},
 			{
-				Config:             testAccOrganizationApplicationUserResource(suffix, true),
-				PlanOnly:           false,
-				ExpectNonEmptyPlan: true,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					// The value can't be changed and remains false.
-					resource.TestCheckResourceAttr(resourceName, "is_super_admin", "false"),
-				),
+				Config:      testAccOrganizationApplicationUserResource(suffix, true),
+				ExpectError: regexp.MustCompile(`Making application users super admin is no\s+longer supported`),
 			},
 			{
 				ResourceName:      resourceName,
@@ -61,6 +57,38 @@ func TestAccOrganizationApplicationUserResource(t *testing.T) {
 
 					return util.ComposeID(rs.Primary.Attributes["organization_id"], rs.Primary.Attributes["user_id"]), nil
 				},
+			},
+		},
+	})
+}
+
+func TestAccOrganizationApplicationUserDataSource(t *testing.T) {
+	suffix := acc.RandStr()
+	dataUserFoo := "data.aiven_organization_application_user.foo"
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = "%s"
+}
+
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "test-acc-org-app-user-%s"
+}
+
+data "aiven_organization_application_user" "foo" {
+  organization_id = aiven_organization_application_user.foo.organization_id
+  user_id         = aiven_organization_application_user.foo.user_id
+}
+`, acc.OrganizationName(), suffix),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(dataUserFoo, "name", "test-acc-org-app-user-"+suffix),
+					resource.TestCheckResourceAttrSet(dataUserFoo, "email"),
+				),
 			},
 		},
 	})

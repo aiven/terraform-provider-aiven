@@ -33,18 +33,16 @@ type ResView[T any] interface {
 	Delete(ctx context.Context, state *T) diag.Diagnostics
 }
 
-// DatViewValidators implements datasource.DataSourceWithConfigValidators.
-// It renames the method, so it can be used with ResViewValidators without collisions.
-type DatViewValidators[T any] interface {
-	DatView[T]
-	DatValidators(ctx context.Context) []datasource.ConfigValidator
+// DatConfigValidators implements datasource.DataSourceWithConfigValidators.
+// It renames the method, so it can be used with ResConfigValidators without collisions.
+type DatConfigValidators interface {
+	DatConfigValidators(ctx context.Context) []datasource.ConfigValidator
 }
 
-// ResViewValidators implements resource.ResourceWithConfigValidators.
-// It renames the method, so it can be used with DatViewValidators without collisions.
-type ResViewValidators[T any] interface {
-	ResView[T]
-	ResValidators(ctx context.Context) []resource.ConfigValidator
+// ResConfigValidators implements resource.ResourceWithConfigValidators.
+// It renames the method, so it can be used with DatConfigValidators without collisions.
+type ResConfigValidators interface {
+	ResConfigValidators(ctx context.Context) []resource.ConfigValidator
 }
 
 // View base view that contains the client and potentially other dependencies

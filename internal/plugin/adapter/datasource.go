@@ -104,9 +104,9 @@ func (a *datasourceAdapter[T]) Read(
 }
 
 func (a *datasourceAdapter[T]) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {
-	v, ok := a.view.(DatViewValidators[T])
+	v, ok := a.view.(DatConfigValidators)
 	if !ok {
 		return nil
 	}
-	return v.DatValidators(ctx)
+	return v.DatConfigValidators(ctx)
 }
