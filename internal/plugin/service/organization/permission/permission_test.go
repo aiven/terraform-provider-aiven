@@ -1,4 +1,4 @@
-package organization_test
+package permission_test
 
 import (
 	"context"

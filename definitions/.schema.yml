@@ -107,11 +107,13 @@ definitions:
       - delete
       - read
       - update
+      - upsert
     $comment: |
       - create: The OperationID is used to create the resource
       - read: The OperationID is used to read the resource
       - update: The OperationID is used to update the resource
       - delete: The OperationID is used to delete the resource
+      - upsert: The OperationID is used to create or update the resource
 
   SchemaMeta:
     type: object
