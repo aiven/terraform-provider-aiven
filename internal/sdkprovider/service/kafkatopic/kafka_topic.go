@@ -83,10 +83,12 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 			Optional:    true,
 		},
 		"message_format_version": {
-			Type:         schema.TypeString,
-			Optional:     true,
+			Type:     schema.TypeString,
+			Optional: true,
+			// MessageFormatVersionTypeChoices has `None` value that available in the Response, we use it for the validation.
+			// ConfigMessageFormatVersionTypeChoices has only valid values (wo `None), we expose it to the documentation.
 			ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
-			Description:  userconfig.Desc("Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand.").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
+			Description:  userconfig.Desc("Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'.").PossibleValuesString(kafkatopic.ConfigMessageFormatVersionTypeChoices()...).Build(),
 		},
 		"message_timestamp_difference_max_ms": {
 			Type:        schema.TypeString,

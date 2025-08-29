@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -25,9 +26,13 @@ import (
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
 func serviceIntegrationTypeChoices() []string {
-	// application_service_credential is not ready for use
+	// These integrations are not supposed to be exposed in TF
+	ignore := []string{
+		"application_service_credential",
+		"kafka_inkless_postgresql",
+	}
 	return lo.Filter(service.IntegrationTypeChoices(), func(s string, _ int) bool {
-		return s != "application_service_credential"
+		return !slices.Contains(ignore, s)
 	})
 }
 
