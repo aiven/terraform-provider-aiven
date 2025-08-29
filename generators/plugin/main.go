@@ -242,6 +242,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 		OperationRead:   ReadHandler,
 		OperationUpdate: UpdateHandler,
 		OperationDelete: DeleteHandler,
+		OperationUpsert: CreateHandler | UpdateHandler,
 	}
 
 	// Initializes the map

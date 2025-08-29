@@ -33,6 +33,7 @@ const (
 	OperationRead   Operation = "read"
 	OperationUpdate Operation = "update"
 	OperationDelete Operation = "delete"
+	OperationUpsert Operation = "upsert"
 )
 
 type Scope struct {

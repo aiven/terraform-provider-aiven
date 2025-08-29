@@ -3,37 +3,12 @@
 page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions
-  to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level.
-  Unit-level permissions aren't shown in the Aiven Console.
-  To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple aiven_organization_permission resources.
-  Instead, use multiple permission blocks as in the example usage.
-  Do not use the aiven_project_user or aiven_organization_group_project resources with this resource.
-  By default, Aiven Terraform Provider validates whether the resource already exists in the Aiven API.
-  This validation prevents you from managing permissions for a specific resource using multiple aiven_organization_group_project resources,
-  which leads to overwrites and conflicts.
-  In case of a conflict, you can import the resource using the terraform import command to continue managing it.
-  Alternatively, you can disable this validation by setting the AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT environment variable to false,
-  which will cause Terraform to override the remote state.
+  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console. To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple aiven_organization_permission resources. Instead, use multiple permission blocks as in the example usage. Do not use the aiven_project_user or aiven_organization_group_project resources with this resource. By default, Aiven Terraform Provider validates whether the resource already exists in the Aiven API. This validation prevents you from managing permissions for a specific resource using multiple aiven_organization_group_project resources, which leads to overwrites and conflicts. In case of a conflict, you can import the resource using the terraform import command to continue managing it. Alternatively, you can disable this validation by setting the AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT environment variable to false, which will cause Terraform to override the remote state.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)
-to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level.
-Unit-level permissions aren't shown in the Aiven Console.
-
-To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple `aiven_organization_permission` resources.
-Instead, use multiple permission blocks as in the example usage.
-
-**Do not use the `aiven_project_user` or `aiven_organization_group_project` resources with this resource**.
-
-By default, Aiven Terraform Provider validates whether the resource already exists in the Aiven API.
-This validation prevents you from managing permissions for a specific resource using multiple `aiven_organization_group_project` resources,
-which leads to overwrites and conflicts.
-In case of a conflict, you can import the resource using the `terraform import` command to continue managing it.
-Alternatively, you can disable this validation by setting the `AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT` environment variable to `false`,
-which will cause Terraform to override the remote state.
+Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console. To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple `aiven_organization_permission` resources. Instead, use multiple permission blocks as in the example usage. **Do not use the `aiven_project_user` or `aiven_organization_group_project` resources with this resource**. By default, Aiven Terraform Provider validates whether the resource already exists in the Aiven API. This validation prevents you from managing permissions for a specific resource using multiple `aiven_organization_group_project` resources, which leads to overwrites and conflicts. In case of a conflict, you can import the resource using the `terraform import` command to continue managing it. Alternatively, you can disable this validation by setting the `AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT` environment variable to `false`, which will cause Terraform to override the remote state.
 
 ## Example Usage
 
@@ -102,32 +77,32 @@ resource "aiven_organization_permission" "example_org_permissions" {
 
 ### Required
 
-- `organization_id` (String) Organization ID.
-- `permissions` (Block Set, Min: 1) Permissions to grant to principals. (see [below for nested schema](#nestedblock--permissions))
-- `resource_id` (String) Resource ID.
-- `resource_type` (String) Resource type. The possible values are `organization`, `organization_unit` and `project`.
+- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
+- `resource_id` (String) Resource Id. Changing this property forces recreation of the resource.
+- `resource_type` (String) Resource type. The possible values are `organization`, `organization_unit` and `project`. Changing this property forces recreation of the resource.
 
 ### Optional
 
+- `permissions` (Block Set) Required property. List of roles to set. (see [below for nested schema](#nestedblock--permissions))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID, a composite of `organization_id`, `resource_type` and `resource_id` IDs.
 
 <a id="nestedblock--permissions"></a>
 ### Nested Schema for `permissions`
 
 Required:
 
-- `permissions` (Set of String) List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant. The possible values are `admin`, `developer`, `operator`, `organization:app_users:write`, `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`, `organization:groups:write`, `organization:networking:read`, `organization:networking:write`, `organization:projects:write`, `organization:users:write`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `project:services:write`, `read_only`, `role:organization:admin`, `role:services:maintenance`, `role:services:recover`, `service:configuration:write`, `service:data:write`, `service:logs:read`, `service:secrets:read` and `service:users:write`.
+- `permissions` (Set of String) List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant". The possible values are `admin`, `developer`, `operator`, `organization:app_users:write`, `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`, `organization:groups:write`, `organization:networking:read`, `organization:networking:write`, `organization:projects:write`, `organization:users:write`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `project:services:write`, `read_only`, `role:organization:admin`, `role:services:maintenance`, `role:services:recover`, `service:configuration:write`, `service:data:write`, `service:logs:read`, `service:secrets:read` and `service:users:write`.
 - `principal_id` (String) ID of the user or group to grant permissions to. Only active users who have accepted an [invite](https://aiven.io/docs/platform/howto/manage-org-users) to join the organization can be granted permissions.
-- `principal_type` (String) The type of principal. The possible values are `user` and `user_group`.
+- `principal_type` (String) An enumeration. The possible values are `user` and `user_group`.
 
 Read-Only:
 
-- `create_time` (String) Time created.
-- `update_time` (String) Time updated.
+- `create_time` (String) Create Time.
+- `update_time` (String) Update Time.
 
 
 <a id="nestedblock--timeouts"></a>
@@ -135,11 +110,10 @@ Read-Only:
 
 Optional:
 
-- `create` (String)
-- `default` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
