@@ -16,7 +16,8 @@ nav_order: 1
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `autoscaler_service`
 - Change field `disk_space_used`: remove deprecation notice as this field is a computed read-only field that shows current
   disk usage
-- Deprecate `aiven_kafka_topic` field `config.message_format_version` in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be `"None"`.
+- Deprecate `aiven_kafka_topic` field `config.message_format_version` in Kafka 4.0+: this configuration is removed
+  and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be `"None"`.
 
 ## [4.44.0] - 2025-08-14
 
