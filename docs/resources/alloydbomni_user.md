@@ -6,6 +6,18 @@ description: |-
   Creates and manages an Aiven for AlloyDB Omni service user.
   This resource is in the beta stage and may change without notice. Set
   the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+  !> End of life notice
+  Aiven for AlloyDB Omni is entering its end-of-life cycle https://aiven.io/docs/platform/reference/end-of-life.
+  From 5 September 2025, you can no longer create new Aiven for AlloyDB Omni services. Existing
+  services continue to operate until the end of life (EOL) date but you cannot change plans for these services.
+  On 5 December 2025, all active Aiven for AlloyDB Omni services are powered off and deleted, making data from
+  these services inaccessible. The recommended alternatives to Aiven for AlloyDB Omni are:
+  Aiven for PostgreSQL® https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/pg,
+  Aiven for ClickHouse® https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/clickhouse,
+  and Aiven for MySQL® https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/mysql.
+  To ensure uninterrupted service, complete your migration before December 5, 2025.
+  For further assistance, contact the Aiven support team mailto:support@aiven.io or your
+  account team.
 ---
 
 # aiven_alloydbomni_user (Resource)
@@ -14,6 +26,19 @@ Creates and manages an Aiven for AlloyDB Omni service user.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+
+!> **End of life notice**
+Aiven for AlloyDB Omni is entering its [end-of-life cycle](https://aiven.io/docs/platform/reference/end-of-life).
+From **5 September 2025**, you can no longer create new Aiven for AlloyDB Omni services. Existing
+services continue to operate until the end of life (EOL) date but you cannot change plans for these services.
+On **5 December 2025**, all active Aiven for AlloyDB Omni services are powered off and deleted, making data from
+these services inaccessible. The recommended alternatives to Aiven for AlloyDB Omni are:
+[Aiven for PostgreSQL®](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/pg),
+[Aiven for ClickHouse®](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/clickhouse),
+and [Aiven for MySQL®](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/mysql).
+To ensure uninterrupted service, complete your migration before December 5, 2025.
+For further assistance, contact the [Aiven support team](mailto:support@aiven.io) or your
+account team.
 
 
 
