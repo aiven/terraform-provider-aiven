@@ -49,11 +49,12 @@ var aivenInfluxDBUserSchema = map[string]*schema.Schema{
 
 func ResourceInfluxDBUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The InfluxDB User resource allows the creation and management of Aiven InfluxDB Users.",
-		CreateContext: schemautil.ResourceServiceUserCreate,
-		UpdateContext: schemautil.ResourceServiceUserUpdate,
-		ReadContext:   schemautil.ResourceServiceUserRead,
-		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
+		DeprecationMessage: deprecationMessage,
+		Description:        "The InfluxDB User resource allows the creation and management of Aiven InfluxDB Users.",
+		CreateContext:      schemautil.ResourceServiceUserCreate,
+		UpdateContext:      schemautil.ResourceServiceUserUpdate,
+		ReadContext:        schemautil.ResourceServiceUserRead,
+		DeleteContext:      schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

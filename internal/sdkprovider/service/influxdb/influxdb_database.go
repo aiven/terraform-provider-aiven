@@ -30,11 +30,12 @@ var aivenInfluxDBDatabaseSchema = map[string]*schema.Schema{
 
 func ResourceInfluxDBDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The InfluxDB Database resource allows the creation and management of Aiven InfluxDB Databases.",
-		CreateContext: resourceInfluxDBDatabaseCreate,
-		ReadContext:   resourceInfluxDBDatabaseRead,
-		DeleteContext: resourceInfluxDBDatabaseDelete,
-		UpdateContext: resourceInfluxDBDatabaseUpdate,
+		DeprecationMessage: deprecationMessage,
+		Description:        "The InfluxDB Database resource allows the creation and management of Aiven InfluxDB Databases.",
+		CreateContext:      resourceInfluxDBDatabaseCreate,
+		ReadContext:        resourceInfluxDBDatabaseRead,
+		DeleteContext:      resourceInfluxDBDatabaseDelete,
+		UpdateContext:      resourceInfluxDBDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
