@@ -33,7 +33,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "The email address of the user who sent an invitation to the user.",
-		Deprecated:  "This field is deprecated and will be removed in the next major release. ",
+		Deprecated:  "This field is deprecated and will be removed in the next major release.",
 	},
 	"accepted": {
 		Type:     schema.TypeBool,
@@ -41,7 +41,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 		Description: "This is a boolean flag that determines whether an invitation was accepted or not by the user. " +
 			"`false` value means that the invitation was sent to the user but not yet accepted. `true` means that" +
 			" the user accepted the invitation and now a member of an organization.",
-		Deprecated: "This field is deprecated and will be removed in the next major release. ",
+		Deprecated: "This field is deprecated and will be removed in the next major release.",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
@@ -57,7 +57,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 
 func ResourceOrganizationUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an Aiven Organization user. ",
+		Description:   "Creates and manages an Aiven Organization user.",
 		CreateContext: resourceOrganizationUserCreate,
 		ReadContext:   common.WithGenClient(resourceOrganizationUserRead),
 		DeleteContext: common.WithGenClient(resourceOrganizationUserDelete),

@@ -7,6 +7,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
 
+const deprecationMessage = "After April 30, 2025, all active Aiven for InfluxDB services are powered off and deleted, making data from these services inaccessible."
+
 func influxDBSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeInfluxDB)
 	s[schemautil.ServiceTypeInfluxDB] = &schema.Schema{
@@ -55,12 +57,13 @@ func influxDBSchema() map[string]*schema.Schema {
 
 func ResourceInfluxDB() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The InfluxDB resource allows the creation and management of Aiven InfluxDB services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeInfluxDB),
-		ReadContext:   schemautil.ResourceServiceRead,
-		UpdateContext: schemautil.ResourceServiceUpdate,
-		DeleteContext: schemautil.ResourceServiceDelete,
-		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeInfluxDB),
+		DeprecationMessage: deprecationMessage,
+		Description:        "The InfluxDB resource allows the creation and management of Aiven InfluxDB services.",
+		CreateContext:      schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeInfluxDB),
+		ReadContext:        schemautil.ResourceServiceRead,
+		UpdateContext:      schemautil.ResourceServiceUpdate,
+		DeleteContext:      schemautil.ResourceServiceDelete,
+		CustomizeDiff:      schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeInfluxDB),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

@@ -2198,7 +2198,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_message_downconversion_enable": {
-					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
+					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2395,7 +2395,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_message_downconversion_enable": {
-					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
+					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2573,7 +2573,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2635,7 +2635,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3020,7 +3020,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3082,7 +3082,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},

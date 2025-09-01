@@ -12,8 +12,9 @@ import (
 
 func DatasourceInfluxDBDatabase() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceDatabaseRead,
-		Description: "The InfluxDB Database data source provides information about the existing Aiven InfluxDB Database.",
+		DeprecationMessage: deprecationMessage,
+		ReadContext:        datasourceDatabaseRead,
+		Description:        "The InfluxDB Database data source provides information about the existing Aiven InfluxDB Database.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenInfluxDBDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}
