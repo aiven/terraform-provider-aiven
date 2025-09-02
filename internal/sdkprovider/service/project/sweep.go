@@ -96,7 +96,7 @@ func sweepBillingGroups(ctx context.Context) func(region string) error {
 		}
 
 		for _, billingGroup := range billingGroups {
-			if strings.Contains(billingGroup.BillingGroupName, "test-acc-") {
+			if strings.Contains(billingGroup.BillingGroupName, "test-") {
 				if err := client.BillingGroup.Delete(ctx, billingGroup.Id); err != nil {
 					// billing group not found
 					var e aiven.Error
