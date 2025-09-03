@@ -33,7 +33,12 @@ func mergeSlices[T any](args ...[]T) []T {
 	for _, a := range args {
 		merged = append(merged, a...)
 	}
-	return distinct(merged...)
+
+	result := distinct(merged...)
+	if len(result) == 0 {
+		return nil
+	}
+	return result
 }
 
 func or[T comparable](a, b T) T {
@@ -51,7 +56,7 @@ func orLonger[T ~string](a, b T) T {
 	return b
 }
 
-func orDefault[T any](v *T, def T) T {
+func ptrOrDefault[T any](v *T, def T) T {
 	if v == nil {
 		return def
 	}
@@ -98,6 +103,20 @@ func fmtDescription(isResource bool, item *Item) string {
 
 	if item.Default != nil {
 		b.DefaultValue(item.Default)
+	}
+
+	// Validators
+	if item.AlsoRequires != nil {
+		b.RequiredWith(item.AlsoRequires...)
+	}
+	if item.ConflictsWith != nil {
+		b.ConflictsWith(item.ConflictsWith...)
+	}
+	if item.ExactlyOneOf != nil {
+		b.ExactlyOneOf(item.ExactlyOneOf...)
+	}
+	if item.AtLeastOneOf != nil {
+		b.AtLeastOneOf(item.AtLeastOneOf...)
 	}
 
 	return b.Build()

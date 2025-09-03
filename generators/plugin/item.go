@@ -86,6 +86,13 @@ type Item struct {
 	UserSensitive *bool `yaml:"sensitive"`
 	UserForceNew  *bool `yaml:"forceNew"`
 
+	// TF Validators
+	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
+	ConflictsWith []string `yaml:"conflictsWith"`
+	ExactlyOneOf  []string `yaml:"exactlyOneOf"`
+	AtLeastOneOf  []string `yaml:"atLeastOneOf"`
+	AlsoRequires  []string `yaml:"alsoRequires"`
+
 	JSONName           string     `yaml:"jsonName"`
 	Type               SchemaType `yaml:"type"`
 	Description        string     `yaml:"description"`
