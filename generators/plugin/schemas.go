@@ -27,6 +27,11 @@ func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
 
+	if isResource && def.Version != nil {
+		// Only resources have Version field
+		attrs[jen.Id("Version")] = jen.Lit(*def.Version)
+	}
+
 	example, err := exampleRoot(isResource, item)
 	if err != nil {
 		return nil, fmt.Errorf("example error: %w", err)
@@ -223,10 +228,19 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 
 	if !item.IsNested() {
 		if isResource {
+			typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+			planModifiers := make([]jen.Code, 0)
 			if item.ForceNew {
-				typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
+			}
+
+			if item.UseStateForUnknown {
+				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "UseStateForUnknown").Call())
+			}
+
+			if len(planModifiers) > 0 {
 				values[jen.Id("PlanModifiers")] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
-					Values(jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
+					Values(planModifiers...)
 			}
 
 			if item.Required {

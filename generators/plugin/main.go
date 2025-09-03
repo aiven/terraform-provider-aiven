@@ -585,11 +585,12 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.AlsoRequires = mergeSlices(a.AlsoRequires, b.AlsoRequires)
 
 	// User overrides that can set "false" values
-	a.UserSensitive = or(b.UserSensitive, a.UserSensitive)
-	a.UserRequired = or(b.UserRequired, a.UserRequired)
-	a.UserComputed = or(b.UserComputed, a.UserComputed)
-	a.UserOptional = or(b.UserOptional, a.UserOptional)
-	a.UserForceNew = or(b.UserForceNew, a.UserForceNew)
+	a.OverrideSensitive = or(b.OverrideSensitive, a.OverrideSensitive)
+	a.OverrideRequired = or(b.OverrideRequired, a.OverrideRequired)
+	a.OverrideComputed = or(b.OverrideComputed, a.OverrideComputed)
+	a.OverrideOptional = or(b.OverrideOptional, a.OverrideOptional)
+	a.OverrideForceNew = or(b.OverrideForceNew, a.OverrideForceNew)
+	a.UseStateForUnknown = a.UseStateForUnknown || b.UseStateForUnknown
 
 	if a.Name == "" {
 		return nil, fmt.Errorf("node doesn't have name set, parent: %q", parent.Name)
@@ -618,34 +619,35 @@ func recalcDeep(item *Item) error {
 	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
 
 	// Overrides that come from the user config
-	item.Optional = ptrOrDefault(item.UserOptional, item.Optional)
-	item.Required = ptrOrDefault(item.UserRequired, item.Required)
+	item.Optional = ptrOrDefault(item.OverrideOptional, item.Optional)
+	item.Required = ptrOrDefault(item.OverrideRequired, item.Required)
 
 	// Optional field can't be required
 	// If user has set both Required and Optional, TF will complain about it.
-	if item.Optional && item.UserRequired == nil {
+	if item.Optional && item.OverrideRequired == nil {
 		item.Required = false
 	}
 
 	if item.Required {
 		// Required field can't be optional
-		if item.UserOptional == nil {
+		if item.OverrideOptional == nil {
 			item.Optional = false
 		}
 
 		// Required field can't be computed
-		if item.UserComputed == nil {
+		if item.OverrideComputed == nil {
 			item.Computed = false
 		}
 	}
 
-	item.Sensitive = ptrOrDefault(item.UserSensitive, item.Sensitive)
-	item.Computed = ptrOrDefault(item.UserComputed, item.Computed)
-	item.ForceNew = ptrOrDefault(item.UserForceNew, item.ForceNew)
+	item.Sensitive = ptrOrDefault(item.OverrideSensitive, item.Sensitive)
+	item.Computed = ptrOrDefault(item.OverrideComputed, item.Computed)
+	item.ForceNew = ptrOrDefault(item.OverrideForceNew, item.ForceNew)
 
 	for k, v := range item.Properties {
 		// If parent is computed, child must be computed too
 		v.Computed = v.Computed || item.Computed
+		v.UseStateForUnknown = v.UseStateForUnknown || item.UseStateForUnknown
 		err := recalcDeep(v)
 		if err != nil {
 			return fmt.Errorf("%s property: %w", k, err)
@@ -655,6 +657,7 @@ func recalcDeep(item *Item) error {
 	if item.Items != nil {
 		// If parent is computed, child must be computed too
 		item.Items.Computed = item.Items.Computed || item.Computed
+		item.Items.UseStateForUnknown = item.Items.UseStateForUnknown || item.UseStateForUnknown
 		err := recalcDeep(item.Items)
 		if err != nil {
 			return fmt.Errorf("%s items: %w", item.Name, err)

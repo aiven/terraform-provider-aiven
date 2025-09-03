@@ -18,6 +18,7 @@ type MightyResource interface {
 	resource.ResourceWithImportState
 	resource.ResourceWithValidateConfig
 	resource.ResourceWithConfigValidators
+	resource.ResourceWithModifyPlan
 }
 
 type newResourceSchema func(context.Context) schema.Schema
@@ -54,6 +55,36 @@ type resourceAdapter[T any] struct {
 
 	// composeID is the list of identifiers used to compose the resource ID.
 	composeID []string
+}
+
+func (a *resourceAdapter[T]) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, rsp *resource.ModifyPlanResponse) {
+	vw, ok := a.view.(ResPlanModifier[T])
+	if !ok {
+		return
+	}
+
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var (
+		plan  = a.newModel()
+		state = a.newModel()
+		diags = &rsp.Diagnostics
+	)
+
+	diags.Append(req.Plan.Get(ctx, plan)...)
+	diags.Append(req.State.Get(ctx, state)...)
+	if diags.HasError() {
+		return
+	}
+
+	diags.Append(vw.ModifyPlan(ctx, plan.SharedModel(), state.SharedModel())...)
+	if diags.HasError() {
+		return
+	}
+
+	diags.Append(rsp.Plan.Set(ctx, plan)...)
 }
 
 func (a *resourceAdapter[T]) Configure(
