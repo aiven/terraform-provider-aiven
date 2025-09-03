@@ -78,6 +78,12 @@ github.com/aiven/go-api-schemas v1.142.0 h1:Al9RB5JY7U4en2RgQe2KJplM3IdMkdcIEvj/
 github.com/aiven/go-api-schemas v1.142.0/go.mod h1:gKq9h6Btptv6HzrqVOK+gEq4/5xvVXohQyFoU4hzAyc=
 github.com/aiven/go-client-codegen v0.121.0 h1:In4qsv3WHlPds1yPkYgRldGHoPRbGmTS2r9hhk6Mvqw=
 github.com/aiven/go-client-codegen v0.121.0/go.mod h1:QFo0OEL3lqbALcv0s3NU8BxDX6J/ARUfBvR4UFBdCVs=
+github.com/aiven/go-client-codegen v0.118.0 h1:PV9q5PnC7txSt34eJGM4oSL4l3N01xRfmlMtjFisLQ0=
+github.com/aiven/go-client-codegen v0.118.0/go.mod h1:M3B9TctBIv7NY1xMvI609ue1UHXZHiat0m4thb5piOY=
+github.com/aiven/go-client-codegen v0.121.1-0.20250903082939-300bc7185066 h1:b06D9m/gGJFJmOIIxzCiQtELM+whazO6e5th7cbgUu0=
+github.com/aiven/go-client-codegen v0.121.1-0.20250903082939-300bc7185066/go.mod h1:QFo0OEL3lqbALcv0s3NU8BxDX6J/ARUfBvR4UFBdCVs=
+github.com/aiven/go-client-codegen v0.121.1-0.20250903114002-e795ab1cab21 h1:POukurzFk/UUe+XFJBW47S/GaC4m9dkki0oARYW2grs=
+github.com/aiven/go-client-codegen v0.121.1-0.20250903114002-e795ab1cab21/go.mod h1:QFo0OEL3lqbALcv0s3NU8BxDX6J/ARUfBvR4UFBdCVs=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
 github.com/aiven/go-utils/selproj v0.1.0/go.mod h1:Tc71RJ7tPJ5V0IsVxSrXbAJQICGLpe5iMXS+rq8aLqg=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
@@ -788,6 +794,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
+github.com/stretchr/testify v1.11.0 h1:ib4sjIrwZKxE5u/Japgo/7SJV3PvgjGiRNAvTVGqQl8=
+github.com/stretchr/testify v1.11.0/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
