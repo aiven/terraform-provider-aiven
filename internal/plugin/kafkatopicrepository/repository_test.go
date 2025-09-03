@@ -9,7 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestRepositoryContextWithDeadline(t *testing.T) {
 	defer cancel()
 
 	rep := newRepository(&fakeTopicClient{
-		storage: map[string]*aiven.KafkaListTopic{
+		storage: map[string]*kafkatopic.TopicOut{
 			"a/b/c": {TopicName: "c"},
 		},
 	})
@@ -36,7 +37,7 @@ func TestRepositoryRead(t *testing.T) {
 		requests  []request  // to call Read()
 		responses []response // to get from Read()
 		// fakeTopicClient params
-		storage         map[string]*aiven.KafkaListTopic
+		storage         map[string]*kafkatopic.TopicOut
 		v1ListErr       error
 		v1ListCalled    int32
 		v2ListErr       error
@@ -51,7 +52,7 @@ func TestRepositoryRead(t *testing.T) {
 			responses: []response{
 				{err: errNotFound},
 			},
-			storage:         make(map[string]*aiven.KafkaListTopic),
+			storage:         make(map[string]*kafkatopic.TopicOut),
 			v1ListCalled:    1,
 			v2ListCalled:    0, // doesn't reach V2List, because "storage" doesn't return the topic
 			v2ListBatchSize: defaultV2ListBatchSize,
@@ -62,9 +63,9 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "a", service: "b", topic: "c"},
 			},
 			responses: []response{
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 			},
 			v1ListCalled:    1,
@@ -78,10 +79,10 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "a", service: "b", topic: "d"},
 			},
 			responses: []response{
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
 				{err: errNotFound},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 			},
 			v1ListCalled:    1, // called once
@@ -95,10 +96,10 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "a", service: "d", topic: "e"},
 			},
 			responses: []response{
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
 				{err: errNotFound},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 			},
 			v1ListCalled:    2, // called once for each service
@@ -112,10 +113,10 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "a", service: "d", topic: "e"},
 			},
 			responses: []response{
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
-				{topic: &aiven.KafkaTopic{TopicName: "e"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "e"}},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 				"a/d/e": {TopicName: "e"},
 			},
@@ -139,16 +140,16 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "b", service: "a", topic: "b"},
 			},
 			responses: []response{
-				{topic: &aiven.KafkaTopic{TopicName: "a"}},
-				{topic: &aiven.KafkaTopic{TopicName: "b"}},
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
-				{topic: &aiven.KafkaTopic{TopicName: "a"}},
-				{topic: &aiven.KafkaTopic{TopicName: "b"}},
-				{topic: &aiven.KafkaTopic{TopicName: "c"}},
-				{topic: &aiven.KafkaTopic{TopicName: "a"}},
-				{topic: &aiven.KafkaTopic{TopicName: "b"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "a"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "b"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "a"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "b"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "a"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "b"}},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/a/a": {TopicName: "a"},
 				"a/a/b": {TopicName: "b"},
 				"a/a/c": {TopicName: "c"},
@@ -187,7 +188,7 @@ func TestRepositoryRead(t *testing.T) {
 			responses: []response{
 				{err: fmt.Errorf("topic read error: All attempts fail:\n#1: bla bla bla")},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 			},
 			v2ListErr:       fmt.Errorf("bla bla bla"),
@@ -201,12 +202,12 @@ func TestRepositoryRead(t *testing.T) {
 				{project: "a", service: "b", topic: "c"},
 			},
 			responses: []response{
-				{err: fmt.Errorf("topic read error: All attempts fail:\n#1: topic list has changed")},
+				{err: fmt.Errorf("topic read error: All attempts fail:\n#1: topic list has changed: [404 ]: Foo")},
 			},
-			storage: map[string]*aiven.KafkaListTopic{
+			storage: map[string]*kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
 			},
-			v2ListErr:       aiven.Error{Status: 404},
+			v2ListErr:       avngen.Error{Status: 404, Message: "Foo"},
 			v1ListCalled:    1,
 			v2ListCalled:    1,
 			v2ListBatchSize: defaultV2ListBatchSize,
@@ -253,13 +254,13 @@ func TestRepositoryRead(t *testing.T) {
 	}
 }
 
-var _ topicsClient = &fakeTopicClient{}
+var _ topicsClient = (*fakeTopicClient)(nil)
 
 // fakeTopicClient fake Aiven client topic handler
 type fakeTopicClient struct {
 	// stores topics as if they stored at Aiven
 	// key format: project/service/topic
-	storage map[string]*aiven.KafkaListTopic
+	storage map[string]*kafkatopic.TopicOut
 	// errors to return
 	createErr []error
 	deleteErr error
@@ -272,7 +273,7 @@ type fakeTopicClient struct {
 	v2ListCalled int32
 }
 
-func (f *fakeTopicClient) Create(context.Context, string, string, aiven.CreateKafkaTopicRequest) error {
+func (f *fakeTopicClient) ServiceKafkaTopicCreate(ctx context.Context, project string, serviceName string, in *kafkatopic.ServiceKafkaTopicCreateIn) error {
 	time.Sleep(time.Millisecond * 100) // we need some lag to simulate races
 	attempt := atomic.AddInt32(&f.createCalled, 1) - 1
 	if int(attempt) >= len(f.createErr) {
@@ -281,34 +282,34 @@ func (f *fakeTopicClient) Create(context.Context, string, string, aiven.CreateKa
 	return f.createErr[attempt]
 }
 
-func (f *fakeTopicClient) Update(context.Context, string, string, string, aiven.UpdateKafkaTopicRequest) error {
+func (f *fakeTopicClient) ServiceKafkaTopicUpdate(ctx context.Context, project string, serviceName string, topicName string, in *kafkatopic.ServiceKafkaTopicUpdateIn) error {
 	panic("implement me")
 }
 
-func (f *fakeTopicClient) Delete(context.Context, string, string, string) error {
+func (f *fakeTopicClient) ServiceKafkaTopicDelete(ctx context.Context, project string, serviceName string, topicName string) error {
 	atomic.AddInt32(&f.deleteCalled, 1)
 	return f.deleteErr
 }
 
-func (f *fakeTopicClient) List(_ context.Context, project, service string) ([]*aiven.KafkaListTopic, error) {
+func (f *fakeTopicClient) ServiceKafkaTopicList(ctx context.Context, project string, serviceName string) ([]kafkatopic.TopicOut, error) {
 	atomic.AddInt32(&f.v1ListCalled, 1)
-	key := newKey(project, service) + "/"
-	result := make([]*aiven.KafkaListTopic, 0)
+	key := newKey(project, serviceName) + "/"
+	result := make([]kafkatopic.TopicOut, 0)
 	for k, v := range f.storage {
 		if strings.HasPrefix(k, key) {
-			result = append(result, v)
+			result = append(result, *v)
 		}
 	}
 	return result, f.v1ListErr
 }
 
-func (f *fakeTopicClient) V2List(_ context.Context, project, service string, topicNames []string) ([]*aiven.KafkaTopic, error) {
+func (f *fakeTopicClient) ServiceKafkaTopicListV2(ctx context.Context, project string, serviceName string, in *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error) {
 	atomic.AddInt32(&f.v2ListCalled, 1)
-	result := make([]*aiven.KafkaTopic, 0)
-	for _, n := range topicNames {
-		v, ok := f.storage[newKey(project, service, n)]
+	result := make([]kafkatopic.ServiceKafkaTopicGetOut, 0)
+	for _, n := range in.TopicNames {
+		v, ok := f.storage[newKey(project, serviceName, n)]
 		if ok {
-			result = append(result, &aiven.KafkaTopic{TopicName: v.TopicName})
+			result = append(result, kafkatopic.ServiceKafkaTopicGetOut{TopicName: v.TopicName})
 		}
 	}
 	return result, f.v2ListErr

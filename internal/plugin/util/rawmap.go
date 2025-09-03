@@ -77,6 +77,7 @@ func (r *rawMap) Set(value any, keys ...string) error {
 		return fmt.Errorf("no keys provided")
 	}
 
+	path := filepath.Join(keys...)
 	var b []byte
 	switch v := value.(type) {
 	case string:
@@ -91,13 +92,13 @@ func (r *rawMap) Set(value any, keys ...string) error {
 		var err error
 		b, err = json.Marshal(value)
 		if err != nil {
-			return fmt.Errorf("failed to marshal value %v: %w", value, err)
+			return fmt.Errorf("%w: failed to marshal value at %q", err, path)
 		}
 	}
 
 	updated, err := jsonparser.Set(r.data, b, keys...)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: faild to set value at %q", err, path)
 	}
 
 	r.data = updated
@@ -106,7 +107,7 @@ func (r *rawMap) Set(value any, keys ...string) error {
 	// https://github.com/buger/jsonparser?tab=readme-ov-file#set
 	// Validate the output to catch potential issues like swapped keys/values.
 	if !json.Valid(r.data) {
-		return fmt.Errorf("invalid JSON, can't set %v at %q", value, filepath.Join(keys...))
+		return fmt.Errorf("invalid JSON, can't set a value at %q", path)
 	}
 	return nil
 }

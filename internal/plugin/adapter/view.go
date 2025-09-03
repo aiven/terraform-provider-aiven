@@ -36,7 +36,7 @@ type DatView[T any] interface {
 // Create and Update operations typically use plan as it represents the desired end state.
 // "config" is used when we need to check what values the user explicitly defined.
 //
-// For optional+computed attributes with UseStateForUnknown:
+// For computed+optional attributes with UseStateForUnknown:
 // When a user removes a value from "config", the value persists in "state" and appears in "plan",
 // allowing the attribute to retain its last known value.
 type ResView[T any] interface {
@@ -63,6 +63,12 @@ type ResConfigValidators[T any] interface {
 // https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
 type ResValidateConfig[T any] interface {
 	ResValidateConfig(ctx context.Context, config *T) diag.Diagnostics
+}
+
+// ResModifyPlan implements resource.ResourceWithModifyPlan.
+// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
+type ResModifyPlan[T any] interface {
+	ResModifyPlan(ctx context.Context, plan, state, config *T) diag.Diagnostics
 }
 
 // View base view that contains the client and potentially other dependencies

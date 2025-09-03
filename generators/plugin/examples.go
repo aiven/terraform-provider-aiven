@@ -165,7 +165,9 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 
 func exampleScalarItem(item *Item) (cty.Value, error) {
 	var anyValue any
-	if item.Default != nil {
+	if item.Default != nil && item.Default != "" {
+		// A bug in Terraform makes us use default="" to suppress the diff, so we ignore "".
+		// https://discuss.hashicorp.com/t/framework-migration-test-produces-non-empty-plan/54523
 		anyValue = item.Default
 	} else if item.IsEnum() {
 		anyValue = item.Enum[0]

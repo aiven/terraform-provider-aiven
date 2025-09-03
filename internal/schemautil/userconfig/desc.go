@@ -207,7 +207,11 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 
 	if db.withDefaultValue != nil {
 		builder.WriteRune(' ')
-		builder.WriteString(fmt.Sprintf("The default value is `%v`.", db.withDefaultValue))
+		// A bug in Terraform makes us use default="" to suppress the diff, so we ignore "".
+		// https://discuss.hashicorp.com/t/framework-migration-test-produces-non-empty-plan/54523
+		if db.withDefaultValue != "" {
+			builder.WriteString(fmt.Sprintf("The default value is `%v`.", db.withDefaultValue))
+		}
 	}
 
 	if db.withUseReference {

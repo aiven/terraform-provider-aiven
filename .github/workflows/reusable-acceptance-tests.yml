@@ -67,7 +67,7 @@ jobs:
       - id: get_matrix
         name: Discover test matrix
         run: |
-          task ci:discover-test-matrix  SLOW_TESTS_CSV=sdk-service-vpc,sdk-service-kafka,sdk-service-kafkatopic | jq -cr '
+          task ci:discover-test-matrix  SLOW_TESTS_CSV=sdk-service-vpc,sdk-service-kafka | jq -cr '
             # The input from the pipe is the correct JSON: {"slow":[...], "normal":[...]}
             {
               "matrix": tostring,
