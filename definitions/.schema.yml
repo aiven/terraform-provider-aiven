@@ -5,10 +5,20 @@ $comment: |
   This schema defines the structure for configuring Terraform provider resources and datasources.
   Use this file to specify how your provider's resources and datasources should behave.
 properties:
+  version:
+    type: integer
+    $comment: |
+      Specifies the version/generation of the resource schema.
+      Usually you don't need to set this.
   beta:
     type: boolean
     $comment: |
       Set to true if this resource/datasource is in beta and may have breaking changes.
+  legacyTimeouts:
+    type: boolean
+    $comment: |
+      Set to true to use legacy timeout handling for this resource.
+      This is only needed for older resources.
   datasource:
     $ref: '#/definitions/SchemaMeta'
     $comment: |
@@ -152,7 +162,11 @@ definitions:
         type: boolean
         $comment: |
           Set to true if this attribute's value is determined by the provider/API.
-          
+      useStateForUnknown:
+        type: boolean
+        $comment: |
+          During the planning phase Terraform shows "known after apply" for computed attributes.
+          Set this to true if the attribute's value should be taken from the current state during planning.
       default:
         type: any
         $comment: Default value for this attribute
