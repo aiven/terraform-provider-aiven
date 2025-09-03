@@ -90,10 +90,18 @@ func (a *datasourceAdapter[T]) Read(
 		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
+
 	diags.Append(req.Config.Get(ctx, state)...)
 	if diags.HasError() {
 		return
 	}
+
+	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutRead)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
 
 	diags.Append(a.view.Read(ctx, state.SharedModel())...)
 	if diags.HasError() {
