@@ -30,12 +30,11 @@ func Remarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 		return remarshal(in, out)
 	}
 
-	b, err := json.Marshal(in)
+	m, err := MarshalRawMap(in)
 	if err != nil {
-		return fmt.Errorf("failed to marshal input: %w", err)
+		return err
 	}
 
-	m := NewRawMap(b)
 	for _, modify := range modifiers {
 		err := modify(m, in)
 		if err != nil {
@@ -43,10 +42,23 @@ func Remarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 		}
 	}
 
-	// Leave this branch for debugging purposes.
-	err = json.Unmarshal(m.Data(), out)
+	return UnmarshalRawMap(m, out)
+}
+
+func MarshalRawMap(in any) (RawMap, error) {
+	b, err := json.Marshal(in)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("error converting %T to RawMap: %w", in, err)
+	}
+	return NewRawMap(b), nil
+}
+
+func UnmarshalRawMap(r RawMap, out any) error {
+	d := json.NewDecoder(bytes.NewReader(r.Data()))
+	d.UseNumber()
+	err := d.Decode(out)
+	if err != nil {
+		return fmt.Errorf("error converting RawMap to %T: %w", out, err)
 	}
 	return nil
 }

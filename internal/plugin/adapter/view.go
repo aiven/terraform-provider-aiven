@@ -65,6 +65,12 @@ type ResValidateConfig[T any] interface {
 	ResValidateConfig(ctx context.Context, config *T) diag.Diagnostics
 }
 
+// ResModifyPlan implements resource.ResourceWithModifyPlan.
+// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
+type ResModifyPlan[T any] interface {
+	ResModifyPlan(ctx context.Context, plan, state, config *T) diag.Diagnostics
+}
+
 // View base view that contains the client and potentially other dependencies
 type View struct {
 	Client avngen.Client

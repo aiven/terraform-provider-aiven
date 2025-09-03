@@ -18,6 +18,7 @@ type MightyResource interface {
 	resource.ResourceWithImportState
 	resource.ResourceWithValidateConfig
 	resource.ResourceWithConfigValidators
+	resource.ResourceWithModifyPlan
 }
 
 type newResourceSchema func(context.Context) schema.Schema
@@ -254,5 +255,55 @@ func (a *resourceAdapter[T]) ValidateConfig(
 		return
 	}
 
+	// Some resources might run API calls to validate the configuration.
+	ctx, cancel, d := withTimeout(ctx, config.TimeoutsObject(), timeoutRead)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
+
 	diags.Append(v.ResValidateConfig(ctx, config.SharedModel())...)
+}
+
+func (a *resourceAdapter[T]) ModifyPlan(
+	ctx context.Context,
+	req resource.ModifyPlanRequest,
+	rsp *resource.ModifyPlanResponse,
+) {
+	v, ok := a.view.(ResModifyPlan[T])
+	if !ok {
+		return
+	}
+
+	var (
+		plan   = a.newModel()
+		state  = a.newModel()
+		config = a.newModel()
+		diags  = &rsp.Diagnostics
+	)
+
+	if !req.Plan.Raw.IsNull() {
+		// If resource is not marked for deletion.
+		diags.Append(req.Plan.Get(ctx, plan)...)
+		diags.Append(req.Config.Get(ctx, config)...)
+	}
+	diags.Append(req.State.Get(ctx, state)...)
+	if diags.HasError() {
+		return
+	}
+
+	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutRead)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
+
+	diags.Append(v.ResModifyPlan(ctx, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+	if diags.HasError() {
+		return
+	}
+
+	diags.Append(rsp.Plan.Set(ctx, plan)...)
 }

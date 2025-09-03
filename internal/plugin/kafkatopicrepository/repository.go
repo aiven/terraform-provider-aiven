@@ -7,17 +7,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 )
 
 var (
 	initOnce sync.Once
 	// singleRep a singleton for repository to share it across running goroutines
 	singleRep = &repository{}
-	// errNotFound mimics Aiven "not found" error. Never wrap it, so it can be determined by aiven.IsNotFound
-	errNotFound = aiven.Error{Status: http.StatusNotFound, Message: "Topic not found"}
-	// errAlreadyExists mimics Aiven "conflict" error. Never wrap it, so it can be determined by aiven.IsAlreadyExists
-	errAlreadyExists = aiven.Error{Status: http.StatusConflict, Message: "Topic conflict, already exists"}
+	// errNotFound mimics Aiven "not found" error. Never wrap it, so it can be determined by avngen.IsNotFound
+	errNotFound = avngen.Error{OperationID: "KafkaTopicRepository", Status: http.StatusNotFound, Message: "Topic not found"}
+	// errAlreadyExists mimics Aiven "conflict" error. Never wrap it, so it can be determined by avngen.IsAlreadyExists
+	errAlreadyExists = avngen.Error{OperationID: "KafkaTopicRepository", Status: http.StatusConflict, Message: "Topic conflict, already exists"}
 )
 
 const (
@@ -42,22 +43,21 @@ func New(client topicsClient) Repository {
 	return singleRep
 }
 
-// Repository CRUD interface for topics
-type Repository interface {
-	Create(ctx context.Context, project, service string, req aiven.CreateKafkaTopicRequest) error
-	Read(ctx context.Context, project, service, topic string) (*aiven.KafkaTopic, error)
-	Update(ctx context.Context, project, service, topic string, req aiven.UpdateKafkaTopicRequest) error
-	Delete(ctx context.Context, project, service, topic string) error
-	Exists(ctx context.Context, project, service, topic string) (bool, error)
+type topicsClient interface {
+	ServiceKafkaTopicCreate(ctx context.Context, project string, serviceName string, in *kafkatopic.ServiceKafkaTopicCreateIn) error
+	ServiceKafkaTopicUpdate(ctx context.Context, project string, serviceName string, topicName string, in *kafkatopic.ServiceKafkaTopicUpdateIn) error
+	ServiceKafkaTopicDelete(ctx context.Context, project string, serviceName string, topicName string) error
+	ServiceKafkaTopicList(ctx context.Context, project string, serviceName string) ([]kafkatopic.TopicOut, error)
+	ServiceKafkaTopicListV2(ctx context.Context, project string, serviceName string, in *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error)
 }
 
-// topicsClient interface for unit tests
-type topicsClient interface {
-	List(ctx context.Context, project, service string) ([]*aiven.KafkaListTopic, error)
-	V2List(ctx context.Context, project, service string, topicNames []string) ([]*aiven.KafkaTopic, error)
-	Create(ctx context.Context, project, service string, req aiven.CreateKafkaTopicRequest) error
-	Update(ctx context.Context, project, service, topic string, req aiven.UpdateKafkaTopicRequest) error
+// Repository CRUD interface for topics
+type Repository interface {
+	Create(ctx context.Context, project, service string, req *kafkatopic.ServiceKafkaTopicCreateIn) error
+	Read(ctx context.Context, project, service, topic string) (*kafkatopic.ServiceKafkaTopicGetOut, error)
+	Update(ctx context.Context, project, service, topic string, req *kafkatopic.ServiceKafkaTopicUpdateIn) error
 	Delete(ctx context.Context, project, service, topic string) error
+	Exists(ctx context.Context, project, service, topic string) (bool, error)
 }
 
 func newRepository(client topicsClient) *repository {
@@ -153,7 +153,7 @@ func (rep *repository) forgetService(project, service string) {
 }
 
 type response struct {
-	topic *aiven.KafkaTopic
+	topic *kafkatopic.ServiceKafkaTopicGetOut
 	err   error
 }
 
@@ -168,7 +168,7 @@ func (r *request) key() string {
 	return newKey(r.project, r.service, r.topic)
 }
 
-func (r *request) send(topic *aiven.KafkaTopic, err error) {
+func (r *request) send(topic *kafkatopic.ServiceKafkaTopicGetOut, err error) {
 	r.rsp <- &response{topic: topic, err: err}
 }
 
