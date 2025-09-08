@@ -34,7 +34,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
@@ -52,7 +52,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
