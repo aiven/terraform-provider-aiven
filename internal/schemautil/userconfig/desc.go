@@ -41,8 +41,6 @@ type DescriptionBuilder struct {
 	availabilityType AvailabilityType
 	// withPossibleValues is a flag that indicates if the possible values should be included.
 	withPossibleValues []string
-	// withRequiredWith is a flag that indicates if the required with should be included.
-	withRequiredWith []string
 	// withMaxLen is a flag that indicates if the maximum length should be included.
 	withMaxLen int
 	// withDefaultValue is a flag that indicates if the default value should be included.
@@ -51,6 +49,9 @@ type DescriptionBuilder struct {
 	withUseReference bool
 	// withForceNew is a flag that indicates if the force new should be included.
 	withForceNew bool
+
+	// TF validators https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
+	withRequiredWith, withConflictsWith, withExactlyOneOf, withAtLeastOneOf []string
 }
 
 // Desc is a function that creates a new DescriptionBuilder.
@@ -81,8 +82,24 @@ func (db *DescriptionBuilder) PossibleValuesString(values ...string) *Descriptio
 }
 
 // RequiredWith is a function that sets the withRequiredWith flag.
+// Also known as AlsoRequires in TF Plugin Framework.
 func (db *DescriptionBuilder) RequiredWith(values ...string) *DescriptionBuilder {
 	db.withRequiredWith = values
+	return db
+}
+
+func (db *DescriptionBuilder) ConflictsWith(values ...string) *DescriptionBuilder {
+	db.withConflictsWith = values
+	return db
+}
+
+func (db *DescriptionBuilder) ExactlyOneOf(values ...string) *DescriptionBuilder {
+	db.withExactlyOneOf = values
+	return db
+}
+
+func (db *DescriptionBuilder) AtLeastOneOf(values ...string) *DescriptionBuilder {
+	db.withAtLeastOneOf = values
 	return db
 }
 
@@ -155,33 +172,27 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		} else {
 			builder.WriteString("s are ")
 		}
-		for i, value := range db.withPossibleValues {
-			if i > 0 {
-				if i == len(db.withPossibleValues)-1 {
-					builder.WriteString(" and ")
-				} else {
-					builder.WriteString(", ")
-				}
-			}
-			builder.WriteString(fmt.Sprintf("`%v`", value))
-		}
+		builder.WriteString(listOfCodes(db.withPossibleValues...))
 		builder.WriteRune('.')
 	}
 
-	if db.withRequiredWith != nil {
-		builder.WriteRune(' ')
-		builder.WriteString("The field is required with")
-		for i, value := range db.withRequiredWith {
-			if i > 0 {
-				if i == len(db.withRequiredWith)-1 {
-					builder.WriteString(" and ")
-				} else {
-					builder.WriteString(", ")
-				}
-			}
-			builder.WriteString(fmt.Sprintf("`%v`", value))
+	// Adds validators information.
+	// There should be only one of this, so we don't need to preserve the order.
+	validators := map[string][]string{
+		"The field is required with ":                    db.withRequiredWith,
+		"The field conflicts with ":                      db.withConflictsWith,
+		"Exactly one of the fields must be specified: ":  db.withExactlyOneOf,
+		"At least one of the fields must be specified: ": db.withAtLeastOneOf,
+	}
+
+	for k, v := range validators {
+		if len(v) > 0 {
+			builder.WriteRune(' ')
+			builder.WriteString(k)
+			builder.WriteString(listOfCodes(v...))
+			builder.WriteRune('.')
+			break
 		}
-		builder.WriteRune('.')
 	}
 
 	if db.withMaxLen > 0 {
@@ -212,4 +223,24 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		return ""
 	}
 	return s
+}
+
+// listOfCodes turns ["a", "b", "c"] into "`a`, `b` and `c`"
+func listOfCodes(source ...string) string {
+	lastOne := len(source) - 1
+	items := make([]string, len(source))
+	for i, v := range source {
+		pre := ""
+		switch i {
+		case 0:
+		case lastOne:
+			pre = " and "
+		default:
+			pre = ", "
+		}
+
+		items[i] = fmt.Sprintf("%s`%s`", pre, v)
+	}
+
+	return strings.Join(items, "")
 }

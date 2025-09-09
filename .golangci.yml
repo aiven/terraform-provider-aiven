@@ -24,6 +24,10 @@ linters:
   settings:
     lll:
       line-length: 140
+    revive:
+      rules:
+        - name: unused-parameter
+          disabled: true
   exclusions:
     generated: lax
     presets:

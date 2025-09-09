@@ -18,6 +18,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	applicationuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user"
 	applicationusertoken "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user_token"
@@ -167,6 +168,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		applicationuser.NewResource,
 		applicationusertoken.NewResource,
 		permission.NewResource,
+		topic.NewResource,
 	}
 
 	// Add to a list of resources that are currently in beta.
@@ -188,6 +190,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	dataSources := []func() datasource.DataSource{
 		organization.NewDatasource,
 		applicationuser.NewDatasource,
+		topic.NewDatasource,
 	}
 
 	// Add to a list of data sources that are currently in beta.

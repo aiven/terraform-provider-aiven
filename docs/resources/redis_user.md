@@ -48,10 +48,10 @@ resource "aiven_redis_user" "foo" {
 ### Optional
 
 - `password` (String, Sensitive) The password of the Redis User.
-- `redis_acl_categories` (List of String) Defines command category rules. The field is required with`redis_acl_commands` and `redis_acl_keys`. Changing this property forces recreation of the resource.
+- `redis_acl_categories` (List of String) Defines command category rules. The field is required with `redis_acl_commands` and `redis_acl_keys`. Changing this property forces recreation of the resource.
 - `redis_acl_channels` (List of String) Defines the permitted pub/sub channel patterns. Changing this property forces recreation of the resource.
-- `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
-- `redis_acl_keys` (List of String) Defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
+- `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with `redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
+- `redis_acl_keys` (List of String) Defines key access rules. The field is required with `redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

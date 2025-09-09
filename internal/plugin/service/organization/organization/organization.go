@@ -45,7 +45,7 @@ func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
 	return result
 }
 
-var _ adapter.DatConfigValidators = (*view)(nil)
+var _ adapter.DatConfigValidators[tfModel] = (*view)(nil)
 
 type view struct{ adapter.View }
 
