@@ -578,6 +578,12 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.Minimum = max(a.Minimum, b.Minimum)
 	a.Maximum = max(a.Maximum, b.Maximum)
 
+	// Validators
+	a.ConflictsWith = mergeSlices(a.ConflictsWith, b.ConflictsWith)
+	a.ExactlyOneOf = mergeSlices(a.ExactlyOneOf, b.ExactlyOneOf)
+	a.AtLeastOneOf = mergeSlices(a.AtLeastOneOf, b.AtLeastOneOf)
+	a.AlsoRequires = mergeSlices(a.AlsoRequires, b.AlsoRequires)
+
 	// User overrides that can set "false" values
 	a.UserSensitive = or(b.UserSensitive, a.UserSensitive)
 	a.UserRequired = or(b.UserRequired, a.UserRequired)
@@ -612,8 +618,8 @@ func recalcDeep(item *Item) error {
 	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
 
 	// Overrides that come from the user config
-	item.Optional = orDefault(item.UserOptional, item.Optional)
-	item.Required = orDefault(item.UserRequired, item.Required)
+	item.Optional = ptrOrDefault(item.UserOptional, item.Optional)
+	item.Required = ptrOrDefault(item.UserRequired, item.Required)
 
 	// Optional field can't be required
 	// If user has set both Required and Optional, TF will complain about it.
@@ -633,11 +639,13 @@ func recalcDeep(item *Item) error {
 		}
 	}
 
-	item.Sensitive = orDefault(item.UserSensitive, item.Sensitive)
-	item.Computed = orDefault(item.UserComputed, item.Computed)
-	item.ForceNew = orDefault(item.UserForceNew, item.ForceNew)
+	item.Sensitive = ptrOrDefault(item.UserSensitive, item.Sensitive)
+	item.Computed = ptrOrDefault(item.UserComputed, item.Computed)
+	item.ForceNew = ptrOrDefault(item.UserForceNew, item.ForceNew)
 
 	for k, v := range item.Properties {
+		// If parent is computed, child must be computed too
+		v.Computed = v.Computed || item.Computed
 		err := recalcDeep(v)
 		if err != nil {
 			return fmt.Errorf("%s property: %w", k, err)
@@ -645,6 +653,8 @@ func recalcDeep(item *Item) error {
 	}
 
 	if item.Items != nil {
+		// If parent is computed, child must be computed too
+		item.Items.Computed = item.Items.Computed || item.Computed
 		err := recalcDeep(item.Items)
 		if err != nil {
 			return fmt.Errorf("%s items: %w", item.Name, err)
