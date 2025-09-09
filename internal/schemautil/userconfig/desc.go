@@ -177,21 +177,26 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 	}
 
 	// Adds validators information.
-	// There should be only one of this, so we don't need to preserve the order.
-	validators := map[string][]string{
-		"The field is required with ":                    db.withRequiredWith,
-		"The field conflicts with ":                      db.withConflictsWith,
-		"Exactly one of the fields must be specified: ":  db.withExactlyOneOf,
-		"At least one of the fields must be specified: ": db.withAtLeastOneOf,
+	validators := [][]string{
+		db.withRequiredWith,
+		db.withConflictsWith,
+		db.withExactlyOneOf,
+		db.withAtLeastOneOf,
 	}
 
-	for k, v := range validators {
+	validatorTitles := []string{
+		"The field is required with ",
+		"The field conflicts with ",
+		"Exactly one of the fields must be specified: ",
+		"At least one of the fields must be specified: ",
+	}
+
+	for i, v := range validators {
 		if len(v) > 0 {
 			builder.WriteRune(' ')
-			builder.WriteString(k)
+			builder.WriteString(validatorTitles[i])
 			builder.WriteString(listOfCodes(v...))
 			builder.WriteRune('.')
-			break
 		}
 	}
 

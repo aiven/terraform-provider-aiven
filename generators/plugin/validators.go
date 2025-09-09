@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/samber/lo"
 )
@@ -63,5 +66,46 @@ func genValidators(item *Item) ([]jen.Code, error) {
 		}
 	}
 
+	// A quick implementation of validators
+	// It might be that root level rules require a better way of building "paths"
+	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#examples
+	validators := map[string][]string{
+		"ConflictsWith": item.ConflictsWith,
+		"ExactlyOneOf":  item.ExactlyOneOf,
+		"AtLeastOneOf":  item.AtLeastOneOf,
+		"AlsoRequires":  item.AlsoRequires,
+	}
+
+	validatorKeys := sortedKeys(validators)
+	for _, name := range validatorKeys {
+		list := validators[name]
+		if len(list) > 0 {
+			paths, err := siblingPath(list...)
+			if err != nil {
+				return nil, err
+			}
+			codes = append(codes, jen.Qual(pkg, name).Call(paths...))
+		}
+	}
+
 	return codes, nil
+}
+
+// rePathName so far we don't support complex paths, just relative attributes
+var rePathName = regexp.MustCompile(`[a-z_][a-z0-9_]*`)
+
+func siblingPath(list ...string) ([]jen.Code, error) {
+	paths := make([]jen.Code, 0, len(list))
+	for _, v := range list {
+		if !rePathName.MatchString(v) {
+			return nil, fmt.Errorf("invalid path name: %q, must be: `[a-z_][a-z0-9_]*`", v)
+		}
+
+		p := jen.
+			Qual(pathPackage, "MatchRelative").Call().
+			Dot("AtParent").Call().
+			Dot("AtName").Call(jen.Lit(v))
+		paths = append(paths, p)
+	}
+	return paths, nil
 }

@@ -224,4 +224,9 @@ definitions:
           - boolean
           - array
           - object
+      alsoRequires:
+        type: array
+        items:
+          type: string
+        $comment: List of other attributes that must be set if this attribute is set
     additionalProperties: false
