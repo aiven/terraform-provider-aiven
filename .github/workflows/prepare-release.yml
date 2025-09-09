@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -144,7 +144,7 @@ jobs:
       statuses: write
     steps:
       - name: Report status of all required checks
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const head_sha = '${{ needs.create_release_pr.outputs.pr_head_sha }}';

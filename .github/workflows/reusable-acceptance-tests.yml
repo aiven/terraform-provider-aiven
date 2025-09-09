@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
@@ -90,7 +90,7 @@ jobs:
       matrix:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).normal }}
     steps:
-      - uses: softprops/turnstyle@v2
+      - uses: softprops/turnstyle@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -100,7 +100,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
@@ -138,7 +138,7 @@ jobs:
       matrix:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).slow }}
     steps:
-      - uses: softprops/turnstyle@v2
+      - uses: softprops/turnstyle@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -148,7 +148,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
@@ -195,7 +195,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: softprops/turnstyle@v2
+      - uses: softprops/turnstyle@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -204,7 +204,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - uses: arduino/setup-task@v2
