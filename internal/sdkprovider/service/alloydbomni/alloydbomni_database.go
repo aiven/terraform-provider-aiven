@@ -41,10 +41,11 @@ var aivenAlloyDBOmniDatabaseSchema = map[string]*schema.Schema{
 
 func ResourceAlloyDBOmniDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages a database in an Aiven for AlloyDB Omni service.",
-		CreateContext: common.WithGenClient(resourceAlloyDBOmniDatabaseCreate),
-		ReadContext:   common.WithGenClient(resourceAlloyDBOmniDatabaseRead),
-		DeleteContext: common.WithGenClient(resourceAlloyDBOmniDatabaseDelete),
+		Description:        "Creates and manages a database in an Aiven for AlloyDB Omni service.",
+		DeprecationMessage: deprecationMessage,
+		CreateContext:      common.WithGenClient(resourceAlloyDBOmniDatabaseCreate),
+		ReadContext:        common.WithGenClient(resourceAlloyDBOmniDatabaseRead),
+		DeleteContext:      common.WithGenClient(resourceAlloyDBOmniDatabaseDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
