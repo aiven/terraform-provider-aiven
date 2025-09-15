@@ -252,6 +252,7 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 		}
 	}
 
+	// So far no validations for datasources
 	if !item.IsReadOnly(isResource) {
 		validators, err := genValidators(item)
 		if err != nil {

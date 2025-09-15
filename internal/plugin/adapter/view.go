@@ -35,14 +35,21 @@ type ResView[T any] interface {
 
 // DatConfigValidators implements datasource.DataSourceWithConfigValidators.
 // It renames the method, so it can be used with ResConfigValidators without collisions.
-type DatConfigValidators interface {
+type DatConfigValidators[T any] interface {
 	DatConfigValidators(ctx context.Context) []datasource.ConfigValidator
 }
 
 // ResConfigValidators implements resource.ResourceWithConfigValidators.
 // It renames the method, so it can be used with DatConfigValidators without collisions.
-type ResConfigValidators interface {
+// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#configvalidators-method
+type ResConfigValidators[T any] interface {
 	ResConfigValidators(ctx context.Context) []resource.ConfigValidator
+}
+
+// ResValidateConfig implements resource.ResourceWithValidateConfig.
+// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
+type ResValidateConfig[T any] interface {
+	ResValidateConfig(ctx context.Context, config *T) diag.Diagnostics
 }
 
 // View base view that contains the client and potentially other dependencies

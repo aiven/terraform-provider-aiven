@@ -16,6 +16,8 @@ import (
 type MightyResource interface {
 	resource.ResourceWithConfigure
 	resource.ResourceWithImportState
+	resource.ResourceWithValidateConfig
+	resource.ResourceWithConfigValidators
 }
 
 type newResourceSchema func(context.Context) schema.Schema
@@ -198,9 +200,31 @@ func (a *resourceAdapter[T]) ImportState(
 }
 
 func (a *resourceAdapter[T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	v, ok := a.view.(ResConfigValidators)
+	v, ok := a.view.(ResConfigValidators[T])
 	if !ok {
 		return nil
 	}
 	return v.ResConfigValidators(ctx)
+}
+
+func (a *resourceAdapter[T]) ValidateConfig(
+	ctx context.Context,
+	req resource.ValidateConfigRequest,
+	rsp *resource.ValidateConfigResponse,
+) {
+	v, ok := a.view.(ResValidateConfig[T])
+	if !ok {
+		return
+	}
+
+	var (
+		config = a.newModel()
+		diags  = &rsp.Diagnostics
+	)
+	diags.Append(req.Config.Get(ctx, config)...)
+	if diags.HasError() {
+		return
+	}
+
+	diags.Append(v.ResValidateConfig(ctx, config.SharedModel())...)
 }

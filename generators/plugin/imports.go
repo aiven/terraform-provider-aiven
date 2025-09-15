@@ -25,6 +25,7 @@ const (
 	attrPackage      = "github.com/hashicorp/terraform-plugin-framework/attr"
 	diagPackage      = "github.com/hashicorp/terraform-plugin-framework/diag"
 	typesPackage     = "github.com/hashicorp/terraform-plugin-framework/types"
+	pathPackage      = "github.com/hashicorp/terraform-plugin-framework/path"
 	validatorPackage = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	utilPackage      = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	adapterPackage   = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -35,6 +36,7 @@ func getUntypedImports() []string {
 		attrPackage,
 		diagPackage,
 		typesPackage,
+		pathPackage,
 		validatorPackage,
 		utilPackage,
 		adapterPackage,
