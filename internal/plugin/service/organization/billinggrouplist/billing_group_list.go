@@ -2,6 +2,7 @@ package billinggrouplist
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aiven/go-client-codegen/handler/organizationbilling"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 func NewDatasource() datasource.DataSource {
@@ -34,16 +36,13 @@ type organizationBillingGroupList struct {
 	BillingGroups []organizationbilling.BillingGroupOut `json:"billing_groups"`
 }
 
-func emailsToStr(rsp map[string]any, in *organizationBillingGroupList) error {
+func emailsToStr(rsp util.RawMap, in *organizationBillingGroupList) error {
 	if len(in.BillingGroups) == 0 {
 		return nil
 	}
 
-	items := rsp["billing_groups"].([]any)
-	for i, item := range items {
-		dto := in.BillingGroups[i]
+	for i, dto := range in.BillingGroups {
 		emails := make([]string, 0)
-
 		for _, v := range dto.BillingEmails {
 			emails = append(emails, v.Email)
 		}
@@ -57,12 +56,18 @@ func emailsToStr(rsp map[string]any, in *organizationBillingGroupList) error {
 		// They must have zero lengths or shouldn't be set at all.
 		// Otherwise, Terraform will try to cast nil to set and fail:
 		// > types.SetType[!!! MISSING TYPE!!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
-		m := item.(map[string]any)
+		index := fmt.Sprintf("[%d]", i)
 		if len(emails) > 0 {
-			m["billing_emails"] = emails
+			err := rsp.Set(emails, "billing_groups", index, "billing_emails")
+			if err != nil {
+				return err
+			}
 		}
 		if len(contactEmails) > 0 {
-			m["billing_contact_emails"] = contactEmails
+			err := rsp.Set(contactEmails, "billing_groups", index, "billing_contact_emails")
+			if err != nil {
+				return err
+			}
 		}
 	}
 

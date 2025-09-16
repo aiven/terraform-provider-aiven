@@ -10,6 +10,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 func NewResource() resource.Resource {
@@ -80,13 +81,16 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return flattenData(ctx, state, rsp, emailsToStr)
 }
 
-func emailsToMap(req map[string]any, in *apiModel) error {
+func emailsToMap(req util.RawMap, in *apiModel) error {
 	if in.BillingEmails != nil {
 		emails := make([]map[string]any, 0)
 		for _, v := range *in.BillingEmails {
 			emails = append(emails, map[string]any{"email": v})
 		}
-		req["billing_emails"] = emails
+		err := req.Set(emails, "billing_emails")
+		if err != nil {
+			return err
+		}
 	}
 
 	if in.BillingContactEmails != nil {
@@ -94,12 +98,15 @@ func emailsToMap(req map[string]any, in *apiModel) error {
 		for _, v := range *in.BillingContactEmails {
 			emails = append(emails, map[string]any{"email": v})
 		}
-		req["billing_contact_emails"] = emails
+		err := req.Set(emails, "billing_contact_emails")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func emailsToStr(rsp map[string]any, in *organizationbilling.OrganizationBillingGroupGetOut) error {
+func emailsToStr(rsp util.RawMap, in *organizationbilling.OrganizationBillingGroupGetOut) error {
 	emails := make([]string, 0)
 	for _, v := range in.BillingEmails {
 		emails = append(emails, v.Email)
@@ -115,10 +122,16 @@ func emailsToStr(rsp map[string]any, in *organizationbilling.OrganizationBilling
 	// Otherwise, Terraform will try to cast nil to set and fail:
 	// > types.SetType[!!! MISSING TYPE!!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
 	if len(emails) > 0 {
-		rsp["billing_emails"] = emails
+		err := rsp.Set(emails, "billing_emails")
+		if err != nil {
+			return err
+		}
 	}
 	if len(contactEmails) > 0 {
-		rsp["billing_contact_emails"] = contactEmails
+		err := rsp.Set(contactEmails, "billing_contact_emails")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
