@@ -127,7 +127,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 
 func ResourceProject() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
+		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects). You should create projects in organizations or organizational units using the `parent_id` field. In a future release, this resource will be replaced by `aiven_organization_project` resource, which requires the `parent_id` field.",
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,
