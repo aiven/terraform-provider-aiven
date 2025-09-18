@@ -10,9 +10,8 @@ Creates and manages an Aiven [service integration](https://aiven.io/docs/platfor
 -> Services integrations are not supported for services running on hobbyist plans.
 
 You can set up an integration between two Aiven services or an Aiven service and an external
-service. For example, you can send metrics from a Kafka service to an M3DB service,
-send metrics from an M3DB service to a Grafana service to show dashboards, and send logs from
-any service to OpenSearch. For external integrations, you also need an
+service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs
+into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an
 [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).
 
 You can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).
