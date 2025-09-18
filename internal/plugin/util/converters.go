@@ -25,13 +25,12 @@ func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 		return remarshal(in, out)
 	}
 
-	// To applied modifiers, we need to unmarshal into a map[string]any
-	m := make(map[string]any)
-	err := remarshal(in, &m)
+	b, err := json.Marshal(in)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal map: %w", err)
+		return fmt.Errorf("failed to marshal input: %w", err)
 	}
 
+	m := NewRawMap(b)
 	for _, modify := range modifiers {
 		err := modify(m, in)
 		if err != nil {
@@ -39,7 +38,12 @@ func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 		}
 	}
 
-	return remarshal(&m, out)
+	// Leave this branch for debugging purposes.
+	err = json.Unmarshal(m.Data(), out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // MapModifier modifies Request and Response objects
@@ -47,13 +51,13 @@ func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 // in *I — input type, for instance, a dataModel or foo.CreateIn dto.
 // Hint: to ignore "in" type and modify only the map, use `any`, for instance:
 //
-//	func foo[T any](reqRsp map[string]any, _ *T) error {
+//	func foo[T any](reqRsp RawMap, _ *T) error {
 //		reqRsp["foo"] = "bar"
 //	}
 //
 // In this case, the function can be used with any type of Request/Response object.
 // The map's keys are equal to original API keys, not TF schema fields.
-type MapModifier[I any] func(reqRsp map[string]any, in *I) error
+type MapModifier[I any] func(reqRsp RawMap, in *I) error
 
 // Expand sets values to Request from a nested object.
 // T - terraform object, for instance baseModelAddress

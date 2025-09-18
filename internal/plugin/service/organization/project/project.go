@@ -87,14 +87,17 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 }
 
 func (vw *view) modifyReq(ctx context.Context) util.MapModifier[apiModel] {
-	return func(req map[string]any, in *apiModel) error {
+	return func(req util.RawMap, in *apiModel) error {
 		// Converts OrganizationID to AccountID
 		if in.ParentID != nil {
 			parentID, err := schemautil.ConvertOrganizationToAccountID(ctx, *in.ParentID, vw.Client)
 			if err != nil {
 				return err
 			}
-			req["parent_id"] = parentID
+			err = req.Set(parentID, "parent_id")
+			if err != nil {
+				return err
+			}
 		}
 
 		// Converts a list of strings to a list of maps
@@ -103,7 +106,10 @@ func (vw *view) modifyReq(ctx context.Context) util.MapModifier[apiModel] {
 			for _, v := range *in.TechnicalEmails {
 				emails = append(emails, map[string]any{"email": v})
 			}
-			req["tech_emails"] = emails
+			err := req.Set(emails, "tech_emails")
+			if err != nil {
+				return err
+			}
 		}
 
 		// Converts key-value pairs to a map
@@ -118,43 +124,61 @@ func (vw *view) modifyReq(ctx context.Context) util.MapModifier[apiModel] {
 				tags[k] = *v.Value
 			}
 		}
-		req["tags"] = tags
-		return nil
+		return req.Set(tags, "tags")
 	}
 }
 
 func (vw *view) modifyRsp(ctx context.Context, stateParentID string) util.MapModifier[organizationprojects.OrganizationProjectsGetOut] {
-	return func(rsp map[string]any, in *organizationprojects.OrganizationProjectsGetOut) error {
+	return func(rsp util.RawMap, in *organizationprojects.OrganizationProjectsGetOut) error {
 		// Sets CA certificate
 		cert, err := vw.Client.ProjectKmsGetCA(ctx, in.ProjectId)
 		if err != nil {
 			return err
 		}
-		rsp["certificate"] = cert
+
+		err = rsp.Set(cert, "certificate")
+		if err != nil {
+			return err
+		}
 
 		// The ParentID in the response is the AccountID,
 		// while user could have set the OrganizationID in the state.
 		// Overrides it with the state value to avoid an unnecessary plan output.
 		if stateParentID != "" && schemautil.IsOrganizationID(stateParentID) {
-			rsp["parent_id"] = stateParentID
+			err = rsp.Set(stateParentID, "parent_id")
+			if err != nil {
+				return err
+			}
 		}
 
 		// Converts a list of maps to a list of strings
-		if _, ok := rsp["tech_emails"]; ok {
+		if len(in.TechEmails) > 0 {
 			emails := make([]string, 0)
 			for _, v := range in.TechEmails {
 				emails = append(emails, v.Email)
 			}
-			rsp["tech_emails"] = emails
+			err = rsp.Set(emails, "tech_emails")
+			if err != nil {
+				return err
+			}
 		}
 
-		// Converts a map to key-value pairs
-		if _, ok := rsp["tags"]; ok {
+		// Converts a map to list of key-value pairs
+		// Deletes the field first to avoid having an empty map where a list is expected.
+		err = rsp.Delete("tags")
+		if err != nil {
+			return err
+		}
+
+		if len(in.Tags) > 0 {
 			tags := make([]map[string]string, 0)
 			for k, v := range in.Tags {
 				tags = append(tags, map[string]string{"key": k, "value": v})
 			}
-			rsp["tags"] = tags
+			err = rsp.Set(tags, "tags")
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}

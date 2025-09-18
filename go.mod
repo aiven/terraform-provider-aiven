@@ -7,6 +7,7 @@ require (
 	github.com/aiven/aiven-go-client/v2 v2.34.0
 	github.com/aiven/go-client-codegen v0.121.0
 	github.com/avast/retry-go v3.0.0+incompatible
+	github.com/buger/jsonparser v1.1.1
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.2.0
