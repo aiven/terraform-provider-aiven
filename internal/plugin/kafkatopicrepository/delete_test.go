@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,7 +27,7 @@ func TestDeleteDoesNotExist(t *testing.T) {
 func TestDeletesAfterRetry(t *testing.T) {
 	client := &fakeTopicClient{
 		deleteErr: errNotFound,
-		storage: map[string]*aiven.KafkaListTopic{
+		storage: map[string]*kafkatopic.TopicOut{
 			"a/b/c": {TopicName: "c"},
 		},
 	}
