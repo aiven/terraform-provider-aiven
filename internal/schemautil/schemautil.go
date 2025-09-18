@@ -196,6 +196,25 @@ func ValidateEmailAddress(v any, k string) (ws []string, errors []error) {
 	return
 }
 
+// ValidateMaintenanceWindowTime ensures a string is a valid HH:mm:ss time format
+func ValidateMaintenanceWindowTime(v any, k string) (ws []string, errors []error) {
+	timeStr, ok := v.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("%q: expected string, got %T", k, v))
+		return
+	}
+
+	if ok, _ := regexp.MatchString("^(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]$", timeStr); !ok {
+		errors = append(
+			errors,
+			fmt.Errorf(`%q: must be in HH:mm:ss format where HH is 00-23 (two digits), mm and ss are 00-59 (e.g., "09:30:00", "23:59:59")`, k),
+		)
+		return
+	}
+
+	return
+}
+
 func BuildResourceID(parts ...string) string {
 	finalParts := make([]string, len(parts))
 	for idx, part := range parts {

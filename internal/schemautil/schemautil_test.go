@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
@@ -126,4 +127,136 @@ func TestResourceDataSetAddForceNew(t *testing.T) {
 		RenameAlias("to_rename", "set_of_objects"),
 	)
 	require.NoError(t, err)
+}
+
+func TestValidateMaintenanceWindowTime(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		value        any
+		key          string
+		expectErrors bool
+	}{
+		{
+			name:         "valid time 00:00:00",
+			value:        "00:00:00",
+			expectErrors: false,
+		},
+		{
+			name:         "valid time 23:59:59",
+			value:        "23:59:59",
+			expectErrors: false,
+		},
+		{
+			name:         "valid time 10:30:45",
+			value:        "10:30:45",
+			expectErrors: false,
+		},
+		{
+			name:         "valid time 01:02:03",
+			value:        "01:02:03",
+			expectErrors: false,
+		},
+		{
+			name:         "valid time 09:00:00",
+			value:        "09:00:00",
+			expectErrors: false,
+		},
+		{
+			name:         "invalid single digit hour",
+			value:        "9:00:00",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid type - not string",
+			value:        123,
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - missing seconds",
+			value:        "10:30",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - extra digits",
+			value:        "10:30:45:99",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid hour - too high",
+			value:        "24:00:00",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid hour - negative",
+			value:        "-1:00:00",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid minutes - too high",
+			value:        "10:60:00",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid seconds - too high",
+			value:        "10:30:60",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - random string",
+			value:        "invalid-time",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - empty string",
+			value:        "",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - only numbers",
+			value:        "123456",
+			expectErrors: true,
+		},
+		{
+			name:         "invalid format - wrong separators",
+			value:        "10-30-00",
+			expectErrors: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, errs := ValidateMaintenanceWindowTime(tt.value, "maintenance_window_time")
+
+			if tt.expectErrors {
+				assert.NotEmpty(t, errs, "expected validation errors but got none")
+			} else {
+				assert.Empty(t, errs, "expected no validation errors but got: %v", errs)
+			}
+		})
+	}
+}
+
+func FuzzValidateMaintenanceWindowTime(f *testing.F) {
+	f.Add("00:00:00")
+	f.Add("23:59:59")
+	f.Add("09:30:45")
+	f.Add("11:11:11")
+	f.Add("9:00:00")
+	f.Add("24:00:00")
+	f.Add("10:60:00")
+	f.Add("10:00")
+	f.Add("invalid")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		_, errs := ValidateMaintenanceWindowTime(input, "test_field")
+
+		// if no errors are returned, the input MUST be a valid parsable time
+		if len(errs) == 0 {
+			parsed, err := time.Parse("15:04:05", input)
+			require.NoError(t, err, "input %q was considered valid by function but failed standard library parsing", input)
+			assert.Equal(t, input, parsed.Format("15:04:05"), "input %q was considered valid by function but changed when parsed by stdlib", input)
+		}
+	})
 }
