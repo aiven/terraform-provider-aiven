@@ -1,23 +1,6 @@
-terraform {
-  required_version = ">=0.13"
-  required_providers {
-    aiven = {
-      source  = "aiven/aiven"
-      version = ">=4.0.0, <5.0.0"
-    }
-  }
-}
-
-variable "aiven_api_token" {
-  type = string
-}
-
-provider "aiven" {
-  api_token = var.aiven_api_token
-}
-
 resource "aiven_project" "project" {
-  project = "static-ips-project"
+  project   = var.aiven_project
+  parent_id = var.aiven_organization
 }
 
 resource "aiven_static_ip" "ips" {
