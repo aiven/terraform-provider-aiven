@@ -3,19 +3,26 @@
 page_title: "aiven_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven project https://aiven.io/docs/platform/concepts/orgs-units-projects#projects.
+  Creates and manages an Aiven project https://aiven.io/docs/platform/concepts/orgs-units-projects#projects. You should create projects in organizations or organizational units using the parent_id field. In a future release, this resource will be replaced by aiven_organization_project resource, which requires the parent_id field.
 ---
 
 # aiven_project (Resource)
 
-Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
+Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects). You should create projects in organizations or organizational units using the `parent_id` field. In a future release, this resource will be replaced by `aiven_organization_project` resource, which requires the `parent_id` field.
 
 ## Example Usage
 
 ```terraform
+# Create a project within an organization
 resource "aiven_project" "example_project" {
   project   = "example-project"
   parent_id = aiven_organization.main.id
+}
+
+# Create a project within an organizational unit
+resource "aiven_project" "example_project" {
+  project_id       = "example-project"
+  parent_id        = aiven_organizational_unit.example_unit.id
 }
 ```
 
