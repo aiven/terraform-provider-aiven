@@ -40,6 +40,9 @@ vars:
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
 
+  # --- Docs ---
+  DEPRECATED_RESOURCES: "influxdb m3"   # List of deprecated resources and data sources to exclude from docs
+
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
 
@@ -64,12 +67,18 @@ tasks:
     cmds:
       - "{{.TFPLUGINDOCS}} generate --rendered-website-dir tmp"
       - mkdir -p docs/data-sources docs/resources
-      - mv tmp/data-sources/influxdb*.md docs/data-sources/ || true
-      - mv tmp/resources/influxdb*.md docs/resources/ || true
+      - |
+        for resource in {{.DEPRECATED_RESOURCES}}; do
+          mv tmp/data-sources/${resource}*.md docs/data-sources/ || true
+          mv -f tmp/resources/${resource}*.md docs/resources/ || true
+        done
       - rm -rf tmp
       - "{{.TFPLUGINDOCS}} validate --provider-name aiven"
-      - rm -f docs/data-sources/influxdb*.md
-      - rm -f docs/resources/influxdb*.md
+      - |
+        for resource in {{.DEPRECATED_RESOURCES}}; do
+          rm -f docs/data-sources/${resource}*.md
+          rm -f docs/resources/${resource}*.md
+        done
 
   semgrep:
     desc: "Run Semgrep static analysis security scan"
@@ -160,8 +169,11 @@ tasks:
     cmds:
       - rm -f docs/.DS_Store
       - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
-      - rm -f docs/data-sources/influxdb*.md
-      - rm -f docs/resources/influxdb*.md
+      - |
+        for resource in {{.DEPRECATED_RESOURCES}}; do
+          rm -f docs/data-sources/${resource}*.md
+          rm -f docs/resources/${resource}*.md
+        done
 
   generate:
     desc: "Run all code generation tasks"
