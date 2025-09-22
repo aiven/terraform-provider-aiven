@@ -18,6 +18,7 @@ nav_order: 1
   disk usage
 - Deprecate `aiven_kafka_topic` field `config.message_format_version` in Kafka 4.0+: this configuration is removed
   and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be `"None"`.
+- Added validation for services `maintenance_window_time`: requires HH:mm:ss format
 
 ## [4.44.0] - 2025-08-14
 

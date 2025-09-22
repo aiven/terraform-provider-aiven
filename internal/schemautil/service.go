@@ -167,9 +167,10 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.StringInSlice([]string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}, false),
 		},
 		"maintenance_window_time": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+			ValidateFunc: ValidateMaintenanceWindowTime,
 			DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
 				return newValue == ""
 			},
