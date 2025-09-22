@@ -15576,6 +15576,65 @@ func (_c *MockClient_ServiceKafkaTopicList_Call) RunAndReturn(run func(ctx conte
 	return _c
 }
 
+// ServiceKafkaTopicListV2 provides a mock function for the type MockClient
+func (_mock *MockClient) ServiceKafkaTopicListV2(ctx context.Context, project1 string, serviceName string, in *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error) {
+	ret := _mock.Called(ctx, project1, serviceName, in)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ServiceKafkaTopicListV2")
+	}
+
+	var r0 []kafkatopic.ServiceKafkaTopicGetOut
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error)); ok {
+		return returnFunc(ctx, project1, serviceName, in)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *kafkatopic.ServiceKafkaTopicListV2In) []kafkatopic.ServiceKafkaTopicGetOut); ok {
+		r0 = returnFunc(ctx, project1, serviceName, in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]kafkatopic.ServiceKafkaTopicGetOut)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *kafkatopic.ServiceKafkaTopicListV2In) error); ok {
+		r1 = returnFunc(ctx, project1, serviceName, in)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_ServiceKafkaTopicListV2_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceKafkaTopicListV2'
+type MockClient_ServiceKafkaTopicListV2_Call struct {
+	*mock.Call
+}
+
+// ServiceKafkaTopicListV2 is a helper method to define mock.On call
+//   - ctx
+//   - project1
+//   - serviceName
+//   - in
+func (_e *MockClient_Expecter) ServiceKafkaTopicListV2(ctx interface{}, project1 interface{}, serviceName interface{}, in interface{}) *MockClient_ServiceKafkaTopicListV2_Call {
+	return &MockClient_ServiceKafkaTopicListV2_Call{Call: _e.mock.On("ServiceKafkaTopicListV2", ctx, project1, serviceName, in)}
+}
+
+func (_c *MockClient_ServiceKafkaTopicListV2_Call) Run(run func(ctx context.Context, project1 string, serviceName string, in *kafkatopic.ServiceKafkaTopicListV2In)) *MockClient_ServiceKafkaTopicListV2_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*kafkatopic.ServiceKafkaTopicListV2In))
+	})
+	return _c
+}
+
+func (_c *MockClient_ServiceKafkaTopicListV2_Call) Return(serviceKafkaTopicGetOuts []kafkatopic.ServiceKafkaTopicGetOut, err error) *MockClient_ServiceKafkaTopicListV2_Call {
+	_c.Call.Return(serviceKafkaTopicGetOuts, err)
+	return _c
+}
+
+func (_c *MockClient_ServiceKafkaTopicListV2_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, in *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error)) *MockClient_ServiceKafkaTopicListV2_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ServiceKafkaTopicMessageList provides a mock function for the type MockClient
 func (_mock *MockClient) ServiceKafkaTopicMessageList(ctx context.Context, project1 string, serviceName string, topicName string, in *kafkatopic.ServiceKafkaTopicMessageListIn) ([]kafkatopic.MessageOut, error) {
 	ret := _mock.Called(ctx, project1, serviceName, topicName, in)

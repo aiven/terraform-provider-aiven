@@ -101,6 +101,7 @@ Optional:
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
+- `custom_keystores` (Block List, Max: 10) Allow to register custom keystores in OpenSearch (see [below for nested schema](#nestedblock--opensearch_user_config--custom_keystores))
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
@@ -114,7 +115,7 @@ Optional:
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
-- `opensearch_version` (String) Enum: `1`, `2`, and newer. OpenSearch version.
+- `opensearch_version` (String) Enum: `1`, `2`, `2.19`, and newer. OpenSearch version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
@@ -147,6 +148,15 @@ Optional:
 - `readonly` (Boolean) Whether the repository is read-only. Default: `true`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
+
+
+<a id="nestedblock--opensearch_user_config--custom_keystores"></a>
+### Nested Schema for `opensearch_user_config.custom_keystores`
+
+Required:
+
+- `name` (String)
+- `type` (String) Enum: `azure`, `gcs`, `s3`.
 
 
 <a id="nestedblock--opensearch_user_config--gcs_migration"></a>

@@ -104,6 +104,24 @@ func opensearchUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"custom_keystores": {
+				Description: "Allow to register custom keystores in OpenSearch",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"name": {
+						Required: true,
+						Type:     schema.TypeString,
+					},
+					"type": {
+						Description:  "Enum: `azure`, `gcs`, `s3`.",
+						Required:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"azure", "gcs", "s3"}, false),
+					},
+				}},
+				MaxItems: 10,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"disable_replication_factor_adjustment": {
 				Description: "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.",
 				Optional:    true,
@@ -1179,7 +1197,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description: "Enum: `1`, `2`, and newer. OpenSearch version.",
+				Description: "Enum: `1`, `2`, `2.19`, and newer. OpenSearch version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
