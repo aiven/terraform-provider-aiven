@@ -163,6 +163,8 @@ Read-Only:
 - `log_local_retention_bytes` (Number)
 - `log_local_retention_ms` (Number)
 - `log_message_downconversion_enable` (Boolean)
+- `log_message_timestamp_after_max_ms` (Number)
+- `log_message_timestamp_before_max_ms` (Number)
 - `log_message_timestamp_difference_max_ms` (Number)
 - `log_message_timestamp_type` (String)
 - `log_preallocate` (Boolean)

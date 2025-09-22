@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -191,6 +192,8 @@ func genSchema(f *jen.File, o *object) error {
 	return nil
 }
 
+var errUnknownType = fmt.Errorf("unknown type")
+
 func getSchemaValues(o *object) (jen.Dict, error) {
 	values := make(jen.Dict)
 
@@ -228,7 +231,7 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	case objectTypeNumber:
 		t = "Float"
 	default:
-		return nil, fmt.Errorf("unknown type %q for %q", o.Type, o.jsonName)
+		return nil, fmt.Errorf("%w: %q for %q", errUnknownType, o.Type, o.jsonName)
 	}
 
 	values[jen.Id("Type")] = jen.Qual(importSchema, "Type"+t)
@@ -306,6 +309,11 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	fields := make(jen.Dict)
 	for _, p := range o.properties {
 		vals, err := getSchemaValues(p)
+		if errors.Is(err, errUnknownType) {
+			log.Printf("%s: unknow type or multiple types, skipping", o.jsonName)
+			continue
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -415,10 +423,11 @@ func scalarLit(o *object, value any) *jen.Statement {
 	case objectTypeBoolean:
 		return jen.Lit(value.(bool))
 	case objectTypeInteger:
-		n, _ := strconv.Atoi(value.(string))
+		n, _ := strconv.Atoi(fmt.Sprint(value))
 		return jen.Lit(n)
 	case objectTypeNumber:
-		return jen.Lit(value.(float64))
+		f, _ := strconv.ParseFloat(fmt.Sprint(value), 64)
+		return jen.Lit(f)
 	}
 	log.Fatalf("unknown scalar %v", o)
 	return nil

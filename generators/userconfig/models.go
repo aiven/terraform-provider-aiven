@@ -60,8 +60,6 @@ type object struct {
 	MaxItems       *int               `yaml:"max_items"`
 	MinLength      *int               `yaml:"min_length"`
 	MaxLength      *int               `yaml:"max_length"`
-	Minimum        *float64           `yaml:"minimum"`
-	Maximum        *float64           `yaml:"maximum"`
 	OrigType       any                `yaml:"type"`
 	Format         string             `yaml:"format"`
 	Title          string             `yaml:"title"`

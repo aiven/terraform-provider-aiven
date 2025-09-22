@@ -19,6 +19,12 @@ nav_order: 1
 - Deprecate `aiven_kafka_topic` field `config.message_format_version` in Kafka 4.0+: this configuration is removed
   and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be `"None"`.
 - Added validation for services `maintenance_window_time`: requires HH:mm:ss format
+- Add `aiven_kafka` field `kafka_user_config.kafka.log_message_timestamp_after_max_ms`: The maximum difference allowed
+  between the timestamp when a broker receives a message and the timestamp specified in the message
+- Add `aiven_kafka` field `kafka_user_config.kafka.log_message_timestamp_before_max_ms`: The maximum difference allowed
+  between the timestamp when a broker receives a message and the timestamp specified in the message
+- Add `aiven_opensearch` field `opensearch_user_config.custom_keystores`: Allow to register custom keystores in OpenSearch
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `2.19`
 
 ## [4.44.0] - 2025-08-14
 
