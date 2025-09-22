@@ -66,7 +66,7 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

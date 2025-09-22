@@ -58,7 +58,7 @@ resource "aiven_gcp_org_vpc_peering_connection" "example" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

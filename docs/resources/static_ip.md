@@ -38,7 +38,7 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

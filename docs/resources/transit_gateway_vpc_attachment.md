@@ -52,7 +52,7 @@ resource "aiven_transit_gateway_vpc_attachment" "attachment" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)
