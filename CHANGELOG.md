@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Remove beta flag from `aiven_organization_project` resource and datasource
 - Change `aiven_service_integration` field `integration_type` (enum): add `autoscaler_service`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `autoscaler_service`
 - Change field `disk_space_used`: remove deprecation notice as this field is a computed read-only field that shows current
