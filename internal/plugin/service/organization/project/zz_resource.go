@@ -110,6 +110,6 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": timeouts.BlockAll(ctx),
 		},
-		MarkdownDescription: "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects). \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
 	}
 }
