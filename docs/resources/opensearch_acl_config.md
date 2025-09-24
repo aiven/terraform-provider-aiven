@@ -52,7 +52,7 @@ resource "aiven_opensearch_acl_config" "main" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

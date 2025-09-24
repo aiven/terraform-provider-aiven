@@ -51,7 +51,7 @@ resource "aiven_account" "account1" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

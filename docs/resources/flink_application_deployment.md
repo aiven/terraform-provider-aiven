@@ -95,7 +95,7 @@ resource "aiven_flink_application_deployment" "main" {
 Optional:
 
 - `create` (String)
-- `default` (String)
+- `default` (String, Deprecated) Use specific CRUD timeouts instead.
 - `delete` (String)
 - `read` (String)
 - `update` (String)

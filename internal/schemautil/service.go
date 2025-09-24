@@ -35,9 +35,13 @@ var defaultTimeout time.Duration = 20
 
 func DefaultResourceTimeouts() *schema.ResourceTimeout {
 	return &schema.ResourceTimeout{
-		Create:  schema.DefaultTimeout(defaultTimeout * time.Minute),
-		Update:  schema.DefaultTimeout(defaultTimeout * time.Minute),
-		Delete:  schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Create: schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Update: schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Delete: schema.DefaultTimeout(defaultTimeout * time.Minute),
+		// DEPRECATED: Default timeout is deprecated.
+		// The Plugin Framework does not support the Default timeout field.
+		// This field will be removed in a future major version.
+		// See: https://developer.hashicorp.com/terraform/plugin/framework/resources/timeouts
 		Default: schema.DefaultTimeout(defaultTimeout * time.Minute),
 		Read:    schema.DefaultTimeout(defaultTimeout * time.Minute),
 	}
@@ -438,6 +442,10 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 				Detail:   fmt.Sprintf(detail, lo.FromPtr(v.Metadata.EndOfLifeHelpArticleUrl)),
 			})
 		}
+	}
+
+	if timeoutWarning := common.CheckDeprecatedTimeoutDefault(d); timeoutWarning.Severity != 0 {
+		diags = append(diags, timeoutWarning)
 	}
 
 	return diags

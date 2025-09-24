@@ -381,3 +381,54 @@ Migrate your Aiven for M3 databases to [Aiven for Thanos Metrics](https://aiven.
       ```bash
       terraform apply --auto-approve
       ```
+
+## Migrate from `timeouts.default`
+
+The `timeouts.default` field is deprecated and will be removed in a future version. The [Terraform Plugin Framework does not support the `default` timeout field](https://developer.hashicorp.com/terraform/plugin/framework/resources/timeouts).
+
+### What changed
+
+Resources that previously used `timeouts.default` now require specific CRUD timeouts:
+
+**Before (deprecated):**
+```hcl
+resource "aiven_pg" "example" {
+  project      = "my-project"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "my-postgres"
+
+  timeouts {
+    default = "20m"  # This is deprecated
+  }
+}
+```
+
+**After (recommended):**
+```hcl
+resource "aiven_pg" "example" {
+  project      = "my-project"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "my-postgres"
+
+  timeouts {
+    create = "20m"
+    read   = "5m"
+    update = "20m"
+    delete = "20m"
+  }
+}
+```
+
+### Migration steps
+
+1. Replace `timeouts.default` with specific CRUD timeouts in your Terraform configuration
+2. Set appropriate timeouts for each operation based on your needs:
+    - `create`: Time for resource creation (typically longer)
+    - `read`: Time for reading resource state (typically shorter)
+    - `update`: Time for resource updates (typically longer)
+    - `delete`: Time for resource deletion (typically medium)
+
+-> **Note**
+You'll see deprecation warnings during `terraform plan` and `terraform apply` operations until you migrate to specific CRUD timeouts.

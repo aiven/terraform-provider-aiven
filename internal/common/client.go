@@ -67,7 +67,17 @@ type CrudHandler func(context.Context, *schema.ResourceData, avngen.Client) erro
 // WithGenClient wraps CRUD handlers and runs with avngen.Client
 func WithGenClient(handler CrudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-		return diag.FromErr(handler(ctx, d, genClientCache))
+		var diags diag.Diagnostics
+
+		if timeoutWarning := CheckDeprecatedTimeoutDefault(d); timeoutWarning.Severity != 0 {
+			diags = append(diags, timeoutWarning)
+		}
+
+		if err := handler(ctx, d, genClientCache); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+
+		return diags
 	}
 }
 
@@ -78,7 +88,16 @@ func WithGenClientDiag(f func(context.Context, *schema.ResourceData, avngen.Clie
 	any,
 ) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-		return f(ctx, d, genClientCache)
+		var diags diag.Diagnostics
+
+		if timeoutWarning := CheckDeprecatedTimeoutDefault(d); timeoutWarning.Severity != 0 {
+			diags = append(diags, timeoutWarning)
+		}
+
+		handlerDiags := f(ctx, d, genClientCache)
+		diags = append(diags, handlerDiags...)
+
+		return diags
 	}
 }
 

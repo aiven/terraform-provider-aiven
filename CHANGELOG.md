@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Deprecated `timeouts.default` attribute. The `timeouts.default` attribute is now deprecated and will be removed in a future major version. Use specific CRUD timeouts (`create`, `read`, `update`, `delete`) instead. See the [Migration Guide](https://github.com/aiven/terraform-provider-aiven/blob/main/docs/guides/update-deprecated-resources.md) for more information.
 - Add end-of-life service warnings for existing services
 - Remove beta flag from `aiven_organization_project` resource and datasource
 - Change `aiven_service_integration` field `integration_type` (enum): add `autoscaler_service`
