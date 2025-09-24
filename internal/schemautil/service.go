@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -427,7 +428,19 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set tech_emails in schema: %s", err)
 	}
 
-	return nil
+	var diags diag.Diagnostics
+	for _, v := range s.ServiceNotifications {
+		if v.Type == service.ServiceNotificationTypeServiceEndOfLife {
+			const detail = "See the [documentation](%s) for more information on end of life for Aiven services."
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  v.Message,
+				Detail:   fmt.Sprintf(detail, lo.FromPtr(v.Metadata.EndOfLifeHelpArticleUrl)),
+			})
+		}
+	}
+
+	return diags
 }
 
 func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
