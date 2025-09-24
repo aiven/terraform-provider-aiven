@@ -284,11 +284,11 @@ Optional:
 - `ism_enabled` (Boolean) Specifies whether ISM is enabled or not.
 - `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document.
 - `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. Example: `24`.
-- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. Example: `2500000`.
+- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index.
 - `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Example: `8`.
 - `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Example: `30`.
 - `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
-- `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size.
+- `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory in percentage that can be used for the KNN index. Defaults to 50% of the JVM heap size. 0 is used to set it to null which can be used to invalidate caches.
 - `node_search_cache_size` (String) Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 5gb. Requires restarting all OpenSearch nodes.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.

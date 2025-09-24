@@ -199,7 +199,7 @@ Optional:
 -----END CERTIFICATE-----
 `.
 - `index_days_max` (Number) Maximum number of days of logs to keep. Default: `3`.
-- `timeout` (Number) Elasticsearch request timeout limit. Default: `10.0`.
+- `timeout` (Number) Elasticsearch request timeout limit. Default: `10`.
 
 
 <a id="nestedblock--external_google_cloud_bigquery"></a>
@@ -283,7 +283,7 @@ Optional:
 -----END CERTIFICATE-----
 `.
 - `index_days_max` (Number) Maximum number of days of logs to keep. Default: `3`.
-- `timeout` (Number) OpenSearch request timeout limit. Default: `10.0`.
+- `timeout` (Number) OpenSearch request timeout limit. Default: `10`.
 
 
 <a id="nestedblock--external_postgresql"></a>

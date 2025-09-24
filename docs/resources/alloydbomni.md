@@ -206,7 +206,7 @@ Optional:
 
 - `autovacuum_analyze_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE (e.g. `0.2` for 20% of the table size). The default is `0.2`.
 - `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is `50`.
-- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart. Example: `200000000`.
+- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.
 - `autovacuum_max_workers` (Number) Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is `3`. Changing this parameter causes a service restart.
 - `autovacuum_naptime` (Number) Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds. The default is `60`.
 - `autovacuum_vacuum_cost_delay` (Number) Specifies the cost delay value that will be used in automatic VACUUM operations. If `-1` is specified, the regular vacuum_cost_delay value will be used. The default is `2` (upstream default).
@@ -216,7 +216,7 @@ Optional:
 - `bgwriter_delay` (Number) Specifies the delay between activity rounds for the background writer in milliseconds. The default is `200`. Example: `200`.
 - `bgwriter_flush_after` (Number) Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes. Setting of 0 disables forced writeback. The default is `512`. Example: `512`.
 - `bgwriter_lru_maxpages` (Number) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. The default is `100`. Example: `100`.
-- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2.0`.
+- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.
 - `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition. The default is `1000` (upstream default). Example: `1000`.
 - `default_toast_compression` (String) Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns. The default is `lz4`.
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
@@ -245,7 +245,7 @@ Optional:
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval in seconds to run pg_partman's scheduled tasks. The default is `3600`. Example: `3600`.
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default is `top`.
-- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited. Example: `5000000`.
+- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
 - `timezone` (String) PostgreSQL service timezone. Example: `Europe/Helsinki`.
 - `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session. Changing this parameter causes a service restart. Example: `1024`.
 - `track_commit_timestamp` (String) Enum: `off`, `on`. Record commit time of transactions. Changing this parameter causes a service restart.

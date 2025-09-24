@@ -178,8 +178,8 @@ Optional:
 - `innodb_ft_min_token_size` (Number) Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `3`.
 - `innodb_ft_server_stopword_table` (String) This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.
 - `innodb_lock_wait_timeout` (Number) The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.
-- `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk. Example: `16777216`.
-- `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables. Example: `134217728`.
+- `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk.
+- `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.
 - `innodb_print_all_deadlocks` (Boolean) When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.
 - `innodb_read_io_threads` (Number) The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.
 - `innodb_rollback_on_timeout` (Boolean) When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.
@@ -188,9 +188,9 @@ Optional:
 - `interactive_timeout` (Number) The number of seconds the server waits for activity on an interactive connection before closing it. Example: `3600`.
 - `internal_tmp_mem_storage_engine` (String) Enum: `MEMORY`, `TempTable`. The storage engine for in-memory internal temporary tables.
 - `log_output` (String) Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.
-- `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10.0`.
-- `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M). Example: `67108864`.
-- `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M). Example: `16777216`.
+- `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.
+- `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).
+- `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).
 - `net_buffer_length` (Number) Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service. Example: `16384`.
 - `net_read_timeout` (Number) The number of seconds to wait for more data from a connection before aborting the read. Example: `30`.
 - `net_write_timeout` (Number) The number of seconds to wait for a block to be written to a connection before aborting the write. Example: `30`.
@@ -198,7 +198,7 @@ Optional:
 - `sort_buffer_size` (Number) Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K). Example: `262144`.
 - `sql_mode` (String) Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned. Example: `ANSI,TRADITIONAL`.
 - `sql_require_primary_key` (Boolean) Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.
-- `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M). Example: `16777216`.
+- `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).
 - `wait_timeout` (Number) The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.
 
 

@@ -27,6 +27,10 @@ nav_order: 1
   between the timestamp when a broker receives a message and the timestamp specified in the message
 - Add `aiven_opensearch` field `opensearch_user_config.custom_keystores`: Allow to register custom keystores in OpenSearch
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `2.19`
+- Add `aiven_kafka` field `kafka_user_config.kafka_diskless`: Kafka Diskless configuration values
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `4.0`
+- Add `aiven_service_integration` field `autoscaler_service_user_config`: AutoscalerService user configurable settings.
+  **Warning:** There's no way to reset advanced configuration options to default
 
 ## [4.44.0] - 2025-08-14
 

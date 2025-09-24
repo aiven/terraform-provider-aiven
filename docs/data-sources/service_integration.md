@@ -33,6 +33,7 @@ data "aiven_service_integration" "example_integration" {
 
 ### Read-Only
 
+- `autoscaler_service_user_config` (List of Object) AutoscalerService user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--autoscaler_service_user_config))
 - `clickhouse_credentials_user_config` (List of Object) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (List of Object) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
@@ -54,6 +55,23 @@ data "aiven_service_integration" "example_integration" {
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_project` (String) Source service project name
+
+<a id="nestedatt--autoscaler_service_user_config"></a>
+### Nested Schema for `autoscaler_service_user_config`
+
+Read-Only:
+
+- `autoscaling` (List of Object) (see [below for nested schema](#nestedobjatt--autoscaler_service_user_config--autoscaling))
+
+<a id="nestedobjatt--autoscaler_service_user_config--autoscaling"></a>
+### Nested Schema for `autoscaler_service_user_config.autoscaling`
+
+Read-Only:
+
+- `max_plan` (String)
+- `min_plan` (String)
+
+
 
 <a id="nestedatt--clickhouse_credentials_user_config"></a>
 ### Nested Schema for `clickhouse_credentials_user_config`
