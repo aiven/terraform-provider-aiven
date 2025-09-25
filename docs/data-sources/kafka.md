@@ -106,6 +106,7 @@ Read-Only:
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
 - `kafka_connect_plugin_versions` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_plugin_versions))
 - `kafka_connect_secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers))
+- `kafka_diskless` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_diskless))
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
@@ -266,6 +267,14 @@ Read-Only:
 - `prefix_path_depth` (Number)
 - `token` (String)
 
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_diskless"></a>
+### Nested Schema for `kafka_user_config.kafka_diskless`
+
+Read-Only:
+
+- `enabled` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>

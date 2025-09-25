@@ -99,7 +99,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"producer_batch_size": {
-					Description: "The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Default: `1000000`.",
+					Description: "The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -120,7 +120,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"producer_queue_buffering_max_kbytes": {
-					Description: "The maximum size of the buffer in kilobytes before sending. Default: `1048576`.",
+					Description: "The maximum size of the buffer in kilobytes before sending.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},

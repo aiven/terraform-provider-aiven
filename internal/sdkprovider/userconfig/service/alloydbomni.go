@@ -120,7 +120,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autovacuum_freeze_max_age": {
-						Description: "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart. Example: `200000000`.",
+						Description: "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -170,7 +170,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"bgwriter_lru_multiplier": {
-						Description: "The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2.0`.",
+						Description: "The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -320,7 +320,7 @@ func alloydbomniUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"all", "none", "top"}, false),
 					},
 					"temp_file_limit": {
-						Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited. Example: `5000000`.",
+						Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

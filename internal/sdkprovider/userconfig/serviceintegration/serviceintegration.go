@@ -6,6 +6,8 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 func GetUserConfig(kind string) *schema.Schema {
 	switch kind {
+	case "autoscaler_service":
+		return autoscalerServiceUserConfig()
 	case "clickhouse_credentials":
 		return clickhouseCredentialsUserConfig()
 	case "clickhouse_kafka":
@@ -46,5 +48,5 @@ func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"clickhouse_credentials", "clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "flink_external_postgresql", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
+	return []string{"autoscaler_service", "clickhouse_credentials", "clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "flink_external_postgresql", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
 }

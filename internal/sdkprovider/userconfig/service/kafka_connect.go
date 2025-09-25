@@ -80,7 +80,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
 					"consumer_fetch_max_bytes": {
-						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.",
+						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -91,7 +91,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_committed", "read_uncommitted"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -137,7 +137,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.",
+						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

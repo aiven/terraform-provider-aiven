@@ -61,6 +61,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 ### Optional
 
+- `autoscaler_service_user_config` (Block List, Max: 1) AutoscalerService user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--autoscaler_service_user_config))
 - `clickhouse_credentials_user_config` (Block List, Max: 1) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
@@ -88,6 +89,23 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 - `id` (String) The ID of this resource.
 - `integration_id` (String) The ID of the Aiven service integration.
+
+<a id="nestedblock--autoscaler_service_user_config"></a>
+### Nested Schema for `autoscaler_service_user_config`
+
+Optional:
+
+- `autoscaling` (Block List, Max: 1) Configure service autoscaling integration. This is an experimental api and subject to change. For further assistance, contact the Aiven support team mailto:support@aiven.io or your account team (see [below for nested schema](#nestedblock--autoscaler_service_user_config--autoscaling))
+
+<a id="nestedblock--autoscaler_service_user_config--autoscaling"></a>
+### Nested Schema for `autoscaler_service_user_config.autoscaling`
+
+Optional:
+
+- `max_plan` (String) Max Plan. Example: `business-5`.
+- `min_plan` (String) Min Plan. Example: `business-4`.
+
+
 
 <a id="nestedblock--clickhouse_credentials_user_config"></a>
 ### Nested Schema for `clickhouse_credentials_user_config`
@@ -134,11 +152,11 @@ Optional:
 - `poll_max_batch_size` (Number) Maximum number of messages to fetch in a single Kafka poll operation for reading. Default: `0`.
 - `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Default: `0`.
 - `producer_batch_num_messages` (Number) The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. Default: `10000`.
-- `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Default: `1000000`.
+- `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent.
 - `producer_compression_codec` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. The compression codec to use when sending a batch of messages to Kafka. Default: `none`.
 - `producer_compression_level` (Number) The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. Default: `-1`.
 - `producer_linger_ms` (Number) The time in milliseconds to wait for additional messages before sending a batch. If the time is exceeded, the batch is sent. Default: `5`.
-- `producer_queue_buffering_max_kbytes` (Number) The maximum size of the buffer in kilobytes before sending. Default: `1048576`.
+- `producer_queue_buffering_max_kbytes` (Number) The maximum size of the buffer in kilobytes before sending.
 - `producer_queue_buffering_max_messages` (Number) The maximum number of messages to buffer before sending. Default: `100000`.
 - `producer_request_required_acks` (Number) The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). Default: `-1`.
 - `skip_broken_messages` (Number) Number of broken messages to skip before stopping processing when reading from Kafka. Useful for handling corrupted data without failing the entire integration. Default: `0`.
@@ -337,10 +355,10 @@ Optional:
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Example: `1024`.
 - `consumer_max_poll_records` (Number) Set consumer max.poll.records. The default is 500. Example: `500`.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.
-- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.
+- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.
-- `producer_max_request_size` (Number) The maximum request size in bytes. Example: `1048576`.
+- `producer_max_request_size` (Number) The maximum request size in bytes.
 
 
 
