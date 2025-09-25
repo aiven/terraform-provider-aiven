@@ -18,6 +18,8 @@ import (
 )
 
 func TestAccAivenAlloyDBOmni_invalid_disk_size(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -107,6 +109,8 @@ func TestAccAivenAlloyDBOmni_invalid_disk_size(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmni_static_ips(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -173,6 +177,8 @@ func TestAccAivenAlloyDBOmni_static_ips(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmni_changing_plan(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -215,6 +221,8 @@ func TestAccAivenAlloyDBOmni_changing_plan(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmni_deleting_additional_disk_size(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -260,6 +268,8 @@ func TestAccAivenAlloyDBOmni_deleting_additional_disk_size(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmni_deleting_disk_size(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -304,6 +314,8 @@ func TestAccAivenAlloyDBOmni_deleting_disk_size(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmni_changing_disk_size(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -579,6 +591,8 @@ data "aiven_alloydbomni" "common" {
 
 // TestAccAivenAlloyDBOmni_admin_creds tests admin creds in user_config
 func TestAccAivenAlloyDBOmni_admin_creds(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.alloydbomni"
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	project := acc.ProjectName()
@@ -624,6 +638,8 @@ resource "aiven_alloydbomni" "alloydbomni" {
 
 // AlloyDBOmni service tests
 func TestAccAivenServiceAlloyDBOmni_basic(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar-alloydbomni"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -678,6 +694,8 @@ func TestAccAivenServiceAlloyDBOmni_termination_protection(t *testing.T) {
 }
 
 func TestAccAivenServiceAlloyDBOmni_read_replica(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar-alloydbomni"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -705,6 +723,8 @@ func TestAccAivenServiceAlloyDBOmni_read_replica(t *testing.T) {
 }
 
 func TestAccAivenServiceAlloyDBOmni_custom_timeouts(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar-alloydbomni"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
@@ -1061,6 +1081,8 @@ func testAccCheckAivenServiceAlloyDBOmniAttributes(n string) resource.TestCheckF
 }
 
 func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	ctx := context.Background()
 	client, err := acc.GetTestGenAivenClient()
 	if err != nil {

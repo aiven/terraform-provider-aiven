@@ -17,6 +17,8 @@ import (
 )
 
 func TestAccAivenGCPPrivatelink_basic(t *testing.T) {
+	t.Skip("Skipping GCP Privatelink tests temporarily due to the ACL issue") // TODO: enable it when the issue is fixed
+
 	resourceName := "aiven_gcp_privatelink.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
