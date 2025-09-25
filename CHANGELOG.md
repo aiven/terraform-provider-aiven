@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.45.0] - 2025-09-25
+
 - Deprecated `timeouts.default` attribute. The `timeouts.default` attribute is now deprecated and will be removed
   in a future major version. Use specific CRUD timeouts (`create`, `read`, `update`, `delete`) instead. See the [Migration
   Guide](https://github.com/aiven/terraform-provider-aiven/blob/main/docs/guides/update-deprecated-resources.md) for more information.
