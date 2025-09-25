@@ -9,6 +9,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -17,6 +18,16 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
 )
+
+func serviceEndpointTypeChoices() []string {
+	// These endpoints are not supposed to be exposed in TF
+	ignore := []string{
+		"autoscaler_service",
+	}
+	return lo.Filter(service.EndpointTypeChoices(), func(s string, _ int) bool {
+		return !slices.Contains(ignore, s)
+	})
+}
 
 func hasEndpointConfig[T string | service.EndpointType](kind T) bool {
 	return slices.Contains(serviceintegrationendpoint.UserConfigTypes(), string(kind))
@@ -37,11 +48,11 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"endpoint_type": {
-			Description:  userconfig.Desc("The type of service integration endpoint.").PossibleValuesString(service.EndpointTypeChoices()...).Build(),
+			Description:  userconfig.Desc("The type of service integration endpoint.").PossibleValuesString(serviceEndpointTypeChoices()...).Build(),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(service.EndpointTypeChoices(), false),
+			ValidateFunc: validation.StringInSlice(serviceEndpointTypeChoices(), false),
 		},
 		"endpoint_config": {
 			Description: "Backend configuration for the endpoint.",
@@ -52,8 +63,10 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 	}
 
 	// Adds user configs
-	for _, k := range serviceintegrationendpoint.UserConfigTypes() {
-		converters.SetUserConfig(converters.ServiceIntegrationEndpointUserConfig, k, s)
+	for _, k := range serviceEndpointTypeChoices() {
+		if hasEndpointConfig(k) {
+			converters.SetUserConfig(converters.ServiceIntegrationEndpointUserConfig, k, s)
+		}
 	}
 	return s
 }

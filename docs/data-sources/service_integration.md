@@ -27,13 +27,12 @@ data "aiven_service_integration" "example_integration" {
 ### Required
 
 - `destination_service_name` (String) Destination service for the integration.
-- `integration_type` (String) Type of the service integration. The possible values are `alertmanager`, `autoscaler`, `autoscaler_service`, `caching`, `cassandra_cross_service_cluster`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `disaster_recovery`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `flink_external_postgresql`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_connect_postgresql`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `stresstester`, `thanos_distributed_query`, `thanos_migrate`, `thanoscompactor`, `thanosquery`, `thanosruler`, `thanosstore`, `vector` and `vmalert`.
+- `integration_type` (String) Type of the service integration. The possible values are `alertmanager`, `autoscaler`, `caching`, `cassandra_cross_service_cluster`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `disaster_recovery`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `flink_external_postgresql`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_connect_postgresql`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `stresstester`, `thanos_distributed_query`, `thanos_migrate`, `thanoscompactor`, `thanosquery`, `thanosruler`, `thanosstore`, `vector` and `vmalert`.
 - `project` (String) Project the integration belongs to.
 - `source_service_name` (String) Source service for the integration (if any)
 
 ### Read-Only
 
-- `autoscaler_service_user_config` (List of Object) AutoscalerService user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--autoscaler_service_user_config))
 - `clickhouse_credentials_user_config` (List of Object) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (List of Object) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
@@ -55,23 +54,6 @@ data "aiven_service_integration" "example_integration" {
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_project` (String) Source service project name
-
-<a id="nestedatt--autoscaler_service_user_config"></a>
-### Nested Schema for `autoscaler_service_user_config`
-
-Read-Only:
-
-- `autoscaling` (List of Object) (see [below for nested schema](#nestedobjatt--autoscaler_service_user_config--autoscaling))
-
-<a id="nestedobjatt--autoscaler_service_user_config--autoscaling"></a>
-### Nested Schema for `autoscaler_service_user_config.autoscaling`
-
-Read-Only:
-
-- `max_plan` (String)
-- `min_plan` (String)
-
-
 
 <a id="nestedatt--clickhouse_credentials_user_config"></a>
 ### Nested Schema for `clickhouse_credentials_user_config`
