@@ -4,10 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"sync"
 
+	"github.com/agnivade/levenshtein"
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
+	projectpkg "github.com/aiven/go-client-codegen/handler/project"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
@@ -22,6 +26,10 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	return customdiff.Sequence(
 		SetServiceTypeIfEmpty(serviceType),
 		CustomizeDiffDisallowMultipleManyToOneKeys,
+		customdiff.IfValueChange("plan",
+			ShouldNotBeEmpty,
+			CustomizeDiffCheckPlan,
+		),
 		customdiff.IfValueChange("tag",
 			ShouldNotBeEmpty,
 			CustomizeDiffCheckUniqueTag,
@@ -319,4 +327,105 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	// We must output a diff for the computed field,
 	// which otherwise will be suppressed by TF
 	return diff.SetNew(k, "0B")
+}
+
+var (
+	planListCache sync.Map
+	planListOnce  DoOnce
+)
+
+// CustomizeDiffCheckPlan validates that the service plan exists and suggests similar plans if not found
+func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if !d.HasChange("plan") {
+		return nil
+	}
+
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
+
+	var (
+		project     = d.Get("project").(string)
+		serviceType = d.Get("service_type").(string)
+		plan        = d.Get("plan").(string)
+
+		maxSuggestions = 3
+	)
+
+	key := fmt.Sprintf("%s/%s", project, serviceType)
+	err = planListOnce.Do(key, func() error {
+		plans, err := client.ProjectServicePlanList(ctx, project, serviceType)
+		if err == nil {
+			planListCache.Store(key, plans)
+		}
+		return err
+	})
+	if err != nil {
+		return fmt.Errorf("unable to fetch service plans: %w", err)
+	}
+
+	load, _ := planListCache.Load(key)
+	plans := load.([]projectpkg.ServicePlanOut)
+
+	planNames := make([]string, 0, len(plans))
+	for _, p := range plans {
+		planNames = append(planNames, p.ServicePlan)
+		if p.ServicePlan == plan {
+			return nil
+		} // valid
+	}
+
+	suggestions := findSimilar(plan, planNames, maxSuggestions)
+
+	errMsg := fmt.Sprintf("invalid service plan %q for service type %q. ", plan, serviceType)
+	switch len(suggestions) {
+	case 0:
+	case 1:
+		errMsg += fmt.Sprintf("Did you mean: %s", suggestions[0])
+	default:
+		errMsg += fmt.Sprintf("Did you mean one of: %s", strings.Join(suggestions, ", "))
+	}
+
+	return fmt.Errorf("%s", errMsg)
+}
+
+// findSimilar finds the most similar strings using Levenshtein distance
+func findSimilar(target string, candidates []string, maxSuggestions int) []string {
+	type suggestion struct {
+		str      string
+		distance int
+	}
+
+	suggestions := make([]suggestion, 0, len(candidates))
+	targetLower := strings.ToLower(target)
+
+	// check for case-insensitive match
+	for _, candidate := range candidates {
+		if strings.EqualFold(target, candidate) {
+			return []string{candidate}
+		}
+	}
+
+	// max ~30% of string length
+	maxDistance := max(2, len(targetLower)*3/10)
+
+	for _, candidate := range candidates {
+		distance := levenshtein.ComputeDistance(targetLower, strings.ToLower(candidate))
+		if distance <= maxDistance {
+			suggestions = append(suggestions, suggestion{str: candidate, distance: distance})
+		}
+	}
+
+	sort.Slice(suggestions, func(i, j int) bool {
+		return suggestions[i].distance < suggestions[j].distance
+	})
+
+	lim := min(len(suggestions), maxSuggestions)
+	result := make([]string, lim)
+	for i := 0; i < lim; i++ {
+		result[i] = suggestions[i].str
+	}
+
+	return result
 }
