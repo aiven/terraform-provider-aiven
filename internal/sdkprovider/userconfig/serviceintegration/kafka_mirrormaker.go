@@ -44,7 +44,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_buffer_memory": {
-						Description: "The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.",
+						Description: "The amount of bytes producer can use for buffering data before publishing to broker.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -60,7 +60,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "The maximum request size in bytes. Example: `1048576`.",
+						Description: "The maximum request size in bytes.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

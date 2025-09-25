@@ -29,7 +29,7 @@ func externalElasticsearchLogsUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"timeout": {
-				Description: "Elasticsearch request timeout limit. Default: `10.0`.",
+				Description: "Elasticsearch request timeout limit. Default: `10`.",
 				Optional:    true,
 				Type:        schema.TypeFloat,
 			},

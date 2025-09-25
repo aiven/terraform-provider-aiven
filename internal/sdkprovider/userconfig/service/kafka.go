@@ -115,7 +115,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"group_max_session_timeout_ms": {
-						Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes). Example: `1800000`.",
+						Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -125,7 +125,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_cleaner_delete_retention_ms": {
-						Description: "How long are delete records retained? (Default: 86400000 (1 day)). Example: `86400000`.",
+						Description: "How long are delete records retained? (Default: 86400000 (1 day)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -166,7 +166,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_index_size_max_bytes": {
-						Description: "The maximum size in bytes of the offset index (Default: 10485760 (10 mebibytes)). Example: `10485760`.",
+						Description: "The maximum size in bytes of the offset index (Default: 10485760 (10 mebibytes)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -257,7 +257,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"message_max_bytes": {
-						Description: "The maximum size of message that the server can receive. (Default: 1048588 bytes (1 mebibyte + 12 bytes)). Example: `1048588`.",
+						Description: "The maximum size of message that the server can receive. (Default: 1048588 bytes (1 mebibyte + 12 bytes)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -322,12 +322,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"transaction_remove_expired_transaction_cleanup_interval_ms": {
-						Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)). Example: `3600000`.",
+						Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"transaction_state_log_segment_bytes": {
-						Description: "The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)). Example: `104857600`.",
+						Description: "The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -375,7 +375,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
 					"consumer_fetch_max_bytes": {
-						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.",
+						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -386,7 +386,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_committed", "read_uncommitted"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -432,7 +432,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.",
+						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -545,6 +545,18 @@ func kafkaUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"kafka_diskless": {
+				Description: "Kafka Diskless configuration values",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
+					Description: "Whether to enable the Diskless functionality.",
+					ForceNew:    true,
+					Required:    true,
+					Type:        schema.TypeBool,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"kafka_rest": {
 				Description: "Enable Kafka-REST service. Default: `false`.",
 				Optional:    true,
@@ -569,7 +581,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_request_max_bytes": {
-						Description: "Maximum number of bytes in unencoded message keys and values by a single request. Default: `67108864`.",
+						Description: "Maximum number of bytes in unencoded message keys and values by a single request.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -608,7 +620,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. Default: `1048576`.",
+						Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -646,7 +658,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, and newer. Kafka major version.",
+				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, and newer. Kafka major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

@@ -118,11 +118,12 @@ Optional:
 - `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
 - `kafka_connect_plugin_versions` (Block List) The plugin selected by the user (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_plugin_versions))
 - `kafka_connect_secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers))
+- `kafka_diskless` (Block List, Max: 1) Kafka Diskless configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_diskless))
 - `kafka_rest` (Boolean) Enable Kafka-REST service. Default: `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (Block List, Max: 1) Kafka SASL mechanisms (see [below for nested schema](#nestedblock--kafka_user_config--kafka_sasl_mechanisms))
-- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, and newer. Kafka major version.
+- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, and newer. Kafka major version.
 - `letsencrypt_sasl_privatelink` (Boolean) Use Letsencrypt CA for Kafka SASL via Privatelink.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
@@ -164,9 +165,9 @@ Optional:
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.
 - `default_replication_factor` (Number) Replication factor for auto-created topics (Default: 3).
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. (Default: 3000 ms (3 seconds)). Example: `3000`.
-- `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes). Example: `1800000`.
+- `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes).
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. (Default: 6000 ms (6 seconds)). Example: `6000`.
-- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained? (Default: 86400000 (1 day)). Example: `86400000`.
+- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained? (Default: 86400000 (1 day)).
 - `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted. (Default: 9223372036854775807 ms (Long.MAX_VALUE)).
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. (Default: 0.5). Example: `0.5`.
 - `log_cleaner_min_compaction_lag_ms` (Number) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted. (Default: 0 ms).
@@ -174,7 +175,7 @@ Optional:
 - `log_flush_interval_messages` (Number) The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)).
 - `log_flush_interval_ms` (Number) The maximum time in ms that a message in any topic is kept in memory (page-cache) before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used (Default: null).
 - `log_index_interval_bytes` (Number) The interval with which Kafka adds an entry to the offset index (Default: 4096 bytes (4 kibibytes)). Example: `4096`.
-- `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index (Default: 10485760 (10 mebibytes)). Example: `10485760`.
+- `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index (Default: 10485760 (10 mebibytes)).
 - `log_local_retention_bytes` (Number) The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value. (Default: -2).
 - `log_local_retention_ms` (Number) The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value. (Default: -2).
 - `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. (Default: true).
@@ -192,7 +193,7 @@ Optional:
 - `log_segment_delete_delay_ms` (Number) The amount of time to wait before deleting a file from the filesystem (Default: 60000 ms (1 minute)). Example: `60000`.
 - `max_connections_per_ip` (Number) The maximum number of connections allowed from each ip address (Default: 2147483647).
 - `max_incremental_fetch_session_cache_slots` (Number) The maximum number of incremental fetch sessions that the broker will maintain. (Default: 1000). Example: `1000`.
-- `message_max_bytes` (Number) The maximum size of message that the server can receive. (Default: 1048588 bytes (1 mebibyte + 12 bytes)). Example: `1048588`.
+- `message_max_bytes` (Number) The maximum size of message that the server can receive. (Default: 1048588 bytes (1 mebibyte + 12 bytes)).
 - `min_insync_replicas` (Number) When a producer sets acks to `all` (or `-1`), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. (Default: 1). Example: `1`.
 - `num_partitions` (Number) Number of partitions for auto-created topics (Default: 1).
 - `offsets_retention_minutes` (Number) Log retention window in minutes for offsets topic (Default: 10080 minutes (7 days)). Example: `10080`.
@@ -205,8 +206,8 @@ Optional:
 - `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT.(Default: sub).
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (Default: 104857600 bytes).
 - `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: true).
-- `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)). Example: `3600000`.
-- `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)). Example: `104857600`.
+- `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)).
+- `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)).
 
 
 <a id="nestedblock--kafka_user_config--kafka_authentication_methods"></a>
@@ -225,9 +226,9 @@ Optional:
 
 - `connector_client_config_override_policy` (String) Enum: `All`, `None`. Defines what client configurations can be overridden by the connector. Default is None.
 - `consumer_auto_offset_reset` (String) Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.
-- `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.
+- `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
 - `consumer_isolation_level` (String) Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
-- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.
+- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.
 - `consumer_max_poll_interval_ms` (Number) The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).
@@ -236,7 +237,7 @@ Optional:
 - `producer_buffer_memory` (Number) The total bytes of memory the producer can use to buffer records waiting to be sent to the broker (defaults to 33554432).
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.
-- `producer_max_request_size` (Number) This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.
+- `producer_max_request_size` (Number) This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.
 - `scheduled_rebalance_max_delay_ms` (Number) The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.
 - `session_timeout_ms` (Number) The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
 
@@ -292,6 +293,14 @@ Optional:
 
 
 
+<a id="nestedblock--kafka_user_config--kafka_diskless"></a>
+### Nested Schema for `kafka_user_config.kafka_diskless`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable the Diskless functionality.
+
+
 <a id="nestedblock--kafka_user_config--kafka_rest_config"></a>
 ### Nested Schema for `kafka_user_config.kafka_rest_config`
 
@@ -299,14 +308,14 @@ Optional:
 
 - `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. Default: `true`.
 - `consumer_idle_disconnect_timeout` (Number) Specifies the maximum duration (in seconds) a client can remain idle before it is deleted. If a consumer is inactive, it will exit the consumer group, and its state will be discarded. A value of 0 (default) indicates that the consumer will not be disconnected automatically due to inactivity. Default: `0`.
-- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. Default: `67108864`.
+- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request.
 - `consumer_request_timeout_ms` (Number) Enum: `1000`, `15000`, `30000`. The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. Default: `1000`.
 - `name_strategy` (String) Enum: `record_name`, `topic_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. Default: `topic_name`.
 - `name_strategy_validation` (Boolean) If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. Default: `true`.
 - `producer_acks` (String) Enum: `-1`, `0`, `1`, `all`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. Default: `1`.
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. Default: `0`.
-- `producer_max_request_size` (Number) The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. Default: `1048576`.
+- `producer_max_request_size` (Number) The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size.
 - `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker. Default: `25`.
 
 

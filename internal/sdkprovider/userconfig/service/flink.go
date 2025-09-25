@@ -86,7 +86,7 @@ func flinkUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"pekko_framesize_b": {
-				Description: "Maximum size in bytes for messages exchanged between the JobManager and the TaskManagers. Example: `10485760`.",
+				Description: "Maximum size in bytes for messages exchanged between the JobManager and the TaskManagers.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},

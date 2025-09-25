@@ -195,12 +195,12 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"innodb_log_buffer_size": {
-						Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk. Example: `16777216`.",
+						Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_online_alter_log_max_size": {
-						Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables. Example: `134217728`.",
+						Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -247,17 +247,17 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "INSIGHTS,TABLE", "NONE", "TABLE"}, false),
 					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10.0`.",
+						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
 					"max_allowed_packet": {
-						Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M). Example: `67108864`.",
+						Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"max_heap_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M). Example: `16777216`.",
+						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -297,7 +297,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"tmp_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M). Example: `16777216`.",
+						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
