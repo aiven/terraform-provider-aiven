@@ -56,12 +56,11 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 ### Required
 
-- `integration_type` (String) Type of the service integration. The possible values are `alertmanager`, `autoscaler`, `autoscaler_service`, `caching`, `cassandra_cross_service_cluster`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `disaster_recovery`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `flink_external_postgresql`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_connect_postgresql`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `stresstester`, `thanos_distributed_query`, `thanos_migrate`, `thanoscompactor`, `thanosquery`, `thanosruler`, `thanosstore`, `vector` and `vmalert`.
+- `integration_type` (String) Type of the service integration. The possible values are `alertmanager`, `autoscaler`, `caching`, `cassandra_cross_service_cluster`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `disaster_recovery`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `flink_external_postgresql`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_connect_postgresql`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `stresstester`, `thanos_distributed_query`, `thanos_migrate`, `thanoscompactor`, `thanosquery`, `thanosruler`, `thanosstore`, `vector` and `vmalert`.
 - `project` (String) Project the integration belongs to.
 
 ### Optional
 
-- `autoscaler_service_user_config` (Block List, Max: 1) AutoscalerService user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--autoscaler_service_user_config))
 - `clickhouse_credentials_user_config` (Block List, Max: 1) ClickhouseCredentials user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_credentials_user_config))
 - `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
 - `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
@@ -89,23 +88,6 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 - `id` (String) The ID of this resource.
 - `integration_id` (String) The ID of the Aiven service integration.
-
-<a id="nestedblock--autoscaler_service_user_config"></a>
-### Nested Schema for `autoscaler_service_user_config`
-
-Optional:
-
-- `autoscaling` (Block List, Max: 1) Configure service autoscaling integration. This is an experimental api and subject to change. For further assistance, contact the Aiven support team mailto:support@aiven.io or your account team (see [below for nested schema](#nestedblock--autoscaler_service_user_config--autoscaling))
-
-<a id="nestedblock--autoscaler_service_user_config--autoscaling"></a>
-### Nested Schema for `autoscaler_service_user_config.autoscaling`
-
-Optional:
-
-- `max_plan` (String) Max Plan. Example: `business-5`.
-- `min_plan` (String) Min Plan. Example: `business-4`.
-
-
 
 <a id="nestedblock--clickhouse_credentials_user_config"></a>
 ### Nested Schema for `clickhouse_credentials_user_config`

@@ -30,10 +30,15 @@ func serviceIntegrationTypeChoices() []string {
 	ignore := []string{
 		"application_service_credential",
 		"kafka_inkless_postgresql",
+		"autoscaler_service",
 	}
 	return lo.Filter(service.IntegrationTypeChoices(), func(s string, _ int) bool {
 		return !slices.Contains(ignore, s)
 	})
+}
+
+func hasIntegrationConfig[T string | service.EndpointType](kind T) bool {
+	return slices.Contains(serviceintegration.UserConfigTypes(), string(kind))
 }
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
@@ -102,8 +107,10 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	}
 
 	// Adds user configs
-	for _, k := range serviceintegration.UserConfigTypes() {
-		converters.SetUserConfig(converters.ServiceIntegrationUserConfig, k, s)
+	for _, k := range serviceIntegrationTypeChoices() {
+		if hasIntegrationConfig(k) {
+			converters.SetUserConfig(converters.ServiceIntegrationUserConfig, k, s)
+		}
 	}
 	return s
 }
