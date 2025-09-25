@@ -16,6 +16,8 @@ import (
 )
 
 func TestAccAivenAlloyDBOmniUser_basic(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{

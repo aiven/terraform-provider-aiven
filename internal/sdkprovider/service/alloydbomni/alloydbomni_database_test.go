@@ -17,6 +17,8 @@ import (
 )
 
 func TestAccAivenAlloyDBOmniDatabase_basic(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni_database.foo"
 	projectName := acc.ProjectName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
