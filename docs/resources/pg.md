@@ -148,7 +148,7 @@ Optional:
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.
 - `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Changing this parameter causes a service restart. When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.
-- `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, and newer. PostgreSQL major version.
+- `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, `18`, and newer. PostgreSQL major version.
 - `pgaudit` (Block List, Max: 1) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--pg_user_config--pgaudit))
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) System-wide settings for pglookout (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
