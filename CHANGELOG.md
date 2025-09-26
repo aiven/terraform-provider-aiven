@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_pg` field `pg_user_config.pg_version` (enum): add `18`
+
 ## [4.45.0] - 2025-09-25
 
 - Deprecated `timeouts.default` attribute. The `timeouts.default` attribute is now deprecated and will be removed
