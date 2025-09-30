@@ -40,6 +40,8 @@ func TestAccAivenAlloyDBOmniUser_basic(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmniUser_alloydbomni_no_password(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -62,6 +64,8 @@ func TestAccAivenAlloyDBOmniUser_alloydbomni_no_password(t *testing.T) {
 }
 
 func TestAccAivenAlloyDBOmniUser_alloydbomni_replica(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	project := acc.ProjectName()

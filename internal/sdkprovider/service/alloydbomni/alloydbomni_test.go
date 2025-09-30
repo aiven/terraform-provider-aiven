@@ -666,6 +666,8 @@ func TestAccAivenServiceAlloyDBOmni_basic(t *testing.T) {
 }
 
 func TestAccAivenServiceAlloyDBOmni_termination_protection(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	resourceName := "aiven_alloydbomni.bar-alloydbomni"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{

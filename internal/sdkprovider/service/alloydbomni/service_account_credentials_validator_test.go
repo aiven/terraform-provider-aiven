@@ -9,6 +9,8 @@ import (
 )
 
 func TestValidateServiceAccountCredentials(t *testing.T) {
+	t.Skip("Deprecated resource")
+
 	cases := []struct {
 		name     string
 		input    string
