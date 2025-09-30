@@ -38,7 +38,7 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 				"resource_name":           "bar",
 				"project":                 projectName,
 				"service_name":            serviceName,
-				"plan":                    "startup-2",
+				"plan":                    "startup-4",
 				"cloud_name":              "google-europe-west1",
 				"maintenance_window_dow":  "monday",
 				"maintenance_window_time": "10:00:00",
