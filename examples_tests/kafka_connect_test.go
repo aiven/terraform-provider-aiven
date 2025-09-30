@@ -43,7 +43,7 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 	kafkaService, err := s.client.Services.Get(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 	s.Equal("kafka", kafkaService.Type)
-	s.Equal("startup-2", kafkaService.Plan)
+	s.Equal("startup-4", kafkaService.Plan)
 	s.Equal("google-europe-west1", kafkaService.CloudName)
 
 	kafkaConnect, err := s.client.Services.Get(ctx, s.config.Project, kafkaConnectName)

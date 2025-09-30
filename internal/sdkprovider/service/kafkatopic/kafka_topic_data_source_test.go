@@ -44,7 +44,7 @@ data "aiven_project" "project" {
 resource "aiven_kafka" "kafka" {
   project                 = data.aiven_project.project.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"

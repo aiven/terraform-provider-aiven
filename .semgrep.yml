@@ -107,10 +107,10 @@ rules:
         }
         ...
       }
-  - pattern-not-regex: startup-2|%s
-  fix: plan = "startup-2"
+  - pattern-not-regex: startup-4|%s
+  fix: plan = "startup-4"
   message: |
-    Tests should use startup-2 for Kafka without kafka_connect
+    Tests should use startup-4 for Kafka without kafka_connect
   severity: ERROR
 
 # Rule for Flink
