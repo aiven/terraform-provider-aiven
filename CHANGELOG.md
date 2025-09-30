@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Added service plan validation during `terraform plan`
+
 ## [4.45.1] - 2025-09-30
 
 - Change `aiven_pg` field `pg_user_config.pg_version` (enum): add `18`
@@ -36,8 +38,6 @@ nav_order: 1
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `2.19`
 - Add `aiven_kafka` field `kafka_user_config.kafka_diskless`: Kafka Diskless configuration values
 - Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `4.0`
-- Add `aiven_service_integration` field `autoscaler_service_user_config`: AutoscalerService user configurable settings.
-  **Warning:** There's no way to reset advanced configuration options to default
 
 ## [4.44.0] - 2025-08-14
 
