@@ -13,6 +13,10 @@ func CheckDeprecatedTimeoutDefault(d *schema.ResourceData) diag.Diagnostic {
 		return diag.Diagnostic{}
 	}
 
+	if !rawConfig.Type().HasAttribute(schema.TimeoutsConfigKey) {
+		return diag.Diagnostic{}
+	}
+
 	timeoutsVal := rawConfig.GetAttr(schema.TimeoutsConfigKey)
 	if timeoutsVal.IsNull() {
 		return diag.Diagnostic{}

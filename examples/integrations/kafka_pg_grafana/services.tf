@@ -8,7 +8,7 @@ resource "aiven_kafka" "example_kafka" {
   project      = data.aiven_project.main.project
   service_name = var.kafka_service_name
   cloud_name   = "aws-eu-west-2"
-  plan         = "startup-2"
+  plan         = "startup-4"
 }
 
 # PostgreSQL service
