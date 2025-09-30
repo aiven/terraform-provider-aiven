@@ -67,27 +67,27 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.AddressLines = &vAddressLines
 	}
-	if !plan.City.IsNull() || state != nil && !state.City.IsNull() {
+	if !plan.City.IsNull() {
 		vCity := plan.City.ValueString()
 		api.City = &vCity
 	}
-	if !plan.CountryCode.IsNull() || state != nil && !state.CountryCode.IsNull() {
+	if !plan.CountryCode.IsNull() {
 		vCountryCode := plan.CountryCode.ValueString()
 		api.CountryCode = &vCountryCode
 	}
-	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
+	if !plan.Name.IsNull() {
 		vName := plan.Name.ValueString()
 		api.Name = &vName
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.State.IsNull() || state != nil && !state.State.IsNull() {
+	if !plan.State.IsNull() {
 		vState := plan.State.ValueString()
 		api.State = &vState
 	}
-	if !plan.ZipCode.IsNull() || state != nil && !state.ZipCode.IsNull() {
+	if !plan.ZipCode.IsNull() {
 		vZipCode := plan.ZipCode.ValueString()
 		api.ZipCode = &vZipCode
 	}

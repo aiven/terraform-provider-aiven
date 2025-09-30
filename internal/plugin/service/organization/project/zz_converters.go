@@ -81,23 +81,23 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.TechnicalEmails = &vTechnicalEmails
 	}
-	if !plan.BasePort.IsNull() && !plan.BasePort.IsUnknown() {
+	if !plan.BasePort.IsNull() {
 		vBasePort := plan.BasePort.ValueInt64()
 		api.BasePort = &vBasePort
 	}
-	if !plan.BillingGroupID.IsNull() || state != nil && !state.BillingGroupID.IsNull() {
+	if !plan.BillingGroupID.IsNull() {
 		vBillingGroupID := plan.BillingGroupID.ValueString()
 		api.BillingGroupID = &vBillingGroupID
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.ParentID.IsNull() || state != nil && !state.ParentID.IsNull() {
+	if !plan.ParentID.IsNull() {
 		vParentID := plan.ParentID.ValueString()
 		api.ParentID = &vParentID
 	}
-	if !plan.ProjectID.IsNull() || state != nil && !state.ProjectID.IsNull() {
+	if !plan.ProjectID.IsNull() {
 		vProjectID := plan.ProjectID.ValueString()
 		api.ProjectID = &vProjectID
 	}

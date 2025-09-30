@@ -72,15 +72,15 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.Permissions = &vPermissions
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.ResourceID.IsNull() || state != nil && !state.ResourceID.IsNull() {
+	if !plan.ResourceID.IsNull() {
 		vResourceID := plan.ResourceID.ValueString()
 		api.ResourceID = &vResourceID
 	}
-	if !plan.ResourceType.IsNull() || state != nil && !state.ResourceType.IsNull() {
+	if !plan.ResourceType.IsNull() {
 		vResourceType := plan.ResourceType.ValueString()
 		api.ResourceType = &vResourceType
 	}

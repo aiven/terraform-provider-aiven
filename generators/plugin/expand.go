@@ -129,13 +129,18 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 	}
 
 	ifOk := jen.Op("!").Add(dataField.Clone()).Dot("IsNull").Call()
-	if item.Computed {
-		// Computed fields have initially state "unknown", not "null".
-		ifOk.Op("&&").Op(" !").Add(dataField.Clone()).Dot("IsUnknown").Call()
-	} else if item.IsRootProperty() {
-		// Compares root fields with state.
-		ifOk.Op("||").Id(stateVar).Op("!=").Nil().
-			Op("&&").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call()
+
+	// Checks if user removed an array.
+	// In that case, we should send an empty array to the API.
+	if item.IsArray() {
+		if item.Computed {
+			// Computed+optional fields have initially state "unknown", not "null".
+			ifOk.Op("&&").Op(" !").Add(dataField.Clone()).Dot("IsUnknown").Call()
+		} else if item.IsRootProperty() {
+			// Compares root fields with state.
+			ifOk.Op("||").Id(stateVar).Op("!=").Nil().
+				Op("&&").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call()
+		}
 	}
 
 	return jen.If(ifOk).Block(block...), nil

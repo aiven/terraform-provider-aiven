@@ -77,35 +77,35 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.BillingEmails = &vBillingEmails
 	}
-	if !plan.BillingAddressID.IsNull() || state != nil && !state.BillingAddressID.IsNull() {
+	if !plan.BillingAddressID.IsNull() {
 		vBillingAddressID := plan.BillingAddressID.ValueString()
 		api.BillingAddressID = &vBillingAddressID
 	}
-	if !plan.BillingGroupName.IsNull() || state != nil && !state.BillingGroupName.IsNull() {
+	if !plan.BillingGroupName.IsNull() {
 		vBillingGroupName := plan.BillingGroupName.ValueString()
 		api.BillingGroupName = &vBillingGroupName
 	}
-	if !plan.Currency.IsNull() || state != nil && !state.Currency.IsNull() {
+	if !plan.Currency.IsNull() {
 		vCurrency := plan.Currency.ValueString()
 		api.Currency = &vCurrency
 	}
-	if !plan.CustomInvoiceText.IsNull() || state != nil && !state.CustomInvoiceText.IsNull() {
+	if !plan.CustomInvoiceText.IsNull() {
 		vCustomInvoiceText := plan.CustomInvoiceText.ValueString()
 		api.CustomInvoiceText = &vCustomInvoiceText
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.PaymentMethodID.IsNull() || state != nil && !state.PaymentMethodID.IsNull() {
+	if !plan.PaymentMethodID.IsNull() {
 		vPaymentMethodID := plan.PaymentMethodID.ValueString()
 		api.PaymentMethodID = &vPaymentMethodID
 	}
-	if !plan.ShippingAddressID.IsNull() || state != nil && !state.ShippingAddressID.IsNull() {
+	if !plan.ShippingAddressID.IsNull() {
 		vShippingAddressID := plan.ShippingAddressID.ValueString()
 		api.ShippingAddressID = &vShippingAddressID
 	}
-	if !plan.VatID.IsNull() || state != nil && !state.VatID.IsNull() {
+	if !plan.VatID.IsNull() {
 		vVatID := plan.VatID.ValueString()
 		api.VatID = &vVatID
 	}

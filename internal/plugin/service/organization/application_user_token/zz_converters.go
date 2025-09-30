@@ -90,23 +90,23 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.Scopes = &vScopes
 	}
-	if !plan.Description.IsNull() || state != nil && !state.Description.IsNull() {
+	if !plan.Description.IsNull() {
 		vDescription := plan.Description.ValueString()
 		api.Description = &vDescription
 	}
-	if !plan.ExtendWhenUsed.IsNull() && !plan.ExtendWhenUsed.IsUnknown() {
+	if !plan.ExtendWhenUsed.IsNull() {
 		vExtendWhenUsed := plan.ExtendWhenUsed.ValueBool()
 		api.ExtendWhenUsed = &vExtendWhenUsed
 	}
-	if !plan.MaxAgeSeconds.IsNull() || state != nil && !state.MaxAgeSeconds.IsNull() {
+	if !plan.MaxAgeSeconds.IsNull() {
 		vMaxAgeSeconds := plan.MaxAgeSeconds.ValueInt64()
 		api.MaxAgeSeconds = &vMaxAgeSeconds
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.UserID.IsNull() || state != nil && !state.UserID.IsNull() {
+	if !plan.UserID.IsNull() {
 		vUserID := plan.UserID.ValueString()
 		api.UserID = &vUserID
 	}

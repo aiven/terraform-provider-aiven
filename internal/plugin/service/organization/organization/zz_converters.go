@@ -45,7 +45,7 @@ func composeID() []string {
 // expandData turns TF object into Request
 func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[apiModel]) diag.Diagnostics {
 	api := new(apiModel)
-	if !plan.Name.IsNull() || state != nil && !state.Name.IsNull() {
+	if !plan.Name.IsNull() {
 		vName := plan.Name.ValueString()
 		api.Name = &vName
 	}

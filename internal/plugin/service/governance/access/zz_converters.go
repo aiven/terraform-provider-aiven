@@ -88,26 +88,26 @@ func composeID() []string {
 // expandData turns TF object into Request
 func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[apiModel]) diag.Diagnostics {
 	api := new(apiModel)
-	if !plan.AccessData.IsNull() || state != nil && !state.AccessData.IsNull() {
+	if !plan.AccessData.IsNull() {
 		vAccessData, diags := util.ExpandSingleNested(ctx, expandAccessData, plan.AccessData)
 		if diags.HasError() {
 			return diags
 		}
 		api.AccessData = vAccessData
 	}
-	if !plan.AccessName.IsNull() || state != nil && !state.AccessName.IsNull() {
+	if !plan.AccessName.IsNull() {
 		vAccessName := plan.AccessName.ValueString()
 		api.AccessName = &vAccessName
 	}
-	if !plan.AccessType.IsNull() || state != nil && !state.AccessType.IsNull() {
+	if !plan.AccessType.IsNull() {
 		vAccessType := plan.AccessType.ValueString()
 		api.AccessType = &vAccessType
 	}
-	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
+	if !plan.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
 	}
-	if !plan.OwnerUserGroupID.IsNull() || state != nil && !state.OwnerUserGroupID.IsNull() {
+	if !plan.OwnerUserGroupID.IsNull() {
 		vOwnerUserGroupID := plan.OwnerUserGroupID.ValueString()
 		api.OwnerUserGroupID = &vOwnerUserGroupID
 	}
@@ -137,7 +137,7 @@ func expandAccessData(ctx context.Context, plan *tfModelAccessData) (*apiModelAc
 		vServiceName := plan.ServiceName.ValueString()
 		api.ServiceName = &vServiceName
 	}
-	if !plan.Username.IsNull() && !plan.Username.IsUnknown() {
+	if !plan.Username.IsNull() {
 		vUsername := plan.Username.ValueString()
 		api.Username = &vUsername
 	}
@@ -146,7 +146,7 @@ func expandAccessData(ctx context.Context, plan *tfModelAccessData) (*apiModelAc
 
 func expandAccessDataAcls(ctx context.Context, plan *tfModelAccessDataAcls) (*apiModelAccessDataAcls, diag.Diagnostics) {
 	api := new(apiModelAccessDataAcls)
-	if !plan.Host.IsNull() && !plan.Host.IsUnknown() {
+	if !plan.Host.IsNull() {
 		vHost := plan.Host.ValueString()
 		api.Host = &vHost
 	}
