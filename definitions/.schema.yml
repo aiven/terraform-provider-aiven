@@ -9,6 +9,11 @@ properties:
     type: boolean
     $comment: |
       Set to true if this resource/datasource is in beta and may have breaking changes.
+  legacyTimeouts:
+    type: boolean
+    $comment: |
+      Set to true to use legacy timeout handling for this resource.
+      This is only needed for SDKv2 compatibility.
   datasource:
     $ref: '#/definitions/SchemaMeta'
     $comment: |

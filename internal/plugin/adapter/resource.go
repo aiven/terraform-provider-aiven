@@ -108,6 +108,13 @@ func (a *resourceAdapter[T]) Create(
 		return
 	}
 
+	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutCreate)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
+
 	diags.Append(a.view.Create(ctx, plan.SharedModel())...)
 	if diags.HasError() {
 		return
@@ -125,10 +132,18 @@ func (a *resourceAdapter[T]) Read(
 		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
+
 	diags.Append(req.State.Get(ctx, state)...)
 	if diags.HasError() {
 		return
 	}
+
+	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutRead)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
 
 	diags.Append(a.view.Read(ctx, state.SharedModel())...)
 	if diags.HasError() {
@@ -144,23 +159,30 @@ func (a *resourceAdapter[T]) Update(
 	rsp *resource.UpdateResponse,
 ) {
 	var (
-		plan  = a.newModel()
-		state = a.newModel()
-		diags = &rsp.Diagnostics
+		config = a.newModel()
+		state  = a.newModel()
+		diags  = &rsp.Diagnostics
 	)
 
-	diags.Append(req.Plan.Get(ctx, plan)...)
+	diags.Append(req.Config.Get(ctx, config)...)
 	diags.Append(req.State.Get(ctx, state)...)
 	if diags.HasError() {
 		return
 	}
 
-	diags.Append(a.view.Update(ctx, plan.SharedModel(), state.SharedModel())...)
+	ctx, cancel, d := withTimeout(ctx, config.TimeoutsObject(), timeoutUpdate)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
+
+	diags.Append(a.view.Update(ctx, config.SharedModel(), state.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
 
-	diags.Append(rsp.State.Set(ctx, plan)...)
+	diags.Append(rsp.State.Set(ctx, config)...)
 }
 
 func (a *resourceAdapter[T]) Delete(
@@ -172,10 +194,18 @@ func (a *resourceAdapter[T]) Delete(
 		state = a.newModel()
 		diags = &rsp.Diagnostics
 	)
+
 	diags.Append(req.State.Get(ctx, state)...)
 	if diags.HasError() {
 		return
 	}
+
+	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutDelete)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
 
 	diags.Append(a.view.Delete(ctx, state.SharedModel())...)
 }

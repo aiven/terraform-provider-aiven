@@ -64,6 +64,13 @@ func genTFModel(isResource bool, item *Item) []jen.Code {
 		meth.Clone().
 			Id("SharedModel").Params().Op("*").Id(item.TFModelName()).
 			Block(jen.Return(jen.Op("&").Id(tfVar).Dot(item.TFModelName()))).
+			Line().
+			Line(), // Had to add this extra to separate methods visually
+
+		// Adds TimeoutsObject method that returns types.Object (see TimeoutsObject usage)
+		meth.Clone().
+			Id("TimeoutsObject").Params().Qual(typesPackage, "Object").
+			Block(jen.Return(jen.Id(tfVar).Dot("Timeouts").Dot("Object"))).
 			Line(),
 	}
 }
