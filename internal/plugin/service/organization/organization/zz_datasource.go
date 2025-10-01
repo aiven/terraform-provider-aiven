@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -24,6 +25,10 @@ type datasourceModel struct {
 
 func (tf *datasourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
+}
+
+func (tf *datasourceModel) TimeoutsObject() types.Object {
+	return tf.Timeouts.Object
 }
 
 /*

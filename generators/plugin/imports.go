@@ -22,13 +22,14 @@ func boolEntity(isResource bool) entityType {
 
 // Generic untyped imports
 const (
-	attrPackage      = "github.com/hashicorp/terraform-plugin-framework/attr"
-	diagPackage      = "github.com/hashicorp/terraform-plugin-framework/diag"
-	typesPackage     = "github.com/hashicorp/terraform-plugin-framework/types"
-	pathPackage      = "github.com/hashicorp/terraform-plugin-framework/path"
-	validatorPackage = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	utilPackage      = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
-	adapterPackage   = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	attrPackage           = "github.com/hashicorp/terraform-plugin-framework/attr"
+	diagPackage           = "github.com/hashicorp/terraform-plugin-framework/diag"
+	typesPackage          = "github.com/hashicorp/terraform-plugin-framework/types"
+	pathPackage           = "github.com/hashicorp/terraform-plugin-framework/path"
+	validatorPackage      = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	utilPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	adapterPackage        = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	legacyTimeoutsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
 func getUntypedImports() []string {
@@ -40,6 +41,7 @@ func getUntypedImports() []string {
 		validatorPackage,
 		utilPackage,
 		adapterPackage,
+		legacyTimeoutsPackage,
 	}
 }
 

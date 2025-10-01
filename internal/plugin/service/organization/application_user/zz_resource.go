@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -27,6 +28,10 @@ type resourceModel struct {
 
 func (tf *resourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
+}
+
+func (tf *resourceModel) TimeoutsObject() types.Object {
+	return tf.Timeouts.Object
 }
 
 /*
