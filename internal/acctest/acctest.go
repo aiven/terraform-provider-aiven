@@ -192,7 +192,7 @@ var (
 // GetTestAivenClient returns a new Aiven client that can be used for acceptance tests.
 func GetTestAivenClient() *aiven.Client {
 	testAivenClientOnce.Do(func() {
-		client, err := common.NewAivenClient()
+		client, err := common.NewAivenClient(common.BuildVersionOpt("acc-tests"))
 		if err != nil {
 			log.Panicf("test client error: %s", err)
 		}
@@ -202,7 +202,7 @@ func GetTestAivenClient() *aiven.Client {
 }
 
 func GetTestGenAivenClient() (avngen.Client, error) {
-	client, err := common.NewAivenGenClient()
+	client, err := common.NewAivenGenClient(common.BuildVersionOpt("acc-tests"))
 	if err != nil {
 		return nil, fmt.Errorf("test generated client error: %w", err)
 	}
