@@ -9,12 +9,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-func genSchema(isBeta, isResource bool, item *Item, idField *IDAttribute) (jen.Code, error) {
-	extrAttrs := jen.Dict{
-		jen.Lit("id"): genIDField(isResource, idField),
-	}
-
-	attrs, err := genAttributes(isResource, item, extrAttrs)
+func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
+	attrs, err := genAttributes(isResource, item, def)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +22,7 @@ func genSchema(isBeta, isResource bool, item *Item, idField *IDAttribute) (jen.C
 	}
 
 	desc := fmtDescription(isResource, item)
-	if isBeta {
+	if def.Beta {
 		desc = userconfig.Desc(desc).AvailabilityType(userconfig.Beta).Build()
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
@@ -50,13 +46,17 @@ func genSchema(isBeta, isResource bool, item *Item, idField *IDAttribute) (jen.C
 }
 
 // genTimeoutsField generates the timeouts field for the schema.
-// The result depends on the entity type.
-func genTimeoutsField(isResource bool) jen.Code {
-	timeoutsMethod := "Block"
+// The result depends on the entity type and whether legacy timeouts are used.
+func genTimeoutsField(isResource bool, def *Definition) jen.Code {
+	pkg := entityImport(isResource, timeoutsPackageFmt)
+	method := "Block"
 	if isResource {
-		timeoutsMethod = "BlockAll"
+		method = "BlockAll"
+		if def.LegacyTimeouts {
+			pkg = legacyTimeoutsPackage
+		}
 	}
-	return jen.Qual(entityImport(isResource, timeoutsPackageFmt), timeoutsMethod).Call(jen.Id("ctx"))
+	return jen.Qual(pkg, method).Call(jen.Id("ctx"))
 }
 
 // genIDField generates the ID field for the schema.
@@ -100,7 +100,7 @@ func genIDField(isResource bool, idField *IDAttribute) jen.Code {
 }
 
 // genAttributes generates the Attributes field value (map).
-func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, error) {
+func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, error) {
 	pkg := entityImport(isResource, schemaPackageFmt)
 	attrs := make(jen.Dict)
 	blocks := make(jen.Dict)
@@ -148,11 +148,8 @@ func genAttributes(isResource bool, item *Item, extraAttrs jen.Dict) (jen.Dict, 
 	}
 
 	if item.IsRoot() {
-		blocks[jen.Lit("timeouts")] = genTimeoutsField(isResource)
-	}
-
-	for k, v := range extraAttrs {
-		attrs[k] = v
+		attrs[jen.Lit("id")] = genIDField(isResource, def.IDAttribute)
+		blocks[jen.Lit("timeouts")] = genTimeoutsField(isResource, def)
 	}
 
 	nested := make(jen.Dict)

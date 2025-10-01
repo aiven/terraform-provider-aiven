@@ -47,6 +47,11 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 	}
 }
 
+// GetDefaultTimeout returns the default timeout for service operations.
+func GetDefaultTimeout() time.Duration {
+	return defaultTimeout * time.Minute
+}
+
 const (
 	ServiceTypeAlloyDBOmni      = "alloydbomni"
 	ServiceTypePG               = "pg"

@@ -120,7 +120,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 
 		root.Name = resName
 		isResource := entity == resourceType
-		schema, err := genSchema(def.Beta, isResource, root, def.IDAttribute)
+		schema, err := genSchema(isResource, root, def)
 		if err != nil {
 			return err
 		}
