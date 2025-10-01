@@ -358,14 +358,23 @@ func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ inter
 		plans, err := client.ProjectServicePlanList(ctx, project, serviceType)
 		if err == nil {
 			planListCache.Store(key, plans)
+			return nil
 		}
+
+		if avngen.IsNotFound(err) {
+			return nil // project may not exist yet, we cannot validate the plan
+		}
+
 		return err
 	})
 	if err != nil {
 		return fmt.Errorf("unable to fetch service plans: %w", err)
 	}
 
-	load, _ := planListCache.Load(key)
+	load, ok := planListCache.Load(key)
+	if !ok {
+		return nil
+	}
 	plans := load.([]projectpkg.ServicePlanOut)
 
 	planNames := make([]string, 0, len(plans))
