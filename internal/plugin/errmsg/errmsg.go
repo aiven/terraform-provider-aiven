@@ -63,6 +63,9 @@ const (
 
 	// SummaryInvalidConfiguration is the error summary for when a configuration is invalid.
 	SummaryInvalidConfiguration = "Invalid Configuration"
+
+	// SummaryErrorModifyPlanResource is the error summary for when a resource cannot be read.
+	SummaryErrorModifyPlanResource = "Error ModifyPlan Resource"
 )
 
 // Below is the list of detailed error messages that are used in the provider.

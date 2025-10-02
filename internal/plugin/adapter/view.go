@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Model implements resource or datasource model with the shared fields model.
 type Model[T any] interface {
 	// SharedModel returns the shared fields model between resource and datasource.
 	SharedModel() *T
+	TimeoutsObject() types.Object
 }
 
 // newModel returns a new instance of the Model.
@@ -50,6 +52,10 @@ type ResConfigValidators[T any] interface {
 // https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
 type ResValidateConfig[T any] interface {
 	ResValidateConfig(ctx context.Context, config *T) diag.Diagnostics
+}
+
+type ResPlanModifier[T any] interface {
+	ModifyPlan(ctx context.Context, plan, state *T) diag.Diagnostics
 }
 
 // View base view that contains the client and potentially other dependencies
