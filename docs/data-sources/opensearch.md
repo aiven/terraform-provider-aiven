@@ -94,6 +94,7 @@ Read-Only:
 - `azure_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--azure_migration))
 - `custom_domain` (String)
 - `custom_keystores` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--custom_keystores))
+- `custom_repos` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--custom_repos))
 - `disable_replication_factor_adjustment` (Boolean)
 - `gcs_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--gcs_migration))
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
@@ -141,6 +142,15 @@ Read-Only:
 
 <a id="nestedobjatt--opensearch_user_config--custom_keystores"></a>
 ### Nested Schema for `opensearch_user_config.custom_keystores`
+
+Read-Only:
+
+- `name` (String)
+- `type` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--custom_repos"></a>
+### Nested Schema for `opensearch_user_config.custom_repos`
 
 Read-Only:
 
