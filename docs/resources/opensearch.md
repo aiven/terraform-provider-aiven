@@ -102,6 +102,7 @@ Optional:
 - `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `custom_keystores` (Block List, Max: 10) Allow to register custom keystores in OpenSearch (see [below for nested schema](#nestedblock--opensearch_user_config--custom_keystores))
+- `custom_repos` (Block List, Max: 10) Allow to register object storage repositories in OpenSearch (see [below for nested schema](#nestedblock--opensearch_user_config--custom_repos))
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
@@ -152,6 +153,15 @@ Optional:
 
 <a id="nestedblock--opensearch_user_config--custom_keystores"></a>
 ### Nested Schema for `opensearch_user_config.custom_keystores`
+
+Required:
+
+- `name` (String)
+- `type` (String) Enum: `azure`, `gcs`, `s3`.
+
+
+<a id="nestedblock--opensearch_user_config--custom_repos"></a>
+### Nested Schema for `opensearch_user_config.custom_repos`
 
 Required:
 

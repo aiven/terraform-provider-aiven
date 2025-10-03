@@ -12952,64 +12952,6 @@ func (_c *MockClient_ServiceGetMigrationStatus_Call) RunAndReturn(run func(ctx c
 	return _c
 }
 
-// ServiceInfluxDBStats provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceInfluxDBStats(ctx context.Context, project1 string, serviceName string) (map[string]any, error) {
-	ret := _mock.Called(ctx, project1, serviceName)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ServiceInfluxDBStats")
-	}
-
-	var r0 map[string]any
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (map[string]any, error)); ok {
-		return returnFunc(ctx, project1, serviceName)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) map[string]any); ok {
-		r0 = returnFunc(ctx, project1, serviceName)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[string]any)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = returnFunc(ctx, project1, serviceName)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_ServiceInfluxDBStats_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ServiceInfluxDBStats'
-type MockClient_ServiceInfluxDBStats_Call struct {
-	*mock.Call
-}
-
-// ServiceInfluxDBStats is a helper method to define mock.On call
-//   - ctx
-//   - project1
-//   - serviceName
-func (_e *MockClient_Expecter) ServiceInfluxDBStats(ctx interface{}, project1 interface{}, serviceName interface{}) *MockClient_ServiceInfluxDBStats_Call {
-	return &MockClient_ServiceInfluxDBStats_Call{Call: _e.mock.On("ServiceInfluxDBStats", ctx, project1, serviceName)}
-}
-
-func (_c *MockClient_ServiceInfluxDBStats_Call) Run(run func(ctx context.Context, project1 string, serviceName string)) *MockClient_ServiceInfluxDBStats_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
-	})
-	return _c
-}
-
-func (_c *MockClient_ServiceInfluxDBStats_Call) Return(stringToV map[string]any, err error) *MockClient_ServiceInfluxDBStats_Call {
-	_c.Call.Return(stringToV, err)
-	return _c
-}
-
-func (_c *MockClient_ServiceInfluxDBStats_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string) (map[string]any, error)) *MockClient_ServiceInfluxDBStats_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // ServiceIntegrationCreate provides a mock function for the type MockClient
 func (_mock *MockClient) ServiceIntegrationCreate(ctx context.Context, project1 string, in *service.ServiceIntegrationCreateIn) (*service.ServiceIntegrationCreateOut, error) {
 	ret := _mock.Called(ctx, project1, in)
@@ -15921,8 +15863,14 @@ func (_c *MockClient_ServiceKmsGetKeypair_Call) RunAndReturn(run func(ctx contex
 }
 
 // ServiceList provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceList(ctx context.Context, project1 string) ([]service.ServiceOut, error) {
-	ret := _mock.Called(ctx, project1)
+func (_mock *MockClient) ServiceList(ctx context.Context, project1 string, query ...[2]string) ([]service.ServiceOut, error) {
+	var tmpRet mock.Arguments
+	if len(query) > 0 {
+		tmpRet = _mock.Called(ctx, project1, query)
+	} else {
+		tmpRet = _mock.Called(ctx, project1)
+	}
+	ret := tmpRet
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServiceList")
@@ -15930,18 +15878,18 @@ func (_mock *MockClient) ServiceList(ctx context.Context, project1 string) ([]se
 
 	var r0 []service.ServiceOut
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) ([]service.ServiceOut, error)); ok {
-		return returnFunc(ctx, project1)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...[2]string) ([]service.ServiceOut, error)); ok {
+		return returnFunc(ctx, project1, query...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) []service.ServiceOut); ok {
-		r0 = returnFunc(ctx, project1)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...[2]string) []service.ServiceOut); ok {
+		r0 = returnFunc(ctx, project1, query...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]service.ServiceOut)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = returnFunc(ctx, project1)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, ...[2]string) error); ok {
+		r1 = returnFunc(ctx, project1, query...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -15956,13 +15904,16 @@ type MockClient_ServiceList_Call struct {
 // ServiceList is a helper method to define mock.On call
 //   - ctx
 //   - project1
-func (_e *MockClient_Expecter) ServiceList(ctx interface{}, project1 interface{}) *MockClient_ServiceList_Call {
-	return &MockClient_ServiceList_Call{Call: _e.mock.On("ServiceList", ctx, project1)}
+//   - query
+func (_e *MockClient_Expecter) ServiceList(ctx interface{}, project1 interface{}, query ...interface{}) *MockClient_ServiceList_Call {
+	return &MockClient_ServiceList_Call{Call: _e.mock.On("ServiceList",
+		append([]interface{}{ctx, project1}, query...)...)}
 }
 
-func (_c *MockClient_ServiceList_Call) Run(run func(ctx context.Context, project1 string)) *MockClient_ServiceList_Call {
+func (_c *MockClient_ServiceList_Call) Run(run func(ctx context.Context, project1 string, query ...[2]string)) *MockClient_ServiceList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		variadicArgs := args[2].([][2]string)
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
 	})
 	return _c
 }
@@ -15972,7 +15923,7 @@ func (_c *MockClient_ServiceList_Call) Return(serviceOuts []service.ServiceOut, 
 	return _c
 }
 
-func (_c *MockClient_ServiceList_Call) RunAndReturn(run func(ctx context.Context, project1 string) ([]service.ServiceOut, error)) *MockClient_ServiceList_Call {
+func (_c *MockClient_ServiceList_Call) RunAndReturn(run func(ctx context.Context, project1 string, query ...[2]string) ([]service.ServiceOut, error)) *MockClient_ServiceList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -18871,8 +18822,14 @@ func (_c *MockClient_ServiceUserDelete_Call) RunAndReturn(run func(ctx context.C
 }
 
 // ServiceUserGet provides a mock function for the type MockClient
-func (_mock *MockClient) ServiceUserGet(ctx context.Context, project1 string, serviceName string, serviceUsername string) (*service.ServiceUserGetOut, error) {
-	ret := _mock.Called(ctx, project1, serviceName, serviceUsername)
+func (_mock *MockClient) ServiceUserGet(ctx context.Context, project1 string, serviceName string, serviceUsername string, query ...[2]string) (*service.ServiceUserGetOut, error) {
+	var tmpRet mock.Arguments
+	if len(query) > 0 {
+		tmpRet = _mock.Called(ctx, project1, serviceName, serviceUsername, query)
+	} else {
+		tmpRet = _mock.Called(ctx, project1, serviceName, serviceUsername)
+	}
+	ret := tmpRet
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServiceUserGet")
@@ -18880,18 +18837,18 @@ func (_mock *MockClient) ServiceUserGet(ctx context.Context, project1 string, se
 
 	var r0 *service.ServiceUserGetOut
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) (*service.ServiceUserGetOut, error)); ok {
-		return returnFunc(ctx, project1, serviceName, serviceUsername)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, ...[2]string) (*service.ServiceUserGetOut, error)); ok {
+		return returnFunc(ctx, project1, serviceName, serviceUsername, query...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) *service.ServiceUserGetOut); ok {
-		r0 = returnFunc(ctx, project1, serviceName, serviceUsername)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, ...[2]string) *service.ServiceUserGetOut); ok {
+		r0 = returnFunc(ctx, project1, serviceName, serviceUsername, query...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*service.ServiceUserGetOut)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = returnFunc(ctx, project1, serviceName, serviceUsername)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, ...[2]string) error); ok {
+		r1 = returnFunc(ctx, project1, serviceName, serviceUsername, query...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -18908,13 +18865,16 @@ type MockClient_ServiceUserGet_Call struct {
 //   - project1
 //   - serviceName
 //   - serviceUsername
-func (_e *MockClient_Expecter) ServiceUserGet(ctx interface{}, project1 interface{}, serviceName interface{}, serviceUsername interface{}) *MockClient_ServiceUserGet_Call {
-	return &MockClient_ServiceUserGet_Call{Call: _e.mock.On("ServiceUserGet", ctx, project1, serviceName, serviceUsername)}
+//   - query
+func (_e *MockClient_Expecter) ServiceUserGet(ctx interface{}, project1 interface{}, serviceName interface{}, serviceUsername interface{}, query ...interface{}) *MockClient_ServiceUserGet_Call {
+	return &MockClient_ServiceUserGet_Call{Call: _e.mock.On("ServiceUserGet",
+		append([]interface{}{ctx, project1, serviceName, serviceUsername}, query...)...)}
 }
 
-func (_c *MockClient_ServiceUserGet_Call) Run(run func(ctx context.Context, project1 string, serviceName string, serviceUsername string)) *MockClient_ServiceUserGet_Call {
+func (_c *MockClient_ServiceUserGet_Call) Run(run func(ctx context.Context, project1 string, serviceName string, serviceUsername string, query ...[2]string)) *MockClient_ServiceUserGet_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		variadicArgs := args[4].([][2]string)
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), variadicArgs...)
 	})
 	return _c
 }
@@ -18924,7 +18884,7 @@ func (_c *MockClient_ServiceUserGet_Call) Return(serviceUserGetOut *service.Serv
 	return _c
 }
 
-func (_c *MockClient_ServiceUserGet_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, serviceUsername string) (*service.ServiceUserGetOut, error)) *MockClient_ServiceUserGet_Call {
+func (_c *MockClient_ServiceUserGet_Call) RunAndReturn(run func(ctx context.Context, project1 string, serviceName string, serviceUsername string, query ...[2]string) (*service.ServiceUserGetOut, error)) *MockClient_ServiceUserGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
