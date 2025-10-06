@@ -41,7 +41,7 @@ func apiConfigTypes() map[string]schema.ValueType {
 		"flush_messages":                      schema.TypeInt,
 		"flush_ms":                            schema.TypeInt,
 		"index_interval_bytes":                schema.TypeInt,
-		"inkless_enable":                      schema.TypeBool,
+		"diskless_enable":                     schema.TypeBool,
 		"local_retention_bytes":               schema.TypeInt,
 		"local_retention_ms":                  schema.TypeInt,
 		"max_compaction_lag_ms":               schema.TypeInt,

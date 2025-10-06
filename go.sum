@@ -76,6 +76,8 @@ github.com/agnivade/levenshtein v1.2.1 h1:EHBY3UOn1gwdy/VbFwgo4cxecRznFk7fKWN1KO
 github.com/agnivade/levenshtein v1.2.1/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
 github.com/aiven/aiven-go-client/v2 v2.34.0 h1:Iq3GZVoqrAPb4XcA3pJVL8MpRtiXep+LYA7y6aoi5xQ=
 github.com/aiven/aiven-go-client/v2 v2.34.0/go.mod h1:qXBgER0dtjJa1V3l7kzpizuAGjFCkgahhHL5OpoM2ZM=
+github.com/aiven/aiven-go-client/v2 v2.36.0 h1:yhJe0mNF5Bqi8wEXbNx/k5s35B4sftURkxVHboxsT3Q=
+github.com/aiven/aiven-go-client/v2 v2.36.0/go.mod h1:tQh+7sk0at5xy6lSnb23OBkwMDnaTMg7ilEVZ6ZdDYY=
 github.com/aiven/go-api-schemas v1.146.0 h1:Zo3o2woUhrTdzFZm5pM51KP42lHmsK7tyB29w3il6cQ=
 github.com/aiven/go-api-schemas v1.146.0/go.mod h1:5LwUYroUjA+62SmJUG1OKUO/7dTh1I+A5jfnlyVfokw=
 github.com/aiven/go-client-codegen v0.122.0 h1:uDT7Hlry6cLIwq6tnQJ+vkaURmlxXn7DDHkLOGQKkbM=
@@ -650,6 +652,7 @@ github.com/onsi/ginkgo/v2 v2.23.3 h1:edHxnszytJ4lD9D5Jjc4tiDkPBZ3siDeJJkUZJJVkp0
 github.com/onsi/ginkgo/v2 v2.23.3/go.mod h1:zXTP6xIp3U8aVuXN8ENK9IXRaTjFnpVB9mGmaSRvxnM=
 github.com/onsi/gomega v1.36.3 h1:hID7cr8t3Wp26+cYnfcjR6HpJ00fdogN6dqZ1t6IylU=
 github.com/onsi/gomega v1.36.3/go.mod h1:8D9+Txp43QWKhM24yyOBEdpkzN8FvJyAwecBgsU4KU0=
+github.com/onsi/gomega v1.38.2 h1:eZCjf2xjZAqe+LeWvKb5weQ+NcPwX84kqJ0cZNxok2A=
 github.com/otiai10/copy v1.2.0/go.mod h1:rrF5dJ5F0t/EWSYODDu4j9/vEeYHMkc8jt0zJChqQWw=
 github.com/otiai10/copy v1.14.0 h1:dCI/t1iTdYGtkvCuBG2BgR6KZa83PTclw4U5n2wAllU=
 github.com/otiai10/copy v1.14.0/go.mod h1:ECfuL02W+/FkTWZWgQqXPWZgW9oeKCSQ5qVfSc4qc4w=
