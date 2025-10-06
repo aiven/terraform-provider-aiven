@@ -13,6 +13,9 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Added service plan validation during `terraform plan`
+- Add `aiven_alloydbomni` field `alloydbomni_user_config.node_count`: Number of nodes for the service. Example: `3`.
+- Add `aiven_opensearch` field `opensearch_user_config.custom_repos`: Allow to register object storage repositories in OpenSearch
+- Add `aiven_pg` field `pg_user_config.node_count`: Number of nodes for the service. Example: `3`.
 
 ## [4.45.1] - 2025-09-30
 
