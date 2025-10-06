@@ -143,6 +143,7 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
+- `node_count` (Number) Number of nodes for the service. Example: `3`.
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
 - `pg_qualstats` (Block List, Max: 1, Deprecated) System-wide settings for the pg_qualstats extension (see [below for nested schema](#nestedblock--pg_user_config--pg_qualstats))
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).

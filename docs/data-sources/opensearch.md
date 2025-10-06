@@ -93,7 +93,6 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `azure_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--azure_migration))
 - `custom_domain` (String)
-- `custom_keystores` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--custom_keystores))
 - `disable_replication_factor_adjustment` (Boolean)
 - `gcs_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--gcs_migration))
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
@@ -137,15 +136,6 @@ Read-Only:
 - `restore_global_state` (Boolean)
 - `sas_token` (String)
 - `snapshot_name` (String)
-
-
-<a id="nestedobjatt--opensearch_user_config--custom_keystores"></a>
-### Nested Schema for `opensearch_user_config.custom_keystores`
-
-Read-Only:
-
-- `name` (String)
-- `type` (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--gcs_migration"></a>

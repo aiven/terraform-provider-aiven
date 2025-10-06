@@ -15,8 +15,10 @@ nav_order: 1
 - Added service plan validation during `terraform plan`
 - Add `aiven_kafka_topic` field `config.diskless_enable`: Indicates whether diskless should be enabled.
   This is only available for BYOC services with Diskless feature enabled.
+- Add `aiven_pg` field `pg_user_config.node_count`: Number of nodes for the service.
 - Remove redundant `aiven_kafka_topic` field `config.inkless_enable`: The field was not propagated to the client. 
-  Use `diskless_enable` instead.
+  Please, use `diskless_enable` instead.
+- Remove `aiven_opensearch` field `opensearch_user_config.custom_keystores`: the block is missing a required field `settings`.
 
 ## [4.45.1] - 2025-09-30
 

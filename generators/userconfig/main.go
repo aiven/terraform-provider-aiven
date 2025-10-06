@@ -311,6 +311,13 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 		vals, err := getSchemaValues(p)
 		if errors.Is(err, errUnknownType) {
 			log.Printf("%s: unknow type or multiple types, skipping", o.jsonName)
+			if p.Required {
+				// This is a required field that cannot be skipped since the object depends on it.
+				// The error will propagate up the call stack until it reaches an optional field,
+				// at which point that entire branch of properties can be safely omitted.
+				return nil, fmt.Errorf("%w: %s", errUnknownType, p.jsonName)
+			}
+
 			continue
 		}
 
