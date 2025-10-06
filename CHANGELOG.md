@@ -13,6 +13,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Added service plan validation during `terraform plan`
+- Add `aiven_opensearch` field `opensearch_user_config.custom_repos`: Allow to register object storage repositories in OpenSearch
 
 ## [4.45.1] - 2025-09-30
 
