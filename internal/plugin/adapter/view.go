@@ -25,11 +25,22 @@ type DatView[T any] interface {
 	Read(ctx context.Context, state *T) diag.Diagnostics
 }
 
-// ResView resource view interface
+// ResView represents a resource view that handles CRUD operations. It uses three main state objects:
+//
+// - state: The current state of the resource containing all values (required, optional, computed)
+// - config: The raw configuration from the user which may contain unknown values due to interpolation
+// - plan: The planned final state, combining user-defined values from "config" with computed/optional values from "state"
+//
+// Create and Update operations typically use plan as it represents the desired end state.
+// "config" is used when we need to check what values the user explicitly defined.
+//
+// For optional+computed attributes with UseStateForUnknown:
+// When a user removes a value from "config", the value persists in "state" and appears in "plan",
+// allowing the attribute to retain its last known value.
 type ResView[T any] interface {
 	DatView[T]
 	Create(ctx context.Context, plan *T) diag.Diagnostics
-	Update(ctx context.Context, plan, state *T) diag.Diagnostics
+	Update(ctx context.Context, plan, state, config *T) diag.Diagnostics
 	Delete(ctx context.Context, state *T) diag.Diagnostics
 }
 

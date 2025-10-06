@@ -79,7 +79,7 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 	return vw.Read(ctx, plan)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state *tfModel) diag.Diagnostics {
+func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
 	var req account.AccountUpdateIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
