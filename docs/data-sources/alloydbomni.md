@@ -132,6 +132,7 @@ Read-Only:
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
+- `node_count` (Number)
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--alloydbomni_user_config--pg))
 - `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
