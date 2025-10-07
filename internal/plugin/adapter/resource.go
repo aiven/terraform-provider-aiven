@@ -144,18 +144,20 @@ func (a *resourceAdapter[T]) Update(
 	rsp *resource.UpdateResponse,
 ) {
 	var (
-		plan  = a.newModel()
-		state = a.newModel()
-		diags = &rsp.Diagnostics
+		plan   = a.newModel()
+		state  = a.newModel()
+		config = a.newModel()
+		diags  = &rsp.Diagnostics
 	)
 
 	diags.Append(req.Plan.Get(ctx, plan)...)
 	diags.Append(req.State.Get(ctx, state)...)
+	diags.Append(req.Config.Get(ctx, config)...)
 	if diags.HasError() {
 		return
 	}
 
-	diags.Append(a.view.Update(ctx, plan.SharedModel(), state.SharedModel())...)
+	diags.Append(a.view.Update(ctx, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
 	if diags.HasError() {
 		return
 	}

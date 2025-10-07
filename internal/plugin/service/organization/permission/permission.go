@@ -54,10 +54,10 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 		return diags
 	}
 
-	return vw.Update(ctx, plan, nil)
+	return vw.Update(ctx, plan, nil, nil)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state *tfModel) diag.Diagnostics {
+func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
 	var req organization.PermissionsSetIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {

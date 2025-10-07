@@ -49,7 +49,7 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 	return vw.Read(ctx, plan)
 }
 
-func (vw *view) Update(_ context.Context, _, _ *tfModel) diag.Diagnostics {
+func (vw *view) Update(_ context.Context, _, _, _ *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	diags.AddError(errmsg.SummaryErrorReadingResource, "This resource cannot be updated")
 	return diags
