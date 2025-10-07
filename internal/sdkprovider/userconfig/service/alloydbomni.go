@@ -106,6 +106,11 @@ func alloydbomniUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeSet,
 			},
+			"node_count": {
+				Description: "Number of nodes for the service. Example: `3`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"pg": {
 				Description: "postgresql.conf configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{

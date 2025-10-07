@@ -4,8 +4,9 @@ go 1.24.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/agnivade/levenshtein v1.2.1
 	github.com/aiven/aiven-go-client/v2 v2.34.0
-	github.com/aiven/go-client-codegen v0.122.0
+	github.com/aiven/go-client-codegen v0.126.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/buger/jsonparser v1.1.1
 	github.com/dave/jennifer v1.7.1
@@ -48,7 +49,6 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
-	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/aiven/go-utils/selproj v0.1.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.16.0 // indirect
 	github.com/alecthomas/go-check-sumtype v0.3.1 // indirect
@@ -265,7 +265,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.146.0
+	github.com/aiven/go-api-schemas v1.149.0
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.18.0 // indirect

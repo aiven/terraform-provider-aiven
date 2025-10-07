@@ -122,6 +122,7 @@ Read-Only:
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
+- `node_count` (Number)
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
 - `pg_qualstats` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg_qualstats))
 - `pg_read_replica` (Boolean)
