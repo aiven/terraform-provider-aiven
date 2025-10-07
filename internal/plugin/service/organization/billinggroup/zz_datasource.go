@@ -29,6 +29,10 @@ func (tf *datasourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+func (tf *datasourceModel) TimeoutsObject() types.Object {
+	return tf.Timeouts.Object
+}
+
 /*
 newDatasourceSchema:
 

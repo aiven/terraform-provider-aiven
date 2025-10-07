@@ -56,16 +56,17 @@ type IDAttribute struct {
 }
 
 type Definition struct {
-	Beta        bool                 `yaml:"beta"`
-	Location    string               `yaml:"location"`
-	Schema      map[string]*Item     `yaml:"schema,omitempty"`
-	Delete      []string             `yaml:"delete,omitempty"`
-	Rename      map[string]string    `yaml:"rename,omitempty"`
-	ObjectKey   string               `yaml:"objectKey,omitempty"`
-	Resource    *SchemaMeta          `yaml:"resource,omitempty"`
-	Datasource  *SchemaMeta          `yaml:"datasource,omitempty"`
-	IDAttribute *IDAttribute         `yaml:"idAttribute"`
-	Operations  map[string]Operation `yaml:"operations"`
+	Beta           bool                 `yaml:"beta"`
+	Location       string               `yaml:"location"`
+	Schema         map[string]*Item     `yaml:"schema,omitempty"`
+	Delete         []string             `yaml:"delete,omitempty"`
+	Rename         map[string]string    `yaml:"rename,omitempty"`
+	ObjectKey      string               `yaml:"objectKey,omitempty"`
+	Resource       *SchemaMeta          `yaml:"resource,omitempty"`
+	Datasource     *SchemaMeta          `yaml:"datasource,omitempty"`
+	IDAttribute    *IDAttribute         `yaml:"idAttribute"`
+	LegacyTimeouts bool                 `yaml:"legacyTimeouts,omitempty"`
+	Operations     map[string]Operation `yaml:"operations"`
 }
 
 type Item struct {

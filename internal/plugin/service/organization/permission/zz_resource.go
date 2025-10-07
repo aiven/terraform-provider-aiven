@@ -32,6 +32,10 @@ func (tf *resourceModel) SharedModel() *tfModel {
 	return &tf.tfModel
 }
 
+func (tf *resourceModel) TimeoutsObject() types.Object {
+	return tf.Timeouts.Object
+}
+
 /*
 newResourceSchema:
 

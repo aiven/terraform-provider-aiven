@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Model implements resource or datasource model with the shared fields model.
 type Model[T any] interface {
 	// SharedModel returns the shared fields model between resource and datasource.
 	SharedModel() *T
+	TimeoutsObject() types.Object
 }
 
 // newModel returns a new instance of the Model.
