@@ -13,6 +13,10 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Added service plan validation during `terraform plan`
+- Add `aiven_kafka_topic` field `config.diskless_enable`: Indicates whether diskless should be enabled.
+  This is only available for BYOC services with Diskless feature enabled.
+- Remove redundant `aiven_kafka_topic` field `config.inkless_enable`: The field was not propagated to the client. 
+  Use `diskless_enable` instead.
 
 ## [4.45.1] - 2025-09-30
 

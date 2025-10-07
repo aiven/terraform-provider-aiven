@@ -1,6 +1,7 @@
 package kafkatopic
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -171,7 +172,7 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 			Description: "This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1.",
 			Optional:    true,
 		},
-		"inkless_enable": {
+		"diskless_enable": {
 			Type:        schema.TypeBool,
 			Description: "Creates a [diskless topic](https://aiven.io/docs/products/diskless). You can only do this when you create the topic and you cannot change it later. Diskless topics are only available for bring your own cloud (BYOC) services that have the feature enabled.",
 			Optional:    true,
@@ -415,7 +416,9 @@ func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error)
 	}
 
 	var result aiven.KafkaTopicConfig
-	err = json.Unmarshal(b, &result)
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.UseNumber()
+	err = dec.Decode(&result)
 	return result, err
 }
 
