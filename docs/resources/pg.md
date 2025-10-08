@@ -83,6 +83,7 @@ resource "aiven_pg" "example_postgres" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) The disk space that the service is currently using. This is the sum of `disk_space` and `additional_disk_space` in human-readable format (for example: `90GiB`).
 - `id` (String) The ID of this resource.
+- `maintenance_window_enabled` (Boolean) Indicates whether the maintenance window is currently enabled for this service.
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service

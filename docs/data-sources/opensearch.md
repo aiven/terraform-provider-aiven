@@ -39,6 +39,7 @@ data "aiven_opensearch" "example_opensearch" {
 - `disk_space_used` (String) The disk space that the service is currently using. This is the sum of `disk_space` and `additional_disk_space` in human-readable format (for example: `90GiB`).
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_enabled` (Boolean) Indicates whether the maintenance window is currently enabled for this service.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `opensearch` (List of Object, Sensitive) Values provided by the OpenSearch server. (see [below for nested schema](#nestedatt--opensearch))
 - `opensearch_user_config` (List of Object) Opensearch user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--opensearch_user_config))
