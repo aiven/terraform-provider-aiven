@@ -185,6 +185,11 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 				return newValue == ""
 			},
 		},
+		"maintenance_window_enabled": {
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "Indicates whether the maintenance window is currently enabled for this service.",
+		},
 		"termination_protection": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -758,6 +763,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("maintenance_window_time", s.Maintenance.Time); err != nil {
+		return err
+	}
+	if err := d.Set("maintenance_window_enabled", s.Maintenance.Enabled); err != nil {
 		return err
 	}
 

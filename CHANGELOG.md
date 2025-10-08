@@ -12,11 +12,12 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Added `maintenance_window_enabled` field to service resources: Indicates whether the maintenance window is currently enabled for this service.
 - Added service plan validation during `terraform plan`
 - Add `aiven_kafka_topic` field `config.diskless_enable`: Indicates whether diskless should be enabled.
   This is only available for BYOC services with Diskless feature enabled.
 - Add `aiven_pg` field `pg_user_config.node_count`: Number of nodes for the service.
-- Remove redundant `aiven_kafka_topic` field `config.inkless_enable`: The field was not propagated to the client. 
+- Remove redundant `aiven_kafka_topic` field `config.inkless_enable`: The field was not propagated to the client.
   Please, use `diskless_enable` instead.
 - Remove `aiven_opensearch` field `opensearch_user_config.custom_keystores`: the block is missing a required field `settings`.
 
