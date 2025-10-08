@@ -9,12 +9,16 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
+	retryGo "github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -223,4 +227,63 @@ func RandStr() string {
 
 func RandName(name string) string {
 	return fmt.Sprintf("%s-%s-%s", DefaultResourceNamePrefix, name, RandStr())
+}
+
+type CreateTestServiceOpt func(*service.ServiceCreateIn)
+
+func WithServiceType(serviceType string) CreateTestServiceOpt {
+	return func(req *service.ServiceCreateIn) {
+		req.ServiceType = serviceType
+	}
+}
+
+func WithCloud(cloud string) CreateTestServiceOpt {
+	return func(req *service.ServiceCreateIn) {
+		req.Cloud = lo.ToPtr(cloud)
+	}
+}
+
+func WithPlan(plan string) CreateTestServiceOpt {
+	return func(req *service.ServiceCreateIn) {
+		req.Plan = plan
+	}
+}
+
+// CreateTestService creates a test service that can be shared between tests.
+func CreateTestService(ctx context.Context, projectName, serviceName string, opts ...CreateTestServiceOpt) (func(), error) {
+	client, err := GetTestGenAivenClient()
+	if err != nil {
+		return nil, err
+	}
+
+	req := &service.ServiceCreateIn{
+		ServiceName: serviceName,
+	}
+
+	for _, opt := range opts {
+		opt(req)
+	}
+
+	_, err = client.ServiceCreate(ctx, projectName, req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = retryGo.Do(
+		func() error {
+			kafka, err := client.ServiceGet(ctx, projectName, serviceName)
+			switch {
+			case err != nil:
+				return retryGo.Unrecoverable(err)
+			case kafka.State != service.ServiceStateTypeRunning:
+				return fmt.Errorf("waiting for kafka to be running, current state %s", kafka.State)
+			default:
+				return nil
+			}
+		},
+		retryGo.Context(ctx),
+		retryGo.Delay(5*time.Second),
+	)
+
+	return func() { _ = client.ServiceDelete(ctx, projectName, serviceName) }, err
 }
