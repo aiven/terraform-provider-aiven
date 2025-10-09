@@ -65,6 +65,10 @@ type ResValidateConfig[T any] interface {
 	ResValidateConfig(ctx context.Context, config *T) diag.Diagnostics
 }
 
+type ResPlanModifier[T any] interface {
+	ModifyPlan(ctx context.Context, plan, state *T) diag.Diagnostics
+}
+
 // View base view that contains the client and potentially other dependencies
 type View struct {
 	Client avngen.Client
