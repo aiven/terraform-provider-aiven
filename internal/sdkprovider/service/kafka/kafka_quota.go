@@ -208,18 +208,46 @@ func resourceKafkaQuotaDelete(ctx context.Context, d *schema.ResourceData, clien
 	)
 }
 
-// readKafkaQuotaWithRetry is a helper function that retries reading a Kafka quota resource in case of a 404 error.
-// We need to retry reading the resource because the Kafka quota may not be immediately available after creation.
+// readKafkaQuotaWithRetry retries reading a Kafka quota resource to handle eventual consistency on API side.
 func readKafkaQuotaWithRetry(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	return retry.RetryContext(ctx, 3*time.Second, func() *retry.RetryError {
+	expectedConsumerRate := d.Get("consumer_byte_rate")
+	expectedProducerRate := d.Get("producer_byte_rate")
+	expectedRequestPct := d.Get("request_percentage")
+
+	return retry.RetryContext(ctx, 5*time.Second, func() *retry.RetryError {
 		err := resourceKafkaQuotaRead(ctx, d, client)
-		if err == nil {
-			return nil
+		if err != nil {
+			// resource may not be yet available after create
+			if avngen.IsNotFound(err) {
+				return &retry.RetryError{Err: err, Retryable: true}
+			}
+
+			return &retry.RetryError{Err: err, Retryable: false}
 		}
 
-		return &retry.RetryError{
-			Err:       err,
-			Retryable: avngen.IsNotFound(err), // retries not found errors only
+		// verify that the values we read match what we expect (eventual consistency on API side)
+		actualConsumerRate := d.Get("consumer_byte_rate")
+		actualProducerRate := d.Get("producer_byte_rate")
+		actualRequestPct := d.Get("request_percentage")
+
+		mismatch := false
+		if expectedConsumerRate != nil && expectedConsumerRate != actualConsumerRate {
+			mismatch = true
 		}
+		if expectedProducerRate != nil && expectedProducerRate != actualProducerRate {
+			mismatch = true
+		}
+		if expectedRequestPct != nil && expectedRequestPct != actualRequestPct {
+			mismatch = true
+		}
+
+		if mismatch {
+			return &retry.RetryError{
+				Err:       fmt.Errorf("quota values not yet updated on backend"),
+				Retryable: true,
+			}
+		}
+
+		return nil
 	})
 }
