@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/agnivade/levenshtein v1.2.1
 	github.com/aiven/aiven-go-client/v2 v2.36.0
-	github.com/aiven/go-client-codegen v0.125.0
+	github.com/aiven/go-client-codegen v0.126.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/buger/jsonparser v1.1.1
 	github.com/dave/jennifer v1.7.1
