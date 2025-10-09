@@ -24,6 +24,10 @@ func init() {
 	sweep.AddTestSweepers("aiven_organization", &resource.Sweeper{
 		Name: "aiven_organization",
 		F:    sweepOrganizations(ctx),
+		Dependencies: []string{
+			"aiven_organizational_unit",
+			"aiven_organization_project",
+		},
 	})
 
 	sweep.AddTestSweepers("aiven_organization_application_user", &resource.Sweeper{

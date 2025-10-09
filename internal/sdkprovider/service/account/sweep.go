@@ -117,7 +117,27 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
 
+		// separate organizational units from parent accounts
+		var childAccounts, parentAccounts []account.AccountOut
 		for _, a := range accounts {
+			if a.ParentAccountId != nil && *a.ParentAccountId != "" {
+				childAccounts = append(childAccounts, a)
+			} else {
+				parentAccounts = append(parentAccounts, a)
+			}
+		}
+
+		// delete child accounts first
+		for _, a := range childAccounts {
+			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
+				if common.IsCritical(err) {
+					return fmt.Errorf("error destroying child account %s during sweep: %w", a.AccountName, err)
+				}
+			}
+		}
+
+		// delete parent accounts
+		for _, a := range parentAccounts {
 			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
 				if common.IsCritical(err) {
 					return fmt.Errorf("error destroying account %s during sweep: %w", a.AccountName, err)
