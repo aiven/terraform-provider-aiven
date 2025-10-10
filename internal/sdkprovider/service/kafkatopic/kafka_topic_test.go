@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"reflect"
+	"os"
 	"regexp"
 	"testing"
 	"time"
@@ -24,150 +24,267 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
 )
 
-func TestAccAivenKafkaTopic_basic(t *testing.T) {
-	resourceName := "aiven_kafka_topic.foo"
-	topic2ResourceName := "aiven_kafka_topic.topic2"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKafkaTopicResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.segment_bytes", "1610612736"),
-					resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
-					resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
-				),
+func TestAccAivenKafkaTopic(t *testing.T) {
+	if os.Getenv(resource.EnvTfAcc) != "1" {
+		t.Skipf("Set '%s=1' to run this acceptance test", resource.EnvTfAcc)
+	}
+
+	orgName := acc.OrganizationName()
+	projectName := acc.ProjectName()
+	kafkaName := acc.RandName("kafka")
+
+	// Creates shared Kafka
+	cleanup, err := acc.CreateTestService(
+		t.Context(),
+		projectName,
+		kafkaName,
+		acc.WithServiceType("kafka"),
+		acc.WithPlan("startup-4"),
+		acc.WithCloud("google-europe-west1"),
+	)
+
+	require.NoError(t, err)
+	defer cleanup()
+
+	t.Run("basic", func(t *testing.T) {
+		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+
+		resourceName := "aiven_kafka_topic.foo"
+		topic2ResourceName := "aiven_kafka_topic.topic2"
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafkaTopicResource(orgName, projectName, kafkaName, rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+						resource.TestCheckResourceAttr(resourceName, "project", projectName),
+						resource.TestCheckResourceAttr(resourceName, "service_name", kafkaName),
+						resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+						resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
+						resource.TestCheckResourceAttr(resourceName, "config.0.segment_bytes", "1610612736"),
+						resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
+						resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
+					),
+				},
 			},
-		},
+		})
+	})
+
+	// The test proves that TF can create hundreds of topics without hitting any server issues
+	t.Run("many_topics", func(t *testing.T) {
+		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+
+		topicName := acc.RandName("topic")
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafka451TopicResource(projectName, kafkaName, topicName),
+					Check: resource.ComposeTestCheckFunc(
+						func(state *terraform.State) error {
+							assert.Len(t, state.RootModule().Resources, 451)
+							return nil
+						},
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("termination_protection", func(t *testing.T) {
+		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+
+		topicName := acc.RandName("topic")
+		resourceName := "aiven_kafka_topic.foo"
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config:                    testAccKafkaTopicTerminationProtectionResource(projectName, kafkaName, topicName),
+					PreventPostDestroyRefresh: true,
+					ExpectNonEmptyPlan:        true,
+					PlanOnly:                  true,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "project", projectName),
+						resource.TestCheckResourceAttr(resourceName, "service_name", kafkaName),
+						resource.TestCheckResourceAttr(resourceName, "topic_name", topicName),
+						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
+					),
+				},
+			},
+		})
+	})
+
+	// TestAccAivenKafkaTopic_recreate validates that topic is recreated if it is missing
+	// Kafka loses all topics on turn off/on, then TF recreates topics. This test imitates the case.
+	t.Run("recreate_missing", func(t *testing.T) {
+		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+
+		topicResource := "aiven_kafka_topic.topic"
+		topicName := acc.RandName("topic")
+		kafkaID := fmt.Sprintf("%s/%s", projectName, kafkaName)
+		topicID := fmt.Sprintf("%s/%s", kafkaID, topicName)
+
+		config := testAccAivenKafkaTopicResourceRecreateMissing(projectName, kafkaName, topicName)
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					// Step 1: setups resources, creates the state
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(topicResource, "id", topicID),
+					),
+				},
+				{
+					// Step 2: deletes topic, then runs apply, same config & checks
+					PreConfig: func() {
+						ctx := t.Context()
+						client := acc.GetTestAivenClient()
+
+						// deletes
+						err := client.KafkaTopics.Delete(ctx, projectName, kafkaName, topicName)
+						require.NoError(t, err)
+
+						// Makes sure topic does not exist
+						err = retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
+							_, err := client.KafkaTopics.Get(ctx, projectName, kafkaName, topicName)
+							if err != nil {
+								return &retry.RetryError{
+									Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
+									Retryable: aiven.IsNotFound(err),
+								}
+							}
+							return nil
+						})
+						require.NoError(t, err)
+
+						// We need to remove it from reps cache
+						assert.NoError(t, kafkatopicrepository.ForgetTopic(projectName, kafkaName, topicName))
+					},
+					// Now plan shows a diff
+					ExpectNonEmptyPlan: true,
+					RefreshState:       true,
+				},
+				{
+					// Step 3: recreates the topic
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						// Saved in state
+						resource.TestCheckResourceAttr(topicResource, "id", topicID),
+						func(_ *terraform.State) error {
+							// Topic exists and active
+							client := acc.GetTestAivenClient()
+							return retry.RetryContext(
+								t.Context(),
+								time.Minute,
+								func() *retry.RetryError {
+									ctx := t.Context()
+									tc, err := client.KafkaTopics.Get(ctx, projectName, kafkaName, topicName)
+									if err != nil {
+										return &retry.RetryError{
+											Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
+											Retryable: aiven.IsNotFound(err),
+										}
+									}
+									assert.Equal(t, "ACTIVE", tc.State)
+									return nil
+								},
+							)
+						},
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("import_missing", func(t *testing.T) {
+		topicName := acc.RandName("topic")
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					// Tries to import non-existing topic
+					// Must fail not create
+					Config:        testAccAivenKafkaTopicResourceImportMissing(projectName, kafkaName, topicName),
+					ResourceName:  "aiven_kafka_topic.topic",
+					ImportState:   true,
+					ImportStateId: fmt.Sprintf("%s/%s/%s", projectName, kafkaName, topicName),
+					ExpectError:   regexp.MustCompile(`While attempting to import an existing object to "aiven_kafka_topic.topic"`),
+				},
+			},
+		})
+	})
+
+	t.Run("conflicts_if_exists", func(t *testing.T) {
+		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+
+		topicName := acc.RandName("topic")
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config:      testAccAivenKafkaTopicConflictsIfExists(projectName, kafkaName, topicName),
+					ExpectError: regexp.MustCompile(fmt.Sprintf(`topic conflict, already exists: %q`, topicName)),
+				},
+			},
+		})
 	})
 }
 
-func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
-	resourceName := "aiven_kafka_topic.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKafka451TopicResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-				),
-			},
-		},
-	})
-}
+func testAccKafka451TopicResource(projectName, kafkaName, topicName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_topic" "foo" {
+  count = 451
 
-func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
-	resourceName := "aiven_kafka_topic.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config:                    testAccKafkaTopicTerminationProtectionResource(rName),
-				PreventPostDestroyRefresh: true,
-				ExpectNonEmptyPlan:        true,
-				PlanOnly:                  true,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
-	resourceName := "aiven_kafka_topic.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKafkaTopicCustomTimeoutsResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
-			},
-		},
-	})
-}
-
-func testAccKafka451TopicResource(name string) string {
-	return testAccKafkaTopicResource(name) + `
-resource "aiven_kafka_topic" "more" {
-  count = 450
-
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
-  topic_name   = "test-acc-topic-${count.index}"
+  project      = %q
+  service_name = %q
+  topic_name   = "%s-${count.index}"
   partitions   = 3
   replication  = 2
-}`
+}`, projectName, kafkaName, topicName)
 }
 
-func testAccKafkaTopicResource(name string) string {
+func testAccKafkaTopicResource(orgName, projectName, kafkaName, rName string) string {
 	return fmt.Sprintf(`
 data "aiven_organization" "foo" {
-  name = "%s"
+  name = %[1]q
+}
+
+data "aiven_kafka" "bar" {
+  project      = %[2]q
+  service_name = %[3]q
 }
 
 resource "aiven_organization_user_group" "foo" {
-  name            = "test-acc-u-grp-%s"
+  name            = "test-acc-u-grp-%[4]s"
   organization_id = data.aiven_organization.foo.id
   description     = "test"
 }
 
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_kafka" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
 resource "aiven_kafka_topic" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
-  topic_name   = "test-acc-topic-%s"
+  project      = data.aiven_kafka.bar.project
+  service_name = data.aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%[4]s"
   partitions   = 3
   replication  = 2
 
@@ -190,84 +307,22 @@ data "aiven_kafka_topic" "topic" {
 }
 
 resource "aiven_kafka_topic" "topic2" {
-  project             = data.aiven_project.foo.project
-  service_name        = aiven_kafka.bar.service_name
-  topic_name          = "test-acc-topic2-%s"
-  topic_description   = "test-acc-topic2-desc-%s"
+  project             = data.aiven_kafka.bar.project
+  service_name        = data.aiven_kafka.bar.service_name
+  topic_name          = "test-acc-topic2-%[4]s"
+  topic_description   = "test-acc-topic2-desc-%[4]s"
   owner_user_group_id = aiven_organization_user_group.foo.group_id
   partitions          = 3
   replication         = 2
-}`, acc.OrganizationName(), name, acc.ProjectName(), name, name, name, name)
+}`, orgName, projectName, kafkaName, rName)
 }
 
-func testAccKafkaTopicCustomTimeoutsResource(name string) string {
+func testAccKafkaTopicTerminationProtectionResource(projectName, kafkaName, topicName string) string {
 	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_kafka" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-
-  timeouts {
-    create = "25m"
-    update = "20m"
-  }
-}
-
 resource "aiven_kafka_topic" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
-  topic_name   = "test-acc-topic-%s"
-  partitions   = 3
-  replication  = 2
-
-  timeouts {
-    create = "15m"
-    read   = "15m"
-  }
-}
-
-data "aiven_kafka_topic" "topic" {
-  project      = aiven_kafka_topic.foo.project
-  service_name = aiven_kafka_topic.foo.service_name
-  topic_name   = aiven_kafka_topic.foo.topic_name
-
-  depends_on = [aiven_kafka_topic.foo]
-}`, acc.ProjectName(), name, name)
-}
-
-func testAccKafkaTopicTerminationProtectionResource(name string) string {
-	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_kafka" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-
-  kafka_user_config {
-    kafka {
-      group_max_session_timeout_ms = 70000
-      log_retention_bytes          = 1000000000
-    }
-  }
-}
-
-resource "aiven_kafka_topic" "foo" {
-  project                = data.aiven_project.foo.project
-  service_name           = aiven_kafka.bar.service_name
-  topic_name             = "test-acc-topic-%s"
+  project                = %[1]q
+  service_name           = %[2]q
+  topic_name             = %[3]q
   partitions             = 3
   replication            = 2
   termination_protection = true
@@ -279,7 +334,7 @@ data "aiven_kafka_topic" "topic" {
   topic_name   = aiven_kafka_topic.foo.topic_name
 
   depends_on = [aiven_kafka_topic.foo]
-}`, acc.ProjectName(), name, name)
+}`, projectName, kafkaName, topicName)
 }
 
 func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
@@ -369,248 +424,44 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestPartitions(t *testing.T) {
-	type args struct {
-		numPartitions int
-	}
-	tests := []struct {
-		name           string
-		args           args
-		wantPartitions []*aiven.Partition
-	}{
-		{
-			"basic",
-			args{numPartitions: 3},
-			[]*aiven.Partition{{}, {}, {}},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotPartitions := partitions(tt.args.numPartitions); !reflect.DeepEqual(gotPartitions, tt.wantPartitions) {
-				t.Errorf("partitions() = %v, want %v", gotPartitions, tt.wantPartitions)
-			}
-		})
-	}
-}
-
-// TestAccAivenKafkaTopic_recreate validates that topic is recreated if it is missing
-// Kafka looses all topics on turn off/on, then TF recreates topics. This test imitates the case.
-func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
-	project := acc.ProjectName()
-
-	prefix := "test-tf-acc-" + acctest.RandString(7)
-	kafkaResource := "aiven_kafka.kafka"
-	topicResource := "aiven_kafka_topic.topic"
-	kafkaName := prefix + "-kafka"
-	topicName := "topic"
-	kafkaID := fmt.Sprintf("%s/%s", project, kafkaName)
-	topicID := kafkaID + "/topic"
-
-	config := testAccAivenKafkaTopicResourceRecreateMissing(prefix, project)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				// Step 1: setups resources, creates the state
-				Config: config,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
-					resource.TestCheckResourceAttr(topicResource, "id", topicID),
-				),
-			},
-			{
-				// Step 2: deletes topic, then runs apply, same config & checks
-				PreConfig: func() {
-					client := acc.GetTestAivenClient()
-
-					ctx := context.Background()
-
-					// deletes
-					err := client.KafkaTopics.Delete(ctx, project, kafkaName, topicName)
-					require.NoError(t, err)
-
-					// Makes sure topic does not exist
-					tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
-					assert.Nil(t, tc)
-					assert.True(t, aiven.IsNotFound(err))
-
-					// We need to remove it from reps cache
-					assert.NoError(t, kafkatopicrepository.ForgetTopic(project, kafkaName, topicName))
-				},
-				// Now plan shows a diff
-				ExpectNonEmptyPlan: true,
-				RefreshState:       true,
-			},
-			{
-				// Step 3: recreates the topic
-				Config: config,
-				Check: resource.ComposeTestCheckFunc(
-					// Saved in state
-					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
-					resource.TestCheckResourceAttr(topicResource, "id", topicID),
-					func(_ *terraform.State) error {
-						// Topic exists and active
-						client := acc.GetTestAivenClient()
-						return retry.RetryContext(
-							context.Background(),
-							time.Minute,
-							func() *retry.RetryError {
-								ctx := context.Background()
-
-								tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
-								if err != nil {
-									return &retry.RetryError{
-										Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
-										Retryable: aiven.IsNotFound(err),
-									}
-								}
-								assert.Equal(t, "ACTIVE", tc.State)
-								return nil
-							},
-						)
-					},
-				),
-			},
-		},
-	})
-}
-
-func testAccAivenKafkaTopicResourceRecreateMissing(prefix, project string) string {
+func testAccAivenKafkaTopicResourceRecreateMissing(projectName, kafkaName, topicName string) string {
 	return fmt.Sprintf(`
-data "aiven_project" "project" {
-  project = %[2]q
-}
-
-resource "aiven_kafka" "kafka" {
-  project                 = data.aiven_project.project.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "%[1]s-kafka"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
 resource "aiven_kafka_topic" "topic" {
-  project      = aiven_kafka.kafka.project
-  service_name = aiven_kafka.kafka.service_name
-  topic_name   = "topic"
+  project      = %[1]q
+  service_name = %[2]q
+  topic_name   = %[3]q
   partitions   = 5
   replication  = 2
-}`, prefix, project)
+}`, projectName, kafkaName, topicName)
 }
 
-// TestAccAivenKafkaTopic_import_missing tests that simple import doesn't create a new topic
-func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
-	project := acc.ProjectName()
-	prefix := "test-tf-acc-" + acctest.RandString(7)
-	kafkaName := prefix + "-kafka"
-	topicName := "topic"
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				// Step 1: setups resources, creates the state
-				Config: testAccAivenKafkaTopicResourceImportMissing(prefix, project),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aiven_kafka.kafka", "id", fmt.Sprintf("%s/%s", project, kafkaName)),
-				),
-			},
-			{
-				// Step 2:
-				// Tries to import non-existing topic
-				// Must fail not create
-				Config:        testAccAivenKafkaTopicResourceImportMissingStep2(prefix, project),
-				ResourceName:  "aiven_kafka_topic.topic",
-				ImportState:   true,
-				ImportStateId: fmt.Sprintf("%s/%s/%s", project, kafkaName, topicName),
-				ExpectError:   regexp.MustCompile(`While attempting to import an existing object to "aiven_kafka_topic.topic"`),
-			},
-		},
-	})
-}
-
-func testAccAivenKafkaTopicResourceImportMissing(prefix, project string) string {
+func testAccAivenKafkaTopicResourceImportMissing(projectName, kafkaName, topicName string) string {
 	result := fmt.Sprintf(`
-resource "aiven_kafka" "kafka" {
-  project                 = %[2]q
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "%[1]s-kafka"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-`, prefix, project)
-	return result
-}
-
-func testAccAivenKafkaTopicResourceImportMissingStep2(prefix, project string) string {
-	result := fmt.Sprintf(`
-resource "aiven_kafka" "kafka" {
-  project                 = %[2]q
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "%[1]s-kafka"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
 resource "aiven_kafka_topic" "topic" {
-  project      = aiven_kafka.kafka.project
-  service_name = aiven_kafka.kafka.service_name
-  topic_name   = "topic"
+  project      = %[1]q
+  service_name = %[2]q
+  topic_name   = %[3]q
   partitions   = 5
   replication  = 2
 }
-`, prefix, project)
+`, projectName, kafkaName, topicName)
 	return result
 }
 
-func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
-	project := acc.ProjectName()
-	prefix := "test-tf-acc-" + acctest.RandString(7)
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
-				ExpectError: regexp.MustCompile(`(?i)topic conflict, already exists`),
-			},
-		},
-	})
-}
-
-func testAccAivenKafkaTopicConflictsIfExists(prefix, project string) string {
-	return fmt.Sprintf(`data "aiven_project" "project" {
-  project = %[2]q
-}
-
-resource "aiven_kafka" "kafka" {
-  project                 = data.aiven_project.project.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "%[1]s-kafka"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-
+func testAccAivenKafkaTopicConflictsIfExists(projectName, kafkaName, topicName string) string {
+	return fmt.Sprintf(`
 resource "aiven_kafka_topic" "topic" {
-  project      = aiven_kafka.kafka.project
-  service_name = aiven_kafka.kafka.service_name
-  topic_name   = "conflict"
+  project      = %[1]q
+  service_name = %[2]q
+  topic_name   = %[3]q
   partitions   = 5
   replication  = 2
 }
 
 resource "aiven_kafka_topic" "topic_conflict" {
-  project      = aiven_kafka.kafka.project
-  service_name = aiven_kafka.kafka.service_name
-  topic_name   = "conflict"
+  project      = %[1]q
+  service_name = %[2]q
+  topic_name   = %[3]q
   partitions   = 5
   replication  = 2
 
@@ -618,15 +469,7 @@ resource "aiven_kafka_topic" "topic_conflict" {
     aiven_kafka_topic.topic
   ]
 }
-`, prefix, project)
-}
-
-// partitions returns a slice, of empty aiven.Partition, of specified size
-func partitions(numPartitions int) (partitions []*aiven.Partition) {
-	for i := 0; i < numPartitions; i++ {
-		partitions = append(partitions, &aiven.Partition{})
-	}
-	return
+`, projectName, kafkaName, topicName)
 }
 
 func TestAccAivenKafkaTopic_local_retention_bytes_overflow_error(t *testing.T) {

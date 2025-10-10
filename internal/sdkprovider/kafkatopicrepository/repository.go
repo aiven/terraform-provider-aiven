@@ -135,6 +135,23 @@ func (rep *repository) forgetTopic(project, service, topic string) error {
 	return nil
 }
 
+// forgetService removes all the caches for the given service name
+func (rep *repository) forgetService(project, service string) {
+	rep.Lock()
+	defer rep.Unlock()
+	key := newKey(project, service)
+	if rep.seenServices != nil {
+		rep.seenServices[key] = false
+	}
+
+	keyPrefix := key + "/"
+	for k := range rep.seenTopics {
+		if strings.HasPrefix(k, keyPrefix) {
+			rep.seenTopics[k] = false
+		}
+	}
+}
+
 type response struct {
 	topic *aiven.KafkaTopic
 	err   error
@@ -163,4 +180,9 @@ func newKey(parts ...string) string {
 // ForgetTopic see repository.forgetTopic
 func ForgetTopic(project, service, topic string) error {
 	return singleRep.forgetTopic(project, service, topic)
+}
+
+// ForgetService see repository.forgetService
+func ForgetService(project, service string) {
+	singleRep.forgetService(project, service)
 }
