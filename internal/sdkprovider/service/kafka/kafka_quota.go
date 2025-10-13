@@ -56,7 +56,7 @@ Defines the bandwidth limit in bytes/sec for each group of clients sharing a quo
 Every distinct client group is allocated a specific quota, as defined by the cluster, on a per-broker basis.
 Exceeding this limit results in client throttling.`,
 		ValidateFunc: validation.IntBetween(0, 1073741824),
-		AtLeastOneOf: []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"},
+		AtLeastOneOf: quotaOptionalFields(),
 	},
 	"producer_byte_rate": {
 		Type:     schema.TypeInt,
@@ -66,7 +66,7 @@ Defines the bandwidth limit in bytes/sec for each group of clients sharing a quo
 Every distinct client group is allocated a specific quota, as defined by the cluster, on a per-broker basis.
 Exceeding this limit results in client throttling.`,
 		ValidateFunc: validation.IntBetween(0, 1073741824),
-		AtLeastOneOf: []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"},
+		AtLeastOneOf: quotaOptionalFields(),
 	},
 	"request_percentage": {
 		Type:     schema.TypeFloat,
@@ -76,7 +76,7 @@ Sets the maximum percentage of CPU time that a client group can use on request h
 Exceeding this limit triggers throttling.
 The quota, expressed as a percentage, also indicates the total allowable CPU usage for the client groups sharing the quota.`,
 		ValidateFunc: validation.FloatBetween(0, 100),
-		AtLeastOneOf: []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"},
+		AtLeastOneOf: quotaOptionalFields(),
 	},
 }
 
@@ -208,18 +208,34 @@ func resourceKafkaQuotaDelete(ctx context.Context, d *schema.ResourceData, clien
 	)
 }
 
-// readKafkaQuotaWithRetry is a helper function that retries reading a Kafka quota resource in case of a 404 error.
-// We need to retry reading the resource because the Kafka quota may not be immediately available after creation.
+// quotaOptionalFields returns the list of optional field names for a Kafka quota resource.
+func quotaOptionalFields() []string {
+	return []string{"consumer_byte_rate", "producer_byte_rate", "request_percentage"}
+}
+
+// readKafkaQuotaWithRetry retries reading a Kafka quota resource to handle eventual consistency on API side.
 func readKafkaQuotaWithRetry(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	return retry.RetryContext(ctx, 3*time.Second, func() *retry.RetryError {
+	// capture expected values from plan
+	planValues := make(map[string]any, len(quotaOptionalFields()))
+	for _, field := range quotaOptionalFields() {
+		planValues[field] = d.Get(field)
+	}
+
+	return retry.RetryContext(ctx, 5*time.Second, func() *retry.RetryError {
 		err := resourceKafkaQuotaRead(ctx, d, client)
-		if err == nil {
-			return nil
+		if err != nil {
+			return &retry.RetryError{Err: err, Retryable: avngen.IsNotFound(err)}
 		}
 
-		return &retry.RetryError{
-			Err:       err,
-			Retryable: avngen.IsNotFound(err), // retries not found errors only
+		for field, planValue := range planValues {
+			if planValue != d.Get(field) {
+				return &retry.RetryError{
+					Err:       fmt.Errorf("quota values not yet updated on backend"),
+					Retryable: true,
+				}
+			}
 		}
+
+		return nil
 	})
 }

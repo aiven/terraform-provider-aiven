@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/aiven/go-client-codegen/handler/account"
@@ -117,10 +118,17 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
 
+		// sort accounts so child accounts come first
+		sort.Slice(accounts, func(i, j int) bool {
+			iHasParent := accounts[i].ParentAccountId != nil && *accounts[i].ParentAccountId != ""
+			jHasParent := accounts[j].ParentAccountId != nil && *accounts[j].ParentAccountId != ""
+			return iHasParent && !jHasParent
+		})
+
 		for _, a := range accounts {
 			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
 				if common.IsCritical(err) {
-					return fmt.Errorf("error destroying account %s during sweep: %w", a.AccountName, err)
+					return fmt.Errorf("error destroying account %q during sweep: %w", a.AccountName, err)
 				}
 			}
 		}

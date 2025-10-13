@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
+
 ## [4.46.0] - 2025-10-09
 
 - Added `maintenance_window_enabled` field to service resources: Indicates whether the maintenance window is currently enabled for this service.
