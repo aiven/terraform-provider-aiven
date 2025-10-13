@@ -27,6 +27,11 @@ func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
 
+	if isResource && def.Version != nil {
+		// Only resources have Version field
+		attrs[jen.Id("Version")] = jen.Lit(*def.Version)
+	}
+
 	example, err := exampleRoot(isResource, item)
 	if err != nil {
 		return nil, fmt.Errorf("example error: %w", err)

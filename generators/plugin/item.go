@@ -67,6 +67,7 @@ type Definition struct {
 	IDAttribute    *IDAttribute         `yaml:"idAttribute"`
 	LegacyTimeouts bool                 `yaml:"legacyTimeouts,omitempty"`
 	Operations     map[string]Operation `yaml:"operations"`
+	Version        *int                 `yaml:"version"`
 }
 
 type Item struct {
