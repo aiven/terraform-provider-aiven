@@ -19,8 +19,8 @@ func remarshal(in, out any) error {
 	return json.Unmarshal(b, out)
 }
 
-// Unmarshal unmarshals a value from in to out, applies typed modifiers before unmarshalling to out.
-func Unmarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
+// Remarshal remarshals a value from in to out, applies typed modifiers before unmarshalling to out.
+func Remarshal[I any, O any](in *I, out *O, modifiers ...MapModifier[I]) error {
 	if len(modifiers) == 0 {
 		return remarshal(in, out)
 	}

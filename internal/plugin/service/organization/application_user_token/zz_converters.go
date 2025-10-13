@@ -110,10 +110,10 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		vUserID := plan.UserID.ValueString()
 		api.UserID = &vUserID
 	}
-	err := util.Unmarshal(api, req, modifiers...)
+	err := util.Remarshal(api, req, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
-		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal dtoModel to Request: %s", err.Error()))
+		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal dtoModel to Request: %s", err.Error()))
 		return diags
 	}
 	return nil
@@ -122,10 +122,10 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 // flattenData turns Response into TF object
 func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
 	api := new(apiModel)
-	err := util.Unmarshal(rsp, api, modifiers...)
+	err := util.Remarshal(rsp, api, modifiers...)
 	if err != nil {
 		var diags diag.Diagnostics
-		diags.AddError("Unmarshal error", fmt.Sprintf("Failed to unmarshal Response to dtoModel: %s", err.Error()))
+		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
 	if api.IpAllowlist != nil && (len(*api.IpAllowlist) > 0 || !state.IpAllowlist.IsNull()) {

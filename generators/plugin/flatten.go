@@ -32,14 +32,14 @@ func genFlatten(item *Item) ([]jen.Code, error) {
 		// Renders Unmarshal
 		jen.Id("err").
 			Op(":=").
-			Qual(utilPackage, "Unmarshal").
+			Qual(utilPackage, "Remarshal").
 			Call(
 				jen.Id("rsp"),
 				jen.Id(apiVar),
 				jen.Id("modifiers").Op("..."),
 			),
 
-		jen.Add(ifErr(true, "Unmarshal error", "Failed to unmarshal Response to dtoModel: %s")),
+		jen.Add(ifErr(true, "Remarshal error", "Failed to remarshal Response to dtoModel: %s")),
 	}
 
 	props, err := genFlattenProperties(item, true)
