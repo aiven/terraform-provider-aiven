@@ -1,6 +1,7 @@
 package schemautil
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/mail"
@@ -568,5 +569,9 @@ func Remarshal(in, out any) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(b, out)
+
+	// Uses json.Number to avoid int->float64->int overflow issue.
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.UseNumber()
+	return d.Decode(out)
 }
