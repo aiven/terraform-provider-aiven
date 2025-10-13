@@ -72,21 +72,22 @@ type Definition struct {
 
 type Item struct {
 	Parent              *Item     `yaml:"-"`
-	AppearsIn           AppearsIn `yaml:"appearsIn"`
-	Name                string    `yaml:"name"`
-	InIDAttribute       bool      `yaml:"inIDAttribute"`       // If field is part of ID attribute
-	IDAttributePosition int       `yaml:"idAttributePosition"` // Position in the ID field
+	AppearsIn           AppearsIn `yaml:"-"` // In Create, Read, Update, Delete request or response
+	Name                string    `yaml:"-"`
+	InIDAttribute       bool      `yaml:"-"` // If field is part of ID attribute
+	IDAttributePosition int       `yaml:"-"` // Position in the ID field
 
 	// Tagged fields are exposed to the Definition.yaml
 	Properties map[string]*Item `yaml:"properties"`
 	Items      *Item            `yaml:"items"` // Array item or Map item
 
 	// User-defined fields for YAML generation
-	UserRequired  *bool `yaml:"required"`
-	UserComputed  *bool `yaml:"computed"`
-	UserOptional  *bool `yaml:"optional"`
-	UserSensitive *bool `yaml:"sensitive"`
-	UserForceNew  *bool `yaml:"forceNew"`
+	OverrideRequired   *bool `yaml:"required"`
+	OverrideComputed   *bool `yaml:"computed"`
+	OverrideOptional   *bool `yaml:"optional"`
+	OverrideSensitive  *bool `yaml:"sensitive"`
+	OverrideForceNew   *bool `yaml:"forceNew"`
+	UseStateForUnknown bool  `yaml:"useStateForUnknown"`
 
 	// TF Validators
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
