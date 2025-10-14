@@ -100,7 +100,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -286,6 +286,60 @@ func opensearchUserConfig() *schema.Schema {
 				MaxItems: 8000,
 				Optional: true,
 				Type:     schema.TypeSet,
+			},
+			"jwt": {
+				Description: "OpenSearch JWT Configuration",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"enabled": {
+						Description: "Enables or disables JWT-based authentication for OpenSearch. When enabled, users can authenticate using JWT tokens. Default: `false`.",
+						Required:    true,
+						Type:        schema.TypeBool,
+					},
+					"jwt_clock_skew_tolerance_seconds": {
+						Description: "The maximum allowed time difference in seconds between the JWT issuer's clock and the OpenSearch server's clock. This helps prevent token validation failures due to minor time synchronization issues. Default: `20`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"jwt_header": {
+						Description: "The HTTP header name where the JWT token is transmitted. Typically `Authorization` for Bearer tokens. Default: `Authorization`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"jwt_url_parameter": {
+						Description: "If the JWT token is transmitted as a URL parameter instead of an HTTP header, specify the parameter name here. Example: `token`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"required_audience": {
+						Description: "If specified, the JWT must contain an `aud` claim that matches this value. This provides additional security by ensuring the JWT was issued for the expected audience. Example: `https://myapp.example.com`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"required_issuer": {
+						Description: "If specified, the JWT must contain an `iss` claim that matches this value. This provides additional security by ensuring the JWT was issued by the expected issuer. Example: `https://auth.example.com`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"roles_key": {
+						Description: "The key in the JWT payload that contains the user's roles. If specified, roles will be extracted from the JWT for authorization. Example: `roles`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"signing_key": {
+						Description: "The secret key used to sign and verify JWT tokens. This should be a secure, randomly generated key HMAC key or public RSA/ECDSA key. Example: `MrJiimVjKgjRKCSk0s6rcEuCz17v5ZyFRqKARfZbuZE= (HMAC) or -----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY----- (PEM)`.",
+						Required:    true,
+						Sensitive:   true,
+						Type:        schema.TypeString,
+					},
+					"subject_key": {
+						Description: "The key in the JWT payload that contains the user's subject identifier. If not specified, the `sub` claim is used by default. Example: `sub`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"keep_index_refresh_interval": {
 				Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",

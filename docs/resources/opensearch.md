@@ -101,7 +101,7 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
@@ -110,6 +110,7 @@ Optional:
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `jwt` (Block List, Max: 1) OpenSearch JWT Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--jwt))
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
 - `max_index_count` (Number) Use index_patterns instead. Default: `0`.
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
@@ -215,6 +216,27 @@ Required:
 Optional:
 
 - `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
+
+
+<a id="nestedblock--opensearch_user_config--jwt"></a>
+### Nested Schema for `opensearch_user_config.jwt`
+
+Required:
+
+- `enabled` (Boolean) Enables or disables JWT-based authentication for OpenSearch. When enabled, users can authenticate using JWT tokens. Default: `false`.
+- `signing_key` (String, Sensitive) The secret key used to sign and verify JWT tokens. This should be a secure, randomly generated key HMAC key or public RSA/ECDSA key. Example: `MrJiimVjKgjRKCSk0s6rcEuCz17v5ZyFRqKARfZbuZE= (HMAC) or -----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+-----END PUBLIC KEY----- (PEM)`.
+
+Optional:
+
+- `jwt_clock_skew_tolerance_seconds` (Number) The maximum allowed time difference in seconds between the JWT issuer's clock and the OpenSearch server's clock. This helps prevent token validation failures due to minor time synchronization issues. Default: `20`.
+- `jwt_header` (String) The HTTP header name where the JWT token is transmitted. Typically `Authorization` for Bearer tokens. Default: `Authorization`.
+- `jwt_url_parameter` (String) If the JWT token is transmitted as a URL parameter instead of an HTTP header, specify the parameter name here. Example: `token`.
+- `required_audience` (String) If specified, the JWT must contain an `aud` claim that matches this value. This provides additional security by ensuring the JWT was issued for the expected audience. Example: `https://myapp.example.com`.
+- `required_issuer` (String) If specified, the JWT must contain an `iss` claim that matches this value. This provides additional security by ensuring the JWT was issued by the expected issuer. Example: `https://auth.example.com`.
+- `roles_key` (String) The key in the JWT payload that contains the user's roles. If specified, roles will be extracted from the JWT for authorization. Example: `roles`.
+- `subject_key` (String) The key in the JWT payload that contains the user's subject identifier. If not specified, the `sub` claim is used by default. Example: `sub`.
 
 
 <a id="nestedblock--opensearch_user_config--openid"></a>
