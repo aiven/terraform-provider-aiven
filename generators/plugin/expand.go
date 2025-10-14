@@ -19,13 +19,13 @@ func genExpand(item *Item) ([]jen.Code, error) {
 		block,
 		jen.Id("err").
 			Op(":=").
-			Qual(utilPackage, "Unmarshal").
+			Qual(utilPackage, "Remarshal").
 			Call(
 				jen.Id(apiVar),
 				jen.Id("req"),
 				jen.Id("modifiers").Op("..."),
 			),
-		jen.Add(ifErr(true, "Unmarshal error", "Failed to unmarshal dtoModel to Request: %s")),
+		jen.Add(ifErr(true, "Remarshal error", "Failed to remarshal dtoModel to Request: %s")),
 		jen.Return(jen.Nil()),
 	)
 
