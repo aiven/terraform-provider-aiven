@@ -228,10 +228,19 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 
 	if !item.IsNested() {
 		if isResource {
+			typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+			planModifiers := make([]jen.Code, 0)
 			if item.ForceNew {
-				typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
+			}
+
+			if item.UseStateForUnknown {
+				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "UseStateForUnknown").Call())
+			}
+
+			if len(planModifiers) > 0 {
 				values[jen.Id("PlanModifiers")] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
-					Values(jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
+					Values(planModifiers...)
 			}
 
 			if item.Required {

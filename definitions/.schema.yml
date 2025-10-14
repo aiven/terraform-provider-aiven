@@ -162,7 +162,11 @@ definitions:
         type: boolean
         $comment: |
           Set to true if this attribute's value is determined by the provider/API.
-          
+      useStateForUnknown:
+        type: boolean
+        $comment: |
+          During the planning phase Terraform shows "known after apply" for computed attributes.
+          Set this to true if the attribute's value should be taken from the current state during planning.
       default:
         type: any
         $comment: Default value for this attribute
