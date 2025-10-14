@@ -5,6 +5,11 @@ $comment: |
   This schema defines the structure for configuring Terraform provider resources and datasources.
   Use this file to specify how your provider's resources and datasources should behave.
 properties:
+  version:
+    type: integer
+    $comment: |
+      Specifies the version/generation of the resource schema.
+      Usually you don't need to set this.
   beta:
     type: boolean
     $comment: |
