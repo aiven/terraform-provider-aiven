@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,11 @@ func remarshal(in, out any) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(b, out)
+
+	// Uses json.Number to avoid int->float64->int overflow issue.
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.UseNumber()
+	return d.Decode(out)
 }
 
 // Remarshal remarshals a value from in to out, applies typed modifiers before unmarshalling to out.
