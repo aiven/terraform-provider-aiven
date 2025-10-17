@@ -14,6 +14,7 @@ nav_order: 1
 
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
+- Change `aiven_kafka_topic`: do not set "config" in the state if user hasn't defined it
 
 ## [4.46.0] - 2025-10-09
 
