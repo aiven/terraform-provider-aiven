@@ -465,11 +465,18 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	config, err := FlattenKafkaTopicConfig(topic)
-	if err != nil {
-		return diag.FromErr(err)
+	// Sets `nil` to topic.config if the configuration file doesn't have it.
+	// This prevents showing diffs in the Plugin Framework for optional+computed blocks,
+	// since the framework doesn't support them.
+	// https://discuss.hashicorp.com/t/54523
+	var config []map[string]any
+	if schemautil.HasConfigValue(d, configField) {
+		config, err = FlattenKafkaTopicConfig(topic)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
-	if err := d.Set("config", config); err != nil {
+	if err := d.Set(configField, config); err != nil {
 		return diag.FromErr(err)
 	}
 
