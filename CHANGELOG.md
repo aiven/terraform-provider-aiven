@@ -14,6 +14,7 @@ nav_order: 1
 
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
+- Migrate `aiven_kafka_topic` to the [Terraform Plugin Framework](https://developer.hashicorp.com/terraform/plugin/framework) with backwards compatibility
 
 ## [4.46.0] - 2025-10-09
 
