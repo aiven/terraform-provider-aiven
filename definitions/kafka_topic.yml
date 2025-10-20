@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafka/topic
+version: 1
+resource:
+  description: Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).
+datasource:
+  description: Gets information about an Aiven for Apache Kafka® topic.
+idAttribute:
+  compose:
+    - project
+    - service_name
+    - topic_name
+legacyTimeouts: true
+rename:
+  tags: tag
+delete:
+  - cleanup_policy
+  - min_insync_replicas
+  - retention_bytes
+  - retention_hours
+operations:
+  ServiceKafkaTopicCreate: create
+  ServiceKafkaTopicDelete: delete
+  ServiceKafkaTopicUpdate: update
+#  The endpoint returns config options as objects,
+#  we can't use them https://api.aiven.io/doc/#tag/Service:_Kafka/operation/ServiceKafkaTopicGet
+#  ServiceKafkaTopicGet: read
+schema:
+  # todo: remove in v5.0.0. This field never existed in the API.
+  # Use instead: https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion
+  termination_protection:
+    description: Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
+    optional: true
+    type: boolean
+    default: false
+  # todo: remove in v5.0.0. Terraform fails to compare null to empty string https://discuss.hashicorp.com/t/54523
+  topic_description:
+    default: ""
+  owner_user_group_id:
+    default: ""
+# The replication and partitions are actually computed+optional: when values are not provided, the BE sets defaults.
+# However, our provider doesn't read the topic after creation to speed up the things —
+# the reading might take up to a minute.
+# Probably, this is the reason why these fields were made required in the first place in SDKv2.
+# We copy the same behavior here to the Plugin Framework.
+  replication:
+    required: true
+  partitions:
+    required: true
+  config:
+    computed: true
+    useStateForUnknown: true
+    description: |
+      [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics.
+      Removing the block won't reset the topic configuration to default values. 
+      Instead, the topic will retain its last known configuration.
+    properties:
+      # These strings are legacy types from the SDKv2-based provider.
+      # todo: use API types (integers) in v5.0.0.
+      delete_retention_ms:
+        type: string
+      file_delete_delay_ms:
+        type: string
+      flush_messages:
+        type: string
+      flush_ms:
+        type: string
+      index_interval_bytes:
+        type: string
+      local_retention_ms:
+        type: string
+        alsoRequires: [retention_ms]
+      local_retention_bytes:
+        type: string
+        alsoRequires: [retention_bytes]
+      max_compaction_lag_ms:
+        type: string
+      max_message_bytes:
+        type: string
+      message_timestamp_difference_max_ms:
+        type: string
+      min_compaction_lag_ms:
+        type: string
+      min_insync_replicas:
+        type: string
+      retention_bytes:
+        type: string
+      retention_ms:
+        type: string
+      segment_bytes:
+        type: string
+      segment_index_bytes:
+        type: string
+      segment_jitter_ms:
+        type: string
+      segment_ms:
+        type: string

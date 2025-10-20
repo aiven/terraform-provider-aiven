@@ -36,7 +36,7 @@ type DatView[T any] interface {
 // Create and Update operations typically use plan as it represents the desired end state.
 // "config" is used when we need to check what values the user explicitly defined.
 //
-// For optional+computed attributes with UseStateForUnknown:
+// For computed+optional attributes with UseStateForUnknown:
 // When a user removes a value from "config", the value persists in "state" and appears in "plan",
 // allowing the attribute to retain its last known value.
 type ResView[T any] interface {

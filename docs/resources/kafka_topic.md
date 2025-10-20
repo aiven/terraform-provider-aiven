@@ -40,24 +40,24 @@ resource "aiven_kafka_topic" "example_topic" {
 
 ### Required
 
-- `partitions` (Number) The number of partitions to create in the topic.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `replication` (Number) The replication factor for the topic.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `topic_name` (String) The name of the topic. Changing this property forces recreation of the resource.
+- `partitions` (Number) Number of partitions.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `replication` (Number) Number of replicas.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
+- `topic_name` (String) Kafka topic name. Maximum length: `249`. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `config` (Block List, Max: 1) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedblock--config))
-- `owner_user_group_id` (String) The ID of the user group that owns the topic. Assigning ownership to decentralize topic management is part of [Aiven for Apache Kafka® governance](https://aiven.io/docs/products/kafka/concepts/governance-overview).
-- `tag` (Block Set) Tags for the topic. (see [below for nested schema](#nestedblock--tag))
-- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
+- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration. (see [below for nested schema](#nestedblock--config))
+- `owner_user_group_id` (String) The user group that owns this topic. Maximum length: `36`.
+- `tag` (Block Set) Topic tags. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**. The default value is `false`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `topic_description` (String) The description of the topic
+- `topic_description` (String) Topic description. Maximum length: `256`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID, a composite of `project`, `service_name` and `topic_name` IDs.
 
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
@@ -67,29 +67,31 @@ Optional:
 - `cleanup_policy` (String) The retention policy to use on old segments. Possible values include 'delete', 'compact', or a comma-separated list of them. The default policy ('delete') will discard old segments when their retention time or size limit has been reached. The 'compact' setting will enable log compaction on the topic. The possible values are `compact`, `compact,delete` and `delete`.
 - `compression_type` (String) Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer. The possible values are `gzip`, `lz4`, `producer`, `snappy`, `uncompressed` and `zstd`.
 - `delete_retention_ms` (String) The amount of time to retain delete tombstone markers for log compacted topics. This setting also gives a bound on the time in which a consumer must complete a read if they begin from offset 0 to ensure that they get a valid snapshot of the final stage (otherwise delete tombstones may be collected before they complete their scan).
-- `diskless_enable` (Boolean) Creates a [diskless topic](https://aiven.io/docs/products/diskless). You can only do this when you create the topic and you cannot change it later. Diskless topics are only available for bring your own cloud (BYOC) services that have the feature enabled.
+- `diskless_enable` (Boolean) Indicates whether diskless should be enabled. This is only available for BYOC services with Diskless feature enabled.
 - `file_delete_delay_ms` (String) The time to wait before deleting a file from the filesystem.
 - `flush_messages` (String) This setting allows specifying an interval at which we will force an fsync of data written to the log. For example if this was set to 1 we would fsync after every message; if it were 5 we would fsync after every five messages. In general we recommend you not set this and use replication for durability and allow the operating system's background flush capabilities as it is more efficient.
 - `flush_ms` (String) This setting allows specifying a time interval at which we will force an fsync of data written to the log. For example if this was set to 1000 we would fsync after 1000 ms had passed. In general we recommend you not set this and use replication for durability and allow the operating system's background flush capabilities as it is more efficient.
 - `index_interval_bytes` (String) This setting controls how frequently Kafka adds an index entry to its offset index. The default setting ensures that we index a message roughly every 4096 bytes. More indexing allows reads to jump closer to the exact position in the log but makes the index larger. You probably don't need to change this.
-- `local_retention_bytes` (String) This configuration controls the maximum bytes tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the limit is equal to overall retention time. If set to -1, no limit is applied but it's possible only if overall retention is also -1.
-- `local_retention_ms` (String) This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1.
+- `local_retention_bytes` (String) This configuration controls the maximum bytes tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the limit is equal to overall retention time. If set to -1, no limit is applied but it's possible only if overall retention is also -1. The field is required with `retention_bytes`.
+- `local_retention_ms` (String) This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1. The field is required with `retention_ms`.
 - `max_compaction_lag_ms` (String) The maximum time a message will remain ineligible for compaction in the log. Only applicable for logs that are being compacted.
 - `max_message_bytes` (String) The largest record batch size allowed by Kafka (after compression if compression is enabled). If this is increased and there are consumers older than 0.10.2, the consumers' fetch size must also be increased so that the they can fetch record batches this large. In the latest message format version, records are always grouped into batches for efficiency. In previous message format versions, uncompressed records are not grouped into batches and this limit only applies to a single record in that case.
 - `message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. When set to false, broker will not perform down-conversion for consumers expecting an older message format. The broker responds with UNSUPPORTED_VERSION error for consume requests from such older clients. This configuration does not apply to any message format conversion that might be required for replication to followers.
 - `message_format_version` (String) Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'. The possible values are `0.10.0`, `0.10.0-IV0`, `0.10.0-IV1`, `0.10.1`, `0.10.1-IV0`, `0.10.1-IV1`, `0.10.1-IV2`, `0.10.2`, `0.10.2-IV0`, `0.11.0`, `0.11.0-IV0`, `0.11.0-IV1`, `0.11.0-IV2`, `0.8.0`, `0.8.1`, `0.8.2`, `0.9.0`, `1.0`, `1.0-IV0`, `1.1`, `1.1-IV0`, `2.0`, `2.0-IV0`, `2.0-IV1`, `2.1`, `2.1-IV0`, `2.1-IV1`, `2.1-IV2`, `2.2`, `2.2-IV0`, `2.2-IV1`, `2.3`, `2.3-IV0`, `2.3-IV1`, `2.4`, `2.4-IV0`, `2.4-IV1`, `2.5`, `2.5-IV0`, `2.6`, `2.6-IV0`, `2.7`, `2.7-IV0`, `2.7-IV1`, `2.7-IV2`, `2.8`, `2.8-IV0`, `2.8-IV1`, `3.0`, `3.0-IV0`, `3.0-IV1`, `3.1`, `3.1-IV0`, `3.2`, `3.2-IV0`, `3.3`, `3.3-IV0`, `3.3-IV1`, `3.3-IV2`, `3.3-IV3`, `3.4`, `3.4-IV0`, `3.5`, `3.5-IV0`, `3.5-IV1`, `3.5-IV2`, `3.6`, `3.6-IV0`, `3.6-IV1`, `3.6-IV2`, `3.7`, `3.7-IV0`, `3.7-IV1`, `3.7-IV2`, `3.7-IV3`, `3.7-IV4`, `3.8`, `3.8-IV0`, `3.9`, `3.9-IV0`, `3.9-IV1`, `4.0`, `4.0-IV0`, `4.1` and `4.1-IV0`.
+- `message_timestamp_after_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.
+- `message_timestamp_before_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.
 - `message_timestamp_difference_max_ms` (String) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if message.timestamp.type=LogAppendTime.
 - `message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time. The possible values are `CreateTime` and `LogAppendTime`.
 - `min_cleanable_dirty_ratio` (Number) This configuration controls how frequently the log compactor will attempt to clean the log (assuming log compaction is enabled). By default we will avoid cleaning a log where more than 50% of the log has been compacted. This ratio bounds the maximum space wasted in the log by duplicates (at 50% at most 50% of the log could be duplicates). A higher ratio will mean fewer, more efficient cleanings but will mean more wasted space in the log. If the max.compaction.lag.ms or the min.compaction.lag.ms configurations are also specified, then the log compactor considers the log to be eligible for compaction as soon as either: (i) the dirty ratio threshold has been met and the log has had dirty (uncompacted) records for at least the min.compaction.lag.ms duration, or (ii) if the log has had dirty (uncompacted) records for at most the max.compaction.lag.ms period.
 - `min_compaction_lag_ms` (String) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
 - `min_insync_replicas` (String) When a producer sets acks to 'all' (or '-1'), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks of 'all'. This will ensure that the producer raises an exception if a majority of replicas do not receive a write.
 - `preallocate` (Boolean) True if we should preallocate the file on disk when creating a new log segment.
-- `remote_storage_enable` (Boolean) Indicates whether tiered storage should be enabled.
+- `remote_storage_enable` (Boolean) Indicates whether tiered storage should be enabled. This is only available for services with Tiered Storage feature enabled.
 - `retention_bytes` (String) This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the 'delete' retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.
 - `retention_ms` (String) This configuration controls the maximum time we will retain a log before we will discard old log segments to free up space if we are using the 'delete' retention policy. This represents an SLA on how soon consumers must read their data. If set to -1, no time limit is applied.
-- `segment_bytes` (String) This configuration controls the size of the index that maps offsets to file positions. We preallocate this index file and shrink it only after log rolls. You generally should not need to change this setting.
+- `segment_bytes` (String) This configuration controls the segment file size for the log. Retention and cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over retention. Setting this to a very low value has consequences, and the Aiven management plane ignores values less than 10 megabytes.
 - `segment_index_bytes` (String) This configuration controls the size of the index that maps offsets to file positions. We preallocate this index file and shrink it only after log rolls. You generally should not need to change this setting.
-- `segment_jitter_ms` (String) The maximum random jitter subtracted from the scheduled segment roll time to avoid thundering herds of segment rolling
+- `segment_jitter_ms` (String) The maximum random jitter subtracted from the scheduled segment roll time to avoid thundering herds of segment rolling.
 - `segment_ms` (String) This configuration controls the period of time after which Kafka will force the log to roll even if the segment file isn't full to ensure that retention can delete or compact old data. Setting this to a very low value has consequences, and the Aiven management plane ignores values less than 10 seconds.
 - `unclean_leader_election_enable` (Boolean) Indicates whether to enable replicas not in the ISR set to be elected as leader as a last resort, even though doing so may result in data loss.
 
@@ -100,9 +102,6 @@ Optional:
 Required:
 
 - `key` (String) Tag key. Maximum length: `64`.
-
-Optional:
-
 - `value` (String) Tag value. Maximum length: `256`.
 
 
@@ -111,11 +110,11 @@ Optional:
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
