@@ -220,6 +220,11 @@ Optional:
 - `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition. The default is `1000` (upstream default). Example: `1000`.
 - `default_toast_compression` (String) Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns. The default is `lz4`. Only available for PostgreSQL 14+.
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
+- `io_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units. Version 17 and up only. Default: `16`.
+- `io_max_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.
+- `io_max_concurrency` (Number) EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `-1`.
+- `io_method` (String) Enum: `io_uring`, `sync`, `worker`. EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `worker`.
+- `io_workers` (Number) EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Changing this parameter causes a service restart. Default: `3`.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one disables logging autovacuum actions. The default is `1000`.
 - `log_error_verbosity` (String) Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
