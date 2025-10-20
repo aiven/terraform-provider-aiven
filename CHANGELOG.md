@@ -14,6 +14,15 @@ nav_order: 1
 
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
+- Add `aiven_pg` field `pg_user_config.pg.io_combine_limit`: EXPERIMENTAL: Controls the largest I/O size in operations
+  that combine I/O in 8kB units
+- Add `aiven_pg` field `pg_user_config.pg.io_max_combine_limit`: EXPERIMENTAL: Controls the largest I/O size in operations
+  that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit
+- Add `aiven_pg` field `pg_user_config.pg.io_max_concurrency`: EXPERIMENTAL: Controls the maximum number of I/O operations
+  that one process can execute simultaneously
+- Add `aiven_pg` field `pg_user_config.pg.io_method` (enum)
+- Add `aiven_pg` field `pg_user_config.pg.io_workers`: EXPERIMENTAL: Number of IO worker processes, for io_method=worker.
+  Version 18 and up only
 
 ## [4.46.0] - 2025-10-09
 
