@@ -235,6 +235,32 @@ func pgUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"io_combine_limit": {
+						Description: "EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units. Version 17 and up only. Default: `16`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"io_max_combine_limit": {
+						Description: "EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"io_max_concurrency": {
+						Description: "EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `-1`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"io_method": {
+						Description:  "Enum: `io_uring`, `sync`, `worker`. EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `worker`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"io_uring", "sync", "worker"}, false),
+					},
+					"io_workers": {
+						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Changing this parameter causes a service restart. Default: `3`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"jit": {
 						Description: "Controls system-wide use of Just-in-Time Compilation (JIT).",
 						Optional:    true,

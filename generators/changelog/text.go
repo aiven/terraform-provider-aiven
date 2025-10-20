@@ -16,7 +16,8 @@ func hasBeta(description string) bool {
 	return strings.Contains(description, util.AivenEnableBeta)
 }
 
-var reEnum = regexp.MustCompile("(?i)enum: `.+`\\.?\\s*")
+// reEnum finds enum values from the description: "Enum: `foo`, `bar`"
+var reEnum = regexp.MustCompile("(?i)enum: `[^`]+`(?:, `[^`]+`)*\\.?\\s*")
 
 // removeEnum removes enum values from the description to keep it brief
 func removeEnum(text string) string {
