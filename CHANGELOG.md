@@ -24,6 +24,7 @@ nav_order: 1
   that one process can execute simultaneously
 - Add `aiven_pg` field `pg_user_config.pg.io_workers`: EXPERIMENTAL: Number of IO worker processes, for io_method=worker.
   Version 18 and up only
+- Add validation to require service `plan` field only during creation. After creation, the field becomes optional and can be removed, which is useful when enabling `autoscaler_service` integration.
 
 ## [4.46.0] - 2025-10-09
 
