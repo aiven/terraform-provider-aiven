@@ -30,7 +30,6 @@ func serviceIntegrationTypeChoices() []string {
 	ignore := []string{
 		"application_service_credential",
 		"kafka_inkless_postgresql",
-		"autoscaler_service",
 	}
 	return lo.Filter(service.IntegrationTypeChoices(), func(s string, _ int) bool {
 		return !slices.Contains(ignore, s)
