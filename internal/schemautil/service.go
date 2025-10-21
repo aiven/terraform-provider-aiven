@@ -140,8 +140,9 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		},
 		"plan": {
 			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).",
+			Optional:    true,
+			Computed:    true,
+			Description: "Defines the computing resources allocated for the service. The plan is required when you create the service. You can change the field after service creation. When changing to a smaller plan, the new plan must have enough disk space to store all data. Switching to a plan with fewer nodes is not supported for most services. The basic plan names are: `hobbyist`, `startup-x`, `business-x`, and `premium-x`, where `x` is the approximate amount of memory on each node. Other attributes like the CPU count and disk space vary, but plan names are based on memory. View the available options on the [Aiven pricing page](https://aiven.io/pricing). **Note**: If you enable the `autoscaler_service` integration on a service, remove this `plan` field to prevent the provider from resetting the plan value.",
 		},
 		"service_name": {
 			Type:        schema.TypeString,
