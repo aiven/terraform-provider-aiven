@@ -50,7 +50,7 @@ type SchemaMeta struct {
 }
 
 type IDAttribute struct {
-	Compose     []string `yaml:"compose"`
+	Fields      []string `yaml:"fields"`
 	Description string   `yaml:"description,omitempty"`
 	Mutable     bool     `yaml:"mutable,omitempty"` // Negative for UseStateForUnknown
 }
@@ -59,7 +59,7 @@ type Definition struct {
 	Beta           bool                 `yaml:"beta"`
 	Location       string               `yaml:"location"`
 	Schema         map[string]*Item     `yaml:"schema,omitempty"`
-	Delete         []string             `yaml:"delete,omitempty"`
+	Remove         []string             `yaml:"remove,omitempty"`
 	Rename         map[string]string    `yaml:"rename,omitempty"`
 	ObjectKey      string               `yaml:"objectKey,omitempty"`
 	Resource       *SchemaMeta          `yaml:"resource,omitempty"`

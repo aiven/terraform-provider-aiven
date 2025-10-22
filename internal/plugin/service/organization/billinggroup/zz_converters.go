@@ -52,9 +52,9 @@ type apiModel struct {
 	VatID                *string   `json:"vat_id,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization_billing_group.foo ORGANIZATION_ID/BILLING_GROUP_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "billing_group_id"}
 }
 

@@ -21,7 +21,7 @@ import (
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
 		TypeName: aivenName,
-		IDFields: composeID(),
+		IDFields: idFields(),
 		Schema:   newResourceSchema,
 		Read:     readOrganization,
 		Create:   createOrganization,

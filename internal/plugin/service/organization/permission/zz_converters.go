@@ -56,9 +56,9 @@ type apiModelPermissions struct {
 	UpdateTime    *string   `json:"update_time,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization_permission.foo ORGANIZATION_ID/RESOURCE_TYPE/RESOURCE_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "resource_type", "resource_id"}
 }
 

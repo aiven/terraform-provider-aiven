@@ -9,7 +9,7 @@ resource:
 datasource:
   description: Gets information about an application user.
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - user_id
 operations:

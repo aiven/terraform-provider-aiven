@@ -12,13 +12,13 @@ resource:
     [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes.
     You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - susbcription_id
 rename:
   access_id: susbcription_id
   access_data/project_name: project
-delete:
+remove:
   - credentials_user_id
   - credentials_consumed
   - created_by

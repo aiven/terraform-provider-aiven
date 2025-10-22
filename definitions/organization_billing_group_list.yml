@@ -4,7 +4,7 @@ location: internal/plugin/service/organization/billinggrouplist
 datasource:
   description: Lists billing groups for an organization.
 idAttribute:
-  compose:
+  fields:
     - organization_id
 operations:
   OrganizationBillingGroupList: read

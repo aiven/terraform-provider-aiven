@@ -31,7 +31,7 @@ const (
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
 		TypeName: aivenName,
-		IDFields: composeID(),
+		IDFields: idFields(),
 		Schema:   patchedSchema,
 		Read:     readPermission,
 		Create:   createPermission,

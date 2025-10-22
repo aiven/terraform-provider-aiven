@@ -57,9 +57,9 @@ type apiModelTag struct {
 	Value *string `json:"value,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization_project.foo ORGANIZATION_ID/PROJECT_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "project_id"}
 }
 

@@ -154,18 +154,18 @@ func genFieldTag(kv ...string) map[string]string {
 	return m
 }
 
-const funcComposeID = "composeID"
+const funcIDFields = "idFields"
 
-func genComposeID(avnName string, fields []string) jen.Code {
+func genIDFields(avnName string, fields []string) jen.Code {
 	codes := make([]jen.Code, 0)
 	for _, v := range fields {
 		codes = append(codes, jen.Lit(v))
 	}
 
 	return jen.
-		Commentf("%s the ID attribute fields, i.e.:", funcComposeID).Line().
+		Commentf("%s the ID attribute fields, i.e.:", funcIDFields).Line().
 		Commentf("terraform import %s.foo %s", avnName, strings.ToUpper(filepath.Join(fields...))).Line().
-		Func().Id(funcComposeID).Params().Index().String().
+		Func().Id(funcIDFields).Params().Index().String().
 		Block(jen.Return().Index().String().Values(codes...))
 }
 

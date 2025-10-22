@@ -18,7 +18,7 @@ resource:
     Alternatively, you can disable this validation by setting the `AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT` environment variable to `false`,
     which will cause Terraform to override the remote state.
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - resource_type
     - resource_id
