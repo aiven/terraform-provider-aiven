@@ -46,13 +46,6 @@ func genTFModel(isResource bool, item *Item) []jen.Code {
 	name := string(entity) + "Model"
 	meth := jen.Func().Params(jen.Id(tfVar).Op("*").Id(name))
 	return []jen.Code{
-		// Generates constructor for the model
-		jen.
-			Func().Id("new"+firstUpper(name)).Params().
-			Qual(adapterPackage, "Model").Index(jen.Id(item.TFModelName())).
-			Block(jen.Return(jen.New(jen.Id(name)))).
-			Line(),
-
 		// Generates the model
 		jen.
 			Commentf("%s with specific %s timeouts", name, entity).Line().

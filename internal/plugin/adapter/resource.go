@@ -3,61 +3,83 @@ package adapter
 import (
 	"context"
 	"fmt"
+	"reflect"
 
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-// MightyResource implements additional resource methods
-type MightyResource interface {
-	resource.ResourceWithConfigure
-	resource.ResourceWithImportState
-	resource.ResourceWithValidateConfig
-	resource.ResourceWithConfigValidators
-	resource.ResourceWithModifyPlan
+// Model implements resource or datasource model with the shared fields model.
+type Model[T any] interface {
+	// SharedModel returns the shared fields model between resource and datasource.
+	SharedModel() *T
+	TimeoutsObject() types.Object
 }
 
-type newResourceSchema func(context.Context) schema.Schema
+// instantiate creates a new instance of the model using reflection since we can't
+// directly instantiate an interface type.
+func instantiate[M Model[T], T any]() M {
+	var m M
+	return reflect.New(reflect.TypeOf(m).Elem()).Interface().(M)
+}
 
-func NewResource[T any](
-	name string,
-	view ResView[T],
-	newSchema newResourceSchema,
-	newModel newModel[T],
-	composeID []string,
-) MightyResource {
-	return &resourceAdapter[T]{
-		name:      name,
-		view:      view,
-		newSchema: newSchema,
-		newModel:  newModel,
-		composeID: composeID,
+type ResourceOptions[M Model[T], T any] struct {
+	// TypeName is the name of resource,
+	// for instance, "aiven_organization_address"
+	TypeName string
+	Schema   func(ctx context.Context) schema.Schema
+
+	// IDFields are used to build the resource ID.
+	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
+	IDFields []string
+
+	// CRUD operations
+	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
+	Delete func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
+	Create func(ctx context.Context, client avngen.Client, plan *T) diag.Diagnostics
+	Update func(ctx context.Context, client avngen.Client, plan, state, config *T) diag.Diagnostics
+
+	// ModifyPlan implements resource.ResourceWithModifyPlan.
+	// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
+	ModifyPlan func(ctx context.Context, client avngen.Client, plan, state, config *T) diag.Diagnostics
+
+	// ValidateConfig implements resource.ResourceWithValidateConfig.
+	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
+	ValidateConfig func(ctx context.Context, client avngen.Client, config *T) diag.Diagnostics
+
+	// ConfigValidators implements resource.ResourceWithConfigValidators.
+	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#configvalidators-method
+	ConfigValidators func(ctx context.Context, client avngen.Client) []resource.ConfigValidator
+}
+
+func NewResource[M Model[T], T any](options ResourceOptions[M, T]) resource.Resource {
+	return &resourceAdapter[M, T]{
+		resource: options,
 	}
 }
 
-type resourceAdapter[T any] struct {
-	// name is the name of resource,
-	// for instance, "aiven_organization_address"
-	name string
+var (
+	_ resource.Resource                     = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.ResourceWithConfigure        = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.ResourceWithImportState      = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.ResourceWithValidateConfig   = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.ResourceWithConfigValidators = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.ResourceWithModifyPlan       = (*resourceAdapter[Model[any], any])(nil)
+)
 
-	// view implements CRUD functions
-	view ResView[T]
-
-	// newSchema returns a new instance of the generated resource Schema.
-	newSchema newResourceSchema
-
-	// newModel returns a new instance of the generated datasource newModel.
-	newModel newModel[T]
-
-	// composeID is the list of identifiers used to compose the resource ID.
-	composeID []string
+type resourceAdapter[M Model[T], T any] struct {
+	client   avngen.Client
+	resource ResourceOptions[M, T]
 }
 
-func (a *resourceAdapter[T]) Configure(
+func (a *resourceAdapter[M, T]) Configure(
 	_ context.Context,
 	req resource.ConfigureRequest,
 	rsp *resource.ConfigureResponse,
@@ -73,34 +95,32 @@ func (a *resourceAdapter[T]) Configure(
 		return
 	}
 
-	// Setups the client.
-	// Configure other things, like logging, if needed.
-	a.view.Configure(p.GetGenClient())
+	a.client = p.GetGenClient()
 }
 
-func (a *resourceAdapter[T]) Metadata(
+func (a *resourceAdapter[M, T]) Metadata(
 	_ context.Context,
 	_ resource.MetadataRequest,
 	rsp *resource.MetadataResponse,
 ) {
-	rsp.TypeName = a.name
+	rsp.TypeName = a.resource.TypeName
 }
 
-func (a *resourceAdapter[T]) Schema(
+func (a *resourceAdapter[M, T]) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
 	rsp *resource.SchemaResponse,
 ) {
-	rsp.Schema = a.newSchema(ctx)
+	rsp.Schema = a.resource.Schema(ctx)
 }
 
-func (a *resourceAdapter[T]) Create(
+func (a *resourceAdapter[M, T]) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	rsp *resource.CreateResponse,
 ) {
 	var (
-		plan  = a.newModel()
+		plan  = instantiate[M]()
 		diags = &rsp.Diagnostics
 	)
 
@@ -116,7 +136,7 @@ func (a *resourceAdapter[T]) Create(
 	}
 	defer cancel()
 
-	diags.Append(a.view.Create(ctx, plan.SharedModel())...)
+	diags.Append(a.resource.Create(ctx, a.client, plan.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -124,13 +144,13 @@ func (a *resourceAdapter[T]) Create(
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (a *resourceAdapter[T]) Read(
+func (a *resourceAdapter[M, T]) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
 	rsp *resource.ReadResponse,
 ) {
 	var (
-		state = a.newModel()
+		state = instantiate[M]()
 		diags = &rsp.Diagnostics
 	)
 
@@ -146,7 +166,7 @@ func (a *resourceAdapter[T]) Read(
 	}
 	defer cancel()
 
-	diags.Append(a.view.Read(ctx, state.SharedModel())...)
+	diags.Append(a.resource.Read(ctx, a.client, state.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
@@ -154,15 +174,19 @@ func (a *resourceAdapter[T]) Read(
 	diags.Append(rsp.State.Set(ctx, state)...)
 }
 
-func (a *resourceAdapter[T]) Update(
+func (a *resourceAdapter[M, T]) Update(
 	ctx context.Context,
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
 ) {
+	if a.resource.Update == nil {
+		return
+	}
+
 	var (
-		plan   = a.newModel()
-		state  = a.newModel()
-		config = a.newModel()
+		plan   = instantiate[M]()
+		state  = instantiate[M]()
+		config = instantiate[M]()
 		diags  = &rsp.Diagnostics
 	)
 
@@ -173,7 +197,6 @@ func (a *resourceAdapter[T]) Update(
 		return
 	}
 
-	diags.Append(a.view.Update(ctx, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
 	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutUpdate)
 	diags.Append(d...)
 	if diags.HasError() {
@@ -181,16 +204,21 @@ func (a *resourceAdapter[T]) Update(
 	}
 	defer cancel()
 
+	diags.Append(a.resource.Update(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+	if diags.HasError() {
+		return
+	}
+
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
-func (a *resourceAdapter[T]) Delete(
+func (a *resourceAdapter[M, T]) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
 	rsp *resource.DeleteResponse,
 ) {
 	var (
-		state = a.newModel()
+		state = instantiate[M]()
 		diags = &rsp.Diagnostics
 	)
 
@@ -206,17 +234,17 @@ func (a *resourceAdapter[T]) Delete(
 	}
 	defer cancel()
 
-	diags.Append(a.view.Delete(ctx, state.SharedModel())...)
+	diags.Append(a.resource.Delete(ctx, a.client, state.SharedModel())...)
 }
 
-func (a *resourceAdapter[T]) ImportState(
+func (a *resourceAdapter[M, T]) ImportState(
 	ctx context.Context,
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
-	values, err := schemautil.SplitResourceID(req.ID, len(a.composeID))
+	values, err := schemautil.SplitResourceID(req.ID, len(a.resource.IDFields))
 	if err != nil {
-		importPath := schemautil.BuildResourceID(a.composeID...)
+		importPath := schemautil.BuildResourceID(a.resource.IDFields...)
 		rsp.Diagnostics.AddError(
 			"Unexpected Read Identifier",
 			fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
@@ -224,30 +252,28 @@ func (a *resourceAdapter[T]) ImportState(
 	}
 
 	for i, v := range values {
-		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.composeID[i]), v)...)
+		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.resource.IDFields[i]), v)...)
 	}
 }
 
-func (a *resourceAdapter[T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	v, ok := a.view.(ResConfigValidators[T])
-	if !ok {
+func (a *resourceAdapter[M, T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	if a.resource.ConfigValidators == nil {
 		return nil
 	}
-	return v.ResConfigValidators(ctx)
+	return a.resource.ConfigValidators(ctx, a.client)
 }
 
-func (a *resourceAdapter[T]) ValidateConfig(
+func (a *resourceAdapter[M, T]) ValidateConfig(
 	ctx context.Context,
 	req resource.ValidateConfigRequest,
 	rsp *resource.ValidateConfigResponse,
 ) {
-	v, ok := a.view.(ResValidateConfig[T])
-	if !ok {
+	if a.resource.ValidateConfig == nil {
 		return
 	}
 
 	var (
-		config = a.newModel()
+		config = instantiate[M]()
 		diags  = &rsp.Diagnostics
 	)
 	diags.Append(req.Config.Get(ctx, config)...)
@@ -263,23 +289,22 @@ func (a *resourceAdapter[T]) ValidateConfig(
 	}
 	defer cancel()
 
-	diags.Append(v.ResValidateConfig(ctx, config.SharedModel())...)
+	diags.Append(a.resource.ValidateConfig(ctx, a.client, config.SharedModel())...)
 }
 
-func (a *resourceAdapter[T]) ModifyPlan(
+func (a *resourceAdapter[M, T]) ModifyPlan(
 	ctx context.Context,
 	req resource.ModifyPlanRequest,
 	rsp *resource.ModifyPlanResponse,
 ) {
-	v, ok := a.view.(ResModifyPlan[T])
-	if !ok {
+	if a.resource.ModifyPlan == nil {
 		return
 	}
 
 	var (
-		plan   = a.newModel()
-		state  = a.newModel()
-		config = a.newModel()
+		plan   = instantiate[M]()
+		state  = instantiate[M]()
+		config = instantiate[M]()
 		diags  = &rsp.Diagnostics
 	)
 
@@ -300,7 +325,7 @@ func (a *resourceAdapter[T]) ModifyPlan(
 	}
 	defer cancel()
 
-	diags.Append(v.ResModifyPlan(ctx, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
 	if diags.HasError() {
 		return
 	}

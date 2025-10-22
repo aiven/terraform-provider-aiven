@@ -14,13 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-func newResourceModel() adapter.Model[tfModel] {
-	return new(resourceModel)
-}
 
 // resourceModel with specific resource timeouts
 type resourceModel struct {

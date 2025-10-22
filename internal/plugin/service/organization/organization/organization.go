@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -18,13 +19,27 @@ import (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   newResourceSchema,
+		Read:     readOrganization,
+		Create:   createOrganization,
+		Update:   updateOrganization,
+		Delete:   deleteOrganization,
+	})
 }
 
 func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(aivenName, new(view), datasourceSchemaPatched, newDatasourceModel)
+	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+		TypeName:         aivenName,
+		Schema:           datasourceSchemaPatched,
+		Read:             readOrganization,
+		ConfigValidators: datasourceConfigValidators,
+	})
 }
 
+// datasourceSchemaPatched turns "id" and "name" into optional attributes so it can be found either by ID or name.
 func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
 	patch := dataschema.Schema{
 		Attributes: map[string]dataschema.Attribute{
@@ -45,11 +60,7 @@ func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
 	return result
 }
 
-var _ adapter.DatConfigValidators[tfModel] = (*view)(nil)
-
-type view struct{ adapter.View }
-
-func (vw *view) DatConfigValidators(_ context.Context) []datasource.ConfigValidator {
+func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
 	validatable := path.Expressions{
 		path.MatchRoot("id"),
 		path.MatchRoot("name"),
@@ -61,14 +72,14 @@ func (vw *view) DatConfigValidators(_ context.Context) []datasource.ConfigValida
 	}
 }
 
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createOrganization(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var req account.AccountCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.AccountCreate(ctx, &req)
+	rsp, err := client.AccountCreate(ctx, &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -76,23 +87,23 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 
 	// Sets ID field to Read() the resource
 	plan.SetID(rsp.OrganizationId)
-	return vw.Read(ctx, plan)
+	return readOrganization(ctx, client, plan)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
+func updateOrganization(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
 	var req account.AccountUpdateIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	accountID, err := vw.getAccountID(ctx, state)
+	accountID, err := getAccountID(ctx, client, state)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
 	}
 
-	rsp, err := vw.Client.AccountUpdate(ctx, accountID, &req)
+	rsp, err := client.AccountUpdate(ctx, accountID, &req)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorUpdatingResource,
@@ -103,18 +114,18 @@ func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagno
 
 	// Sets ID field to Read() the resource
 	plan.SetID(rsp.OrganizationId)
-	return vw.Read(ctx, plan)
+	return readOrganization(ctx, client, plan)
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deleteOrganization(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	accountID, err := vw.getAccountID(ctx, state)
+	accountID, err := getAccountID(ctx, client, state)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags
 	}
 
-	err = vw.Client.AccountDelete(ctx, accountID)
+	err = client.AccountDelete(ctx, accountID)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorDeletingResource,
@@ -126,15 +137,15 @@ func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return nil
 }
 
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
+func readOrganization(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	accountID, err := vw.getAccountID(ctx, state)
+	accountID, err := getAccountID(ctx, client, state)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags
 	}
 
-	rsp, err := vw.Client.AccountGet(ctx, accountID)
+	rsp, err := client.AccountGet(ctx, accountID)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorReadingResource,
@@ -147,12 +158,12 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 }
 
 // getAccountID is a helper function that returns the account ID to use for API calls.
-func (vw *view) getAccountID(ctx context.Context, state *tfModel) (string, error) {
+func getAccountID(ctx context.Context, client avngen.Client, state *tfModel) (string, error) {
 	id := state.ID.ValueString()
 	switch {
 	case strings.HasPrefix(id, "org"):
 		// This is an organization ID (org123456) format
-		org, err := vw.Client.OrganizationGet(ctx, id)
+		org, err := client.OrganizationGet(ctx, id)
 		if err != nil {
 			return "", fmt.Errorf("faild to resolve organization id %q", id)
 		}
@@ -167,7 +178,7 @@ func (vw *view) getAccountID(ctx context.Context, state *tfModel) (string, error
 		return "", fmt.Errorf("no Organization ID or name provided")
 	}
 
-	list, err := vw.Client.AccountList(ctx)
+	list, err := client.AccountList(ctx)
 	if err != nil {
 		return "", err
 	}
