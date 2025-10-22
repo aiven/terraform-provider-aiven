@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationprojects"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -16,23 +17,33 @@ import (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   newResourceSchema,
+		Read:     readProject,
+		Create:   createProject,
+		Update:   updateProject,
+		Delete:   deleteProject,
+	})
 }
 
 func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(aivenName, new(view), newDatasourceSchema, newDatasourceModel)
+	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+		TypeName: aivenName,
+		Schema:   newDatasourceSchema,
+		Read:     readProject,
+	})
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createProject(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var req organizationprojects.OrganizationProjectsCreateIn
-	diags := expandData(ctx, plan, nil, &req, vw.modifyReq(ctx))
+	diags := expandData(ctx, plan, nil, &req, modifyReq(ctx, client))
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.OrganizationProjectsCreate(ctx, plan.OrganizationID.ValueString(), &req)
+	rsp, err := client.OrganizationProjectsCreate(ctx, plan.OrganizationID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -40,18 +51,18 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 
 	// Sets ID field to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.ProjectId)
-	return vw.Read(ctx, plan)
+	return readProject(ctx, client, plan)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
+func updateProject(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
 	var req organizationprojects.OrganizationProjectsUpdateIn
-	diags := expandData(ctx, plan, state, &req, vw.modifyReq(ctx))
+	diags := expandData(ctx, plan, state, &req, modifyReq(ctx, client))
 	if diags.HasError() {
 		return diags
 	}
 
 	// OrganizationID is a mutable field, must take it from the state
-	rsp, err := vw.Client.OrganizationProjectsUpdate(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString(), &req)
+	rsp, err := client.OrganizationProjectsUpdate(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
@@ -60,12 +71,12 @@ func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagno
 	// Sets ID field to Read() the resource.
 	// When parent_id is changed, this mutates the ID.
 	plan.SetID(rsp.OrganizationId, rsp.ProjectId)
-	return vw.Read(ctx, plan)
+	return readProject(ctx, client, plan)
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deleteProject(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	err := schemautil.WaitUntilNotFound(ctx, func() error {
-		return vw.Client.OrganizationProjectsDelete(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
+		return client.OrganizationProjectsDelete(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
 	})
 	if err != nil {
 		var diags diag.Diagnostics
@@ -75,22 +86,22 @@ func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return nil
 }
 
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
+func readProject(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := vw.Client.OrganizationProjectsGet(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
+	rsp, err := client.OrganizationProjectsGet(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags
 	}
 
-	return flattenData(ctx, state, rsp, vw.modifyRsp(ctx, state.ParentID.ValueString()))
+	return flattenData(ctx, state, rsp, modifyRsp(ctx, client, state.ParentID.ValueString()))
 }
 
-func (vw *view) modifyReq(ctx context.Context) util.MapModifier[apiModel] {
+func modifyReq(ctx context.Context, client avngen.Client) util.MapModifier[apiModel] {
 	return func(req util.RawMap, in *apiModel) error {
 		// Converts OrganizationID to AccountID
 		if in.ParentID != nil {
-			parentID, err := schemautil.ConvertOrganizationToAccountID(ctx, *in.ParentID, vw.Client)
+			parentID, err := schemautil.ConvertOrganizationToAccountID(ctx, *in.ParentID, client)
 			if err != nil {
 				return err
 			}
@@ -128,10 +139,10 @@ func (vw *view) modifyReq(ctx context.Context) util.MapModifier[apiModel] {
 	}
 }
 
-func (vw *view) modifyRsp(ctx context.Context, stateParentID string) util.MapModifier[organizationprojects.OrganizationProjectsGetOut] {
+func modifyRsp(ctx context.Context, client avngen.Client, stateParentID string) util.MapModifier[organizationprojects.OrganizationProjectsGetOut] {
 	return func(rsp util.RawMap, in *organizationprojects.OrganizationProjectsGetOut) error {
 		// Sets CA certificate
-		cert, err := vw.Client.ProjectKmsGetCA(ctx, in.ProjectId)
+		cert, err := client.ProjectKmsGetCA(ctx, in.ProjectId)
 		if err != nil {
 			return err
 		}

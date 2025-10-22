@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationbilling"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,14 +15,16 @@ import (
 )
 
 func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(aivenName, new(view), newDatasourceSchema, newDatasourceModel)
+	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+		TypeName: aivenName,
+		Schema:   newDatasourceSchema,
+		Read:     readBillingGroupList,
+	})
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
+func readBillingGroupList(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := vw.Client.OrganizationBillingGroupList(ctx, state.OrganizationID.ValueString())
+	rsp, err := client.OrganizationBillingGroupList(ctx, state.OrganizationID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags

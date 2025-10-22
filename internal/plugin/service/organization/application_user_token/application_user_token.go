@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,19 +15,24 @@ import (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   newResourceSchema,
+		Read:     readApplicationUserToken,
+		Create:   createApplicationUserToken,
+		Delete:   deleteApplicationUserToken,
+	})
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createApplicationUserToken(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var req applicationuser.ApplicationUserAccessTokenCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.ApplicationUserAccessTokenCreate(ctx, plan.OrganizationID.ValueString(), plan.UserID.ValueString(), &req)
+	rsp, err := client.ApplicationUserAccessTokenCreate(ctx, plan.OrganizationID.ValueString(), plan.UserID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -46,18 +52,12 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 	plan.LastUserAgent = types.StringValue("")
 	plan.LastUserAgentHumanReadable = types.StringValue("")
 	plan.ExpiryTime = types.StringValue("") // Is nil if `max_age_seconds` is not set
-	return vw.Read(ctx, plan)
+	return readApplicationUserToken(ctx, client, plan)
 }
 
-func (vw *view) Update(_ context.Context, _, _, _ *tfModel) diag.Diagnostics {
+func readApplicationUserToken(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	diags.AddError(errmsg.SummaryErrorReadingResource, "This resource cannot be updated")
-	return diags
-}
-
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	rsp, err := vw.Client.ApplicationUserAccessTokensList(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString())
+	rsp, err := client.ApplicationUserAccessTokensList(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags
@@ -74,9 +74,9 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return diags
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deleteApplicationUserToken(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	err := vw.Client.ApplicationUserAccessTokenDelete(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString(), state.TokenPrefix.ValueString())
+	err := client.ApplicationUserAccessTokenDelete(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString(), state.TokenPrefix.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags

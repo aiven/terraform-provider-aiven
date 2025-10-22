@@ -3,6 +3,7 @@ package access
 import (
 	"context"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationgovernance"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,19 +13,24 @@ import (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   newResourceSchema,
+		Read:     readAccess,
+		Create:   createAccess,
+		Delete:   deleteAccess,
+	})
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createAccess(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var req organizationgovernance.OrganizationGovernanceAccessCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.OrganizationGovernanceAccessCreate(ctx, plan.OrganizationID.ValueString(), &req)
+	rsp, err := client.OrganizationGovernanceAccessCreate(ctx, plan.OrganizationID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -32,18 +38,12 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(plan.OrganizationID.ValueString(), rsp.AccessId)
-	return vw.Read(ctx, plan)
+	return readAccess(ctx, client, plan)
 }
 
-func (vw *view) Update(_ context.Context, _, _, _ *tfModel) diag.Diagnostics {
+func readAccess(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	diags.AddError(errmsg.SummaryErrorUpdatingResource, "Update is not supported for this resource")
-	return diags
-}
-
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	rsp, err := vw.Client.OrganizationGovernanceAccessGet(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
+	rsp, err := client.OrganizationGovernanceAccessGet(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags
@@ -52,9 +52,9 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return flattenData(ctx, state, rsp)
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deleteAccess(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	_, err := vw.Client.OrganizationGovernanceAccessDelete(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
+	_, err := client.OrganizationGovernanceAccessDelete(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags

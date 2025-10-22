@@ -3,6 +3,7 @@ package billinggroup
 import (
 	"context"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationbilling"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,23 +15,33 @@ import (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), newResourceSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   newResourceSchema,
+		Read:     readBillingGroup,
+		Create:   createBillingGroup,
+		Update:   updateBillingGroup,
+		Delete:   deleteBillingGroup,
+	})
 }
 
 func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(aivenName, new(view), newDatasourceSchema, newDatasourceModel)
+	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+		TypeName: aivenName,
+		Schema:   newDatasourceSchema,
+		Read:     readBillingGroup,
+	})
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createBillingGroup(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var req organizationbilling.OrganizationBillingGroupCreateIn
 	diags := expandData(ctx, plan, nil, &req, emailsToMap)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.OrganizationBillingGroupCreate(ctx, plan.OrganizationID.ValueString(), &req)
+	rsp, err := client.OrganizationBillingGroupCreate(ctx, plan.OrganizationID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -38,17 +49,17 @@ func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.BillingGroupId)
-	return vw.Read(ctx, plan)
+	return readBillingGroup(ctx, client, plan)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
+func updateBillingGroup(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
 	var req organizationbilling.OrganizationBillingGroupUpdateIn
 	diags := expandData(ctx, plan, state, &req, emailsToMap)
 	if diags.HasError() {
 		return diags
 	}
 
-	rsp, err := vw.Client.OrganizationBillingGroupUpdate(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString(), &req)
+	rsp, err := client.OrganizationBillingGroupUpdate(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString(), &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
 		return diags
@@ -56,12 +67,12 @@ func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagno
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.BillingGroupId)
-	return vw.Read(ctx, plan)
+	return readBillingGroup(ctx, client, plan)
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deleteBillingGroup(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	err := vw.Client.OrganizationBillingGroupDelete(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
+	err := client.OrganizationBillingGroupDelete(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags
@@ -70,9 +81,9 @@ func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return nil
 }
 
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
+func readBillingGroup(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := vw.Client.OrganizationBillingGroupGet(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
+	rsp, err := client.OrganizationBillingGroupGet(ctx, state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return diags

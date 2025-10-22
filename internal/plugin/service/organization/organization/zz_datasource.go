@@ -9,13 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-func newDatasourceModel() adapter.Model[tfModel] {
-	return new(datasourceModel)
-}
 
 // datasourceModel with specific datasource timeouts
 type datasourceModel struct {

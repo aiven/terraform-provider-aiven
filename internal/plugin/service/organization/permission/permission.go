@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/accountteam"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -28,7 +29,15 @@ const (
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(aivenName, new(view), patchedSchema, newResourceModel, composeID())
+	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
+		TypeName: aivenName,
+		IDFields: composeID(),
+		Schema:   patchedSchema,
+		Read:     readPermission,
+		Create:   createPermission,
+		Update:   updatePermission,
+		Delete:   deletePermission,
+	})
 }
 
 // patchedSchema adds "permissions" enum values that are not yet in OpenAPI spec.
@@ -44,20 +53,18 @@ func patchedSchema(ctx context.Context) schema.Schema {
 	return s
 }
 
-type view struct{ adapter.View }
-
-func (vw *view) Create(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func createPermission(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	permissionLock.Lock()
 	defer permissionLock.Unlock()
-	diags := vw.validateConflict(ctx, plan)
+	diags := validateConflict(ctx, client, plan)
 	if diags.HasError() {
 		return diags
 	}
 
-	return vw.Update(ctx, plan, nil, nil)
+	return updatePermission(ctx, client, plan, nil, nil)
 }
 
-func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagnostics {
+func updatePermission(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
 	var req organization.PermissionsSetIn
 	diags := expandData(ctx, plan, state, &req)
 	if diags.HasError() {
@@ -67,7 +74,7 @@ func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagno
 	orgID := plan.OrganizationID.ValueString()
 	resourceType := plan.ResourceType.ValueString()
 	resourceID := plan.ResourceID.ValueString()
-	err := vw.Client.PermissionsSet(ctx, orgID, organization.ResourceType(resourceType), resourceID, &req)
+	err := client.PermissionsSet(ctx, orgID, organization.ResourceType(resourceType), resourceID, &req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
 		return diags
@@ -75,12 +82,12 @@ func (vw *view) Update(ctx context.Context, plan, state, _ *tfModel) diag.Diagno
 
 	// Sets ID fields to Read() the resource
 	plan.SetID(orgID, resourceType, resourceID)
-	return vw.Read(ctx, plan)
+	return readPermission(ctx, client, plan)
 }
 
-func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
+func readPermission(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := vw.Client.PermissionsGet(
+	rsp, err := client.PermissionsGet(
 		ctx,
 		state.OrganizationID.ValueString(),
 		organization.ResourceType(state.ResourceType.ValueString()),
@@ -97,7 +104,7 @@ func (vw *view) Read(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return flattenData(ctx, state, &wrapper{Permissions: rsp})
 }
 
-func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
+func deletePermission(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	req := &organization.PermissionsSetIn{
 		Permissions: make([]organization.PermissionIn, 0),
@@ -106,7 +113,7 @@ func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	orgID := state.OrganizationID.ValueString()
 	resourceType := state.ResourceType.ValueString()
 	resourceID := state.ResourceID.ValueString()
-	err := vw.Client.PermissionsSet(ctx, orgID, organization.ResourceType(resourceType), resourceID, req)
+	err := client.PermissionsSet(ctx, orgID, organization.ResourceType(resourceType), resourceID, req)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
 		return diags
@@ -114,12 +121,12 @@ func (vw *view) Delete(ctx context.Context, state *tfModel) diag.Diagnostics {
 	return nil
 }
 
-func (vw *view) validateConflict(ctx context.Context, plan *tfModel) diag.Diagnostics {
+func validateConflict(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	orgID := plan.OrganizationID.ValueString()
 	resourceType := plan.ResourceType.ValueString()
 	resourceID := plan.ResourceID.ValueString()
-	v, err := vw.Client.PermissionsGet(ctx, orgID, organization.ResourceType(resourceType), resourceID)
+	v, err := client.PermissionsGet(ctx, orgID, organization.ResourceType(resourceType), resourceID)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorCreatingResource, fmt.Sprintf("failed to read remote state: %s", err))
 		return diags
