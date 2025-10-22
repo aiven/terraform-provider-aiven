@@ -7,7 +7,7 @@ resource:
 datasource:
   description: Gets information about a billing group.
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - billing_group_id
 operations:

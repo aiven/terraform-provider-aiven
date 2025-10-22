@@ -79,9 +79,9 @@ type apiModelAccessDataAcls struct {
 	ResourceType   *string `json:"resource_type,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_governance_access.foo ORGANIZATION_ID/SUSBCRIPTION_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "susbcription_id"}
 }
 

@@ -11,11 +11,11 @@ operations:
   OrganizationProjectsUpdate: update
   ProjectKmsGetCA: read
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - project_id
   mutable: true
-delete:
+remove:
   - end_of_life_extension
   - features
   - account_id

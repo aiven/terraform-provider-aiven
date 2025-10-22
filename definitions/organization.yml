@@ -11,10 +11,10 @@ resource:
 datasource:
   description: Gets information about an organization.
 idAttribute:
-  compose:
+  fields:
     - id
   description: The organization ID.
-delete:
+remove:
   - features
   - access_source
   - account_owner_team_id

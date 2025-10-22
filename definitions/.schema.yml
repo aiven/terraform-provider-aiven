@@ -24,11 +24,11 @@ properties:
     $comment: |
       Documentation and configuration specific to this datasource.
       Use this to provide clear descriptions for your datasource in the Terraform registry.
-  delete:
-    $ref: '#/definitions/Delete'
+  remove:
+    $ref: '#/definitions/Remove'
     $comment: |
-      List of attributes to delete from the resource/datasource.
-      Example: delete: ["openapi_name1", "openapi_name2"]
+      List of attributes to remove from the resource/datasource.
+      Example: remove: ["openapi_name1", "openapi_name2"]
   idAttribute:
     $ref: '#/definitions/IDAttribute'
     $comment: |
@@ -71,21 +71,20 @@ required:
   - location
   - idAttribute
   - operations
-$comment: These fields must be specified for every resource/datasource
 additionalProperties: false
 
 definitions:
-  Delete:
+  Remove:
     type: array
     items:
       type: string
-      $comment: The attribute to delete
+      $comment: The attribute to remove
 
   IDAttribute:
     type: object
     $comment: Configuration for how resource IDs are structured and managed
     properties:
-      compose:
+      fields:
         type: array
         items:
           type: string
@@ -105,7 +104,7 @@ definitions:
           Most resources should not set this.
           When set to true, it doesn't generate the `UseStateForUnknown` plan modifier. 
     required:
-      - compose
+      - fields
     additionalProperties: false
 
   Operation:

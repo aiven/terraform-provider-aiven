@@ -6,7 +6,7 @@ resource:
 datasource:
   description: Gets information about an organization address.
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - address_id
 operations:

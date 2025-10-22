@@ -5,7 +5,7 @@ resource:
     Creates and manages an application user token.
     Review the [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.
 idAttribute:
-  compose:
+  fields:
     - organization_id
     - user_id
     - token_prefix

@@ -69,10 +69,10 @@ func genTimeoutsField(isResource bool, def *Definition) jen.Code {
 func genIDField(isResource bool, idField *IDAttribute) jen.Code {
 	description := idField.Description
 	if description == "" {
-		fields := lo.Map(idField.Compose, func(v string, _ int) string {
+		fields := lo.Map(idField.Fields, func(v string, _ int) string {
 			return fmt.Sprintf("`%s`", v)
 		})
-		switch len(idField.Compose) {
+		switch len(idField.Fields) {
 		case 0:
 		case 1:
 			description = fmt.Sprintf("Resource ID, equal to %s.", fields[0])
@@ -85,7 +85,7 @@ func genIDField(isResource bool, idField *IDAttribute) jen.Code {
 		jen.Id("MarkdownDescription"): jen.Lit(description),
 	}
 
-	if !isResource && len(idField.Compose) == 1 && idField.Compose[0] == "id" {
+	if !isResource && len(idField.Fields) == 1 && idField.Fields[0] == "id" {
 		// If datasource id is literally "id", it is required.
 		attrs[jen.Id("Required")] = jen.True()
 	} else {

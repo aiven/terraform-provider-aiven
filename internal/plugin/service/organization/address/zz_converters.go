@@ -50,9 +50,9 @@ type apiModel struct {
 	ZipCode        *string   `json:"zip_code,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization_address.foo ORGANIZATION_ID/ADDRESS_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "address_id"}
 }
 

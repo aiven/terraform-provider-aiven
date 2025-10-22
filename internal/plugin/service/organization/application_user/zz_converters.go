@@ -40,9 +40,9 @@ type apiModel struct {
 	UserID         *string `json:"user_id,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization_application_user.foo ORGANIZATION_ID/USER_ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"organization_id", "user_id"}
 }
 

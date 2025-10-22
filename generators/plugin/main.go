@@ -147,9 +147,9 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			}
 			codes = append(codes, models...)
 
-			// Resources need composeID and expander
+			// Resources need idFields and expander
 			if hasResource {
-				codes = append(codes, genComposeID(avnName, def.IDAttribute.Compose))
+				codes = append(codes, genIDFields(avnName, def.IDAttribute.Fields))
 				expand, err := genExpand(root)
 				if err != nil {
 					return fmt.Errorf("could not generate expand: %w", err)
@@ -284,7 +284,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	// Marks ID fields
-	for i, v := range pkg.IDAttribute.Compose {
+	for i, v := range pkg.IDAttribute.Fields {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
 			return nil, fmt.Errorf("ID field %q not found in: %s", v, strings.Join(keys, ", "))
@@ -494,7 +494,7 @@ func getOperationID(scope *Scope, operationID string) (*OAPath, error) {
 }
 
 func addProperty(scope *Scope, parent, prop *Item) error {
-	if slices.Contains(scope.Definition.Delete, prop.JSONPath()) {
+	if slices.Contains(scope.Definition.Remove, prop.JSONPath()) {
 		return nil
 	}
 

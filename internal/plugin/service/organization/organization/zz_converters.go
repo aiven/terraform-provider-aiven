@@ -36,9 +36,9 @@ type apiModel struct {
 	UpdateTime *string `json:"update_time,omitempty"`
 }
 
-// composeID the ID attribute fields, i.e.:
+// idFields the ID attribute fields, i.e.:
 // terraform import aiven_organization.foo ID
-func composeID() []string {
+func idFields() []string {
 	return []string{"id"}
 }
 
