@@ -465,11 +465,11 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	config, err := FlattenKafkaTopicConfig(topic)
+	config, err := FlattenKafkaTopicConfig(topic, isResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("config", config); err != nil {
+	if err := d.Set(configField, config); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -575,9 +575,10 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, error) {
+func FlattenKafkaTopicConfig(t *aiven.KafkaTopic, isResource bool) ([]map[string]any, error) {
 	source := make(map[string]struct {
-		Value any `json:"value"`
+		Source kafkatopic.SourceType `json:"source"`
+		Value  any                   `json:"value"`
 	})
 
 	data, err := json.Marshal(t.Config)
@@ -590,6 +591,15 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, err
 		return nil, err
 	}
 
+	// Set resource "config" block to nil if no user configuration exists.
+	// This state upgrade is needed before migrating to Plugin Framework since it doesn't
+	// support computed+optional blocks (see https://github.com/hashicorp/terraform-plugin-framework/issues/883).
+	// Since SDKv2 Read() can't access raw config, we determine if values were user-set
+	// by checking the source field in the API response - "topic_config" indicates user configuration.
+	//
+	// Datasource gets all the values anyway because it doesn't have the "plan" operation.
+	setConfigBlock := !isResource
+
 	config := make(map[string]any)
 	configSchema := aivenKafkaTopicConfigSchema()
 	for k, v := range source {
@@ -598,7 +608,16 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, err
 		} else {
 			config[k] = v.Value
 		}
+
+		if v.Source == kafkatopic.SourceTypeTopicConfig {
+			// There is at least one user defined value.
+			setConfigBlock = true
+		}
 	}
 
-	return []map[string]interface{}{config}, nil
+	if setConfigBlock {
+		return []map[string]any{config}, nil
+	}
+
+	return nil, nil
 }

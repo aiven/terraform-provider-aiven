@@ -67,10 +67,14 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+						resource.TestCheckResourceAttr(resourceName, "config.#", "1"),
 						resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
 						resource.TestCheckResourceAttr(resourceName, "config.0.segment_bytes", "1610612736"),
 						resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
 						resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
+
+						// Topic config is not set when it is not defined by user
+						resource.TestCheckResourceAttr(topic2ResourceName, "config.#", "0"),
 					),
 				},
 			},
@@ -611,7 +615,7 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
-			result, err := kafkatopic.FlattenKafkaTopicConfig(&aiven.KafkaTopic{Config: opt.config})
+			result, err := kafkatopic.FlattenKafkaTopicConfig(&aiven.KafkaTopic{Config: opt.config}, false)
 			require.NoError(t, err)
 			assert.Empty(t, cmp.Diff([]map[string]any{opt.expect}, result))
 		})
