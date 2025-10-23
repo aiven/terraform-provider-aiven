@@ -10,7 +10,7 @@ Contributions are very welcome on terraform-provider-aiven. When contributing pl
 
 ### Local environment
 
-[Go](https://go.dev/doc/install) >=1.22 \
+[Go](https://go.dev/doc/install) >=1.25 \
 [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=1.2 \
 [Task](https://taskfile.dev/#/installation) >=3.20.0
 

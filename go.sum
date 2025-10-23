@@ -74,12 +74,12 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agnivade/levenshtein v1.2.1 h1:EHBY3UOn1gwdy/VbFwgo4cxecRznFk7fKWN1KOX7eoM=
 github.com/agnivade/levenshtein v1.2.1/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
-github.com/aiven/aiven-go-client/v2 v2.36.0 h1:yhJe0mNF5Bqi8wEXbNx/k5s35B4sftURkxVHboxsT3Q=
-github.com/aiven/aiven-go-client/v2 v2.36.0/go.mod h1:tQh+7sk0at5xy6lSnb23OBkwMDnaTMg7ilEVZ6ZdDYY=
+github.com/aiven/aiven-go-client/v2 v2.37.0 h1:bROOt9K5VJxacavzC/UrtDEZuI0KlDX/oP76W+DsxcM=
+github.com/aiven/aiven-go-client/v2 v2.37.0/go.mod h1:XHS4+7sseQk+GR4Wwre3IvVonWb6fGNk67WmAzs+qZk=
 github.com/aiven/go-api-schemas v1.152.0 h1:2w8pOv6kgaOaZcOaJwxak7UFlKq9aLZyr6qH2oSxD+k=
 github.com/aiven/go-api-schemas v1.152.0/go.mod h1:7TMCmOJHgx4JmoSJp/2ACkYxL8gBreZV0jIKPbW497o=
-github.com/aiven/go-client-codegen v0.129.0 h1:CPEP6N+KG27D7usixb/cY3vMmXKK+16gIgKHUl7TyHI=
-github.com/aiven/go-client-codegen v0.129.0/go.mod h1:BQ95aO4sb/RboX81pu0d5JN7MwVlLDN3lrV7YDVWkTI=
+github.com/aiven/go-client-codegen v0.130.0 h1:xfEOLT4C8PdtiIpImYgwSDhkB2yIg8GDSU/5CbeO98Q=
+github.com/aiven/go-client-codegen v0.130.0/go.mod h1:+6eIsNIBB4KHMBTzy7maVAyoIZUyscTsL8ssHxrZZrU=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
 github.com/aiven/go-utils/selproj v0.1.0/go.mod h1:Tc71RJ7tPJ5V0IsVxSrXbAJQICGLpe5iMXS+rq8aLqg=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
