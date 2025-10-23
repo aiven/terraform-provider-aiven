@@ -98,7 +98,7 @@ resource "aiven_opensearch_acl_rule" "os_acl_rule" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

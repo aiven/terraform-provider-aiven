@@ -61,7 +61,7 @@ resource "aiven_aws_org_vpc_peering_connection" "example_peering" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

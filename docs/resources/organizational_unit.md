@@ -44,7 +44,7 @@ resource "aiven_organizational_unit" "example_unit" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

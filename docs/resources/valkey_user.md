@@ -86,7 +86,7 @@ resource "aiven_valkey_user" "manage_sessions" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

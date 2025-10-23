@@ -5,8 +5,7 @@ vars:
   # --- Basic ---
   GO_CMD: go
   GOTOOL_CMD: "{{.GO_CMD}} tool"
-  CONTAINER_TOOL:
-    sh: 'command -v podman || command -v docker'
+  CONTAINER_TOOL: docker                                                                    # Use only docker
   OPENAPI_URL: https://api.aiven.io/doc/openapi.json # Source URL for the spec
   OPENAPI_FILE: openapi.json
   OPA: opa # Open Policy Agent binary for policy checks
@@ -15,7 +14,7 @@ vars:
   USER_HOME:
     sh: 'echo $HOME'
   ARCH:
-    sh: "{{.GO_CMD}} env GOOS GOARCH | tr '\n' '_' | sed 's/_$//'" # Get OS/Arch (e.g., linux_amd64)
+    sh: 'GOOS=$(go env GOOS) GOARCH=$(go env GOARCH); echo "${GOOS}_${GOARCH}"'              # Use this command
   BUILD_DEV_DIR: '{{.USER_HOME}}/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/{{.ARCH}}'
   BUILD_DEV_BIN: "{{.BUILD_DEV_DIR}}/terraform-provider-aiven_v0.0.0+dev"
 
@@ -39,9 +38,6 @@ vars:
   SWEEP: global                          # Default scope for resource sweeper
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
-
-  # --- Docs ---
-  DEPRECATED_RESOURCES: "influxdb m3"   # List of deprecated resources and data sources to exclude from docs
 
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
@@ -67,18 +63,12 @@ tasks:
     cmds:
       - "{{.TFPLUGINDOCS}} generate --rendered-website-dir tmp"
       - mkdir -p docs/data-sources docs/resources
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          mv tmp/data-sources/${resource}*.md docs/data-sources/ || true
-          mv -f tmp/resources/${resource}*.md docs/resources/ || true
-        done
+      - mv tmp/data-sources/influxdb*.md docs/data-sources/ || true
+      - mv tmp/resources/influxdb*.md docs/resources/ || true
       - rm -rf tmp
       - "{{.TFPLUGINDOCS}} validate --provider-name aiven"
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          rm -f docs/data-sources/${resource}*.md
-          rm -f docs/resources/${resource}*.md
-        done
+      - rm -f docs/data-sources/influxdb*.md
+      - rm -f docs/resources/influxdb*.md
 
   semgrep:
     desc: "Run Semgrep static analysis security scan"
@@ -119,12 +109,6 @@ tasks:
     cmds:
       - "{{.CONTAINER_TOOL}} run --rm -v \"{{.ROOT_DIR}}:/lint\" -w /lint {{.PRECOMMIT_IMAGE}} run -a"
 
-  fmt-fast:
-    desc: "Fast formatting for docs/ after generation, removes trailing whitespace and empty lines from markdown files"
-    cmds:
-      - find docs -name "*.md" -type f -exec sed -i'' -e 's/[[:space:]]*$//' {} +
-      - find docs -name "*.md" -type f -exec sed -i'' -e '${/^$/d}' {} +
-
   #-------------------------------------
   # Generate Sub-Tasks
   #-------------------------------------
@@ -148,18 +132,8 @@ tasks:
 
   gen-plugin:
     desc: "Generate Terraform Plugin Framework resources"
-    vars:
-      no_spec: '{{.no_spec | default "false"}}'
     cmds:
-      - task: '{{if eq .no_spec "true"}}nothing{{else}}get-spec{{end}}'
-      - task: gen-plugin-generator
-
-  gen-plugin-generator:
-    desc: "Run the plugin generator (requires openapi.json to exist)"
-    preconditions:
-      - sh: test -f {{.OPENAPI_FILE}}
-        msg: "{{.OPENAPI_FILE}} not found. Run 'task get-spec' to download it."
-    cmds:
+      - task: get-spec
       - "{{.GO_CMD}} run ./generators/plugin/..."
 
   gen-docs:
@@ -169,23 +143,16 @@ tasks:
     cmds:
       - rm -f docs/.DS_Store
       - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          rm -f docs/data-sources/${resource}*.md
-          rm -f docs/resources/${resource}*.md
-        done
-      - find docs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
+      - rm -f docs/data-sources/influxdb*.md
+      - rm -f docs/resources/influxdb*.md
 
   generate:
     desc: "Run all code generation tasks"
-    vars:
-      no_spec: '{{.no_spec | default "false"}}'
+    deps:
+      - gen-go
+      - gen-plugin
+      - gen-docs
     cmds:
-      - task: gen-go
-      - task: gen-plugin
-        vars:
-          no_spec: '{{.no_spec}}'
-      - task: gen-docs
       - task: mockery
 
   #-------------------------------------
@@ -269,13 +236,3 @@ tasks:
     silent: true
     cmds:
       - true
-
-
-  #-------------------------------------
-  # OPA Tasks
-  #-------------------------------------
-  opa:verify:
-    desc: Verify OPA installed
-    preconditions:
-      - sh: command -v "{{.OPA}}"
-        msg: "OPA is not installed. Please install it manually."

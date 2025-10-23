@@ -49,7 +49,7 @@ resource "aiven_mysql_user" "example_mysql_user" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

@@ -58,7 +58,7 @@ resource "aiven_azure_vpc_peering_connection" "azure_to_aiven_peering" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

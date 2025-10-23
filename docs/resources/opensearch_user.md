@@ -46,7 +46,7 @@ resource "aiven_opensearch_user" "example_opensearch_user" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

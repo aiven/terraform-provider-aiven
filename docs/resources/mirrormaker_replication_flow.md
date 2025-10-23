@@ -77,7 +77,7 @@ resource "aiven_mirrormaker_replication_flow" "example_replication_flow" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

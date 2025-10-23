@@ -94,7 +94,7 @@ resource "aiven_azure_privatelink_connection_approval" "approval" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)

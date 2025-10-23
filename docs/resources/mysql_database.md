@@ -44,7 +44,7 @@ resource "aiven_mysql_database" "example_mysql_database" {
 Optional:
 
 - `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
+- `default` (String)
 - `delete` (String)
 - `read` (String)
 - `update` (String)
