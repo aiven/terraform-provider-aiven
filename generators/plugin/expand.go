@@ -30,9 +30,9 @@ func genExpand(item *Item) ([]jen.Code, error) {
 	)
 
 	expand := jen.
-		Comment("expandData turns TF object into Request").Line().
+		Comment(expandDataFunc+" turns TF object into Request").Line().
 		Func().
-		Id("expandData").
+		Id(expandDataFunc).
 		Index(jen.Id("R").Any()).
 		Params(
 			jen.Id("ctx").Qual("context", "Context"),

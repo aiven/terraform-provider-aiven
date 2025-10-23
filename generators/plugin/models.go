@@ -198,7 +198,7 @@ func genSetIDMeth(item *Item) jen.Code {
 
 	return jen.Func().
 		Parens(jen.Id(tfVar).Op("*").Id(item.TFModelName())).
-		Id("SetID").
+		Id(setIDFunc).
 		Params(params...).
 		Block(block...)
 }

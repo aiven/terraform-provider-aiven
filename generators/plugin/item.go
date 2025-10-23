@@ -24,6 +24,9 @@ const (
 	CreateRequestBody
 	UpdateRequestBody
 	CreateResponseBody
+	DeleteResponseBody
+	ReadResponseBody
+	UpdateResponseBody
 )
 
 type Operation string
@@ -68,6 +71,8 @@ type Definition struct {
 	LegacyTimeouts bool                 `yaml:"legacyTimeouts,omitempty"`
 	Operations     map[string]Operation `yaml:"operations"`
 	Version        *int                 `yaml:"version"`
+	ClientHandler  string               `yaml:"clientHandler,omitempty"`
+	DisableViews   []Operation          `yaml:"disableViews,omitempty"`
 }
 
 type Item struct {
@@ -286,4 +291,13 @@ func (item *Item) GetIDFields() []*Item {
 		return fields[i].IDAttributePosition < fields[j].IDAttributePosition
 	})
 	return fields
+}
+
+func (item *Item) appearsIn(args ...AppearsIn) bool {
+	for _, a := range args {
+		if item.AppearsIn&a == 0 {
+			return false
+		}
+	}
+	return true
 }
