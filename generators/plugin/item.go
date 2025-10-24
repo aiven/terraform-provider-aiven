@@ -73,6 +73,7 @@ type Definition struct {
 	Version        *int                 `yaml:"version"`
 	ClientHandler  string               `yaml:"clientHandler,omitempty"`
 	DisableViews   []Operation          `yaml:"disableViews,omitempty"`
+	RefreshState   bool                 `yaml:"refreshState,omitempty"`
 }
 
 type Item struct {

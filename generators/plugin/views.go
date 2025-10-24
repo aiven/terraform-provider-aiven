@@ -77,6 +77,7 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 		entityInterface = entityTitle
 		entityPackage = resourcePackage
 		values[jen.Id("IDFields")] = jen.Id(funcIDFields).Call()
+		values[jen.Id("RefreshState")] = jen.Lit(def.RefreshState)
 	}
 
 	funcName := "New" + entityTitle
@@ -198,63 +199,37 @@ func genGenericView(item *Item, def *Definition, operation Operation) (jen.Code,
 			Id("client").Dot(operationID).Call(clientParams...).Line().
 			If(jen.Err().Op("!=").Nil()).
 			Block(
-				jen.Id("diags").Dot("AddError").Call(
-					jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operationID))),
-					jen.Err().Dot("Error").Call(),
+				jen.Return().Append(
+					jen.Id("diags"),
+					jen.Qual(errMsgPackage, "FromError").Call(
+						jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operationID))),
+						jen.Err(),
+					),
 				),
-				jen.Return().Id("diags"),
 			).Line()
 	}())
 
 	// Reads the response from the previous call
-	if hasResponse {
-		switch operation {
-		case OperationCreate, OperationUpdate:
-			blocks = append(
-				blocks,
-				jen.Comment("The response may contain values that don't exist in the Read operation."),
-				jen.Comment("Additionally, the Read operation needs ID fields to format the URL, which may come from this response."),
-				jen.Id("diags").Dot("Append").Call(
-					jen.Id(flattenDataFunc).Call(
-						jen.Id("ctx"),
-						jen.Id("plan"),
-						jen.Id("rsp"),
-					).Op("..."),
-				),
-				jen.If(jen.Id("diags").Dot("HasError").Call()).
-					Block(jen.Return().Id("diags")).Line(),
-			)
-		}
-	}
-
-	// Additionally, calls the Read view after Create or Update
-	// to ensure the state is in sync with the server
 	blocks = append(blocks, func() jen.Code {
 		switch operation {
-		case OperationRead:
-			return jen.
-				Return().Append(
+		case OperationRead, OperationCreate, OperationUpdate:
+			if !hasResponse {
+				break
+			}
+
+			state := "plan"
+			if operation == OperationRead {
+				state = "state"
+			}
+
+			return jen.Return().Append(
 				jen.Id("diags"),
 				jen.Id(flattenDataFunc).Call(
 					jen.Id("ctx"),
-					jen.Id("state"),
+					jen.Id(state),
 					jen.Id("rsp"),
 				).Op("..."),
 			)
-		case OperationCreate, OperationUpdate:
-			// If the read view was disabled, we can't call it.
-			if !slices.Contains(def.DisableViews, OperationRead) {
-				return jen.
-					Comment("Reads the remote state to sync and detect drift.").Line().
-					Return().Append(
-					jen.Id("diags"),
-					jen.Id(string(OperationRead)+viewSuffix).Call(
-						jen.Id("ctx"),
-						jen.Id("client"),
-						jen.Id("plan"),
-					).Op("..."),
-				)
-			}
 		}
 
 		return jen.Return().Id("diags")
