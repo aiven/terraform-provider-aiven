@@ -30,6 +30,9 @@ const (
 	utilPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	adapterPackage        = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	legacyTimeoutsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	avnGenPackage         = "github.com/aiven/go-client-codegen"
+	resourcePackage       = "github.com/hashicorp/terraform-plugin-framework/resource"
+	datasourcePackage     = "github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 func getUntypedImports() []string {
@@ -42,6 +45,8 @@ func getUntypedImports() []string {
 		utilPackage,
 		adapterPackage,
 		legacyTimeoutsPackage,
+		resourcePackage,
+		datasourcePackage,
 	}
 }
 

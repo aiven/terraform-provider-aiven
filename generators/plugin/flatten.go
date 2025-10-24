@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	funcFlattenData = "flattenData"
+	flattenDataFunc = "flattenData"
+	expandDataFunc  = "expandData"
 	attrPrefix      = "attrs"
 	planVar         = "plan"
 	stateVar        = "state"
@@ -19,6 +20,7 @@ const (
 	tfModelPrefix   = "tfModel"
 	apiVar          = "api"
 	apiModelPrefix  = "apiModel"
+	setIDFunc       = "SetID"
 	// To avoid conflicts with generated models, the root models must have unique ever name.
 	tfRootModel  = tfModelPrefix
 	apiRootModel = apiModelPrefix
@@ -67,9 +69,9 @@ func genFlatten(item *Item) ([]jen.Code, error) {
 	)
 
 	flatten := jen.
-		Comment(funcFlattenData+" turns Response into TF object").Line().
+		Comment(flattenDataFunc+" turns Response into TF object").Line().
 		Func().
-		Id(funcFlattenData).
+		Id(flattenDataFunc).
 		Index(jen.Id("R").Any()).
 		Params(
 			jen.Id("ctx").Qual("context", "Context"),
@@ -199,7 +201,7 @@ func genSetID(item *Item) *jen.Statement {
 		values = append(values, jen.Id(stateVar).Dot(v.GoFieldName()).Dot("Value"+v.TFType()).Call())
 	}
 
-	return jen.Id(stateVar).Dot("SetID").Call(values...)
+	return jen.Id(stateVar).Dot(setIDFunc).Call(values...)
 }
 
 func genSetIDFields(item *Item) jen.Code {

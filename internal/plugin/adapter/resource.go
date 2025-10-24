@@ -249,6 +249,7 @@ func (a *resourceAdapter[M, T]) ImportState(
 			"Unexpected Read Identifier",
 			fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
 		)
+		return
 	}
 
 	for i, v := range values {
