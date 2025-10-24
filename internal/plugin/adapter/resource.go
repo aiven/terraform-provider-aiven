@@ -6,12 +6,14 @@ import (
 	"reflect"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -39,6 +41,9 @@ type ResourceOptions[M Model[T], T any] struct {
 	// IDFields are used to build the resource ID.
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
 	IDFields []string
+
+	// Whether to call Read after Create and Update operations.
+	RefreshState bool
 
 	// CRUD operations
 	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
@@ -141,6 +146,13 @@ func (a *resourceAdapter[M, T]) Create(
 		return
 	}
 
+	if a.resource.RefreshState {
+		diags.Append(a.refreshState(ctx, plan)...)
+		if diags.HasError() {
+			return
+		}
+	}
+
 	diags.Append(rsp.State.Set(ctx, plan)...)
 }
 
@@ -172,6 +184,18 @@ func (a *resourceAdapter[M, T]) Read(
 	}
 
 	diags.Append(rsp.State.Set(ctx, state)...)
+}
+
+// refreshState retries Read if the resource is not found.
+// In rare cases, the backend might return 404 after the resource is created or updated.
+func (a *resourceAdapter[M, T]) refreshState(ctx context.Context, plan M) diag.Diagnostics {
+	return errmsg.RetryDiags(
+		func() diag.Diagnostics {
+			return a.resource.Read(ctx, a.client, plan.SharedModel())
+		},
+		retry.Context(ctx),
+		retry.RetryIf(avngen.IsNotFound),
+	)
 }
 
 func (a *resourceAdapter[M, T]) Update(
@@ -207,6 +231,13 @@ func (a *resourceAdapter[M, T]) Update(
 	diags.Append(a.resource.Update(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
 	if diags.HasError() {
 		return
+	}
+
+	if a.resource.RefreshState {
+		diags.Append(a.refreshState(ctx, plan)...)
+		if diags.HasError() {
+			return
+		}
 	}
 
 	diags.Append(rsp.State.Set(ctx, plan)...)

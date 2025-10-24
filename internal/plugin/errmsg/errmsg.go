@@ -1,6 +1,10 @@
 // Package errmsg is the package that contains all the error messages in the provider.
 package errmsg
 
+import (
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+)
+
 // All error messages in the provider should be defined in this package.
 // This is to ensure that all error messages are consistent and not duplicated, and follow the same style.
 // This is also to ensure that all error messages are defined in one place, and are easy to find and update:
@@ -146,3 +150,17 @@ var (
 	// UnableToSetValueFrom is the error message for when a Set cannot be created from a value.
 	UnableToSetValueFrom = "unable to set value from %v"
 )
+
+// DiagError wraps diag.Diagnostic with original error for error.Is()
+type DiagError struct {
+	diag.ErrorDiagnostic
+	Error error
+}
+
+// FromError creates a DiagError that wraps the original error.
+func FromError(summary string, err error) diag.Diagnostic {
+	return DiagError{
+		ErrorDiagnostic: diag.NewErrorDiagnostic(summary, err.Error()),
+		Error:           err,
+	}
+}

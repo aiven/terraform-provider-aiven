@@ -13,17 +13,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
-		Create:   createView,
-		Delete:   deleteView,
-		IDFields: idFields(),
-		Read:     readView,
-		Schema:   newResourceSchema,
-		TypeName: aivenName,
-		Update:   updateView,
+		Create:       createView,
+		Delete:       deleteView,
+		IDFields:     idFields(),
+		Read:         readView,
+		RefreshState: false,
+		Schema:       newResourceSchema,
+		TypeName:     aivenName,
+		Update:       updateView,
 	})
 }
 
@@ -44,19 +46,10 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 
 	rsp, err := client.OrganizationAddressCreate(ctx, plan.OrganizationID.ValueString(), &req)
 	if err != nil {
-		diags.AddError("OrganizationAddressCreate Error", err.Error())
-		return diags
+		return append(diags, errmsg.FromError("OrganizationAddressCreate Error", err))
 	}
 
-	// The response may contain values that don't exist in the Read operation.
-	// Additionally, the Read operation needs ID fields to format the URL, which may come from this response.
-	diags.Append(flattenData(ctx, plan, rsp)...)
-	if diags.HasError() {
-		return diags
-	}
-
-	// Reads the remote state to sync and detect drift.
-	return append(diags, readView(ctx, client, plan)...)
+	return append(diags, flattenData(ctx, plan, rsp)...)
 }
 
 func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
@@ -68,27 +61,17 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 
 	rsp, err := client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
 	if err != nil {
-		diags.AddError("OrganizationAddressUpdate Error", err.Error())
-		return diags
+		return append(diags, errmsg.FromError("OrganizationAddressUpdate Error", err))
 	}
 
-	// The response may contain values that don't exist in the Read operation.
-	// Additionally, the Read operation needs ID fields to format the URL, which may come from this response.
-	diags.Append(flattenData(ctx, plan, rsp)...)
-	if diags.HasError() {
-		return diags
-	}
-
-	// Reads the remote state to sync and detect drift.
-	return append(diags, readView(ctx, client, plan)...)
+	return append(diags, flattenData(ctx, plan, rsp)...)
 }
 
 func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	rsp, err := client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
 	if err != nil {
-		diags.AddError("OrganizationAddressGet Error", err.Error())
-		return diags
+		return append(diags, errmsg.FromError("OrganizationAddressGet Error", err))
 	}
 
 	return append(diags, flattenData(ctx, state, rsp)...)
@@ -98,8 +81,7 @@ func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.
 	var diags diag.Diagnostics
 	err := client.OrganizationAddressDelete(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
 	if err != nil {
-		diags.AddError("OrganizationAddressDelete Error", err.Error())
-		return diags
+		return append(diags, errmsg.FromError("OrganizationAddressDelete Error", err))
 	}
 
 	return diags
