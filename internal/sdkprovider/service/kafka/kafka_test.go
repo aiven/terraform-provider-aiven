@@ -31,7 +31,7 @@ func TestAccAiven_kafka(t *testing.T) {
 				ExpectError:        regexp.MustCompile("tag keys should be unique"),
 			},
 			{
-				Config: testAccKafkaResource(rName),
+				Config: testAccKafkaResource(rName, 1<<30), // 1 GiB = 1073741824 bytes
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
@@ -50,6 +50,20 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", "1073741824"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.tiered_storage.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_diskless.0.enabled", "false"),
+				),
+			},
+			{
+				// Updates the user config block.
+				// Proves that when Terraform detects "false" value as "null", we don't send an empty map to the API.
+				// The "kafka_diskless.enabled" field is "false" here, so we remove the whole "kafka_diskless" block from the request.
+				Config: testAccKafkaResource(rName, 1<<29), // 0.5 GiB = 536870912 bytes
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", "536870912"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.tiered_storage.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_diskless.0.enabled", "false"),
 				),
 			},
 			{
@@ -106,7 +120,7 @@ func TestAccAiven_kafka(t *testing.T) {
 	})
 }
 
-func testAccKafkaResource(name string) string {
+func testAccKafkaResource(name string, logRetentionBytes int) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -124,12 +138,20 @@ resource "aiven_kafka" "bar" {
   kafka_user_config {
     kafka {
       group_max_session_timeout_ms = 70000
-      log_retention_bytes          = 1000000000
+      log_retention_bytes          = %d
     }
 
     public_access {
       kafka_rest    = true
       kafka_connect = true
+    }
+
+    tiered_storage {
+      enabled = true
+    }
+
+    kafka_diskless {
+      enabled = false
     }
   }
 }
@@ -139,7 +161,7 @@ data "aiven_kafka" "common" {
   project      = aiven_kafka.bar.project
 
   depends_on = [aiven_kafka.bar]
-}`, acc.ProjectName(), name)
+}`, acc.ProjectName(), name, logRetentionBytes)
 }
 
 func testAccKafkaWithoutDefaultACLResource(name string) string {
