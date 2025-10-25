@@ -309,21 +309,23 @@ func expandList(s *stateCompose) (any, error) {
 	states := s.listItems()
 	items := make([]any, 0, len(states))
 	for i := range states {
-		var exp any
-		var err error
 		if isObjList {
-			exp, err = expandObj(states[i])
+			v, err := expandObj(states[i])
+			if err != nil {
+				return nil, err
+			}
+			if len(v) > 0 {
+				// Avoids sending empty objects
+				items = append(items, v)
+			}
 		} else {
-			exp, err = expandScalar(states[i])
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		// If an object is not empty
-		if exp != nil {
-			items = append(items, exp)
+			v, err := expandScalar(states[i])
+			if err != nil {
+				return nil, err
+			}
+			if v != nil {
+				items = append(items, v)
+			}
 		}
 	}
 
