@@ -72,16 +72,18 @@ type Expand[T, R any] func(ctx context.Context, obj *T) (*R, diag.Diagnostics)
 
 func expandEach[T, R any](ctx context.Context, expand Expand[T, R], target []T) ([]*R, diag.Diagnostics) {
 	// Goes deeper and expands each object
+	var diags diag.Diagnostics
 	items := make([]*R, 0, len(target))
 	for _, v := range target {
 		// Expands the object using the provided expander function.
-		m, diags := expand(ctx, &v)
+		m, d := expand(ctx, &v)
+		diags.Append(d...)
 		if diags.HasError() {
 			return nil, diags
 		}
 		items = append(items, m)
 	}
-	return items, nil
+	return items, diags
 }
 
 // ExpandSetNested recursively sets values to Request for a set of objects.
@@ -91,42 +93,49 @@ func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set typ
 	if diags.HasError() {
 		return nil, diags
 	}
-	return expandEach(ctx, expand, target)
+
+	items, d := expandEach(ctx, expand, target)
+	diags.Append(d...)
+	if len(items) == 0 || diags.HasError() {
+		return nil, diags
+	}
+	return items, diags
 }
 
 // ExpandSingleNested sets values to Request for a single object.
 func ExpandSingleNested[T, R any](ctx context.Context, expand Expand[T, R], list types.List) (*R, diag.Diagnostics) {
 	var target []T
 	diags := list.ElementsAs(ctx, &target, false)
-	if diags.HasError() || len(target) == 0 {
+	if diags.HasError() {
 		return nil, diags
 	}
 
-	items, diags := expandEach(ctx, expand, target)
-	if diags.HasError() || len(items) == 0 {
+	items, d := expandEach(ctx, expand, target)
+	diags.Append(d...)
+	if len(items) == 0 || diags.HasError() {
 		return nil, diags
 	}
-
-	return items[0], nil
+	return items[0], diags
 }
 
 func ExpandMapNested[T, R any](ctx context.Context, expand Expand[T, R], dict types.Map) (map[string]*R, diag.Diagnostics) {
 	target := make(map[string]T)
 	diags := dict.ElementsAs(ctx, &target, false)
-	if diags.HasError() {
+	if len(target) == 0 || diags.HasError() {
 		return nil, diags
 	}
 
 	elements := make(map[string]*R, len(target))
 	for k, v := range target {
 		// Expands the object using the provided expander function.
-		m, diags := expand(ctx, &v)
+		m, d := expand(ctx, &v)
+		diags.Append(d...)
 		if diags.HasError() {
 			return nil, diags
 		}
 		elements[k] = m
 	}
-	return elements, nil
+	return elements, diags
 }
 
 // Flatten reads values from Response for a nested object.
@@ -136,65 +145,81 @@ func ExpandMapNested[T, R any](ctx context.Context, expand Expand[T, R], dict ty
 type Flatten[R, T any] func(ctx context.Context, response *R) (*T, diag.Diagnostics)
 
 // FlattenSetNested reads values from Response for a set of objects.
+// Same as types.SetValueFrom() returns unknown type on error.
 func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []*R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
-	null := types.SetNull(oType)
 	if len(set) == 0 {
-		return null, nil
+		return types.SetNull(oType), nil
 	}
+
+	var diags diag.Diagnostics
+	unknown := types.SetUnknown(oType)
 
 	items := make([]*T, 0, len(set))
 	for _, v := range set {
-		item, diags := flatten(ctx, v)
+		item, d := flatten(ctx, v)
+		diags.Append(d...)
 		if diags.HasError() {
-			return null, diags
+			return unknown, diags
 		}
 		items = append(items, item)
 	}
 
-	result, diags := types.SetValueFrom(ctx, oType, items)
+	result, d := types.SetValueFrom(ctx, oType, items)
+	diags.Append(d...)
 	if diags.HasError() {
-		return null, diags
+		return unknown, diags
 	}
-	return result, nil
+	return result, diags
 }
 
 // FlattenSingleNested reads values from Response for a single object.
+// Same as types.ListValueFrom() returns unknown type on error.
 func FlattenSingleNested[R, T any](ctx context.Context, flatten Flatten[R, T], dto *R, oType types.ObjectType) (types.List, diag.Diagnostics) {
-	null := types.ListNull(oType)
 	if dto == nil {
-		return null, nil
+		return types.ListNull(oType), nil
 	}
 
-	item, diags := flatten(ctx, dto)
+	var diags diag.Diagnostics
+	unknown := types.ListUnknown(oType)
+
+	item, d := flatten(ctx, dto)
+	diags.Append(d...)
 	if diags.HasError() {
-		return null, diags
+		return unknown, diags
 	}
 
-	result, diags := types.ListValueFrom(ctx, oType, []*T{item})
+	result, d := types.ListValueFrom(ctx, oType, []*T{item})
+	diags.Append(d...)
 	if diags.HasError() {
-		return null, diags
+		return unknown, diags
 	}
-	return result, nil
+	return result, diags
 }
 
+// FlattenMapNested reads values from Response for a map of objects.
+// Same as types.MapValueFrom() returns unknown type on error.
 func FlattenMapNested[R, T any](ctx context.Context, flatten Flatten[R, T], dict map[string]*R, oType types.ObjectType) (types.Map, diag.Diagnostics) {
-	null := types.MapNull(oType)
 	if len(dict) == 0 {
-		return null, nil
+		return types.MapNull(oType), nil
 	}
+
+	var diags diag.Diagnostics
+	unknown := types.MapUnknown(oType)
 
 	elements := make(map[string]*T, len(dict))
 	for k, v := range dict {
-		item, diags := flatten(ctx, v)
+		item, d := flatten(ctx, v)
+		diags.Append(d...)
 		if diags.HasError() {
-			return null, diags
+			return unknown, diags
 		}
 		elements[k] = item
 	}
 
-	result, diags := types.MapValueFrom(ctx, oType, elements)
+	result, d := types.MapValueFrom(ctx, oType, elements)
+	diags.Append(d...)
 	if diags.HasError() {
-		return null, diags
+		return unknown, diags
 	}
-	return result, nil
+	return result, diags
 }
