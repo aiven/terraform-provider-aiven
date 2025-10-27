@@ -80,6 +80,11 @@ properties:
     $comment: |
       Disables generation of specific CRUD views for this resource.
       Example: disableViews: ["delete"]
+  refreshState:
+    type: boolean
+    $comment: |
+      Set to true to refresh the state after the resource is created/updated/deleted.
+      Example: refreshState: true
 required:
   - location
   - idAttribute
