@@ -92,14 +92,20 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 			block = append(block, val, value)
 		}
 	case item.IsNested(), item.IsMapNested():
-		f := "ExpandSingleNested"
+		var f string
 		switch {
-		case item.IsArray():
+		case item.IsObject():
+			f = "ExpandSingleNested"
+		case item.IsList():
+			f = "ExpandListNested"
+		case item.IsSet():
 			f = "ExpandSetNested"
 			value.Op("&")
 		case item.IsMap():
 			f = "ExpandMapNested"
 			value.Op("&")
+		default:
+			return nil, fmt.Errorf("unsupported nested type %s for %s", item.Type, item.Path())
 		}
 
 		value.Id(item.GoVarName())

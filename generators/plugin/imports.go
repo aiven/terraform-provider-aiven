@@ -68,12 +68,13 @@ func entityImport(isResource bool, importString entityImportType) string {
 // typingMapping Terraform internal types mapping
 func typingMapping() map[SchemaType]string {
 	return map[SchemaType]string{
-		SchemaTypeBoolean: "Bool",
-		SchemaTypeNumber:  "Float64",
-		SchemaTypeInteger: "Int64",
-		SchemaTypeObject:  "List", // We use List type for objects, because it is compatible with SDKv2
-		SchemaTypeArray:   "Set",
-		SchemaTypeString:  "String",
+		SchemaTypeBoolean:      "Bool",
+		SchemaTypeNumber:       "Float64",
+		SchemaTypeInteger:      "Int64",
+		SchemaTypeObject:       "List", // We use List type for objects, because it is compatible with SDKv2
+		SchemaTypeArray:        "Set",
+		SchemaTypeArrayOrdered: "List",
+		SchemaTypeString:       "String",
 	}
 }
 

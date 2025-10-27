@@ -179,8 +179,11 @@ func (item *Item) TFType() string {
 	switch {
 	case item.IsObject():
 		// List type is compatible with SDKv2
+		// todo: replace with object in v5.0.0.
 		return "List"
-	case item.IsArray():
+	case item.IsList():
+		return "List"
+	case item.IsSet():
 		return "Set"
 	case item.IsMap():
 		return "Map"
@@ -261,7 +264,15 @@ func (item *Item) IsMap() bool {
 }
 
 func (item *Item) IsArray() bool {
+	return item.IsSet() || item.IsList()
+}
+
+func (item *Item) IsSet() bool {
 	return item.Type == SchemaTypeArray
+}
+
+func (item *Item) IsList() bool {
+	return item.Type == SchemaTypeArrayOrdered
 }
 
 func (item *Item) IsObject() bool {

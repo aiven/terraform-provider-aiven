@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_organization_address` field `address_lines` type from `Set` to `List` to preserve order of address lines
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
 - Add `aiven_pg` field `pg_user_config.pg.io_combine_limit`: EXPERIMENTAL: Controls the largest I/O size in operations

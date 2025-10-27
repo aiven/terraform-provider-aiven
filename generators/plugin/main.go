@@ -449,7 +449,7 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 		// but on the type explicitly.
 		var thisItemsSchema *OASchema
 		switch thisSchema.Type {
-		case SchemaTypeArray:
+		case SchemaTypeArray, SchemaTypeArrayOrdered:
 			if thisSchema.Items != nil {
 				thisItemsSchema = thisSchema.Items
 			}

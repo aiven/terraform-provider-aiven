@@ -31,7 +31,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Read-Only
 
-- `address_lines` (Set of String) Address Lines.
+- `address_lines` (List of String) Address Lines.
 - `city` (String) City.
 - `country_code` (String) Country Code.
 - `create_time` (String) Create Time.

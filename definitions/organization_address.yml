@@ -15,3 +15,6 @@ operations:
   OrganizationAddressDelete: delete
   OrganizationAddressGet: read
   OrganizationAddressUpdate: update
+schema:
+  address_lines:
+    type: arrayOrdered

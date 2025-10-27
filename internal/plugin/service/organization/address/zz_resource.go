@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -55,11 +55,11 @@ func newResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Address ID.",
 			},
-			"address_lines": schema.SetAttribute{
+			"address_lines": schema.ListAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Address Lines.",
 				Required:            true,
-				Validators:          []validator.Set{setvalidator.SizeBetween(1, 5)},
+				Validators:          []validator.List{listvalidator.SizeBetween(1, 5)},
 			},
 			"city": schema.StringAttribute{
 				MarkdownDescription: "City.",
