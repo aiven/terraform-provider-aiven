@@ -29,6 +29,10 @@ nav_order: 1
 - Change `aiven_influxdb` resource field `influxdb_user_config`: deprecate: This property is deprecated
 - Upgraded `go` version to `1.25`
 
+## [4.46.1] - 2025-10-27
+
+- Fix `aiven_kafka` user config field `kafka_diskless` being sent empty to the API
+
 ## [4.46.0] - 2025-10-09
 
 - Added `maintenance_window_enabled` field to service resources: Indicates whether the maintenance window is currently enabled for this service.
