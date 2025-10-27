@@ -130,7 +130,8 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 					jen.Id(attrPrefix+item.UniqueName()).Call(),
 				)
 		} else {
-			val.Qual(utilPackage, "FlattenSetNested").
+			// FlattenListNested or FlattenSetNested
+			val.Qual(utilPackage, fmt.Sprintf("Flatten%sNested", item.TFType())).
 				Call(
 					jen.Id("ctx"),
 					jen.Id("flatten"+item.UniqueName()),
@@ -303,8 +304,8 @@ func genAttrFieldType(item *Item) *jen.Statement {
 		return jen.Qual(typesPackage, item.TFType()+"Type")
 	case item.IsObject():
 		return jen.Id(attrPrefix + item.UniqueName()).Call()
-	case item.IsArray():
-		return jen.Qual(typesPackage, "SetType").Values(jen.Dict{
+	case item.IsSet(), item.IsList():
+		return jen.Qual(typesPackage, item.TFType()+"Type").Values(jen.Dict{
 			jen.Id("ElemType"): genAttrFieldType(item.Items),
 		})
 	default:

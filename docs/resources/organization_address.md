@@ -22,7 +22,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Required
 
-- `address_lines` (Set of String) Address Lines.
+- `address_lines` (List of String) Address Lines.
 - `city` (String) City.
 - `country_code` (String) Country Code.
 - `name` (String) Name of a company. Maximum length: `128`.

@@ -98,18 +98,13 @@ type OAParameter struct {
 type SchemaType string
 
 const (
-	// SchemaTypeObject represents an object schema type.
-	SchemaTypeObject SchemaType = "object"
-	// SchemaTypeArray represents an array schema type.
-	SchemaTypeArray SchemaType = "array"
-	// SchemaTypeString represents a string schema type.
-	SchemaTypeString SchemaType = "string"
-	// SchemaTypeInteger represents an integer schema type.
-	SchemaTypeInteger SchemaType = "integer"
-	// SchemaTypeNumber represents a number schema type.
-	SchemaTypeNumber SchemaType = "number"
-	// SchemaTypeBoolean represents a boolean schema type.
-	SchemaTypeBoolean SchemaType = "boolean"
+	SchemaTypeObject       SchemaType = "object"
+	SchemaTypeArray        SchemaType = "array"        // Rendered as TypeSet
+	SchemaTypeArrayOrdered SchemaType = "arrayOrdered" // Rendered as TypeList
+	SchemaTypeString       SchemaType = "string"
+	SchemaTypeInteger      SchemaType = "integer"
+	SchemaTypeNumber       SchemaType = "number"
+	SchemaTypeBoolean      SchemaType = "boolean"
 )
 
 // OASchema represents a parsed OpenAPIDoc schema.

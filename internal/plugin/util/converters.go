@@ -104,6 +104,15 @@ func ExpandSetNested[T, R any](ctx context.Context, expand Expand[T, R], set typ
 
 // ExpandSingleNested sets values to Request for a single object.
 func ExpandSingleNested[T, R any](ctx context.Context, expand Expand[T, R], list types.List) (*R, diag.Diagnostics) {
+	items, diags := ExpandListNested(ctx, expand, list)
+	if len(items) == 0 {
+		return nil, diags
+	}
+	return items[0], diags
+}
+
+// ExpandListNested sets values to Request for a list of objects.
+func ExpandListNested[T, R any](ctx context.Context, expand Expand[T, R], list types.List) ([]*R, diag.Diagnostics) {
 	var target []T
 	diags := list.ElementsAs(ctx, &target, false)
 	if diags.HasError() {
@@ -115,7 +124,7 @@ func ExpandSingleNested[T, R any](ctx context.Context, expand Expand[T, R], list
 	if len(items) == 0 || diags.HasError() {
 		return nil, diags
 	}
-	return items[0], diags
+	return items, nil
 }
 
 func ExpandMapNested[T, R any](ctx context.Context, expand Expand[T, R], dict types.Map) (map[string]*R, diag.Diagnostics) {
@@ -175,20 +184,33 @@ func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set 
 // FlattenSingleNested reads values from Response for a single object.
 // Same as types.ListValueFrom() returns unknown type on error.
 func FlattenSingleNested[R, T any](ctx context.Context, flatten Flatten[R, T], dto *R, oType types.ObjectType) (types.List, diag.Diagnostics) {
-	if dto == nil {
+	var items []*R
+	if dto != nil {
+		items = append(items, dto)
+	}
+	return FlattenListNested(ctx, flatten, items, oType)
+}
+
+// FlattenListNested reads values from Response for a list of objects.
+func FlattenListNested[R, T any](ctx context.Context, flatten Flatten[R, T], list []*R, oType types.ObjectType) (types.List, diag.Diagnostics) {
+	if len(list) == 0 {
 		return types.ListNull(oType), nil
 	}
 
 	var diags diag.Diagnostics
 	unknown := types.ListUnknown(oType)
 
-	item, d := flatten(ctx, dto)
-	diags.Append(d...)
-	if diags.HasError() {
-		return unknown, diags
+	items := make([]*T, 0, len(list))
+	for _, v := range list {
+		item, d := flatten(ctx, v)
+		diags.Append(d...)
+		if diags.HasError() {
+			return unknown, diags
+		}
+		items = append(items, item)
 	}
 
-	result, d := types.ListValueFrom(ctx, oType, []*T{item})
+	result, d := types.ListValueFrom(ctx, oType, items)
 	diags.Append(d...)
 	if diags.HasError() {
 		return unknown, diags

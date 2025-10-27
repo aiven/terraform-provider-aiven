@@ -254,6 +254,7 @@ definitions:
           - number
           - boolean
           - array
+          - arrayOrdered
           - object
       alsoRequires:
         type: array

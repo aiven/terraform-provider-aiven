@@ -117,7 +117,12 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 			if err != nil {
 				return err
 			}
-			val = cty.ListVal([]cty.Value{value})
+
+			if v.IsSet() {
+				val = cty.SetVal([]cty.Value{value})
+			} else {
+				val = cty.ListVal([]cty.Value{value})
+			}
 		case v.IsMapNested():
 			// There is no Map Block thing, only Map Attribute.
 			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested

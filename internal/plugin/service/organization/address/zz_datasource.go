@@ -53,7 +53,7 @@ func newDatasourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
-			"address_lines": schema.SetAttribute{
+			"address_lines": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
 				MarkdownDescription: "Address Lines.",

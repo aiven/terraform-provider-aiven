@@ -20,7 +20,7 @@ const aivenName = "aiven_organization_address"
 type tfModel struct {
 	ID             types.String `tfsdk:"id"`
 	AddressID      types.String `tfsdk:"address_id"`
-	AddressLines   types.Set    `tfsdk:"address_lines"`
+	AddressLines   types.List   `tfsdk:"address_lines"`
 	City           types.String `tfsdk:"city"`
 	CountryCode    types.String `tfsdk:"country_code"`
 	CreateTime     types.String `tfsdk:"create_time"`
@@ -110,7 +110,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		return diags
 	}
 	if api.AddressLines != nil && (len(*api.AddressLines) > 0 || !state.AddressLines.IsNull()) {
-		vAddressLines, diags := types.SetValueFrom(ctx, types.StringType, api.AddressLines)
+		vAddressLines, diags := types.ListValueFrom(ctx, types.StringType, api.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
