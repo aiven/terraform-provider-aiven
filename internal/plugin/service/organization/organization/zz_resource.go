@@ -30,7 +30,7 @@ func (tf *resourceModel) TimeoutsObject() types.Object {
 }
 
 /*
-newResourceSchema:
+resourceSchema:
 
 	resource "aiven_organization" "example" {
 	  name = "test"
@@ -42,7 +42,7 @@ newResourceSchema:
 	  update_time = "foo"
 	}
 */
-func newResourceSchema(ctx context.Context) schema.Schema {
+func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"create_time": schema.StringAttribute{

@@ -26,7 +26,7 @@ func (tf *datasourceModel) TimeoutsObject() types.Object {
 }
 
 /*
-newDatasourceSchema:
+datasourceSchema:
 
 	data "aiven_organization" "example" {
 	  id = "foo"
@@ -38,7 +38,7 @@ newDatasourceSchema:
 	  update_time = "foo"
 	}
 */
-func newDatasourceSchema(ctx context.Context) schema.Schema {
+func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"create_time": schema.StringAttribute{

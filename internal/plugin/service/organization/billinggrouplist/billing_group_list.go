@@ -16,8 +16,8 @@ import (
 
 func NewDatasource() datasource.DataSource {
 	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
-		TypeName: aivenName,
-		Schema:   newDatasourceSchema,
+		TypeName: typeName,
+		Schema:   datasourceSchema,
 		Read:     readBillingGroupList,
 	})
 }

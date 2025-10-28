@@ -23,8 +23,8 @@ func NewResource() resource.Resource {
 		IDFields:     idFields(),
 		Read:         readView,
 		RefreshState: false,
-		Schema:       newResourceSchema,
-		TypeName:     aivenName,
+		Schema:       resourceSchema,
+		TypeName:     typeName,
 		Update:       updateView,
 	})
 }
@@ -32,8 +32,8 @@ func NewResource() resource.Resource {
 func NewDatasource() datasource.DataSource {
 	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
 		Read:     readView,
-		Schema:   newDatasourceSchema,
-		TypeName: aivenName,
+		Schema:   datasourceSchema,
+		TypeName: typeName,
 	})
 }
 

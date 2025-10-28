@@ -58,8 +58,8 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 func genNewResource(entity entityType, def *Definition) jen.Code {
 	entityTitle := firstUpper(entity)
 	values := jen.Dict{
-		jen.Id("TypeName"): jen.Id(aivenNameConst),
-		jen.Id("Schema"):   jen.Id(fmt.Sprintf("new%sSchema", entityTitle)),
+		jen.Id("TypeName"): jen.Id(typeName),
+		jen.Id("Schema"):   jen.Id(string(entity) + schemaSuffix),
 	}
 
 	for _, v := range def.Operations {

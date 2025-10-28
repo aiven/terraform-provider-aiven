@@ -16,7 +16,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-const aivenName = "aiven_organization_permission"
+const typeName = "aiven_organization_permission"
 
 type tfModel struct {
 	ID             types.String `tfsdk:"id"`

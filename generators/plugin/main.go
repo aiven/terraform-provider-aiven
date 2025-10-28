@@ -61,15 +61,15 @@ func exec() error {
 }
 
 const (
-	// aivenNameConst resource and datasource name, e.g. aivenName = "aiven_foo_bar"
-	aivenNameConst = "aivenName"
+	// typeName resource and datasource name, e.g. typeName = "aiven_foo_bar"
+	typeName = "typeName"
 
-	// aivenNamePrefix is a prefix for the resource and datasource names: aiven_pg, aiven_kafka, etc.
-	aivenNamePrefix = "aiven_"
+	// typeNamePrefix is a prefix for the resource and datasource names: aiven_pg, aiven_kafka, etc.
+	typeNamePrefix = "aiven_"
 
-	// convertersFileName contains expandData and flattenData functions
-	convertersFileName = "converters"
-	viewFileName       = "view"
+	// converterFileName contains expandData and flattenData functions
+	converterFileName = "converter"
+	viewFileName      = "view"
 )
 
 // genDefinition generates zz_datasource.go, zz_resource.go, and zz_converters.go files
@@ -139,8 +139,8 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			var codes []jen.Code
 
 			// Renders the resourceName constant
-			avnName := aivenNamePrefix + resName
-			codes = append(codes, jen.Const().Id(aivenNameConst).Op("=").Lit(avnName))
+			avnName := typeNamePrefix + resName
+			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(avnName))
 
 			// Generates TF and API models
 			models, err := genModels(root)
@@ -171,7 +171,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 				convertersFile.Add(c).Line()
 			}
 
-			convertersPath := genFilePath(def.Location, convertersFileName)
+			convertersPath := genFilePath(def.Location, converterFileName)
 			err = convertersFile.Save(convertersPath)
 			if err != nil {
 				return fmt.Errorf("could not save file %s: %w", convertersPath, err)
