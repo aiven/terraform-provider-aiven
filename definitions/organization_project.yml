@@ -27,7 +27,7 @@ rename:
   certificate: ca_cert
 schema:
   base_port:
-    description: Valid port number (1-65535) to use as a base for service port allocation.
+    description: Valid port number (10000-30000) to use as a base for service port allocation.
     computed: true
   ca_cert:
     sensitive: true

@@ -33,7 +33,7 @@ data "aiven_organization_project" "example" {
 
 ### Read-Only
 
-- `base_port` (Number) Valid port number (1-65535) to use as a base for service port allocation.
+- `base_port` (Number) Valid port number (10000-30000) to use as a base for service port allocation.
 - `billing_group_id` (String) Billing group ID to assign to the project. It's required when moving projects between organizations.
 - `ca_cert` (String, Sensitive) PEM encoded certificate.
 - `id` (String) Resource ID, a composite of `organization_id` and `project_id` IDs.

@@ -51,7 +51,7 @@ func newDatasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"base_port": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "Valid port number (1-65535) to use as a base for service port allocation.",
+				MarkdownDescription: "Valid port number (10000-30000) to use as a base for service port allocation.",
 			},
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
