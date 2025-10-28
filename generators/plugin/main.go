@@ -609,8 +609,18 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)
 	a.MaxLength = max(a.MaxLength, b.MaxLength)
-	a.Minimum = max(a.Minimum, b.Minimum)
+
+	// Minimum and Maximum values may vary between endpoints and request/response schemas.
+	// For Maximum, we can safely take the higher value.
+	// For Minimum, we need to handle 0 specially since
+	// we avoid using pointers to keep the generator simpler.
 	a.Maximum = max(a.Maximum, b.Maximum)
+	switch {
+	case a.Minimum != 0 && b.Minimum != 0:
+		a.Minimum = min(a.Minimum, b.Minimum)
+	case a.Minimum == 0:
+		a.Minimum = b.Minimum
+	}
 
 	// Validators
 	a.ConflictsWith = mergeSlices(a.ConflictsWith, b.ConflictsWith)
