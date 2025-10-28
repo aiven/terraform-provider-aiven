@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/planlist
+datasource:
+  description: >
+    A list of service plans for a given project and service type.
+idAttribute:
+  fields:
+    - project
+    - service_type
+remove:
+  - service_plans/node_count
+  - service_plans/shard_count
+  - service_plans/max_memory_percent
+  - service_plans/backup_config
+  - service_plans/service_type
+  - service_plans/regions
+operations:
+  ProjectServicePlanList: read
+schema:
+  service_plans:
+    type: arrayOrdered
+    items:
+      properties:
+        cloud_names:
+          type: arrayOrdered
+          items:
+            type: string
+          description: List of cloud names where the service plan is available.

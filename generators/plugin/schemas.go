@@ -205,7 +205,7 @@ func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
 	}
 
 	t := "SetNestedBlock"
-	if item.IsObject() {
+	if item.IsObject() || item.IsList() {
 		t = "ListNestedBlock"
 	}
 
