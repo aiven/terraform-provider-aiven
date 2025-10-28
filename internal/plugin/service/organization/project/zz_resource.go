@@ -31,7 +31,7 @@ func (tf *resourceModel) TimeoutsObject() types.Object {
 }
 
 /*
-newResourceSchema:
+resourceSchema:
 
 	resource "aiven_organization_project" "example" {
 	  organization_id  = "org1a23f456789"
@@ -49,7 +49,7 @@ newResourceSchema:
 	  ca_cert = "foo"
 	}
 */
-func newResourceSchema(ctx context.Context) schema.Schema {
+func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"base_port": schema.Int64Attribute{

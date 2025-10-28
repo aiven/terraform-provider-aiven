@@ -15,9 +15,9 @@ import (
 
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
-		TypeName: aivenName,
+		TypeName: typeName,
 		IDFields: idFields(),
-		Schema:   newResourceSchema,
+		Schema:   resourceSchema,
 		Read:     readApplicationUser,
 		Create:   createApplicationUser,
 		Update:   updateApplicationUser,
@@ -27,8 +27,8 @@ func NewResource() resource.Resource {
 
 func NewDatasource() datasource.DataSource {
 	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
-		TypeName: aivenName,
-		Schema:   newDatasourceSchema,
+		TypeName: typeName,
+		Schema:   datasourceSchema,
 		Read:     readApplicationUser,
 	})
 }

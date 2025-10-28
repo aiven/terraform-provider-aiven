@@ -9,6 +9,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
+const schemaSuffix = "Schema"
+
 func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
 	attrs, err := genAttributes(isResource, item, def)
 	if err != nil {
@@ -39,7 +41,7 @@ func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
 
 	// Schema package depends on the entity type.
 	pkg := entityImport(isResource, schemaPackageFmt)
-	funcName := "new" + firstUpper(boolEntity(isResource)) + "Schema"
+	funcName := string(boolEntity(isResource)) + schemaSuffix
 	return jen.
 		Comment(funcName+":\n"+example).
 		Line().

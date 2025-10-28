@@ -30,7 +30,7 @@ const (
 
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
-		TypeName: aivenName,
+		TypeName: typeName,
 		IDFields: idFields(),
 		Schema:   patchedSchema,
 		Read:     readPermission,
@@ -43,7 +43,7 @@ func NewResource() resource.Resource {
 // patchedSchema adds "permissions" enum values that are not yet in OpenAPI spec.
 // They are exactly the same as for teams.
 func patchedSchema(ctx context.Context) schema.Schema {
-	s := newResourceSchema(ctx)
+	s := resourceSchema(ctx)
 	b := s.Blocks["permissions"].(schema.SetNestedBlock)
 	v := b.NestedObject.Attributes["permissions"].(schema.SetAttribute)
 	v.MarkdownDescription = userconfig.

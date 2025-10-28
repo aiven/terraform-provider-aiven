@@ -19,7 +19,7 @@ func exampleRoot(isResource bool, item *Item) (string, error) {
 	}
 
 	f := hclwrite.NewEmptyFile()
-	rootBody := f.Body().AppendNewBlock(t, []string{aivenNamePrefix + item.Name, "example"}).Body()
+	rootBody := f.Body().AppendNewBlock(t, []string{typeNamePrefix + item.Name, "example"}).Body()
 	err := exampleObjectItem(isResource, item, rootBody)
 	if err != nil {
 		return "", err
