@@ -31,6 +31,14 @@ func NewDataSource[M Model[T], T any](options DataSourceOptions[M, T]) datasourc
 	}
 }
 
+// NewLazyDataSource creates a lazy resource constructor.
+// The provider.Provider.DataSources requires a function that returns a datasource.DataSource.
+func NewLazyDataSource[M Model[T], T any](options DataSourceOptions[M, T]) func() datasource.DataSource {
+	return func() datasource.DataSource {
+		return NewDataSource(options)
+	}
+}
+
 var (
 	_ datasource.DataSource                     = (*datasourceAdapter[Model[any], any])(nil)
 	_ datasource.DataSourceWithConfigure        = (*datasourceAdapter[Model[any], any])(nil)

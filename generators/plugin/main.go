@@ -56,7 +56,16 @@ func exec() error {
 		}
 	}
 
-	return nil
+	// Generates constructor for the provider
+	provider := newFile(providerFilePkg)
+	for _, entity := range listEntityTypes() {
+		// Tells the generator to not assign redundant alias to the import
+		provider.ImportName(entity.Import(entityPackage), string(entity))
+		genEntityProvider(provider, entity, definitions)
+	}
+
+	providerPath := genFilePath(providerFilePath, providerFileName)
+	return provider.Save(providerPath)
 }
 
 const (
@@ -477,8 +486,17 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 }
 
 func fromParameter(scope *Scope, parent *Item, path *OAPath, appearsIn AppearsIn) error {
-	if appearsIn&CreateHandler > 0 {
-		appearsIn |= CreatePathParameter
+	inMap := map[AppearsIn]AppearsIn{
+		CreateHandler: CreatePathParameter,
+		UpdateHandler: UpdatePathParameter,
+		ReadHandler:   ReadPathParameter,
+		DeleteHandler: DeletePathParameter,
+	}
+
+	for a, b := range inMap {
+		if appearsIn&a > 0 {
+			appearsIn |= b
+		}
 	}
 
 	for _, param := range path.Parameters {

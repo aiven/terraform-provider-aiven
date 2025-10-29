@@ -12,13 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	applicationuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user"
 	applicationusertoken "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user_token"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
@@ -173,14 +173,16 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
 		betaResources := []func() resource.Resource{
-			address.NewResource,
 			billinggroup.NewResource,
 			project.NewResource,
 		}
 		resources = append(resources, betaResources...)
 	}
 
-	return resources
+	// This is a map where the keys are resource names, e.g. "aiven_foo".
+	// In case when the generated resource must be completely excluded from the provider, just drop it by the key.
+	genResources := Resources()
+	return append(resources, lo.Values(genResources)...)
 }
 
 // DataSources returns the data sources supported by this provider.
@@ -196,7 +198,6 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
 			externalidentity.NewDataSource,
-			address.NewDataSource,
 			billinggroup.NewDataSource,
 			billinggrouplist.NewDataSource,
 			project.NewDataSource,
@@ -204,7 +205,10 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 		dataSources = append(dataSources, betaDataSources...)
 	}
 
-	return dataSources
+	// This is a map where the keys are datasource names, e.g. "aiven_foo".
+	// In case when the generated datasource must be completely excluded from the provider, just drop it by the key.
+	genDataSources := DataSources()
+	return append(dataSources, lo.Values(genDataSources)...)
 }
 
 // New returns a new provider factory for the Aiven provider.
