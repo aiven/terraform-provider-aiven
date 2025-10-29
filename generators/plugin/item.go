@@ -21,6 +21,9 @@ const (
 	UpdateHandler
 	DeleteHandler
 	CreatePathParameter
+	UpdatePathParameter
+	ReadPathParameter
+	DeletePathParameter
 	CreateRequestBody
 	UpdateRequestBody
 	CreateResponseBody
@@ -59,6 +62,8 @@ type IDAttribute struct {
 }
 
 type Definition struct {
+	fileName       string               // e.g. organization_address.yaml
+	typeName       string               // e.g. aiven_organization_address, aiven_kafka_topic
 	Beta           bool                 `yaml:"beta"`
 	Location       string               `yaml:"location"`
 	Schema         map[string]*Item     `yaml:"schema,omitempty"`

@@ -48,12 +48,11 @@ func exec() error {
 	}
 
 	// Generates files
-	for _, fileName := range definitions {
-		log.Info().Str("file", fileName).Msg("generating")
-		fullPath := filepath.Join(definitionsPath, fileName)
-		err := genDefinition(doc, fullPath)
+	for _, def := range definitions {
+		log.Info().Str("file", def.fileName).Msg("generating")
+		err := genDefinition(doc, def)
 		if err != nil {
-			return fmt.Errorf("could not generate package %q: %w", fullPath, err)
+			return fmt.Errorf("could not generate package %q: %w", def.fileName, err)
 		}
 	}
 
@@ -70,27 +69,15 @@ const (
 	// converterFileName contains expandData and flattenData functions
 	converterFileName = "converter"
 	viewFileName      = "view"
+	providerFilePkg   = "plugin"
+	providerFileName  = "provider"
+	providerFilePath  = "internal/plugin"
 )
 
 // genDefinition generates zz_datasource.go, zz_resource.go, and zz_converters.go files
-func genDefinition(doc *OpenAPIDoc, defPath string) error {
-	defFile, err := os.Open(defPath)
-	if err != nil {
-		return fmt.Errorf("could not open definition file %q: %w", defPath, err)
-	}
-
-	// Marshals yaml files with a little validation
-	def := new(Definition)
-	dec := yaml.NewDecoder(defFile)
-	dec.KnownFields(true)
-	err = dec.Decode(def)
-	if err != nil {
-		return err
-	}
-
-	resName := strings.TrimSuffix(filepath.Base(defPath), filepath.Ext(defPath))
+func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 	if def.Resource == nil && def.Datasource == nil {
-		return fmt.Errorf("resource %q has no resource or datasource defined", resName)
+		return fmt.Errorf("resource %q has no resource or datasource defined", def.fileName)
 	}
 
 	// Stores datasource and resource functions in separate files because they have different imports
@@ -119,9 +106,8 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			return err
 		}
 
-		root.Name = resName
-		isResource := entity == resourceType
-		schema, err := genSchema(isResource, root, def)
+		root.Name = strings.TrimPrefix(def.typeName, typeNamePrefix)
+		schema, err := genSchema(entity, root, def)
 		if err != nil {
 			return err
 		}
@@ -131,16 +117,14 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			return fmt.Errorf("could not create directory %s: %w", def.Location, err)
 		}
 
-		fileName := filepath.Base(def.Location)
-		pkgName := goPkgName(fileName)
+		pkgName := goPkgName(def.Location)
 		if doOnce {
 			doOnce = false
 			hasResource := def.Resource != nil
 			var codes []jen.Code
 
 			// Renders the resourceName constant
-			avnName := typeNamePrefix + resName
-			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(avnName))
+			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(def.typeName))
 
 			// Generates TF and API models
 			models, err := genModels(root)
@@ -151,7 +135,7 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 
 			// Resources need idFields and expander
 			if hasResource {
-				codes = append(codes, genIDFields(avnName, def.IDAttribute.Fields))
+				codes = append(codes, genIDFields(def.typeName, def.IDAttribute.Fields))
 				expand, err := genExpand(root)
 				if err != nil {
 					return fmt.Errorf("could not generate expand: %w", err)
@@ -197,12 +181,13 @@ func genDefinition(doc *OpenAPIDoc, defPath string) error {
 			}
 		}
 
+		isResource := entity.isResource()
 		filePath := genFilePath(def.Location, entity)
 		file := newFile(
 			pkgName,
-			entityImport(isResource, schemaPackageFmt),
-			entityImport(isResource, planmodifierPackageFmt),
-			entityImport(isResource, timeoutsPackageFmt),
+			entity.Import(schemaPackageFmt),
+			entity.Import(planmodifierPackageFmt),
+			entity.Import(timeoutsPackageFmt),
 		)
 		file.Add(genTFModel(isResource, root)...)
 		file.Add(schema)
@@ -226,7 +211,7 @@ func genFilePath[T ~string](location string, name T) string {
 var reNonAlphaNum = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 func goPkgName(s string) string {
-	return reNonAlphaNum.ReplaceAllString(strings.ToLower(s), "")
+	return reNonAlphaNum.ReplaceAllString(strings.ToLower(filepath.Base(s)), "")
 }
 
 // newFile creates a new file with the given package name, imports, and copyrights.
@@ -544,22 +529,40 @@ func addProperty(scope *Scope, parent, prop *Item) error {
 }
 
 // listDefinitionFiles returns go file names
-func listDefinitionFiles(dir string) ([]string, error) {
+func listDefinitionFiles(dir string) ([]*Definition, error) {
 	pattern := regexp.MustCompile(`^[a-z_]+\.yml$`)
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]string, 0, len(files))
+	defs := make([]*Definition, 0)
 	for _, file := range files {
 		name := file.Name()
 		if file.IsDir() || !pattern.MatchString(name) {
 			continue
 		}
-		list = append(list, name)
+
+		defPath := filepath.Join(definitionsPath, name)
+		defFile, err := os.Open(defPath)
+		if err != nil {
+			return nil, fmt.Errorf("could not open definition file %q: %w", name, err)
+		}
+
+		// Marshals yaml files with a little validation
+		def := new(Definition)
+		dec := yaml.NewDecoder(defFile)
+		dec.KnownFields(true)
+		err = dec.Decode(def)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse definition file %q: %w", name, err)
+		}
+		def.fileName = name
+		def.typeName = typeNamePrefix + strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+		defs = append(defs, def)
 	}
-	return list, nil
+
+	return defs, nil
 }
 
 func mergeItem(parent, a, b *Item) (*Item, error) {

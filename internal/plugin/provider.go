@@ -187,19 +187,19 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
-		organization.NewDatasource,
-		applicationuser.NewDatasource,
-		planlist.NewDatasource,
+		organization.NewDataSource,
+		applicationuser.NewDataSource,
+		planlist.NewDataSource,
 	}
 
 	// Add to a list of data sources that are currently in beta.
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
-			externalidentity.NewDatasource,
-			address.NewDatasource,
-			billinggroup.NewDatasource,
-			billinggrouplist.NewDatasource,
-			project.NewDatasource,
+			externalidentity.NewDataSource,
+			address.NewDataSource,
+			billinggroup.NewDataSource,
+			billinggrouplist.NewDataSource,
+			project.NewDataSource,
 		}
 		dataSources = append(dataSources, betaDataSources...)
 	}

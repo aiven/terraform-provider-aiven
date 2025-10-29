@@ -11,8 +11,8 @@ import (
 
 const schemaSuffix = "Schema"
 
-func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
-	attrs, err := genAttributes(isResource, item, def)
+func genSchema(entity entityType, item *Item, def *Definition) (jen.Code, error) {
+	attrs, err := genAttributes(entity.isResource(), item, def)
 	if err != nil {
 		return nil, err
 	}
@@ -23,25 +23,25 @@ func genSchema(isResource bool, item *Item, def *Definition) (jen.Code, error) {
 		attrs[jen.Id("DeprecationMessage")] = jen.Lit(item.DeprecationMessage)
 	}
 
-	desc := fmtDescription(isResource, item)
+	desc := fmtDescription(entity.isResource(), item)
 	if def.Beta {
 		desc = userconfig.Desc(desc).AvailabilityType(userconfig.Beta).Build()
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
 
-	if isResource && def.Version != nil {
+	if entity.isResource() && def.Version != nil {
 		// Only resources have Version field
 		attrs[jen.Id("Version")] = jen.Lit(*def.Version)
 	}
 
-	example, err := exampleRoot(isResource, item)
+	example, err := exampleRoot(entity.isResource(), item)
 	if err != nil {
 		return nil, fmt.Errorf("example error: %w", err)
 	}
 
 	// Schema package depends on the entity type.
-	pkg := entityImport(isResource, schemaPackageFmt)
-	funcName := string(boolEntity(isResource)) + schemaSuffix
+	pkg := entityImport(entity.isResource(), schemaPackageFmt)
+	funcName := string(entity) + schemaSuffix
 	return jen.
 		Comment(funcName+":\n"+example).
 		Line().

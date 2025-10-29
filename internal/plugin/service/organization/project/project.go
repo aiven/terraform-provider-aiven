@@ -28,8 +28,8 @@ func NewResource() resource.Resource {
 	})
 }
 
-func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+func NewDataSource() datasource.DataSource {
+	return adapter.NewDataSource(adapter.DataSourceOptions[*datasourceModel, tfModel]{
 		TypeName: typeName,
 		Schema:   datasourceSchema,
 		Read:     readProject,
