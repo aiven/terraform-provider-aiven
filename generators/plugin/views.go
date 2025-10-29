@@ -12,6 +12,7 @@ import (
 const (
 	avnGenHandlerPackage = "github.com/aiven/go-client-codegen/handler/"
 	viewSuffix           = "View"
+	optionsSuffix        = "Options"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -29,34 +30,35 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 			continue
 		}
 
-		v, err := genGenericView(item, def, op)
-		if err != nil {
-			return nil, fmt.Errorf("%s view error: %w", op, err)
-		}
-		if v != nil {
-			codes = append(codes, v)
+		for opID, o := range def.Operations {
+			if o != op {
+				continue
+			}
+
+			v, err := genGenericView(item, def, op, opID)
+			if err != nil {
+				return nil, fmt.Errorf("%s view error: %w", op, err)
+			}
+			if v != nil {
+				codes = append(codes, v)
+			}
 		}
 	}
 
-	if len(codes) > 0 && def.DisableViews == nil {
-		builders := make([]jen.Code, 0)
-		if def.Resource != nil {
-			builders = append(builders, genNewResource(resourceType, def))
-		}
-
-		if def.Datasource != nil {
-			builders = append(builders, genNewResource(datasourceType, def))
-		}
-
-		codes = append(builders, codes...)
+	builders := make([]jen.Code, 0)
+	if def.Resource != nil {
+		builders = append(builders, genNewResource(resourceType, def))
 	}
 
-	return codes, nil
+	if def.Datasource != nil {
+		builders = append(builders, genNewResource(datasourceType, def))
+	}
+
+	return append(builders, codes...), nil
 }
 
 // genNewResource generates NewResource or NewDatasource function
 func genNewResource(entity entityType, def *Definition) jen.Code {
-	entityTitle := firstUpper(entity)
 	values := jen.Dict{
 		jen.Id("TypeName"): jen.Id(typeName),
 		jen.Id("Schema"):   jen.Id(string(entity) + schemaSuffix),
@@ -71,35 +73,31 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 	}
 
 	entityName := string(entity)
-	entityInterface := "DataSource" // It is called "DataSource" not "Datasource"
-	entityPackage := datasourcePackage
 	if entity == resourceType {
-		entityInterface = entityTitle
-		entityPackage = resourcePackage
 		values[jen.Id("IDFields")] = jen.Id(funcIDFields).Call()
 		values[jen.Id("RefreshState")] = jen.Lit(def.RefreshState)
 	}
 
-	funcName := "New" + entityTitle
+	title := entity.Title() + optionsSuffix
 	genericType := jen.List(jen.Op("*").Id(entityName+"Model"), jen.Id(tfRootModel))
-	returnValue := jen.Qual(adapterPackage, entityTitle+"Options").Index(genericType).Values(values)
-	return jen.Func().Id(funcName).Params().
-		Qual(entityPackage, entityInterface).
-		Block(jen.Return().Qual(adapterPackage, funcName).Call(returnValue))
+	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(values)
+	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
-func genGenericView(item *Item, def *Definition, operation Operation) (jen.Code, error) {
-	inPath := PathParameter
-	var inView, inRequest, inResponse AppearsIn
+func genGenericView(item *Item, def *Definition, operation Operation, operationID string) (jen.Code, error) {
+	var inView, inPath, inRequest, inResponse AppearsIn
 	switch operation {
 	case OperationDelete:
 		inView = DeleteHandler
+		inPath = DeletePathParameter
 		inResponse = DeleteResponseBody
 	case OperationRead:
 		inView = ReadHandler
+		inPath = ReadPathParameter
 		inResponse = ReadResponseBody
 	case OperationUpdate:
 		inView = UpdateHandler
+		inPath = UpdatePathParameter
 		inRequest = UpdateRequestBody
 		inResponse = UpdateResponseBody
 	case OperationCreate:
@@ -116,17 +114,6 @@ func genGenericView(item *Item, def *Definition, operation Operation) (jen.Code,
 	sort.Slice(properties, func(i, j int) bool {
 		return properties[i].Name < properties[j].Name
 	})
-
-	var operationID string
-	for opID, op := range def.Operations {
-		if op == operation {
-			operationID = opID
-		}
-	}
-	if operationID == "" {
-		// Create, Read, Update, or Delete operation is not defined for the item
-		return nil, nil
-	}
 
 	blocks := make([]jen.Code, 0)
 	hasRequest := len(filterAppearsIn(properties, inRequest)) > 0

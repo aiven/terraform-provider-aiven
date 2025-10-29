@@ -11,7 +11,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 )
 
-type DatasourceOptions[M Model[T], T any] struct {
+type DataSourceOptions[M Model[T], T any] struct {
 	// TypeName is the name of resource,
 	// for instance, "aiven_organization_address"
 	TypeName string
@@ -25,7 +25,7 @@ type DatasourceOptions[M Model[T], T any] struct {
 	ConfigValidators func(ctx context.Context, client avngen.Client) []datasource.ConfigValidator
 }
 
-func NewDatasource[M Model[T], T any](options DatasourceOptions[M, T]) datasource.DataSource {
+func NewDataSource[M Model[T], T any](options DataSourceOptions[M, T]) datasource.DataSource {
 	return &datasourceAdapter[M, T]{
 		datasource: options,
 	}
@@ -39,7 +39,7 @@ var (
 
 type datasourceAdapter[M Model[T], T any] struct {
 	client     avngen.Client
-	datasource DatasourceOptions[M, T]
+	datasource DataSourceOptions[M, T]
 }
 
 func (a *datasourceAdapter[M, T]) Configure(

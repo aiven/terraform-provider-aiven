@@ -14,8 +14,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func NewDatasource() datasource.DataSource {
-	return adapter.NewDatasource(adapter.DatasourceOptions[*datasourceModel, tfModel]{
+func NewDataSource() datasource.DataSource {
+	return adapter.NewDataSource(adapter.DataSourceOptions[*datasourceModel, tfModel]{
 		TypeName: typeName,
 		Schema:   datasourceSchema,
 		Read:     readPlanList,
