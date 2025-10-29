@@ -13,6 +13,10 @@ const (
 	datasourceType entityType = "datasource"
 )
 
+func listEntityTypes() []entityType {
+	return []entityType{resourceType, datasourceType}
+}
+
 func (e entityType) isResource() bool {
 	return e == resourceType
 }

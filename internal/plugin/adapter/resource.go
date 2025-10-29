@@ -70,6 +70,14 @@ func NewResource[M Model[T], T any](options ResourceOptions[M, T]) resource.Reso
 	}
 }
 
+// NewLazyResource creates a lazy resource constructor.
+// The provider.Provider.Resources requires a function that returns a resource.Resource.
+func NewLazyResource[M Model[T], T any](options ResourceOptions[M, T]) func() resource.Resource {
+	return func() resource.Resource {
+		return NewResource(options)
+	}
+}
+
 var (
 	_ resource.Resource                     = (*resourceAdapter[Model[any], any])(nil)
 	_ resource.ResourceWithConfigure        = (*resourceAdapter[Model[any], any])(nil)

@@ -8,33 +8,27 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-func NewResource() resource.Resource {
-	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
-		Create:       createView,
-		Delete:       deleteView,
-		IDFields:     idFields(),
-		Read:         readView,
-		RefreshState: false,
-		Schema:       resourceSchema,
-		TypeName:     typeName,
-		Update:       updateView,
-	})
+var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
+	Create:       createView,
+	Delete:       deleteView,
+	IDFields:     idFields(),
+	Read:         readView,
+	RefreshState: false,
+	Schema:       resourceSchema,
+	TypeName:     typeName,
+	Update:       updateView,
 }
 
-func NewDataSource() datasource.DataSource {
-	return adapter.NewDataSource(adapter.DataSourceOptions[*datasourceModel, tfModel]{
-		Read:     readView,
-		Schema:   datasourceSchema,
-		TypeName: typeName,
-	})
+var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
+	Read:     readView,
+	Schema:   datasourceSchema,
+	TypeName: typeName,
 }
 
 func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
