@@ -475,12 +475,11 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 		// Either array item or additional properties
 		if thisItemsSchema != nil {
 			// Array or Map items
-			items := newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
-			err := fromSchema(scope, items, thisItemsSchema, appearsIn)
+			thisItem.Items = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
+			err := fromSchema(scope, thisItem.Items, thisItemsSchema, appearsIn)
 			if err != nil {
 				return err
 			}
-			thisItem.Items = items
 		}
 
 		err := addProperty(scope, parent, thisItem)
