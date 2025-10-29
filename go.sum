@@ -397,8 +397,8 @@ github.com/gostaticanalysis/nilerr v0.1.1/go.mod h1:wZYb6YI5YAxxq0i1+VJbY0s2YONW
 github.com/gostaticanalysis/testutil v0.3.1-0.20210208050101-bfb5c8eec0e4/go.mod h1:D+FIZ+7OahH3ePw/izIEeH5I06eKs1IKI4Xr64/Am3M=
 github.com/gostaticanalysis/testutil v0.5.0 h1:Dq4wT1DdTwTGCQQv3rl3IvD5Ld0E6HiY+3Zh0sUGqw8=
 github.com/gostaticanalysis/testutil v0.5.0/go.mod h1:OLQSbuM6zw2EvCcXTz1lVq5unyoNft372msDY0nY5Hs=
-github.com/gruntwork-io/terratest v0.51.0 h1:RCXlCwWlHqhUoxgF6n3hvywvbvrsTXqoqt34BrnLekw=
-github.com/gruntwork-io/terratest v0.51.0/go.mod h1:evZHXb8VWDgv5O5zEEwfkwMhkx9I53QR/RB11cISrpg=
+github.com/gruntwork-io/terratest v0.52.0 h1:7+I3FqEImowIajZ9Qyo5ngr7n2AUINJko6x+KzlWNjU=
+github.com/gruntwork-io/terratest v0.52.0/go.mod h1:y2Evi+Ac04QpzF3mbRPqrBjipDN7gjqlw6+OZoy2vX4=
 github.com/hamba/avro/v2 v2.30.0 h1:OaIdh0+dZIJ331FO/+YYBwZZRdGVyyHuRSyHsjZLJoA=
 github.com/hamba/avro/v2 v2.30.0/go.mod h1:X6gDhYv6DQVAT56VqOKuW+PLnQrEQqGB9l1nhlMdAdQ=
 github.com/hashicorp/cli v1.1.7 h1:/fZJ+hNdwfTSfsxMBa9WWMlfjUZbX8/LnUxgAd7lCVU=
@@ -452,8 +452,8 @@ github.com/hashicorp/terraform-plugin-docs v0.21.0 h1:yoyA/Y719z9WdFJAhpUkI1jRbK
 github.com/hashicorp/terraform-plugin-docs v0.21.0/go.mod h1:J4Wott1J2XBKZPp/NkQv7LMShJYOcrqhQ2myXBcu64s=
 github.com/hashicorp/terraform-plugin-framework v1.16.1 h1:1+zwFm3MEqd/0K3YBB2v9u9DtyYHyEuhVOfeIXbteWA=
 github.com/hashicorp/terraform-plugin-framework v1.16.1/go.mod h1:0xFOxLy5lRzDTayc4dzK/FakIgBhNf/lC4499R9cV4Y=
-github.com/hashicorp/terraform-plugin-framework-timeouts v0.6.0 h1:Vv16e7EW4nT9668IV0RhdpEmnLl0im7BZx6J+QMlUkg=
-github.com/hashicorp/terraform-plugin-framework-timeouts v0.6.0/go.mod h1:rpHo9hZLn4vEkvNL5xsSdLRdaDZKSinuc0xL+BdOpVA=
+github.com/hashicorp/terraform-plugin-framework-timeouts v0.7.0 h1:jblRy1PkLfPm5hb5XeMa3tezusnMRziUGqtT5epSYoI=
+github.com/hashicorp/terraform-plugin-framework-timeouts v0.7.0/go.mod h1:5jm2XK8uqrdiSRfD5O47OoxyGMCnwTcl8eoiDgSa+tc=
 github.com/hashicorp/terraform-plugin-framework-validators v0.19.0 h1:Zz3iGgzxe/1XBkooZCewS0nJAaCFPFPHdNJd8FgE4Ow=
 github.com/hashicorp/terraform-plugin-framework-validators v0.19.0/go.mod h1:GBKTNGbGVJohU03dZ7U8wHqc2zYnMUawgCN+gC0itLc=
 github.com/hashicorp/terraform-plugin-go v0.29.0 h1:1nXKl/nSpaYIUBU1IG/EsDOX0vv+9JxAltQyDMpq5mU=
