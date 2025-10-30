@@ -60,6 +60,7 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 // genNewResource generates NewResource or NewDatasource function
 func genNewResource(entity entityType, def *Definition) jen.Code {
 	values := jen.Dict{
+		jen.Id("Beta"):     jen.Lit(def.Beta),
 		jen.Id("TypeName"): jen.Id(typeName),
 		jen.Id("Schema"):   jen.Id(string(entity) + schemaSuffix),
 	}

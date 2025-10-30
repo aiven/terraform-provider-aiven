@@ -15,6 +15,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -37,6 +38,10 @@ type ResourceOptions[M Model[T], T any] struct {
 	// for instance, "aiven_organization_address"
 	TypeName string
 	Schema   func(ctx context.Context) schema.Schema
+
+	// Indicates whether the resource is in beta.
+	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
+	Beta bool
 
 	// IDFields are used to build the resource ID.
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
@@ -308,6 +313,14 @@ func (a *resourceAdapter[M, T]) ValidateConfig(
 	req resource.ValidateConfigRequest,
 	rsp *resource.ValidateConfigResponse,
 ) {
+	if a.resource.Beta && !util.IsBeta() {
+		rsp.Diagnostics.AddError(
+			"Beta Resource Not Enabled",
+			fmt.Sprintf("The `%s` resource is in beta. Set the `%s` environment variable to enable.", a.resource.TypeName, util.AivenEnableBeta),
+		)
+		return
+	}
+
 	if a.resource.ValidateConfig == nil {
 		return
 	}

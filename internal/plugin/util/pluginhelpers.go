@@ -18,7 +18,13 @@ const (
 // This is used in the provider schema to determine if beta features should be included.
 // In case this functionality is needed in tests, please use acc.SkipIfNotBeta(t) to skip tests when beta features are not enabled.
 func IsBeta() bool {
-	return os.Getenv(AivenEnableBeta) != ""
+	switch strings.ToLower(os.Getenv(AivenEnableBeta)) {
+	case "false", "":
+		// The previous implementation allowed any "a non-zero value" to enable beta.
+		// For backward compatibility, we explicitly check for "false".
+		return false
+	}
+	return true
 }
 
 // ComposeID is a helper function that composes an ID from the parts passed in.
