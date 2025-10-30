@@ -16,7 +16,7 @@ import (
 
 func TestCreateUpdateRetriesErrors(t *testing.T) {
 	ctx := context.Background()
-	client := mocks.NewMockClient(t)
+	client := avngen.NewMockClient(t)
 	projectName := "foo"
 	serviceName := "bar"
 	username := "baz"
@@ -93,7 +93,7 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 // ReadContext must not retry empty password and the plan must show the diff.
 func TestReadDoesNotRetryEmptyPassword(t *testing.T) {
 	ctx := context.Background()
-	client := mocks.NewMockClient(t)
+	client := avngen.NewMockClient(t)
 	projectName := "foo"
 	serviceName := "bar"
 	username := "baz"

@@ -4,9 +4,6 @@ template: testify
 filename: "{{ .InterfaceName | lower }}.go"
 formatter: goimports
 packages:
-  github.com/aiven/go-client-codegen:
-    interfaces:
-      Client: {}
   github.com/aiven/terraform-provider-aiven/internal/schemautil:
     interfaces:
       ResourceData: {}

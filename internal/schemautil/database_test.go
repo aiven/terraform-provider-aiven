@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/aiven/terraform-provider-aiven/mocks"
 )
 
 func TestCheckDbConflict(t *testing.T) {
@@ -55,7 +54,7 @@ func TestCheckDbConflict(t *testing.T) {
 			serviceName := fmt.Sprintf("test-service-db-conflict-%d", i)
 
 			ctx := context.Background()
-			mockClient := mocks.NewMockClient(t)
+			mockClient := avngen.NewMockClient(t)
 			mockClient.EXPECT().
 				ServiceGet(ctx, projectName, serviceName).
 				Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
@@ -81,7 +80,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	const dbName = "test-db"
 
 	ctx := context.Background()
-	mockClient := mocks.NewMockClient(t)
+	mockClient := avngen.NewMockClient(t)
 	mockClient.EXPECT().
 		ServiceGet(ctx, projectName, serviceName).
 		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
