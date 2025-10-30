@@ -17,8 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/aiven/terraform-provider-aiven/mocks"
 )
 
 var testMu = &sync.RWMutex{}
@@ -26,7 +24,7 @@ var testMu = &sync.RWMutex{}
 func TestCreatePeeringConnection(t *testing.T) {
 	var (
 		ctx        = context.Background()
-		mockClient = mocks.NewMockClient(t)
+		mockClient = avngen.NewMockClient(t)
 		d          = schema.TestResourceDataRaw(t, nil, nil)
 
 		orgID = uuid.New().String()
@@ -35,16 +33,16 @@ func TestCreatePeeringConnection(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		setupMocks    func() *mocks.MockClient
+		setupMocks    func() *avngen.MockClient
 		expectedState organizationvpc.VpcPeeringConnectionStateType
 		expectError   bool
 	}{
 		{
 			name:          "successful creation and approval",
 			expectedState: organizationvpc.VpcPeeringConnectionStateTypeActive,
-			setupMocks: func() *mocks.MockClient {
+			setupMocks: func() *avngen.MockClient {
 				pcID := uuid.New().String()
-				mc := mocks.NewMockClient(t)
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 1*time.Second)
 
 				// Setup create response
@@ -90,8 +88,8 @@ func TestCreatePeeringConnection(t *testing.T) {
 		},
 		{
 			name: "creation fails",
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 
 				mc.On("OrganizationVpcPeeringConnectionCreate",
 					ctx,
@@ -106,9 +104,9 @@ func TestCreatePeeringConnection(t *testing.T) {
 		},
 		{
 			name: "approval timeout",
-			setupMocks: func() *mocks.MockClient {
+			setupMocks: func() *avngen.MockClient {
 				pcID := uuid.New().String()
-				mc := mocks.NewMockClient(t)
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 100*time.Millisecond)
 
 				mc.On("OrganizationVpcPeeringConnectionCreate",
@@ -140,9 +138,9 @@ func TestCreatePeeringConnection(t *testing.T) {
 		},
 		{
 			name: "peering connection disappears",
-			setupMocks: func() *mocks.MockClient {
+			setupMocks: func() *avngen.MockClient {
 				pcID := uuid.New().String()
-				mc := mocks.NewMockClient(t)
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 1*time.Second)
 
 				mc.On("OrganizationVpcPeeringConnectionCreate",
@@ -241,23 +239,23 @@ func TestDeletePeeringConnection(t *testing.T) {
 
 	testCases := []struct {
 		name        string
-		setupMocks  func() *mocks.MockClient
+		setupMocks  func() *avngen.MockClient
 		inputPC     *organizationvpc.OrganizationVpcGetPeeringConnectionOut
 		expectError bool
 	}{
 		{
 			name:    "nil peering connection",
 			inputPC: nil,
-			setupMocks: func() *mocks.MockClient {
-				return mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				return avngen.NewMockClient(t)
 			},
 			expectError: false,
 		},
 		{
 			name:    "successful deletion",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 2*time.Second)
 
 				// Setup delete response
@@ -303,8 +301,8 @@ func TestDeletePeeringConnection(t *testing.T) {
 		{
 			name:    "delete returns not found",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 2*time.Second)
 
 				// Setup delete response with not found error
@@ -322,8 +320,8 @@ func TestDeletePeeringConnection(t *testing.T) {
 		{
 			name:    "delete fails with error",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 2*time.Second)
 
 				mc.On("OrganizationVpcPeeringConnectionDeleteById",
@@ -340,8 +338,8 @@ func TestDeletePeeringConnection(t *testing.T) {
 		{
 			name:    "get after delete fails with non-404 error",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 2*time.Second)
 
 				// Setup delete response
@@ -366,8 +364,8 @@ func TestDeletePeeringConnection(t *testing.T) {
 		{
 			name:    "get after delete returns 404",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 2*time.Second)
 
 				// Setup delete response
@@ -392,8 +390,8 @@ func TestDeletePeeringConnection(t *testing.T) {
 		{
 			name:    "deletion timeout",
 			inputPC: pc,
-			setupMocks: func() *mocks.MockClient {
-				mc := mocks.NewMockClient(t)
+			setupMocks: func() *avngen.MockClient {
+				mc := avngen.NewMockClient(t)
 				setTimeouts(t, d, 10*time.Millisecond, 10*time.Millisecond, 1*time.Second)
 
 				// Setup delete response
