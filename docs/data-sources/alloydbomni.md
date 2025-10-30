@@ -128,6 +128,7 @@ Read-Only:
 - `backup_hour` (Number)
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
+- `enable_ha_replica_dns` (Boolean)
 - `google_columnar_engine_enabled` (Boolean)
 - `google_columnar_engine_memory_size_percentage` (Number)
 - `ip_filter` (Set of String)
