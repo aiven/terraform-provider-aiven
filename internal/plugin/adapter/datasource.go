@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 type DataSourceOptions[M Model[T], T any] struct {
@@ -17,8 +19,16 @@ type DataSourceOptions[M Model[T], T any] struct {
 	TypeName string
 	Schema   func(ctx context.Context) schema.Schema
 
+	// Indicates whether the datasource is in beta.
+	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
+	Beta bool
+
 	// Read is the only CRUD operation for datasource.
 	Read func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
+
+	// ValidateConfig implements datasource.DataSourceWithValidateConfig.
+	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#validateconfig-method
+	ValidateConfig func(ctx context.Context, client avngen.Client, config *T) diag.Diagnostics
 
 	// ConfigValidators implements datasource.DataSourceWithConfigValidators.
 	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#configvalidators-method
@@ -42,6 +52,7 @@ func NewLazyDataSource[M Model[T], T any](options DataSourceOptions[M, T]) func(
 var (
 	_ datasource.DataSource                     = (*datasourceAdapter[Model[any], any])(nil)
 	_ datasource.DataSourceWithConfigure        = (*datasourceAdapter[Model[any], any])(nil)
+	_ datasource.DataSourceWithValidateConfig   = (*datasourceAdapter[Model[any], any])(nil)
 	_ datasource.DataSourceWithConfigValidators = (*datasourceAdapter[Model[any], any])(nil)
 )
 
@@ -113,6 +124,39 @@ func (a *datasourceAdapter[M, T]) Read(
 	}
 
 	diags.Append(rsp.State.Set(ctx, state)...)
+}
+
+func (a *datasourceAdapter[M, T]) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, rsp *datasource.ValidateConfigResponse) {
+	if a.datasource.Beta && !util.IsBeta() {
+		rsp.Diagnostics.AddError(
+			"Beta DataSource Not Enabled",
+			fmt.Sprintf("The `%s` datasource is in beta. Set the `%s=true` environment variable to enable.", a.datasource.TypeName, util.AivenEnableBeta),
+		)
+		return
+	}
+
+	if a.datasource.ValidateConfig == nil {
+		return
+	}
+
+	var (
+		config = instantiate[M]()
+		diags  = &rsp.Diagnostics
+	)
+	diags.Append(req.Config.Get(ctx, config)...)
+	if diags.HasError() {
+		return
+	}
+
+	// Some datasources might run API calls to validate the configuration.
+	ctx, cancel, d := withTimeout(ctx, config.TimeoutsObject(), timeoutRead)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	defer cancel()
+
+	diags.Append(a.datasource.ValidateConfig(ctx, a.client, config.SharedModel())...)
 }
 
 func (a *datasourceAdapter[M, T]) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {

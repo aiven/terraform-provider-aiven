@@ -9,21 +9,12 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 func Resources() map[string]func() resource.Resource {
-	resources := map[string]func() resource.Resource{}
-	if util.IsBeta() {
-		resources["aiven_organization_address"] = adapter.NewLazyResource(address.ResourceOptions)
-	}
-	return resources
+	return map[string]func() resource.Resource{"aiven_organization_address": adapter.NewLazyResource(address.ResourceOptions)}
 }
 
 func DataSources() map[string]func() datasource.DataSource {
-	dataSources := map[string]func() datasource.DataSource{}
-	if util.IsBeta() {
-		dataSources["aiven_organization_address"] = adapter.NewLazyDataSource(address.DataSourceOptions)
-	}
-	return dataSources
+	return map[string]func() datasource.DataSource{"aiven_organization_address": adapter.NewLazyDataSource(address.DataSourceOptions)}
 }
