@@ -26,6 +26,8 @@ nav_order: 1
   that one process can execute simultaneously
 - Add `aiven_pg` field `pg_user_config.pg.io_workers`: EXPERIMENTAL: Number of IO worker processes, for io_method=worker.
   Version 18 and up only
+- Add `aiven_pg` field `pg_user_config.enable_ha_replica_dns`: Enable DNS resolution for HA replica endpoints. Default: `false`
+- Add `aiven_alloydbomni` field `alloydbomni_user_config.enable_ha_replica_dns`: Enable DNS resolution for HA replica endpoints. Default: `false`
 - Change `aiven_kafka_topic`: do not set "config" block in the state if no user-defined configuration values exist. This
   change prepares for future Plugin Framework migration which doesn't support computed+optional blocks
 - Change `aiven_influxdb` resource field `influxdb_user_config`: deprecate: This property is deprecated
