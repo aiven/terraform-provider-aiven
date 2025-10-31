@@ -163,6 +163,7 @@ Optional:
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
+- `enable_ha_replica_dns` (Boolean) Enable DNS resolution for HA replica endpoints. Default: `false`.
 - `google_columnar_engine_enabled` (Boolean) Enables or disables the columnar engine. When enabled, it accelerates SQL query processing. Default: `true`.
 - `google_columnar_engine_memory_size_percentage` (Number) Allocate the amount of RAM to store columnar data. Default: `10`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
