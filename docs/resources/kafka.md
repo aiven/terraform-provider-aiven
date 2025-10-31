@@ -186,7 +186,7 @@ Optional:
 - `log_message_timestamp_type` (String) Enum: `CreateTime`, `LogAppendTime`. Define whether the timestamp in the message is message create time or log append time. (Default: CreateTime).
 - `log_preallocate` (Boolean) Should pre allocate file when create new segment? (Default: false).
 - `log_retention_bytes` (Number) The maximum size of the log before deleting messages (Default: -1).
-- `log_retention_hours` (Number) The number of hours to keep a log file before deleting it (Default: 168 hours (1 week)).
+- `log_retention_hours` (Number) The number of hours to keep a log file before deleting it. Use -1 for unlimited retention or 1 or higher. Setting 0 is invalid and prevents Kafka from starting. (Default: 168 hours, or 1 week).
 - `log_retention_ms` (Number) The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied. (Default: null, log.retention.hours applies).
 - `log_roll_jitter_ms` (Number) The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used (Default: null).
 - `log_roll_ms` (Number) The maximum time before a new log segment is rolled out (in milliseconds). (Default: null, log.roll.hours applies (Default: 168, 7 days)).

@@ -217,7 +217,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_retention_hours": {
-						Description: "The number of hours to keep a log file before deleting it (Default: 168 hours (1 week)).",
+						Description: "The number of hours to keep a log file before deleting it. Use -1 for unlimited retention or 1 or higher. Setting 0 is invalid and prevents Kafka from starting. (Default: 168 hours, or 1 week).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
