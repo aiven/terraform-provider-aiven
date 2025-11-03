@@ -56,7 +56,7 @@ type tfModelBackupConfig struct {
 type apiModel struct {
 	BackupConfig            *apiModelBackupConfig `json:"backup_config,omitempty"`
 	BasePriceUsd            *string               `json:"base_price_usd,omitempty"`
-	CloudName               *string               `json:"cloud_name,omitempty"`
+	CloudName               *string               `json:"cloud,omitempty"`
 	DiskSpaceCapMb          *int64                `json:"disk_space_cap_mb,omitempty"`
 	DiskSpaceMb             *int64                `json:"disk_space_mb,omitempty"`
 	DiskSpaceStepMb         *int64                `json:"disk_space_step_mb,omitempty"`

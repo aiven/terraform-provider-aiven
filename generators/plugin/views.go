@@ -17,31 +17,19 @@ const (
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
 func genViews(item *Item, def *Definition) ([]jen.Code, error) {
-	operations := []Operation{
-		OperationCreate,
-		OperationUpdate,
-		OperationRead,
-		OperationDelete,
-	}
-
 	codes := make([]jen.Code, 0)
-	for _, op := range operations {
+	for _, op := range listOperations() {
 		if slices.Contains(def.DisableViews, op) {
 			continue
 		}
 
-		for opID, o := range def.Operations {
-			if o != op {
-				continue
-			}
+		v, err := genGenericView(item, def, op)
+		if err != nil {
+			return nil, fmt.Errorf("%s view error: %w", op, err)
+		}
 
-			v, err := genGenericView(item, def, op, opID)
-			if err != nil {
-				return nil, fmt.Errorf("%s view error: %w", op, err)
-			}
-			if v != nil {
-				codes = append(codes, v)
-			}
+		if v != nil {
+			codes = append(codes, v)
 		}
 	}
 
@@ -59,10 +47,12 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 
 // genNewResource generates NewResource or NewDatasource function
 func genNewResource(entity entityType, def *Definition) jen.Code {
-	values := jen.Dict{
-		jen.Id("Beta"):     jen.Lit(def.Beta),
-		jen.Id("TypeName"): jen.Id(typeName),
-		jen.Id("Schema"):   jen.Id(string(entity) + schemaSuffix),
+	// Resource might have multiple read operations.
+	// We use here a dict, so we don't need to handle duplicates.
+	values := map[string]jen.Code{
+		"Beta":     jen.Lit(def.Beta),
+		"TypeName": jen.Id(typeName),
+		"Schema":   jen.Id(string(entity) + schemaSuffix),
 	}
 
 	for _, v := range def.Operations {
@@ -70,45 +60,85 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 			// Datasource only supports Read operation
 			continue
 		}
-		values[jen.Id(firstUpper(v))] = jen.Id(fmt.Sprintf("%s%s", v, viewSuffix))
+		values[firstUpper(v)] = jen.Id(fmt.Sprintf("%s%s", v, viewSuffix))
 	}
 
 	entityName := string(entity)
 	if entity == resourceType {
-		values[jen.Id("IDFields")] = jen.Id(funcIDFields).Call()
-		values[jen.Id("RefreshState")] = jen.Lit(def.RefreshState)
+		values["IDFields"] = jen.Id(funcIDFields).Call()
+		values["RefreshState"] = jen.Lit(def.RefreshState)
+	}
+
+	valuesDict := make(jen.Dict)
+	for k, v := range values {
+		valuesDict[jen.Id(k)] = v
 	}
 
 	title := entity.Title() + optionsSuffix
 	genericType := jen.List(jen.Op("*").Id(entityName+"Model"), jen.Id(tfRootModel))
-	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(values)
+	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(valuesDict)
 	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
-func genGenericView(item *Item, def *Definition, operation Operation, operationID string) (jen.Code, error) {
-	var inView, inPath, inRequest, inResponse AppearsIn
-	switch operation {
-	case OperationDelete:
-		inView = DeleteHandler
-		inPath = DeletePathParameter
-		inResponse = DeleteResponseBody
-	case OperationRead:
-		inView = ReadHandler
-		inPath = ReadPathParameter
-		inResponse = ReadResponseBody
-	case OperationUpdate:
-		inView = UpdateHandler
-		inPath = UpdatePathParameter
-		inRequest = UpdateRequestBody
-		inResponse = UpdateResponseBody
-	case OperationCreate:
-		inView = CreateHandler
-		inPath = CreatePathParameter
-		inRequest = CreateRequestBody
-		inResponse = CreateResponseBody
-	default:
-		return nil, fmt.Errorf("unsupported operation: %s", operation)
+func genGenericView(item *Item, def *Definition, operation Operation) (jen.Code, error) {
+	funcBlocks := make([]jen.Code, 0)
+	count := 0
+	for opID, op := range def.Operations {
+		if op == operation {
+			if count > 0 {
+				funcBlocks = append(
+					funcBlocks,
+					jen.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags")),
+				)
+			}
+			thisBlocks, err := genGenericViewOperation(item, def, operation, opID)
+			if err != nil {
+				return nil, fmt.Errorf("generating operation ID %q view: %w", opID, err)
+			}
+			funcBlocks = append(funcBlocks, jen.Func().Params().Block(thisBlocks...).Call())
+			count++
+		}
 	}
+
+	if count == 0 {
+		return nil, nil
+	}
+
+	opFuncParams := []jen.Code{
+		jen.Id("ctx").Qual("context", "Context"),
+		jen.Id("client").Qual(avnGenPackage, "Client"),
+	}
+
+	// Generates the view function.
+	// See ResourceOptions for parameter details.
+	switch operation {
+	case OperationCreate:
+		opFuncParams = append(opFuncParams, jen.Id("plan").Op("*").Id(tfRootModel))
+	case OperationUpdate:
+		opFuncParams = append(
+			opFuncParams,
+			jen.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel),
+		)
+	default:
+		opFuncParams = append(opFuncParams, jen.Id("state").Op("*").Id(tfRootModel))
+	}
+
+	// The return block
+	var blocks []jen.Code
+	blocks = append(blocks, jen.Var().Id("diags").Qual(diagPackage, "Diagnostics"))
+	blocks = append(blocks, funcBlocks...)
+	blocks = append(blocks, jen.Return().Id("diags"))
+
+	return jen.Func().Id(fmt.Sprintf("%s%s", operation, viewSuffix)).
+		Params(opFuncParams...).
+		Qual(diagPackage, "Diagnostics").
+		Block(blocks...), nil
+}
+
+func genGenericViewOperation(item *Item, def *Definition, operation Operation, operationID string) ([]jen.Code, error) {
+	inPath := def.Operations.AppearsInID(operationID, PathParameter)
+	inRequest := def.Operations.AppearsInID(operationID, RequestBody)
+	inResponse := def.Operations.AppearsInID(operationID, ResponseBody)
 
 	// Properties must be sorted for consistent output
 	properties := slices.Collect(maps.Values(item.Properties))
@@ -121,31 +151,34 @@ func genGenericView(item *Item, def *Definition, operation Operation, operationI
 	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0
 
 	// Generates the code that converts the TF model into the Client request struct
-	blocks = append(blocks, func() jen.Code {
-		req := jen.Var().Id("diags").Qual(diagPackage, "Diagnostics")
-		if !hasRequest {
-			return req
-		}
-
+	if hasRequest {
 		state := jen.Id("state")
 		if operation == OperationCreate {
 			state = jen.Nil()
 		}
 
 		pkgName := avnGenHandlerPackage + def.ClientHandler
-		req = jen.Var().Id("req").Qual(pkgName, operationID+"In")
-		req.Line().
-			Id("diags").Op(":=").Id(expandDataFunc).
-			Call(
-				jen.Id("ctx"),
-				jen.Id("plan"),
-				state,
-				jen.Id("&req"),
-			).Line().
-			If(jen.Id("diags").Dot("HasError").Call()).
-			Block(jen.Return().Id("diags")).Line()
-		return req
-	}())
+		blocks = append(
+			blocks,
+			// Creates the request var
+			jen.Var().Id("req").Qual(pkgName, operationID+"In"),
+
+			// Expands data into the request
+			jen.Id("diags").Dot("Append").Call(
+				jen.Id(expandDataFunc).
+					Call(
+						jen.Id("ctx"),
+						jen.Id("plan"),
+						state,
+						jen.Id("&req"),
+					).
+					Op("..."),
+			),
+
+			// If HasError, then return
+			jen.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return()),
+		)
+	}
 
 	// Generates the Client request block
 	blocks = append(blocks, func() jen.Code {
@@ -159,7 +192,7 @@ func genGenericView(item *Item, def *Definition, operation Operation, operationI
 			state = "plan"
 		}
 
-		idFields := filterAppearsIn(properties, inView, inPath)
+		idFields := filterAppearsIn(properties, inPath)
 		sort.Slice(idFields, func(i, j int) bool {
 			return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
 		})
@@ -187,72 +220,44 @@ func genGenericView(item *Item, def *Definition, operation Operation, operationI
 			Id("client").Dot(operationID).Call(clientParams...).Line().
 			If(jen.Err().Op("!=").Nil()).
 			Block(
-				jen.Return().Append(
-					jen.Id("diags"),
+				jen.Id("diags").Dot("Append").Call(
 					jen.Qual(errMsgPackage, "FromError").Call(
 						jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operationID))),
 						jen.Err(),
 					),
 				),
-			).Line()
+				jen.Return(),
+			)
 	}())
 
 	// Reads the response from the previous call
-	blocks = append(blocks, func() jen.Code {
-		switch operation {
-		case OperationRead, OperationCreate, OperationUpdate:
-			if !hasResponse {
-				break
-			}
-
-			state := "plan"
-			if operation == OperationRead {
-				state = "state"
-			}
-
-			return jen.Return().Append(
-				jen.Id("diags"),
-				jen.Id(flattenDataFunc).Call(
-					jen.Id("ctx"),
-					jen.Id(state),
-					jen.Id("rsp"),
-				).Op("..."),
-			)
+	if hasResponse && operation != OperationDelete {
+		state := "plan"
+		if operation == OperationRead {
+			state = "state"
 		}
-
-		return jen.Return().Id("diags")
-	}())
-
-	opFuncParams := []jen.Code{
-		jen.Id("ctx").Qual("context", "Context"),
-		jen.Id("client").Qual(avnGenPackage, "Client"),
-	}
-
-	// Generates the view function.
-	// See ResourceOptions for parameter details.
-	switch operation {
-	case OperationCreate:
-		opFuncParams = append(opFuncParams, jen.Id("plan").Op("*").Id(tfRootModel))
-	case OperationUpdate:
-		opFuncParams = append(
-			opFuncParams,
-			jen.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel),
+		blocks = append(
+			blocks,
+			jen.Id("diags").Dot("Append").Call(
+				jen.Id(flattenDataFunc).
+					Call(
+						jen.Id("ctx"),
+						jen.Id(state),
+						jen.Id("rsp"),
+					).
+					Op("..."),
+			),
 		)
-	default:
-		opFuncParams = append(opFuncParams, jen.Id("state").Op("*").Id(tfRootModel))
 	}
 
-	return jen.Func().Id(fmt.Sprintf("%s%s", operation, viewSuffix)).
-		Params(opFuncParams...).
-		Qual(diagPackage, "Diagnostics").
-		Block(blocks...), nil
+	return blocks, nil
 }
 
 // filterAppearsIn filters items by their appearance in Create/Update request, response, etc.
-func filterAppearsIn(items []*Item, appearsIn ...AppearsIn) []*Item {
+func filterAppearsIn(items []*Item, appearsIn AppearsIn) []*Item {
 	var props []*Item
 	for _, v := range items {
-		if v.appearsIn(appearsIn...) {
+		if v.AppearsIn.Contains(appearsIn) {
 			props = append(props, v)
 		}
 	}

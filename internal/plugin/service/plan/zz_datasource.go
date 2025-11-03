@@ -66,6 +66,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"cloud_name": schema.StringAttribute{
 				MarkdownDescription: "Cloud region name.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 			},
 			"disk_space_cap_mb": schema.Int64Attribute{
 				Computed:            true,
@@ -150,6 +151,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": timeouts.Block(ctx),
 		},
-		MarkdownDescription: "Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.",
+		MarkdownDescription: "Gets detailed information about a specific service plan, including specifications and pricing for a cloud region. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }
