@@ -4,11 +4,16 @@ page_title: "aiven_service_plan Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_service_plan (Data Source)
 
 Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
+
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

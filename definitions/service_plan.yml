@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/plan
+beta: true
 datasource:
   description: >
     Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
@@ -9,8 +10,14 @@ idAttribute:
     - service_type
     - service_plan
     - cloud_name
+clientHandler: project
 operations:
+  ProjectServicePlanPriceGet: read
   ProjectServicePlanSpecsGet: read
+rename:
+  cloud: cloud_name
+remove:
+  - extra_disk_price_per_gb_usd
 schema:
   cloud_name:
     type: string

@@ -34,51 +34,62 @@ var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
 }
 
 func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
-	var req organization.OrganizationAddressCreateIn
-	diags := expandData(ctx, plan, nil, &req)
-	if diags.HasError() {
-		return diags
-	}
-
-	rsp, err := client.OrganizationAddressCreate(ctx, plan.OrganizationID.ValueString(), &req)
-	if err != nil {
-		return append(diags, errmsg.FromError("OrganizationAddressCreate Error", err))
-	}
-
-	return append(diags, flattenData(ctx, plan, rsp)...)
-}
-
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var req organization.OrganizationAddressUpdateIn
-	diags := expandData(ctx, plan, state, &req)
-	if diags.HasError() {
-		return diags
-	}
-
-	rsp, err := client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
-	if err != nil {
-		return append(diags, errmsg.FromError("OrganizationAddressUpdate Error", err))
-	}
-
-	return append(diags, flattenData(ctx, plan, rsp)...)
+	var diags diag.Diagnostics
+	func() {
+		var req organization.OrganizationAddressCreateIn
+		diags.Append(expandData(ctx, plan, nil, &req)...)
+		if diags.HasError() {
+			return
+		}
+		rsp, err := client.OrganizationAddressCreate(ctx, plan.OrganizationID.ValueString(), &req)
+		if err != nil {
+			diags.Append(errmsg.FromError("OrganizationAddressCreate Error", err))
+			return
+		}
+		diags.Append(flattenData(ctx, plan, rsp)...)
+	}()
+	return diags
 }
 
 func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	rsp, err := client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
-	if err != nil {
-		return append(diags, errmsg.FromError("OrganizationAddressGet Error", err))
-	}
+	func() {
+		rsp, err := client.OrganizationAddressGet(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
+		if err != nil {
+			diags.Append(errmsg.FromError("OrganizationAddressGet Error", err))
+			return
+		}
+		diags.Append(flattenData(ctx, state, rsp)...)
+	}()
+	return diags
+}
 
-	return append(diags, flattenData(ctx, state, rsp)...)
+func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	func() {
+		var req organization.OrganizationAddressUpdateIn
+		diags.Append(expandData(ctx, plan, state, &req)...)
+		if diags.HasError() {
+			return
+		}
+		rsp, err := client.OrganizationAddressUpdate(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString(), &req)
+		if err != nil {
+			diags.Append(errmsg.FromError("OrganizationAddressUpdate Error", err))
+			return
+		}
+		diags.Append(flattenData(ctx, plan, rsp)...)
+	}()
+	return diags
 }
 
 func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	err := client.OrganizationAddressDelete(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
-	if err != nil {
-		return append(diags, errmsg.FromError("OrganizationAddressDelete Error", err))
-	}
-
+	func() {
+		err := client.OrganizationAddressDelete(ctx, state.OrganizationID.ValueString(), state.AddressID.ValueString())
+		if err != nil {
+			diags.Append(errmsg.FromError("OrganizationAddressDelete Error", err))
+			return
+		}
+	}()
 	return diags
 }

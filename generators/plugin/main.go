@@ -258,23 +258,9 @@ func createRootItem(scope *Scope) (*Item, error) {
 		Type:       SchemaTypeObject,
 	}
 
-	operationAppearsIn := map[Operation]AppearsIn{
-		OperationCreate: CreateHandler,
-		OperationRead:   ReadHandler,
-		OperationUpdate: UpdateHandler,
-		OperationDelete: DeleteHandler,
-		OperationUpsert: CreateHandler | UpdateHandler,
-	}
-
 	// Initializes the map
 	for _, operationID := range sortedKeys(pkg.Operations) {
-		operation := pkg.Operations[operationID]
-		appearsIn := operationAppearsIn[operation]
-		if appearsIn == 0 {
-			return nil, fmt.Errorf("unknown operation %q: %q", operationID, operation)
-		}
-
-		err := fromOperationID(scope, root, appearsIn, operationID)
+		err := fromOperationID(scope, operationID, root)
 		if err != nil {
 			return nil, fmt.Errorf("operationID %s: %w", operationID, err)
 		}
@@ -299,7 +285,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 		}
 	}
 
-	err = recalcDeep(root)
+	err = recalcDeep(scope.Definition, root)
 	if err != nil {
 		return nil, err
 	}
@@ -317,14 +303,14 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-func fromOperationID(scope *Scope, root *Item, appearsIn AppearsIn, operationID string) error {
-	path, err := getOperationID(scope, operationID)
+func fromOperationID(scope *Scope, operationID string, root *Item) error {
+	path, err := getOperationPath(scope, operationID)
 	if err != nil {
 		return err
 	}
 
 	root.Description = path.Summary
-	err = fromParameter(scope, root, path, appearsIn|PathParameter)
+	err = fromParameter(scope, operationID, root, path)
 	if err != nil {
 		return err
 	}
@@ -335,15 +321,7 @@ func fromOperationID(scope *Scope, root *Item, appearsIn AppearsIn, operationID 
 			return fmt.Errorf("request schema: %w", err)
 		}
 
-		ap := appearsIn | RequestBody
-		if ap&CreateHandler > 0 {
-			ap |= CreateRequestBody
-		}
-
-		if ap&UpdateHandler > 0 {
-			ap |= UpdateRequestBody
-		}
-
+		ap := scope.Definition.Operations.AppearsInID(operationID, RequestBody)
 		err = fromSchema(scope, root, request, ap)
 		if err != nil {
 			return err
@@ -360,18 +338,7 @@ func fromOperationID(scope *Scope, root *Item, appearsIn AppearsIn, operationID 
 		delete(response.Properties, "message")
 		delete(response.Properties, "errors")
 
-		ap := appearsIn | ResponseBody
-		switch {
-		case ap&CreateHandler > 0:
-			ap |= CreateResponseBody
-		case ap&DeleteHandler > 0:
-			ap |= DeleteResponseBody
-		case ap&ReadHandler > 0:
-			ap |= ReadResponseBody
-		case ap&UpdateHandler > 0:
-			ap |= UpdateResponseBody
-		}
-
+		ap := scope.Definition.Operations.AppearsInID(operationID, ResponseBody)
 		err = fromSchema(scope, root, response, ap)
 		if err != nil {
 			return err
@@ -485,20 +452,8 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 	return nil
 }
 
-func fromParameter(scope *Scope, parent *Item, path *OAPath, appearsIn AppearsIn) error {
-	inMap := map[AppearsIn]AppearsIn{
-		CreateHandler: CreatePathParameter,
-		UpdateHandler: UpdatePathParameter,
-		ReadHandler:   ReadPathParameter,
-		DeleteHandler: DeletePathParameter,
-	}
-
-	for a, b := range inMap {
-		if appearsIn&a > 0 {
-			appearsIn |= b
-		}
-	}
-
+func fromParameter(scope *Scope, operationID string, parent *Item, path *OAPath) error {
+	appearsIn := scope.Definition.Operations.AppearsInID(operationID, PathParameter)
 	for _, param := range path.Parameters {
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)
 		if err != nil {
@@ -515,7 +470,7 @@ func fromParameter(scope *Scope, parent *Item, path *OAPath, appearsIn AppearsIn
 	return nil
 }
 
-func getOperationID(scope *Scope, operationID string) (*OAPath, error) {
+func getOperationPath(scope *Scope, operationID string) (*OAPath, error) {
 	for _, pathKey := range sortedKeys(scope.OpenAPI.Paths) {
 		path := scope.OpenAPI.Paths[pathKey]
 		for _, methodKey := range sortedKeys(path) {
@@ -672,15 +627,19 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 // But the child might appear only in the Response (as computed field).
 // It is OK to inherit AppearsIn from the parent when you create a child node.
 // But shouldn't do that after all nodes are merged.
-func recalcDeep(item *Item) error {
+func recalcDeep(def *Definition, item *Item) error {
 	in := func(a AppearsIn) bool {
-		return item.AppearsIn&a > 0
+		return item.AppearsIn.Contains(a)
 	}
 
-	item.Required = in(CreatePathParameter) || item.Required && in(CreateRequestBody) // Sometimes field required in GET
+	createPathParam := def.Operations.AppearsInHandler(CreateHandler, PathParameter)
+	createRequestBody := def.Operations.AppearsInHandler(CreateHandler, RequestBody)
+	updateRequestBody := def.Operations.AppearsInHandler(UpdateHandler, RequestBody)
+
+	item.Required = in(createPathParam) || item.Required && in(createRequestBody) // Sometimes field required in GET
 	item.Optional = item.Optional || !item.Required && in(RequestBody)
 	item.Computed = item.Computed || item.Default != nil || !item.Required && !in(RequestBody) && in(ResponseBody)
-	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(UpdateRequestBody)
+	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(updateRequestBody)
 
 	// Overrides that come from the user config
 	item.Optional = ptrOrDefault(item.OverrideOptional, item.Optional)
@@ -712,7 +671,7 @@ func recalcDeep(item *Item) error {
 		// If parent is computed, child must be computed too
 		v.Computed = v.Computed || item.Computed
 		v.UseStateForUnknown = v.UseStateForUnknown || item.UseStateForUnknown
-		err := recalcDeep(v)
+		err := recalcDeep(def, v)
 		if err != nil {
 			return fmt.Errorf("%s property: %w", k, err)
 		}
@@ -722,7 +681,7 @@ func recalcDeep(item *Item) error {
 		// If parent is computed, child must be computed too
 		item.Items.Computed = item.Items.Computed || item.Computed
 		item.Items.UseStateForUnknown = item.Items.UseStateForUnknown || item.UseStateForUnknown
-		err := recalcDeep(item.Items)
+		err := recalcDeep(def, item.Items)
 		if err != nil {
 			return fmt.Errorf("%s items: %w", item.Name, err)
 		}

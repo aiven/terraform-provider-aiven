@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -170,5 +171,54 @@ func TestItemRemoveElements(t *testing.T) {
 				t.Errorf("properties mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestOperationsIDAppearsIn(t *testing.T) {
+	operations := Operations{
+		"FooCreate": OperationCreate,
+		"FooRead":   OperationRead,
+		"FooUpdate": OperationUpdate,
+		"FooDelete": OperationDelete,
+	}
+
+	sources := listSources()
+	handlers := operationToHandler()
+	seen := make(map[AppearsIn]bool)
+
+	for opID, op := range operations {
+		for i, source := range sources {
+			t.Run(fmt.Sprintf("%s_%d_source", opID, i), func(t *testing.T) {
+				this := operations.AppearsInID(opID, source)
+				require.NotEqual(t, 0, this)
+				require.Positive(t, this&handlers[op])
+				require.Positive(t, this&source)
+
+				// Same as by handler type
+				require.Equal(t,
+					fmt.Sprintf("%b", this),
+					fmt.Sprintf("%b", operations.AppearsInHandler(handlers[op], source)),
+				)
+
+				// Proves the mask doesn't contain other operations: create, update, etc
+				// OperationUpsert is a special case that combines Create and Update and has both flags set
+				for o, a := range handlers {
+					if o != op && o != OperationUpsert {
+						require.EqualValues(t, 0, this&a)
+					}
+				}
+
+				// Proves the mask doesn't contain other sources: RequestBody, ResponseBody, etc
+				for _, s := range sources {
+					if s != source {
+						require.EqualValues(t, 0, this&s)
+					}
+				}
+
+				// Stores to make sure all values are unique
+				require.False(t, seen[this])
+				seen[this] = true
+			})
+		}
 	}
 }

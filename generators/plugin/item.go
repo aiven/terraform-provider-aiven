@@ -10,27 +10,29 @@ import (
 )
 
 // AppearsIn is a bitmask for the field appearance (request, response, etc.)
-type AppearsIn int
+type AppearsIn uint
 
 const (
-	PathParameter AppearsIn = 1 << iota
-	RequestBody
-	ResponseBody
-	CreateHandler
+	CreateHandler AppearsIn = 1 << iota
 	ReadHandler
 	UpdateHandler
 	DeleteHandler
-	CreatePathParameter
-	UpdatePathParameter
-	ReadPathParameter
-	DeletePathParameter
-	CreateRequestBody
-	UpdateRequestBody
-	CreateResponseBody
-	DeleteResponseBody
-	ReadResponseBody
-	UpdateResponseBody
+	PathParameter
+	RequestBody
+	ResponseBody
 )
+
+func (a AppearsIn) Contains(other AppearsIn) bool {
+	return other > 0 && a&other == other
+}
+
+func listSources() []AppearsIn {
+	return []AppearsIn{
+		PathParameter,
+		RequestBody,
+		ResponseBody,
+	}
+}
 
 type Operation string
 
@@ -41,6 +43,68 @@ const (
 	OperationDelete Operation = "delete"
 	OperationUpsert Operation = "upsert"
 )
+
+func listOperations() []Operation {
+	return []Operation{
+		OperationCreate,
+		OperationRead,
+		OperationUpdate,
+		OperationDelete,
+	}
+}
+
+func operationToHandler() map[Operation]AppearsIn {
+	return map[Operation]AppearsIn{
+		OperationCreate: CreateHandler,
+		OperationRead:   ReadHandler,
+		OperationUpdate: UpdateHandler,
+		OperationDelete: DeleteHandler,
+		OperationUpsert: CreateHandler | UpdateHandler,
+	}
+}
+
+type Operations map[string]Operation
+
+// AppearsInID returns the AppearsIn bitmask for a given operation ID and source (such as PathParameter, RequestBody, or ResponseBody).
+// Example: o.AppearsInID("FooReadOperationID", PathParameter) will include:
+//  1. The handler bit (e.g., ReadHandler) for this operation,
+//  2. The source bit (e.g., PathParameter),
+//  3. A unique bit specific to this operation ID and source, allowing fine-grained distinction.
+//
+// This enables querying for all sources of a type (like all path parameters),
+// or isolating those associated with a particular operation ID.
+// Different operations may define different sets of parameters, hence we need to distinguish them.
+func (o Operations) AppearsInID(operationID string, source AppearsIn) AppearsIn {
+	sources := listSources()                // PathParameter, RequestBody, ResponseBody
+	handlers := operationToHandler()        // CreateHandler, ReadHandler, etc.
+	generic := len(handlers) + len(sources) // Reserved bits for generic bits: sources and handlers
+
+	// Each operation has its own bucket of bits: [create:..read:...update:...delete:...]
+	operationBucket := len(sources) * slices.Index(sortedKeys(o), operationID)
+
+	// Offset: [generic...create...read:path...update...delete...]
+	// ---------------------------------^
+	bitOffset := generic + operationBucket + slices.Index(sources, source)
+	if bitOffset > 63 {
+		panic(fmt.Sprintf("bitOffset overflow %s: generic=%d, bitOffset=%d", operationID, generic, bitOffset))
+	}
+
+	// E.g.: [generic(CreateHandler, ResponseBody), create(OperationSpecificResponse)]
+	return handlers[o[operationID]] | source | (1 << bitOffset)
+}
+
+// AppearsInHandler finds all operation IDs matching the operation, merges the result
+// There are can be multiple read operations, for example.
+func (o Operations) AppearsInHandler(handler, source AppearsIn) AppearsIn {
+	handlers := operationToHandler()
+	var appearsIn AppearsIn
+	for opID, op := range o {
+		if handlers[op]&handler > 0 {
+			appearsIn |= o.AppearsInID(opID, source)
+		}
+	}
+	return appearsIn
+}
 
 type Scope struct {
 	OpenAPI     *OpenAPIDoc
@@ -62,23 +126,23 @@ type IDAttribute struct {
 }
 
 type Definition struct {
-	fileName       string               // e.g. organization_address.yaml
-	typeName       string               // e.g. aiven_organization_address, aiven_kafka_topic
-	Beta           bool                 `yaml:"beta"`
-	Location       string               `yaml:"location"`
-	Schema         map[string]*Item     `yaml:"schema,omitempty"`
-	Remove         []string             `yaml:"remove,omitempty"`
-	Rename         map[string]string    `yaml:"rename,omitempty"`
-	ObjectKey      string               `yaml:"objectKey,omitempty"`
-	Resource       *SchemaMeta          `yaml:"resource,omitempty"`
-	Datasource     *SchemaMeta          `yaml:"datasource,omitempty"`
-	IDAttribute    *IDAttribute         `yaml:"idAttribute"`
-	LegacyTimeouts bool                 `yaml:"legacyTimeouts,omitempty"`
-	Operations     map[string]Operation `yaml:"operations"`
-	Version        *int                 `yaml:"version"`
-	ClientHandler  string               `yaml:"clientHandler,omitempty"`
-	DisableViews   []Operation          `yaml:"disableViews,omitempty"`
-	RefreshState   bool                 `yaml:"refreshState,omitempty"`
+	fileName       string            // e.g. organization_address.yaml
+	typeName       string            // e.g. aiven_organization_address, aiven_kafka_topic
+	Beta           bool              `yaml:"beta"`
+	Location       string            `yaml:"location"`
+	Schema         map[string]*Item  `yaml:"schema,omitempty"`
+	Remove         []string          `yaml:"remove,omitempty"`
+	Rename         map[string]string `yaml:"rename,omitempty"`
+	ObjectKey      string            `yaml:"objectKey,omitempty"`
+	Resource       *SchemaMeta       `yaml:"resource,omitempty"`
+	Datasource     *SchemaMeta       `yaml:"datasource,omitempty"`
+	IDAttribute    *IDAttribute      `yaml:"idAttribute"`
+	LegacyTimeouts bool              `yaml:"legacyTimeouts,omitempty"`
+	Operations     Operations        `yaml:"operations"`
+	Version        *int              `yaml:"version"`
+	ClientHandler  string            `yaml:"clientHandler,omitempty"`
+	DisableViews   []Operation       `yaml:"disableViews,omitempty"`
+	RefreshState   bool              `yaml:"refreshState,omitempty"`
 }
 
 type Item struct {
@@ -308,13 +372,4 @@ func (item *Item) GetIDFields() []*Item {
 		return fields[i].IDAttributePosition < fields[j].IDAttributePosition
 	})
 	return fields
-}
-
-func (item *Item) appearsIn(args ...AppearsIn) bool {
-	for _, a := range args {
-		if item.AppearsIn&a == 0 {
-			return false
-		}
-	}
-	return true
 }
