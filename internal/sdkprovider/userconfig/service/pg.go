@@ -52,11 +52,6 @@ func pgUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
-			"enable_ha_replica_dns": {
-				Description: "Enable DNS resolution for HA replica endpoints. Default: `false`.",
-				Optional:    true,
-				Type:        schema.TypeBool,
-			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",

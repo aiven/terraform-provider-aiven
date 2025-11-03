@@ -57,11 +57,6 @@ func alloydbomniUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
-			"enable_ha_replica_dns": {
-				Description: "Enable DNS resolution for HA replica endpoints. Default: `false`.",
-				Optional:    true,
-				Type:        schema.TypeBool,
-			},
 			"google_columnar_engine_enabled": {
 				Description: "Enables or disables the columnar engine. When enabled, it accelerates SQL query processing. Default: `true`.",
 				Optional:    true,
