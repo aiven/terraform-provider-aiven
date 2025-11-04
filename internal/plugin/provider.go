@@ -25,6 +25,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -187,6 +188,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	dataSources := []func() datasource.DataSource{
 		organization.NewDataSource,
 		planlist.NewDataSource,
+		usergrouplist.NewDataSource,
 	}
 
 	// Add to a list of data sources that are currently in beta.

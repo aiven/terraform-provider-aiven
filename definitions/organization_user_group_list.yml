@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/usergrouplist
+datasource:
+  description: List all user groups within an organization
+idAttribute:
+  fields:
+    - organization_id
+operations:
+  UserGroupsList: read
