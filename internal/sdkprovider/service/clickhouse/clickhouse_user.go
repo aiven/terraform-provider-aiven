@@ -2,9 +2,10 @@ package clickhouse
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/clickhouse"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -44,9 +45,9 @@ var aivenClickhouseUserSchema = map[string]*schema.Schema{
 func ResourceClickhouseUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages a ClickHouse user.",
-		CreateContext: resourceClickhouseUserCreate,
-		ReadContext:   resourceClickhouseUserRead,
-		DeleteContext: resourceClickhouseUserDelete,
+		CreateContext: common.WithGenClient(resourceClickhouseUserCreate),
+		ReadContext:   common.WithGenClient(resourceClickhouseUserRead),
+		DeleteContext: common.WithGenClient(resourceClickhouseUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -56,74 +57,78 @@ func ResourceClickhouseUser() *schema.Resource {
 	}
 }
 
-func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
-	u, err := client.ClickhouseUser.Create(
-		ctx,
-		projectName,
-		serviceName,
-		username,
-	)
+
+	u, err := client.ServiceClickHouseUserCreate(ctx, projectName, serviceName, &clickhouse.ServiceClickHouseUserCreateIn{
+		Name: username,
+	})
 	if err != nil {
-		return diag.FromErr(err)
+		return fmt.Errorf("cannot create ClickHouse user: %w", err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(projectName, serviceName, u.User.UUID))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, u.Uuid))
 
-	if err := d.Set("password", u.User.Password); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("password", u.Password); err != nil {
+		return err
 	}
 
-	return resourceClickhouseUserRead(ctx, d, m)
+	return resourceClickhouseUserRead(ctx, d, client)
 }
 
-func resourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	user, err := client.ClickhouseUser.Get(ctx, projectName, serviceName, uuid)
+	var user *clickhouse.UserOut
+	ul, err := client.ServiceClickHouseUserList(ctx, projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return err
 	}
 
-	if err := d.Set("project", projectName); err != nil {
-		return diag.FromErr(err)
+	for _, u := range ul {
+		if u.Uuid == uuid {
+			user = &u
+			break
+		}
 	}
-	if err := d.Set("service_name", serviceName); err != nil {
-		return diag.FromErr(err)
+
+	if user == nil {
+		return schemautil.ResourceReadHandleNotFound(fmt.Errorf("user %q not found", d.Id()), d)
 	}
-	if err := d.Set("username", user.Name); err != nil {
-		return diag.FromErr(err)
+
+	if err = d.Set("project", projectName); err != nil {
+		return err
 	}
-	if err := d.Set("uuid", user.UUID); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("service_name", serviceName); err != nil {
+		return err
 	}
-	if err := d.Set("required", user.Required); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("username", user.Name); err != nil {
+		return err
+	}
+	if err = d.Set("uuid", user.Uuid); err != nil {
+		return err
+	}
+	if err = d.Set("required", user.Required); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourceClickhouseUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceClickhouseUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.ClickhouseUser.Delete(ctx, projectName, serviceName, uuid)
+	err = client.ServiceClickHouseUserDelete(ctx, projectName, serviceName, uuid)
 	if common.IsCritical(err) {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil

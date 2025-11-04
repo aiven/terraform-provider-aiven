@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_clickhouse_user` resource and data source: migrate to use generated client
 - Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information for a specific plan and cloud region
 - Add `aiven_service_plan_list` data source: query available service plans and their regional availability for a service type
 - Change `aiven_organization_address` field `address_lines` type from `Set` to `List` to preserve order of address lines
