@@ -12,7 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information for a specific plan and cloud region
+- Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information
+  for a specific plan and cloud region
 - Add `aiven_service_plan_list` data source: query available service plans and their regional availability for a service type
 - Change `aiven_organization_address` field `address_lines` type from `Set` to `List` to preserve order of address lines
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
@@ -31,6 +32,7 @@ nav_order: 1
   change prepares for future Plugin Framework migration which doesn't support computed+optional blocks
 - Change `aiven_influxdb` resource field `influxdb_user_config`: deprecate: This property is deprecated
 - Upgraded `go` version to `1.25`
+- Change `aiven_service_component` datasource field `usage` (enum): add `ha_replica`
 
 ## [4.46.1] - 2025-10-27
 
