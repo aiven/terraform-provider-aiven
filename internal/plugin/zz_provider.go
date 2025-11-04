@@ -11,6 +11,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 )
 
@@ -26,6 +27,7 @@ func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
 		"aiven_organization_address":          adapter.NewLazyDataSource(address.DataSourceOptions),
 		"aiven_organization_application_user": adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
+		"aiven_organization_user_group_list":  adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
 		"aiven_service_plan":                  adapter.NewLazyDataSource(plan.DataSourceOptions),
 	}
 }
