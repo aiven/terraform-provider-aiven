@@ -44,8 +44,6 @@ resource "aiven_organization_application_user_token" "bar" {
   organization_id = aiven_organization_application_user.foo.organization_id
   user_id         = aiven_organization_application_user.foo.user_id
 }
-
-
 `, acc.RandStr(), org),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(tokenFoo, "description", "Terraform acceptance tests"),
@@ -58,6 +56,22 @@ resource "aiven_organization_application_user_token" "bar" {
 					resource.TestCheckResourceAttr(tokenBar, "extend_when_used", "false"),
 				),
 			},
+			{
+				// The token must survive the refresh command
+				RefreshState: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrWith(tokenFoo, "full_token", validToken),
+					resource.TestCheckResourceAttrWith(tokenBar, "full_token", validToken),
+				),
+			},
 		},
 	})
+}
+
+func validToken(s string) error {
+	// Not "", "nil" or some other invalid value
+	if len(s) < 100 {
+		return fmt.Errorf("expected full_token to have value, got length %d", len(s))
+	}
+	return nil
 }

@@ -79,20 +79,20 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.Email != nil && (*api.Email != "" || !state.Email.IsNull()) {
-		state.Email = types.StringPointerValue(api.Email)
+	if api.Email != nil || state.Email.IsUnknown() {
+		state.Email = util.StringPointerValue(api.Email)
 	}
-	if api.IsSuperAdmin != nil {
+	if api.IsSuperAdmin != nil || state.IsSuperAdmin.IsUnknown() {
 		state.IsSuperAdmin = types.BoolPointerValue(api.IsSuperAdmin)
 	}
-	if api.Name != nil && (*api.Name != "" || !state.Name.IsNull()) {
-		state.Name = types.StringPointerValue(api.Name)
+	if api.Name != nil {
+		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.UserID != nil && (*api.UserID != "" || !state.UserID.IsNull()) {
-		state.UserID = types.StringPointerValue(api.UserID)
+	if api.UserID != nil || state.UserID.IsUnknown() {
+		state.UserID = util.StringPointerValue(api.UserID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.

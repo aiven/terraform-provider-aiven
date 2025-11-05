@@ -130,14 +130,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.Permissions = vPermissions
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.ResourceID != nil && (*api.ResourceID != "" || !state.ResourceID.IsNull()) {
-		state.ResourceID = types.StringPointerValue(api.ResourceID)
+	if api.ResourceID != nil {
+		state.ResourceID = util.StringPointerValue(api.ResourceID)
 	}
-	if api.ResourceType != nil && (*api.ResourceType != "" || !state.ResourceType.IsNull()) {
-		state.ResourceType = types.StringPointerValue(api.ResourceType)
+	if api.ResourceType != nil {
+		state.ResourceType = util.StringPointerValue(api.ResourceType)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -163,23 +163,23 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 func flattenPermissions(ctx context.Context, api *apiModelPermissions) (*tfModelPermissions, diag.Diagnostics) {
 	state := new(tfModelPermissions)
 	if api.Permissions != nil {
-		vPermissions, diags := types.SetValueFrom(ctx, types.StringType, api.Permissions)
+		vPermissions, diags := util.SetValueFrom(ctx, types.StringType, api.Permissions)
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.Permissions = vPermissions
 	}
 	if api.CreateTime != nil {
-		state.CreateTime = types.StringPointerValue(api.CreateTime)
+		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
 	if api.PrincipalID != nil {
-		state.PrincipalID = types.StringPointerValue(api.PrincipalID)
+		state.PrincipalID = util.StringPointerValue(api.PrincipalID)
 	}
 	if api.PrincipalType != nil {
-		state.PrincipalType = types.StringPointerValue(api.PrincipalType)
+		state.PrincipalType = util.StringPointerValue(api.PrincipalType)
 	}
 	if api.UpdateTime != nil {
-		state.UpdateTime = types.StringPointerValue(api.UpdateTime)
+		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
 	return state, nil
 }

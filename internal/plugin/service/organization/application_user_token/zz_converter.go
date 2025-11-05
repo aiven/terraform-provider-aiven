@@ -128,64 +128,64 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.IpAllowlist != nil && (len(*api.IpAllowlist) > 0 || !state.IpAllowlist.IsNull()) {
-		vIpAllowlist, diags := types.SetValueFrom(ctx, types.StringType, api.IpAllowlist)
+	if api.IpAllowlist != nil {
+		vIpAllowlist, diags := util.SetValueFrom(ctx, types.StringType, api.IpAllowlist)
 		if diags.HasError() {
 			return diags
 		}
 		state.IpAllowlist = vIpAllowlist
 	}
-	if api.Scopes != nil && (len(*api.Scopes) > 0 || !state.Scopes.IsNull()) {
-		vScopes, diags := types.SetValueFrom(ctx, types.StringType, api.Scopes)
+	if api.Scopes != nil {
+		vScopes, diags := util.SetValueFrom(ctx, types.StringType, api.Scopes)
 		if diags.HasError() {
 			return diags
 		}
 		state.Scopes = vScopes
 	}
-	if api.CreateTime != nil && (*api.CreateTime != "" || !state.CreateTime.IsNull()) {
-		state.CreateTime = types.StringPointerValue(api.CreateTime)
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
+		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.CreatedManually != nil {
+	if api.CreatedManually != nil || state.CreatedManually.IsUnknown() {
 		state.CreatedManually = types.BoolPointerValue(api.CreatedManually)
 	}
-	if api.CurrentlyActive != nil {
+	if api.CurrentlyActive != nil || state.CurrentlyActive.IsUnknown() {
 		state.CurrentlyActive = types.BoolPointerValue(api.CurrentlyActive)
 	}
-	if api.Description != nil && (*api.Description != "" || !state.Description.IsNull()) {
-		state.Description = types.StringPointerValue(api.Description)
+	if api.Description != nil {
+		state.Description = util.StringPointerValue(api.Description)
 	}
-	if api.ExpiryTime != nil && (*api.ExpiryTime != "" || !state.ExpiryTime.IsNull()) {
-		state.ExpiryTime = types.StringPointerValue(api.ExpiryTime)
+	if api.ExpiryTime != nil || state.ExpiryTime.IsUnknown() {
+		state.ExpiryTime = util.StringPointerValue(api.ExpiryTime)
 	}
-	if api.ExtendWhenUsed != nil {
+	if api.ExtendWhenUsed != nil || state.ExtendWhenUsed.IsUnknown() {
 		state.ExtendWhenUsed = types.BoolPointerValue(api.ExtendWhenUsed)
 	}
-	if api.FullToken != nil && (*api.FullToken != "" || !state.FullToken.IsNull()) {
-		state.FullToken = types.StringPointerValue(api.FullToken)
+	if api.FullToken != nil || state.FullToken.IsUnknown() {
+		state.FullToken = util.StringPointerValue(api.FullToken)
 	}
-	if api.LastIP != nil && (*api.LastIP != "" || !state.LastIP.IsNull()) {
-		state.LastIP = types.StringPointerValue(api.LastIP)
+	if api.LastIP != nil || state.LastIP.IsUnknown() {
+		state.LastIP = util.StringPointerValue(api.LastIP)
 	}
-	if api.LastUsedTime != nil && (*api.LastUsedTime != "" || !state.LastUsedTime.IsNull()) {
-		state.LastUsedTime = types.StringPointerValue(api.LastUsedTime)
+	if api.LastUsedTime != nil || state.LastUsedTime.IsUnknown() {
+		state.LastUsedTime = util.StringPointerValue(api.LastUsedTime)
 	}
-	if api.LastUserAgent != nil && (*api.LastUserAgent != "" || !state.LastUserAgent.IsNull()) {
-		state.LastUserAgent = types.StringPointerValue(api.LastUserAgent)
+	if api.LastUserAgent != nil || state.LastUserAgent.IsUnknown() {
+		state.LastUserAgent = util.StringPointerValue(api.LastUserAgent)
 	}
-	if api.LastUserAgentHumanReadable != nil && (*api.LastUserAgentHumanReadable != "" || !state.LastUserAgentHumanReadable.IsNull()) {
-		state.LastUserAgentHumanReadable = types.StringPointerValue(api.LastUserAgentHumanReadable)
+	if api.LastUserAgentHumanReadable != nil || state.LastUserAgentHumanReadable.IsUnknown() {
+		state.LastUserAgentHumanReadable = util.StringPointerValue(api.LastUserAgentHumanReadable)
 	}
 	if api.MaxAgeSeconds != nil {
 		state.MaxAgeSeconds = types.Int64PointerValue(api.MaxAgeSeconds)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.TokenPrefix != nil && (*api.TokenPrefix != "" || !state.TokenPrefix.IsNull()) {
-		state.TokenPrefix = types.StringPointerValue(api.TokenPrefix)
+	if api.TokenPrefix != nil || state.TokenPrefix.IsUnknown() {
+		state.TokenPrefix = util.StringPointerValue(api.TokenPrefix)
 	}
-	if api.UserID != nil && (*api.UserID != "" || !state.UserID.IsNull()) {
-		state.UserID = types.StringPointerValue(api.UserID)
+	if api.UserID != nil {
+		state.UserID = util.StringPointerValue(api.UserID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.

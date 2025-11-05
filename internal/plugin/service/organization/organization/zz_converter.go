@@ -67,20 +67,20 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.CreateTime != nil && (*api.CreateTime != "" || !state.CreateTime.IsNull()) {
-		state.CreateTime = types.StringPointerValue(api.CreateTime)
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
+		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.ID != nil && (*api.ID != "" || !state.ID.IsNull()) {
-		state.ID = types.StringPointerValue(api.ID)
+	if api.ID != nil || state.ID.IsUnknown() {
+		state.ID = util.StringPointerValue(api.ID)
 	}
-	if api.Name != nil && (*api.Name != "" || !state.Name.IsNull()) {
-		state.Name = types.StringPointerValue(api.Name)
+	if api.Name != nil {
+		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.TenantID != nil && (*api.TenantID != "" || !state.TenantID.IsNull()) {
-		state.TenantID = types.StringPointerValue(api.TenantID)
+	if api.TenantID != nil || state.TenantID.IsUnknown() {
+		state.TenantID = util.StringPointerValue(api.TenantID)
 	}
-	if api.UpdateTime != nil && (*api.UpdateTime != "" || !state.UpdateTime.IsNull()) {
-		state.UpdateTime = types.StringPointerValue(api.UpdateTime)
+	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
+		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
 	return nil
 }

@@ -108,15 +108,21 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 	notNil := dtoField.Clone().Op("!=").Nil()
 	switch {
 	case item.IsScalar():
-		value.Qual(typesPackage, item.TFType()+"PointerValue").Call(dtoField.Clone())
-		if item.IsRootProperty() && !item.Nullable && item.Type == SchemaTypeString {
-			// Adds (*dto.State != "" || !state.State.IsNull())
-			// Ignores empty strings if user hasn't explicitly set it in the state.
-			notNil.Op("&&").Parens(
-				jen.Op("*").Id(apiVar).Dot(item.GoFieldName()).Op("!=").Lit("").Op("||").
-					Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call(),
-			)
+		val := dtoField.Clone()
+		pkg := typesPackage
+		if item.Type == SchemaTypeString {
+			// See util.StringPointerValue
+			pkg = utilPackage
 		}
+
+		value.Qual(pkg, item.TFType()+"PointerValue").Call(val)
+		if item.IsRootProperty() && item.Computed {
+			// For "computed" fields, Terraform expects their state to be resolved during flatten.
+			// This ensures that every computed field is either fully populated or explicitly set to "nil" by the end.
+			// The state is available in the root flatten function only, that's why we check for IsRootProperty().
+			notNil.Op("||").Id(stateVar).Dot(item.GoFieldName()).Dot("IsUnknown").Call()
+		}
+
 	case item.IsNested():
 		// A struct or an array of structs.
 		value.Id(item.GoVarName())
@@ -141,22 +147,12 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		}
 		block = append(block, val, ifHasError(rootLevel))
 	case item.IsArray(), item.IsMap():
-		// 1. If the API returns an empty list/map, while the field is nil, TF will output an error.
-		//    Checks the length of the list/map to not set empty array/map.
-		// 2. But if we have sent the empty array to the API, it is OK to get it back — checks the state for nil.
-		if item.Parent.IsRoot() {
-			notNil.Op("&&").Parens(
-				jen.Len(jen.Op("*").Add(dtoField.Clone())).Op(">").Lit(0).
-					Op("||").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call(),
-			)
-		}
-
 		value.Id(item.GoVarName())
 		switch {
 		case item.Items.IsScalar():
 			// A list or a map of scalars.
 			val := jen.List(jen.Id(item.GoVarName()), jen.Id("diags")).Op(":=").
-				Qual(typesPackage, item.TFType()+"ValueFrom").
+				Qual(utilPackage, item.TFType()+"ValueFrom").
 				Call(
 					jen.Id("ctx"),
 					jen.Qual(typesPackage, item.Items.TFType()+"Type"),

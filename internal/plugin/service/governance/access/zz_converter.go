@@ -185,20 +185,20 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.AccessData = vAccessData
 	}
-	if api.AccessName != nil && (*api.AccessName != "" || !state.AccessName.IsNull()) {
-		state.AccessName = types.StringPointerValue(api.AccessName)
+	if api.AccessName != nil {
+		state.AccessName = util.StringPointerValue(api.AccessName)
 	}
-	if api.AccessType != nil && (*api.AccessType != "" || !state.AccessType.IsNull()) {
-		state.AccessType = types.StringPointerValue(api.AccessType)
+	if api.AccessType != nil {
+		state.AccessType = util.StringPointerValue(api.AccessType)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.OwnerUserGroupID != nil && (*api.OwnerUserGroupID != "" || !state.OwnerUserGroupID.IsNull()) {
-		state.OwnerUserGroupID = types.StringPointerValue(api.OwnerUserGroupID)
+	if api.OwnerUserGroupID != nil {
+		state.OwnerUserGroupID = util.StringPointerValue(api.OwnerUserGroupID)
 	}
-	if api.SusbcriptionID != nil && (*api.SusbcriptionID != "" || !state.SusbcriptionID.IsNull()) {
-		state.SusbcriptionID = types.StringPointerValue(api.SusbcriptionID)
+	if api.SusbcriptionID != nil || state.SusbcriptionID.IsUnknown() {
+		state.SusbcriptionID = util.StringPointerValue(api.SusbcriptionID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -228,13 +228,13 @@ func flattenAccessData(ctx context.Context, api *apiModelAccessData) (*tfModelAc
 		state.Acls = vAcls
 	}
 	if api.Project != nil {
-		state.Project = types.StringPointerValue(api.Project)
+		state.Project = util.StringPointerValue(api.Project)
 	}
 	if api.ServiceName != nil {
-		state.ServiceName = types.StringPointerValue(api.ServiceName)
+		state.ServiceName = util.StringPointerValue(api.ServiceName)
 	}
 	if api.Username != nil {
-		state.Username = types.StringPointerValue(api.Username)
+		state.Username = util.StringPointerValue(api.Username)
 	}
 	return state, nil
 }
@@ -242,28 +242,28 @@ func flattenAccessData(ctx context.Context, api *apiModelAccessData) (*tfModelAc
 func flattenAccessDataAcls(ctx context.Context, api *apiModelAccessDataAcls) (*tfModelAccessDataAcls, diag.Diagnostics) {
 	state := new(tfModelAccessDataAcls)
 	if api.Host != nil {
-		state.Host = types.StringPointerValue(api.Host)
+		state.Host = util.StringPointerValue(api.Host)
 	}
 	if api.ID != nil {
-		state.ID = types.StringPointerValue(api.ID)
+		state.ID = util.StringPointerValue(api.ID)
 	}
 	if api.Operation != nil {
-		state.Operation = types.StringPointerValue(api.Operation)
+		state.Operation = util.StringPointerValue(api.Operation)
 	}
 	if api.PatternType != nil {
-		state.PatternType = types.StringPointerValue(api.PatternType)
+		state.PatternType = util.StringPointerValue(api.PatternType)
 	}
 	if api.PermissionType != nil {
-		state.PermissionType = types.StringPointerValue(api.PermissionType)
+		state.PermissionType = util.StringPointerValue(api.PermissionType)
 	}
 	if api.Principal != nil {
-		state.Principal = types.StringPointerValue(api.Principal)
+		state.Principal = util.StringPointerValue(api.Principal)
 	}
 	if api.ResourceName != nil {
-		state.ResourceName = types.StringPointerValue(api.ResourceName)
+		state.ResourceName = util.StringPointerValue(api.ResourceName)
 	}
 	if api.ResourceType != nil {
-		state.ResourceType = types.StringPointerValue(api.ResourceType)
+		state.ResourceType = util.StringPointerValue(api.ResourceType)
 	}
 	return state, nil
 }

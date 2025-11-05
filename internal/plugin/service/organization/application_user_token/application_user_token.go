@@ -43,15 +43,6 @@ func createApplicationUserToken(ctx context.Context, client avngen.Client, plan 
 
 	// FullToken is only available at creation time
 	plan.FullToken = types.StringValue(rsp.FullToken)
-
-	// This information is not available at creation time.
-	// Terraform state requires all fields to be set:
-	// "After the apply operation, the provider still indicated an unknown value for"
-	plan.LastUsedTime = types.StringValue("")
-	plan.LastIP = types.StringValue("")
-	plan.LastUserAgent = types.StringValue("")
-	plan.LastUserAgentHumanReadable = types.StringValue("")
-	plan.ExpiryTime = types.StringValue("") // Is nil if `max_age_seconds` is not set
 	return readApplicationUserToken(ctx, client, plan)
 }
 

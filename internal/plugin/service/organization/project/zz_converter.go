@@ -139,30 +139,30 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.Tag = vTag
 	}
-	if api.TechnicalEmails != nil && (len(*api.TechnicalEmails) > 0 || !state.TechnicalEmails.IsNull()) {
-		vTechnicalEmails, diags := types.SetValueFrom(ctx, types.StringType, api.TechnicalEmails)
+	if api.TechnicalEmails != nil {
+		vTechnicalEmails, diags := util.SetValueFrom(ctx, types.StringType, api.TechnicalEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.TechnicalEmails = vTechnicalEmails
 	}
-	if api.BasePort != nil {
+	if api.BasePort != nil || state.BasePort.IsUnknown() {
 		state.BasePort = types.Int64PointerValue(api.BasePort)
 	}
-	if api.BillingGroupID != nil && (*api.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
-		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
+	if api.BillingGroupID != nil {
+		state.BillingGroupID = util.StringPointerValue(api.BillingGroupID)
 	}
-	if api.CaCert != nil && (*api.CaCert != "" || !state.CaCert.IsNull()) {
-		state.CaCert = types.StringPointerValue(api.CaCert)
+	if api.CaCert != nil || state.CaCert.IsUnknown() {
+		state.CaCert = util.StringPointerValue(api.CaCert)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.ParentID != nil && (*api.ParentID != "" || !state.ParentID.IsNull()) {
-		state.ParentID = types.StringPointerValue(api.ParentID)
+	if api.ParentID != nil {
+		state.ParentID = util.StringPointerValue(api.ParentID)
 	}
-	if api.ProjectID != nil && (*api.ProjectID != "" || !state.ProjectID.IsNull()) {
-		state.ProjectID = types.StringPointerValue(api.ProjectID)
+	if api.ProjectID != nil {
+		state.ProjectID = util.StringPointerValue(api.ProjectID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -185,10 +185,10 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 func flattenTag(ctx context.Context, api *apiModelTag) (*tfModelTag, diag.Diagnostics) {
 	state := new(tfModelTag)
 	if api.Key != nil {
-		state.Key = types.StringPointerValue(api.Key)
+		state.Key = util.StringPointerValue(api.Key)
 	}
 	if api.Value != nil {
-		state.Value = types.StringPointerValue(api.Value)
+		state.Value = util.StringPointerValue(api.Value)
 	}
 	return state, nil
 }

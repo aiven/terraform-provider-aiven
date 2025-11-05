@@ -6,8 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/samber/lo"
 )
 
 // remarshal unmarshals a value from in to out.
@@ -244,4 +247,42 @@ func FlattenMapNested[R, T any](ctx context.Context, flatten Flatten[R, T], dict
 		return unknown, diags
 	}
 	return result, diags
+}
+
+// SetValueFrom same as types.SetValueFrom but doesn't complain about "nil" values.
+// Empty slices are treated as "nil", which might be a default value in the API response.
+// Or it might be that the user has removed the value, and we have sent an empty slice to the API to clear the list.
+// Terraform compares the empty slice to "nil" (removed) and it detects the state drift.
+func SetValueFrom[T any](ctx context.Context, elementType attr.Type, elements *[]T) (basetypes.SetValue, diag.Diagnostics) {
+	if elements == nil || len(*elements) == 0 {
+		return basetypes.NewSetNull(elementType), nil
+	}
+	return types.SetValueFrom(ctx, elementType, elements)
+}
+
+// ListValueFrom see SetValueFrom.
+func ListValueFrom[T any](ctx context.Context, elementType attr.Type, elements *[]T) (basetypes.ListValue, diag.Diagnostics) {
+	if elements == nil || len(*elements) == 0 {
+		return basetypes.NewListNull(elementType), nil
+	}
+	return types.ListValueFrom(ctx, elementType, elements)
+}
+
+// MapValueFrom see SetValueFrom.
+func MapValueFrom[T any](ctx context.Context, elementType attr.Type, elements *map[string]T) (basetypes.MapValue, diag.Diagnostics) {
+	if elements == nil || len(*elements) == 0 {
+		return basetypes.NewMapNull(elementType), nil
+	}
+	return types.MapValueFrom(ctx, elementType, elements)
+}
+
+// StringPointerValue same as types.StringPointerValue but treats empty string as null.
+// When a user sets a string field (e.g., "address") and later removes it from the config,
+// Terraform represents the field as "nil", but the API may return it as an empty string ("").
+// To prevent Terraform state drift, convert empty strings to "nil".
+func StringPointerValue(value *string) basetypes.StringValue {
+	if lo.FromPtr(value) == "" {
+		return basetypes.NewStringNull()
+	}
+	return types.StringPointerValue(value)
 }
