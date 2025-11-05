@@ -203,10 +203,10 @@ func (a *resourceAdapter[M, T]) Read(
 // In rare cases, the backend might return 404 after the resource is created or updated.
 func (a *resourceAdapter[M, T]) refreshState(ctx context.Context, plan M) diag.Diagnostics {
 	return errmsg.RetryDiags(
+		ctx,
 		func() diag.Diagnostics {
 			return a.resource.Read(ctx, a.client, plan.SharedModel())
 		},
-		retry.Context(ctx),
 		retry.RetryIf(avngen.IsNotFound),
 	)
 }

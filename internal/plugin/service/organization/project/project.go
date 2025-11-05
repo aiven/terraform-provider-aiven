@@ -3,9 +3,13 @@ package project
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationprojects"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -51,7 +55,7 @@ func createProject(ctx context.Context, client avngen.Client, plan *tfModel) dia
 
 	// Sets ID field to Read() the resource
 	plan.SetID(rsp.OrganizationId, rsp.ProjectId)
-	return readProject(ctx, client, plan)
+	return readWithRetryProject(ctx, client, plan)
 }
 
 func updateProject(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
@@ -71,7 +75,7 @@ func updateProject(ctx context.Context, client avngen.Client, plan, state, _ *tf
 	// Sets ID field to Read() the resource.
 	// When parent_id is changed, this mutates the ID.
 	plan.SetID(rsp.OrganizationId, rsp.ProjectId)
-	return readProject(ctx, client, plan)
+	return readWithRetryProject(ctx, client, plan)
 }
 
 func deleteProject(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
@@ -84,6 +88,22 @@ func deleteProject(ctx context.Context, client avngen.Client, state *tfModel) di
 		return diags
 	}
 	return nil
+}
+
+// readWithRetryProject retries "Not a project member" errors caused by eventual consistency.
+// Should only be called after Create or Update operations, when membership propagation may lag.
+func readWithRetryProject(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
+	return errmsg.RetryDiags(
+		ctx,
+		func() diag.Diagnostics {
+			return readProject(ctx, client, state)
+		},
+		errmsg.RetryIfAivenError(func(e avngen.Error) bool {
+			return e.Status == http.StatusForbidden && strings.Contains(e.Message, "Not a project member")
+		}),
+		retry.Attempts(5),
+		retry.Delay(time.Second*5),
+	)
 }
 
 func readProject(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
