@@ -16,6 +16,7 @@ nav_order: 1
 - Add `aiven_service_plan_list` data source: query available service plans and their regional availability for a service type
 - Change `aiven_organization_address` field `address_lines` type from `Set` to `List` to preserve order of address lines
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
+- Improve `aiven_organization`: added retries to `AccountList` for eventual consistency
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
 - Add `aiven_pg` field `pg_user_config.pg.io_combine_limit`: EXPERIMENTAL: Controls the largest I/O size in operations
   that combine I/O in 8kB units
