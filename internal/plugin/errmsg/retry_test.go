@@ -70,10 +70,14 @@ func TestRetryDiags(t *testing.T) {
 			)
 
 			attempts := 0
-			_ = RetryDiags(func() diag.Diagnostics {
-				attempts++
-				return tc.diags
-			}, tc.opts...)
+			_ = RetryDiags(
+				t.Context(),
+				func() diag.Diagnostics {
+					attempts++
+					return tc.diags
+				},
+				tc.opts...,
+			)
 
 			assert.Equal(t, tc.expectRetried, attempts == maxAttempts)
 		})

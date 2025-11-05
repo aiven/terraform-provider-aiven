@@ -1,16 +1,17 @@
 package errmsg
 
 import (
+	"context"
+	"errors"
+
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
 // RetryDiags detects DiagError in diagnostics and retries it.
 // Use FromError to create a DiagError from diag.Diagnostic.
-func RetryDiags(
-	retryableFunc func() diag.Diagnostics,
-	opts ...retry.Option,
-) diag.Diagnostics {
+func RetryDiags(ctx context.Context, retryableFunc func() diag.Diagnostics, opts ...retry.Option) diag.Diagnostics {
 	var diags diag.Diagnostics
 	_ = retry.Do(func() error {
 		diags = retryableFunc()
@@ -24,6 +25,13 @@ func RetryDiags(
 
 		// No DiagError found, exit.
 		return nil
-	}, opts...)
+	}, append(opts, retry.Context(ctx))...)
 	return diags
+}
+
+func RetryIfAivenError(f func(avngen.Error) bool) retry.Option {
+	return retry.RetryIf(func(err error) bool {
+		var e avngen.Error
+		return errors.As(err, &e) && f(e)
+	})
 }
