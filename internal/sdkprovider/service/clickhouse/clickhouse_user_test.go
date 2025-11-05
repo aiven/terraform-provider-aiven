@@ -2,12 +2,11 @@ package clickhouse_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -42,7 +41,10 @@ func TestAccAivenClickhouseUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenClickhouseUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error getting client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -57,16 +59,20 @@ func testAccCheckAivenClickhouseUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ClickhouseUser.Get(ctx, projectName, serviceName, uuid)
+		users, err := c.ServiceClickHouseUserList(ctx, projectName, serviceName)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
+			if avngen.IsNotFound(err) {
+				// if we get an error, consider it destroyed
+				return nil
 			}
+
+			return err
 		}
 
-		if p != nil {
-			return fmt.Errorf("clickhouse user (%s) still exists", rs.Primary.ID)
+		for _, u := range users {
+			if u.Uuid == uuid {
+				return fmt.Errorf("clickhouse user (%q) still exists", rs.Primary.ID)
+			}
 		}
 	}
 

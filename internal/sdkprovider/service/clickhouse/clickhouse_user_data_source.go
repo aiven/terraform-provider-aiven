@@ -2,42 +2,41 @@ package clickhouse
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceClickhouseUser() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceClickhouseUserRead,
+		ReadContext: common.WithGenClient(datasourceClickhouseUserRead),
 		Description: "Gets information about a ClickHouse user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenClickhouseUserSchema,
 			"project", "service_name", "username"),
 	}
 }
 
-func datasourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	userName := d.Get("username").(string)
 
-	list, err := client.ClickhouseUser.List(ctx, projectName, serviceName)
+	list, err := client.ServiceClickHouseUserList(ctx, projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, u := range list.Users {
+	for _, u := range list {
 		if u.Name == userName {
-			d.SetId(schemautil.BuildResourceID(projectName, serviceName, u.UUID))
-			return resourceClickhouseUserRead(ctx, d, m)
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, u.Uuid))
+			return resourceClickhouseUserRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("clickhouse user %s/%s/%s not found",
+	return fmt.Errorf("clickhouse user %s/%s/%s not found",
 		projectName, serviceName, userName)
 }
