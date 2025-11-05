@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -178,7 +180,22 @@ func getAccountID(ctx context.Context, client avngen.Client, state *tfModel) (st
 		return "", fmt.Errorf("no Organization ID or name provided")
 	}
 
-	list, err := client.AccountList(ctx)
+	var err error
+	var list []account.AccountOut
+	err = retry.Do(
+		func() error {
+			list, err = client.AccountList(ctx)
+			return err
+		},
+		// This error can randomly occur.
+		// Granted, the token is valid, we can retry `AccountList` safely, because the token is the only "parameter".
+		// This might take up to a minute or more.
+		retry.RetryIf(avngen.IsNotFound),
+		retry.LastErrorOnly(true),
+		retry.Attempts(10),
+		retry.Delay(time.Second*10),
+		retry.Context(ctx),
+	)
 	if err != nil {
 		return "", err
 	}
