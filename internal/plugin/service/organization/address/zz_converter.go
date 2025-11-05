@@ -109,39 +109,39 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.AddressLines != nil && (len(*api.AddressLines) > 0 || !state.AddressLines.IsNull()) {
-		vAddressLines, diags := types.ListValueFrom(ctx, types.StringType, api.AddressLines)
+	if api.AddressLines != nil {
+		vAddressLines, diags := util.ListValueFrom(ctx, types.StringType, api.AddressLines)
 		if diags.HasError() {
 			return diags
 		}
 		state.AddressLines = vAddressLines
 	}
-	if api.AddressID != nil && (*api.AddressID != "" || !state.AddressID.IsNull()) {
-		state.AddressID = types.StringPointerValue(api.AddressID)
+	if api.AddressID != nil || state.AddressID.IsUnknown() {
+		state.AddressID = util.StringPointerValue(api.AddressID)
 	}
-	if api.City != nil && (*api.City != "" || !state.City.IsNull()) {
-		state.City = types.StringPointerValue(api.City)
+	if api.City != nil {
+		state.City = util.StringPointerValue(api.City)
 	}
-	if api.CountryCode != nil && (*api.CountryCode != "" || !state.CountryCode.IsNull()) {
-		state.CountryCode = types.StringPointerValue(api.CountryCode)
+	if api.CountryCode != nil {
+		state.CountryCode = util.StringPointerValue(api.CountryCode)
 	}
-	if api.CreateTime != nil && (*api.CreateTime != "" || !state.CreateTime.IsNull()) {
-		state.CreateTime = types.StringPointerValue(api.CreateTime)
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
+		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.Name != nil && (*api.Name != "" || !state.Name.IsNull()) {
-		state.Name = types.StringPointerValue(api.Name)
+	if api.Name != nil {
+		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.State != nil && (*api.State != "" || !state.State.IsNull()) {
-		state.State = types.StringPointerValue(api.State)
+	if api.State != nil {
+		state.State = util.StringPointerValue(api.State)
 	}
-	if api.UpdateTime != nil && (*api.UpdateTime != "" || !state.UpdateTime.IsNull()) {
-		state.UpdateTime = types.StringPointerValue(api.UpdateTime)
+	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
+		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
-	if api.ZipCode != nil && (*api.ZipCode != "" || !state.ZipCode.IsNull()) {
-		state.ZipCode = types.StringPointerValue(api.ZipCode)
+	if api.ZipCode != nil {
+		state.ZipCode = util.StringPointerValue(api.ZipCode)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.

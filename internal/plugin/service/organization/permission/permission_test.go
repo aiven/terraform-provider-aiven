@@ -71,17 +71,17 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 func testAccOrganizationPermissionResource(name, permission string) string {
 	config := fmt.Sprintf(`
 resource "aiven_organization" "org" {
-  name = "test-org-permissions-%[1]s"
+  name = "test-acc-permissions-%[1]s"
 }
 
 resource "aiven_project" "project" {
   parent_id = aiven_organization.org.id
-  project   = "test-proj-permissions-%[1]s"
+  project   = "test-acc-permissions-%[1]s"
 }
 
 resource "aiven_organization_user_group" "group" {
   organization_id = aiven_organization.org.id
-  name            = "test-group-%[1]s"
+  name            = "test-acc-%[1]s"
   description     = "test group description"
 }
 `, name)
@@ -119,12 +119,12 @@ data "aiven_organization" "org" {
 
 resource "aiven_project" "project" {
   parent_id = data.aiven_organization.org.id
-  project   = "test-proj-%[2]s"
+  project   = "test-acc-%[2]s"
 }
 
 resource "aiven_organization_user_group" "group" {
   organization_id = data.aiven_organization.org.id
-  name            = "test-group-%[2]s"
+  name            = "test-acc-%[2]s"
   description     = "test group description"
 }
 

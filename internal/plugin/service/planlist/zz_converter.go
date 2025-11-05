@@ -63,11 +63,11 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.ServicePlans = vServicePlans
 	}
-	if api.Project != nil && (*api.Project != "" || !state.Project.IsNull()) {
-		state.Project = types.StringPointerValue(api.Project)
+	if api.Project != nil {
+		state.Project = util.StringPointerValue(api.Project)
 	}
-	if api.ServiceType != nil && (*api.ServiceType != "" || !state.ServiceType.IsNull()) {
-		state.ServiceType = types.StringPointerValue(api.ServiceType)
+	if api.ServiceType != nil {
+		state.ServiceType = util.StringPointerValue(api.ServiceType)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.
@@ -90,14 +90,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 func flattenServicePlans(ctx context.Context, api *apiModelServicePlans) (*tfModelServicePlans, diag.Diagnostics) {
 	state := new(tfModelServicePlans)
 	if api.CloudNames != nil {
-		vCloudNames, diags := types.ListValueFrom(ctx, types.StringType, api.CloudNames)
+		vCloudNames, diags := util.ListValueFrom(ctx, types.StringType, api.CloudNames)
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.CloudNames = vCloudNames
 	}
 	if api.ServicePlan != nil {
-		state.ServicePlan = types.StringPointerValue(api.ServicePlan)
+		state.ServicePlan = util.StringPointerValue(api.ServicePlan)
 	}
 	return state, nil
 }

@@ -127,46 +127,46 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.BillingContactEmails != nil && (len(*api.BillingContactEmails) > 0 || !state.BillingContactEmails.IsNull()) {
-		vBillingContactEmails, diags := types.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
+	if api.BillingContactEmails != nil {
+		vBillingContactEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingContactEmails = vBillingContactEmails
 	}
-	if api.BillingEmails != nil && (len(*api.BillingEmails) > 0 || !state.BillingEmails.IsNull()) {
-		vBillingEmails, diags := types.SetValueFrom(ctx, types.StringType, api.BillingEmails)
+	if api.BillingEmails != nil {
+		vBillingEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingEmails = vBillingEmails
 	}
-	if api.BillingAddressID != nil && (*api.BillingAddressID != "" || !state.BillingAddressID.IsNull()) {
-		state.BillingAddressID = types.StringPointerValue(api.BillingAddressID)
+	if api.BillingAddressID != nil {
+		state.BillingAddressID = util.StringPointerValue(api.BillingAddressID)
 	}
-	if api.BillingGroupID != nil && (*api.BillingGroupID != "" || !state.BillingGroupID.IsNull()) {
-		state.BillingGroupID = types.StringPointerValue(api.BillingGroupID)
+	if api.BillingGroupID != nil || state.BillingGroupID.IsUnknown() {
+		state.BillingGroupID = util.StringPointerValue(api.BillingGroupID)
 	}
-	if api.BillingGroupName != nil && (*api.BillingGroupName != "" || !state.BillingGroupName.IsNull()) {
-		state.BillingGroupName = types.StringPointerValue(api.BillingGroupName)
+	if api.BillingGroupName != nil {
+		state.BillingGroupName = util.StringPointerValue(api.BillingGroupName)
 	}
-	if api.Currency != nil && (*api.Currency != "" || !state.Currency.IsNull()) {
-		state.Currency = types.StringPointerValue(api.Currency)
+	if api.Currency != nil {
+		state.Currency = util.StringPointerValue(api.Currency)
 	}
-	if api.CustomInvoiceText != nil && (*api.CustomInvoiceText != "" || !state.CustomInvoiceText.IsNull()) {
-		state.CustomInvoiceText = types.StringPointerValue(api.CustomInvoiceText)
+	if api.CustomInvoiceText != nil {
+		state.CustomInvoiceText = util.StringPointerValue(api.CustomInvoiceText)
 	}
-	if api.OrganizationID != nil && (*api.OrganizationID != "" || !state.OrganizationID.IsNull()) {
-		state.OrganizationID = types.StringPointerValue(api.OrganizationID)
+	if api.OrganizationID != nil {
+		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.PaymentMethodID != nil && (*api.PaymentMethodID != "" || !state.PaymentMethodID.IsNull()) {
-		state.PaymentMethodID = types.StringPointerValue(api.PaymentMethodID)
+	if api.PaymentMethodID != nil {
+		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
 	}
-	if api.ShippingAddressID != nil && (*api.ShippingAddressID != "" || !state.ShippingAddressID.IsNull()) {
-		state.ShippingAddressID = types.StringPointerValue(api.ShippingAddressID)
+	if api.ShippingAddressID != nil {
+		state.ShippingAddressID = util.StringPointerValue(api.ShippingAddressID)
 	}
-	if api.VatID != nil && (*api.VatID != "" || !state.VatID.IsNull()) {
-		state.VatID = types.StringPointerValue(api.VatID)
+	if api.VatID != nil {
+		state.VatID = util.StringPointerValue(api.VatID)
 	}
 	// Response may not contain ID fields.
 	// In that case, `terraform import` won't be able to set them. Gets values from the ID.

@@ -95,40 +95,40 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.BackupConfig = vBackupConfig
 	}
-	if api.BasePriceUsd != nil && (*api.BasePriceUsd != "" || !state.BasePriceUsd.IsNull()) {
-		state.BasePriceUsd = types.StringPointerValue(api.BasePriceUsd)
+	if api.BasePriceUsd != nil || state.BasePriceUsd.IsUnknown() {
+		state.BasePriceUsd = util.StringPointerValue(api.BasePriceUsd)
 	}
-	if api.CloudName != nil && (*api.CloudName != "" || !state.CloudName.IsNull()) {
-		state.CloudName = types.StringPointerValue(api.CloudName)
+	if api.CloudName != nil {
+		state.CloudName = util.StringPointerValue(api.CloudName)
 	}
-	if api.DiskSpaceCapMb != nil {
+	if api.DiskSpaceCapMb != nil || state.DiskSpaceCapMb.IsUnknown() {
 		state.DiskSpaceCapMb = types.Int64PointerValue(api.DiskSpaceCapMb)
 	}
-	if api.DiskSpaceMb != nil {
+	if api.DiskSpaceMb != nil || state.DiskSpaceMb.IsUnknown() {
 		state.DiskSpaceMb = types.Int64PointerValue(api.DiskSpaceMb)
 	}
-	if api.DiskSpaceStepMb != nil {
+	if api.DiskSpaceStepMb != nil || state.DiskSpaceStepMb.IsUnknown() {
 		state.DiskSpaceStepMb = types.Int64PointerValue(api.DiskSpaceStepMb)
 	}
-	if api.MaxMemoryPercent != nil {
+	if api.MaxMemoryPercent != nil || state.MaxMemoryPercent.IsUnknown() {
 		state.MaxMemoryPercent = types.Int64PointerValue(api.MaxMemoryPercent)
 	}
-	if api.NodeCount != nil {
+	if api.NodeCount != nil || state.NodeCount.IsUnknown() {
 		state.NodeCount = types.Int64PointerValue(api.NodeCount)
 	}
-	if api.ObjectStorageGbPriceUsd != nil && (*api.ObjectStorageGbPriceUsd != "" || !state.ObjectStorageGbPriceUsd.IsNull()) {
-		state.ObjectStorageGbPriceUsd = types.StringPointerValue(api.ObjectStorageGbPriceUsd)
+	if api.ObjectStorageGbPriceUsd != nil || state.ObjectStorageGbPriceUsd.IsUnknown() {
+		state.ObjectStorageGbPriceUsd = util.StringPointerValue(api.ObjectStorageGbPriceUsd)
 	}
-	if api.Project != nil && (*api.Project != "" || !state.Project.IsNull()) {
-		state.Project = types.StringPointerValue(api.Project)
+	if api.Project != nil {
+		state.Project = util.StringPointerValue(api.Project)
 	}
-	if api.ServicePlan != nil && (*api.ServicePlan != "" || !state.ServicePlan.IsNull()) {
-		state.ServicePlan = types.StringPointerValue(api.ServicePlan)
+	if api.ServicePlan != nil {
+		state.ServicePlan = util.StringPointerValue(api.ServicePlan)
 	}
-	if api.ServiceType != nil && (*api.ServiceType != "" || !state.ServiceType.IsNull()) {
-		state.ServiceType = types.StringPointerValue(api.ServiceType)
+	if api.ServiceType != nil || state.ServiceType.IsUnknown() {
+		state.ServiceType = util.StringPointerValue(api.ServiceType)
 	}
-	if api.ShardCount != nil {
+	if api.ShardCount != nil || state.ShardCount.IsUnknown() {
 		state.ShardCount = types.Int64PointerValue(api.ShardCount)
 	}
 	// Response may not contain ID fields.
@@ -176,7 +176,7 @@ func flattenBackupConfig(ctx context.Context, api *apiModelBackupConfig) (*tfMod
 		state.MaxCount = types.Int64PointerValue(api.MaxCount)
 	}
 	if api.RecoveryMode != nil {
-		state.RecoveryMode = types.StringPointerValue(api.RecoveryMode)
+		state.RecoveryMode = util.StringPointerValue(api.RecoveryMode)
 	}
 	return state, nil
 }
