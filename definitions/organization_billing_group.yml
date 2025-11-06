@@ -1,7 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
 location: internal/plugin/service/organization/billinggroup
-objectKey: billing_group
 resource:
   description: Creates and manages an organization billing group.
 datasource:
@@ -11,10 +10,15 @@ idAttribute:
     - organization_id
     - billing_group_id
 operations:
-  OrganizationBillingGroupCreate: create
-  OrganizationBillingGroupDelete: delete
-  OrganizationBillingGroupGet: read
-  OrganizationBillingGroupUpdate: update
+  - id: OrganizationBillingGroupCreate
+    type: create
+  - id: OrganizationBillingGroupDelete
+    type: delete
+  - id: OrganizationBillingGroupUpdate
+    type: update
+  - id: OrganizationBillingGroupGet
+    type: read
+    resultKey: billing_group
 schema:
   billing_contact_emails:
     items:

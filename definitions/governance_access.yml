@@ -1,11 +1,15 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
 location: internal/plugin/service/governance/access
-objectKey: access
 operations:
-  OrganizationGovernanceAccessCreate: create
-  OrganizationGovernanceAccessDelete: delete
-  OrganizationGovernanceAccessGet: read
+  - id: OrganizationGovernanceAccessCreate
+    type: create
+    resultKey: access
+  - id: OrganizationGovernanceAccessGet
+    type: read
+    resultKey: access
+  - id: OrganizationGovernanceAccessDelete
+    type: delete
 resource:
   description: |
     Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance.

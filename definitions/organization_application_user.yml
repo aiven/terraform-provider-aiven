@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/application_user
+location: internal/plugin/service/organization/applicationuser
 resource:
   description: |
     Creates and manages an organization application user.
@@ -12,11 +12,16 @@ idAttribute:
   fields:
     - organization_id
     - user_id
+clientHandler: applicationuser
 operations:
-  ApplicationUserCreate: create
-  ApplicationUserDelete: delete
-  ApplicationUserGet: read
-  ApplicationUserUpdate: update
+  - id: ApplicationUserCreate
+    type: create
+  - id: ApplicationUserDelete
+    type: delete
+  - id: ApplicationUserGet
+    type: read
+  - id: ApplicationUserUpdate
+    type: update
 rename:
   user_email: email
 schema:

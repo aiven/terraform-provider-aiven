@@ -19,8 +19,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
-	applicationuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user"
-	applicationusertoken "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/application_user_token"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
@@ -165,8 +163,6 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		usergroupmember.NewResource,
 		groupproject.NewResource,
 		access.NewResource,
-		applicationuser.NewResource,
-		applicationusertoken.NewResource,
 		permission.NewResource,
 	}
 
@@ -190,7 +186,6 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
 		organization.NewDataSource,
-		applicationuser.NewDataSource,
 		planlist.NewDataSource,
 	}
 

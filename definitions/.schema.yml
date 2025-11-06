@@ -39,17 +39,12 @@ properties:
     $comment: |
       Specifies the file path where the resource package is located.
       Example: location: "internal/plugin/service/organization"
-  objectKey:
-    type: string
-    $comment: |
-      The unique key that identifies this resource in the provider.
-      Example: objectKey: "postgresql"
   operations:
-    type: object
+    type: array
     $comment: |
-      Specify which CRUD operations this resource supports.
-      Only include operations that are fully implemented in your provider.
-    additionalProperties:
+      A list of CRUD operations supported by this resource.
+      Each entry specifies an operation, with its OpenAPI ID, type, and result extraction instructions.
+    items:
       $ref: '#/definitions/Operation'
   rename:
     $ref: '#/definitions/Rename'
@@ -72,14 +67,6 @@ properties:
     $comment: |
       The name of the client package to use for this resource/datasource.
       Example: clientHandler: "organization"
-  disableViews:
-    type: array
-    items:
-      type: string
-      enum: ["create", "read", "update", "delete"]
-    $comment: |
-      Disables generation of specific CRUD views for this resource.
-      Example: disableViews: ["delete"]
   refreshState:
     type: boolean
     $comment: |
@@ -126,22 +113,35 @@ definitions:
     additionalProperties: false
 
   Operation:
-    type: string
+    type: object
     $comment: |
       Aiven OperationID and CRUD operation pairs.
-    enum:
-      - create
-      - delete
-      - read
-      - update
-      - upsert
-    $comment: |
-      - create: The OperationID is used to create the resource
-      - read: The OperationID is used to read the resource
-      - update: The OperationID is used to update the resource
-      - delete: The OperationID is used to delete the resource
-      - upsert: The OperationID is used to create or update the resource
-
+    properties:
+      id:
+        type: string
+        $comment: The operation's unique identifier, e.g. "OrganizationCreate"
+      type:
+        type: string
+        enum: ["create", "read", "update", "delete", "upsert"]
+        $comment: The type of operation (create, read, update, delete, upsert)
+      disableView:
+        type: boolean
+        $comment: Set to true to disable view generation for this specific operation
+      resultKey:
+        type: string
+        $comment: |
+          The key to extract the result object from the response (if the API nests result under a property)
+          E.g.: resultKey: "result" retrieves response.result
+      resultListLookupKeys:
+        type: array
+        items:
+          type: string
+        $comment: |
+          When the response returns a list, these keys are used to locate the item within the response
+    required:
+      - id
+      - type
+    additionalProperties: false
   SchemaMeta:
     type: object
     $comment: Metadata for the resource/datasource

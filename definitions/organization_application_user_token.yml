@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/application_user_token
+location: internal/plugin/service/organization/applicationusertoken
 resource:
   description: |
     Creates and manages an application user token.
@@ -9,11 +9,17 @@ idAttribute:
     - organization_id
     - user_id
     - token_prefix
+clientHandler: applicationuser
+refreshState: true
 operations:
-  ApplicationUserAccessTokenCreate: create
-  ApplicationUserAccessTokenDelete: delete
-  ApplicationUserAccessTokensList: read
-objectKey: tokens
+  - id: ApplicationUserAccessTokenCreate
+    type: create
+  - id: ApplicationUserAccessTokenDelete
+    type: delete
+  - id: ApplicationUserAccessTokensList
+    type: read
+    resultKey: tokens
+    resultListLookupKeys: [token_prefix]
 schema:
   full_token:
     sensitive: true

@@ -164,7 +164,7 @@ func TestItemRemoveElements(t *testing.T) {
 			root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
 			scope := &Scope{Definition: &Definition{Remove: tt.remove}}
 
-			err := fromSchema(scope, root, tt.schema, ReadHandler)
+			err := fromSchema(scope, "", root, tt.schema, ReadHandler)
 			require.NoError(t, err)
 
 			if diff := cmp.Diff(tt.want, root.Properties, transformer); diff != "" {
@@ -176,34 +176,34 @@ func TestItemRemoveElements(t *testing.T) {
 
 func TestOperationsIDAppearsIn(t *testing.T) {
 	operations := Operations{
-		"FooCreate": OperationCreate,
-		"FooRead":   OperationRead,
-		"FooUpdate": OperationUpdate,
-		"FooDelete": OperationDelete,
+		{ID: "FooCreate", Type: OperationCreate},
+		{ID: "FooRead", Type: OperationRead},
+		{ID: "FooUpdate", Type: OperationUpdate},
+		{ID: "FooDelete", Type: OperationDelete},
 	}
 
 	sources := listSources()
 	handlers := operationToHandler()
 	seen := make(map[AppearsIn]bool)
 
-	for opID, op := range operations {
+	for _, op := range operations {
 		for i, source := range sources {
-			t.Run(fmt.Sprintf("%s_%d_source", opID, i), func(t *testing.T) {
-				this := operations.AppearsInID(opID, source)
+			t.Run(fmt.Sprintf("%s_%d_source", op.ID, i), func(t *testing.T) {
+				this := operations.AppearsInID(op.ID, source)
 				require.NotEqual(t, 0, this)
-				require.Positive(t, this&handlers[op])
+				require.Positive(t, this&handlers[op.Type])
 				require.Positive(t, this&source)
 
 				// Same as by handler type
 				require.Equal(t,
 					fmt.Sprintf("%b", this),
-					fmt.Sprintf("%b", operations.AppearsInHandler(handlers[op], source)),
+					fmt.Sprintf("%b", operations.AppearsInHandler(handlers[op.Type], source)),
 				)
 
 				// Proves the mask doesn't contain other operations: create, update, etc
 				// OperationUpsert is a special case that combines Create and Update and has both flags set
 				for o, a := range handlers {
-					if o != op && o != OperationUpsert {
+					if o != op.Type && o != OperationUpsert {
 						require.EqualValues(t, 0, this&a)
 					}
 				}

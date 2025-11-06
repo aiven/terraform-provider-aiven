@@ -11,10 +11,14 @@ idAttribute:
     - organization_id
     - address_id
 operations:
-  OrganizationAddressCreate: create
-  OrganizationAddressDelete: delete
-  OrganizationAddressGet: read
-  OrganizationAddressUpdate: update
+  - id: OrganizationAddressCreate
+    type: create
+  - id: OrganizationAddressDelete
+    type: delete
+  - id: OrganizationAddressGet
+    type: read
+  - id: OrganizationAddressUpdate
+    type: update
 schema:
   address_lines:
     type: arrayOrdered

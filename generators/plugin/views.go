@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"maps"
+	"regexp"
 	"slices"
 	"sort"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/hashicorp/go-multierror"
+	"github.com/iancoleman/strcase"
 )
 
 const (
@@ -19,10 +22,6 @@ const (
 func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 	codes := make([]jen.Code, 0)
 	for _, op := range listOperations() {
-		if slices.Contains(def.DisableViews, op) {
-			continue
-		}
-
 		v, err := genGenericView(item, def, op)
 		if err != nil {
 			return nil, fmt.Errorf("%s view error: %w", op, err)
@@ -56,11 +55,11 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 	}
 
 	for _, v := range def.Operations {
-		if entity == datasourceType && v != OperationRead {
+		if v.DisableView || entity == datasourceType && v.Type != OperationRead {
 			// Datasource only supports Read operation
 			continue
 		}
-		values[firstUpper(v)] = jen.Id(fmt.Sprintf("%s%s", v, viewSuffix))
+		values[firstUpper(v.Type)] = jen.Id(fmt.Sprintf("%s%s", v.Type, viewSuffix))
 	}
 
 	entityName := string(entity)
@@ -80,65 +79,84 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
-func genGenericView(item *Item, def *Definition, operation Operation) (jen.Code, error) {
-	funcBlocks := make([]jen.Code, 0)
-	count := 0
-	for opID, op := range def.Operations {
-		if op == operation {
-			if count > 0 {
-				funcBlocks = append(
-					funcBlocks,
-					jen.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags")),
-				)
-			}
-			thisBlocks, err := genGenericViewOperation(item, def, operation, opID)
-			if err != nil {
-				return nil, fmt.Errorf("generating operation ID %q view: %w", opID, err)
-			}
-			funcBlocks = append(funcBlocks, jen.Func().Params().Block(thisBlocks...).Call())
-			count++
+func genGenericView(item *Item, def *Definition, operation OperationType) (jen.Code, error) {
+	operations := make([]Operation, 0)
+	for _, op := range def.Operations {
+		if op.Type == operation && !op.DisableView {
+			operations = append(operations, op)
 		}
 	}
 
-	if count == 0 {
+	if len(operations) == 0 {
 		return nil, nil
 	}
 
-	opFuncParams := []jen.Code{
-		jen.Id("ctx").Qual("context", "Context"),
-		jen.Id("client").Qual(avnGenPackage, "Client"),
-	}
+	view := jen.Func().Id(fmt.Sprintf("%s%s", operation, viewSuffix))
+	view.ParamsFunc(func(g *jen.Group) {
+		g.Id("ctx").Qual("context", "Context")
+		g.Id("client").Qual(avnGenPackage, "Client")
 
-	// Generates the view function.
-	// See ResourceOptions for parameter details.
-	switch operation {
-	case OperationCreate:
-		opFuncParams = append(opFuncParams, jen.Id("plan").Op("*").Id(tfRootModel))
-	case OperationUpdate:
-		opFuncParams = append(
-			opFuncParams,
-			jen.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel),
-		)
-	default:
-		opFuncParams = append(opFuncParams, jen.Id("state").Op("*").Id(tfRootModel))
-	}
+		// Generates the view function.
+		// See ResourceOptions for parameter details.
+		switch operation {
+		case OperationCreate:
+			g.Id("plan").Op("*").Id(tfRootModel)
+		case OperationUpdate:
+			g.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel)
+		default:
+			g.Id("state").Op("*").Id(tfRootModel)
+		}
+	})
 
-	// The return block
-	var blocks []jen.Code
-	blocks = append(blocks, jen.Var().Id("diags").Qual(diagPackage, "Diagnostics"))
-	blocks = append(blocks, funcBlocks...)
-	blocks = append(blocks, jen.Return().Id("diags"))
+	// The return value
+	view.Qual(diagPackage, "Diagnostics")
 
-	return jen.Func().Id(fmt.Sprintf("%s%s", operation, viewSuffix)).
-		Params(opFuncParams...).
-		Qual(diagPackage, "Diagnostics").
-		Block(blocks...), nil
+	// The function block
+	errM := new(multierror.Error)
+	view.BlockFunc(func(g *jen.Group) {
+		g.Var().Id("diags").Qual(diagPackage, "Diagnostics")
+		for i, op := range operations {
+			if i != 0 {
+				g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
+			}
+
+			g.Func().Params().BlockFunc(func(f *jen.Group) {
+				err := genGenericViewOperation(f, item, def, op)
+				if err != nil {
+					errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", op.ID, err))
+				}
+			}).Call()
+		}
+
+		// Read after Create/Update if RefreshState is true
+		if def.RefreshState && (operation == OperationCreate || operation == OperationUpdate) {
+			// Calls Read to refresh state after Create/Update
+			state := "state"
+			if operation == OperationCreate {
+				state = "plan"
+			}
+			g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
+			g.Line()
+			g.Id("diags").Dot("Append").Call(
+				jen.Id(fmt.Sprintf("%s%s", OperationRead, viewSuffix)).
+					Call(
+						jen.Id("ctx"),
+						jen.Id("client"),
+						jen.Id(state),
+					).Op("..."),
+			)
+		}
+
+		g.Return().Id("diags")
+	})
+
+	return view, errM.ErrorOrNil()
 }
 
-func genGenericViewOperation(item *Item, def *Definition, operation Operation, operationID string) ([]jen.Code, error) {
-	inPath := def.Operations.AppearsInID(operationID, PathParameter)
-	inRequest := def.Operations.AppearsInID(operationID, RequestBody)
-	inResponse := def.Operations.AppearsInID(operationID, ResponseBody)
+func genGenericViewOperation(g *jen.Group, item *Item, def *Definition, operation Operation) error {
+	inPath := def.Operations.AppearsInID(operation.ID, PathParameter)
+	inRequest := def.Operations.AppearsInID(operation.ID, RequestBody)
+	inResponse := def.Operations.AppearsInID(operation.ID, ResponseBody)
 
 	// Properties must be sorted for consistent output
 	properties := slices.Collect(maps.Values(item.Properties))
@@ -146,111 +164,150 @@ func genGenericViewOperation(item *Item, def *Definition, operation Operation, o
 		return properties[i].Name < properties[j].Name
 	})
 
-	blocks := make([]jen.Code, 0)
 	hasRequest := len(filterAppearsIn(properties, inRequest)) > 0
 	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0
 
 	// Generates the code that converts the TF model into the Client request struct
 	if hasRequest {
 		state := jen.Id("state")
-		if operation == OperationCreate {
+		if operation.Type == OperationCreate {
 			state = jen.Nil()
 		}
 
+		// Creates the request var
 		pkgName := avnGenHandlerPackage + def.ClientHandler
-		blocks = append(
-			blocks,
-			// Creates the request var
-			jen.Var().Id("req").Qual(pkgName, operationID+"In"),
+		g.Var().Id("req").Qual(pkgName, string(operation.ID)+"In")
 
-			// Expands data into the request
-			jen.Id("diags").Dot("Append").Call(
-				jen.Id(expandDataFunc).
-					Call(
-						jen.Id("ctx"),
-						jen.Id("plan"),
-						state,
-						jen.Id("&req"),
-					).
-					Op("..."),
-			),
-
-			// If HasError, then return
-			jen.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return()),
+		// Expands data into the request
+		g.Id("diags").Dot("Append").Call(
+			jen.Id(expandDataFunc).
+				Call(
+					jen.Id("ctx"),
+					jen.Id("plan"),
+					state,
+					jen.Id("&req"),
+				).
+				Op("..."),
 		)
+
+		// If HasError, then return
+		g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return())
+		g.Line()
 	}
 
 	// Generates the Client request block
-	blocks = append(blocks, func() jen.Code {
-		// Gathers parameters: ctx and path parameters to call the client method
-		clientParams := []jen.Code{
-			jen.Id("ctx"),
-		}
+	// If there is a response for Delete operation, then renders "_, err :="
+	// otherwise "rsp, err :="
+	clientCall := jen.Err()
+	switch {
+	case hasResponse && operation.Type == OperationDelete:
+		clientCall = jen.List(jen.Id("_"), jen.Err())
+	case hasResponse:
+		clientCall = jen.List(jen.Id("rsp"), jen.Err())
+	}
 
-		state := "state"
-		if operation == OperationCreate {
-			state = "plan"
-		}
-
-		idFields := filterAppearsIn(properties, inPath)
-		sort.Slice(idFields, func(i, j int) bool {
-			return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
-		})
-
-		for _, v := range idFields {
-			clientParams = append(clientParams, jen.Id(state).Dot(v.GoFieldName()).Dot("Value"+v.TFType()).Call())
-		}
-
-		if hasRequest {
-			clientParams = append(clientParams, jen.Id("&req"))
-		}
-
-		clientResult := jen.Err()
-		if hasResponse {
-			// If there is a response for Delete operation, then renders "_, err :="
-			// otherwise "rsp, err :="
-			if operation == OperationDelete {
-				clientResult = jen.List(jen.Id("_"), jen.Err())
-			} else {
-				clientResult = jen.List(jen.Id("rsp"), jen.Err())
+	g.Add(clientCall.Op(":=").
+		Id("client").Dot(string(operation.ID)).
+		CallFunc(func(params *jen.Group) {
+			// Read, Update, Delete use the "state"
+			state := "state"
+			if operation.Type == OperationCreate {
+				state = "plan"
 			}
-		}
 
-		return clientResult.Op(":=").
-			Id("client").Dot(operationID).Call(clientParams...).Line().
-			If(jen.Err().Op("!=").Nil()).
-			Block(
-				jen.Id("diags").Dot("Append").Call(
-					jen.Qual(errMsgPackage, "FromError").Call(
-						jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operationID))),
-						jen.Err(),
-					),
+			idFields := filterAppearsIn(properties, inPath)
+			sort.Slice(idFields, func(i, j int) bool {
+				return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
+			})
+
+			// Gathers parameters: ctx and path parameters to call the client method
+			params.Id("ctx")
+			for _, v := range idFields {
+				params.Id(state).Dot(v.GoFieldName()).Dot("Value" + v.TFType()).Call()
+			}
+
+			if hasRequest {
+				params.Id("&req")
+			}
+		}),
+	)
+
+	// If the client returned the error
+	g.If(jen.Err().Op("!=").Nil()).
+		Block(
+			jen.Id("diags").Dot("Append").Call(
+				jen.Qual(errMsgPackage, "FromError").Call(
+					jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operation.ID))),
+					jen.Err(),
 				),
-				jen.Return(),
-			)
-	}())
+			),
+			jen.Return(),
+		)
 
 	// Reads the response from the previous call
-	if hasResponse && operation != OperationDelete {
-		state := "plan"
-		if operation == OperationRead {
-			state = "state"
+	if hasResponse && operation.Type != OperationDelete {
+		err := viewResponse(g, item, def, operation)
+		if err != nil {
+			return err
 		}
-		blocks = append(
-			blocks,
-			jen.Id("diags").Dot("Append").Call(
-				jen.Id(flattenDataFunc).
-					Call(
-						jen.Id("ctx"),
-						jen.Id(state),
-						jen.Id("rsp"),
-					).
-					Op("..."),
-			),
+	}
+
+	return nil
+}
+
+func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation) error {
+	state := "plan"
+	if operation.Type == OperationRead {
+		state = "state"
+	}
+
+	// Flatten depends on whether the result is a list or a single object
+	flatten := func(rsp string) jen.Code {
+		return jen.Id("diags").Dot("Append").Call(
+			jen.Id(flattenDataFunc).
+				Call(
+					jen.Id("ctx"),
+					jen.Id(state),
+					jen.Id(rsp),
+				).
+				Op("..."),
 		)
 	}
 
-	return blocks, nil
+	// Flattens the response directly, because it is not a list but an object
+	if len(operation.ResultListLookupKeys) == 0 {
+		g.Add(flatten("rsp"))
+		return nil
+	}
+
+	// Finds a match in the list.
+	// E.g. if rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
+	fieldsMatch := make([]jen.Code, 0)
+	for i, key := range operation.ResultListLookupKeys {
+		if i > 0 {
+			fieldsMatch = append(fieldsMatch, jen.Op("&&"))
+		}
+
+		field := item.Properties[key]
+		fieldsMatch = append(
+			fieldsMatch,
+			jen.Id("v").Dot(clientCamelName(key)).
+				Op("==").
+				Id(state).Dot(field.GoFieldName()).Dot("Value"+field.TFType()).Call(),
+		)
+	}
+
+	// Flattens the item on the list if all key fields match.
+	g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id("rsp")).
+		Block(jen.If(fieldsMatch...).Block(flatten("&v"), jen.Return()))
+
+	// If passed the "for" loop, then no item was found - adds error
+	g.Id("diags").Dot("AddError").Call(
+		jen.Lit("Resource Not Found"),
+		jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(operation.ResultListLookupKeys))),
+	)
+
+	return nil
 }
 
 // filterAppearsIn filters items by their appearance in Create/Update request, response, etc.
@@ -262,4 +319,29 @@ func filterAppearsIn(items []*Item, appearsIn AppearsIn) []*Item {
 		}
 	}
 	return props
+}
+
+// humanizeCodeList turns ["foo", "bar", "baz"] -> "`foo`, `bar` and `baz`"
+func humanizeCodeList(args []string) string {
+	list := ""
+	last := len(args) - 1
+	for i, v := range args {
+		switch i {
+		case 0:
+		case last:
+			list += " and "
+		default:
+			list += ", "
+		}
+		list += fmt.Sprintf("`%s`", v)
+	}
+	return list
+}
+
+var reNonWord = regexp.MustCompile(`\W+`)
+
+// clientCamelName returns go client camel case name
+// fixme: make client naming same as in terraform
+func clientCamelName(s string) string {
+	return strcase.ToCamel(reNonWord.ReplaceAllString(s, "_"))
 }

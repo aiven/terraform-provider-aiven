@@ -259,10 +259,10 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	// Initializes the map
-	for _, operationID := range sortedKeys(pkg.Operations) {
-		err := fromOperationID(scope, operationID, root)
+	for _, op := range pkg.Operations {
+		err := fromOperationID(scope, op.ID, root)
 		if err != nil {
-			return nil, fmt.Errorf("operationID %s: %w", operationID, err)
+			return nil, fmt.Errorf("operationID %s: %w", op.ID, err)
 		}
 	}
 
@@ -303,7 +303,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-func fromOperationID(scope *Scope, operationID string, root *Item) error {
+func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
 	path, err := getOperationPath(scope, operationID)
 	if err != nil {
 		return err
@@ -322,7 +322,7 @@ func fromOperationID(scope *Scope, operationID string, root *Item) error {
 		}
 
 		ap := scope.Definition.Operations.AppearsInID(operationID, RequestBody)
-		err = fromSchema(scope, root, request, ap)
+		err = fromSchema(scope, operationID, root, request, ap)
 		if err != nil {
 			return err
 		}
@@ -339,7 +339,7 @@ func fromOperationID(scope *Scope, operationID string, root *Item) error {
 		delete(response.Properties, "errors")
 
 		ap := scope.Definition.Operations.AppearsInID(operationID, ResponseBody)
-		err = fromSchema(scope, root, response, ap)
+		err = fromSchema(scope, operationID, root, response, ap)
 		if err != nil {
 			return err
 		}
@@ -387,13 +387,13 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 	return item
 }
 
-func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
-	if p, ok := parentSchema.Properties[scope.Definition.ObjectKey]; ok {
+func fromSchema(scope *Scope, operationID OperationID, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
+	if p, ok := parentSchema.Properties[scope.Definition.Operations.ByID(operationID).ResultKey]; ok {
 		// The object is hidden on the root level
 		if p.Type == SchemaTypeArray {
-			return fromSchema(scope, parent, p.Items, appearsIn)
+			return fromSchema(scope, operationID, parent, p.Items, appearsIn)
 		}
-		return fromSchema(scope, parent, p, appearsIn)
+		return fromSchema(scope, operationID, parent, p, appearsIn)
 	}
 
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
@@ -423,7 +423,7 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 				thisItemsSchema = v
 			} else if len(thisSchema.Properties) > 0 {
 				// A regular object with properties
-				err := fromSchema(scope, thisItem, thisSchema, appearsIn)
+				err := fromSchema(scope, operationID, thisItem, thisSchema, appearsIn)
 				if err != nil {
 					return err
 				}
@@ -437,7 +437,7 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 		if thisItemsSchema != nil {
 			// Array or Map items
 			thisItem.Items = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
-			err := fromSchema(scope, thisItem.Items, thisItemsSchema, appearsIn)
+			err := fromSchema(scope, operationID, thisItem.Items, thisItemsSchema, appearsIn)
 			if err != nil {
 				return err
 			}
@@ -452,7 +452,7 @@ func fromSchema(scope *Scope, parent *Item, parentSchema *OASchema, appearsIn Ap
 	return nil
 }
 
-func fromParameter(scope *Scope, operationID string, parent *Item, path *OAPath) error {
+func fromParameter(scope *Scope, operationID OperationID, parent *Item, path *OAPath) error {
 	appearsIn := scope.Definition.Operations.AppearsInID(operationID, PathParameter)
 	for _, param := range path.Parameters {
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)
@@ -470,12 +470,12 @@ func fromParameter(scope *Scope, operationID string, parent *Item, path *OAPath)
 	return nil
 }
 
-func getOperationPath(scope *Scope, operationID string) (*OAPath, error) {
+func getOperationPath(scope *Scope, operationID OperationID) (*OAPath, error) {
 	for _, pathKey := range sortedKeys(scope.OpenAPI.Paths) {
 		path := scope.OpenAPI.Paths[pathKey]
 		for _, methodKey := range sortedKeys(path) {
 			method := path[methodKey]
-			if method.OperationID == operationID {
+			if method.OperationID == string(operationID) {
 				return method, nil
 			}
 		}
@@ -579,11 +579,14 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.Description = orLonger(a.Description, b.Description)
 	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
 	a.Enum = mergeSlices(a.Enum, b.Enum)
-	a.Default = or(b.Default, a.Default)
 	a.MinItems = max(a.MinItems, b.MinItems)
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)
 	a.MaxLength = max(a.MaxLength, b.MaxLength)
+
+	if b.Default != nil {
+		a.Default = b.Default
+	}
 
 	// Minimum and Maximum values may vary between endpoints and request/response schemas.
 	// For Maximum, we can safely take the higher value.

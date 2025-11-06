@@ -12,8 +12,10 @@ idAttribute:
     - cloud_name
 clientHandler: project
 operations:
-  ProjectServicePlanPriceGet: read
-  ProjectServicePlanSpecsGet: read
+  - id: ProjectServicePlanPriceGet
+    type: read
+  - id: ProjectServicePlanSpecsGet
+    type: read
 rename:
   cloud: cloud_name
 remove:
