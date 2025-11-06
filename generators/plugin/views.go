@@ -262,21 +262,28 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 	}
 
 	// Flatten depends on whether the result is a list or a single object
-	flatten := func(rsp string) jen.Code {
+	flatten := func(rsp jen.Code) jen.Code {
 		return jen.Id("diags").Dot("Append").Call(
 			jen.Id(flattenDataFunc).
 				Call(
 					jen.Id("ctx"),
 					jen.Id(state),
-					jen.Id(rsp),
+					rsp,
 				).
 				Op("..."),
 		)
 	}
 
+	// Wraps the list into a map by the specified key
+	if operation.ResultListToKey != "" {
+		m := jen.Op("&").Map(jen.String()).Any()
+		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultListToKey): jen.Id("rsp")})))
+		return nil
+	}
+
 	// Flattens the response directly, because it is not a list but an object
 	if len(operation.ResultListLookupKeys) == 0 {
-		g.Add(flatten("rsp"))
+		g.Add(flatten(jen.Id("rsp")))
 		return nil
 	}
 
@@ -299,7 +306,7 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 
 	// Flattens the item on the list if all key fields match.
 	g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id("rsp")).
-		Block(jen.If(fieldsMatch...).Block(flatten("&v"), jen.Return()))
+		Block(jen.If(fieldsMatch...).Block(flatten(jen.Id("&v")), jen.Return()))
 
 	// If passed the "for" loop, then no item was found - adds error
 	g.Id("diags").Dot("AddError").Call(
