@@ -13,12 +13,14 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Change `aiven_clickhouse_user` resource and data source: migrate to use generated client
-- Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information for a specific plan and cloud region
+- Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information
+  for a specific plan and cloud region
 - Add `aiven_service_plan_list` data source: query available service plans and their regional availability for a service type
 - Change `aiven_organization_address` field `address_lines` type from `Set` to `List` to preserve order of address lines
 - Fix `aiven_kafka_quota` added retry logic to handle API eventual consistency
 - Improve `aiven_organization`: added retries to `AccountList` for eventual consistency
-- Improve `aiven_organization_project`: added retries to the read operation to ensure eventual consistency after creating or updating the resource
+- Improve `aiven_organization_project`: added retries to the read operation to ensure eventual consistency after creating
+  or updating the resource
 - Fix `aiven_organization_application_user_token`: prevent `full_token` from being lost after running `terraform refresh`
 - Add `aiven_opensearch` field `opensearch_user_config.jwt`: OpenSearch JWT Configuration
 - Add `aiven_pg` field `pg_user_config.pg.io_combine_limit`: EXPERIMENTAL: Controls the largest I/O size in operations
@@ -35,6 +37,7 @@ nav_order: 1
   change prepares for future Plugin Framework migration which doesn't support computed+optional blocks
 - Change `aiven_influxdb` resource field `influxdb_user_config`: deprecate: This property is deprecated
 - Upgraded `go` version to `1.25`
+- Change `aiven_service_component` datasource field `usage` (enum): add `ha_replica`
 
 ## [4.46.1] - 2025-10-27
 
