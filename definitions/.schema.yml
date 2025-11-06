@@ -138,6 +138,10 @@ definitions:
           type: string
         $comment: |
           When the response returns a list, these keys are used to locate the item within the response
+      resultListToKey:
+        type: string
+        $comment: |
+          Specifies the key to map list responses into a single object for flatten/expand logic
     required:
       - id
       - type
