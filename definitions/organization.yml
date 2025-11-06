@@ -1,11 +1,17 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/organization/organization
 operations:
-  AccountCreate: create
-  AccountDelete: delete
-  AccountGet: read
-  AccountUpdate: update
-objectKey: account
+  - id: AccountCreate
+    type: create
+    resultKey: account
+  - id: AccountGet
+    type: read
+    resultKey: account
+  - id: AccountUpdate
+    type: update
+    resultKey: account
+  - id: AccountDelete
+    type: delete
 resource:
   description: Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).
 datasource:

@@ -34,18 +34,18 @@ func listSources() []AppearsIn {
 	}
 }
 
-type Operation string
+type OperationType string
 
 const (
-	OperationCreate Operation = "create"
-	OperationRead   Operation = "read"
-	OperationUpdate Operation = "update"
-	OperationDelete Operation = "delete"
-	OperationUpsert Operation = "upsert"
+	OperationCreate OperationType = "create"
+	OperationRead   OperationType = "read"
+	OperationUpdate OperationType = "update"
+	OperationDelete OperationType = "delete"
+	OperationUpsert OperationType = "upsert"
 )
 
-func listOperations() []Operation {
-	return []Operation{
+func listOperations() []OperationType {
+	return []OperationType{
 		OperationCreate,
 		OperationRead,
 		OperationUpdate,
@@ -53,8 +53,8 @@ func listOperations() []Operation {
 	}
 }
 
-func operationToHandler() map[Operation]AppearsIn {
-	return map[Operation]AppearsIn{
+func operationToHandler() map[OperationType]AppearsIn {
+	return map[OperationType]AppearsIn{
 		OperationCreate: CreateHandler,
 		OperationRead:   ReadHandler,
 		OperationUpdate: UpdateHandler,
@@ -63,7 +63,34 @@ func operationToHandler() map[Operation]AppearsIn {
 	}
 }
 
-type Operations map[string]Operation
+type OperationID string
+
+type Operation struct {
+	ID                   OperationID   `yaml:"id"`
+	Type                 OperationType `yaml:"type"`
+	DisableView          bool          `yaml:"disableView"`
+	ResultKey            string        `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
+	ResultListLookupKeys []string      `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
+}
+
+type Operations []Operation
+
+func (o Operations) ByID(operationID OperationID) Operation {
+	for _, operation := range o {
+		if operation.ID == operationID {
+			return operation
+		}
+	}
+	return Operation{}
+}
+
+func (o Operations) OperationIDTypes() map[OperationID]OperationType {
+	result := make(map[OperationID]OperationType)
+	for _, operation := range o {
+		result[operation.ID] = operation.Type
+	}
+	return result
+}
 
 // AppearsInID returns the AppearsIn bitmask for a given operation ID and source (such as PathParameter, RequestBody, or ResponseBody).
 // Example: o.AppearsInID("FooReadOperationID", PathParameter) will include:
@@ -74,13 +101,14 @@ type Operations map[string]Operation
 // This enables querying for all sources of a type (like all path parameters),
 // or isolating those associated with a particular operation ID.
 // Different operations may define different sets of parameters, hence we need to distinguish them.
-func (o Operations) AppearsInID(operationID string, source AppearsIn) AppearsIn {
+func (o Operations) AppearsInID(operationID OperationID, source AppearsIn) AppearsIn {
 	sources := listSources()                // PathParameter, RequestBody, ResponseBody
 	handlers := operationToHandler()        // CreateHandler, ReadHandler, etc.
 	generic := len(handlers) + len(sources) // Reserved bits for generic bits: sources and handlers
 
 	// Each operation has its own bucket of bits: [create:..read:...update:...delete:...]
-	operationBucket := len(sources) * slices.Index(sortedKeys(o), operationID)
+	operationIDTypes := o.OperationIDTypes()
+	operationBucket := len(sources) * slices.Index(sortedKeys(operationIDTypes), operationID)
 
 	// Offset: [generic...create...read:path...update...delete...]
 	// ---------------------------------^
@@ -90,7 +118,7 @@ func (o Operations) AppearsInID(operationID string, source AppearsIn) AppearsIn 
 	}
 
 	// E.g.: [generic(CreateHandler, ResponseBody), create(OperationSpecificResponse)]
-	return handlers[o[operationID]] | source | (1 << bitOffset)
+	return handlers[operationIDTypes[operationID]] | source | (1 << bitOffset)
 }
 
 // AppearsInHandler finds all operation IDs matching the operation, merges the result
@@ -98,8 +126,8 @@ func (o Operations) AppearsInID(operationID string, source AppearsIn) AppearsIn 
 func (o Operations) AppearsInHandler(handler, source AppearsIn) AppearsIn {
 	handlers := operationToHandler()
 	var appearsIn AppearsIn
-	for opID, op := range o {
-		if handlers[op]&handler > 0 {
+	for opID, opType := range o.OperationIDTypes() {
+		if handlers[opType]&handler > 0 {
 			appearsIn |= o.AppearsInID(opID, source)
 		}
 	}
@@ -133,7 +161,6 @@ type Definition struct {
 	Schema         map[string]*Item  `yaml:"schema,omitempty"`
 	Remove         []string          `yaml:"remove,omitempty"`
 	Rename         map[string]string `yaml:"rename,omitempty"`
-	ObjectKey      string            `yaml:"objectKey,omitempty"`
 	Resource       *SchemaMeta       `yaml:"resource,omitempty"`
 	Datasource     *SchemaMeta       `yaml:"datasource,omitempty"`
 	IDAttribute    *IDAttribute      `yaml:"idAttribute"`
@@ -141,7 +168,6 @@ type Definition struct {
 	Operations     Operations        `yaml:"operations"`
 	Version        *int              `yaml:"version"`
 	ClientHandler  string            `yaml:"clientHandler,omitempty"`
-	DisableViews   []Operation       `yaml:"disableViews,omitempty"`
 	RefreshState   bool              `yaml:"refreshState,omitempty"`
 }
 

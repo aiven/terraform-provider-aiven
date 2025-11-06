@@ -15,7 +15,8 @@ remove:
   - service_plans/service_type
   - service_plans/regions
 operations:
-  ProjectServicePlanList: read
+  - id: ProjectServicePlanList
+    type: read
 schema:
   service_plans:
     type: arrayOrdered

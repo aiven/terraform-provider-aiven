@@ -5,11 +5,16 @@ resource:
 datasource:
   description: Gets information about an Aiven project.
 operations:
-  OrganizationProjectsCreate: create
-  OrganizationProjectsDelete: delete
-  OrganizationProjectsGet: read
-  OrganizationProjectsUpdate: update
-  ProjectKmsGetCA: read
+  - id: OrganizationProjectsCreate
+    type: create
+  - id: OrganizationProjectsDelete
+    type: delete
+  - id: OrganizationProjectsGet
+    type: read
+  - id: OrganizationProjectsUpdate
+    type: update
+  - id: ProjectKmsGetCA
+    type: read
 idAttribute:
   fields:
     - organization_id

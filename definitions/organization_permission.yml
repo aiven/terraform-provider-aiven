@@ -23,8 +23,10 @@ idAttribute:
     - resource_type
     - resource_id
 operations:
-  PermissionsSet: upsert
-  PermissionsGet: read
+  - id: PermissionsSet
+    type: upsert
+  - id: PermissionsGet
+    type: read
 schema:
   permissions:
     items:

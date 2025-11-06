@@ -9,16 +9,23 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 )
 
 func Resources() map[string]func() resource.Resource {
-	return map[string]func() resource.Resource{"aiven_organization_address": adapter.NewLazyResource(address.ResourceOptions)}
+	return map[string]func() resource.Resource{
+		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),
+		"aiven_organization_application_user":       adapter.NewLazyResource(applicationuser.ResourceOptions),
+		"aiven_organization_application_user_token": adapter.NewLazyResource(applicationusertoken.ResourceOptions),
+	}
 }
 
 func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
-		"aiven_organization_address": adapter.NewLazyDataSource(address.DataSourceOptions),
-		"aiven_service_plan":         adapter.NewLazyDataSource(plan.DataSourceOptions),
+		"aiven_organization_address":          adapter.NewLazyDataSource(address.DataSourceOptions),
+		"aiven_organization_application_user": adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
+		"aiven_service_plan":                  adapter.NewLazyDataSource(plan.DataSourceOptions),
 	}
 }
