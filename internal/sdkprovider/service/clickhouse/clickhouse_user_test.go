@@ -3,7 +3,7 @@ package clickhouse_test
 import (
 	"context"
 	"fmt"
-	"log"
+	"regexp"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -15,25 +15,90 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func TestAccAivenClickhouseUser_basic(t *testing.T) {
+func TestAccAivenClickhouseUser(t *testing.T) {
 	resourceName := "aiven_clickhouse_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenClickhouseUserResourceDestroy,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				Source:            "hashicorp/random",
+				VersionConstraint: ">= 3.0.0",
+			},
+		},
+		CheckDestroy: testAccCheckAivenClickhouseUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
+				// create user with generated password
 				Config: testAccClickhouseUserResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenClickhouseUserAttributes("data.aiven_clickhouse_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-					resource.TestCheckResourceAttrSet(resourceName, "password"),
+					resource.TestCheckResourceAttrSet(resourceName, "password"), // verify generated password is in state
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo_version"),
 					resource.TestCheckResourceAttrSet(resourceName, "uuid"),
 					resource.TestCheckResourceAttrSet(resourceName, "required"),
+					testAccCheckAivenClickhouseUserAttributes("data.aiven_clickhouse_user.user"),
+				),
+			},
+			{
+				// migrate to write-only password
+				Config: testAccClickhouseUserResourceWriteOnly(rName, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"), // verify password_wo is NOT in state
+					resource.TestCheckResourceAttr(resourceName, "password", ""),  // verify password is empty when using write-only
+					resource.TestCheckResourceAttrSet(resourceName, "uuid"),
+				),
+			},
+			{
+				// rotate password
+				Config: testAccClickhouseUserResourceWriteOnly(rName, 2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "password", ""),
+				),
+			},
+			{
+				// refresh state without changes
+				RefreshState: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "password", ""),
+				),
+			},
+			{
+				// attempt to decrement version (should fail)
+				Config:      testAccClickhouseUserResourceWriteOnly(rName, 1),
+				ExpectError: regexp.MustCompile(`password_wo_version must be incremented.*`),
+			},
+			{
+				// transition back to auto-generated password
+				Config: testAccClickhouseUserResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttrSet(resourceName, "password"), // verify new generated password is in state
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "0"),
+				),
+			},
+			{
+				// switch back to write-only password with new version 1
+				Config: testAccClickhouseUserResourceWriteOnly(rName, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "password", ""), // verify password is empty when using write-only
 				),
 			},
 		},
@@ -107,12 +172,42 @@ data "aiven_clickhouse_user" "user" {
 }`, acc.ProjectName(), name, name)
 }
 
+func testAccClickhouseUserResourceWriteOnly(name string, version int) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_clickhouse" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-16"
+  service_name            = "test-acc-sr-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "random_password" "pw" {
+  length  = 24
+  special = true
+  keepers = {
+    version = %[3]d
+  }
+}
+
+resource "aiven_clickhouse_user" "foo" {
+  service_name        = aiven_clickhouse.bar.service_name
+  project             = aiven_clickhouse.bar.project
+  username            = "user-%[2]s"
+  password_wo         = random_password.pw.result
+  password_wo_version = %[3]d
+}`, acc.ProjectName(), name, version)
+}
+
 func testAccCheckAivenClickhouseUserAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
-
-		log.Printf("[DEBUG] clickhouse user attributes %v", a)
 
 		if a["username"] == "" {
 			return fmt.Errorf("expected to get a clikchouse user username from Aiven")

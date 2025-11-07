@@ -15,8 +15,12 @@ func DatasourceClickhouseUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClient(datasourceClickhouseUserRead),
 		Description: "Gets information about a ClickHouse user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenClickhouseUserSchema,
-			"project", "service_name", "username"),
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
+			aivenClickhouseUserSchema,
+			"project",
+			"service_name",
+			"username",
+		),
 	}
 }
 
