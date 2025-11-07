@@ -38,6 +38,7 @@ nav_order: 1
 - Change `aiven_influxdb` resource field `influxdb_user_config`: deprecate: This property is deprecated
 - Upgraded `go` version to `1.25`
 - Change `aiven_service_component` datasource field `usage` (enum): add `ha_replica`
+- Add `aiven_organization_user_group_list` data source: List all user groups within an organization
 
 ## [4.46.1] - 2025-10-27
 
