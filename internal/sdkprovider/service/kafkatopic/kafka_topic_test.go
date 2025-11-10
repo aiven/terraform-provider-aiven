@@ -6,12 +6,15 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	kafkatopic2 "github.com/aiven/go-client-codegen/handler/kafkatopic"
+	"github.com/avast/retry-go"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -25,9 +28,13 @@ import (
 )
 
 func TestAccAivenKafkaTopic(t *testing.T) {
-	if os.Getenv(resource.EnvTfAcc) != "1" {
-		t.Skipf("Set '%s=1' to run this acceptance test", resource.EnvTfAcc)
+	accEnabled, _ := strconv.ParseBool(os.Getenv(resource.EnvTfAcc))
+	if !accEnabled {
+		t.Skipf("Set '%s=true' to run this acceptance test", resource.EnvTfAcc)
 	}
+
+	client, err := acc.GetTestGenAivenClient()
+	require.NoError(t, err)
 
 	orgName := acc.OrganizationName()
 	projectName := acc.ProjectName()
@@ -104,6 +111,8 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 		})
 	})
 
+	// This test proves the "termination_protection" field doesn't mess up with the state in various scenarios,
+	// despite being a virtual field (not sent to or returned from the API).
 	t.Run("termination_protection", func(t *testing.T) {
 		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
 
@@ -159,23 +168,23 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 					// Step 2: deletes topic, then runs apply, same config & checks
 					PreConfig: func() {
 						ctx := t.Context()
-						client := acc.GetTestAivenClient()
-
-						// deletes
-						err := client.KafkaTopics.Delete(ctx, projectName, kafkaName, topicName)
 						require.NoError(t, err)
 
 						// Makes sure topic does not exist
-						err = retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
-							_, err := client.KafkaTopics.Get(ctx, projectName, kafkaName, topicName)
-							if err != nil {
-								return &retry.RetryError{
-									Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
-									Retryable: aiven.IsNotFound(err),
+						err = retry.Do(
+							func() error {
+								topic, err := client.ServiceKafkaTopicGet(ctx, projectName, kafkaName, topicName)
+								if topic != nil {
+									assert.Equal(t, kafkatopic2.TopicStateTypeActive, topic.State)
 								}
-							}
-							return nil
-						})
+								return err
+							},
+							retry.Context(ctx),
+							retry.Delay(5*time.Second),
+							retry.Attempts(20),
+							retry.RetryIf(avngen.IsNotFound),
+							retry.LastErrorOnly(true),
+						)
 						require.NoError(t, err)
 
 						// We need to remove it from reps cache
@@ -193,22 +202,20 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 						resource.TestCheckResourceAttr(topicResource, "id", topicID),
 						func(_ *terraform.State) error {
 							// Topic exists and active
-							client := acc.GetTestAivenClient()
-							return retry.RetryContext(
-								t.Context(),
-								time.Minute,
-								func() *retry.RetryError {
-									ctx := t.Context()
-									tc, err := client.KafkaTopics.Get(ctx, projectName, kafkaName, topicName)
-									if err != nil {
-										return &retry.RetryError{
-											Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
-											Retryable: aiven.IsNotFound(err),
-										}
+							ctx := t.Context()
+							return retry.Do(
+								func() error {
+									topic, err := client.ServiceKafkaTopicGet(ctx, projectName, kafkaName, topicName)
+									if topic != nil {
+										assert.Equal(t, kafkatopic2.TopicStateTypeActive, topic.State)
 									}
-									assert.Equal(t, "ACTIVE", tc.State)
-									return nil
+									return err
 								},
+								retry.Context(ctx),
+								retry.Delay(5*time.Second),
+								retry.Attempts(20),
+								retry.RetryIf(avngen.IsNotFound),
+								retry.LastErrorOnly(true),
 							)
 						},
 					),
@@ -373,7 +380,10 @@ func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return err
+	}
 
 	ctx := context.Background()
 
@@ -385,17 +395,17 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 				return err
 			}
 
-			_, err = c.Services.Get(ctx, project, serviceName)
+			_, err = c.ServiceGet(ctx, project, serviceName)
 			if err != nil {
-				if aiven.IsNotFound(err) {
+				if avngen.IsNotFound(err) {
 					return nil
 				}
 				return err
 			}
 
-			t, err := c.KafkaTopics.Get(ctx, project, serviceName, topicName)
+			t, err := c.ServiceKafkaTopicGet(ctx, project, serviceName, topicName)
 			if err != nil {
-				if aiven.IsNotFound(err) {
+				if avngen.IsNotFound(err) {
 					return nil
 				}
 				return err
@@ -411,9 +421,9 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 				return err
 			}
 
-			r, err := c.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
+			r, err := c.UserGroupGet(ctx, orgID, userGroupID)
 			if err != nil {
-				if aiven.IsNotFound(err) {
+				if avngen.IsNotFound(err) {
 					return nil
 				}
 				return err
