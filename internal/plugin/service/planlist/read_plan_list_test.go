@@ -57,7 +57,7 @@ func TestReadPlanList(t *testing.T) {
 		Return(plansOut, nil).
 		Once()
 
-	diags := readPlanList(t.Context(), client, state)
+	diags := readView(t.Context(), client, state)
 
 	require.False(t, diags.HasError(), "expected no errors but got: %v", diags)
 

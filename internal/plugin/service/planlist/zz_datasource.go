@@ -34,8 +34,23 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  service_plans {
-	    cloud_names  = ["test"]
+	    max_memory_percent = 42
+	    node_count         = 42
+	    regions = {
+	      foo = {
+	        disk_space_cap_mb           = 42
+	        disk_space_gb_price_usd     = "foo"
+	        disk_space_mb               = 42
+	        disk_space_step_mb          = 42
+	        node_cpu_count              = 42
+	        node_memory_mb              = 42
+	        object_storage_gb_price_usd = "foo"
+	        price_usd                   = "foo"
+	      }
+	    }
 	    service_plan = "foo"
+	    service_type = "foo"
+	    shard_count  = 42
 	  }
 	}
 */
@@ -59,14 +74,63 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"service_plans": schema.ListNestedBlock{
 				MarkdownDescription: "List of plans available for this type of service.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
-					"cloud_names": schema.ListAttribute{
+					"max_memory_percent": schema.Int64Attribute{
 						Computed:            true,
-						ElementType:         types.StringType,
-						MarkdownDescription: "List of cloud names where the service plan is available.",
+						MarkdownDescription: "Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.",
+					},
+					"node_count": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: "Number of nodes in this service plan.",
+					},
+					"regions": schema.MapNestedAttribute{
+						Computed:            true,
+						MarkdownDescription: "Service plan hourly price per cloud region.",
+						NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
+							"disk_space_cap_mb": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Maximum amount of disk space possible for the plan in the given region.",
+							},
+							"disk_space_gb_price_usd": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Hourly additional disk space price per GiB in this region.",
+							},
+							"disk_space_mb": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Combined amount of service disk space of all service nodes in megabytes.",
+							},
+							"disk_space_step_mb": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Disk space change step size.",
+							},
+							"node_cpu_count": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Number of CPU cores on each service node.",
+							},
+							"node_memory_mb": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Amount of memory on each service node in megabytes.",
+							},
+							"object_storage_gb_price_usd": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Hourly object storage price per GiB in this region.",
+							},
+							"price_usd": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Hourly service price in this region.",
+							},
+						}},
 					},
 					"service_plan": schema.StringAttribute{
 						Computed:            true,
 						MarkdownDescription: "Subscription plan.",
+					},
+					"service_type": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Service type code.",
+					},
+					"shard_count": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: "Number of shards in this service plan.",
 					},
 				}},
 			},

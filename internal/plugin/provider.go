@@ -26,7 +26,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -186,7 +185,6 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
 		organization.NewDataSource,
-		planlist.NewDataSource,
 	}
 
 	// Add to a list of data sources that are currently in beta.
