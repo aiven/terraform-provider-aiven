@@ -25,7 +25,7 @@ output "plan_names" {
   value = [for plan in data.aiven_service_plan_list.kafka_plans.service_plans : plan.service_plan]
 }
 
-## Find a specific plan
+# Find a specific plan
 locals {
   business_plan = one([
     for plan in data.aiven_service_plan_list.kafka_plans.service_plans :
@@ -33,8 +33,19 @@ locals {
   ])
 }
 
-output "business_4_cloud_names" {
-  value = local.business_plan.cloud_names
+# All available region names (cloud names) for the "business-4" plan
+output "business_4_region_names" {
+  value = keys(local.business_plan.regions)
+}
+
+# CPU count for the "business-4" plan in "aws-eu-west-1"
+output "business_4_aws_eu_west_1_cpu" {
+  value = local.business_plan.regions["aws-eu-west-1"].node_cpu_count
+}
+
+# Memory amount for the "business-4" plan in "aws-eu-west-1"
+output "business_4_aws_eu_west_1_memory" {
+  value = local.business_plan.regions["aws-eu-west-1"].node_memory_mb
 }
 ```
 
@@ -68,5 +79,23 @@ Optional:
 
 Read-Only:
 
-- `cloud_names` (List of String) List of cloud names where the service plan is available.
+- `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
+- `node_count` (Number) Number of nodes in this service plan.
+- `regions` (Attributes Map) Service plan hourly price per cloud region. (see [below for nested schema](#nestedatt--service_plans--regions))
 - `service_plan` (String) Subscription plan.
+- `service_type` (String) Service type code.
+- `shard_count` (Number) Number of shards in this service plan.
+
+<a id="nestedatt--service_plans--regions"></a>
+### Nested Schema for `service_plans.regions`
+
+Read-Only:
+
+- `disk_space_cap_mb` (Number) Maximum amount of disk space possible for the plan in the given region.
+- `disk_space_gb_price_usd` (String) Hourly additional disk space price per GiB in this region.
+- `disk_space_mb` (Number) Combined amount of service disk space of all service nodes in megabytes.
+- `disk_space_step_mb` (Number) Disk space change step size.
+- `node_cpu_count` (Number) Number of CPU cores on each service node.
+- `node_memory_mb` (Number) Amount of memory on each service node in megabytes.
+- `object_storage_gb_price_usd` (String) Hourly object storage price per GiB in this region.
+- `price_usd` (String) Hourly service price in this region.

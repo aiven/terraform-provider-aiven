@@ -707,6 +707,12 @@ func fillOptionalFields(parent *Item, item *Item, name string) error {
 		}
 	}
 
+	// A map uses "Items" to store the additional properties.
+	if item.AdditionalProperties != nil {
+		item.Items = item.AdditionalProperties
+		item.AdditionalProperties = nil
+	}
+
 	if item.Items != nil {
 		err := fillOptionalFields(item, item.Items, name)
 		if err != nil {

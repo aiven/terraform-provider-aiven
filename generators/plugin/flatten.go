@@ -296,11 +296,11 @@ func genAttrFunc(item *Item) *jen.Statement {
 
 func genAttrFieldType(item *Item) *jen.Statement {
 	switch {
-	case item.IsScalar(), item.IsMap():
+	case item.IsScalar():
 		return jen.Qual(typesPackage, item.TFType()+"Type")
 	case item.IsObject():
 		return jen.Id(attrPrefix + item.UniqueName()).Call()
-	case item.IsSet(), item.IsList():
+	case item.IsSet(), item.IsList(), item.IsMap():
 		return jen.Qual(typesPackage, item.TFType()+"Type").Values(jen.Dict{
 			jen.Id("ElemType"): genAttrFieldType(item.Items),
 		})

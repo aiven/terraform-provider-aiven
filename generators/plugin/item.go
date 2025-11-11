@@ -184,6 +184,10 @@ type Item struct {
 	Properties map[string]*Item `yaml:"properties"`
 	Items      *Item            `yaml:"items"` // Array item or Map item
 
+	// Inherited from the user definition and propagated to "Items";
+	// this simplifies generation logic, as both arrays and maps use "Items" similarly.
+	AdditionalProperties *Item `yaml:"additionalProperties"`
+
 	// User-defined fields for YAML generation
 	OverrideRequired   *bool `yaml:"required"`
 	OverrideComputed   *bool `yaml:"computed"`

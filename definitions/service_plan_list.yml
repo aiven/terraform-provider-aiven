@@ -8,22 +8,46 @@ idAttribute:
     - project
     - service_type
 remove:
-  - service_plans/node_count
-  - service_plans/shard_count
-  - service_plans/max_memory_percent
   - service_plans/backup_config
-  - service_plans/service_type
-  - service_plans/regions
+clientHandler: project
 operations:
   - id: ProjectServicePlanList
     type: read
+    resultListToKey: service_plans
 schema:
   service_plans:
     type: arrayOrdered
     items:
       properties:
-        cloud_names:
-          type: arrayOrdered
-          items:
-            type: string
-          description: List of cloud names where the service plan is available.
+        regions:
+          # The spec doesn't define the "regions" properties:
+          # https://api.aiven.io/doc/#tag/Project/operation/ProjectServicePlanList
+          type: object
+          additionalProperties:
+            type: object
+            description: Plan details for the given service type in this particular cloud region
+            properties:
+              disk_space_mb:
+                type: integer
+                description: Combined amount of service disk space of all service nodes in megabytes
+              disk_space_step_mb:
+                type: integer
+                description: Disk space change step size
+              disk_space_cap_mb:
+                type: integer
+                description: Maximum amount of disk space possible for the plan in the given region
+              disk_space_gb_price_usd:
+                type: string
+                description: Hourly additional disk space price per GiB in this region
+              object_storage_gb_price_usd:
+                type: string
+                description: Hourly object storage price per GiB in this region
+              price_usd:
+                type: string
+                description: Hourly service price in this region
+              node_cpu_count:
+                type: integer
+                description: Number of CPU cores on each service node
+              node_memory_mb:
+                type: integer
+                description: Amount of memory on each service node in megabytes

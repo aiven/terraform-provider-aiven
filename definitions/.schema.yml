@@ -202,8 +202,11 @@ definitions:
           Updated description for the attribute.
           Example: "The size of the instance in GB"
       items:
-        type: object
+        $ref: "#/definitions/Schema"
         $comment: Array item or Map item configuration
+      additionalProperties:
+        $ref: "#/definitions/Schema"
+        $comment: Additional properties for object types
       enum:
         type: array
         items:

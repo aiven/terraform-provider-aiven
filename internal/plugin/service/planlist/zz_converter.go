@@ -32,8 +32,23 @@ func (tf *tfModel) SetID(vProject string, vServiceType string) {
 }
 
 type tfModelServicePlans struct {
-	CloudNames  types.List   `tfsdk:"cloud_names"`
-	ServicePlan types.String `tfsdk:"service_plan"`
+	MaxMemoryPercent types.Int64  `tfsdk:"max_memory_percent"`
+	NodeCount        types.Int64  `tfsdk:"node_count"`
+	Regions          types.Map    `tfsdk:"regions"`
+	ServicePlan      types.String `tfsdk:"service_plan"`
+	ServiceType      types.String `tfsdk:"service_type"`
+	ShardCount       types.Int64  `tfsdk:"shard_count"`
+}
+
+type tfModelServicePlansRegions struct {
+	DiskSpaceCapMb          types.Int64  `tfsdk:"disk_space_cap_mb"`
+	DiskSpaceGbPriceUsd     types.String `tfsdk:"disk_space_gb_price_usd"`
+	DiskSpaceMb             types.Int64  `tfsdk:"disk_space_mb"`
+	DiskSpaceStepMb         types.Int64  `tfsdk:"disk_space_step_mb"`
+	NodeCPUCount            types.Int64  `tfsdk:"node_cpu_count"`
+	NodeMemoryMb            types.Int64  `tfsdk:"node_memory_mb"`
+	ObjectStorageGbPriceUsd types.String `tfsdk:"object_storage_gb_price_usd"`
+	PriceUsd                types.String `tfsdk:"price_usd"`
 }
 
 type apiModel struct {
@@ -43,8 +58,23 @@ type apiModel struct {
 }
 
 type apiModelServicePlans struct {
-	CloudNames  *[]string `json:"cloud_names,omitempty"`
-	ServicePlan *string   `json:"service_plan,omitempty"`
+	MaxMemoryPercent *int64                                   `json:"max_memory_percent,omitempty"`
+	NodeCount        *int64                                   `json:"node_count,omitempty"`
+	Regions          *map[string]*apiModelServicePlansRegions `json:"regions,omitempty"`
+	ServicePlan      *string                                  `json:"service_plan,omitempty"`
+	ServiceType      *string                                  `json:"service_type,omitempty"`
+	ShardCount       *int64                                   `json:"shard_count,omitempty"`
+}
+
+type apiModelServicePlansRegions struct {
+	DiskSpaceCapMb          *int64  `json:"disk_space_cap_mb,omitempty"`
+	DiskSpaceGbPriceUsd     *string `json:"disk_space_gb_price_usd,omitempty"`
+	DiskSpaceMb             *int64  `json:"disk_space_mb,omitempty"`
+	DiskSpaceStepMb         *int64  `json:"disk_space_step_mb,omitempty"`
+	NodeCPUCount            *int64  `json:"node_cpu_count,omitempty"`
+	NodeMemoryMb            *int64  `json:"node_memory_mb,omitempty"`
+	ObjectStorageGbPriceUsd *string `json:"object_storage_gb_price_usd,omitempty"`
+	PriceUsd                *string `json:"price_usd,omitempty"`
 }
 
 // flattenData turns Response into TF object
@@ -89,22 +119,80 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenServicePlans(ctx context.Context, api *apiModelServicePlans) (*tfModelServicePlans, diag.Diagnostics) {
 	state := new(tfModelServicePlans)
-	if api.CloudNames != nil {
-		vCloudNames, diags := util.ListValueFrom(ctx, types.StringType, api.CloudNames)
+	if api.Regions != nil {
+		vRegions, diags := util.FlattenMapNested(ctx, flattenServicePlansRegions, *api.Regions, attrsServicePlansRegions())
 		if diags.HasError() {
 			return nil, diags
 		}
-		state.CloudNames = vCloudNames
+		state.Regions = vRegions
+	}
+	if api.MaxMemoryPercent != nil {
+		state.MaxMemoryPercent = types.Int64PointerValue(api.MaxMemoryPercent)
+	}
+	if api.NodeCount != nil {
+		state.NodeCount = types.Int64PointerValue(api.NodeCount)
 	}
 	if api.ServicePlan != nil {
 		state.ServicePlan = util.StringPointerValue(api.ServicePlan)
+	}
+	if api.ServiceType != nil {
+		state.ServiceType = util.StringPointerValue(api.ServiceType)
+	}
+	if api.ShardCount != nil {
+		state.ShardCount = types.Int64PointerValue(api.ShardCount)
+	}
+	return state, nil
+}
+
+func flattenServicePlansRegions(ctx context.Context, api *apiModelServicePlansRegions) (*tfModelServicePlansRegions, diag.Diagnostics) {
+	state := new(tfModelServicePlansRegions)
+	if api.DiskSpaceCapMb != nil {
+		state.DiskSpaceCapMb = types.Int64PointerValue(api.DiskSpaceCapMb)
+	}
+	if api.DiskSpaceGbPriceUsd != nil {
+		state.DiskSpaceGbPriceUsd = util.StringPointerValue(api.DiskSpaceGbPriceUsd)
+	}
+	if api.DiskSpaceMb != nil {
+		state.DiskSpaceMb = types.Int64PointerValue(api.DiskSpaceMb)
+	}
+	if api.DiskSpaceStepMb != nil {
+		state.DiskSpaceStepMb = types.Int64PointerValue(api.DiskSpaceStepMb)
+	}
+	if api.NodeCPUCount != nil {
+		state.NodeCPUCount = types.Int64PointerValue(api.NodeCPUCount)
+	}
+	if api.NodeMemoryMb != nil {
+		state.NodeMemoryMb = types.Int64PointerValue(api.NodeMemoryMb)
+	}
+	if api.ObjectStorageGbPriceUsd != nil {
+		state.ObjectStorageGbPriceUsd = util.StringPointerValue(api.ObjectStorageGbPriceUsd)
+	}
+	if api.PriceUsd != nil {
+		state.PriceUsd = util.StringPointerValue(api.PriceUsd)
 	}
 	return state, nil
 }
 
 func attrsServicePlans() types.ObjectType {
 	return types.ObjectType{AttrTypes: map[string]attr.Type{
-		"cloud_names":  types.ListType{ElemType: types.StringType},
-		"service_plan": types.StringType,
+		"max_memory_percent": types.Int64Type,
+		"node_count":         types.Int64Type,
+		"regions":            types.MapType{ElemType: attrsServicePlansRegions()},
+		"service_plan":       types.StringType,
+		"service_type":       types.StringType,
+		"shard_count":        types.Int64Type,
+	}}
+}
+
+func attrsServicePlansRegions() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{
+		"disk_space_cap_mb":           types.Int64Type,
+		"disk_space_gb_price_usd":     types.StringType,
+		"disk_space_mb":               types.Int64Type,
+		"disk_space_step_mb":          types.Int64Type,
+		"node_cpu_count":              types.Int64Type,
+		"node_memory_mb":              types.Int64Type,
+		"object_storage_gb_price_usd": types.StringType,
+		"price_usd":                   types.StringType,
 	}}
 }
