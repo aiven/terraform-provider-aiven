@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.47.0] - 2025-11-12
+
 - Add `aiven_clickhouse_user` resource fields `password_wo` and `password_wo_version`: support for write-only passwords to manage them securely without storing them in state
 - Change `aiven_clickhouse_user` resource and data source: migrate to use generated client
 - Add `aiven_service_plan` data source: retrieve detailed service plan specifications and pricing information
