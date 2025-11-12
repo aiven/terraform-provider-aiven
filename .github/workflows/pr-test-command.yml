@@ -1,0 +1,121 @@
+name: PR Test Command
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  parse-and-discover:
+    name: Parse Command and Discover Tests
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/test')
+    outputs:
+      should_run: ${{ steps.check_permission.outputs.should_run }}
+      pr_sha: ${{ steps.parse.outputs.pr_sha }}
+      filter_services: ${{ steps.parse.outputs.filter_services }}
+      comment_id: ${{ steps.post_comment.outputs.comment_id }}
+    steps:
+      - name: Check user permissions
+        id: check_permission
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const association = context.payload.comment.author_association;
+            const allowedAssociations = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+            const shouldRun = allowedAssociations.includes(association);
+
+            core.setOutput('should_run', shouldRun);
+
+      - name: Get PR details and parse command
+        id: parse
+        if: steps.check_permission.outputs.should_run == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Parse command
+            const comment = context.payload.comment.body;
+            const commandLine = comment.split('\n')[0].trim();
+
+            let serviceFilter = '';
+            if (commandLine.startsWith('/test ')) {
+              serviceFilter = commandLine.substring(6).trim();
+            } else if (commandLine === '/test') {
+              serviceFilter = ''; // Run all tests
+            }
+
+            // Convert spaces to commas for the Go program
+            const filterFormatted = serviceFilter.replace(/\s+/g, ',');
+
+            console.log(`Service filter: ${serviceFilter || 'all tests'}`);
+
+            core.setOutput('pr_sha', pr.data.head.sha);
+            core.setOutput('service_filter_display', serviceFilter);
+            core.setOutput('filter_services', filterFormatted);
+
+      - name: Post initial comment
+        id: post_comment
+        if: steps.check_permission.outputs.should_run == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const serviceFilter = '${{ steps.parse.outputs.service_filter_display }}';
+            const filterInfo = !serviceFilter
+              ? 'All acceptance tests'
+              : `Services: \`${serviceFilter}\``;
+
+            const comment = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ⏳ Running Acceptance Tests\n\n**Triggered by:** @${context.actor}\n**Filter:** ${filterInfo}\n\n🔗 [View Progress](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            });
+
+            core.setOutput('comment_id', comment.data.id);
+
+  run-tests:
+    name: Run Acceptance Tests
+    needs: parse-and-discover
+    if: needs.parse-and-discover.outputs.should_run == 'true'
+    uses: ./.github/workflows/reusable-acceptance-tests.yml
+    with:
+      ref: ${{ needs.parse-and-discover.outputs.pr_sha }}
+      filter_services: ${{ needs.parse-and-discover.outputs.filter_services }}
+    secrets: inherit
+
+  update-comment:
+    name: Update PR Comment
+    runs-on: ubuntu-latest
+    if: always() && needs.parse-and-discover.outputs.comment_id != ''
+    needs: [parse-and-discover, run-tests]
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Update comment with results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testResult = '${{ needs.run-tests.result }}';
+            const success = testResult === 'success';
+            const emoji = success ? '✅' : '❌';
+            const status = success ? 'Passed' : 'Failed';
+
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: ${{ needs.parse-and-discover.outputs.comment_id }},
+              body: `## ${emoji} Acceptance Tests ${status}\n\n**Result:** ${testResult}\n\n🔗 [View Details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            });
