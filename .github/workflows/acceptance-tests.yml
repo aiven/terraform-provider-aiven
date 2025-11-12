@@ -63,7 +63,11 @@ jobs:
 
   notify-slack-success:
     needs: [call-tests, gatekeeper]
-    if: success() && needs.gatekeeper.outputs.should_run == 'true'
+    if: |
+      always() &&
+      success() &&
+      needs.gatekeeper.outputs.should_run == 'true' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     uses: ./.github/workflows/slack-notify.yml
     with:
       status: 'success'
@@ -74,7 +78,11 @@ jobs:
 
   notify-slack-failure:
     needs: [call-tests, gatekeeper]
-    if: failure() && needs.gatekeeper.outputs.should_run == 'true'
+    if: |
+      always() &&
+      failure() &&
+      needs.gatekeeper.outputs.should_run == 'true' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     uses: ./.github/workflows/slack-notify.yml
     with:
       status: 'failure'
