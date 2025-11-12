@@ -208,7 +208,7 @@ func TestGenerateMatrix(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			matrix, err := GenerateMatrix(internalDir, tc.slowTestsCSV)
+			matrix, err := GenerateMatrix(internalDir, tc.slowTestsCSV, "")
 			require.NoError(t, err)
 
 			getUniqueNames := func(tests []Test) []string {
@@ -233,6 +233,191 @@ func TestGenerateMatrix(t *testing.T) {
 
 			assert.ElementsMatch(t, tc.expectedSlow, getUniqueNames(matrix.Slow), "mismatch in slow tests")
 			assert.ElementsMatch(t, expectedNormal, getUniqueNames(matrix.Normal), "mismatch in normal tests")
+		})
+	}
+}
+
+func TestGenerateMatrixWithFilter(t *testing.T) {
+	t.Parallel()
+
+	tempRoot := t.TempDir()
+	internalDir := filepath.Join(tempRoot, "internal")
+
+	testDirs := []string{
+		"sdkprovider/service/kafka",
+		"sdkprovider/service/kafkatopic",
+		"sdkprovider/service/kafkaschema",
+		"sdkprovider/service/pg",
+		"sdkprovider/service/clickhouse",
+		"sdkprovider/service/vpc",
+		"plugin/service/organization",
+		"sdkprovider/service/organization",
+	}
+
+	for _, dir := range testDirs {
+		fullDir := filepath.Join(internalDir, dir)
+		require.NoError(t, os.MkdirAll(fullDir, 0o755))
+		require.NoError(t, os.WriteFile(filepath.Join(fullDir, "dummy_test.go"), []byte("package dummy"), 0o644))
+	}
+
+	testCases := []struct {
+		name          string
+		filterCSV     string
+		expectedPaths []string
+		slowTestsCSV  string
+		expectError   bool
+	}{
+		{
+			name:          "no filter returns all tests",
+			filterCSV:     "",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema", "pg", "clickhouse", "vpc", "organization", "organization"},
+		},
+		{
+			name:          "filter single service - kafka matches multiple",
+			filterCSV:     "kafka",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema"},
+		},
+		{
+			name:          "filter single service - pg",
+			filterCSV:     "pg",
+			expectedPaths: []string{"pg"},
+		},
+		{
+			name:          "filter multiple services comma-separated",
+			filterCSV:     "kafka,pg",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema", "pg"},
+		},
+		{
+			name:          "filter multiple services space-separated",
+			filterCSV:     "kafka pg",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema", "pg"},
+		},
+		{
+			name:          "filter multiple services mixed separators",
+			filterCSV:     "kafka, pg vpc",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema", "pg", "vpc"},
+		},
+		{
+			name:          "filter with whitespace",
+			filterCSV:     "  kafka  ,  pg  ",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema", "pg"},
+		},
+		{
+			name:        "filter non-existent service returns error",
+			filterCSV:   "nonexistent",
+			expectError: true,
+		},
+		{
+			name:          "filter matches organization in both sdk and plugin",
+			filterCSV:     "organization",
+			expectedPaths: []string{"organization", "organization"},
+		},
+		{
+			name:          "case insensitive matching",
+			filterCSV:     "KAFKA",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema"},
+		},
+		{
+			name:          "fuzzy match - typo correction (kafk→kafka)",
+			filterCSV:     "kafk",
+			expectedPaths: []string{"kafka", "kafkatopic", "kafkaschema"},
+		},
+		{
+			name:          "fuzzy match - typo correction (vcp→vpc)",
+			filterCSV:     "vcp",
+			expectedPaths: []string{"vpc"},
+		},
+		{
+			name:          "fuzzy match - mixed correct and typo (pg clickhuse)",
+			filterCSV:     "pg clickhuse",
+			expectedPaths: []string{"pg", "clickhouse"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			matrix, err := GenerateMatrix(internalDir, tc.slowTestsCSV, tc.filterCSV)
+
+			if tc.expectError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+
+			allTests := make([]Test, 0, len(matrix.Normal)+len(matrix.Slow))
+			allTests = append(allTests, matrix.Normal...)
+			allTests = append(allTests, matrix.Slow...)
+			actualNames := make([]string, len(allTests))
+
+			for i, test := range allTests {
+				actualNames[i] = test.Name
+			}
+
+			assert.ElementsMatch(t, tc.expectedPaths, actualNames, "mismatch in filtered tests")
+		})
+	}
+}
+
+func TestMatchesAnyService(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name     string
+		path     string
+		filters  []string
+		expected bool
+	}{
+		{
+			name:     "exact match",
+			path:     "internal/sdkprovider/service/kafka",
+			filters:  []string{"kafka"},
+			expected: true,
+		},
+		{
+			name:     "prefix match",
+			path:     "internal/sdkprovider/service/kafkatopic",
+			filters:  []string{"kafka"},
+			expected: true,
+		},
+		{
+			name:     "no match - substring but not prefix",
+			path:     "internal/schemautil/typeupgrader",
+			filters:  []string{"pg"},
+			expected: false,
+		},
+		{
+			name:     "match in filters list",
+			path:     "internal/sdkprovider/service/pg",
+			filters:  []string{"kafka", "pg", "vpc"},
+			expected: true,
+		},
+		{
+			name:     "case insensitive",
+			path:     "internal/sdkprovider/service/Kafka",
+			filters:  []string{"kafka"},
+			expected: true,
+		},
+		{
+			name:     "empty filters",
+			path:     "internal/sdkprovider/service/kafka",
+			filters:  []string{},
+			expected: false,
+		},
+		{
+			name:     "filter with whitespace",
+			path:     "internal/sdkprovider/service/kafka",
+			filters:  []string{"  kafka  "},
+			expected: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			actual := matchesAnyService(tc.path, tc.filters)
+			assert.Equal(t, tc.expected, actual)
 		})
 	}
 }
