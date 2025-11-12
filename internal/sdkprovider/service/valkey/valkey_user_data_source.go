@@ -14,7 +14,7 @@ func DatasourceValkeyUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClient(datasourceValkeyUserRead),
 		Description: "The Valkey User data source provides information about the existing Aiven for Valkey user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenValkeyUserSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenValkeyUserSchema(),
 			"project", "service_name", "username"),
 	}
 }

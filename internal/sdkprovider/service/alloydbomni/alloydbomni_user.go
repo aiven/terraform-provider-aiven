@@ -18,7 +18,8 @@ func ResourceAlloyDBOmniUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
-		Schema:   pg.ResourcePGUserSchema,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		CustomizeDiff: schemautil.CustomizeDiffServiceUserPasswordWoVersion,
+		Schema:        pg.ResourcePGUserSchema,
 	}
 }

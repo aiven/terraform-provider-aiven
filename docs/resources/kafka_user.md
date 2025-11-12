@@ -32,7 +32,11 @@ resource "aiven_kafka_user" "example_service_user" {
 
 ### Optional
 
-- `password` (String, Sensitive) The Kafka service user's password.
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
+- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). Must be used with `password_wo_version`. Cannot be empty.
+- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. Must be >= 1.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

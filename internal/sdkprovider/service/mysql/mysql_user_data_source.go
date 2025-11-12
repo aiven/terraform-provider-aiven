@@ -11,7 +11,7 @@ func DatasourceMySQLUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClientDiag(schemautil.DatasourceServiceUserRead),
 		Description: "Gets information about an Aiven for MySQL® service user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenMySQLUserSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenMySQLUserSchema(),
 			"project", "service_name", "username"),
 	}
 }

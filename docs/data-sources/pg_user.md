@@ -34,6 +34,6 @@ data "aiven_pg_user" "example_user" {
 - `access_cert` (String, Sensitive) The access certificate for the servie user.
 - `access_key` (String, Sensitive) The access certificate key for the service user.
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the service user.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
 - `pg_allow_replication` (Boolean) Allows replication. For the default avnadmin user this attribute is required and is always `true`.
 - `type` (String) The service user account type, either primary or regular.

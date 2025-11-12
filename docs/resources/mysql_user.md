@@ -32,8 +32,12 @@ resource "aiven_mysql_user" "example_mysql_user" {
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `authentication` (String) Authentication details. The possible values are `caching_sha2_password`, `mysql_native_password` and `null`.
-- `password` (String, Sensitive) The password of the MySQL service user.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
+- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). Must be used with `password_wo_version`. Cannot be empty.
+- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. Must be >= 1.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

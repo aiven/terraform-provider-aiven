@@ -16,49 +16,47 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var ResourcePGUserSchema = map[string]*schema.Schema{
-	"project":      schemautil.CommonSchemaProjectReference,
-	"service_name": schemautil.CommonSchemaServiceNameReference,
-	"username": {
-		Type:         schema.TypeString,
-		Required:     true,
-		ForceNew:     true,
-		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The name of the service user for this service.").ForceNew().Referenced().Build(),
-	},
-	"password": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Sensitive:        true,
-		Computed:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the service user.",
-	},
-	"pg_allow_replication": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Description: "Allows replication. For the default avnadmin user this attribute is required and is always `true`.",
-	},
+func pgUserSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"project":      schemautil.CommonSchemaProjectReference,
+		"service_name": schemautil.CommonSchemaServiceNameReference,
+		"username": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+			Description:  userconfig.Desc("The name of the service user for this service.").ForceNew().Referenced().Build(),
+		},
+		"pg_allow_replication": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Allows replication. For the default avnadmin user this attribute is required and is always `true`.",
+		},
 
-	// computed fields
-	"type": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "The service user account type, either primary or regular.",
-	},
-	"access_cert": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "The access certificate for the servie user.",
-	},
-	"access_key": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "The access certificate key for the service user.",
-	},
+		// computed fields
+		"type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The service user account type, either primary or regular.",
+		},
+		"access_cert": {
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Computed:    true,
+			Description: "The access certificate for the servie user.",
+		},
+		"access_key": {
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Computed:    true,
+			Description: "The access certificate key for the service user.",
+		},
+	}
+
+	return schemautil.MergeSchemas(s, schemautil.ServiceUserPasswordSchema())
 }
+
+var ResourcePGUserSchema = pgUserSchema()
 
 func ResourcePGUser() *schema.Resource {
 	return &schema.Resource{
@@ -70,8 +68,9 @@ func ResourcePGUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
-		Schema:   ResourcePGUserSchema,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		Schema:        ResourcePGUserSchema,
+		CustomizeDiff: schemautil.CustomizeDiffServiceUserPasswordWoVersion,
 	}
 }
 
@@ -95,18 +94,8 @@ func ResourcePGUserCreate(ctx context.Context, d schemautil.ResourceData, client
 		return err
 	}
 
-	password := d.Get("password").(string)
-	if password != "" {
-		_, err = client.ServiceUserCredentialsModify(
-			ctx, projectName, serviceName, username,
-			&service.ServiceUserCredentialsModifyIn{
-				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-				NewPassword: &password,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("error setting password: %w", err)
-		}
+	if err = schemautil.UpsertPassword(ctx, d, client); err != nil {
+		return err
 	}
 
 	// Retries 404 and password not received
@@ -135,17 +124,8 @@ func ResourcePGUserUpdate(ctx context.Context, d schemautil.ResourceData, client
 		return err
 	}
 
-	if d.HasChange("password") {
-		_, err = client.ServiceUserCredentialsModify(
-			ctx, projectName, serviceName, username,
-			&service.ServiceUserCredentialsModifyIn{
-				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-				NewPassword: lo.ToPtr(d.Get("password").(string)),
-			},
-		)
-		if err != nil {
-			return err
-		}
+	if err = schemautil.UpsertPassword(ctx, d, client); err != nil {
+		return err
 	}
 
 	if d.HasChange("pg_allow_replication") {
@@ -206,6 +186,10 @@ func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client a
 		}
 	}
 
+	if err = schemautil.ClearPasswordIfWriteOnly(d); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -215,6 +199,11 @@ func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client a
 var errPasswordNotReceived = fmt.Errorf("password is not received from the API")
 
 func validateUserPassword(d schemautil.ResourceData) error {
+	// skip validation when using write-only password
+	if version, ok := d.GetOk("password_wo_version"); ok && version.(int) > 0 {
+		return nil
+	}
+
 	if d.Get("password").(string) == "" {
 		return errPasswordNotReceived
 	}

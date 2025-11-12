@@ -32,6 +32,6 @@ data "aiven_clickhouse_user" "example_user" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the ClickHouse user (generated). Empty when using `password_wo`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
 - `required` (Boolean) Indicates if a ClickHouse user is required.
 - `uuid` (String) UUID of the ClickHouse user.

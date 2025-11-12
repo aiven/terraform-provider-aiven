@@ -32,5 +32,5 @@ data "aiven_opensearch_user" "example_opensearch_user" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The OpenSearch service user's password.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
 - `type` (String) User account type, such as primary or regular account.

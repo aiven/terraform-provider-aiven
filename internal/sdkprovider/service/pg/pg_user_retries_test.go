@@ -7,6 +7,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -22,14 +23,24 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 	username := "baz"
 	password := "PA$$W0RD"
 	d := mocks.NewMockResourceData(t)
+
 	d.EXPECT().Get("project").Return(projectName)
 	d.EXPECT().Get("service_name").Return(serviceName)
 	d.EXPECT().Get("username").Return(username)
-	d.EXPECT().Get("password").Return(password).Once()
 	d.EXPECT().Get("pg_allow_replication").Return(true)
 	d.EXPECT().SetId("foo/bar/baz")
-	d.EXPECT().Id().Return("foo/bar/baz")
 	d.EXPECT().IsNewResource().Return(true)
+
+	// UpsertPassword is called before SetId, so Id() returns empty for new resource
+	mockRawConfig := cty.ObjectVal(map[string]cty.Value{
+		"password_wo":         cty.NullVal(cty.String),
+		"password_wo_version": cty.NullVal(cty.Number),
+	})
+	d.EXPECT().Id().Return("").Once()                          // first call in UpsertPassword
+	d.EXPECT().GetRawConfig().Return(mockRawConfig)            // can be called multiple times
+	d.EXPECT().GetOk("password").Return(password, true).Once() // Called in shouldResetPassword
+
+	d.EXPECT().Id().Return("foo/bar/baz")
 
 	// Creates a new service user
 	createIn := &service.ServiceUserCreateIn{
@@ -76,6 +87,8 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 		Once()
 	d.EXPECT().Get("password").Return(password).Once()
 
+	d.EXPECT().GetOk("password_wo_version").Return(nil, false)
+
 	// Sets lots of things, so doesn't matter what
 	d.EXPECT().Set(mock.Anything, mock.Anything).Return(nil)
 	err := ResourcePGUserCreate(ctx, d, client)
@@ -109,6 +122,8 @@ func TestReadDoesNotRetryEmptyPassword(t *testing.T) {
 	d.EXPECT().Set("username", username).Return(nil)
 	d.EXPECT().Set("type", "normal").Return(nil)
 	d.EXPECT().Set("password", "").Return(nil) // Empty password!
+
+	d.EXPECT().GetOk("password_wo_version").Return(nil, false)
 
 	err := ResourcePGUserRead(ctx, d, client)
 	require.NoError(t, err)

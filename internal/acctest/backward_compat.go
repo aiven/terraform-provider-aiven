@@ -84,6 +84,15 @@ type BackwardCompatConfig struct {
 
 	// OldProviderVersion is the version to test against (defaults to latest stable)
 	OldProviderVersion string
+
+	// PlanOnly controls whether verification step runs with PlanOnly mode (defaults to false).
+	// When false, verification step performs a refresh during plan (`terraform plan`) to allow Read functions to migrate state.
+	// When true, verification only compares state to schema without calling Read functions
+	// (equivalent to `terraform plan -refresh=false`).
+	//
+	// e.g. Adding optional fields can be breaking for PlanOnly mode since old state lacks these fields
+	// and Read function doesn't run to migrate them. This may affect some CI pipelines using `plan -refresh=false`.
+	PlanOnly bool
 }
 
 // BackwardCompatibilitySteps creates a two-step backward compatibility test:
@@ -117,7 +126,7 @@ func BackwardCompatibilitySteps(t *testing.T, config BackwardCompatConfig) []res
 		{
 			ProtoV6ProviderFactories: TestProtoV6ProviderFactories,
 			Config:                   config.TFConfig,
-			PlanOnly:                 true,
+			PlanOnly:                 config.PlanOnly,
 			ExpectNonEmptyPlan:       false,
 			Check:                    config.Checks,
 		},
