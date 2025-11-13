@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Enum: ``, `mydumper`, `mysqldump`. Experimental!
+  Tool to use for database dump and restore during migration
+
 ## [4.47.0] - 2025-11-12
 
 - Add `aiven_clickhouse_user` resource fields `password_wo` and `password_wo_version`: support for write-only passwords to manage them securely without storing them in state

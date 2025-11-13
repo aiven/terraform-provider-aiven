@@ -141,6 +141,7 @@ Read-Only:
 Read-Only:
 
 - `dbname` (String)
+- `dump_tool` (String)
 - `host` (String)
 - `ignore_dbs` (String)
 - `ignore_roles` (String)

@@ -99,6 +99,12 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"dump_tool": {
+						Description:  "Enum: ``, `mydumper`, `mysqldump`. Experimental! Tool to use for database dump and restore during migration. Default: mysqldump.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"", "mydumper", "mysqldump"}, false),
+					},
 					"host": {
 						Description: "Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.",
 						Required:    true,
