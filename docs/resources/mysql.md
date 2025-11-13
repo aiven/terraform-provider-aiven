@@ -115,8 +115,8 @@ Optional:
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `admin_password` (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
 - `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created. Example: `avnadmin`.
-- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
-- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
+- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Default: `0`.
+- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Default: `0`.
 - `binlog_retention_period` (Number) The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector. Example: `600`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--mysql_user_config--ip_filter_object))
@@ -157,6 +157,7 @@ Required:
 Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
+- `dump_tool` (String) Enum: `mydumper`, `mysqldump`. Experimental! Tool to use for database dump and restore during migration. Default: mysqldump.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
 - `ignore_roles` (String) Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.
 - `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).

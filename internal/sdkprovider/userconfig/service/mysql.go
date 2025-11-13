@@ -38,12 +38,12 @@ func mysqlUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"backup_hour": {
-				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.",
+				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Default: `0`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"backup_minute": {
-				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.",
+				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Default: `0`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -98,6 +98,12 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "Database name for bootstrapping the initial connection. Example: `defaultdb`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"dump_tool": {
+						Description:  "Enum: `mydumper`, `mysqldump`. Experimental! Tool to use for database dump and restore during migration. Default: mysqldump.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"mydumper", "mysqldump"}, false),
 					},
 					"host": {
 						Description: "Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.",
