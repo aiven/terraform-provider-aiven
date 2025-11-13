@@ -271,7 +271,8 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 				return nil, err
 			}
 
-			// todo: allow version validation when we make automatic releases
+			// Allows managing new server versions with old versions of the provider.
+			// Disables validation for version field.
 			if !o.isVersionField() {
 				// There are no other types functions.
 				// Bool and number won't compile

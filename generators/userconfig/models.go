@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/samber/lo"
 	"github.com/stoewer/go-strcase"
 	"golang.org/x/exp/slices"
 )
@@ -22,6 +23,11 @@ const (
 	objectTypeInteger objectType = "integer"
 	objectTypeNumber  objectType = "number"
 )
+
+type objectEnum struct {
+	Value        string `yaml:"value"`
+	IsDeprecated bool   `yaml:"is_deprecated"`
+}
 
 type object struct {
 	isRoot        bool   // top level object
@@ -50,11 +56,8 @@ type object struct {
 	Default any `yaml:"default"`
 
 	// To make the default value flexible (to change it on the backend), it quite often comes as an "example"
-	Example any `yaml:"example"`
-	Enum    []*struct {
-		Value        string `yaml:"value"`
-		IsDeprecated bool   `yaml:"is_deprecated"`
-	} `yaml:"enum"`
+	Example        any                `yaml:"example"`
+	Enum           []*objectEnum      `yaml:"enum"`
 	Pattern        string             `yaml:"pattern"`
 	MinItems       *int               `yaml:"min_items"`
 	MaxItems       *int               `yaml:"max_items"`
@@ -164,6 +167,16 @@ func (o *object) init(name string) {
 	// A fix that removes empty string default value
 	if o.Type == objectTypeString && o.Default != nil && o.Default.(string) == "" {
 		o.Default = nil
+	}
+
+	// Cleans up enum values
+	if o.Enum != nil {
+		o.Enum = lo.Filter(o.Enum, func(item *objectEnum, _ int) bool {
+			// Some enums might contain "null" value, meaning the field is nullable.
+			// Yaml parser skips null values, so we check for empty string here.
+			// https://github.com/go-yaml/yaml/issues/681
+			return item.Value != ""
+		})
 	}
 
 	// Sorts version enum values for consistent order
