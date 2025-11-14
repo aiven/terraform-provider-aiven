@@ -7,6 +7,11 @@ on:
         description: 'The git ref (branch, tag, or commit) to run tests against'
         required: true
         type: string
+      filter_services:
+        description: 'Optional comma-separated service names to filter tests (e.g., "kafka,pg,vpc"). Empty = all tests.'
+        required: false
+        type: string
+        default: ""
     secrets:
       AIVEN_TOKEN:
         required: true
@@ -67,7 +72,7 @@ jobs:
       - id: get_matrix
         name: Discover test matrix
         run: |
-          task ci:discover-test-matrix  SLOW_TESTS_CSV=sdk-service-vpc,sdk-service-kafka,sdk-service-kafkatopic | jq -cr '
+          task ci:discover-test-matrix SLOW_TESTS_CSV=sdk-service-vpc,sdk-service-kafka,sdk-service-kafkatopic FILTER_SERVICES="${{ inputs.filter_services }}" | jq -cr '
             # The input from the pipe is the correct JSON: {"slow":[...], "normal":[...]}
             {
               "matrix": tostring,
