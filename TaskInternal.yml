@@ -245,11 +245,12 @@ tasks:
       - find ./examples -type f \( -name '*.tfstate' -o -name '*.tfstate.backup' \) -delete
 
   discover-test-matrix:
-    desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2"
+    desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, optionally filters by FILTER_SERVICES, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2 FILTER_SERVICES='kafka,pg'"
     vars:
       SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV}}'
+      FILTER_SERVICES: '{{.FILTER_SERVICES | default ""}}'
     cmds:
-        - "{{.GO_CMD}} run ./tools/main.go tests matrix --slow-tests-csv {{.SLOW_TESTS_CSV}}"
+        - "{{.GO_CMD}} run ./tools/main.go tests matrix --slow-tests-csv {{.SLOW_TESTS_CSV}}{{if .FILTER_SERVICES}} --filter {{.FILTER_SERVICES}}{{end}}"
     silent: true
 
   verify-version:
