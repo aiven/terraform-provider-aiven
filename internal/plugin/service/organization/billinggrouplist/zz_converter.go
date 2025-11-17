@@ -63,9 +63,9 @@ type apiModelBillingGroups struct {
 }
 
 // flattenData turns Response into TF object
-func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[R]) diag.Diagnostics {
+func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[tfModel]) diag.Diagnostics {
 	api := new(apiModel)
-	err := util.Remarshal(rsp, api, modifiers...)
+	err := util.Remarshal(rsp, api, state, append(modifiers, flattenModifier)...)
 	if err != nil {
 		var diags diag.Diagnostics
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))

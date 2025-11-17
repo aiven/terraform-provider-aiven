@@ -4,6 +4,10 @@ resource:
   description: Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 datasource:
   description: Gets information about an Aiven project.
+clientHandler: organizationprojects
+expandModifier: true
+flattenModifier: true
+refreshState: true
 operations:
   - id: OrganizationProjectsCreate
     type: create
@@ -15,6 +19,7 @@ operations:
     type: update
   - id: ProjectKmsGetCA
     type: read
+    resultToKey: certificate
 idAttribute:
   fields:
     - organization_id
@@ -24,12 +29,12 @@ remove:
   - end_of_life_extension
   - features
   - account_id
-  - project # comes from ProjectKmsGetCA
   - tags # replaced by tag
   - tech_emails # replaced by technical_emails
   - project_name
 rename:
   certificate: ca_cert
+  project: project_id # comes from ProjectKmsGetCA
 schema:
   base_port:
     description: Valid port number (10000-30000) to use as a base for service port allocation.
