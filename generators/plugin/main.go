@@ -145,7 +145,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			// Resources need idFields and expander
 			if hasResource {
 				codes = append(codes, genIDFields(def.typeName, def.IDAttribute.Fields))
-				expand, err := genExpand(root)
+				expand, err := genExpand(def, root)
 				if err != nil {
 					return fmt.Errorf("could not generate expand: %w", err)
 				}
@@ -153,7 +153,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			}
 
 			// Flatten is only needed for both resource and datasource
-			flatten, err := genFlatten(root)
+			flatten, err := genFlatten(def, root)
 			if err != nil {
 				return fmt.Errorf("could not generate flatten: %w", err)
 			}
@@ -619,7 +619,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	}
 
 	if a.Type == "" {
-		return nil, fmt.Errorf("node doesn't have type set, parent: %q", parent.Name)
+		return nil, fmt.Errorf("node has empty type, parent: %q", parent.Name)
 	}
 
 	return a, nil

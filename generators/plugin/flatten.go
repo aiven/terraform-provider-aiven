@@ -22,26 +22,28 @@ const (
 	apiModelPrefix  = "apiModel"
 	setIDFunc       = "SetID"
 	// To avoid conflicts with generated models, the root models must have unique ever name.
-	tfRootModel  = tfModelPrefix
-	apiRootModel = apiModelPrefix
+	tfRootModel     = tfModelPrefix
+	apiRootModel    = apiModelPrefix
+	remarshalVar    = "Remarshal"
+	modifiersVar    = "modifiers"
+	flattenModifier = "flattenModifier"
+	expandModifier  = "expandModifier"
 )
 
 // genFlatten generates a function that turns rsp into TF object
-func genFlatten(item *Item) ([]jen.Code, error) {
+func genFlatten(def *Definition, item *Item) ([]jen.Code, error) {
+	argModifier := jen.Id(modifiersVar)
+	if def.FlattenModifier {
+		argModifier = jen.Append(argModifier, jen.Id(flattenModifier))
+	}
+
 	block := []jen.Code{
 		jen.Id(apiVar).Op(":=").New(jen.Id(item.ApiModelName())),
-
-		// Renders Unmarshal
 		jen.Id("err").
 			Op(":=").
-			Qual(utilPackage, "Remarshal").
-			Call(
-				jen.Id("rsp"),
-				jen.Id(apiVar),
-				jen.Id("modifiers").Op("..."),
-			),
-
-		jen.Add(ifErr(true, "Remarshal error", "Failed to remarshal Response to dtoModel: %s")),
+			Qual(utilPackage, remarshalVar).
+			Call(jen.Id("rsp"), jen.Id(apiVar), jen.Id("state"), argModifier.Op("...")),
+		jen.Add(ifErr("Remarshal error", "Failed to remarshal Response to dtoModel: %s")),
 	}
 
 	props, err := genFlattenProperties(item, true)
@@ -77,7 +79,7 @@ func genFlatten(item *Item) ([]jen.Code, error) {
 			jen.Id("ctx").Qual("context", "Context"),
 			jen.Id(stateVar).Op("*").Id(item.TFModelName()),
 			jen.Id("rsp").Id("*R"),
-			jen.Id("modifiers").Op("...").Qual(utilPackage, "MapModifier").Index(jen.Id("R")),
+			jen.Id(modifiersVar).Op("...").Qual(utilPackage, "MapModifier").Index(jen.Id(tfRootModel)),
 		).
 		Qual(diagPackage, "Diagnostics").
 		Block(block...)
@@ -309,7 +311,7 @@ func genAttrFieldType(item *Item) *jen.Statement {
 	}
 }
 
-func ifErr(rootLevel bool, summary, format string) jen.Code {
+func ifErr(summary, format string) jen.Code {
 	return jen.
 		If(jen.Err().Op("!=").Nil()).
 		BlockFunc(func(g *jen.Group) {
@@ -318,7 +320,7 @@ func ifErr(rootLevel bool, summary, format string) jen.Code {
 				jen.Lit(summary),
 				jen.Qual("fmt", "Sprintf").Call(jen.Lit(format), jen.Err().Dot("Error").Call()),
 			)
-			g.Add(returnErr(rootLevel))
+			g.Add(jen.Return(jen.Id("diags")))
 		})
 }
 

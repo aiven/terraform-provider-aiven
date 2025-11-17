@@ -19,12 +19,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -167,10 +164,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
-		betaResources := []func() resource.Resource{
-			billinggroup.NewResource,
-			project.NewResource,
-		}
+		betaResources := []func() resource.Resource{}
 		resources = append(resources, betaResources...)
 	}
 
@@ -191,9 +185,6 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
 			externalidentity.NewDataSource,
-			billinggroup.NewDataSource,
-			billinggrouplist.NewDataSource,
-			project.NewDataSource,
 		}
 		dataSources = append(dataSources, betaDataSources...)
 	}
