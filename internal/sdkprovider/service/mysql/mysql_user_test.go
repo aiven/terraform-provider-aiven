@@ -2,11 +2,10 @@ package mysql_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -25,7 +24,7 @@ func TestAccAivenMySQLUser_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenMySQLUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMySQLUserNewPasswordResource(rName),
+				Config: testAccMySQLUserNewPasswordResource(rName, "Test$1234"),
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_mysql_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
@@ -34,12 +33,25 @@ func TestAccAivenMySQLUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 				),
 			},
+			{
+				Config: testAccMySQLUserNewPasswordResource(rName, "UpdatedP@ss5678"),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_mysql_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "UpdatedP@ss5678"),
+				),
+			},
 		},
 	})
 }
 
 func testAccCheckAivenMySQLUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -54,23 +66,20 @@ func testAccCheckAivenMySQLUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
+		_, err = c.ServiceUserGet(ctx, projectName, serviceName, username)
+		if err != nil && !avngen.IsNotFound(err) {
+			return fmt.Errorf("error checking if user was destroyed: %w", err)
 		}
 
-		if p != nil {
-			return fmt.Errorf("common user (%s) still exists", rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("mysql user (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccMySQLUserNewPasswordResource(name string) string {
+func testAccMySQLUserNewPasswordResource(name, password string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -89,12 +98,12 @@ resource "aiven_mysql_user" "foo" {
   service_name = aiven_mysql.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-%s"
-  password     = "Test$1234"
+  password     = "%s"
 }
 
 data "aiven_mysql_user" "user" {
   service_name = aiven_mysql_user.foo.service_name
   project      = aiven_mysql_user.foo.project
   username     = aiven_mysql_user.foo.username
-}`, acc.ProjectName(), name, name)
+}`, acc.ProjectName(), name, name, password)
 }

@@ -2,11 +2,10 @@ package opensearch_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -42,7 +41,10 @@ func TestAccAivenOpenSearchUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenOpenSearchUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -57,16 +59,13 @@ func testAccCheckAivenOpenSearchUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
+		_, err = c.ServiceUserGet(ctx, projectName, serviceName, username)
+		if err != nil && !avngen.IsNotFound(err) {
+			return fmt.Errorf("error checking if user was destroyed: %w", err)
 		}
 
-		if p != nil {
-			return fmt.Errorf("common user (%s) still exists", rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("opensearch user (%s) still exists", rs.Primary.ID)
 		}
 	}
 

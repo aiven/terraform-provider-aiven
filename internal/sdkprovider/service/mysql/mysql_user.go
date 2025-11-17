@@ -2,13 +2,15 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -63,9 +65,9 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 func ResourceMySQLUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for MySQL® service user.",
-		CreateContext: resourceMySQLUserCreate,
-		UpdateContext: resourceMySQLUserUpdate,
-		ReadContext:   schemautil.ResourceServiceUserRead,
+		CreateContext: common.WithGenClientDiag(resourceMySQLUserCreate),
+		UpdateContext: common.WithGenClientDiag(resourceMySQLUserUpdate),
+		ReadContext:   common.WithGenClientDiag(schemautil.ResourceServiceUserRead),
 		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -76,56 +78,65 @@ func ResourceMySQLUser() *schema.Resource {
 	}
 }
 
-func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
-	_, err := client.ServiceUsers.Create(
-		ctx,
-		projectName,
-		serviceName,
-		aiven.CreateServiceUserRequest{
-			Username:       username,
-			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
-		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
+
+	createIn := &service.ServiceUserCreateIn{
+		Username: username,
 	}
 
-	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
-				NewPassword: schemautil.OptionalStringPointer(d, "password"),
+	if auth := schemautil.OptionalStringPointer(d, "authentication"); auth != nil {
+		createIn.Authentication = service.AuthenticationType(*auth)
+	}
+
+	_, err := client.ServiceUserCreate(ctx, projectName, serviceName, createIn)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("cannot create MySQL service user: %w", err))
+	}
+
+	password := d.Get("password").(string)
+	if password != "" {
+		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				NewPassword: &password,
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 			})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("cannot update MySQL service user password: %w", err))
 		}
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
 
-	return schemautil.ResourceServiceUserRead(ctx, d, m)
+	return schemautil.ResourceServiceUserRead(ctx, d, client)
 }
 
-func resourceMySQLUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceMySQLUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-		aiven.ModifyServiceUserRequest{
-			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
-			NewPassword:    schemautil.OptionalStringPointer(d, "password"),
-		})
-	if err != nil {
-		return diag.FromErr(err)
+	if d.HasChange("password") || d.HasChange("authentication") {
+		modifyIn := &service.ServiceUserCredentialsModifyIn{
+			Operation: service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+		}
+
+		if password := schemautil.OptionalStringPointer(d, "password"); password != nil {
+			modifyIn.NewPassword = password
+		}
+
+		if auth := schemautil.OptionalStringPointer(d, "authentication"); auth != nil {
+			modifyIn.Authentication = service.AuthenticationType(*auth)
+		}
+
+		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, modifyIn)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("cannot update MySQL service user: %w", err))
+		}
 	}
 
-	return schemautil.ResourceServiceUserRead(ctx, d, m)
+	return schemautil.ResourceServiceUserRead(ctx, d, client)
 }

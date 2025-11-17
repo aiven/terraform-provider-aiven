@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -51,10 +51,10 @@ var aivenOpenSearchUserSchema = map[string]*schema.Schema{
 func ResourceOpenSearchUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for OpenSearch® service user.",
-		CreateContext: resourceOpenSearchUserCreate,
-		ReadContext:   resourceOpenSearchUserRead,
-		UpdateContext: resourceOpenSearchUserUpdate,
-		DeleteContext: resourceOpenSearchUserDelete,
+		CreateContext: common.WithGenClientDiag(resourceOpenSearchUserCreate),
+		ReadContext:   common.WithGenClientDiag(resourceOpenSearchUserRead),
+		UpdateContext: common.WithGenClientDiag(resourceOpenSearchUserUpdate),
+		DeleteContext: common.WithGenClientDiag(resourceOpenSearchUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -66,13 +66,11 @@ func ResourceOpenSearchUser() *schema.Resource {
 
 // detourSecurityPluginEnabledCheck checks if the OpenSearch Security Plugin is enabled for the OpenSearch service.
 // If it is enabled, it returns an error, and the resource is not allowed to be created, read or updated.
-func detourSecurityPluginEnabledCheck(ctx context.Context, d *schema.ResourceData, m any) error {
-	client := m.(*aiven.Client)
-
+func detourSecurityPluginEnabledCheck(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	r, err := client.OpenSearchSecurityPluginHandler.Get(ctx, project, serviceName)
+	r, err := client.ServiceOpenSearchSecurityGet(ctx, project, serviceName)
 	if err == nil && r.SecurityPluginAdminEnabled {
 		return errors.New("when the OpenSearch Security Plugin is enabled, OpenSearch users are being " +
 			"managed by it; delete the aiven_opensearch_user resource(s), and manage the users via the " +
@@ -84,17 +82,17 @@ func detourSecurityPluginEnabledCheck(ctx context.Context, d *schema.ResourceDat
 }
 
 // resourceOpenSearchUserCreate creates a OpenSearch User.
-func resourceOpenSearchUserCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	if err := detourSecurityPluginEnabledCheck(ctx, d, m); err != nil {
+func resourceOpenSearchUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	if err := detourSecurityPluginEnabledCheck(ctx, d, client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	return schemautil.ResourceServiceUserCreate(ctx, d, m)
+	return schemautil.ResourceServiceUserCreate(ctx, d, client)
 }
 
 // resourceOpenSearchUserRead reads a OpenSearch User into the Terraform state.
-func resourceOpenSearchUserRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	diags := schemautil.ResourceServiceUserRead(ctx, d, m)
+func resourceOpenSearchUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	diags := schemautil.ResourceServiceUserRead(ctx, d, client)
 
 	if diags == nil {
 		return nil
@@ -112,7 +110,7 @@ func resourceOpenSearchUserRead(ctx context.Context, d *schema.ResourceData, m a
 		}
 	}
 
-	if err := detourSecurityPluginEnabledCheck(ctx, d, m); err != nil &&
+	if err := detourSecurityPluginEnabledCheck(ctx, d, client); err != nil && e != nil &&
 		strings.Contains(strings.ToLower(e.Summary), errOpenSearchConfiguredDirectly) {
 		return schemautil.ErrorToDiagWarning(err)
 	}
@@ -121,33 +119,29 @@ func resourceOpenSearchUserRead(ctx context.Context, d *schema.ResourceData, m a
 }
 
 // resourceOpenSearchUserUpdate updates a OpenSearch User.
-func resourceOpenSearchUserUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	if err := detourSecurityPluginEnabledCheck(ctx, d, m); err != nil {
+func resourceOpenSearchUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	if err := detourSecurityPluginEnabledCheck(ctx, d, client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	return schemautil.ResourceServiceUserUpdate(ctx, d, m)
+	return schemautil.ResourceServiceUserUpdate(ctx, d, client)
 }
 
 // resourceOpenSearchUserDelete deletes a OpenSearch User.
-func resourceOpenSearchUserDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceOpenSearchUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
+	err = client.ServiceUserDelete(ctx, projectName, serviceName, username)
 	if common.IsCritical(err) {
-		var e aiven.Error
-
 		// This is a special case where the user is not managed by Aiven, but by the OpenSearch Security plugin.
 		// We don't want to fail on destroy operations if the OpenSearch Security Plugin is enabled,
 		// because the users of our provider wouldn't want to have obsolete resources in their manifests, so we
 		// nullify the error instead of returning it, and the resource is allowed to be destroyed, while
 		// performing a no-op.
-		if errors.As(err, &e) && strings.Contains(strings.ToLower(e.Message), errOpenSearchConfiguredDirectly) {
+		if strings.Contains(strings.ToLower(err.Error()), errOpenSearchConfiguredDirectly) {
 			return nil
 		}
 

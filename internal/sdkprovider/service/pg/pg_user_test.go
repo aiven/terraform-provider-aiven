@@ -2,11 +2,10 @@ package pg_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -26,13 +25,23 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenPGUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGUserNewPasswordResource(projectName, serviceName),
+				Config: testAccPGUserNewPasswordResource(projectName, serviceName, "P4$$word"),
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
 					resource.TestCheckResourceAttr(resourceName, "password", "P4$$word"),
+				),
+			},
+			{
+				Config: testAccPGUserNewPasswordResource(projectName, serviceName, "NewP@ssw0rd!"),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
+					resource.TestCheckResourceAttr(resourceName, "password", "NewP@ssw0rd!"),
 				),
 			},
 			{
@@ -131,7 +140,12 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 }
 
 func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
+
+	ctx := context.Background()
 
 	// loop through the resources in state, verifying each aiven_pg_user is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -144,18 +158,13 @@ func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		ctx := context.Background()
-
-		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
+		_, err = c.ServiceUserGet(ctx, projectName, serviceName, username)
+		if err != nil && !avngen.IsNotFound(err) {
+			return fmt.Errorf("error checking if user was destroyed: %w", err)
 		}
 
-		if p != nil {
-			return fmt.Errorf("common user (%s) still exists", rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("pg user (%s) still exists", rs.Primary.ID)
 		}
 	}
 
@@ -259,7 +268,7 @@ data "aiven_pg_user" "user" {
 }
 
 // testAccPGUserNewPasswordResource creates 100 users to test bulk creation
-func testAccPGUserNewPasswordResource(projectName, serviceName string) string {
+func testAccPGUserNewPasswordResource(projectName, serviceName, password string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = %[1]q
@@ -279,7 +288,7 @@ resource "aiven_pg_user" "foo" {
   service_name = aiven_pg.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-${count.index + 1}"
-  password     = "P4$$word"
+  password     = %[3]q
 }
 
 data "aiven_pg_user" "user" {
@@ -288,7 +297,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.0.username
 
   depends_on = [aiven_pg_user.foo]
-}`, projectName, serviceName)
+}`, projectName, serviceName, password)
 }
 
 func testAccPGUserNoPasswordResource(name string) string {

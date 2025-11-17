@@ -3,6 +3,7 @@ package m3db
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -39,9 +40,9 @@ func ResourceM3DBUser() *schema.Resource {
 	return &schema.Resource{
 		Description:        "Creates and manages an Aiven for M3 service user.",
 		DeprecationMessage: deprecationMessage,
-		CreateContext:      schemautil.ResourceServiceUserCreate,
-		UpdateContext:      schemautil.ResourceServiceUserUpdate,
-		ReadContext:        schemautil.ResourceServiceUserRead,
+		CreateContext:      common.WithGenClientDiag(schemautil.ResourceServiceUserCreate),
+		UpdateContext:      common.WithGenClientDiag(schemautil.ResourceServiceUserUpdate),
+		ReadContext:        common.WithGenClientDiag(schemautil.ResourceServiceUserRead),
 		DeleteContext:      schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
