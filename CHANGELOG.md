@@ -29,6 +29,7 @@ nav_order: 1
   `aiven_opensearch_user`, `aiven_pg_user`
 - Add `aiven_pg` field `pg_user_config.enable_ha_replica_dns`: Creates a dedicated read-only DNS that automatically falls
   back to the primary if standby nodes are unavailable
+- Remove docs for `aiven_redis` and `aiven_redis_user` resources: The Redis service has reached end of life.
 
 ## [4.47.0] - 2025-11-12
 

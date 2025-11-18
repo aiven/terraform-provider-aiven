@@ -10,6 +10,7 @@ You can migrate your existing resources to new resources by updating your Terraf
 * A resource is changed in another interface like the Aiven Console or API. This can happen when Aiven makes changes like migrating customers from an
   old feature to a new one. It can also happen in cases where you can only make a change, like an upgrade, in one of these other interfaces.
   In these cases, you need to update your Terraform configuration to match the actual state.
+* A resource field is deprecated or changed.
 
 Details about changes to resources are available in the [changelog](https://github.com/aiven/terraform-provider-aiven/blob/main/CHANGELOG.md).
 Aiven also sends email notifications for situations like automatic migrations to new resources.
@@ -258,129 +259,6 @@ To migrate from teams to groups:
 
    ~> **Important**
    Deleting the teams in your organization will disable the teams feature. You won't be able to create new teams or access your Account Owners team.
-
-## Update `aiven_redis` resources after Valkey upgrade
-
-After you [upgrade from Aiven for Caching to Aiven for Valkey™](https://aiven.io/docs/products/caching/howto/upgrade-aiven-for-caching-to-valkey), update your
-Terraform configuration to use the `aiven_valkey` resource. Aiven for Caching can only be upgraded to Valkey using the Aiven Console or the Aiven API.
-
-The following steps show you how to update your Terraform files using this example file with an Aiven for Caching service:
-
-```hcl
-resource "aiven_redis" "caching_service" {
- project      = data.aiven_project.example_project.project
- cloud_name   = "google-europe-west1"
- plan         = "business-4"
- service_name = "example-caching-service"
-
- redis_user_config {
-   redis_timeout = 120
-   redis_maxmemory_policy = "allkeys-random"
- }
-}
-
-resource "aiven_redis_user" "caching_example_user" {
-  service_name = aiven_redis.caching_service.service_name
-  project      = data.aiven_project.example_project.project
-  username     = "example-user"
-  password     = var.caching_user_pw
-}
-```
-
-1. Replace the `aiven_redis` resources with `aiven_valkey`:
-
-      ```hcl
-      resource "aiven_valkey" "caching_service" {
-       project      = data.aiven_project.example_project.project
-       cloud_name   = "google-europe-west1"
-       plan         = "business-4"
-       service_name = "example-caching-service"
-
-       valkey_user_config {
-         valkey_timeout = 120
-         valkey_maxmemory_policy = "allkeys-random"
-       }
-      }
-      ```
-
-2. Replace `aiven_redis_user` resources with `aiven_valkey_user`:
-
-      ```hcl
-      resource "aiven_valkey_user" "caching_example_user" {
-         service_name = aiven_valkey.caching_service.service_name
-         project      = data.aiven_project.example_project.project
-         username     = "example-user"
-         password     = var.caching_user_pw
-      }
-      ```
-
-3. To remove Terraform's control of the aiven_redis resources, run:
-
-      ```bash
-      terraform state rm aiven_redis.caching_service
-      terraform state rm aiven_redis_user.caching_example_user
-      ```
-
-4. Add the Valkey resources to Terraform by [importing them](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/importing-resources).
-   For example:
-
-      ```bash
-      terraform import aiven_valkey.caching_service PROJECT/example-caching-service
-      terraform import aiven_valkey_user.caching_example_user PROJECT/example-caching-service/example-user
-      ```
-
-     Where `PROJECT` is the name of the project.
-
-5. To preview the changes, run:
-
-      ```bash
-      terraform plan
-      ```
-
-6. To apply the changes, run:
-
-      ```bash
-      terraform apply --auto-approve
-      ```
-
-7. To confirm the changes, list the resources in the state file by running:
-
-      ```bash
-      terraform state list
-      ```
-
-## Migrate from M3DB to Thanos Metrics
-
-Migrate your Aiven for M3 databases to [Aiven for Thanos Metrics](https://aiven.io/docs/products/metrics).
-
-1. Create an Aiven for Thanos Metrics service to migrate your Aiven for M3 databases to using the `aiven_thanos` resource:
-      ```hcl
-      resource "aiven_thanos" "example_thanos" {
-       project      = data.aiven_project.example_project.project
-       cloud_name   = "google-europe-west1"
-       plan         = "business-4"
-       service_name = "example-thanos-service"
-      }
-      ```
-
-2. In the Aiven Console, [migrate your M3DB database to this Thanos service](https://aiven.io/docs/products/metrics/howto/migrate-m3db-thanos).
-
-3. After the migration, remove the `aiven_m3db` and `aiven_m3db_user` resources.
-
-     -> **Note**
-      Aiven for Metrics does not have service users. You can grant access to the service using [project roles and permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission).
-
-4. To preview the changes, run:
-
-      ```bash
-      terraform plan
-      ```
-
-5. To apply the changes, run:
-
-      ```bash
-      terraform apply --auto-approve
-      ```
 
 ## Migrate from `timeouts.default`
 
