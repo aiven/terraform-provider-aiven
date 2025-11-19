@@ -138,10 +138,10 @@ definitions:
           type: string
         $comment: |
           When the response returns a list, these keys are used to locate the item within the response
-      resultListToKey:
+      resultToKey:
         type: string
         $comment: |
-          Specifies the key to map list responses into a single object for flatten/expand logic
+          When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
     required:
       - id
       - type

@@ -8,5 +8,5 @@ idAttribute:
 operations:
   - id: UserGroupsList
     type: read
-    resultListToKey: user_groups
+    resultToKey: user_groups
 clientHandler: usergroup

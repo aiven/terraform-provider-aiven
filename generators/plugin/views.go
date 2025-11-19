@@ -255,10 +255,10 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 		)
 	}
 
-	// Wraps the list into a map by the specified key
-	if operation.ResultListToKey != "" {
+	// Wraps the result into a map by the specified key
+	if operation.ResultToKey != "" {
 		m := jen.Op("&").Map(jen.String()).Any()
-		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultListToKey): jen.Id("rsp")})))
+		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultToKey): jen.Id("rsp")})))
 		return nil
 	}
 
