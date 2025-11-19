@@ -166,7 +166,7 @@ func resourceValkeyUserRead(ctx context.Context, d *schema.ResourceData, client 
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	err = schemautil.CopyServiceUserGenPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
+	err = schemautil.CopyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
 	if err != nil {
 		return err
 	}

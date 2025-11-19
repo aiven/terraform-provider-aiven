@@ -2,11 +2,14 @@ package redis
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -81,9 +84,9 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 func ResourceRedisUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [Aiven for Caching](https://aiven.io/docs/products/caching) (formerly known as Aiven for Redis®) service user.",
-		CreateContext: resourceRedisUserCreate,
-		UpdateContext: resourceRedisUserUpdate,
-		ReadContext:   resourceRedisUserRead,
+		CreateContext: common.WithGenClientDiag(resourceRedisUserCreate),
+		UpdateContext: common.WithGenClientDiag(resourceRedisUserUpdate),
+		ReadContext:   common.WithGenClientDiag(resourceRedisUserRead),
 		DeleteContext: schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -95,73 +98,76 @@ func ResourceRedisUser() *schema.Resource {
 	}
 }
 
-func resourceRedisUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceRedisUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
-	_, err := client.ServiceUsers.Create(
-		ctx,
-		projectName,
-		serviceName,
-		aiven.CreateServiceUserRequest{
-			Username: username,
-			AccessControl: &aiven.AccessControl{
-				RedisACLCategories: schemautil.FlattenToString(d.Get("redis_acl_categories").([]interface{})),
-				RedisACLCommands:   schemautil.FlattenToString(d.Get("redis_acl_commands").([]interface{})),
-				RedisACLKeys:       schemautil.FlattenToString(d.Get("redis_acl_keys").([]interface{})),
-				RedisACLChannels:   schemautil.FlattenToString(d.Get("redis_acl_channels").([]interface{})),
-			},
+
+	categories := schemautil.FlattenToString(d.Get("redis_acl_categories").([]interface{}))
+	commands := schemautil.FlattenToString(d.Get("redis_acl_commands").([]interface{}))
+	keys := schemautil.FlattenToString(d.Get("redis_acl_keys").([]interface{}))
+	channels := schemautil.FlattenToString(d.Get("redis_acl_channels").([]interface{}))
+
+	createIn := &service.ServiceUserCreateIn{
+		Username: username,
+		AccessControl: &service.AccessControlIn{
+			RedisAclCategories: &categories,
+			RedisAclCommands:   &commands,
+			RedisAclKeys:       &keys,
+			RedisAclChannels:   &channels,
 		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
 	}
 
-	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
-				NewPassword: schemautil.OptionalStringPointer(d, "password"),
+	_, err := client.ServiceUserCreate(ctx, projectName, serviceName, createIn)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("cannot create redis service user: %w", err))
+	}
+
+	password := d.Get("password").(string)
+	if password != "" {
+		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				NewPassword: &password,
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 			})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("cannot update redis service user password: %w", err))
 		}
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
 
-	return resourceRedisUserRead(ctx, d, m)
+	return resourceRedisUserRead(ctx, d, client)
 }
 
-func resourceRedisUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceRedisUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-		aiven.ModifyServiceUserRequest{
-			NewPassword: schemautil.OptionalStringPointer(d, "password"),
-		})
-	if err != nil {
-		return diag.FromErr(err)
+	if d.HasChange("password") {
+		password := d.Get("password").(string)
+		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				NewPassword: &password,
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+			})
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("cannot update redis service user password: %w", err))
+		}
 	}
 
-	return resourceRedisUserRead(ctx, d, m)
+	return resourceRedisUserRead(ctx, d, client)
 }
 
-func resourceRedisUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceRedisUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	user, err := client.ServiceUsers.Get(ctx, projectName, serviceName, username)
+	user, err := client.ServiceUserGet(ctx, projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -171,17 +177,19 @@ func resourceRedisUserRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("redis_acl_keys", user.AccessControl.RedisACLKeys); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("redis_acl_categories", user.AccessControl.RedisACLCategories); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
-		return diag.FromErr(err)
+	if user.AccessControl != nil {
+		if err := d.Set("redis_acl_keys", user.AccessControl.RedisAclKeys); err != nil {
+			return diag.FromErr(err)
+		}
+		if err := d.Set("redis_acl_categories", user.AccessControl.RedisAclCategories); err != nil {
+			return diag.FromErr(err)
+		}
+		if err := d.Set("redis_acl_commands", user.AccessControl.RedisAclCommands); err != nil {
+			return diag.FromErr(err)
+		}
+		if err := d.Set("redis_acl_channels", user.AccessControl.RedisAclChannels); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil

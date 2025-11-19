@@ -3,6 +3,7 @@ package influxdb
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -51,9 +52,9 @@ func ResourceInfluxDBUser() *schema.Resource {
 	return &schema.Resource{
 		DeprecationMessage: deprecationMessage,
 		Description:        "The InfluxDB User resource allows the creation and management of Aiven InfluxDB Users.",
-		CreateContext:      schemautil.ResourceServiceUserCreate,
-		UpdateContext:      schemautil.ResourceServiceUserUpdate,
-		ReadContext:        schemautil.ResourceServiceUserRead,
+		CreateContext:      common.WithGenClientDiag(schemautil.ResourceServiceUserCreate),
+		UpdateContext:      common.WithGenClientDiag(schemautil.ResourceServiceUserUpdate),
+		ReadContext:        common.WithGenClientDiag(schemautil.ResourceServiceUserRead),
 		DeleteContext:      schemautil.WithResourceData(schemautil.ResourceServiceUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,

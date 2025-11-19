@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -15,64 +15,63 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
-	_, err := client.ServiceUsers.Create(
+
+	_, err := client.ServiceUserCreate(
 		ctx,
 		projectName,
 		serviceName,
-		aiven.CreateServiceUserRequest{
+		&service.ServiceUserCreateIn{
 			Username: username,
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("cannot create service user: %w", err))
 	}
 
-	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
-				NewPassword: OptionalStringPointer(d, "password"),
+	password := d.Get("password").(string)
+	if password != "" {
+		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				NewPassword: &password,
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 			})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("cannot update service user password: %w", err))
 		}
 	}
 
 	// Retry because the user may not be immediately available
 	// todo: Retry NotFound user might be not available immediately
 	d.SetId(BuildResourceID(projectName, serviceName, username))
-	return ResourceServiceUserRead(ctx, d, m)
+	return ResourceServiceUserRead(ctx, d, client)
 }
 
-func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if d.HasChange("password") {
-		_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
-			aiven.ModifyServiceUserRequest{
-				NewPassword: OptionalStringPointer(d, "password"),
+		password := d.Get("password").(string)
+		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username,
+			&service.ServiceUserCredentialsModifyIn{
+				NewPassword: &password,
+				Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 			})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("cannot update service user password: %w", err))
 		}
 	}
 
-	return ResourceServiceUserRead(ctx, d, m)
+	return ResourceServiceUserRead(ctx, d, client)
 }
 
-func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -80,10 +79,10 @@ func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	// User password might be Null https://api.aiven.io/doc/#tag/Service/operation/ServiceUserGet
 	// > Account password. A null value indicates a user overridden password.
-	var user *aiven.ServiceUser
+	var user *service.ServiceUserGetOut
 	err = retry.Do(
 		func() error {
-			user, err = client.ServiceUsers.Get(ctx, projectName, serviceName, username)
+			user, err = client.ServiceUserGet(ctx, projectName, serviceName, username)
 			if err != nil {
 				return retry.Unrecoverable(err)
 			}
@@ -119,22 +118,20 @@ func ResourceServiceUserDelete(ctx context.Context, d ResourceData, client avnge
 	return OmitNotFound(err)
 }
 
-func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	userName := d.Get("username").(string)
 
-	list, err := client.ServiceUsers.List(ctx, projectName, serviceName)
+	svc, err := client.ServiceGet(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	for _, u := range list {
+	for _, u := range svc.Users {
 		if u.Username == userName {
 			d.SetId(BuildResourceID(projectName, serviceName, userName))
-			return ResourceServiceUserRead(ctx, d, m)
+			return ResourceServiceUserRead(ctx, d, client)
 		}
 	}
 
