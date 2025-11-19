@@ -9,7 +9,7 @@ idAttribute:
 operations:
   - id: OrganizationBillingGroupList
     type: read
-    resultListToKey: billing_groups
+    resultToKey: billing_groups
 schema:
   billing_groups:
     items:

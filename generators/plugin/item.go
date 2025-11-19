@@ -71,8 +71,8 @@ type Operation struct {
 	DisableView          bool          `yaml:"disableView"`
 	ResultKey            string        `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
 	ResultListLookupKeys []string      `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
-	// Specifies the key to map list responses into a single object for flatten/expand logic
-	ResultListToKey string `yaml:"resultListToKey"`
+	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
+	ResultToKey string `yaml:"resultToKey"`
 }
 
 type Operations []Operation

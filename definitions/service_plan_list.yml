@@ -13,7 +13,7 @@ clientHandler: project
 operations:
   - id: ProjectServicePlanList
     type: read
-    resultListToKey: service_plans
+    resultToKey: service_plans
 schema:
   service_plans:
     type: arrayOrdered
