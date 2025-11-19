@@ -3,7 +3,9 @@ package adapter
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"reflect"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go"
@@ -48,9 +50,13 @@ type ResourceOptions[M Model[T], T any] struct {
 	IDFields []string
 
 	// Whether to call Read after Create and Update operations.
+	// Retries common errors like 404 and 403 (see the implementation for details).
 	RefreshState bool
 
-	// CRUD operations
+	// CRUD operations.
+	// Each CRUD operation should return diag.Diagnostics (rather than taking it as an argument)
+	// This design allows internal retry logic for operations that can fail transiently.
+	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState=true to trigger a post-operation Read.
 	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
 	Delete func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
 	Create func(ctx context.Context, client avngen.Client, plan *T) diag.Diagnostics
@@ -199,15 +205,21 @@ func (a *resourceAdapter[M, T]) Read(
 	diags.Append(rsp.State.Set(ctx, state)...)
 }
 
-// refreshState retries Read if the resource is not found.
-// In rare cases, the backend might return 404 after the resource is created or updated.
+// refreshState reads the resource state after Create or Update operation.
+// In rare cases, the backend might be inconsistent right after yet, retries known errors.
 func (a *resourceAdapter[M, T]) refreshState(ctx context.Context, plan M) diag.Diagnostics {
 	return errmsg.RetryDiags(
 		ctx,
 		func() diag.Diagnostics {
 			return a.resource.Read(ctx, a.client, plan.SharedModel())
 		},
-		retry.RetryIf(avngen.IsNotFound),
+		retry.Delay(time.Second*5),
+		retry.Attempts(10),
+		retry.LastErrorOnly(true),
+		errmsg.RetryIfAivenStatus(
+			http.StatusNotFound,  // The API is inconsistent, returns 404 after Create/Update
+			http.StatusForbidden, // Eventual consistency might cause permission errors, for instance for "organization_project"
+		),
 	)
 }
 

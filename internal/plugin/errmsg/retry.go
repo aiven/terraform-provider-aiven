@@ -3,6 +3,7 @@ package errmsg
 import (
 	"context"
 	"errors"
+	"slices"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go"
@@ -33,5 +34,11 @@ func RetryIfAivenError(f func(avngen.Error) bool) retry.Option {
 	return retry.RetryIf(func(err error) bool {
 		var e avngen.Error
 		return errors.As(err, &e) && f(e)
+	})
+}
+
+func RetryIfAivenStatus(codes ...int) retry.Option {
+	return RetryIfAivenError(func(e avngen.Error) bool {
+		return slices.Contains(codes, e.Status)
 	})
 }
