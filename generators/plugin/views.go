@@ -128,25 +128,6 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 			}).Call()
 		}
 
-		// Read after Create/Update if RefreshState is true
-		if def.RefreshState && (operation == OperationCreate || operation == OperationUpdate) {
-			// Calls Read to refresh state after Create/Update
-			state := "state"
-			if operation == OperationCreate {
-				state = "plan"
-			}
-			g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
-			g.Line()
-			g.Id("diags").Dot("Append").Call(
-				jen.Id(fmt.Sprintf("%s%s", OperationRead, viewSuffix)).
-					Call(
-						jen.Id("ctx"),
-						jen.Id("client"),
-						jen.Id(state),
-					).Op("..."),
-			)
-		}
-
 		g.Return().Id("diags")
 	})
 

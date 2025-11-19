@@ -41,11 +41,6 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 		}
 		diags.Append(flattenData(ctx, plan, rsp)...)
 	}()
-	if diags.HasError() {
-		return diags
-	}
-
-	diags.Append(readView(ctx, client, plan)...)
 	return diags
 }
 
