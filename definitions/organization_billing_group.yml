@@ -9,6 +9,9 @@ idAttribute:
   fields:
     - organization_id
     - billing_group_id
+clientHandler: organizationbilling
+expandModifier: true
+flattenModifier: true
 operations:
   - id: OrganizationBillingGroupCreate
     type: create

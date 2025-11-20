@@ -67,6 +67,10 @@ properties:
     $comment: |
       The name of the client package to use for this resource/datasource.
       Example: clientHandler: "organization"
+  expandModifier:
+    type: boolean
+  flattenModifier:
+    type: boolean
   refreshState:
     type: boolean
     $comment: |

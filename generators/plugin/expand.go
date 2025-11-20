@@ -7,10 +7,15 @@ import (
 )
 
 // genExpand generates a function that turns TF object into DTO
-func genExpand(item *Item) ([]jen.Code, error) {
+func genExpand(def *Definition, item *Item) ([]jen.Code, error) {
 	props, err := genExpandModelProperties(item, true)
 	if err != nil {
 		return nil, err
+	}
+
+	argModifier := jen.Id(modifiersVar)
+	if def.ExpandModifier {
+		argModifier = jen.Append(argModifier, jen.Id(expandModifier))
 	}
 
 	var block []jen.Code
@@ -19,13 +24,9 @@ func genExpand(item *Item) ([]jen.Code, error) {
 		block,
 		jen.Id("err").
 			Op(":=").
-			Qual(utilPackage, "Remarshal").
-			Call(
-				jen.Id(apiVar),
-				jen.Id("req"),
-				jen.Id("modifiers").Op("..."),
-			),
-		jen.Add(ifErr(true, "Remarshal error", "Failed to remarshal dtoModel to Request: %s")),
+			Qual(utilPackage, remarshalVar).
+			Call(jen.Id(apiVar), jen.Id("req"), jen.Id("plan"), argModifier.Op("...")),
+		jen.Add(ifErr("Remarshal error", "Failed to remarshal dtoModel to Request: %s")),
 		jen.Return(jen.Nil()),
 	)
 
@@ -38,7 +39,7 @@ func genExpand(item *Item) ([]jen.Code, error) {
 			jen.Id("ctx").Qual("context", "Context"),
 			jen.List(jen.Id(planVar), jen.Id(stateVar)).Op("*").Id(tfRootModel),
 			jen.Id("req").Id("*R"),
-			jen.Id("modifiers").Op("...").Qual(utilPackage, "MapModifier").Index(jen.Id(apiRootModel)),
+			jen.Id(modifiersVar).Op("...").Qual(utilPackage, "MapModifier").Index(jen.Id(tfRootModel)),
 		).
 		Qual(diagPackage, "Diagnostics").
 		Block(block...)
