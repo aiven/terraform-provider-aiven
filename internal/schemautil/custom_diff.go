@@ -25,6 +25,7 @@ import (
 func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	return customdiff.Sequence(
 		SetServiceTypeIfEmpty(serviceType),
+		RequirePlanOnCreate,
 		CustomizeDiffDisallowMultipleManyToOneKeys,
 		customdiff.IfValueChange("plan",
 			ShouldNotBeEmpty,
@@ -437,4 +438,13 @@ func findSimilar(target string, candidates []string, maxSuggestions int) []strin
 	}
 
 	return result
+}
+
+// RequirePlanOnCreate ensures the "plan" field is specified when creating a service.
+// After creation, the field becomes optional and can be removed, which is useful when enabling `autoscaler_service` integration.
+func RequirePlanOnCreate(_ context.Context, diff *schema.ResourceDiff, _ any) error {
+	if diff.Id() == "" && diff.Get("plan") == "" {
+		return fmt.Errorf(`the "plan" field is required when creating a new service`)
+	}
+	return nil
 }
