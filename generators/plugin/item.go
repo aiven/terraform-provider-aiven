@@ -156,21 +156,23 @@ type IDAttribute struct {
 }
 
 type Definition struct {
-	fileName       string            // e.g. organization_address.yaml
-	typeName       string            // e.g. aiven_organization_address, aiven_kafka_topic
-	Beta           bool              `yaml:"beta"`
-	Location       string            `yaml:"location"`
-	Schema         map[string]*Item  `yaml:"schema,omitempty"`
-	Remove         []string          `yaml:"remove,omitempty"`
-	Rename         map[string]string `yaml:"rename,omitempty"`
-	Resource       *SchemaMeta       `yaml:"resource,omitempty"`
-	Datasource     *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttribute    *IDAttribute      `yaml:"idAttribute"`
-	LegacyTimeouts bool              `yaml:"legacyTimeouts,omitempty"`
-	Operations     Operations        `yaml:"operations"`
-	Version        *int              `yaml:"version"`
-	ClientHandler  string            `yaml:"clientHandler,omitempty"`
-	RefreshState   bool              `yaml:"refreshState,omitempty"`
+	fileName        string            // e.g. organization_address.yaml
+	typeName        string            // e.g. aiven_organization_address, aiven_kafka_topic
+	Beta            bool              `yaml:"beta"`
+	Location        string            `yaml:"location"`
+	Schema          map[string]*Item  `yaml:"schema,omitempty"`
+	Remove          []string          `yaml:"remove,omitempty"`
+	Rename          map[string]string `yaml:"rename,omitempty"`
+	Resource        *SchemaMeta       `yaml:"resource,omitempty"`
+	Datasource      *SchemaMeta       `yaml:"datasource,omitempty"`
+	IDAttribute     *IDAttribute      `yaml:"idAttribute"`
+	LegacyTimeouts  bool              `yaml:"legacyTimeouts,omitempty"`
+	Operations      Operations        `yaml:"operations"`
+	Version         *int              `yaml:"version"`
+	ClientHandler   string            `yaml:"clientHandler,omitempty"`
+	RefreshState    bool              `yaml:"refreshState,omitempty"`
+	ExpandModifier  bool              `yaml:"expandModifier,omitempty"`
+	FlattenModifier bool              `yaml:"flattenModifier,omitempty"`
 }
 
 type Item struct {

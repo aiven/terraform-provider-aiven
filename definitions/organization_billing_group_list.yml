@@ -10,6 +10,8 @@ operations:
   - id: OrganizationBillingGroupList
     type: read
     resultToKey: billing_groups
+clientHandler: organizationbilling
+flattenModifier: true
 schema:
   billing_groups:
     items:
