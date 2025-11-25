@@ -164,8 +164,8 @@ func ServiceUserPasswordSchema() map[string]*schema.Schema {
 			Computed:         true,
 			DiffSuppressFunc: EmptyObjectDiffSuppressFunc,
 			ConflictsWith:    []string{"password_wo"},
-			ValidateFunc:     validation.StringIsNotEmpty,
-			Description:      "The password of the service user (auto-generated if not provided). Cannot be empty if specified.",
+			ValidateFunc:     validation.StringLenBetween(8, 256),
+			Description:      "The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.",
 		},
 		"password_wo": {
 			Type:          schema.TypeString,
@@ -174,8 +174,8 @@ func ServiceUserPasswordSchema() map[string]*schema.Schema {
 			WriteOnly:     true,
 			RequiredWith:  []string{"password_wo_version"},
 			ConflictsWith: []string{"password"},
-			ValidateFunc:  validation.StringIsNotEmpty,
-			Description:   "The password of the service user (write-only, not stored in state). Must be used with `password_wo_version`. Cannot be empty.",
+			ValidateFunc:  validation.StringLenBetween(8, 256),
+			Description:   "The password of the service user (write-only, not stored in state). Must be used with `password_wo_version`. Must be 8-256 characters.",
 		},
 		"password_wo_version": {
 			Type:         schema.TypeInt,

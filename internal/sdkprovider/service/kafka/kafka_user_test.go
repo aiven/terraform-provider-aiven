@@ -3,6 +3,7 @@ package kafka_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -29,6 +30,37 @@ func TestAccAivenKafkaUser(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckAivenKafkaUserResourceDestroy,
 		Steps: []resource.TestStep{
+			{
+				// password validation: password too short
+				Config:      testAccKafkaUserResource(rName, "short"),
+				ExpectError: regexp.MustCompile(`expected length of password to be in the range \(8 - 256\)`),
+			},
+			{
+				// password validation: password_wo too short
+				Config: fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_user" "foo" {
+  service_name        = aiven_kafka.bar.service_name
+  project             = data.aiven_project.foo.project
+  username            = "user-%s"
+  password_wo         = "short"
+  password_wo_version = 1
+}
+`, acc.ProjectName(), rName, rName),
+				ExpectError: regexp.MustCompile(`expected length of password_wo to be in the range \(8 - 256\)`),
+			},
 			{
 				// create with optional password
 				Config: testAccKafkaUserResource(rName, "Test$1234"),
@@ -157,6 +189,35 @@ func TestAccAivenKafkaUser(t *testing.T) {
 	})
 }
 
+func TestAccAivenKafkaUser_passwordValidation(t *testing.T) {
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// password too short (less than 8 characters)
+				Config:      testAccKafkaUserResource(rName, "short"),
+				ExpectError: regexp.MustCompile(`expected length of password to be in the range \(8 - 256\)`),
+			},
+			{
+				// password_wo too short (less than 8 characters)
+				Config:      testAccKafkaUserWriteOnlyPasswordShort(rName),
+				ExpectError: regexp.MustCompile(`expected length of password_wo to be in the range \(8 - 256\)`),
+			},
+			{
+				// valid password with exactly 8 characters
+				Config: testAccKafkaUserResource(rName, "Valid$12"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aiven_kafka_user.foo", "password", "Valid$12"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAivenKafkaUserResourceDestroy(s *terraform.State) error {
 	c, err := acc.GetTestGenAivenClient()
 	if err != nil {
@@ -266,4 +327,29 @@ resource "aiven_kafka_user" "foo" {
   password_wo_version = %[3]d
 }
 `, acc.ProjectName(), name, version)
+}
+
+func testAccKafkaUserWriteOnlyPasswordShort(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_user" "foo" {
+  service_name        = aiven_kafka.bar.service_name
+  project             = data.aiven_project.foo.project
+  username            = "user-%[2]s"
+  password_wo         = "short"
+  password_wo_version = 1
+}
+`, acc.ProjectName(), name)
 }

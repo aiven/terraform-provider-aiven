@@ -47,5 +47,5 @@ data "aiven_cassandra_user" "example_service_user" {
 - `access_cert` (String, Sensitive) Access certificate for the user.
 - `access_key` (String, Sensitive) Access certificate key for the user.
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Cannot be empty if specified.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
 - `type` (String) User account type, such as primary or regular account.
