@@ -14,7 +14,14 @@ nav_order: 1
 
 - Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Experimental! Tool to use for database dump
   and restore during migration
-- Change service user resources and data sources: migrate to use generated client: `aiven_cassandra_user`, `aiven_influxdb_user`, `aiven_kafka_user`, `aiven_m3db_user`, `aiven_mysql_user`, `aiven_opensearch_user`, `aiven_pg_user`, `aiven_redis_user`
+- Change service user resources and data sources: migrate to use generated client: `aiven_cassandra_user`,
+  `aiven_influxdb_user`, `aiven_kafka_user`, `aiven_m3db_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
+  `aiven_pg_user`, `aiven_redis_user`
+- Add `aiven_kafka` field `kafka_user_config.letsencrypt_sasl`: Use a Let's Encrypt certificate authority (CA) for Kafka
+  SASL authentication
+- Add `aiven_kafka` field `kafka_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL OAUTHBEARER authentication
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL
+  OAUTHBEARER authentication
 
 ## [4.47.0] - 2025-11-12
 

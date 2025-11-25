@@ -87,6 +87,7 @@ Read-Only:
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
+- `sasl_oauthbearer_allowed_urls` (List of String)
 - `secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
