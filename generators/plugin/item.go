@@ -145,41 +145,38 @@ type Scope struct {
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description        string `yaml:"description"`
-	DeprecationMessage string `yaml:"deprecationMessage,omitempty"`
-}
-
-type IDAttribute struct {
-	Fields      []string `yaml:"fields"`
-	Description string   `yaml:"description,omitempty"`
-	Mutable     bool     `yaml:"mutable,omitempty"` // Negative for UseStateForUnknown
+	Description        string   `yaml:"description"`
+	DeprecationMessage string   `yaml:"deprecationMessage,omitempty"`
+	ExactlyOneOf       []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
 }
 
 type Definition struct {
-	fileName        string            // e.g. organization_address.yaml
-	typeName        string            // e.g. aiven_organization_address, aiven_kafka_topic
-	Beta            bool              `yaml:"beta"`
-	Location        string            `yaml:"location"`
-	Schema          map[string]*Item  `yaml:"schema,omitempty"`
-	Remove          []string          `yaml:"remove,omitempty"`
-	Rename          map[string]string `yaml:"rename,omitempty"`
-	Resource        *SchemaMeta       `yaml:"resource,omitempty"`
-	Datasource      *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttribute     *IDAttribute      `yaml:"idAttribute"`
-	LegacyTimeouts  bool              `yaml:"legacyTimeouts,omitempty"`
-	Operations      Operations        `yaml:"operations"`
-	Version         *int              `yaml:"version"`
-	ClientHandler   string            `yaml:"clientHandler,omitempty"`
-	RefreshState    bool              `yaml:"refreshState,omitempty"`
-	ExpandModifier  bool              `yaml:"expandModifier,omitempty"`
-	FlattenModifier bool              `yaml:"flattenModifier,omitempty"`
+	fileName            string            // e.g. organization_address.yaml
+	typeName            string            // e.g. aiven_organization_address, aiven_kafka_topic
+	Beta                bool              `yaml:"beta"`
+	Location            string            `yaml:"location"`
+	Schema              map[string]*Item  `yaml:"schema,omitempty"`
+	Remove              []string          `yaml:"remove,omitempty"`
+	Rename              map[string]string `yaml:"rename,omitempty"`
+	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
+	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
+	IDAttribute         string            `yaml:"idAttribute,omitempty"` // Default ID attribute name, e.g. "id"
+	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
+	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
+	Operations          Operations        `yaml:"operations"`
+	Version             *int              `yaml:"version"`
+	ClientHandler       string            `yaml:"clientHandler,omitempty"`
+	RefreshState        bool              `yaml:"refreshState,omitempty"`
+	PlanModifier        bool              `yaml:"planModifier,omitempty"`
+	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
+	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
 }
 
 type Item struct {
 	Parent              *Item     `yaml:"-"`
 	AppearsIn           AppearsIn `yaml:"-"` // In Create, Read, Update, Delete request or response
 	Name                string    `yaml:"-"`
-	InIDAttribute       bool      `yaml:"-"` // If field is part of ID attribute
+	IDAttribute         bool      `yaml:"-"` // If field is part of ID attribute or it is ID attribute
 	IDAttributePosition int       `yaml:"-"` // Position in the ID field
 
 	// Tagged fields are exposed to the Definition.yaml
@@ -211,6 +208,7 @@ type Item struct {
 	DeprecationMessage string     `yaml:"deprecationMessage"`
 	Required           bool       `yaml:"-"`
 	Computed           bool       `yaml:"-"`
+	Virtual            bool       `yaml:"virtual"` // The field doesn't appear in API request/response
 	Nullable           bool       `yaml:"-"`
 	Optional           bool       `yaml:"-"`
 	Sensitive          bool       `yaml:"-"`
@@ -341,7 +339,7 @@ func (item *Item) IsReadOnly(isResource bool) bool {
 	}
 
 	// ID attributes are not read-only in data sources
-	return !item.InIDAttribute
+	return !item.IDAttribute
 }
 
 func (item *Item) IsScalar() bool {
@@ -397,8 +395,10 @@ func (item *Item) IsEnum() bool {
 func (item *Item) GetIDFields() []*Item {
 	fields := make([]*Item, 0)
 	for _, v := range item.Properties {
-		if v.InIDAttribute {
-			fields = append(fields, v)
+		if v.IDAttribute {
+			if !v.Virtual {
+				fields = append(fields, v)
+			}
 		}
 	}
 

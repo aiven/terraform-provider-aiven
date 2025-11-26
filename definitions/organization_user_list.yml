@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/userlist
+datasource:
+  description: Returns a list of [users in the organization](https://aiven.io/docs/platform/concepts/user-access-management), their profile details, and other data . This includes users you add to your organization and application users.
+  exactlyOneOf: [id, name]
+operations:
+  - id: OrganizationUserList
+    type: read
+    resultToKey: users
+clientHandler: organizationuser
+planModifier: true
+rename:
+  organization_id: id
+schema:
+  users:
+    # The plugin framework very slow on "set of objects"
+    # Uses ordered array (list) instead of set
+    type: arrayOrdered
+  name:
+    type: string
+    description: The name of the organization.

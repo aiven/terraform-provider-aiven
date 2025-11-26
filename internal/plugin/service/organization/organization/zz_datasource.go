@@ -7,7 +7,9 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -46,8 +48,9 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Timestamp in ISO 8601 format, always in UTC.",
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The organization ID.",
+				MarkdownDescription: "Organization ID.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,

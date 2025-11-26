@@ -5,9 +5,8 @@ This document tracks the migration status of all resources and datasources from 
 ## Summary as of 2025-11-20
 
 - Unique items: 100 (table rows)
-- SDK implementations: 85
-- Plugin implementations: 15
-- Remaining: 85 to be migrated, 19 of which are deprecated
+- Plugin implementations: 16
+- Remaining: 84 SDK implementations to be migrated, 19 of which are deprecated
 
 ## Resources and Datasources
 
@@ -92,7 +91,7 @@ This document tracks the migration status of all resources and datasources from 
 | 77  | aiven_organization_user_group                 | RD   |        |            |
 | 78  | aiven_organization_user_group_list            | D    | ✓      |            |
 | 79  | aiven_organization_user_group_member          | R    | ✓      |            |
-| 80  | aiven_organization_user_list                  | D    |        |            |
+| 80  | aiven_organization_user_list                  | D    | ✓      |            |
 | 81  | aiven_organization_vpc                        | RD   |        |            |
 | 82  | aiven_organizational_unit                     | RD   |        |            |
 | 83  | aiven_pg                                      | RD   |        |            |

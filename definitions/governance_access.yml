@@ -15,10 +15,7 @@ resource:
     Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance.
     [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes.
     You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
-idAttribute:
-  fields:
-    - organization_id
-    - susbcription_id
+idAttributeComposed: [organization_id, susbcription_id]
 rename:
   access_id: susbcription_id
   access_data/project_name: project

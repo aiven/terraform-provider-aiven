@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -66,46 +66,6 @@ func genTimeoutsField(isResource bool, def *Definition) jen.Code {
 	return jen.Qual(pkg, method).Call(jen.Id("ctx"))
 }
 
-// genIDField generates the ID field for the schema.
-// The result depends on the entity type.
-func genIDField(isResource bool, idField *IDAttribute) jen.Code {
-	description := idField.Description
-	if description == "" {
-		fields := lo.Map(idField.Fields, func(v string, _ int) string {
-			return fmt.Sprintf("`%s`", v)
-		})
-		switch len(idField.Fields) {
-		case 0:
-		case 1:
-			description = fmt.Sprintf("Resource ID, equal to %s.", fields[0])
-		default:
-			description = fmt.Sprintf("Resource ID, a composite of %s IDs.", joinCommaAnd(fields))
-		}
-	}
-
-	attrs := jen.Dict{
-		jen.Id("MarkdownDescription"): jen.Lit(description),
-	}
-
-	if !isResource && len(idField.Fields) == 1 && idField.Fields[0] == "id" {
-		// If datasource id is literally "id", it is required.
-		attrs[jen.Id("Required")] = jen.True()
-	} else {
-		attrs[jen.Id("Computed")] = jen.True()
-	}
-
-	if isResource && !idField.Mutable {
-		// Make ID field plan modifier to use state for unknown
-		// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#usestateforunknown
-		// todo: some resources might change the ID after apply, like aiven_organization_project
-		//  in that case, we should not probably use this plan modifier
-		attrs[jen.Id("PlanModifiers")] = jen.Index().
-			Qual(entityImport(isResource, planmodifierPackageFmt), "String").
-			Values(jen.Qual(getTypedImport(SchemaTypeString, planmodifierTypedImport), "UseStateForUnknown").Call())
-	}
-	return jen.Qual(entityImport(isResource, schemaPackageFmt), "StringAttribute").Values(attrs)
-}
-
 // genAttributes generates the Attributes field value (map).
 func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, error) {
 	pkg := entityImport(isResource, schemaPackageFmt)
@@ -113,11 +73,6 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 	blocks := make(jen.Dict)
 
 	for _, k := range sortedKeys(item.Properties) {
-		if k == "id" && item.IsRoot() {
-			// The id field is added by genIDField
-			continue
-		}
-
 		v := item.Properties[k]
 		key := jen.Lit(k)
 		switch {
@@ -147,15 +102,20 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 			}
 
 			if value != nil {
-				values[jen.Id("ElementType")] = value
+				values["ElementType"] = value
 			}
 
-			attrs[key] = jen.Qual(pkg, v.TFType()+"Attribute").Values(values)
+			if !isResource && item.IsRoot() && slices.Contains(def.Datasource.ExactlyOneOf, k) {
+				delete(values, "Required")
+				values["Optional"] = jen.True()
+				values["Computed"] = jen.True()
+			}
+
+			attrs[key] = jen.Qual(pkg, v.TFType()+"Attribute").Values(dictFromMap(values, false))
 		}
 	}
 
-	if item.IsRoot() {
-		attrs[jen.Lit("id")] = genIDField(isResource, def.IDAttribute)
+	if item.IsRoot() && def != nil {
 		blocks[jen.Lit("timeouts")] = genTimeoutsField(isResource, def)
 	}
 
@@ -182,8 +142,8 @@ func genMapNestedAttribute(isResource bool, item *Item) (jen.Code, error) {
 	if err != nil {
 		return nil, err
 	}
-	values[jen.Id("NestedObject")] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
-	return jen.Qual(pkg, "MapNestedAttribute").Values(values), nil
+	values["NestedObject"] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
+	return jen.Qual(pkg, "MapNestedAttribute").Values(dictFromMap(values, false)), nil
 }
 
 func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
@@ -209,23 +169,23 @@ func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
 		t = "ListNestedBlock"
 	}
 
-	values[jen.Id("NestedObject")] = jen.Qual(pkg, "NestedBlockObject").Values(nested)
-	return jen.Qual(pkg, t).Values(values), nil
+	values["NestedObject"] = jen.Qual(pkg, "NestedBlockObject").Values(nested)
+	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
 }
 
-func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
-	values := jen.Dict{}
+func genAttributeValues(isResource bool, item *Item) (map[string]jen.Code, error) {
+	values := make(map[string]jen.Code)
 	description := fmtDescription(isResource, item)
 	if description != "" {
-		values[jen.Id("MarkdownDescription")] = jen.Lit(description)
+		values["MarkdownDescription"] = jen.Lit(description)
 	}
 
 	if item.DeprecationMessage != "" {
-		values[jen.Id("DeprecationMessage")] = jen.Lit(item.DeprecationMessage)
+		values["DeprecationMessage"] = jen.Lit(item.DeprecationMessage)
 	}
 
 	if item.Sensitive {
-		values[jen.Id("Sensitive")] = jen.True()
+		values["Sensitive"] = jen.True()
 	}
 
 	if !item.IsNested() {
@@ -241,26 +201,26 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 			}
 
 			if len(planModifiers) > 0 {
-				values[jen.Id("PlanModifiers")] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
+				values["PlanModifiers"] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
 					Values(planModifiers...)
 			}
 
 			if item.Required {
-				values[jen.Id("Required")] = jen.True()
+				values["Required"] = jen.True()
 			}
 
 			if item.Optional {
-				values[jen.Id("Optional")] = jen.True()
+				values["Optional"] = jen.True()
 			}
 
 			if item.Computed {
-				values[jen.Id("Computed")] = jen.True()
+				values["Computed"] = jen.True()
 			}
 		} else {
-			if item.InIDAttribute {
-				values[jen.Id("Required")] = jen.True()
+			if item.IDAttribute && !item.Virtual {
+				values["Required"] = jen.True()
 			} else {
-				values[jen.Id("Computed")] = jen.True()
+				values["Computed"] = jen.True()
 			}
 		}
 	}
@@ -273,11 +233,11 @@ func genAttributeValues(isResource bool, item *Item) (jen.Dict, error) {
 		}
 
 		if len(validators) > 0 {
-			values[jen.Id("Validators")] = jen.Index().Qual(validatorPackage, item.TFType()).Values(validators...)
+			values["Validators"] = jen.Index().Qual(validatorPackage, item.TFType()).Values(validators...)
 		}
 
 		if item.Default != nil {
-			values[jen.Id("Default")] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
+			values["Default"] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
 		}
 	}
 

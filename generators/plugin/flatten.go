@@ -57,7 +57,7 @@ func genFlatten(def *Definition, item *Item) ([]jen.Code, error) {
 	// But they are available in the ID field.
 	// Generates the code that splits the ID field and sets the values to the fields.
 	// This way the plan command won't output a diff.
-	if _, ok := item.Properties["id"]; !ok {
+	if len(def.IDAttributeComposed) > 0 {
 		block = append(
 			block,
 			genSetIDFields(item),
@@ -185,7 +185,12 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 func genFlattenProperties(item *Item, rootLevel bool) ([]jen.Code, error) {
 	block := make([]jen.Code, 0, len(item.Properties))
 	for _, k := range nestedFirst(item.Properties) {
-		value, err := genFlattenAttribute(item.Properties[k], rootLevel)
+		v := item.Properties[k]
+		if v.Virtual {
+			// Virtual properties are not present in the API response.
+			continue
+		}
+		value, err := genFlattenAttribute(v, rootLevel)
 		if err != nil {
 			return nil, err
 		}
@@ -300,9 +305,11 @@ func genAttrFieldType(item *Item) *jen.Statement {
 	switch {
 	case item.IsScalar():
 		return jen.Qual(typesPackage, item.TFType()+"Type")
-	case item.IsObject():
-		return jen.Id(attrPrefix + item.UniqueName()).Call()
-	case item.IsSet(), item.IsList(), item.IsMap():
+	case item.IsNested(), item.IsMap():
+		return jen.Qual(typesPackage, item.TFType()+"Type").Values(jen.Dict{
+			jen.Id("ElemType"): jen.Id(attrPrefix + item.UniqueName()).Call(),
+		})
+	case item.IsSet(), item.IsList():
 		return jen.Qual(typesPackage, item.TFType()+"Type").Values(jen.Dict{
 			jen.Id("ElemType"): genAttrFieldType(item.Items),
 		})

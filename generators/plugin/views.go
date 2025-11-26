@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	avnGenHandlerPackage = "github.com/aiven/go-client-codegen/handler/"
-	viewSuffix           = "View"
-	optionsSuffix        = "Options"
+	viewSuffix               = "View"
+	optionsSuffix            = "Options"
+	configValidatorsFuncName = "configValidators"
+	planModifier             = "planModifier"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -34,18 +35,22 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 
 	builders := make([]jen.Code, 0)
 	if def.Resource != nil {
-		builders = append(builders, genNewResource(resourceType, def))
+		builders = append(builders, genNewResource(resourceType, def, false))
 	}
 
 	if def.Datasource != nil {
-		builders = append(builders, genNewResource(datasourceType, def))
+		hasValidators := len(def.Datasource.ExactlyOneOf) > 0
+		if hasValidators {
+			codes = append(codes, datasourceExactlyOneOf(def))
+		}
+		builders = append(builders, genNewResource(datasourceType, def, hasValidators))
 	}
 
 	return append(builders, codes...), nil
 }
 
 // genNewResource generates NewResource or NewDatasource function
-func genNewResource(entity entityType, def *Definition) jen.Code {
+func genNewResource(entity entityType, def *Definition, hasConfigValidators bool) jen.Code {
 	// Resource might have multiple read operations.
 	// We use here a dict, so we don't need to handle duplicates.
 	values := map[string]jen.Code{
@@ -55,7 +60,7 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 	}
 
 	for _, v := range def.Operations {
-		if v.DisableView || entity == datasourceType && v.Type != OperationRead {
+		if entity == datasourceType && v.Type != OperationRead {
 			// Datasource only supports Read operation
 			continue
 		}
@@ -68,14 +73,13 @@ func genNewResource(entity entityType, def *Definition) jen.Code {
 		values["RefreshState"] = jen.Lit(def.RefreshState)
 	}
 
-	valuesDict := make(jen.Dict)
-	for k, v := range values {
-		valuesDict[jen.Id(k)] = v
+	if hasConfigValidators {
+		values["ConfigValidators"] = jen.Id(configValidatorsFuncName)
 	}
 
 	title := entity.Title() + optionsSuffix
 	genericType := jen.List(jen.Op("*").Id(entityName+"Model"), jen.Id(tfRootModel))
-	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(valuesDict)
+	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(dictFromMap(values, false))
 	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
@@ -115,6 +119,20 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
 		g.Var().Id("diags").Qual(diagPackage, "Diagnostics")
+		if def.PlanModifier {
+			state := "state"
+			switch operation {
+			case OperationUpdate, OperationCreate:
+				state = "plan"
+			}
+			g.Id("diags").Dot("Append").Call(jen.Id(planModifier).Call(
+				jen.Id("ctx"),
+				jen.Id("client"),
+				jen.Id(state),
+			).Op("..."))
+			g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
+		}
+
 		for i, op := range operations {
 			if i != 0 {
 				g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
@@ -296,6 +314,27 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 	)
 
 	return nil
+}
+
+func datasourceExactlyOneOf(def *Definition) jen.Code {
+	fields := make([]jen.Code, len(def.Datasource.ExactlyOneOf))
+	for i, v := range def.Datasource.ExactlyOneOf {
+		fields[i] = jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(v))
+	}
+
+	pkg := datasourceType.Import(entityValidatorPkgFmt)
+	validators := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(
+		multilineValues(), jen.Qual(pkg, "ExactlyOneOf").Custom(multilineCall(), fields...),
+	)
+	return jen.Func().Id(configValidatorsFuncName).
+		Params(
+			jen.Id("ctx").Qual("context", "Context"),
+			jen.Id("client").Qual(avnGenPackage, "Client"),
+		).
+		Index().Qual(datasourcePkg, "ConfigValidator").
+		Block(
+			jen.Return(validators),
+		)
 }
 
 // filterAppearsIn filters items by their appearance in Create/Update request, response, etc.

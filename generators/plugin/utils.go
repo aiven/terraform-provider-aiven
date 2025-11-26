@@ -1,12 +1,13 @@
 package main
 
 import (
-	"cmp"
 	"fmt"
 	"maps"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/dave/jennifer/jen"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -63,9 +64,17 @@ func ptrOrDefault[T any](v *T, def T) T {
 	return *v
 }
 
-func sortedKeys[K cmp.Ordered, V any](m map[K]V) []K {
+// sortedKeys sorts the keys, "id" first, then alphabetically
+func sortedKeys[K ~string, V any](m map[K]V) []K {
 	keys := slices.Collect(maps.Keys(m))
-	slices.Sort(keys)
+	slices.SortFunc(keys, func(i, j K) int {
+		if i == "id" {
+			return -1
+		} else if j == "id" {
+			return 1
+		}
+		return strings.Compare(string(i), string(j))
+	})
 	return keys
 }
 
@@ -130,12 +139,49 @@ func firstUpper[T ~string](s T) string {
 	return strings.ToUpper(v[:1]) + v[1:]
 }
 
-func joinCommaAnd(args []string) string {
-	switch len(args) {
+func joinCommaAnd(args []string, code bool) string {
+	list := args
+	if code {
+		list = make([]string, len(args))
+		for i, v := range args {
+			list[i] = fmt.Sprintf("`%s`", v)
+		}
+	}
+	switch len(list) {
 	case 0:
 		return ""
 	case 1:
-		return args[0]
+		return list[0]
 	}
-	return strings.Join(args[:len(args)-1], ", ") + " and " + args[len(args)-1]
+	return strings.Join(list[:len(list)-1], ", ") + " and " + list[len(list)-1]
+}
+
+func dictFromMap(m map[string]jen.Code, litKeys bool) jen.Dict {
+	dict := make(jen.Dict)
+	for k, v := range m {
+		if litKeys {
+			dict[jen.Lit(k)] = v
+		} else {
+			dict[jen.Id(k)] = v
+		}
+	}
+	return dict
+}
+
+func multilineCall() jen.Options {
+	return jen.Options{
+		Close:     ")",
+		Multi:     true,
+		Open:      "(",
+		Separator: ",",
+	}
+}
+
+func multilineValues() jen.Options {
+	return jen.Options{
+		Close:     "}",
+		Multi:     true,
+		Open:      "{",
+		Separator: ",",
+	}
 }

@@ -4,12 +4,7 @@ beta: true
 datasource:
   description: >
     Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
-idAttribute:
-  fields:
-    - project
-    - service_type
-    - service_plan
-    - cloud_name
+idAttributeComposed: [project, service_type, service_plan, cloud_name]
 clientHandler: project
 operations:
   - id: ProjectServicePlanPriceGet
