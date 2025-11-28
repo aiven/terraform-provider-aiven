@@ -125,10 +125,12 @@ Optional:
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (Block List, Max: 1) Kafka SASL mechanisms (see [below for nested schema](#nestedblock--kafka_user_config--kafka_sasl_mechanisms))
 - `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, and newer. Kafka major version.
-- `letsencrypt_sasl_privatelink` (Boolean) Use Letsencrypt CA for Kafka SASL via Privatelink.
+- `letsencrypt_sasl` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication. (Default: False).
+- `letsencrypt_sasl_privatelink` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication via Privatelink. (Default: False).
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
+- `sasl_oauthbearer_allowed_urls` (List of String) List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.
 - `schema_registry` (Boolean) Enable Schema-Registry service. Default: `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
