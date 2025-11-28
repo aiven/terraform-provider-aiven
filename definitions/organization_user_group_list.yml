@@ -2,9 +2,7 @@
 location: internal/plugin/service/organization/usergrouplist
 datasource:
   description: List all user groups within an organization
-idAttribute:
-  fields:
-    - organization_id
+idAttributeComposed: [organization_id]
 operations:
   - id: UserGroupsList
     type: read

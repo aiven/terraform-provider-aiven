@@ -29,8 +29,8 @@ func (tf *tfModel) SetID(vID string) {
 }
 
 type apiModel struct {
-	CreateTime *string `json:"create_time,omitempty"`
 	ID         *string `json:"organization_id,omitempty"`
+	CreateTime *string `json:"create_time,omitempty"`
 	Name       *string `json:"account_name,omitempty"`
 	TenantID   *string `json:"tenant_id,omitempty"`
 	UpdateTime *string `json:"update_time,omitempty"`

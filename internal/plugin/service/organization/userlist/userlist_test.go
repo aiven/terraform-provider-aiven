@@ -1,4 +1,4 @@
-package organization_test
+package userlist_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
 )
 
 func testAccAivenOrganizationUserListByName(name string) string {
@@ -56,7 +56,7 @@ func TestAccAivenOrganizationUserListByID(t *testing.T) {
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)
 
-	id, err := organization.GetOrganizationByName(
+	id, err := userlist.GetOrganizationByName(
 		context.Background(),
 		client,
 		acc.OrganizationName(),
@@ -75,5 +75,43 @@ func TestAccAivenOrganizationUserListByID(t *testing.T) {
 				),
 			},
 		},
+	})
+}
+
+func TestAccAivenOrganizationUserList_InvalidInput(t *testing.T) {
+	t.Run("both id and name set", func(t *testing.T) {
+		tfConfig := fmt.Sprintf(`
+data "aiven_organization_user_list" "invalid" {
+  id   = "%s"
+  name = "%s"
+}
+`, "dummy-id", "dummy-name")
+
+		resource.UnitTest(t, resource.TestCase{
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config:      tfConfig,
+					ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured: \[id,name]`),
+				},
+			},
+		})
+	})
+
+	t.Run("neither id nor name set", func(t *testing.T) {
+		tfConfig := `
+data "aiven_organization_user_list" "invalid" {
+  # neither id nor name
+}
+`
+		resource.UnitTest(t, resource.TestCase{
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config:      tfConfig,
+					ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured: \[id,name]`),
+				},
+			},
+		})
 	})
 }

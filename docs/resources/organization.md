@@ -32,7 +32,7 @@ resource "aiven_organization" "main" {
 ### Read-Only
 
 - `create_time` (String) Timestamp in ISO 8601 format, always in UTC.
-- `id` (String) The organization ID.
+- `id` (String) Organization ID.
 - `tenant_id` (String, Deprecated) Tenant identifier.
 - `update_time` (String) Timestamp in ISO 8601 format, always in UTC.
 

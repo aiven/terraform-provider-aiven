@@ -3,10 +3,7 @@ location: internal/plugin/service/planlist
 datasource:
   description: >
     A list of service plans for a given project and service type.
-idAttribute:
-  fields:
-    - project
-    - service_type
+idAttributeComposed: [project, service_type]
 remove:
   - service_plans/backup_config
 clientHandler: project

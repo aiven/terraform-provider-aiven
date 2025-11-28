@@ -15,6 +15,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
 )
@@ -37,6 +38,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_billing_group_list": adapter.NewLazyDataSource(billinggrouplist.DataSourceOptions),
 		"aiven_organization_project":            adapter.NewLazyDataSource(project.DataSourceOptions),
 		"aiven_organization_user_group_list":    adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
+		"aiven_organization_user_list":          adapter.NewLazyDataSource(userlist.DataSourceOptions),
 		"aiven_service_plan":                    adapter.NewLazyDataSource(plan.DataSourceOptions),
 		"aiven_service_plan_list":               adapter.NewLazyDataSource(planlist.DataSourceOptions),
 	}

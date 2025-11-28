@@ -16,10 +16,6 @@ resource:
   description: Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).
 datasource:
   description: Gets information about an organization.
-idAttribute:
-  fields:
-    - id
-  description: The organization ID.
 remove:
   - features
   - access_source

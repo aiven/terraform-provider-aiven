@@ -62,7 +62,7 @@ func getExampleItemPriority(isResource bool, item *Item) int {
 	switch {
 	case item.IsReadOnly(isResource):
 		return 2
-	case item.InIDAttribute, item.ForceNew:
+	case item.IDAttribute, item.ForceNew:
 		return 0
 	}
 	return 1
@@ -73,6 +73,10 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 
 	for _, k := range sortedKeysPriority(isResource, item.Properties) {
 		v := item.Properties[k]
+		if v.Virtual {
+			// Don't expose internal virtual properties, like "id"
+			continue
+		}
 
 		// Renders COMPUTED FIELDS title before the first computed field
 		if v.IsReadOnly(isResource) && item.IsRoot() && !seenComputed {

@@ -144,7 +144,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 
 			// Resources need idFields and expander
 			if hasResource {
-				codes = append(codes, genIDFields(def.typeName, def.IDAttribute.Fields))
+				codes = append(codes, genIDFields(def.typeName, root))
 				expand, err := genExpand(def, root)
 				if err != nil {
 					return fmt.Errorf("could not generate expand: %w", err)
@@ -177,7 +177,11 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 					return fmt.Errorf("could not generate views: %w", err)
 				}
 
-				viewFile := newFile(pkgName, avnGenHandlerPackage+def.ClientHandler)
+				viewFile := newFile(
+					pkgName,
+					avnGenHandlerPackage+def.ClientHandler,
+					entity.Import(entityValidatorPkgFmt),
+				)
 				for _, v := range codes {
 					viewFile.Add(v).Line()
 				}
@@ -285,19 +289,58 @@ func createRootItem(scope *Scope) (*Item, error) {
 		}
 	}
 
+	// Adds the 'id' field if missing
+	idField, idExists := root.Properties["id"]
+	if !idExists {
+		if len(pkg.IDAttributeComposed) == 0 {
+			return nil, fmt.Errorf("no 'id' field found and no IDAttributeComposed defined")
+		}
+
+		idField = &Item{
+			Name:       "id",
+			JSONName:   "id",
+			Type:       SchemaTypeString,
+			Properties: make(map[string]*Item),
+			Virtual:    true,
+			Computed:   true,
+		}
+		root.Properties["id"] = idField
+	}
+
+	idField.IDAttribute = true
+	if idField.Description == "" && len(pkg.IDAttributeComposed) != 0 {
+		fields := joinCommaAnd(pkg.IDAttributeComposed, true)
+		if len(pkg.IDAttributeComposed) > 1 {
+			idField.Description = fmt.Sprintf("Resource ID, a composite of %s IDs.", fields)
+		} else {
+			idField.Description = fmt.Sprintf("Resource ID, equal to %s.", fields)
+		}
+	}
+
 	err = recalcDeep(scope.Definition, root)
 	if err != nil {
 		return nil, err
 	}
 
 	// Marks ID fields
-	for i, v := range pkg.IDAttribute.Fields {
+	isMutable := scope.Definition.Operations.AppearsInHandler(UpdateHandler, RequestBody)
+	idField.UseStateForUnknown = true
+	for i, v := range pkg.IDAttributeComposed {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
 			return nil, fmt.Errorf("ID field %q not found in: %s", v, strings.Join(keys, ", "))
 		}
-		root.Properties[v].InIDAttribute = true
+		root.Properties[v].IDAttribute = true
 		root.Properties[v].IDAttributePosition = i
+
+		// When a part of the ID can be updated, we can't use "state for unknown" plan modifier,
+		// because we don't know its new value beforehand.
+		// This applies to virtual ID only,
+		// because custom id (e.g. "organization_id") has already been calculated
+		// or modified using "UseStateForUnknown" field.
+		if root.Properties[v].AppearsIn.Contains(isMutable) {
+			idField.UseStateForUnknown = false
+		}
 	}
 
 	return root, nil

@@ -6,10 +6,7 @@ resource:
 datasource:
   description: Gets information about an organization address.
 clientHandler: organization
-idAttribute:
-  fields:
-    - organization_id
-    - address_id
+idAttributeComposed: [organization_id, address_id]
 operations:
   - id: OrganizationAddressCreate
     type: create

@@ -93,20 +93,7 @@ func collectModels(item *Item) []*Item {
 func genItemTFModel(item *Item) (jen.Code, error) {
 	fields := make([]jen.Code, 0)
 
-	if item.IsRoot() {
-		// Adds ID field
-		fields = append(
-			fields,
-			jen.Id("ID").Qual(typesPackage, "String").Tag(genFieldTag("tfsdk", "id")),
-		)
-	}
-
 	for _, k := range sortedKeys(item.Properties) {
-		if k == "id" && item.IsRoot() {
-			// The id field is already added
-			continue
-		}
-
 		v := item.Properties[k]
 		fields = append(
 			fields,
@@ -125,6 +112,10 @@ func genItemApiModel(item *Item) (jen.Code, error) {
 
 	for _, k := range sortedKeys(item.Properties) {
 		v := item.Properties[k]
+		if v.Virtual {
+			continue
+		}
+
 		// It is important to use JSONName here, it might be different from Name
 		tags := genFieldTag("json", v.JSONName)
 		if !v.Nullable {
@@ -156,7 +147,12 @@ func genFieldTag(kv ...string) map[string]string {
 
 const funcIDFields = "idFields"
 
-func genIDFields(avnName string, fields []string) jen.Code {
+func genIDFields(avnName string, root *Item) jen.Code {
+	fields := make([]string, 0)
+	for _, v := range root.GetIDFields() {
+		fields = append(fields, v.Name)
+	}
+
 	codes := make([]jen.Code, 0)
 	for _, v := range fields {
 		codes = append(codes, jen.Lit(v))
@@ -170,12 +166,10 @@ func genIDFields(avnName string, fields []string) jen.Code {
 }
 
 func genSetIDMeth(item *Item) jen.Code {
-	idFields := item.GetIDFields()
 	block := make([]jen.Code, 0)
 	params := make([]jen.Code, 0)
 	pathValues := make([]jen.Code, 0)
-
-	for _, v := range idFields {
+	for _, v := range item.GetIDFields() {
 		// Func params
 		params = append(params, jen.Id(v.GoVarName()).String())
 

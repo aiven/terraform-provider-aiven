@@ -8,10 +8,7 @@ resource:
     You can also add application users to groups using the `aiven_organization_user_group_member` resource.`
 datasource:
   description: Gets information about an application user.
-idAttribute:
-  fields:
-    - organization_id
-    - user_id
+idAttributeComposed: [organization_id, user_id]
 clientHandler: applicationuser
 operations:
   - id: ApplicationUserCreate

@@ -23,37 +23,46 @@ data "aiven_organization_user_list" "users" {
 
 ### Optional
 
-- `id` (String) The ID of the organization.
+- `id` (String) ID of an organization.
 - `name` (String) The name of the organization.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `users` (List of Object) List of the users, their profile information, and other data. (see [below for nested schema](#nestedatt--users))
+- `users` (Block List) List of users of the organization. (see [below for nested schema](#nestedblock--users))
 
-<a id="nestedatt--users"></a>
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedblock--users"></a>
 ### Nested Schema for `users`
 
 Read-Only:
 
-- `is_super_admin` (Boolean)
-- `join_time` (String)
-- `last_activity_time` (String)
-- `user_id` (String)
-- `user_info` (List of Object) (see [below for nested schema](#nestedobjatt--users--user_info))
+- `is_super_admin` (Boolean) Super admin state of the organization user.
+- `join_time` (String) Join time.
+- `last_activity_time` (String) Last activity time.
+- `user_id` (String) User ID.
+- `user_info` (Block List) OrganizationUserInfo. (see [below for nested schema](#nestedblock--users--user_info))
 
-<a id="nestedobjatt--users--user_info"></a>
+<a id="nestedblock--users--user_info"></a>
 ### Nested Schema for `users.user_info`
 
 Read-Only:
 
-- `city` (String)
-- `country` (String)
-- `create_time` (String)
-- `department` (String)
-- `is_application_user` (Boolean)
-- `job_title` (String)
-- `managed_by_scim` (Boolean)
-- `managing_organization_id` (String)
-- `real_name` (String)
-- `state` (String)
-- `user_email` (String)
+- `city` (String) City.
+- `country` (String) Country.
+- `create_time` (String) Creation time.
+- `department` (String) Department.
+- `is_application_user` (Boolean) Is Application User.
+- `job_title` (String) Job Title.
+- `managed_by_scim` (Boolean) Managed By Scim.
+- `managing_organization_id` (String) Managing Organization ID.
+- `real_name` (String) Real Name.
+- `state` (String) State.
+- `user_email` (String) User Email.

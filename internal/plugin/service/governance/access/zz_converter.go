@@ -42,8 +42,8 @@ type tfModelAccessData struct {
 }
 
 type tfModelAccessDataAcls struct {
-	Host           types.String `tfsdk:"host"`
 	ID             types.String `tfsdk:"id"`
+	Host           types.String `tfsdk:"host"`
 	Operation      types.String `tfsdk:"operation"`
 	PatternType    types.String `tfsdk:"pattern_type"`
 	PermissionType types.String `tfsdk:"permission_type"`
@@ -69,8 +69,8 @@ type apiModelAccessData struct {
 }
 
 type apiModelAccessDataAcls struct {
-	Host           *string `json:"host,omitempty"`
 	ID             *string `json:"id,omitempty"`
+	Host           *string `json:"host,omitempty"`
 	Operation      *string `json:"operation,omitempty"`
 	PatternType    *string `json:"pattern_type,omitempty"`
 	PermissionType *string `json:"permission_type,omitempty"`
