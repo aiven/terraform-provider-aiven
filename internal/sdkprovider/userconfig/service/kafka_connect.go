@@ -232,6 +232,12 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"sasl_oauthbearer_allowed_urls": {
+				Description: "List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
+			},
 			"secret_providers": {
 				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{

@@ -662,8 +662,13 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"letsencrypt_sasl": {
+				Description: "Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication. (Default: False).",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"letsencrypt_sasl_privatelink": {
-				Description: "Use Letsencrypt CA for Kafka SASL via Privatelink.",
+				Description: "Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication via Privatelink. (Default: False).",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -770,6 +775,12 @@ func kafkaUserConfig() *schema.Schema {
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
+			},
+			"sasl_oauthbearer_allowed_urls": {
+				Description: "List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
 			},
 			"schema_registry": {
 				Description: "Enable Schema-Registry service. Default: `false`.",
