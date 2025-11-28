@@ -12,71 +12,67 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var aivenValkeyUserSchema = map[string]*schema.Schema{
-	"project":      schemautil.CommonSchemaProjectReference,
-	"service_name": schemautil.CommonSchemaServiceNameReference,
+func aivenValkeyUserSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"project":      schemautil.CommonSchemaProjectReference,
+		"service_name": schemautil.CommonSchemaServiceNameReference,
 
-	"username": {
-		Type:         schema.TypeString,
-		Required:     true,
-		ForceNew:     true,
-		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("Name of the Valkey service user.").ForceNew().Referenced().Build(),
-	},
-	"password": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Sensitive:        true,
-		Computed:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The Valkey service user's password.",
-	},
-	"valkey_acl_categories": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		ForceNew:     true,
-		RequiredWith: []string{"valkey_acl_commands", "valkey_acl_keys"},
-		Description:  userconfig.Desc("Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").ForceNew().Build(),
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"username": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+			Description:  userconfig.Desc("Name of the Valkey service user.").ForceNew().Referenced().Build(),
 		},
-	},
-	"valkey_acl_commands": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		ForceNew:     true,
-		RequiredWith: []string{"valkey_acl_categories", "valkey_acl_keys"},
-		Description:  userconfig.Desc("Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"valkey_acl_categories": {
+			Type:         schema.TypeList,
+			Optional:     true,
+			ForceNew:     true,
+			RequiredWith: []string{"valkey_acl_commands", "valkey_acl_keys"},
+			Description:  userconfig.Desc("Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").ForceNew().Build(),
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-	},
-	"valkey_acl_keys": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		ForceNew:     true,
-		RequiredWith: []string{"valkey_acl_categories", "valkey_acl_commands"},
-		Description:  userconfig.Desc("Key access rules. Entries are defined as standard glob patterns.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"valkey_acl_commands": {
+			Type:         schema.TypeList,
+			Optional:     true,
+			ForceNew:     true,
+			RequiredWith: []string{"valkey_acl_categories", "valkey_acl_keys"},
+			Description:  userconfig.Desc("Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-	},
-	"valkey_acl_channels": {
-		Type:        schema.TypeList,
-		Optional:    true,
-		ForceNew:    true,
-		Description: userconfig.Desc("Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.").ForceNew().Build(),
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"valkey_acl_keys": {
+			Type:         schema.TypeList,
+			Optional:     true,
+			ForceNew:     true,
+			RequiredWith: []string{"valkey_acl_categories", "valkey_acl_commands"},
+			Description:  userconfig.Desc("Key access rules. Entries are defined as standard glob patterns.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-	},
+		"valkey_acl_channels": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			ForceNew:    true,
+			Description: userconfig.Desc("Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.").ForceNew().Build(),
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 
-	// computed fields
-	"type": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "User account type, such as primary or regular account.",
-	},
+		// computed fields
+		"type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "User account type, such as primary or regular account.",
+		},
+	}
+
+	return schemautil.MergeSchemas(s, schemautil.ServiceUserPasswordSchema())
 }
 
 func ResourceValkeyUser() *schema.Resource {
@@ -89,9 +85,9 @@ func ResourceValkeyUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
-
-		Schema: aivenValkeyUserSchema,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		Schema:        aivenValkeyUserSchema(),
+		CustomizeDiff: schemautil.CustomizeDiffServiceUserPasswordWoVersion,
 	}
 }
 
@@ -123,15 +119,9 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 		return err
 	}
 
-	if _, ok := d.GetOk("password"); ok {
-		req := service.ServiceUserCredentialsModifyIn{
-			NewPassword: schemautil.OptionalStringPointer(d, "password"),
-			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-		}
-		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &req)
-		if err != nil {
-			return err
-		}
+	err = schemautil.UpsertPassword(ctx, d, client)
+	if err != nil {
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
@@ -140,14 +130,7 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 }
 
 func resourceValkeyUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
-	if err != nil {
-		return err
-	}
-
-	_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &service.ServiceUserCredentialsModifyIn{
-		NewPassword: schemautil.OptionalStringPointer(d, "password"),
-	})
+	err := schemautil.UpsertPassword(ctx, d, client)
 	if err != nil {
 		return err
 	}
@@ -184,5 +167,5 @@ func resourceValkeyUserRead(ctx context.Context, d *schema.ResourceData, client 
 		return err
 	}
 
-	return nil
+	return schemautil.ClearPasswordIfWriteOnly(d)
 }

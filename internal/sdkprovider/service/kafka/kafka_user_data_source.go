@@ -11,7 +11,7 @@ func DatasourceKafkaUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClientDiag(schemautil.DatasourceServiceUserRead),
 		Description: "Gets information about an Aiven for Apache Kafka® service user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaUserSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaUserSchema(),
 			"project", "service_name", "username"),
 	}
 }

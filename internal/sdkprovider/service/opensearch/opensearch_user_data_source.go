@@ -11,7 +11,7 @@ func DatasourceOpenSearchUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClientDiag(schemautil.DatasourceServiceUserRead),
 		Description: "Gets information about an Aiven for OpenSearch® service user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchUserSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchUserSchema(),
 			"project", "service_name", "username"),
 	}
 }

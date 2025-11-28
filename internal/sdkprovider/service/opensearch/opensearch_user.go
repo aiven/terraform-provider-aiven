@@ -20,32 +20,28 @@ import (
 // the Aiven API.
 const errOpenSearchConfiguredDirectly = "access to service is configured directly by opensearch security"
 
-var aivenOpenSearchUserSchema = map[string]*schema.Schema{
-	"project":      schemautil.CommonSchemaProjectReference,
-	"service_name": schemautil.CommonSchemaServiceNameReference,
+func aivenOpenSearchUserSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"project":      schemautil.CommonSchemaProjectReference,
+		"service_name": schemautil.CommonSchemaServiceNameReference,
 
-	"username": {
-		Type:         schema.TypeString,
-		Required:     true,
-		ForceNew:     true,
-		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("Name of the OpenSearch service user.").ForceNew().Referenced().Build(),
-	},
-	"password": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Sensitive:        true,
-		Computed:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The OpenSearch service user's password.",
-	},
+		"username": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+			Description:  userconfig.Desc("Name of the OpenSearch service user.").ForceNew().Referenced().Build(),
+		},
 
-	// computed fields
-	"type": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "User account type, such as primary or regular account.",
-	},
+		// computed fields
+		"type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "User account type, such as primary or regular account.",
+		},
+	}
+
+	return schemautil.MergeSchemas(s, schemautil.ServiceUserPasswordSchema())
 }
 
 func ResourceOpenSearchUser() *schema.Resource {
@@ -58,9 +54,9 @@ func ResourceOpenSearchUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
-
-		Schema: aivenOpenSearchUserSchema,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		Schema:        aivenOpenSearchUserSchema(),
+		CustomizeDiff: schemautil.CustomizeDiffServiceUserPasswordWoVersion,
 	}
 }
 

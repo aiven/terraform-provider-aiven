@@ -24,7 +24,7 @@ The Valkey User data source provides information about the existing Aiven for Va
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The Valkey service user's password.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
 - `type` (String) User account type, such as primary or regular account.
 - `valkey_acl_categories` (List of String) Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature. The field is required with `valkey_acl_commands` and `valkey_acl_keys`. Changing this property forces recreation of the resource.
 - `valkey_acl_channels` (List of String) Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns. Changing this property forces recreation of the resource.

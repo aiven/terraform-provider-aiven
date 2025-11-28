@@ -317,6 +317,10 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 		}
 	}
 
+	if err := ClearPasswordIfWriteOnly(d); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -537,4 +541,10 @@ func Remarshal(in, out any) error {
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.UseNumber()
 	return d.Decode(out)
+}
+
+// MergeSchemas merges multiple schema maps into the base schema.
+// Later schemas take precedence over earlier ones in case of key conflicts.
+func MergeSchemas(base map[string]*schema.Schema, schemas ...map[string]*schema.Schema) map[string]*schema.Schema {
+	return lo.Assign(append([]map[string]*schema.Schema{base}, schemas...)...)
 }

@@ -8,44 +8,40 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var aivenKafkaUserSchema = map[string]*schema.Schema{
-	"project":      schemautil.CommonSchemaProjectReference,
-	"service_name": schemautil.CommonSchemaServiceNameReference,
+func aivenKafkaUserSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"project":      schemautil.CommonSchemaProjectReference,
+		"service_name": schemautil.CommonSchemaServiceNameReference,
 
-	"username": {
-		Type:         schema.TypeString,
-		Required:     true,
-		ForceNew:     true,
-		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("Name of the Kafka service user.").ForceNew().Referenced().Build(),
-	},
-	"password": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Sensitive:        true,
-		Computed:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The Kafka service user's password.",
-	},
+		"username": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+			Description:  userconfig.Desc("Name of the Kafka service user.").ForceNew().Referenced().Build(),
+		},
 
-	// computed fields
-	"type": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "User account type, such as primary or regular account.",
-	},
-	"access_cert": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "Access certificate for the user.",
-	},
-	"access_key": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "Access certificate key for the user.",
-	},
+		// computed fields
+		"type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "User account type, such as primary or regular account.",
+		},
+		"access_cert": {
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Computed:    true,
+			Description: "Access certificate for the user.",
+		},
+		"access_key": {
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Computed:    true,
+			Description: "Access certificate key for the user.",
+		},
+	}
+
+	return schemautil.MergeSchemas(s, schemautil.ServiceUserPasswordSchema())
 }
 
 func ResourceKafkaUser() *schema.Resource {
@@ -58,8 +54,9 @@ func ResourceKafkaUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
+		CustomizeDiff: schemautil.CustomizeDiffServiceUserPasswordWoVersion,
 
-		Schema: aivenKafkaUserSchema,
+		Schema: aivenKafkaUserSchema(),
 	}
 }

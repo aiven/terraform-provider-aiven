@@ -11,7 +11,7 @@ func DatasourceCassandraUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClientDiag(schemautil.DatasourceServiceUserRead),
 		Description: "Gets information about an Aiven for Apache Cassandra® service user.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenCassandraUserSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenCassandraUserSchema(),
 			"project", "service_name", "username"),
 	}
 }

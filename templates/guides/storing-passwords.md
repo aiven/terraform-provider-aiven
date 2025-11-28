@@ -8,13 +8,44 @@ By default, all passwords are stored in your Terraform state file. To avoid stor
 
 Write-only password fields are available for:
 - `aiven_clickhouse_user`
+- `aiven_kafka_user`
+- `aiven_mysql_user`
+- `aiven_opensearch_user`
+- `aiven_pg_user`
+- `aiven_valkey_user`
 
 ~> **Requirement**
 Write-only arguments support requires Terraform 1.11 or later.
 
-## Create a ClickHouse user with a write-only password
+## Create a service user with a write-only password
 
-Use the `password_wo` and `password_wo_version` fields to set a custom password that won't be stored in state:
+Use the `password_wo` and `password_wo_version` fields to set a custom password that won't be stored in state.
+
+### Example: Kafka user
+
+```hcl
+resource "aiven_kafka" "example" {
+  project      = var.aiven_project_name
+  service_name = "example-kafka"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+}
+
+ephemeral "random_password" "kafka_password" {
+  length  = 24
+  special = true
+}
+
+resource "aiven_kafka_user" "example" {
+  project             = var.aiven_project_name
+  service_name        = aiven_kafka.example.service_name
+  username            = "app_user"
+  password_wo         = ephemeral.random_password.kafka_password.result
+  password_wo_version = 1
+}
+```
+
+### Example: ClickHouse user
 
 ```hcl
 resource "aiven_clickhouse" "example" {
