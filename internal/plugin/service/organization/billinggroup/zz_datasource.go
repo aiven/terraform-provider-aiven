@@ -56,12 +56,12 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_contact_emails": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of billing contact emails.",
+				MarkdownDescription: "Aiven contacts these email addresses when there are billing issues or questions.",
 			},
 			"billing_emails": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of billing contact emails.",
+				MarkdownDescription: "PDF invoices are sent to these email addresses.",
 			},
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID.",
