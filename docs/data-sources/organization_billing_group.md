@@ -32,8 +32,8 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Read-Only
 
 - `billing_address_id` (String) Billing address ID.
-- `billing_contact_emails` (Set of String) List of billing contact emails.
-- `billing_emails` (Set of String) List of billing contact emails.
+- `billing_contact_emails` (Set of String) Aiven contacts these email addresses when there are billing issues or questions.
+- `billing_emails` (Set of String) PDF invoices are sent to these email addresses.
 - `billing_group_name` (String) Billing Group Name.
 - `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text.

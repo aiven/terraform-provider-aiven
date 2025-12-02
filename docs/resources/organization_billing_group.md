@@ -23,8 +23,8 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Required
 
 - `billing_address_id` (String) Billing address ID. Maximum length: `36`.
-- `billing_contact_emails` (Set of String) List of billing contact emails.
-- `billing_emails` (Set of String) List of billing contact emails.
+- `billing_contact_emails` (Set of String) Aiven contacts these email addresses when there are billing issues or questions.
+- `billing_emails` (Set of String) PDF invoices are sent to these email addresses.
 - `billing_group_name` (String) Billing Group Name. Maximum length: `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 - `payment_method_id` (String) Payment method ID.

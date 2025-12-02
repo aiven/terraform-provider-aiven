@@ -58,12 +58,12 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"billing_contact_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of billing contact emails.",
+				MarkdownDescription: "Aiven contacts these email addresses when there are billing issues or questions.",
 				Required:            true,
 			},
 			"billing_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of billing contact emails.",
+				MarkdownDescription: "PDF invoices are sent to these email addresses.",
 				Required:            true,
 			},
 			"billing_group_id": schema.StringAttribute{

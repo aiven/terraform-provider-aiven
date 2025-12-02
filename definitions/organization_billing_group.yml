@@ -21,8 +21,10 @@ operations:
     resultKey: billing_group
 schema:
   billing_contact_emails:
+    description: Aiven contacts these email addresses when there are billing issues or questions.
     items:
       type: string
   billing_emails:
+    description: PDF invoices are sent to these email addresses.
     items:
       type: string
