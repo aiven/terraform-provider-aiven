@@ -118,6 +118,7 @@ Read-Only:
 - `admin_username` (String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
+- `enable_ha_replica_dns` (Boolean)
 - `enable_ipv6` (Boolean)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))

@@ -12,7 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`, `aiven_pg_user`, `aiven_valkey_user`
+- Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
+  them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
+  `aiven_pg_user`, `aiven_valkey_user`
 - Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Experimental! Tool to use for database dump
   and restore during migration
 - Change service user resources and data sources: migrate to use generated client: `aiven_cassandra_user`,
@@ -23,7 +25,10 @@ nav_order: 1
 - Add `aiven_kafka` field `kafka_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL OAUTHBEARER authentication
 - Add `aiven_kafka_connect` field `kafka_connect_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL
   OAUTHBEARER authentication
-- Change service user resources and data sources: migrate to use generated client: `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`, `aiven_pg_user`
+- Change service user resources and data sources: migrate to use generated client: `aiven_kafka_user`, `aiven_mysql_user`,
+  `aiven_opensearch_user`, `aiven_pg_user`
+- Add `aiven_pg` field `pg_user_config.enable_ha_replica_dns`: Creates a dedicated read-only DNS that automatically falls
+  back to the primary if standby nodes are unavailable
 
 ## [4.47.0] - 2025-11-12
 
