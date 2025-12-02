@@ -178,15 +178,18 @@ func genGenericViewOperation(g *jen.Group, item *Item, def *Definition, operatio
 		g.Var().Id("req").Qual(pkgName, string(operation.ID)+"In")
 
 		// Expands data into the request
+		callArgs := []jen.Code{
+			jen.Id("ctx"),
+			jen.Id("plan"),
+			state,
+			jen.Id("&req"),
+		}
+		if def.ExpandModifier {
+			callArgs = append(callArgs, jen.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client")))
+		}
+
 		g.Id("diags").Dot("Append").Call(
-			jen.Id(expandDataFunc).
-				Call(
-					jen.Id("ctx"),
-					jen.Id("plan"),
-					state,
-					jen.Id("&req"),
-				).
-				Op("..."),
+			jen.Id(expandDataFunc).Call(callArgs...).Op("..."),
 		)
 
 		// If HasError, then return
@@ -262,14 +265,12 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 
 	// Flatten depends on whether the result is a list or a single object
 	flatten := func(rsp jen.Code) jen.Code {
+		callArgs := []jen.Code{jen.Id("ctx"), jen.Id(state), rsp}
+		if def.FlattenModifier {
+			callArgs = append(callArgs, jen.Id(flattenModifier).Call(jen.Id("ctx"), jen.Id("client")))
+		}
 		return jen.Id("diags").Dot("Append").Call(
-			jen.Id(flattenDataFunc).
-				Call(
-					jen.Id("ctx"),
-					jen.Id(state),
-					rsp,
-				).
-				Op("..."),
+			jen.Id(flattenDataFunc).Call(callArgs...).Op("..."),
 		)
 	}
 

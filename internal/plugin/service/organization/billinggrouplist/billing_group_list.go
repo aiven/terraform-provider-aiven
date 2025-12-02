@@ -1,19 +1,22 @@
 package billinggrouplist
 
 import (
+	"context"
+
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func flattenModifier(r util.RawMap, plan *tfModel) error {
+func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel] {
 	return util.ComposeModifiers(
 		// These emails are arrays of strings in Terraform.
 		// But in the API they are arrays of objects with "email" key.
 		flattenEmailsMap("billing_groups", "billing_contact_emails", "email"),
 		flattenEmailsMap("billing_groups", "billing_emails", "email"),
-	)(r, plan)
+	)
 }
 
 func flattenEmailsMap(arr, obj, key string) util.MapModifier[tfModel] {
