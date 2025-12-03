@@ -2,11 +2,11 @@
 
 This document tracks the migration status of all resources and datasources from the old SDK to the new Plugin framework.
 
-## Summary as of 2025-11-20
+## Summary as of 2025-12-01
 
 - Unique items: 100 (table rows)
-- Plugin implementations: 16
-- Remaining: 84 SDK implementations to be migrated, 19 of which are deprecated
+- Plugin implementations: 18
+- Remaining: 82 SDK implementations to be migrated, 19 of which are deprecated
 
 ## Resources and Datasources
 
@@ -27,7 +27,7 @@ This document tracks the migration status of all resources and datasources from 
 | 13  | aiven_azure_privatelink                       | RD   |        |            |
 | 14  | aiven_azure_privatelink_connection_approval   | R    |        |            |
 | 15  | aiven_azure_vpc_peering_connection            | RD   |        |            |
-| 16  | aiven_billing_group                           | RD   |        |            |
+| 16  | aiven_billing_group                           | RD   | ✓      |            |
 | 17  | aiven_cassandra                               | RD   |        | ✓          |
 | 18  | aiven_cassandra_user                          | RD   |        | ✓          |
 | 19  | aiven_clickhouse                              | RD   |        |            |

@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_billing_group`: migrate to the Plugin Framework
+- Change `aiven_billing_group`: add `billing_contact_emails` field
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
 - Ignore 404 on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed by a 404 if the resource was already removed.
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage

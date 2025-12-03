@@ -1,4 +1,4 @@
-package project_test
+package billinggroup_test
 
 import (
 	"context"
@@ -18,16 +18,24 @@ import (
 func TestAccAivenBillingGroup_basic(t *testing.T) {
 	resourceName := "aiven_billing_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBillingGroupResource(rName),
+				// Creates a group with billing_contact_emails
+				Config: testAccBillingGroupResource(rName, `billing_contact_emails = ["foo@aiven.fi"]`),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "billing_contact_emails.#", "1"),
+				),
+			},
+			{
+				// Proves that billing_contact_emails can be removed (state update for nil value check)
+				Config: testAccBillingGroupResource(rName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(resourceName, "billing_contact_emails"),
 				),
 			},
 			{
@@ -46,7 +54,10 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error getting Aiven client: %w", err)
+	}
 
 	ctx := context.Background()
 
@@ -56,7 +67,7 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		db, err := c.BillingGroup.Get(ctx, rs.Primary.ID)
+		db, err := c.BillingGroupGet(ctx, rs.Primary.ID)
 		var e aiven.Error
 		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
@@ -70,7 +81,7 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccBillingGroupResource(name string) string {
+func testAccBillingGroupResource(name, contactEmails string) string {
 	return fmt.Sprintf(`
 resource "aiven_organization" "foo" {
   name = "test-acc-org-%[1]s"
@@ -79,6 +90,7 @@ resource "aiven_organization" "foo" {
 resource "aiven_billing_group" "foo" {
   name           = "test-acc-bg-%[1]s"
   billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
+  %s
 }
 
 data "aiven_billing_group" "bar" {
@@ -91,7 +103,7 @@ resource "aiven_project" "pr1" {
   parent_id     = aiven_organization.foo.id
 
   depends_on = [aiven_billing_group.foo]
-}`, name)
+}`, name, contactEmails)
 }
 
 func testCopyBillingGroupFromExistingOne(name string) string {
@@ -107,4 +119,26 @@ resource "aiven_billing_group" "bar2" {
   name                    = "copy-test-acc-bg-%s"
   copy_from_billing_group = aiven_billing_group.bar.id
 }`, name, name)
+}
+
+func TestAccAivenBillingGroupDataSource_basic(t *testing.T) {
+	datasourceName := "data.aiven_billing_group.bar"
+	resourceName := "aiven_billing_group.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingGroupResource(rName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(datasourceName, "name", resourceName, "name"),
+					resource.TestCheckTypeSetElemAttr(datasourceName, "billing_emails.*", "2"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.0"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.1"),
+				),
+			},
+		},
+	})
 }

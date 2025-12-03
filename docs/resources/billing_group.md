@@ -31,45 +31,47 @@ resource "aiven_project" "example_project" {
 
 ### Required
 
-- `name` (String) Name of the billing group.
+- `name` (String) Billing group name. Maximum length: `128`.
 
 ### Optional
 
-- `account_id` (String, Deprecated) Account ID.
+- `account_id` (String, Deprecated) Account ID. Maximum length: `36`.
 - `address_lines` (Set of String) Address lines 1 and 2. For example, street, PO box, or building.
-- `billing_currency` (String) Billing currency for the billing group. Supported currencies are: AUD, CAD, CHF, DKK, EUR, GBP, JPY, NOK, NZD, SEK, SGD, and USD.
-- `billing_emails` (Set of String) Email address of billing contacts. Invoices and other payment notifications are emailed to all billing contacts.
-- `billing_extra_text` (String) Additional information to include on your invoice (for example, a reference number).
-- `card_id` (String) Credit card ID.
-- `city` (String) City, district, suburb, town, or village.
-- `company` (String) Your company name.
-- `copy_from_billing_group` (String) ID of the billing group to copy the company name, address, currency, billing contacts, and extra text from.
-- `country_code` (String) Two-letter country code.
-- `parent_id` (String) Link a billing group to an existing organization by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `state` (String) Address state.
+- `billing_contact_emails` (Set of String) List of billing groups contact email addresses.
+- `billing_currency` (String) Billing currency. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
+- `billing_emails` (Set of String) List of project billing email addresses.
+- `billing_extra_text` (String) Extra text to be included in all project invoices, e.g. purchase order or cost center number. Maximum length: `1000`.
+- `card_id` (String) Credit card ID. Maximum length: `64`.
+- `city` (String) Address city. Maximum length: `512`.
+- `company` (String) Name of a company. Maximum length: `128`.
+- `copy_from_billing_group` (String) Billing group ID. Maximum length: `36`. Changing this property forces recreation of the resource.
+- `country_code` (String) Two letter country code for billing country. Maximum length: `2`.
+- `parent_id` (String) Link a billing group to an existing organization by using its ID.
+- `state` (String) Address state or province. Maximum length: `128`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `vat_id` (String) The VAT identification number for your company.
-- `zip_code` (String) Zip or postal code.
+- `vat_id` (String) EU VAT Identification Number. Maximum length: `64`.
+- `zip_code` (String) Address zip code. Maximum length: `32`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `billing_group_id` (String) The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.
+- `id` (String) Resource ID, equal to `billing_group_id`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_billing_group.example_billing_group ID
+terraform import aiven_billing_group.example BILLING_GROUP_ID
 ```

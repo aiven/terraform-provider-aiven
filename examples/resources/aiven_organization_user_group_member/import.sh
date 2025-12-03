@@ -1,1 +1,1 @@
-terraform import aiven_organization_user_group_member.project_admin ORGANIZATION_ID/USER_GROUP_ID/USER_ID
+terraform import aiven_organization_user_group_member.example ORGANIZATION_ID/GROUP_ID/USER_ID

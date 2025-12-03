@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/billinggroup
+resource:
+  description: Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.
+datasource:
+  description: Gets information about a billing group.
+clientHandler: billinggroup
+expandModifier: true
+flattenModifier: true
+legacyTimeouts: true
+operations:
+  - id: BillingGroupCreate
+    type: create
+    resultKey: billing_group
+  - id: BillingGroupDelete
+    type: delete
+  - id: BillingGroupUpdate
+    type: update
+    resultKey: billing_group
+  - id: BillingGroupGet
+    type: read
+    resultKey: billing_group
+rename:
+  billing_group_name: name
+idAttributeComposed: [billing_group_id]
+remove:
+  # Either deprecated or redundant
+  - account_name
+  - create_time
+  - country
+  - billing_address
+  - billing_address_id
+  - shipping_address_id
+  - card_info
+  - billing_type
+  - estimated_balance_local
+  - estimated_balance_usd
+  - payment_method
+schema:
+  billing_group_id:
+    description: The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.
+  account_id:
+    computed: true
+    deprecationMessage: Use parent_id instead. This field will be removed in the next major release.
+  parent_id:
+    type: string
+    optional: true
+    computed: true
+    description: Link a billing group to an existing organization by using its ID.
+  address_lines:
+    description: Address lines 1 and 2. For example, street, PO box, or building.
+  billing_contact_emails:
+    items:
+      type: string
+  billing_emails:
+    items:
+      type: string
+  billing_currency:
+    computed: true
+  country_code:
+    computed: true
+  company:
+    computed: true
+  city:
+    computed: true
+  vat_id:
+    computed: true

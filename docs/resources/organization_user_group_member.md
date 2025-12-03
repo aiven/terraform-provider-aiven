@@ -47,7 +47,7 @@ resource "aiven_organization_user_group_member" "project_admin" {
 
 ### Read-Only
 
-- `id` (String) Resource ID, a composite of `organization_id`, `group_id` and `user_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/group_id/user_id`.
 - `last_activity_time` (String) Last Activity Time.
 
 <a id="nestedblock--timeouts"></a>
@@ -65,5 +65,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization_user_group_member.project_admin ORGANIZATION_ID/USER_GROUP_ID/USER_ID
+terraform import aiven_organization_user_group_member.example ORGANIZATION_ID/GROUP_ID/USER_ID
 ```

@@ -1,1 +1,1 @@
-terraform import aiven_billing_group.example_billing_group ID
+terraform import aiven_billing_group.example BILLING_GROUP_ID
