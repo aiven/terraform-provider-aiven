@@ -32,17 +32,12 @@ const (
 
 // genFlatten generates a function that turns rsp into TF object
 func genFlatten(def *Definition, item *Item) ([]jen.Code, error) {
-	argModifier := jen.Id(modifiersVar)
-	if def.FlattenModifier {
-		argModifier = jen.Append(argModifier, jen.Id(flattenModifier))
-	}
-
 	block := []jen.Code{
 		jen.Id(apiVar).Op(":=").New(jen.Id(item.ApiModelName())),
 		jen.Id("err").
 			Op(":=").
 			Qual(utilPackage, remarshalVar).
-			Call(jen.Id("rsp"), jen.Id(apiVar), jen.Id("state"), argModifier.Op("...")),
+			Call(jen.Id("rsp"), jen.Id(apiVar), jen.Id("state"), jen.Id(modifiersVar).Op("...")),
 		jen.Add(ifErr("Remarshal error", "Failed to remarshal Response to dtoModel: %s")),
 	}
 

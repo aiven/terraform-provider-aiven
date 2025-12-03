@@ -12,6 +12,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
+// planModifier sets the ID field based on the Name field if provided.
 func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if state.Name.ValueString() != "" {

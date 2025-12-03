@@ -37,7 +37,7 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 	var diags diag.Diagnostics
 	func() {
 		var req organizationprojects.OrganizationProjectsCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
+		diags.Append(expandData(ctx, plan, nil, &req, expandModifier(ctx, client))...)
 		if diags.HasError() {
 			return
 		}
@@ -47,7 +47,7 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 			diags.Append(errmsg.FromError("OrganizationProjectsCreate Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
+		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
 	}()
 	return diags
 }
@@ -60,7 +60,7 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 			diags.Append(errmsg.FromError("OrganizationProjectsGet Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, state, rsp)...)
+		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
 	}()
 	if diags.HasError() {
 		return diags
@@ -71,7 +71,7 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 			diags.Append(errmsg.FromError("ProjectKmsGetCA Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"certificate": rsp})...)
+		diags.Append(flattenData(ctx, state, &map[string]any{"certificate": rsp}, flattenModifier(ctx, client))...)
 	}()
 	return diags
 }
@@ -80,7 +80,7 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 	var diags diag.Diagnostics
 	func() {
 		var req organizationprojects.OrganizationProjectsUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req)...)
+		diags.Append(expandData(ctx, plan, state, &req, expandModifier(ctx, client))...)
 		if diags.HasError() {
 			return
 		}
@@ -90,7 +90,7 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 			diags.Append(errmsg.FromError("OrganizationProjectsUpdate Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
+		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
 	}()
 	return diags
 }

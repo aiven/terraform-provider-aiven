@@ -13,11 +13,6 @@ func genExpand(def *Definition, item *Item) ([]jen.Code, error) {
 		return nil, err
 	}
 
-	argModifier := jen.Id(modifiersVar)
-	if def.ExpandModifier {
-		argModifier = jen.Append(argModifier, jen.Id(expandModifier))
-	}
-
 	var block []jen.Code
 	block = append(block, props...)
 	block = append(
@@ -25,7 +20,7 @@ func genExpand(def *Definition, item *Item) ([]jen.Code, error) {
 		jen.Id("err").
 			Op(":=").
 			Qual(utilPackage, remarshalVar).
-			Call(jen.Id(apiVar), jen.Id("req"), jen.Id("plan"), argModifier.Op("...")),
+			Call(jen.Id(apiVar), jen.Id("req"), jen.Id("plan"), jen.Id(modifiersVar).Op("...")),
 		jen.Add(ifErr("Remarshal error", "Failed to remarshal dtoModel to Request: %s")),
 		jen.Return(jen.Nil()),
 	)

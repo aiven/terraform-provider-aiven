@@ -28,7 +28,7 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 			diags.Append(errmsg.FromError("OrganizationBillingGroupList Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"billing_groups": rsp})...)
+		diags.Append(flattenData(ctx, state, &map[string]any{"billing_groups": rsp}, flattenModifier(ctx, client))...)
 	}()
 	return diags
 }
