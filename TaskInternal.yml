@@ -41,7 +41,7 @@ vars:
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
 
   # --- Docs ---
-  DEPRECATED_RESOURCES: "influxdb m3"   # List of deprecated resources and data sources to exclude from docs
+  DEPRECATED_RESOURCES: "influxdb m3 redis"   # List of deprecated resources and data sources to exclude from docs
 
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
