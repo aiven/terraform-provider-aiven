@@ -128,14 +128,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.IpAllowlist != nil {
+	if api.IpAllowlist != nil && !state.IpAllowlist.IsUnknown() {
 		vIpAllowlist, diags := util.SetValueFrom(ctx, types.StringType, api.IpAllowlist)
 		if diags.HasError() {
 			return diags
 		}
 		state.IpAllowlist = vIpAllowlist
 	}
-	if api.Scopes != nil {
+	if api.Scopes != nil && !state.Scopes.IsUnknown() {
 		vScopes, diags := util.SetValueFrom(ctx, types.StringType, api.Scopes)
 		if diags.HasError() {
 			return diags
@@ -151,7 +151,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.CurrentlyActive != nil || state.CurrentlyActive.IsUnknown() {
 		state.CurrentlyActive = types.BoolPointerValue(api.CurrentlyActive)
 	}
-	if api.Description != nil {
+	if api.Description != nil && !state.Description.IsUnknown() {
 		state.Description = util.StringPointerValue(api.Description)
 	}
 	if api.ExpiryTime != nil || state.ExpiryTime.IsUnknown() {
@@ -175,16 +175,16 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.LastUserAgentHumanReadable != nil || state.LastUserAgentHumanReadable.IsUnknown() {
 		state.LastUserAgentHumanReadable = util.StringPointerValue(api.LastUserAgentHumanReadable)
 	}
-	if api.MaxAgeSeconds != nil {
+	if api.MaxAgeSeconds != nil && !state.MaxAgeSeconds.IsUnknown() {
 		state.MaxAgeSeconds = types.Int64PointerValue(api.MaxAgeSeconds)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
 	if api.TokenPrefix != nil || state.TokenPrefix.IsUnknown() {
 		state.TokenPrefix = util.StringPointerValue(api.TokenPrefix)
 	}
-	if api.UserID != nil {
+	if api.UserID != nil && !state.UserID.IsUnknown() {
 		state.UserID = util.StringPointerValue(api.UserID)
 	}
 	// Response may not contain ID fields.

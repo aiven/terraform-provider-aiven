@@ -73,7 +73,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.ID != nil || state.ID.IsUnknown() {
 		state.ID = util.StringPointerValue(api.ID)
 	}
-	if api.Name != nil {
+	if api.Name != nil && !state.Name.IsUnknown() {
 		state.Name = util.StringPointerValue(api.Name)
 	}
 	if api.TenantID != nil || state.TenantID.IsUnknown() {

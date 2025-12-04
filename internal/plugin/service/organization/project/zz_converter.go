@@ -132,14 +132,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.Tag != nil {
+	if api.Tag != nil && !state.Tag.IsUnknown() {
 		vTag, diags := util.FlattenSetNested(ctx, flattenTag, *api.Tag, attrsTag())
 		if diags.HasError() {
 			return diags
 		}
 		state.Tag = vTag
 	}
-	if api.TechnicalEmails != nil {
+	if api.TechnicalEmails != nil && !state.TechnicalEmails.IsUnknown() {
 		vTechnicalEmails, diags := util.SetValueFrom(ctx, types.StringType, api.TechnicalEmails)
 		if diags.HasError() {
 			return diags
@@ -149,19 +149,19 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.BasePort != nil || state.BasePort.IsUnknown() {
 		state.BasePort = types.Int64PointerValue(api.BasePort)
 	}
-	if api.BillingGroupID != nil {
+	if api.BillingGroupID != nil && !state.BillingGroupID.IsUnknown() {
 		state.BillingGroupID = util.StringPointerValue(api.BillingGroupID)
 	}
 	if api.CaCert != nil || state.CaCert.IsUnknown() {
 		state.CaCert = util.StringPointerValue(api.CaCert)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.ParentID != nil {
+	if api.ParentID != nil && !state.ParentID.IsUnknown() {
 		state.ParentID = util.StringPointerValue(api.ParentID)
 	}
-	if api.ProjectID != nil {
+	if api.ProjectID != nil && !state.ProjectID.IsUnknown() {
 		state.ProjectID = util.StringPointerValue(api.ProjectID)
 	}
 	// Response may not contain ID fields.

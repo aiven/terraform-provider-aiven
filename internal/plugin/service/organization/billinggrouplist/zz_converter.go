@@ -78,7 +78,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.BillingGroups = vBillingGroups
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
 	// Response may not contain ID fields.

@@ -93,10 +93,10 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.ServicePlans = vServicePlans
 	}
-	if api.Project != nil {
+	if api.Project != nil && !state.Project.IsUnknown() {
 		state.Project = util.StringPointerValue(api.Project)
 	}
-	if api.ServiceType != nil {
+	if api.ServiceType != nil && !state.ServiceType.IsUnknown() {
 		state.ServiceType = util.StringPointerValue(api.ServiceType)
 	}
 	// Response may not contain ID fields.

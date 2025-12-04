@@ -109,7 +109,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.AddressLines != nil {
+	if api.AddressLines != nil && !state.AddressLines.IsUnknown() {
 		vAddressLines, diags := util.ListValueFrom(ctx, types.StringType, api.AddressLines)
 		if diags.HasError() {
 			return diags
@@ -119,28 +119,28 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.AddressID != nil || state.AddressID.IsUnknown() {
 		state.AddressID = util.StringPointerValue(api.AddressID)
 	}
-	if api.City != nil {
+	if api.City != nil && !state.City.IsUnknown() {
 		state.City = util.StringPointerValue(api.City)
 	}
-	if api.CountryCode != nil {
+	if api.CountryCode != nil && !state.CountryCode.IsUnknown() {
 		state.CountryCode = util.StringPointerValue(api.CountryCode)
 	}
 	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
 		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.Name != nil {
+	if api.Name != nil && !state.Name.IsUnknown() {
 		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.State != nil {
+	if api.State != nil && !state.State.IsUnknown() {
 		state.State = util.StringPointerValue(api.State)
 	}
 	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
 		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
-	if api.ZipCode != nil {
+	if api.ZipCode != nil && !state.ZipCode.IsUnknown() {
 		state.ZipCode = util.StringPointerValue(api.ZipCode)
 	}
 	// Response may not contain ID fields.

@@ -178,23 +178,23 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.AccessData != nil {
+	if api.AccessData != nil && !state.AccessData.IsUnknown() {
 		vAccessData, diags := util.FlattenSingleNested(ctx, flattenAccessData, api.AccessData, attrsAccessData())
 		if diags.HasError() {
 			return diags
 		}
 		state.AccessData = vAccessData
 	}
-	if api.AccessName != nil {
+	if api.AccessName != nil && !state.AccessName.IsUnknown() {
 		state.AccessName = util.StringPointerValue(api.AccessName)
 	}
-	if api.AccessType != nil {
+	if api.AccessType != nil && !state.AccessType.IsUnknown() {
 		state.AccessType = util.StringPointerValue(api.AccessType)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.OwnerUserGroupID != nil {
+	if api.OwnerUserGroupID != nil && !state.OwnerUserGroupID.IsUnknown() {
 		state.OwnerUserGroupID = util.StringPointerValue(api.OwnerUserGroupID)
 	}
 	if api.SusbcriptionID != nil || state.SusbcriptionID.IsUnknown() {

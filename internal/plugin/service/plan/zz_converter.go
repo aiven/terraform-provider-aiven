@@ -98,7 +98,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.BasePriceUsd != nil || state.BasePriceUsd.IsUnknown() {
 		state.BasePriceUsd = util.StringPointerValue(api.BasePriceUsd)
 	}
-	if api.CloudName != nil {
+	if api.CloudName != nil && !state.CloudName.IsUnknown() {
 		state.CloudName = util.StringPointerValue(api.CloudName)
 	}
 	if api.DiskSpaceCapMb != nil || state.DiskSpaceCapMb.IsUnknown() {
@@ -119,10 +119,10 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.ObjectStorageGbPriceUsd != nil || state.ObjectStorageGbPriceUsd.IsUnknown() {
 		state.ObjectStorageGbPriceUsd = util.StringPointerValue(api.ObjectStorageGbPriceUsd)
 	}
-	if api.Project != nil {
+	if api.Project != nil && !state.Project.IsUnknown() {
 		state.Project = util.StringPointerValue(api.Project)
 	}
-	if api.ServicePlan != nil {
+	if api.ServicePlan != nil && !state.ServicePlan.IsUnknown() {
 		state.ServicePlan = util.StringPointerValue(api.ServicePlan)
 	}
 	if api.ServiceType != nil || state.ServiceType.IsUnknown() {
