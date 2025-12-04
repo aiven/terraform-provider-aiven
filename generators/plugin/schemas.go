@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -24,7 +25,7 @@ func genSchema(entity entityType, item *Item, def *Definition) (jen.Code, error)
 	}
 
 	desc := fmtDescription(entity.isResource(), item)
-	if def.Beta {
+	if lo.FromPtr(def.Beta) {
 		desc = userconfig.Desc(desc).AvailabilityType(userconfig.Beta).Build()
 	}
 	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)

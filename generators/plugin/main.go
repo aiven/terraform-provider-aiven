@@ -12,6 +12,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -350,6 +351,11 @@ func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
 	path, err := getOperationPath(scope, operationID)
 	if err != nil {
 		return err
+	}
+
+	// If the operation is experimental and user has not overridden the beta flag.
+	if path.Experimental && scope.Definition.Beta == nil {
+		scope.Definition.Beta = lo.ToPtr(true)
 	}
 
 	root.Description = path.Summary

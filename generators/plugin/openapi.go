@@ -82,6 +82,7 @@ type OAPath struct {
 			Content Content `json:"content"`
 		} `json:"204"`
 	} `json:"responses"`
+	Experimental bool `json:"x-experimental"`
 }
 
 // OAParameter represents a parsed OpenAPIDoc parameter.

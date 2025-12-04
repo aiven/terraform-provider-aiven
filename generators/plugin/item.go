@@ -153,7 +153,7 @@ type SchemaMeta struct {
 type Definition struct {
 	fileName            string            // e.g. organization_address.yaml
 	typeName            string            // e.g. aiven_organization_address, aiven_kafka_topic
-	Beta                bool              `yaml:"beta"`
+	Beta                *bool             `yaml:"beta"` // Is figured as beta from `x-experimental` OpenAPI field
 	Location            string            `yaml:"location"`
 	Schema              map[string]*Item  `yaml:"schema,omitempty"`
 	Remove              []string          `yaml:"remove,omitempty"`
