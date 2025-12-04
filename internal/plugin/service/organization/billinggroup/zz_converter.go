@@ -127,45 +127,45 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.BillingContactEmails != nil {
+	if api.BillingContactEmails != nil && !state.BillingContactEmails.IsUnknown() {
 		vBillingContactEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingContactEmails = vBillingContactEmails
 	}
-	if api.BillingEmails != nil {
+	if api.BillingEmails != nil && !state.BillingEmails.IsUnknown() {
 		vBillingEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingEmails)
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingEmails = vBillingEmails
 	}
-	if api.BillingAddressID != nil {
+	if api.BillingAddressID != nil && !state.BillingAddressID.IsUnknown() {
 		state.BillingAddressID = util.StringPointerValue(api.BillingAddressID)
 	}
 	if api.BillingGroupID != nil || state.BillingGroupID.IsUnknown() {
 		state.BillingGroupID = util.StringPointerValue(api.BillingGroupID)
 	}
-	if api.BillingGroupName != nil {
+	if api.BillingGroupName != nil && !state.BillingGroupName.IsUnknown() {
 		state.BillingGroupName = util.StringPointerValue(api.BillingGroupName)
 	}
-	if api.Currency != nil {
+	if api.Currency != nil && !state.Currency.IsUnknown() {
 		state.Currency = util.StringPointerValue(api.Currency)
 	}
-	if api.CustomInvoiceText != nil {
+	if api.CustomInvoiceText != nil && !state.CustomInvoiceText.IsUnknown() {
 		state.CustomInvoiceText = util.StringPointerValue(api.CustomInvoiceText)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.PaymentMethodID != nil {
+	if api.PaymentMethodID != nil && !state.PaymentMethodID.IsUnknown() {
 		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
 	}
-	if api.ShippingAddressID != nil {
+	if api.ShippingAddressID != nil && !state.ShippingAddressID.IsUnknown() {
 		state.ShippingAddressID = util.StringPointerValue(api.ShippingAddressID)
 	}
-	if api.VatID != nil {
+	if api.VatID != nil && !state.VatID.IsUnknown() {
 		state.VatID = util.StringPointerValue(api.VatID)
 	}
 	// Response may not contain ID fields.

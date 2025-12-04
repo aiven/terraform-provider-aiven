@@ -85,10 +85,10 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.IsSuperAdmin != nil || state.IsSuperAdmin.IsUnknown() {
 		state.IsSuperAdmin = types.BoolPointerValue(api.IsSuperAdmin)
 	}
-	if api.Name != nil {
+	if api.Name != nil && !state.Name.IsUnknown() {
 		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
 	if api.UserID != nil || state.UserID.IsUnknown() {

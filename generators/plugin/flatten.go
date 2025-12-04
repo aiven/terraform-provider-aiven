@@ -174,6 +174,14 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		return nil, fmt.Errorf("unsupported type %s for %s", item.Type, item.Path())
 	}
 
+	if item.IsRootProperty() && !item.Computed {
+		// Setting a value for a non-computed field can lead to issues, such as: "it was null but now is foo".
+		// To prevent this, we add a safety check to ensure the value exists in the "state".
+		// WARNING: For migrated resources, these fields MUST have Computed=true,
+		// or else their values will be lost during the first apply after migration.
+		notNil.Op("&&").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsUnknown").Call()
+	}
+
 	return jen.If(notNil).Block(append(block, value)...), nil
 }
 

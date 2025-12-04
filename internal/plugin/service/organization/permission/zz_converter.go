@@ -123,20 +123,20 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.Permissions != nil {
+	if api.Permissions != nil && !state.Permissions.IsUnknown() {
 		vPermissions, diags := util.FlattenSetNested(ctx, flattenPermissions, *api.Permissions, attrsPermissions())
 		if diags.HasError() {
 			return diags
 		}
 		state.Permissions = vPermissions
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.ResourceID != nil {
+	if api.ResourceID != nil && !state.ResourceID.IsUnknown() {
 		state.ResourceID = util.StringPointerValue(api.ResourceID)
 	}
-	if api.ResourceType != nil {
+	if api.ResourceType != nil && !state.ResourceType.IsUnknown() {
 		state.ResourceType = util.StringPointerValue(api.ResourceType)
 	}
 	// Response may not contain ID fields.
