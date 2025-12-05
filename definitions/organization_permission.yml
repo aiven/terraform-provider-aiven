@@ -20,7 +20,9 @@ resource:
 idAttributeComposed: [organization_id, resource_type, resource_id]
 operations:
   - id: PermissionsSet
-    type: upsert
+    type: create
+  - id: PermissionsSet
+    type: update
   - id: PermissionsGet
     type: read
 schema:

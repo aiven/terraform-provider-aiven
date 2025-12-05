@@ -265,7 +265,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 
 	// Initializes the map
 	for _, op := range pkg.Operations {
-		err := fromOperationID(scope, op.ID, root)
+		err := fromOperationID(scope, op, root)
 		if err != nil {
 			return nil, fmt.Errorf("operationID %s: %w", op.ID, err)
 		}
@@ -324,7 +324,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	// Marks ID fields
-	isMutable := scope.Definition.Operations.AppearsInHandler(UpdateHandler, RequestBody)
+	isMutable := scope.Definition.Operations.AppearsInHandler(OperationUpdate, RequestBody)
 	idField.UseStateForUnknown = true
 	for i, v := range pkg.IDAttributeComposed {
 		if _, ok := root.Properties[v]; !ok {
@@ -347,8 +347,8 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
-	path, err := getOperationPath(scope, operationID)
+func fromOperationID(scope *Scope, operation Operation, root *Item) error {
+	path, err := getOperationPath(scope, operation.ID)
 	if err != nil {
 		return err
 	}
@@ -359,7 +359,7 @@ func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
 	}
 
 	root.Description = path.Summary
-	err = fromParameter(scope, operationID, root, path)
+	err = fromParameter(scope, operation, root, path)
 	if err != nil {
 		return err
 	}
@@ -370,8 +370,8 @@ func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
 			return fmt.Errorf("request schema: %w", err)
 		}
 
-		ap := scope.Definition.Operations.AppearsInID(operationID, RequestBody)
-		err = fromSchema(scope, operationID, root, request, ap)
+		ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, RequestBody)
+		err = fromSchema(scope, operation, root, request, ap)
 		if err != nil {
 			return err
 		}
@@ -387,8 +387,8 @@ func fromOperationID(scope *Scope, operationID OperationID, root *Item) error {
 		delete(response.Properties, "message")
 		delete(response.Properties, "errors")
 
-		ap := scope.Definition.Operations.AppearsInID(operationID, ResponseBody)
-		err = fromSchema(scope, operationID, root, response, ap)
+		ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
+		err = fromSchema(scope, operation, root, response, ap)
 		if err != nil {
 			return err
 		}
@@ -436,13 +436,13 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 	return item
 }
 
-func fromSchema(scope *Scope, operationID OperationID, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
-	if p, ok := parentSchema.Properties[scope.Definition.Operations.ByID(operationID).ResultKey]; ok {
+func fromSchema(scope *Scope, operation Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
+	if p, ok := parentSchema.Properties[operation.ResultKey]; ok {
 		// The object is hidden on the root level
 		if p.Type == SchemaTypeArray {
-			return fromSchema(scope, operationID, parent, p.Items, appearsIn)
+			return fromSchema(scope, operation, parent, p.Items, appearsIn)
 		}
-		return fromSchema(scope, operationID, parent, p, appearsIn)
+		return fromSchema(scope, operation, parent, p, appearsIn)
 	}
 
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
@@ -472,7 +472,7 @@ func fromSchema(scope *Scope, operationID OperationID, parent *Item, parentSchem
 				thisItemsSchema = v
 			} else if len(thisSchema.Properties) > 0 {
 				// A regular object with properties
-				err := fromSchema(scope, operationID, thisItem, thisSchema, appearsIn)
+				err := fromSchema(scope, operation, thisItem, thisSchema, appearsIn)
 				if err != nil {
 					return err
 				}
@@ -486,7 +486,7 @@ func fromSchema(scope *Scope, operationID OperationID, parent *Item, parentSchem
 		if thisItemsSchema != nil {
 			// Array or Map items
 			thisItem.Items = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
-			err := fromSchema(scope, operationID, thisItem.Items, thisItemsSchema, appearsIn)
+			err := fromSchema(scope, operation, thisItem.Items, thisItemsSchema, appearsIn)
 			if err != nil {
 				return err
 			}
@@ -501,8 +501,8 @@ func fromSchema(scope *Scope, operationID OperationID, parent *Item, parentSchem
 	return nil
 }
 
-func fromParameter(scope *Scope, operationID OperationID, parent *Item, path *OAPath) error {
-	appearsIn := scope.Definition.Operations.AppearsInID(operationID, PathParameter)
+func fromParameter(scope *Scope, operation Operation, parent *Item, path *OAPath) error {
+	appearsIn := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
 	for _, param := range path.Parameters {
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)
 		if err != nil {
@@ -684,9 +684,9 @@ func recalcDeep(def *Definition, item *Item) error {
 		return item.AppearsIn.Contains(a)
 	}
 
-	createPathParam := def.Operations.AppearsInHandler(CreateHandler, PathParameter)
-	createRequestBody := def.Operations.AppearsInHandler(CreateHandler, RequestBody)
-	updateRequestBody := def.Operations.AppearsInHandler(UpdateHandler, RequestBody)
+	createPathParam := def.Operations.AppearsInHandler(OperationCreate, PathParameter)
+	createRequestBody := def.Operations.AppearsInHandler(OperationCreate, RequestBody)
+	updateRequestBody := def.Operations.AppearsInHandler(OperationUpdate, RequestBody)
 
 	item.Required = in(createPathParam) || item.Required && in(createRequestBody) // Sometimes field required in GET
 	item.Optional = item.Optional || !item.Required && in(RequestBody)
