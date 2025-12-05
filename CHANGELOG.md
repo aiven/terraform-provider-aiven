@@ -30,6 +30,8 @@ nav_order: 1
 - Add `aiven_pg` field `pg_user_config.enable_ha_replica_dns`: Creates a dedicated read-only DNS that automatically falls
   back to the primary if standby nodes are unavailable
 - Remove docs for `aiven_redis` and `aiven_redis_user` resources: The Redis service has reached end of life.
+- Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs
+  for SASL OAUTHBEARER authentication
 
 ## [4.47.0] - 2025-11-12
 

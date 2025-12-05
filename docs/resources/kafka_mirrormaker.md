@@ -83,6 +83,7 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `sasl_oauthbearer_allowed_urls` (List of String) List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
