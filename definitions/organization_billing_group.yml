@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-beta: true
 location: internal/plugin/service/organization/billinggroup
 resource:
   description: Creates and manages an organization billing group.

@@ -13,7 +13,8 @@ properties:
   beta:
     type: boolean
     $comment: |
-      Set to true if this resource/datasource is in beta and may have breaking changes.
+      Indicates whether this resource or datasource is in beta status.
+      If not specified, the beta status may be inferred from OperationID schemas.
   legacyTimeouts:
     type: boolean
     $comment: |

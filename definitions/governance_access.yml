@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-beta: true
 location: internal/plugin/service/governance/access
 operations:
   - id: OrganizationGovernanceAccessCreate
