@@ -15,6 +15,7 @@ nav_order: 1
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
   them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
   `aiven_pg_user`, `aiven_valkey_user`
+- Add `user_info` field to `aiven_organization_user_group_member` resource
 - Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Experimental! Tool to use for database dump
   and restore during migration
 - Change service user resources and data sources: migrate to use generated client: `aiven_cassandra_user`,
