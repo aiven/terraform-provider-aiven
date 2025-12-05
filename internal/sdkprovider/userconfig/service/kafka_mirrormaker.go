@@ -141,6 +141,12 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"sasl_oauthbearer_allowed_urls": {
+				Description: "List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,
