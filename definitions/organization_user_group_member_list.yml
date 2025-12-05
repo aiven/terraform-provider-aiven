@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/usergroupmemberlist
+datasource:
+  description: List members of a user group
+idAttributeComposed: [organization_id, user_group_id]
+operations:
+  - id: UserGroupMemberList
+    type: read
+    resultToKey: members
+clientHandler: usergroup
