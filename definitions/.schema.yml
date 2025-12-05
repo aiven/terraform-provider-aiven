@@ -124,8 +124,8 @@ definitions:
         $comment: The operation's unique identifier, e.g. "OrganizationCreate"
       type:
         type: string
-        enum: ["create", "read", "update", "delete", "upsert"]
-        $comment: The type of operation (create, read, update, delete, upsert)
+        enum: ["create", "read", "update", "delete"]
+        $comment: The type of operation (create, read, etc.)
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
