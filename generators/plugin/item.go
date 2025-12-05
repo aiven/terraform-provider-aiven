@@ -41,10 +41,9 @@ const (
 	OperationRead   OperationType = "read"
 	OperationUpdate OperationType = "update"
 	OperationDelete OperationType = "delete"
-	OperationUpsert OperationType = "upsert"
 )
 
-func listOperations() []OperationType {
+func listOperationTypes() []OperationType {
 	return []OperationType{
 		OperationCreate,
 		OperationRead,
@@ -59,7 +58,6 @@ func operationToHandler() map[OperationType]AppearsIn {
 		OperationRead:   ReadHandler,
 		OperationUpdate: UpdateHandler,
 		OperationDelete: DeleteHandler,
-		OperationUpsert: CreateHandler | UpdateHandler,
 	}
 }
 
@@ -77,60 +75,42 @@ type Operation struct {
 
 type Operations []Operation
 
-func (o Operations) ByID(operationID OperationID) Operation {
-	for _, operation := range o {
-		if operation.ID == operationID {
-			return operation
-		}
-	}
-	return Operation{}
-}
-
-func (o Operations) OperationIDTypes() map[OperationID]OperationType {
-	result := make(map[OperationID]OperationType)
-	for _, operation := range o {
-		result[operation.ID] = operation.Type
-	}
-	return result
-}
-
-// AppearsInID returns the AppearsIn bitmask for a given operation ID and source (such as PathParameter, RequestBody, or ResponseBody).
-// Example: o.AppearsInID("FooReadOperationID", PathParameter) will include:
+// AppearsInID returns the AppearsIn bitmask for a given operation ID and handler type and source (such as PathParameter, RequestBody, or ResponseBody).
+// Example: o.AppearsInID("FooReadOperationID", ReadHandler, PathParameter) will include:
 //  1. The handler bit (e.g., ReadHandler) for this operation,
 //  2. The source bit (e.g., PathParameter),
-//  3. A unique bit specific to this operation ID and source, allowing fine-grained distinction.
+//  3. A unique bit specific to this operation ID and handler type and source, allowing fine-grained distinction.
 //
-// This enables querying for all sources of a type (like all path parameters),
-// or isolating those associated with a particular operation ID.
+// This enables querying for all sources of a type (like all path parameters) for a given operation ID and handler type,
+// or isolating those associated with a particular operation ID and handler type.
 // Different operations may define different sets of parameters, hence we need to distinguish them.
-func (o Operations) AppearsInID(operationID OperationID, source AppearsIn) AppearsIn {
-	sources := listSources()                // PathParameter, RequestBody, ResponseBody
-	handlers := operationToHandler()        // CreateHandler, ReadHandler, etc.
-	generic := len(handlers) + len(sources) // Reserved bits for generic bits: sources and handlers
+func (o Operations) AppearsInID(operationID OperationID, handler OperationType, source AppearsIn) AppearsIn {
+	operationIndex := slices.IndexFunc(o, func(op Operation) bool {
+		return op.ID == operationID && op.Type == handler
+	})
 
-	// Each operation has its own bucket of bits: [create:..read:...update:...delete:...]
-	operationIDTypes := o.OperationIDTypes()
-	operationBucket := len(sources) * slices.Index(sortedKeys(operationIDTypes), operationID)
+	sources := listSources()                            // PathParameter, RequestBody, ResponseBody
+	generic := len(sources) + len(listOperationTypes()) // Reserved bits for generic bits: sources and generic handlers
 
 	// Offset: [generic...create...read:path...update...delete...]
 	// ---------------------------------^
+	operationBucket := operationIndex * len(sources)
 	bitOffset := generic + operationBucket + slices.Index(sources, source)
 	if bitOffset > 63 {
 		panic(fmt.Sprintf("bitOffset overflow %s: generic=%d, bitOffset=%d", operationID, generic, bitOffset))
 	}
 
 	// E.g.: [generic(CreateHandler, ResponseBody), create(OperationSpecificResponse)]
-	return handlers[operationIDTypes[operationID]] | source | (1 << bitOffset)
+	return operationToHandler()[o[operationIndex].Type] | source | (1 << bitOffset)
 }
 
 // AppearsInHandler finds all operation IDs matching the operation, merges the result
 // There are can be multiple read operations, for example.
-func (o Operations) AppearsInHandler(handler, source AppearsIn) AppearsIn {
-	handlers := operationToHandler()
+func (o Operations) AppearsInHandler(handler OperationType, source AppearsIn) AppearsIn {
 	var appearsIn AppearsIn
-	for opID, opType := range o.OperationIDTypes() {
-		if handlers[opType]&handler > 0 {
-			appearsIn |= o.AppearsInID(opID, source)
+	for _, op := range o {
+		if op.Type == handler {
+			appearsIn |= o.AppearsInID(op.ID, handler, source)
 		}
 	}
 	return appearsIn
