@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/usergroupmember
+resource:
+  description: |
+    Adds and manages users in a [user group](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group). 
+    You can add organization users and application users to groups.
+    Organization users must be [managed in the Aiven Console](https://aiven.io/docs/platform/howto/manage-org-users). 
+    Application users can be created and managed using the `aiven_organization_application_user` resource.
+    Groups are granted roles and permissions using the `aiven_organization_permission` resource.
+idAttributeComposed: [organization_id, group_id, user_id]
+operations:
+  - id: UserGroupMembersUpdate
+    type: create
+    disableView: true
+  - id: UserGroupMembersUpdate
+    type: delete
+    disableView: true
+  - id: UserGroupMemberList
+    type: read
+    resultKey: members
+    resultListLookupKeys: [user_id]
+refreshState: true # create and update operations have no response.
+clientHandler: usergroup
+rename:
+  user_group_id: group_id
+remove: [members, operation, member_ids, user_info] # user_info — is a computed block, which is not supported by the Plugin Framework
+schema:
+  # The UserID is not an explicit field in the API schema; it is instead included within the 'member_ids' payload.
+  # See: https://api.aiven.io/doc/#tag/Groups/operation/UserGroupMembersUpdate
+  user_id:
+    forceNew: true
+    required: true
+    optional: false
+    computed: false

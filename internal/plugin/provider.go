@@ -22,7 +22,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -156,7 +155,6 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
 		organization.NewResource,
-		usergroupmember.NewResource,
 		groupproject.NewResource,
 		access.NewResource,
 		permission.NewResource,
