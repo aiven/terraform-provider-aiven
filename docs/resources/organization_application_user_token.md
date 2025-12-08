@@ -49,7 +49,7 @@ resource "aiven_organization_application_user_token" "example" {
 - `currently_active` (Boolean) true if API request was made with this access token.
 - `expiry_time` (String) Timestamp when the access token will expire unless extended, if ever.
 - `full_token` (String, Sensitive) Full Token.
-- `id` (String) Resource ID, a composite of `organization_id`, `user_id` and `token_prefix` IDs.
+- `id` (String) Resource ID composed as: `organization_id/user_id/token_prefix`.
 - `last_ip` (String) IP address the access token was last used from in case it has ever been used.
 - `last_used_time` (String) Timestamp when the access token was last used, if ever.
 - `last_user_agent` (String) User agent string of the client that last used the token in case it has ever been used.

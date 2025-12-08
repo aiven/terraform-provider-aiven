@@ -1,0 +1,1 @@
+terraform import aiven_governance_access.example ORGANIZATION_ID/SUSBCRIPTION_ID

@@ -1,1 +1,1 @@
-terraform import aiven_organization_permission.operator ORGANIZATION_ID/ID
+terraform import aiven_organization_permission.example ORGANIZATION_ID/RESOURCE_TYPE/RESOURCE_ID

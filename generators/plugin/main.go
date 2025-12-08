@@ -20,6 +20,8 @@ const (
 	openAPIPath      = "openapi.json"
 	definitionsPath  = "./definitions"
 	openAPIPatchPath = definitionsPath + "/.openapi_patch.yml"
+	examplesDir      = "examples"
+	importFileName   = "import.sh" // Terraform import command for the documentation page
 )
 
 func main() {
@@ -209,6 +211,30 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		if err != nil {
 			return fmt.Errorf("could not save file %s: %w", filePath, err)
 		}
+
+		// Generates import.sh file
+		if isResource {
+			importDir := filepath.Join(examplesDir, "resources", def.typeName)
+			err := os.MkdirAll(importDir, os.ModePerm)
+			if err != nil {
+				return fmt.Errorf("could not create directory %s: %w", importDir, err)
+			}
+
+			idPath := def.IDAttributeComposed
+			if len(idPath) == 0 {
+				idPath = append(idPath, root.Name+"_id")
+			}
+
+			importData := fmt.Sprintf(
+				"terraform import %s.example %s\n",
+				def.typeName,
+				strings.ToUpper(filepath.Join(idPath...)),
+			)
+			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
+			if err != nil {
+				return fmt.Errorf("could not write file %s: %w", filepath.Join(importDir, importFileName), err)
+			}
+		}
 	}
 	return nil
 }
@@ -310,11 +336,10 @@ func createRootItem(scope *Scope) (*Item, error) {
 
 	idField.IDAttribute = true
 	if idField.Description == "" && len(pkg.IDAttributeComposed) != 0 {
-		fields := joinCommaAnd(pkg.IDAttributeComposed, true)
 		if len(pkg.IDAttributeComposed) > 1 {
-			idField.Description = fmt.Sprintf("Resource ID, a composite of %s IDs.", fields)
+			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed...))
 		} else {
-			idField.Description = fmt.Sprintf("Resource ID, equal to %s.", fields)
+			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed[0])
 		}
 	}
 

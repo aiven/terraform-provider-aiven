@@ -35,7 +35,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `city` (String) City.
 - `country_code` (String) Country Code.
 - `create_time` (String) Create Time.
-- `id` (String) Resource ID, a composite of `organization_id` and `address_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/address_id`.
 - `name` (String) Name of a company.
 - `state` (String) State.
 - `update_time` (String) Update Time.

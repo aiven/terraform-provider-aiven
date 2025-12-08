@@ -1,0 +1,1 @@
+terraform import aiven_organization_billing_group.example ORGANIZATION_ID/BILLING_GROUP_ID
