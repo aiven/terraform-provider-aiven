@@ -13,6 +13,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
+- Ignore “Not Found” errors on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed by a 404 if the resource was already removed.
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
   them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
   `aiven_pg_user`, `aiven_valkey_user`
