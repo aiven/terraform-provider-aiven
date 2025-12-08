@@ -42,3 +42,15 @@ func RetryIfAivenStatus(codes ...int) retry.Option {
 		return slices.Contains(codes, e.Status)
 	})
 }
+
+func RemoveDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics {
+	i := 0
+	for _, d := range diags {
+		if e, ok := d.(DiagError); ok && f(e.Error) {
+			continue
+		}
+		diags[i] = d
+		i++
+	}
+	return diags[:i]
+}
