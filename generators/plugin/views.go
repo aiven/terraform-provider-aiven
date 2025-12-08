@@ -23,7 +23,7 @@ const (
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
 func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 	codes := make([]jen.Code, 0)
-	for _, op := range listOperations() {
+	for _, op := range listOperationTypes() {
 		v, err := genGenericView(item, def, op)
 		if err != nil {
 			return nil, fmt.Errorf("%s view error: %w", op, err)
@@ -154,9 +154,9 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 }
 
 func genGenericViewOperation(g *jen.Group, item *Item, def *Definition, operation Operation) error {
-	inPath := def.Operations.AppearsInID(operation.ID, PathParameter)
-	inRequest := def.Operations.AppearsInID(operation.ID, RequestBody)
-	inResponse := def.Operations.AppearsInID(operation.ID, ResponseBody)
+	inPath := def.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
+	inRequest := def.Operations.AppearsInID(operation.ID, operation.Type, RequestBody)
+	inResponse := def.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
 
 	// Properties must be sorted for consistent output
 	properties := slices.Collect(maps.Values(item.Properties))
