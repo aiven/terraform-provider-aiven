@@ -16,6 +16,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmemberlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
@@ -34,14 +35,15 @@ func Resources() map[string]func() resource.Resource {
 
 func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
-		"aiven_organization_address":            adapter.NewLazyDataSource(address.DataSourceOptions),
-		"aiven_organization_application_user":   adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
-		"aiven_organization_billing_group":      adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
-		"aiven_organization_billing_group_list": adapter.NewLazyDataSource(billinggrouplist.DataSourceOptions),
-		"aiven_organization_project":            adapter.NewLazyDataSource(project.DataSourceOptions),
-		"aiven_organization_user_group_list":    adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
-		"aiven_organization_user_list":          adapter.NewLazyDataSource(userlist.DataSourceOptions),
-		"aiven_service_plan":                    adapter.NewLazyDataSource(plan.DataSourceOptions),
-		"aiven_service_plan_list":               adapter.NewLazyDataSource(planlist.DataSourceOptions),
+		"aiven_organization_address":                adapter.NewLazyDataSource(address.DataSourceOptions),
+		"aiven_organization_application_user":       adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
+		"aiven_organization_billing_group":          adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
+		"aiven_organization_billing_group_list":     adapter.NewLazyDataSource(billinggrouplist.DataSourceOptions),
+		"aiven_organization_project":                adapter.NewLazyDataSource(project.DataSourceOptions),
+		"aiven_organization_user_group_list":        adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
+		"aiven_organization_user_group_member_list": adapter.NewLazyDataSource(usergroupmemberlist.DataSourceOptions),
+		"aiven_organization_user_list":              adapter.NewLazyDataSource(userlist.DataSourceOptions),
+		"aiven_service_plan":                        adapter.NewLazyDataSource(plan.DataSourceOptions),
+		"aiven_service_plan_list":                   adapter.NewLazyDataSource(planlist.DataSourceOptions),
 	}
 }
