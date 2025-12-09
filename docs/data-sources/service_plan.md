@@ -70,7 +70,7 @@ output "estimated_monthly_cost" {
 - `disk_space_cap_mb` (Number) Maximum amount of disk space possible for the plan in the given region.
 - `disk_space_mb` (Number) Combined amount of service disk space of all service nodes in megabytes.
 - `disk_space_step_mb` (Number) Disk space change step size.
-- `id` (String) Resource ID, a composite of `project`, `service_type`, `service_plan` and `cloud_name` IDs.
+- `id` (String) Resource ID composed as: `project/service_type/service_plan/cloud_name`.
 - `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
 - `node_count` (Number) Number of nodes in this service plan.
 - `object_storage_gb_price_usd` (String) Hourly object storage price per GiB in this region in USD.

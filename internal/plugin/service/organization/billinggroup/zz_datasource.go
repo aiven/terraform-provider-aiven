@@ -81,7 +81,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `organization_id` and `billing_group_id` IDs.",
+				MarkdownDescription: "Resource ID composed as: `organization_id/billing_group_id`.",
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization.",

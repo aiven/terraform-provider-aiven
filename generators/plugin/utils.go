@@ -139,23 +139,6 @@ func firstUpper[T ~string](s T) string {
 	return strings.ToUpper(v[:1]) + v[1:]
 }
 
-func joinCommaAnd(args []string, code bool) string {
-	list := args
-	if code {
-		list = make([]string, len(args))
-		for i, v := range args {
-			list[i] = fmt.Sprintf("`%s`", v)
-		}
-	}
-	switch len(list) {
-	case 0:
-		return ""
-	case 1:
-		return list[0]
-	}
-	return strings.Join(list[:len(list)-1], ", ") + " and " + list[len(list)-1]
-}
-
 func dictFromMap(m map[string]jen.Code, litKeys bool) jen.Dict {
 	dict := make(jen.Dict)
 	for k, v := range m {

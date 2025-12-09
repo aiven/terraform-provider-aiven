@@ -59,7 +59,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `project` and `service_type` IDs.",
+				MarkdownDescription: "Resource ID composed as: `project/service_type`.",
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",

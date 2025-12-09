@@ -51,7 +51,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `organization_id`, `resource_type` and `resource_id` IDs.",
+				MarkdownDescription: "Resource ID composed as: `organization_id/resource_type/resource_id`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"organization_id": schema.StringAttribute{

@@ -35,7 +35,7 @@ resource "aiven_organization_application_user" "tf_user" {
 ### Read-Only
 
 - `email` (String) User Email.
-- `id` (String) Resource ID, a composite of `organization_id` and `user_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/user_id`.
 - `user_id` (String) User ID.
 
 <a id="nestedblock--timeouts"></a>

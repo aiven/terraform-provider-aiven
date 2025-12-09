@@ -99,7 +99,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `organization_id`, `user_id` and `token_prefix` IDs.",
+				MarkdownDescription: "Resource ID composed as: `organization_id/user_id/token_prefix`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"ip_allowlist": schema.SetAttribute{

@@ -50,7 +50,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `organization_id` and `user_id` IDs.",
+				MarkdownDescription: "Resource ID composed as: `organization_id/user_id`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"is_super_admin": schema.BoolAttribute{

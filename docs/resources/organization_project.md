@@ -63,7 +63,7 @@ resource "aiven_organization_project" "example_project" {
 ### Read-Only
 
 - `ca_cert` (String, Sensitive) PEM encoded certificate.
-- `id` (String) Resource ID, a composite of `organization_id` and `project_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/project_id`.
 
 <a id="nestedblock--tag"></a>
 ### Nested Schema for `tag`
@@ -89,5 +89,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization_project.example_project ORGANIZATION_ID/PROJECT_ID
+terraform import aiven_organization_project.example ORGANIZATION_ID/PROJECT_ID
 ```

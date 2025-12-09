@@ -63,7 +63,7 @@ output "business_4_aws_eu_west_1_memory" {
 
 ### Read-Only
 
-- `id` (String) Resource ID, a composite of `project` and `service_type` IDs.
+- `id` (String) Resource ID composed as: `project/service_type`.
 - `service_plans` (Block List) List of plans available for this type of service. (see [below for nested schema](#nestedblock--service_plans))
 
 <a id="nestedblock--timeouts"></a>

@@ -1,0 +1,1 @@
+terraform import aiven_organization_address.example ORGANIZATION_ID/ADDRESS_ID

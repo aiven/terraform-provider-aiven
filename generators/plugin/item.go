@@ -140,7 +140,6 @@ type Definition struct {
 	Rename              map[string]string `yaml:"rename,omitempty"`
 	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
 	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttribute         string            `yaml:"idAttribute,omitempty"` // Default ID attribute name, e.g. "id"
 	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
 	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
 	Operations          Operations        `yaml:"operations"`

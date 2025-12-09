@@ -88,7 +88,7 @@ resource "aiven_organization_permission" "example_org_permissions" {
 
 ### Read-Only
 
-- `id` (String) Resource ID, a composite of `organization_id`, `resource_type` and `resource_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/resource_type/resource_id`.
 
 <a id="nestedblock--permissions"></a>
 ### Nested Schema for `permissions`
@@ -120,5 +120,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization_permission.operator ORGANIZATION_ID/ID
+terraform import aiven_organization_permission.example ORGANIZATION_ID/RESOURCE_TYPE/RESOURCE_ID
 ```

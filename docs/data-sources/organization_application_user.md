@@ -45,7 +45,7 @@ data "aiven_organization_application_user" "app_user" {
 ### Read-Only
 
 - `email` (String) User Email.
-- `id` (String) Resource ID, a composite of `organization_id` and `user_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/user_id`.
 - `is_super_admin` (Boolean, Deprecated) Alters super admin state of the organization application user. The default value is `false`.
 - `name` (String) Name.
 

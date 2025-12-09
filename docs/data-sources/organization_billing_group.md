@@ -37,7 +37,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_group_name` (String) Billing Group Name.
 - `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text.
-- `id` (String) Resource ID, a composite of `organization_id` and `billing_group_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 - `payment_method_id` (String) Payment method ID.
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.

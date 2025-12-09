@@ -82,7 +82,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID, a composite of `project`, `service_type`, `service_plan` and `cloud_name` IDs.",
+				MarkdownDescription: "Resource ID composed as: `project/service_type/service_plan/cloud_name`.",
 			},
 			"max_memory_percent": schema.Int64Attribute{
 				Computed:            true,
