@@ -33,7 +33,7 @@ data "aiven_organization_user_group_member_list" "foo" {
 
 ### Read-Only
 
-- `id` (String) Resource ID, a composite of `organization_id` and `user_group_id` IDs.
+- `id` (String) Resource ID composed as: `organization_id/user_group_id`.
 - `members` (Block Set) User group members. (see [below for nested schema](#nestedblock--members))
 
 <a id="nestedblock--timeouts"></a>

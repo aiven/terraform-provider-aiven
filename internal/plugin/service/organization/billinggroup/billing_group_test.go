@@ -82,7 +82,7 @@ resource "aiven_organization_billing_group" "billing_group" {
   billing_contact_emails = ["billing@example.com", "billing2@example.com"]
   currency               = "EUR"
   billing_emails         = ["invoices@example.com", "invoices2@example.com"]
-  billing_group_name     = "Updated Billing Group"
+  billing_group_name     = "Test ACC Updated Billing Group"
   custom_invoice_text    = "Updated invoice text"
   payment_method_id      = %q
   shipping_address_id    = aiven_organization_address.shipping_address.address_id
@@ -139,7 +139,7 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check updated fields
 					resource.TestCheckResourceAttr(name, "currency", "EUR"),
-					resource.TestCheckResourceAttr(name, "billing_group_name", "Updated Billing Group"),
+					resource.TestCheckResourceAttr(name, "billing_group_name", "Test ACC Updated Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Updated invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT456"),
 				),

@@ -11,7 +11,7 @@ import (
 
 func expandModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
 	return util.ComposeModifiers(
-		expandParentID[tfModel](ctx, client),
+		expandParentID(ctx, client),
 		util.ExpandKeyValueToMap[tfModel](true, "key", "value", "tags"),
 		util.ExpandArrayToObjects[tfModel](false, "email", "tech_emails"),
 	)
@@ -26,8 +26,8 @@ func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfMode
 }
 
 // expandParentID Converts OrganizationID to AccountID in parent_id field because that's what the API expects.
-func expandParentID[T any](ctx context.Context, client avngen.Client) util.MapModifier[T] {
-	return func(r util.RawMap, _ *T) error {
+func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
+	return func(r util.RawMap, _ *tfModel) error {
 		pID, _ := r.GetString("parent_id")
 		if pID == "" {
 			return nil

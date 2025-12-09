@@ -101,9 +101,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_user_group": organization.DatasourceOrganizationUserGroup(),
 
 			// project
-			"aiven_project":       project.DatasourceProject(),
-			"aiven_project_user":  project.DatasourceProjectUser(),
-			"aiven_billing_group": project.DatasourceBillingGroup(),
+			"aiven_project":      project.DatasourceProject(),
+			"aiven_project_user": project.DatasourceProjectUser(),
 
 			// vpc
 			"aiven_aws_privatelink":                  vpc.DatasourceAWSPrivatelink(),
@@ -217,9 +216,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_user_group": organization.ResourceOrganizationUserGroup(),
 
 			// project
-			"aiven_project":       project.ResourceProject(),
-			"aiven_project_user":  project.ResourceProjectUser(),
-			"aiven_billing_group": project.ResourceBillingGroup(),
+			"aiven_project":      project.ResourceProject(),
+			"aiven_project_user": project.ResourceProjectUser(),
 
 			// vpc
 			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
