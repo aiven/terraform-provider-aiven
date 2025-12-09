@@ -22,7 +22,7 @@ import (
 func serviceEndpointTypeChoices() []string {
 	// These endpoints are not supposed to be exposed in TF
 	ignore := []string{
-		"autoscaler_service",
+		// Add here any endpoint types that are not supposed to be exposed in TF
 	}
 	return lo.Filter(service.EndpointTypeChoices(), func(s string, _ int) bool {
 		return !slices.Contains(ignore, s)
