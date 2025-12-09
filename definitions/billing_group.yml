@@ -41,7 +41,7 @@ schema:
     description: The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.
   account_id:
     computed: true
-    deprecationMessage: Use parent_id instead. This field will be removed in the next major release.
+    deprecationMessage: Use `parent_id` instead. This field will be removed in the next major release.
   parent_id:
     type: string
     optional: true

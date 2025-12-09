@@ -62,7 +62,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,
 				DeprecationMessage:  "This field is deprecated and will be removed in the next major release.",
-				MarkdownDescription: "Tenant identifier.",
+				MarkdownDescription: "Tenant identifier. **Deprecated**: This field is deprecated and will be removed in the next major release.",
 			},
 			"update_time": schema.StringAttribute{
 				Computed:            true,

@@ -62,8 +62,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"account_id": schema.StringAttribute{
 				Computed:            true,
-				DeprecationMessage:  "Use parent_id instead. This field will be removed in the next major release.",
-				MarkdownDescription: "Account ID. Maximum length: `36`.",
+				DeprecationMessage:  "Use `parent_id` instead. This field will be removed in the next major release.",
+				MarkdownDescription: "Account ID. Maximum length: `36`. **Deprecated**: Use `parent_id` instead. This field will be removed in the next major release.",
 				Optional:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},

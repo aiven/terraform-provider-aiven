@@ -57,8 +57,8 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"account_id": schema.StringAttribute{
 				Computed:            true,
-				DeprecationMessage:  "Use parent_id instead. This field will be removed in the next major release.",
-				MarkdownDescription: "Account ID.",
+				DeprecationMessage:  "Use `parent_id` instead. This field will be removed in the next major release.",
+				MarkdownDescription: "Account ID. **Deprecated**: Use `parent_id` instead. This field will be removed in the next major release.",
 			},
 			"address_lines": schema.SetAttribute{
 				Computed:            true,

@@ -52,6 +52,8 @@ type DescriptionBuilder struct {
 
 	// TF validators https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
 	withRequiredWith, withConflictsWith, withExactlyOneOf, withAtLeastOneOf []string
+
+	deprecationMessage string
 }
 
 // Desc is a function that creates a new DescriptionBuilder.
@@ -124,6 +126,11 @@ func (db *DescriptionBuilder) Referenced() *DescriptionBuilder {
 // ForceNew is a function that sets the withForceNew flag.
 func (db *DescriptionBuilder) ForceNew() *DescriptionBuilder {
 	db.withForceNew = true
+	return db
+}
+
+func (db *DescriptionBuilder) Deprecated(msg string) *DescriptionBuilder {
+	db.deprecationMessage = msg
 	return db
 }
 
@@ -226,6 +233,10 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 	s := strings.TrimSpace(builder.String())
 	if s == "." {
 		return ""
+	}
+
+	if db.deprecationMessage != "" {
+		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
 	}
 	return s
 }

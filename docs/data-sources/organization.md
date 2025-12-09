@@ -30,7 +30,7 @@ data "aiven_organization" "main" {
 ### Read-Only
 
 - `create_time` (String) Timestamp in ISO 8601 format, always in UTC.
-- `tenant_id` (String, Deprecated) Tenant identifier.
+- `tenant_id` (String, Deprecated) Tenant identifier. **Deprecated**: This field is deprecated and will be removed in the next major release.
 - `update_time` (String) Timestamp in ISO 8601 format, always in UTC.
 
 <a id="nestedblock--timeouts"></a>
