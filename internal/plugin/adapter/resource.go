@@ -57,7 +57,7 @@ type ResourceOptions[M Model[T], T any] struct {
 	// Each CRUD operation should return diag.Diagnostics (rather than taking it as an argument)
 	// This design allows internal retry logic for operations that can fail transiently.
 	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState=true to trigger a post-operation Read.
-	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
+	// NOTE2: Delete turns 404 errors into warnings since resources may already be deleted after client retries.
 	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
 	Delete func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
 	Create func(ctx context.Context, client avngen.Client, plan *T) diag.Diagnostics
@@ -294,7 +294,7 @@ func (a *resourceAdapter[M, T]) Delete(
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
 	d = a.resource.Delete(ctx, a.client, state.SharedModel())
-	diags.Append(errmsg.RemoveDiagError(d, avngen.IsNotFound)...)
+	diags.Append(errmsg.WarnDiagError(d, avngen.IsNotFound)...)
 }
 
 func (a *resourceAdapter[M, T]) ImportState(

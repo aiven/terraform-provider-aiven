@@ -85,21 +85,21 @@ func TestRetryDiags(t *testing.T) {
 	}
 }
 
-func TestRemoveDiagErrorNotFound(t *testing.T) {
+func TestWarnDiagErrorNotFound(t *testing.T) {
 	type testcase struct {
-		name         string
-		diags        diag.Diagnostics
-		expectTitles []string
+		name      string
+		diags     diag.Diagnostics
+		expectSev []diag.Severity
 	}
 
 	testcases := []testcase{
 		{
-			name: "removes matching error",
+			name: "removes matching error (should remain warning)",
 			diags: diag.Diagnostics{
-				FromError("should be filtered out", avngen.Error{Status: http.StatusNotFound}),
-				FromError("should remain", avngen.Error{Status: http.StatusInternalServerError}),
+				FromError("should turn into warning", avngen.Error{Status: http.StatusNotFound}),
+				FromError("should remain error", avngen.Error{Status: http.StatusInternalServerError}),
 			},
-			expectTitles: []string{"should remain"},
+			expectSev: []diag.Severity{diag.SeverityWarning, diag.SeverityError},
 		},
 		{
 			name: "retains non-matching errors",
@@ -107,14 +107,15 @@ func TestRemoveDiagErrorNotFound(t *testing.T) {
 				FromError("error1", avngen.Error{Status: http.StatusInternalServerError}),
 				FromError("error2", avngen.Error{Status: http.StatusBadRequest}),
 			},
-			expectTitles: []string{"error1", "error2"},
+			expectSev: []diag.Severity{diag.SeverityError, diag.SeverityError},
 		},
 		{
-			name: "removes all matching errors",
+			name: "all become warnings",
 			diags: diag.Diagnostics{
 				FromError("err a", avngen.Error{Status: http.StatusNotFound}),
 				FromError("err b", avngen.Error{Status: http.StatusNotFound}),
 			},
+			expectSev: []diag.Severity{diag.SeverityWarning, diag.SeverityWarning},
 		},
 		{
 			name:  "no errors",
@@ -124,11 +125,11 @@ func TestRemoveDiagErrorNotFound(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := RemoveDiagError(tc.diags, avngen.IsNotFound)
-			titles := lo.Map(result.Errors(), func(d diag.Diagnostic, _ int) string {
-				return d.Summary()
+			result := WarnDiagError(tc.diags, avngen.IsNotFound)
+			severities := lo.Map(result, func(d diag.Diagnostic, _ int) diag.Severity {
+				return d.Severity()
 			})
-			assert.ElementsMatch(t, tc.expectTitles, titles)
+			assert.ElementsMatch(t, tc.expectSev, severities)
 		})
 	}
 }
