@@ -43,14 +43,12 @@ func RetryIfAivenStatus(codes ...int) retry.Option {
 	})
 }
 
-func RemoveDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics {
-	i := 0
-	for _, d := range diags {
+// WarnDiagError turns errors into warnings if they match the filter function.
+func WarnDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics {
+	for i, d := range diags {
 		if e, ok := d.(DiagError); ok && f(e.Error) {
-			continue
+			diags[i] = diag.NewWarningDiagnostic(d.Summary(), d.Detail())
 		}
-		diags[i] = d
-		i++
 	}
-	return diags[:i]
+	return diags
 }
