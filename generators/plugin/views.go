@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	viewSuffix               = "View"
-	optionsSuffix            = "Options"
-	configValidatorsFuncName = "configValidators"
-	planModifier             = "planModifier"
+	viewSuffix                 = "View"
+	optionsSuffix              = "Options"
+	configValidatorsFuncSuffix = "ConfigValidators"
+	planModifier               = "planModifier"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -75,7 +75,7 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	if hasConfigValidators {
-		values["ConfigValidators"] = jen.Id(configValidatorsFuncName)
+		values["ConfigValidators"] = jen.Id(entity.String() + configValidatorsFuncSuffix)
 	}
 
 	title := entity.Title() + optionsSuffix
@@ -328,7 +328,7 @@ func datasourceExactlyOneOf(def *Definition) jen.Code {
 	validators := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(
 		multilineValues(), jen.Qual(pkg, "ExactlyOneOf").Custom(multilineCall(), fields...),
 	)
-	return jen.Func().Id(configValidatorsFuncName).
+	return jen.Func().Id(datasourceType.String()+configValidatorsFuncSuffix).
 		Params(
 			jen.Id("ctx").Qual("context", "Context"),
 			jen.Id("client").Qual(avnGenPackage, "Client"),

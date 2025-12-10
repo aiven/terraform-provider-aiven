@@ -23,8 +23,8 @@ data "aiven_organization_user_list" "users" {
 
 ### Optional
 
-- `id` (String) ID of an organization.
-- `name` (String) The name of the organization.
+- `id` (String) ID of an organization. Exactly one of the fields must be specified: `id` or `name`.
+- `name` (String) The name of the organization. Exactly one of the fields must be specified: `id` or `name`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

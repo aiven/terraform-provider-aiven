@@ -18,7 +18,7 @@ import (
 
 var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
 	Beta:             false,
-	ConfigValidators: configValidators,
+	ConfigValidators: datasourceConfigValidators,
 	Read:             readView,
 	Schema:           datasourceSchema,
 	TypeName:         typeName,
@@ -41,7 +41,7 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 	return diags
 }
 
-func configValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
+func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
 	return []datasource.ConfigValidator{
 		datasourcevalidator.ExactlyOneOf(
 			path.MatchRoot("id"),

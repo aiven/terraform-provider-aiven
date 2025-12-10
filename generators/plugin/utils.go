@@ -80,9 +80,9 @@ func sortedKeys[K ~string, V any](m map[K]V) []K {
 
 var reNewline = regexp.MustCompile(`\s*\n+\s*`)
 
-func fmtDescription(isResource bool, item *Item) string {
+func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	description := strings.TrimSpace(reNewline.ReplaceAllString(item.Description, " "))
-	if isResource && !item.IsRoot() && item.Required && item.IsNested() {
+	if entity.isResource() && !item.IsRoot() && item.Required && item.IsNested() {
 		// The documentation generator renders required nested blocks as optional.
 		// https://github.com/hashicorp/terraform-plugin-docs/issues/363
 		// fixme: remove this once the we render the docs on our own
@@ -94,8 +94,12 @@ func fmtDescription(isResource bool, item *Item) string {
 		b.PossibleValuesString(schemautil.FlattenToString(item.Enum)...)
 	}
 
+	isResource := entity.isResource()
 	if !isResource {
 		b.MarkAsDataSource()
+		if item.IsRootProperty() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
+			b.ExactlyOneOf(def.Datasource.ExactlyOneOf...)
+		}
 	} else if !item.IsReadOnly(isResource) {
 		if item.ForceNew {
 			b.ForceNew()
