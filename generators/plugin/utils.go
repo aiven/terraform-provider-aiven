@@ -114,6 +114,10 @@ func fmtDescription(isResource bool, item *Item) string {
 		b.DefaultValue(item.Default)
 	}
 
+	if item.DeprecationMessage != "" {
+		b.Deprecated(item.DeprecationMessage)
+	}
+
 	// Validators
 	if item.AlsoRequires != nil {
 		b.RequiredWith(item.AlsoRequires...)

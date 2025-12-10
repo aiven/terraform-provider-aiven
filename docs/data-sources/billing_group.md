@@ -31,7 +31,7 @@ data "aiven_billing_group" "example_billing_group" {
 
 ### Read-Only
 
-- `account_id` (String, Deprecated) Account ID.
+- `account_id` (String, Deprecated) Account ID. **Deprecated**: Use `parent_id` instead. This field will be removed in the next major release.
 - `address_lines` (Set of String) Address lines 1 and 2. For example, street, PO box, or building.
 - `billing_contact_emails` (Set of String) List of billing groups contact email addresses.
 - `billing_currency` (String) Billing currency. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.

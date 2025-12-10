@@ -24,4 +24,4 @@ rename:
 schema:
   is_super_admin:
     default: false
-    deprecationMessage: This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the aiven_organization_permission resource.
+    deprecationMessage: This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the `aiven_organization_permission` resource.

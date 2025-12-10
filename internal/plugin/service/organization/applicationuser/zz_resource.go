@@ -56,8 +56,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"is_super_admin": schema.BoolAttribute{
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
-				DeprecationMessage:  "This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the aiven_organization_permission resource.",
-				MarkdownDescription: "Alters super admin state of the organization application user. The default value is `false`.",
+				DeprecationMessage:  "This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the `aiven_organization_permission` resource.",
+				MarkdownDescription: "Alters super admin state of the organization application user. The default value is `false`. **Deprecated**: This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the `aiven_organization_permission` resource.",
 				Optional:            true,
 			},
 			"name": schema.StringAttribute{
