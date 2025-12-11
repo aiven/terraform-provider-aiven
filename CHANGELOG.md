@@ -12,20 +12,19 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Change `aiven_billing_group`: migrate to the Plugin Framework
-- Change `aiven_billing_group`: add `billing_contact_emails` field
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
-- Ignore 404 on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed
-  by a 404 if the resource was already removed.
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
   them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
   `aiven_pg_user`, `aiven_valkey_user`
-- Add `user_info` field to `aiven_organization_user_group_member` resource
-- Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Experimental! Tool to use for database dump
-  and restore during migration
 - Change service user resources and data sources: migrate to use generated client: `aiven_cassandra_user`,
   `aiven_influxdb_user`, `aiven_kafka_user`, `aiven_m3db_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
   `aiven_pg_user`, `aiven_redis_user`
+- Change `aiven_billing_group`: migrate to the Plugin Framework
+- Change `aiven_billing_group`: add `billing_contact_emails` field
+- Warn 404 on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed
+  by a 404 if the resource was already removed.
+- Add `aiven_mysql` field `mysql_user_config.migration.dump_tool` (enum): Experimental! Tool to use for database dump
+  and restore during migration
 - Add `aiven_kafka` field `kafka_user_config.letsencrypt_sasl`: Use a Let's Encrypt certificate authority (CA) for Kafka
   SASL authentication
 - Add `aiven_kafka` field `kafka_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL OAUTHBEARER authentication
@@ -44,7 +43,7 @@ nav_order: 1
   threshold percentage for ML Commons
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_only_run_on_ml_node`: Enable or disable
   running ML Commons tasks only on ML nodes
-- Change `aiven_redis` resource field `redis_user_config`: deprecate: This property is deprecated
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `4.1`
 
 ## [4.47.0] - 2025-11-12
 
