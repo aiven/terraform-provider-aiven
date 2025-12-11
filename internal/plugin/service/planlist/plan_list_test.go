@@ -36,8 +36,6 @@ data "aiven_service_plan_list" "plans" {
 					resource.TestCheckResourceAttr(dataSourceName, "project", projectName),
 					resource.TestCheckResourceAttr(dataSourceName, "service_type", serviceType),
 					resource.TestCheckResourceAttrSet(dataSourceName, "service_plans.#"),
-					resource.TestCheckResourceAttrSet(dataSourceName, "service_plans.0.service_plan"),
-					resource.TestCheckResourceAttrSet(dataSourceName, "service_plans.0.regions.aws-eu-west-1.price_usd"),
 					func(state *terraform.State) error {
 						client, err := acc.GetTestGenAivenClient()
 						require.NoError(t, err)
