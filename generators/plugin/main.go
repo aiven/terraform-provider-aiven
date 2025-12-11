@@ -68,7 +68,12 @@ func exec() error {
 	}
 
 	providerPath := genFilePath(providerFilePath, providerFileName)
-	return provider.Save(providerPath)
+	err = provider.Save(providerPath)
+	if err != nil {
+		return fmt.Errorf("could not save file %s: %w", providerPath, err)
+	}
+
+	return genReport()
 }
 
 const (
