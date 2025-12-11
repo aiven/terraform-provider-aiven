@@ -179,7 +179,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		} else {
 			builder.WriteString("s are ")
 		}
-		builder.WriteString(listOfCodes(db.withPossibleValues...))
+		builder.WriteString(listOfCodes("and", db.withPossibleValues...))
 		builder.WriteRune('.')
 	}
 
@@ -191,6 +191,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		db.withAtLeastOneOf,
 	}
 
+	validatorConjunctions := []string{"and", "and", "or", "or"}
 	validatorTitles := []string{
 		"The field is required with ",
 		"The field conflicts with ",
@@ -202,7 +203,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		if len(v) > 0 {
 			builder.WriteRune(' ')
 			builder.WriteString(validatorTitles[i])
-			builder.WriteString(listOfCodes(v...))
+			builder.WriteString(listOfCodes(validatorConjunctions[i], v...))
 			builder.WriteRune('.')
 		}
 	}
@@ -242,7 +243,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 }
 
 // listOfCodes turns ["a", "b", "c"] into "`a`, `b` and `c`"
-func listOfCodes(source ...string) string {
+func listOfCodes(conj string, source ...string) string {
 	lastOne := len(source) - 1
 	items := make([]string, len(source))
 	for i, v := range source {
@@ -250,7 +251,7 @@ func listOfCodes(source ...string) string {
 		switch i {
 		case 0:
 		case lastOne:
-			pre = " and "
+			pre = fmt.Sprintf(" %s ", conj)
 		default:
 			pre = ", "
 		}

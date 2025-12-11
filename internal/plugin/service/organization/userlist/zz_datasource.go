@@ -59,12 +59,12 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "ID of an organization.",
+				MarkdownDescription: "ID of an organization. Exactly one of the fields must be specified: `id` or `name`.",
 				Optional:            true,
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The name of the organization.",
+				MarkdownDescription: "The name of the organization. Exactly one of the fields must be specified: `id` or `name`.",
 				Optional:            true,
 			},
 		},

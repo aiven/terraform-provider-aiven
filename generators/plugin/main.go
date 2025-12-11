@@ -119,7 +119,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		}
 
 		root.Name = strings.TrimPrefix(def.typeName, typeNamePrefix)
-		schema, err := genSchema(entity, root, def)
+		schema, err := genSchema(def, entity, root)
 		if err != nil {
 			return err
 		}

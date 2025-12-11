@@ -15,6 +15,11 @@ import (
 // planModifier sets the ID field based on the Name field if provided.
 func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
+	if state.ID.ValueString() != "" {
+		// The ID is already set, no need to modify the plan.
+		return diags
+	}
+
 	if state.Name.ValueString() != "" {
 		id, err := GetOrganizationByName(ctx, client, state.Name.ValueString())
 		if err != nil {

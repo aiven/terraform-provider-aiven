@@ -12,8 +12,8 @@ import (
 
 const schemaSuffix = "Schema"
 
-func genSchema(entity entityType, item *Item, def *Definition) (jen.Code, error) {
-	attrs, err := genAttributes(entity.isResource(), item, def)
+func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error) {
+	attrs, err := genAttributes(def, entity, item)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func genSchema(entity entityType, item *Item, def *Definition) (jen.Code, error)
 		attrs[jen.Id("DeprecationMessage")] = jen.Lit(item.DeprecationMessage)
 	}
 
-	desc := fmtDescription(entity.isResource(), item)
+	desc := fmtDescription(def, entity, item)
 	if lo.FromPtr(def.Beta) {
 		desc = userconfig.Desc(desc).AvailabilityType(userconfig.Beta).Build()
 	}
@@ -68,8 +68,8 @@ func genTimeoutsField(isResource bool, def *Definition) jen.Code {
 }
 
 // genAttributes generates the Attributes field value (map).
-func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, error) {
-	pkg := entityImport(isResource, schemaPackageFmt)
+func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, error) {
+	pkg := entity.Import(schemaPackageFmt)
 	attrs := make(jen.Dict)
 	blocks := make(jen.Dict)
 
@@ -80,13 +80,13 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 		case v.IsMapNested():
 			// There is no Map Block thing, only Map Attribute.
 			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
-			value, err := genMapNestedAttribute(isResource, v)
+			value, err := genMapNestedAttribute(def, entity, v)
 			if err != nil {
 				return nil, err
 			}
 			attrs[key] = value
 		case v.IsNested():
-			value, err := genSetNestedBlock(isResource, v)
+			value, err := genSetNestedBlock(def, entity, v)
 			if err != nil {
 				return nil, err
 			}
@@ -97,7 +97,7 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 				value = jen.Qual(typesPackage, v.Items.TFType()+"Type")
 			}
 
-			values, err := genAttributeValues(isResource, v)
+			values, err := genAttributeValues(def, entity, v)
 			if err != nil {
 				return nil, err
 			}
@@ -106,7 +106,7 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 				values["ElementType"] = value
 			}
 
-			if !isResource && item.IsRoot() && slices.Contains(def.Datasource.ExactlyOneOf, k) {
+			if !entity.isResource() && item.IsRoot() && slices.Contains(def.Datasource.ExactlyOneOf, k) {
 				delete(values, "Required")
 				values["Optional"] = jen.True()
 				values["Computed"] = jen.True()
@@ -117,7 +117,7 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 	}
 
 	if item.IsRoot() && def != nil {
-		blocks[jen.Lit("timeouts")] = genTimeoutsField(isResource, def)
+		blocks[jen.Lit("timeouts")] = genTimeoutsField(entity.isResource(), def)
 	}
 
 	nested := make(jen.Dict)
@@ -132,14 +132,14 @@ func genAttributes(isResource bool, item *Item, def *Definition) (jen.Dict, erro
 	return nested, nil
 }
 
-func genMapNestedAttribute(isResource bool, item *Item) (jen.Code, error) {
-	pkg := entityImport(isResource, schemaPackageFmt)
-	values, err := genAttributeValues(isResource, item)
+func genMapNestedAttribute(def *Definition, entity entityType, item *Item) (jen.Code, error) {
+	pkg := entity.Import(schemaPackageFmt)
+	values, err := genAttributeValues(def, entity, item)
 	if err != nil {
 		return nil, err
 	}
 
-	nested, err := genAttributes(isResource, item.Items, nil)
+	nested, err := genAttributes(def, entity, item.Items)
 	if err != nil {
 		return nil, err
 	}
@@ -147,9 +147,9 @@ func genMapNestedAttribute(isResource bool, item *Item) (jen.Code, error) {
 	return jen.Qual(pkg, "MapNestedAttribute").Values(dictFromMap(values, false)), nil
 }
 
-func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
-	pkg := entityImport(isResource, schemaPackageFmt)
-	values, err := genAttributeValues(isResource, item)
+func genSetNestedBlock(def *Definition, entity entityType, item *Item) (jen.Code, error) {
+	pkg := entity.Import(schemaPackageFmt)
+	values, err := genAttributeValues(def, entity, item)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
 		elem = item
 	}
 
-	nested, err := genAttributes(isResource, elem, nil)
+	nested, err := genAttributes(def, entity, elem)
 	if err != nil {
 		return nil, err
 	}
@@ -174,9 +174,9 @@ func genSetNestedBlock(isResource bool, item *Item) (jen.Code, error) {
 	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
 }
 
-func genAttributeValues(isResource bool, item *Item) (map[string]jen.Code, error) {
+func genAttributeValues(def *Definition, entity entityType, item *Item) (map[string]jen.Code, error) {
 	values := make(map[string]jen.Code)
-	description := fmtDescription(isResource, item)
+	description := fmtDescription(def, entity, item)
 	if description != "" {
 		values["MarkdownDescription"] = jen.Lit(description)
 	}
@@ -190,7 +190,7 @@ func genAttributeValues(isResource bool, item *Item) (map[string]jen.Code, error
 	}
 
 	if !item.IsNested() {
-		if isResource {
+		if entity.isResource() {
 			typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
 			planModifiers := make([]jen.Code, 0)
 			if item.ForceNew {
@@ -202,7 +202,7 @@ func genAttributeValues(isResource bool, item *Item) (map[string]jen.Code, error
 			}
 
 			if len(planModifiers) > 0 {
-				values["PlanModifiers"] = jen.Index().Qual(entityImport(isResource, planmodifierPackageFmt), item.TFType()).
+				values["PlanModifiers"] = jen.Index().Qual(entity.Import(planmodifierPackageFmt), item.TFType()).
 					Values(planModifiers...)
 			}
 
@@ -227,7 +227,7 @@ func genAttributeValues(isResource bool, item *Item) (map[string]jen.Code, error
 	}
 
 	// So far no validations for datasources
-	if !item.IsReadOnly(isResource) {
+	if !item.IsReadOnly(entity.isResource()) {
 		validators, err := genValidators(item)
 		if err != nil {
 			return nil, err

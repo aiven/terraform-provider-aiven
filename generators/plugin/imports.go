@@ -21,6 +21,10 @@ func (e entityType) isResource() bool {
 	return e == resourceType
 }
 
+func (e entityType) String() string {
+	return string(e)
+}
+
 func (e entityType) Title() string {
 	if e == resourceType {
 		return "Resource"
