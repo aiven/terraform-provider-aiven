@@ -27,8 +27,8 @@ func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfMode
 
 // expandParentID Converts OrganizationID to AccountID in parent_id field because that's what the API expects.
 func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
-	return func(r util.RawMap, _ *tfModel) error {
-		pID, _ := r.GetString("parent_id")
+	return func(r util.RawMap, plan *tfModel) error {
+		pID := plan.ParentID.ValueString()
 		if pID == "" {
 			return nil
 		}
@@ -46,9 +46,8 @@ func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[
 // while user could have set the OrganizationID in the plan.
 // Overrides it with the plan value to avoid an unnecessary diff output.
 func flattenParentID(r util.RawMap, plan *tfModel) error {
-	pID := plan.ParentID.ValueString()
-	if schemautil.IsOrganizationID(pID) {
-		return r.Set(pID, "parent_id")
+	if plan.ParentID.ValueString() != "" {
+		return r.Set(plan.ParentID.ValueString(), "parent_id")
 	}
 	return nil
 }

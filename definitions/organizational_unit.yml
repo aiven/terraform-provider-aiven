@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/unit
+resource:
+  description: Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) in an Aiven organization.
+datasource:
+  description: Gets information about an organizational unit.
+  exactlyOneOf: [id, name]
+planModifier: true
+clientHandler: account
+flattenModifier: true
+expandModifier: true
+rename:
+  account_id: id
+  account_name: name
+  parent_account_id: parent_id
+remove:
+  - features
+  - organization_id
+  - primary_billing_group_id
+  - account_owner_team_id
+  - access_source
+  - is_account_member
+  - is_account_owner
+  - root_account_id
+legacyTimeouts: true
+operations:
+  - id: AccountCreate
+    type: create
+    resultKey: account
+  - id: AccountDelete
+    type: delete
+  - id: AccountGet
+    type: read
+    resultKey: account
+  - id: AccountUpdate
+    type: update
+    resultKey: account
+schema:
+  id:
+    description: The ID of this resource.
+  name:
+    description: The name of the organizational unit.
+  parent_id:
+    required: true
+    forceNew: false # the value can be account_id or organization_id. It should be possible to change it without recreating the resource.
+    description: The ID of the organization that the unit is created in.

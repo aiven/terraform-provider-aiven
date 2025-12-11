@@ -120,7 +120,7 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
 		g.Var().Id("diags").Qual(diagPackage, "Diagnostics")
-		if def.PlanModifier {
+		if def.PlanModifier && operation == OperationRead {
 			state := "state"
 			switch operation {
 			case OperationUpdate, OperationCreate:
