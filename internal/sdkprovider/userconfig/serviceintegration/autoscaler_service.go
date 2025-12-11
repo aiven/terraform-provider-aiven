@@ -13,15 +13,15 @@ func autoscalerServiceUserConfig() *schema.Schema {
 		Description:      "AutoscalerService user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"autoscaling": {
-			Description: "Configure service autoscaling integration. This is an experimental api and subject to change. For further assistance, contact the Aiven support team mailto:support@aiven.io or your account team",
+			Description: "Configure autoscaling for Inkless services. This feature automatically scales the service plan based on CPU usage. This feature is in the limited availability stage and subject to change. Contact the [Aiven support team](mailto:support@aiven.io) or your account team to request access and enable autoscaling for your project",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_plan": {
-					Description: "Max Plan. Example: `business-5`.",
+					Description: "The maximum service plan to scale up to. Example: `business-5`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"min_plan": {
-					Description: "Min Plan. Example: `business-4`.",
+					Description: "The minimum service plan to scale down to. Example: `business-4`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},

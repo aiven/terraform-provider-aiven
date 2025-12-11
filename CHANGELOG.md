@@ -15,7 +15,8 @@ nav_order: 1
 - Change `aiven_billing_group`: migrate to the Plugin Framework
 - Change `aiven_billing_group`: add `billing_contact_emails` field
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
-- Ignore 404 on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed by a 404 if the resource was already removed.
+- Ignore 404 on client retries when deleting Plugin Framework resources: a 5xx on the first delete may be followed
+  by a 404 if the resource was already removed.
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
   them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
   `aiven_pg_user`, `aiven_valkey_user`
@@ -37,6 +38,13 @@ nav_order: 1
 - Remove docs for `aiven_redis` and `aiven_redis_user` resources: The Redis service has reached end of life.
 - Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs
   for SASL OAUTHBEARER authentication
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_access_control_enabled`: Enable
+  or disable model access control for ML Commons
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_native_memory_threshold`: Native memory
+  threshold percentage for ML Commons
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_only_run_on_ml_node`: Enable or disable
+  running ML Commons tasks only on ML nodes
+- Change `aiven_redis` resource field `redis_user_config`: deprecate: This property is deprecated
 
 ## [4.47.0] - 2025-11-12
 
