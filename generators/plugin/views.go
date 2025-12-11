@@ -69,9 +69,13 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	entityName := string(entity)
-	if entity == resourceType {
+	if entity.isResource() {
 		values["IDFields"] = jen.Id(funcIDFields).Call()
 		values["RefreshState"] = jen.Lit(def.RefreshState)
+
+		if def.Resource.TerminationProtection {
+			values["TerminationProtection"] = jen.Lit(true)
+		}
 	}
 
 	if hasConfigValidators {
