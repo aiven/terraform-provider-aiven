@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.48.0] - 2025-12-11
+
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
 - Add service user resources fields `password_wo` and `password_wo_version`: support for write-only passwords to manage
   them securely without storing them in state for `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
