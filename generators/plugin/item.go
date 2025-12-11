@@ -125,9 +125,10 @@ type Scope struct {
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description        string   `yaml:"description"`
-	DeprecationMessage string   `yaml:"deprecationMessage,omitempty"`
-	ExactlyOneOf       []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
+	Description           string   `yaml:"description"`
+	DeprecationMessage    string   `yaml:"deprecationMessage,omitempty"`
+	ExactlyOneOf          []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
+	TerminationProtection bool     `yaml:"terminationProtection,omitempty"`
 }
 
 type Definition struct {
@@ -187,7 +188,7 @@ type Item struct {
 	DeprecationMessage string     `yaml:"deprecationMessage"`
 	Required           bool       `yaml:"-"`
 	Computed           bool       `yaml:"-"`
-	Virtual            bool       `yaml:"virtual"` // The field doesn't appear in API request/response
+	Virtual            bool       `yaml:"-"` // The field doesn't appear in API request/response. Only "id" for now.
 	Nullable           bool       `yaml:"-"`
 	Optional           bool       `yaml:"-"`
 	Sensitive          bool       `yaml:"-"`

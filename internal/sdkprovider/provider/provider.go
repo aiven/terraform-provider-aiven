@@ -66,9 +66,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_grafana": grafana.DatasourceGrafana(),
 
 			// mysql
-			"aiven_mysql":          mysql.DatasourceMySQL(),
-			"aiven_mysql_user":     mysql.DatasourceMySQLUser(),
-			"aiven_mysql_database": mysql.DatasourceMySQLDatabase(),
+			"aiven_mysql":      mysql.DatasourceMySQL(),
+			"aiven_mysql_user": mysql.DatasourceMySQLUser(),
 
 			// redis
 			"aiven_redis":      redis.DatasourceRedis(),
@@ -180,9 +179,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_grafana": grafana.ResourceGrafana(),
 
 			// mysql
-			"aiven_mysql":          mysql.ResourceMySQL(),
-			"aiven_mysql_user":     mysql.ResourceMySQLUser(),
-			"aiven_mysql_database": mysql.ResourceMySQLDatabase(),
+			"aiven_mysql":      mysql.ResourceMySQL(),
+			"aiven_mysql_user": mysql.ResourceMySQLUser(),
 
 			// redis
 			"aiven_redis":      redis.ResourceRedis(),

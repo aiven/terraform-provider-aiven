@@ -308,6 +308,24 @@ func createRootItem(scope *Scope) (*Item, error) {
 		root.DeprecationMessage = or(scope.CurrentMeta.DeprecationMessage, root.DeprecationMessage)
 	}
 
+	// When termination protection is enabled, adds the field if missing
+	if scope.Definition.Resource != nil && scope.Definition.Resource.TerminationProtection {
+		_, ok := scope.Definition.Schema["termination_protection"]
+		if !ok {
+			if scope.Definition.Schema == nil {
+				scope.Definition.Schema = make(map[string]*Item)
+			}
+
+			scope.Definition.Schema["termination_protection"] = &Item{
+				Type:               SchemaTypeBoolean,
+				Optional:           true,
+				Default:            false,
+				DeprecationMessage: "Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
+				Description:        "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**",
+			}
+		}
+	}
+
 	// Patches the schema and creates new properties
 	var err error
 	for k, v := range scope.Definition.Schema {
@@ -537,6 +555,11 @@ func fromParameter(scope *Scope, operation Operation, parent *Item, path *OAPath
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)
 		if err != nil {
 			return err
+		}
+
+		if p.In != "path" {
+			// Skips query parameters for now
+			continue
 		}
 
 		p.Schema.Description = p.Description

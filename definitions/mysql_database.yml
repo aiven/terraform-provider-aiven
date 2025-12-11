@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/mysql/database
+resource:
+  description: Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.
+  terminationProtection: true
+datasource:
+  description: Gets information about an Aiven for MySQL® database.
+clientHandler: service
+idAttributeComposed: [project, service_name, database_name]
+legacyTimeouts: true
+refreshState: true
+rename:
+  dbname: database_name
+  database: database_name
+remove: [lc_collate, lc_ctype] # These fields are for PostgreSQL only
+operations:
+  - id: ServiceDatabaseCreate
+    type: create
+  - id: ServiceDatabaseDelete
+    type: delete
+  - id: ServiceDatabaseList
+    type: read
+    resultKey: databases
+    resultListLookupKeys: [database_name]

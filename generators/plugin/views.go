@@ -69,9 +69,13 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	entityName := string(entity)
-	if entity == resourceType {
+	if entity.isResource() {
 		values["IDFields"] = jen.Id(funcIDFields).Call()
 		values["RefreshState"] = jen.Lit(def.RefreshState)
+
+		if def.Resource.TerminationProtection {
+			values["TerminationProtection"] = jen.Lit(true)
+		}
 	}
 
 	if hasConfigValidators {
@@ -296,7 +300,11 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 			fieldsMatch = append(fieldsMatch, jen.Op("&&"))
 		}
 
-		field := item.Properties[key]
+		field, ok := item.Properties[key]
+		if !ok {
+			return fmt.Errorf("unknown lookup key `%s` in result list for operation `%s`", key, operation.ID)
+		}
+
 		fieldsMatch = append(
 			fieldsMatch,
 			jen.Id("v").Dot(clientCamelName(key)).

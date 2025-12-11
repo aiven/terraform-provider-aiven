@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	retryGo "github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
 
@@ -74,6 +76,16 @@ func SkipIfNotBeta(t *testing.T) {
 
 	if _, ok := os.LookupEnv(envBetaFeatures); !ok {
 		t.Skip("This test requires beta features to be enabled. Set PROVIDER_AIVEN_ENABLE_BETA environment variable.")
+	}
+}
+
+// SkipIfNotAcc skips the test if acceptance tests are not enabled
+func SkipIfNotAcc(t *testing.T) {
+	t.Helper()
+
+	accEnabled, _ := strconv.ParseBool(os.Getenv(resource.EnvTfAcc))
+	if !accEnabled {
+		t.Skipf("Set '%s=true' to run this acceptance test", resource.EnvTfAcc)
 	}
 }
 

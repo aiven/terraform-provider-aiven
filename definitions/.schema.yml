@@ -29,6 +29,11 @@ properties:
       deprecationMessage:
         type: string
         description: Deprecation message for this resource, if applicable.
+      terminationProtection:
+        type: boolean
+        description: |
+          Set to true to enable termination protection validation for this resource.
+          The `termination_protection` attribute generated automatically.
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
@@ -148,29 +153,6 @@ definitions:
       - id
       - type
     additionalProperties: false
-  SchemaMeta:
-    type: object
-    $comment: Metadata for the resource/datasource
-    properties:
-      exactlyOneOf:
-        type: array
-        items:
-          type: string
-        $comment: List of attributes of which exactly one must be set. Applies to data sources only.
-        example: exactlyOneOf: ["id", "name"]
-      deprecationMessage:
-        type: string
-        $comment: |
-          Message to inform users that this resource/datasource will be removed in a future version.
-          Example: "This resource will be removed in version 3.0.0. Use postgresql_v2 instead."
-      description:
-        type: string
-        $comment: |
-          Detailed description of what this resource/datasource does and how to use it.
-          This appears in the Terraform registry documentation.
-          Example: "Manages PostgreSQL database instance"
-    required:
-      - description
 
   Rename:
     type: object
@@ -187,9 +169,6 @@ definitions:
       jsonName:
         type: string
         $comment: The name of the attribute in the JSON schema
-      virtual:
-        type: boolean
-        $comment: Set to true if this attribute is virtual and not part of the API schema
       computed:
         type: boolean
         $comment: |

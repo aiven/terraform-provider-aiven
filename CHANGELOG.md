@@ -14,6 +14,8 @@ nav_order: 1
 
 - Migrate `aiven_organizational_unit` to the Plugin Framework
 - Added field `kafka_ssl_ca` to `aiven_service_component` data source
+- Migrate `aiven_mysql_database` to the Plugin Framework
+- Deprecated `termination_protection` for `aiven_mysql_database`. Use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion) instead.
 
 ## [4.48.0] - 2025-12-11
 

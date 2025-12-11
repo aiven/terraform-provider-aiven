@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
-	"strconv"
 	"testing"
 	"time"
 
@@ -28,10 +26,7 @@ import (
 )
 
 func TestAccAivenKafkaTopic(t *testing.T) {
-	accEnabled, _ := strconv.ParseBool(os.Getenv(resource.EnvTfAcc))
-	if !accEnabled {
-		t.Skipf("Set '%s=true' to run this acceptance test", resource.EnvTfAcc)
-	}
+	acc.SkipIfNotAcc(t)
 
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)

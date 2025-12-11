@@ -71,13 +71,11 @@ func genReport() error {
 		}
 	}
 
-	// Sort entries: plugin first, then alphabetically by name.
+	// Sort entries alphabetically by name.
+	// It used to be "plugin first", but the git diff was hard to read.
 	entries := slices.Collect(maps.Values(entriesMap))
 	sort.Slice(entries, func(i, j int) bool {
-		if entries[i].plugin == entries[j].plugin {
-			return entries[i].name < entries[j].name
-		}
-		return entries[i].plugin
+		return entries[i].name < entries[j].name
 	})
 
 	// Write table to reportFileName.
