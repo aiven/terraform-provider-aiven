@@ -96,7 +96,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.DatasourceOrganizationalUnit(),
 			"aiven_organization_user":       organization.DatasourceOrganizationUser(),
 			"aiven_organization_user_group": organization.DatasourceOrganizationUserGroup(),
 
@@ -211,7 +210,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.ResourceOrganizationalUnit(),
 			"aiven_organization_user":       organization.ResourceOrganizationUser(),
 			"aiven_organization_user_group": organization.ResourceOrganizationUserGroup(),
 

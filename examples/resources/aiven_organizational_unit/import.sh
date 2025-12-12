@@ -1,1 +1,1 @@
-terraform import aiven_organizational_unit.example_unit ORGANIZATIONAL_UNIT_ID
+terraform import aiven_organizational_unit.example ORGANIZATIONAL_UNIT_ID
