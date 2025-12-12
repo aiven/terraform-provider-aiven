@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_mysql_database` to the Plugin Framework
+
 ## [4.48.0] - 2025-12-11
 
 - Add `aiven_organization_user_group_member_list` datasource: List members of a user group
