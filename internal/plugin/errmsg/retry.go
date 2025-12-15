@@ -52,3 +52,11 @@ func WarnDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics 
 	}
 	return diags
 }
+
+// DropDiagError drops DiagError from diagnostics if they match the filter function.
+func DropDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics {
+	return slices.DeleteFunc(diags, func(d diag.Diagnostic) bool {
+		e, ok := d.(DiagError)
+		return ok && f(e.Error)
+	})
+}
