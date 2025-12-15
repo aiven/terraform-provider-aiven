@@ -24,8 +24,8 @@ resource "aiven_organizational_unit" "example_unit" {
 
 ### Required
 
-- `name` (String) The name of the organizational unit.
-- `parent_id` (String) The ID of the organization that the unit is created in.
+- `name` (String) The name of the organizational unit. Maximum length: `128`.
+- `parent_id` (String) The ID of the organization that the unit is created in. Maximum length: `36`.
 
 ### Optional
 
@@ -33,26 +33,26 @@ resource "aiven_organizational_unit" "example_unit" {
 
 ### Read-Only
 
-- `create_time` (String) Time of creation.
+- `create_time` (String) Timestamp in ISO 8601 format, always in UTC.
 - `id` (String) The ID of this resource.
-- `tenant_id` (String) Tenant ID.
-- `update_time` (String) Time of last update.
+- `tenant_id` (String) Tenant identifier.
+- `update_time` (String) Timestamp in ISO 8601 format, always in UTC.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organizational_unit.example_unit ORGANIZATIONAL_UNIT_ID
+terraform import aiven_organizational_unit.example ORGANIZATIONAL_UNIT_ID
 ```
