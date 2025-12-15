@@ -133,3 +133,53 @@ func TestWarnDiagErrorNotFound(t *testing.T) {
 		})
 	}
 }
+
+func TestDropDiagErrorNotFound(t *testing.T) {
+	type testcase struct {
+		name          string
+		diags         diag.Diagnostics
+		expectSummary []string
+	}
+
+	testcases := []testcase{
+		{
+			name: "removes matching not found error",
+			diags: diag.Diagnostics{
+				FromError("should remove", avngen.Error{Status: http.StatusNotFound}),
+				FromError("should remain", avngen.Error{Status: http.StatusInternalServerError}),
+			},
+			expectSummary: []string{"should remain"},
+		},
+		{
+			name: "removes all not found errors",
+			diags: diag.Diagnostics{
+				FromError("err a", avngen.Error{Status: http.StatusNotFound}),
+				FromError("err b", avngen.Error{Status: http.StatusNotFound}),
+			},
+			expectSummary: nil,
+		},
+		{
+			name: "retains errors without not found status",
+			diags: diag.Diagnostics{
+				FromError("error1", avngen.Error{Status: http.StatusInternalServerError}),
+				FromError("error2", avngen.Error{Status: http.StatusBadRequest}),
+			},
+			expectSummary: []string{"error1", "error2"},
+		},
+		{
+			name:          "no diagnostics",
+			diags:         diag.Diagnostics{},
+			expectSummary: nil,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := DropDiagError(tc.diags, avngen.IsNotFound)
+			summaries := lo.Map(result, func(d diag.Diagnostic, _ int) string {
+				return d.Summary()
+			})
+			assert.ElementsMatch(t, tc.expectSummary, summaries)
+		})
+	}
+}
