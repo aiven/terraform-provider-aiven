@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/aiven/go-client-codegen/handler/service"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
@@ -34,6 +36,7 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(datasourceKafka, "project"),
 					testAccServiceComponentAttributes(datasourceKafka, "kafka", "dynamic"),
 					testAccServiceComponentKafkaAuthenticationMethod(datasourceKafka),
+					testAccServiceComponentKafkaSslCa(datasourceKafka),
 					// Kafka Connect
 					testAccServiceComponentAttributes(datasourceKafkaConnect, "kafka_connect", "public"),
 					// Kafka Rest
@@ -86,6 +89,24 @@ func testAccServiceComponentKafkaAuthenticationMethod(n string) resource.TestChe
 
 		if a["kafka_authentication_method"] == "" {
 			return fmt.Errorf("expected to get a kafka_authentication_method from Aiven")
+		}
+
+		return nil
+	}
+}
+
+func testAccServiceComponentKafkaSslCa(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["kafka_ssl_ca"] == "" {
+			return fmt.Errorf("expected to get a kafka_ssl_ca from Aiven, got empty string")
+		}
+
+		validChoices := service.KafkaSslCaTypeChoices()
+		if !slices.Contains(validChoices, a["kafka_ssl_ca"]) {
+			return fmt.Errorf("expected kafka_ssl_ca to be one of %v, got: %s", validChoices, a["kafka_ssl_ca"])
 		}
 
 		return nil
