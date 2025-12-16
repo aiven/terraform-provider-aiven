@@ -13,6 +13,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Migrate `aiven_organizational_unit` to the Plugin Framework
+- Added field `kafka_ssl_ca` to `aiven_service_component` data source
 
 ## [4.48.0] - 2025-12-11
 

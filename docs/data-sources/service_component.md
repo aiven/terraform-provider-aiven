@@ -30,6 +30,7 @@ data "aiven_service_component" "sc1" {
 ### Optional
 
 - `kafka_authentication_method` (String) Kafka authentication method. This is a value specific to the 'kafka' service component. The possible values are `certificate` and `sasl`.
+- `kafka_ssl_ca` (String) Kafka certificate used. The possible values are `letsencrypt` and `project_ca`.
 - `route` (String) Network access route. The possible values are `dynamic`, `private`, `privatelink` and `public`.
 - `service_name` (String) Service name
 - `ssl` (Boolean) Whether the endpoint is encrypted or accepts plaintext. By default endpoints are always encrypted and this property is only included for service components that may disable encryption
@@ -39,5 +40,4 @@ data "aiven_service_component" "sc1" {
 
 - `host` (String) DNS name for connecting to the service component
 - `id` (String) The ID of this resource.
-- `kafka_ssl_ca` (String) Kafka certificate used. The possible values are `letsencrypt` and `project_ca`.
 - `port` (Number) Port number for connecting to the service component
