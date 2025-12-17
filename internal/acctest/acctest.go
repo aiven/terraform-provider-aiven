@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -262,40 +263,65 @@ func WithPlan(plan string) CreateTestServiceOpt {
 }
 
 // CreateTestService creates a test service that can be shared between tests.
-func CreateTestService(ctx context.Context, projectName, serviceName string, opts ...CreateTestServiceOpt) (func(), error) {
+// If the service already exists, it will be used as is and won't be deleted after the tests.
+func CreateTestService(t *testing.T, projectName, serviceName string, opts ...CreateTestServiceOpt) <-chan error {
+	ctx := t.Context()
 	client, err := GetTestGenAivenClient()
-	if err != nil {
-		return nil, err
+	require.NoError(t, err, "getting Aiven generated client failed")
+
+	// Check if a pre-existing service should be reused in tests.
+	_, err = client.ServiceGet(ctx, projectName, serviceName)
+	if avngen.IsNotFound(err) {
+		req := &service.ServiceCreateIn{ServiceName: serviceName}
+		for _, opt := range opts {
+			opt(req)
+		}
+
+		_, err = client.ServiceCreate(ctx, projectName, req)
+		require.NoErrorf(t, err, "creating service %q failed", serviceName)
+
+		t.Cleanup(func() {
+			// Destroys the service no matter what, uses context.Background()
+			_ = client.ServiceDelete(context.Background(), projectName, serviceName)
+		})
+	} else if err != nil {
+		require.NoErrorf(t, err, "failed to check if service %q exists", serviceName)
 	}
 
-	req := &service.ServiceCreateIn{
-		ServiceName: serviceName,
-	}
+	// Creates a channel to communicate the result of service readiness
+	readiness := make(chan error)
 
-	for _, opt := range opts {
-		opt(req)
-	}
+	// Polls the service state until it is running.
+	// Sends the result to the readiness channel till the context is canceled.
+	go func() {
+		err = retryGo.Do(
+			func() error {
+				s, err := client.ServiceGet(ctx, projectName, serviceName)
+				switch {
+				case err != nil:
+					return retryGo.Unrecoverable(fmt.Errorf("error getting service %q: %w", serviceName, err))
+				case s.State != service.ServiceStateTypeRunning:
+					return fmt.Errorf("waiting for %q to be running, current state %s", serviceName, s.State)
+				default:
+					return nil
+				}
+			},
+			retryGo.Context(ctx),
+			retryGo.Delay(5*time.Second),
+		)
 
-	_, err = client.ServiceCreate(ctx, projectName, req)
-	if err != nil {
-		return nil, err
-	}
-
-	err = retryGo.Do(
-		func() error {
-			kafka, err := client.ServiceGet(ctx, projectName, serviceName)
-			switch {
-			case err != nil:
-				return retryGo.Unrecoverable(err)
-			case kafka.State != service.ServiceStateTypeRunning:
-				return fmt.Errorf("waiting for kafka to be running, current state %s", kafka.State)
-			default:
-				return nil
+		for {
+			select {
+			case <-ctx.Done():
+				// t.Cleanup() called, exits the goroutine.
+				close(readiness)
+				return
+			case readiness <- err:
+				// There can be multiple listeners (subtests) on the channel.
+				// Sends the readiness result till the context is canceled.
 			}
-		},
-		retryGo.Context(ctx),
-		retryGo.Delay(5*time.Second),
-	)
+		}
+	}()
 
-	return func() { _ = client.ServiceDelete(ctx, projectName, serviceName) }, err
+	return readiness
 }
