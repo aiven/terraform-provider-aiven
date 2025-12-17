@@ -218,5 +218,5 @@ func exampleScalarItem(item *Item) (cty.Value, error) {
 		}
 		return cty.NumberFloatVal(anyValue.(float64)), nil
 	}
-	return cty.NilVal, fmt.Errorf("unknown scalar type %s for %s", item.Type, item.Path())
+	return cty.NilVal, fmt.Errorf("unknown scalar type %q for %q", item.Type, item.Path())
 }

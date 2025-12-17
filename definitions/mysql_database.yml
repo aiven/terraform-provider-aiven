@@ -21,4 +21,5 @@ operations:
   - id: ServiceDatabaseList
     type: read
     resultKey: databases
-    resultListLookupKeys: [database_name]
+    resultListLookupKeys:
+      DatabaseName: database_name

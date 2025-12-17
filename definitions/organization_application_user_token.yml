@@ -15,7 +15,8 @@ operations:
   - id: ApplicationUserAccessTokensList
     type: read
     resultKey: tokens
-    resultListLookupKeys: [token_prefix]
+    resultListLookupKeys:
+      TokenPrefix: token_prefix
 schema:
   full_token:
     sensitive: true

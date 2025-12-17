@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"maps"
-	"regexp"
 	"slices"
 	"sort"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/hashicorp/go-multierror"
-	"github.com/iancoleman/strcase"
 	"github.com/samber/lo"
 )
 
@@ -295,19 +293,20 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 	// Finds a match in the list.
 	// E.g. if rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
 	fieldsMatch := make([]jen.Code, 0)
-	for i, key := range operation.ResultListLookupKeys {
+	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
+		fieldName := operation.ResultListLookupKeys[key]
 		if i > 0 {
 			fieldsMatch = append(fieldsMatch, jen.Op("&&"))
 		}
 
-		field, ok := item.Properties[key]
+		field, ok := item.Properties[fieldName]
 		if !ok {
-			return fmt.Errorf("unknown lookup key `%s` in result list for operation `%s`", key, operation.ID)
+			return fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
 		}
 
 		fieldsMatch = append(
 			fieldsMatch,
-			jen.Id("v").Dot(clientCamelName(key)).
+			jen.Id("v").Dot(key).
 				Op("==").
 				Id(state).Dot(field.GoFieldName()).Dot("Value"+field.TFType()).Call(),
 		)
@@ -318,9 +317,11 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 		Block(jen.If(fieldsMatch...).Block(flatten(jen.Id("&v")), jen.Return()))
 
 	// If passed the "for" loop, then no item was found - adds error
+	values := lo.Values(operation.ResultListLookupKeys)
+	slices.Sort(values)
 	g.Id("diags").Dot("AddError").Call(
 		jen.Lit("Resource Not Found"),
-		jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(operation.ResultListLookupKeys))),
+		jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
 	)
 
 	return nil
@@ -373,12 +374,4 @@ func humanizeCodeList(args []string) string {
 		list += fmt.Sprintf("`%s`", v)
 	}
 	return list
-}
-
-var reNonWord = regexp.MustCompile(`\W+`)
-
-// clientCamelName returns go client camel case name
-// fixme: make client naming same as in terraform
-func clientCamelName(s string) string {
-	return strcase.ToCamel(reNonWord.ReplaceAllString(s, "_"))
 }

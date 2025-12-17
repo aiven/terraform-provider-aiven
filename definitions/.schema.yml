@@ -140,11 +140,12 @@ definitions:
           The key to extract the result object from the response (if the API nests result under a property)
           E.g.: resultKey: "result" retrieves response.result
       resultListLookupKeys:
-        type: array
-        items:
+        type: object
+        additionalProperties:
           type: string
         $comment: |
-          When the response returns a list, these keys are used to locate the item within the response
+          Used to find the correct item in a list response.
+          Maps client response field names (key) to Terraform schema attributes (value).
       resultToKey:
         type: string
         $comment: |
