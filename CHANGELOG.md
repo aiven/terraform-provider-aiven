@@ -14,6 +14,7 @@ nav_order: 1
 
 - Migrate `aiven_organizational_unit` to the Plugin Framework
 - Added field `kafka_ssl_ca` to `aiven_service_component` data source
+- Add `aiven_mysql` field `mysql_user_config.migration.reestablish_replication`: Skip dump-restore part and start replication
 
 ## [4.48.0] - 2025-12-11
 
