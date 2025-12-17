@@ -2,99 +2,62 @@ package main
 
 import (
 	"fmt"
-	"maps"
 	"os"
-	"path/filepath"
-	"regexp"
-	"slices"
-	"sort"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
-const (
-	reportFileName   = "PLUGIN_MIGRATION.md"
-	providerGoSuffix = "provider.go"
-)
+const reportFileName = "PLUGIN_MIGRATION.md"
 
-// genReport recursively searches for all `*provider.go` files,
-// extracts all matches of "aiven_*" strings,
-// and writes a table with: resource name, plugin indicator, count to reportFileName.
+// genReport writes a table with: resource name, plugin indicator, count to reportFileName.
 func genReport() error {
-	// Find all *provider.go files
-	var files []string
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(path, providerGoSuffix) {
-			files = append(files, path)
-		}
-		return nil
-	})
+	sdkProvider, err := provider.Provider("foo")
 	if err != nil {
 		return err
 	}
 
-	type entry struct {
-		name   string
-		plugin bool
-		count  int
+	allRes := make(map[string]int)
+	pluginRes := make(map[string]bool)
+	for k := range plugin.ResourcesMap() {
+		allRes[k]++
+		pluginRes[k] = true
 	}
-
-	// Finds all matches in dictionary keys.
-	// `"aiven_foo":` or `foo["aiven_foo"]`
-	reAivenMapKey := regexp.MustCompile(`"aiven_[a-z0-9_]+"[:\]]`)
-	entriesMap := make(map[string]entry)
-	entriesCount := make(map[bool]int)
-	for _, file := range files {
-		content, err := os.ReadFile(file)
-		if err != nil {
-			return err
-		}
-		matches := reAivenMapKey.FindAll(content, -1)
-		if matches == nil {
-			continue
-		}
-
-		plugin := strings.Contains(file, "plugin")
-		for _, m := range matches {
-			// m includes quotes, remove them
-			name := strings.Trim(string(m), `":]`)
-			item := entriesMap[name]
-			item.name = name
-			item.plugin = plugin
-			item.count++
-			entriesMap[name] = item
-			entriesCount[plugin]++
-		}
+	for k := range plugin.DataSourcesMap() {
+		allRes[k]++
+		pluginRes[k] = true
 	}
-
-	// Sort entries alphabetically by name.
-	// It used to be "plugin first", but the git diff was hard to read.
-	entries := slices.Collect(maps.Values(entriesMap))
-	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].name < entries[j].name
-	})
+	for k := range sdkProvider.ResourcesMap {
+		allRes[k]++
+	}
+	for k := range sdkProvider.DataSourcesMap {
+		allRes[k]++
+	}
 
 	// Write table to reportFileName.
+	totalSdk := 0
+	totalPlugin := 0
 	tw := table.NewWriter()
 	tw.AppendHeader(table.Row{"#", "RESOURCE NAME", "PLUGIN", "COUNT"})
-	for i, e := range entries {
-		plugin := ""
-		if e.plugin {
-			plugin = "yes"
+	for i, k := range sortedKeys(allRes) {
+		v := allRes[k]
+		var p string
+		if pluginRes[k] {
+			p = "yes"
+			totalPlugin += v
+		} else {
+			totalSdk += v
 		}
-		tw.AppendRow(table.Row{i + 1, e.name, plugin, e.count})
+		tw.AppendRow(table.Row{i + 1, k, p, v})
 	}
 
-	sdkv2Count := entriesCount[false]
-	pluginCount := entriesCount[true]
-	totalCount := sdkv2Count + pluginCount
-	totalMigrated := fmt.Sprintf("TOTAL MIGRATED %.f%%", 100*float64(pluginCount)/float64(totalCount))
+	totalCount := totalSdk + totalPlugin
+	totalMigrated := fmt.Sprintf("TOTAL MIGRATED %.f%%", 100*float64(totalPlugin)/float64(totalCount))
 	tw.AppendFooter(
-		table.Row{"", totalMigrated, pluginCount, totalCount},
+		table.Row{"", totalMigrated, totalPlugin, totalCount},
 	)
 
 	builder := strings.Builder{}
