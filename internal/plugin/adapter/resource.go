@@ -53,6 +53,11 @@ type ResourceOptions[M Model[T], T any] struct {
 	// Retries common errors like 404 and 403 (see the implementation for details).
 	RefreshState bool
 
+	// Throws an error if the resource is marked for deletion and `termination_protection` field is set to true.
+	// "Virtual" fields (not managed by the API) should be deprecated. Instead, use "prevent_destroy":
+	// https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion
+	TerminationProtection bool
+
 	// CRUD operations.
 	// Each CRUD operation should return diag.Diagnostics (rather than taking it as an argument)
 	// This design allows internal retry logic for operations that can fail transiently.
@@ -229,10 +234,6 @@ func (a *resourceAdapter[M, T]) Update(
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
 ) {
-	if a.resource.Update == nil {
-		return
-	}
-
 	var (
 		plan   = instantiate[M]()
 		state  = instantiate[M]()
@@ -247,16 +248,21 @@ func (a *resourceAdapter[M, T]) Update(
 		return
 	}
 
-	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutUpdate)
-	diags.Append(d...)
-	if diags.HasError() {
-		return
-	}
-	defer cancel()
+	// Some resources might have "virtual" fields, like "termination_protection".
+	// Those fields can be technically updated, but they don't require an API call.
+	// So we skip the Update call if it's not implemented.
+	if a.resource.Update != nil {
+		ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutUpdate)
+		diags.Append(d...)
+		if diags.HasError() {
+			return
+		}
+		defer cancel()
 
-	diags.Append(a.resource.Update(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
-	if diags.HasError() {
-		return
+		diags.Append(a.resource.Update(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+		if diags.HasError() {
+			return
+		}
 	}
 
 	if a.resource.RefreshState {
@@ -366,6 +372,25 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 	req resource.ModifyPlanRequest,
 	rsp *resource.ModifyPlanResponse,
 ) {
+	// Checks if termination protection is enabled for this resource
+	if a.resource.TerminationProtection && req.Plan.Raw.IsNull() {
+		// req.Plan.Raw.IsNull() means "marked for deletion":
+		// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-destroy-plan-diagnostics
+		enabled := false
+		rsp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("termination_protection"), &enabled)...)
+		if rsp.Diagnostics.HasError() {
+			return
+		}
+
+		if enabled {
+			rsp.Diagnostics.AddError(
+				errmsg.SummaryErrorDeletingResource,
+				fmt.Sprintf("The resource `%s` has termination protection enabled and cannot be deleted.", a.resource.TypeName),
+			)
+			return
+		}
+	}
+
 	if a.resource.ModifyPlan == nil {
 		return
 	}

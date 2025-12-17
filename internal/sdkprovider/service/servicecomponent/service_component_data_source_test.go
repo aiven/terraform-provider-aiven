@@ -7,11 +7,11 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/aiven/go-client-codegen/handler/service"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 

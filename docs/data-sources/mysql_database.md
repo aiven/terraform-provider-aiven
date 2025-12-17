@@ -25,11 +25,22 @@ data "aiven_mysql_database" "example_database" {
 
 ### Required
 
-- `database_name` (String) The name of the database. Changing this property forces recreation of the resource.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `database_name` (String) Service database name.
+- `project` (String) Project name.
+- `service_name` (String) Service name.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `termination_protection` (Boolean) Client-side deletion protection that prevents the database from being deleted by Terraform. Enable this for production databases containing critical data. The default value is `false`.
+- `id` (String) Resource ID composed as: `project/service_name/database_name`.
+- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**. The default value is `false`. **Deprecated**: Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
