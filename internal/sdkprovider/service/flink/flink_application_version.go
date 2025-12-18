@@ -272,7 +272,7 @@ func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.Resource
 
 	r, err := client.FlinkApplicationVersions.Get(ctx, project, serviceName, applicationID, version)
 	if err != nil {
-		return diag.Errorf("cannot get Flink Application Version: %v", err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

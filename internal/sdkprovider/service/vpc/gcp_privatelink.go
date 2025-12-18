@@ -87,7 +87,7 @@ func resourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m i
 
 	pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 	if err != nil {
-		return diag.Errorf("Error getting GCP privatelink: %s", err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

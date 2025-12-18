@@ -189,12 +189,7 @@ func resourceGCPPrivatelinkConnectionApprovalRead(
 	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
 	plConnection, err := client.GCPPrivatelink.ConnectionGet(ctx, project, service, plConnectionID)
 	if err != nil {
-		if aiven.IsNotFound(err) {
-			if err := d.Set("privatelink_connection_id", ""); err != nil {
-				return diag.FromErr(err)
-			}
-		}
-		return diag.Errorf("Error getting GCP privatelink connection: %s", err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("privatelink_connection_id", plConnection.PrivatelinkConnectionID); err != nil {

@@ -160,33 +160,13 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	stateChangeConf := &retry.StateChangeConf{
-		Pending: []string{"IN_PROGRESS"},
-		Target:  []string{"OK"},
-		Refresh: func() (interface{}, string, error) {
-			list, err := m.(*aiven.Client).KafkaConnectors.List(ctx, project, serviceName)
-			if err != nil {
-				log.Printf("[DEBUG] Kafka Connectors list waiter err %s", err.Error())
-				if aiven.IsNotFound(err) {
-					return nil, "", err
-				}
-
-				return nil, "IN_PROGRESS", nil
-			}
-
-			return list, "OK", nil
-		},
-		Delay:      common.DefaultStateChangeDelay,
-		Timeout:    d.Timeout(schema.TimeoutRead),
-		MinTimeout: common.DefaultStateChangeMinTimeout,
-	}
-	res, err := stateChangeConf.WaitForStateContext(ctx)
+	list, err := m.(*aiven.Client).KafkaConnectors.List(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	var found bool
-	for _, r := range res.(*aiven.KafkaConnectorsResponse).Connectors {
+	for _, r := range list.Connectors {
 		if r.Name == connectorName {
 			found = true
 			if err := d.Set("project", project); err != nil {
@@ -228,7 +208,8 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	if !found {
-		return diag.Errorf("cannot read Kafka Connector resource with Id: %s not found in a Kafka Connectors list", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	return nil
@@ -272,6 +253,36 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, connectorName))
+
+	// Wait for connector to appear in the list after creation
+	stateChangeConf := &retry.StateChangeConf{
+		Pending: []string{"IN_PROGRESS"},
+		Target:  []string{"OK"},
+		Refresh: func() (any, string, error) {
+			list, err := m.(*aiven.Client).KafkaConnectors.List(ctx, project, serviceName)
+			if err != nil {
+				log.Printf("[DEBUG] Kafka Connectors list waiter err %s", err.Error())
+				// connector was already created successfully, any error here is transient
+				return nil, "IN_PROGRESS", nil
+			}
+
+			for _, r := range list.Connectors {
+				if r.Name == connectorName {
+					return &r, "OK", nil
+				}
+			}
+
+			return nil, "IN_PROGRESS", nil
+		},
+		Delay:      common.DefaultStateChangeDelay,
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		MinTimeout: common.DefaultStateChangeMinTimeout,
+	}
+
+	_, err = stateChangeConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for Kafka Connector to be created: %s", err)
+	}
 
 	return resourceKafkaConnectorRead(ctx, d, m)
 }
