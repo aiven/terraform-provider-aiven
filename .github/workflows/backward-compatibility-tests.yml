@@ -1,0 +1,21 @@
+name: Backward Compatibility Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (branch, tag, or commit) to run backward compatibility tests against'
+        required: false
+        default: 'main'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  call-backward-compat-tests:
+    uses: ./.github/workflows/reusable-acceptance-tests.yml
+    with:
+      ref: ${{ inputs.ref || github.ref }}
+      tags: "backwardcompat"
+    secrets: inherit
