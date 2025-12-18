@@ -152,36 +152,12 @@ func (p *AivenProvider) Configure(
 
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
-	// List of resources that are currently available in the provider.
-	resourcesMap := map[string]func() resource.Resource{
-		"aiven_organization":               organization.NewResource,
-		"aiven_organization_group_project": groupproject.NewResource,
-		"aiven_governance_access":          access.NewResource,
-		"aiven_organization_permission":    permission.NewResource,
-	}
-
-	// This is a map where the keys are resource names, e.g. "aiven_foo".
-	// In case when the generated resource must be completely excluded from the provider, just drop it by the key.
-	genResources := Resources()
-	return append(lo.Values(resourcesMap), lo.Values(genResources)...)
+	return lo.Values(ResourcesMap())
 }
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
-	// List of data sources that are currently available in the provider.
-	dataSourcesMap := map[string]func() datasource.DataSource{
-		"aiven_organization": organization.NewDataSource,
-	}
-
-	// Add to the map of data sources that are currently in beta.
-	if util.IsBeta() {
-		dataSourcesMap["aiven_external_identity"] = externalidentity.NewDataSource
-	}
-
-	// This is a map where the keys are datasource names, e.g. "aiven_foo".
-	// In case when the generated datasource must be completely excluded from the provider, just drop it by the key.
-	genDataSources := DataSources()
-	return append(lo.Values(dataSourcesMap), lo.Values(genDataSources)...)
+	return lo.Values(DataSourcesMap())
 }
 
 // New returns a new provider factory for the Aiven provider.
@@ -189,4 +165,29 @@ func New(version string) provider.Provider {
 	return &AivenProvider{
 		version: version,
 	}
+}
+
+// ResourcesMap used to generate PLUGIN_MIGRATION.md report. See usage.
+func ResourcesMap() map[string]func() resource.Resource {
+	result := map[string]func() resource.Resource{
+		"aiven_organization":               organization.NewResource,
+		"aiven_organization_group_project": groupproject.NewResource,
+		"aiven_governance_access":          access.NewResource,
+		"aiven_organization_permission":    permission.NewResource,
+	}
+
+	return lo.Assign(result, Resources())
+}
+
+// DataSourcesMap used to generate PLUGIN_MIGRATION.md report. See usage.
+func DataSourcesMap() map[string]func() datasource.DataSource {
+	result := map[string]func() datasource.DataSource{
+		"aiven_organization": organization.NewDataSource,
+	}
+
+	if util.IsBeta() {
+		result["aiven_external_identity"] = externalidentity.NewDataSource
+	}
+
+	return lo.Assign(result, DataSources())
 }
