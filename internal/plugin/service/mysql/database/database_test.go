@@ -18,7 +18,6 @@ import (
 
 func TestAccAivenMySQLDatabase(t *testing.T) {
 	acc.SkipIfNotAcc(t)
-	t.Parallel()
 
 	resourceName := "aiven_mysql_database.foo"
 	datasourceName := "data.aiven_mysql_database.foo"
@@ -26,8 +25,8 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 
 	// Creates shared MySQL
 	serviceName := acc.RandName("mysql")
-	cleanup, err := acc.CreateTestService(
-		t.Context(),
+	serviceIsReady := acc.CreateTestService(
+		t,
 		projectName,
 		serviceName,
 		acc.WithServiceType("mysql"),
@@ -35,15 +34,13 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 		acc.WithCloud("google-europe-west1"),
 	)
 
-	require.NoError(t, err)
-	defer cleanup()
-
 	t.Run("backward compatibility test", func(t *testing.T) {
 		dbName := acc.RandName("compatibility")
 		config := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "")
-		resource.Test(t, resource.TestCase{
+		resource.ParallelTest(t, resource.TestCase{
 			PreCheck: func() { acc.TestAccPreCheck(t) },
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+				PreConfig:          func() { require.NoError(t, <-serviceIsReady) },
 				TFConfig:           config,
 				OldProviderVersion: "4.47.0",
 				Checks: resource.ComposeTestCheckFunc(
@@ -66,13 +63,14 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 		configTerminationNil := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "")
 		configTerminationTrue := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "termination_protection=true")
 		configTerminationFalse := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "termination_protection=false")
-		resource.Test(t, resource.TestCase{
+		resource.ParallelTest(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
 			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 			CheckDestroy:             testAccCheckAivenMySQLDatabaseResourceDestroy,
 			Steps: []resource.TestStep{
 				{
-					Config: configTerminationNil,
+					PreConfig: func() { require.NoError(t, <-serviceIsReady) },
+					Config:    configTerminationNil,
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "project", projectName),
 						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),

@@ -82,6 +82,9 @@ type BackwardCompatConfig struct {
 	// Checks are the test checks to run in both steps
 	Checks resource.TestCheckFunc
 
+	// PreConfig Same as resource.TestStep.PreConfig but for the first step only
+	PreConfig func()
+
 	// OldProviderVersion is the version to test against (defaults to latest stable)
 	OldProviderVersion string
 
@@ -119,8 +122,9 @@ func BackwardCompatibilitySteps(t *testing.T, config BackwardCompatConfig) []res
 			ExternalProviders: map[string]resource.ExternalProvider{
 				"aiven": ExternalAivenProvider(t, version),
 			},
-			Config: config.TFConfig,
-			Check:  config.Checks,
+			Config:    config.TFConfig,
+			Check:     config.Checks,
+			PreConfig: config.PreConfig,
 		},
 		// switch to new provider and verify plan is empty
 		{

@@ -36,17 +36,15 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	kafkaName := acc.RandName("kafka")
 
 	// Creates shared Kafka
-	cleanup, err := acc.CreateTestService(
-		t.Context(),
+	serviceIsReady := acc.CreateTestService(
+		t,
 		projectName,
 		kafkaName,
 		acc.WithServiceType("kafka"),
 		acc.WithPlan("startup-4"),
 		acc.WithCloud("google-europe-west1"),
 	)
-
-	require.NoError(t, err)
-	defer cleanup()
+	require.NoError(t, <-serviceIsReady)
 
 	t.Run("basic", func(t *testing.T) {
 		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
