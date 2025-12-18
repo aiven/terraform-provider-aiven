@@ -108,6 +108,14 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 		if item.MaxLength > 0 {
 			b.MaxLen(item.MaxLength)
 		}
+
+		if item.Minimum > 0 {
+			b.Minimum(item.Minimum)
+		}
+
+		if item.Maximum > 0 {
+			b.Maximum(item.Maximum)
+		}
 	}
 
 	if isResource && item.ForceNew {

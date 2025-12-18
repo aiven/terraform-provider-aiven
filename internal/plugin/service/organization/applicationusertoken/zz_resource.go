@@ -126,7 +126,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Human readable user agent string of the client that last used the token in case user agent is known.",
 			},
 			"max_age_seconds": schema.Int64Attribute{
-				MarkdownDescription: "Time the token remains valid since creation (or since last use if extend_when_used is true). Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Time the token remains valid since creation (or since last use if extend_when_used is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
 				Validators:          []validator.Int64{int64validator.Between(600, 315360000)},
