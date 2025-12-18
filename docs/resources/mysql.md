@@ -162,6 +162,7 @@ Optional:
 - `ignore_roles` (String) Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.
 - `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
+- `reestablish_replication` (Boolean) Skip dump-restore part and start replication. Default: `false`.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
 - `username` (String) User name for authentication with the server where to migrate data from. Example: `myname`.
 

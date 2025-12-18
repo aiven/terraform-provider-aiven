@@ -148,6 +148,7 @@ Read-Only:
 - `method` (String)
 - `password` (String)
 - `port` (Number)
+- `reestablish_replication` (Boolean)
 - `ssl` (Boolean)
 - `username` (String)
 

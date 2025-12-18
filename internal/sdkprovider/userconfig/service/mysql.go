@@ -137,6 +137,11 @@ func mysqlUserConfig() *schema.Schema {
 						Required:    true,
 						Type:        schema.TypeInt,
 					},
+					"reestablish_replication": {
+						Description: "Skip dump-restore part and start replication. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"ssl": {
 						Description: "The server where to migrate data from is secured with SSL. Default: `true`.",
 						Optional:    true,
