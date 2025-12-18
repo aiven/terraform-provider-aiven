@@ -43,6 +43,10 @@ type DescriptionBuilder struct {
 	withPossibleValues []string
 	// withMaxLen is a flag that indicates if the maximum length should be included.
 	withMaxLen int
+	// withMinimum is a flag that indicates if the minimum value should be included.
+	withMinimum *int
+	// withMaximum is a flag that indicates if the maximum value should be included.
+	withMaximum *int
 	// withDefaultValue is a flag that indicates if the default value should be included.
 	withDefaultValue any
 	// withUseReference is a flag that indicates if the reference should be used.
@@ -108,6 +112,16 @@ func (db *DescriptionBuilder) AtLeastOneOf(values ...string) *DescriptionBuilder
 // MaxLen is a function that sets the withMaxLen flag.
 func (db *DescriptionBuilder) MaxLen(length int) *DescriptionBuilder {
 	db.withMaxLen = length
+	return db
+}
+
+func (db *DescriptionBuilder) Minimum(value int) *DescriptionBuilder {
+	db.withMinimum = &value
+	return db
+}
+
+func (db *DescriptionBuilder) Maximum(value int) *DescriptionBuilder {
+	db.withMaximum = &value
 	return db
 }
 
@@ -211,6 +225,18 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 	if db.withMaxLen > 0 {
 		builder.WriteRune(' ')
 		builder.WriteString(fmt.Sprintf("Maximum length: `%v`.", db.withMaxLen))
+	}
+
+	switch {
+	case db.withMinimum != nil && db.withMaximum != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Value must be between `%d` and `%d`.", *db.withMinimum, *db.withMaximum))
+	case db.withMinimum != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Minimum value: `%d`.", *db.withMinimum))
+	case db.withMaximum != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Maximum value: `%d`.", *db.withMaximum))
 	}
 
 	if db.withDefaultValue != nil {

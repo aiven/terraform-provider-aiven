@@ -54,9 +54,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"base_port": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "Valid port number (10000-30000) to use as a base for service port allocation.",
+				MarkdownDescription: "Valid port number (10000-30000) to use as a base for service port allocation. Value must be between `10000` and `30000`.",
 				Optional:            true,
-				Validators:          []validator.Int64{int64validator.Between(1, 65535)},
+				Validators:          []validator.Int64{int64validator.Between(10000, 30000)},
 			},
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID to assign to the project. It's required when moving projects between organizations.",

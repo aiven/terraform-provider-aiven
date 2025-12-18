@@ -670,6 +670,21 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 		return nil, err
 	}
 
+	// Takes min/max from the request body if not present in 'a'
+	// Must be done before AppearsIn is merged
+	if !a.AppearsIn.Contains(RequestBody) && b.AppearsIn.Contains(RequestBody) {
+		a.Minimum = b.Minimum
+		a.Maximum = b.Maximum
+	} else if b.AppearsIn == 0 {
+		// User defined values in definition.yml
+		if b.Minimum != 0 {
+			a.Minimum = b.Minimum
+		}
+		if b.Maximum != 0 {
+			a.Maximum = b.Maximum
+		}
+	}
+
 	a.Parent = parent
 	a.AppearsIn |= b.AppearsIn
 	a.Type = or(b.Type, a.Type) // In case user overrides the type
@@ -688,18 +703,6 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 
 	if b.Default != nil {
 		a.Default = b.Default
-	}
-
-	// Minimum and Maximum values may vary between endpoints and request/response schemas.
-	// For Maximum, we can safely take the higher value.
-	// For Minimum, we need to handle 0 specially since
-	// we avoid using pointers to keep the generator simpler.
-	a.Maximum = max(a.Maximum, b.Maximum)
-	switch {
-	case a.Minimum != 0 && b.Minimum != 0:
-		a.Minimum = min(a.Minimum, b.Minimum)
-	case a.Minimum == 0:
-		a.Minimum = b.Minimum
 	}
 
 	// Validators

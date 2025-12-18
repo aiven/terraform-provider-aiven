@@ -38,7 +38,7 @@ resource "aiven_organization_application_user_token" "example" {
 - `description` (String) Description. Maximum length: `1000`. Changing this property forces recreation of the resource.
 - `extend_when_used` (Boolean) Extend token expiration time when token is used. Only applicable if max_age_seconds is specified. The default value is `false`. Changing this property forces recreation of the resource.
 - `ip_allowlist` (Set of String) List of allowed IP ranges. Changing this property forces recreation of the resource.
-- `max_age_seconds` (Number) Time the token remains valid since creation (or since last use if extend_when_used is true). Changing this property forces recreation of the resource.
+- `max_age_seconds` (Number) Time the token remains valid since creation (or since last use if extend_when_used is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.
 - `scopes` (Set of String) Scopes this token is restricted to if specified. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
