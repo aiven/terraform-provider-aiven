@@ -18,7 +18,8 @@ operations:
   - id: UserGroupMemberList
     type: read
     resultKey: members
-    resultListLookupKeys: [user_id]
+    resultListLookupKeys:
+      UserId: user_id
 refreshState: true # create and update operations have no response.
 clientHandler: usergroup
 rename:
