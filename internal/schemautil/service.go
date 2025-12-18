@@ -122,6 +122,16 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 
 const diskSpaceDeprecation = "Please use `additional_disk_space` to specify the space to be added to the default disk space defined by the plan."
 
+// Required permissions for managing all services
+const ServiceRequiredPermissions = `
+
+## Required permissions
+
+The following [permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission) are required to create and manage services:
+- ` + "`" + `project:services:write` + "`" + `
+- ` + "`" + `read_only` + "`" + `
+`
+
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
