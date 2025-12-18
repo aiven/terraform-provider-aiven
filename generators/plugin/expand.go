@@ -60,9 +60,10 @@ func genExpandModelProperties(item *Item, rootLevel bool) ([]jen.Code, error) {
 		jen.Id(apiVar).Op(":=").New(jen.Id(item.ApiModelName())),
 	}
 
-	for _, k := range nestedFirst(item.Properties) {
-		v := item.Properties[k]
-		if !v.IsReadOnly(true) {
+	props := item.PropertiesWithoutWO()
+	for _, k := range nestedFirst(props) {
+		v := props[k]
+		if v.Required || v.Optional {
 			value, err := genExpandField(v, rootLevel)
 			if err != nil {
 				return nil, err

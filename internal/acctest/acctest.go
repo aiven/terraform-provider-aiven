@@ -265,6 +265,9 @@ func WithPlan(plan string) CreateTestServiceOpt {
 // CreateTestService creates a test service that can be shared between tests.
 // If the service already exists, it will be used as is and won't be deleted after the tests.
 func CreateTestService(t *testing.T, projectName, serviceName string, opts ...CreateTestServiceOpt) <-chan error {
+	// This test makes real API calls to Aiven.
+	SkipIfNotAcc(t)
+
 	ctx := t.Context()
 	client, err := GetTestGenAivenClient()
 	require.NoError(t, err, "getting Aiven generated client failed")

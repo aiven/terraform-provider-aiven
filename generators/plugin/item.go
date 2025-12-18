@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -174,6 +175,7 @@ type Item struct {
 	OverrideSensitive  *bool `yaml:"sensitive"`
 	OverrideForceNew   *bool `yaml:"forceNew"`
 	UseStateForUnknown bool  `yaml:"useStateForUnknown"`
+	WriteOnly          bool  `yaml:"writeOnly"`
 
 	// TF Validators
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
@@ -320,6 +322,20 @@ func (item *Item) IsReadOnly(isResource bool) bool {
 
 	// ID attributes are not read-only in data sources
 	return !item.IDAttribute
+}
+
+func (item *Item) PropertiesWithoutWO() map[string]*Item {
+	props := maps.Clone(item.Properties)
+	for k, v := range item.Properties {
+		if v.WriteOnly {
+			delete(props, k)
+			for _, a := range v.AlsoRequires {
+				delete(props, a)
+			}
+		}
+	}
+
+	return props
 }
 
 func (item *Item) IsScalar() bool {

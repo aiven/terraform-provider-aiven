@@ -26,11 +26,6 @@ import (
 )
 
 func TestAccAivenKafkaTopic(t *testing.T) {
-	acc.SkipIfNotAcc(t)
-
-	client, err := acc.GetTestGenAivenClient()
-	require.NoError(t, err)
-
 	orgName := acc.OrganizationName()
 	projectName := acc.ProjectName()
 	kafkaName := acc.RandName("kafka")
@@ -45,6 +40,9 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 		acc.WithCloud("google-europe-west1"),
 	)
 	require.NoError(t, <-serviceIsReady)
+
+	client, err := acc.GetTestGenAivenClient()
+	require.NoError(t, err)
 
 	t.Run("basic", func(t *testing.T) {
 		defer kafkatopicrepository.ForgetService(projectName, kafkaName)

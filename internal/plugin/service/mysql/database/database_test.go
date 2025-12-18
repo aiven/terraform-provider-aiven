@@ -17,8 +17,6 @@ import (
 )
 
 func TestAccAivenMySQLDatabase(t *testing.T) {
-	acc.SkipIfNotAcc(t)
-
 	resourceName := "aiven_mysql_database.foo"
 	datasourceName := "data.aiven_mysql_database.foo"
 	projectName := acc.ProjectName()

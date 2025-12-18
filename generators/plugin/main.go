@@ -460,7 +460,6 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		JSONName:    name,
 		Type:        s.Type,
 		Description: s.Description,
-		Enum:        s.Enum,
 		Default:     s.Default,
 		MinItems:    s.MinItems,
 		MaxItems:    s.MaxItems,
@@ -473,12 +472,24 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		Nullable:    s.Nullable,
 		Required:    required,
 		Properties:  make(map[string]*Item),
+		Enum: lo.Filter(s.Enum, func(item any, _ int) bool {
+			switch fmt.Sprint(item) {
+			case "", "null":
+				return false
+			}
+			return true
+		}),
 	}
 
 	// Renames it to match the definition.
 	newName, ok := scope.Definition.Rename[item.JSONPath()]
 	if ok {
 		item.Name = newName
+	}
+
+	switch item.Name {
+	case "access_cert", "access_key", "private_key", "password", "password_wo":
+		item.Sensitive = true
 	}
 
 	return item
@@ -685,6 +696,13 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 		}
 	}
 
+	// Prefers user description from the definition file
+	if b.Description != "" && b.AppearsIn == 0 {
+		a.Description = b.Description
+	} else {
+		a.Description = orLonger(a.Description, b.Description)
+	}
+
 	a.Parent = parent
 	a.AppearsIn |= b.AppearsIn
 	a.Type = or(b.Type, a.Type) // In case user overrides the type
@@ -693,7 +711,6 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.Computed = a.Computed || b.Computed
 	a.ForceNew = a.ForceNew || b.ForceNew
 	a.Sensitive = a.Sensitive || b.Sensitive
-	a.Description = orLonger(a.Description, b.Description)
 	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
 	a.Enum = mergeSlices(a.Enum, b.Enum)
 	a.MinItems = max(a.MinItems, b.MinItems)
@@ -718,6 +735,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.OverrideOptional = or(b.OverrideOptional, a.OverrideOptional)
 	a.OverrideForceNew = or(b.OverrideForceNew, a.OverrideForceNew)
 	a.UseStateForUnknown = a.UseStateForUnknown || b.UseStateForUnknown
+	a.WriteOnly = a.WriteOnly || b.WriteOnly
 
 	if a.Name == "" {
 		return nil, fmt.Errorf("node doesn't have name set, parent: %q", parent.Name)

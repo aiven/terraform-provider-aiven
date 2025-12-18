@@ -64,7 +64,7 @@
 |  58 | aiven_mirrormaker_replication_flow          |        |     2 |
 |  59 | aiven_mysql                                 |        |     2 |
 |  60 | aiven_mysql_database                        | yes    |     2 |
-|  61 | aiven_mysql_user                            |        |     2 |
+|  61 | aiven_mysql_user                            | yes    |     2 |
 |  62 | aiven_opensearch                            |        |     2 |
 |  63 | aiven_opensearch_acl_config                 |        |     2 |
 |  64 | aiven_opensearch_acl_rule                   |        |     2 |
@@ -106,6 +106,6 @@
 | 100 | aiven_valkey                                |        |     2 |
 | 101 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 16%                          | 28     |   178 |
+|     | TOTAL MIGRATED 17%                          | 30     |   178 |
 +-----+---------------------------------------------+--------+-------+
 ```
