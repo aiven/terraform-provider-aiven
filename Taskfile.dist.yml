@@ -69,8 +69,10 @@ tasks:
       PROVIDER_AIVEN_ENABLE_BETA: 1
     vars:
       EFFECTIVE_PKG_PATH: '{{env "PKG_PATH" | default .PKG_PATH}}'
+      TAGS: '{{.TAGS | default (env "GO_BUILD_TAGS")}}'
+      TAGS_FLAG: '{{if .TAGS}}-tags={{.TAGS}}{{end}}'
     cmds:
-      - cmd: "{{.GO_CMD}} test ./{{.EFFECTIVE_PKG_PATH}}/... -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} {{.CLI_ARGS}} -timeout {{.ACC_TEST_TIMEOUT}}"
+      - cmd: "{{.GO_CMD}} test ./{{.EFFECTIVE_PKG_PATH}}/... {{.TAGS_FLAG}} -v -count {{.TEST_COUNT}} -parallel {{.ACC_TEST_PARALLELISM}} {{.CLI_ARGS}} -timeout {{.ACC_TEST_TIMEOUT}}"
 
   test-examples:
     desc: "Run examples tests (e.g., task test-examples -- -run TestAccExampleMyThing)"
@@ -92,6 +94,13 @@ tasks:
         -parallel {{.ACC_TEST_PARALLELISM}}
         -timeout {{.ACC_TEST_TIMEOUT}}
         {{.CLI_ARGS}}"
+
+  test-backward:
+    desc: Run backward compatibility tests
+    cmds:
+      - task: test-acc
+        vars:
+          TAGS: backwardcompat
 
   #################################################
   # Code Style Tasks

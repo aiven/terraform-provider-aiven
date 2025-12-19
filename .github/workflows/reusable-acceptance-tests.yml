@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: ""
+      tags:
+        description: 'Build tags to pass to tests (e.g., "backwardcompat"). Empty = no tags.'
+        required: false
+        type: string
+        default: ""
     secrets:
       AIVEN_TOKEN:
         required: true
@@ -129,6 +134,7 @@ jobs:
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
           PKG_PATH: ${{ matrix.pkg.path }}
+          GO_BUILD_TAGS: ${{ inputs.tags }}
 
   test-slow:
     name: ${{ matrix.pkg.name }} (${{ matrix.pkg.type }}, slow)
@@ -177,6 +183,7 @@ jobs:
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_PAYMENT_METHOD_ID: ${{ secrets.AIVEN_PAYMENT_METHOD_ID }}
           PKG_PATH: ${{ matrix.pkg.path }}
+          GO_BUILD_TAGS: ${{ inputs.tags }}
 
   tests-summary:
     name: All Tests Passed
