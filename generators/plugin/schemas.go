@@ -73,6 +73,9 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 	attrs := make(jen.Dict)
 	blocks := make(jen.Dict)
 
+	// DataSource must have exactly the same attributes as Resource, including WriteOnly fields.
+	// Otherwise, we need to have separate models and convertors.
+	// That's Terraform Plugin Framework limitation.
 	for _, k := range sortedKeys(item.Properties) {
 		v := item.Properties[k]
 		key := jen.Lit(k)
@@ -187,6 +190,10 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 
 	if item.Sensitive {
 		values["Sensitive"] = jen.True()
+	}
+
+	if entity.isResource() && item.WriteOnly {
+		values["WriteOnly"] = jen.True()
 	}
 
 	if !item.IsNested() {

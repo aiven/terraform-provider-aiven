@@ -186,9 +186,10 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 }
 
 func genFlattenProperties(item *Item, rootLevel bool) ([]jen.Code, error) {
-	block := make([]jen.Code, 0, len(item.Properties))
-	for _, k := range nestedFirst(item.Properties) {
-		v := item.Properties[k]
+	props := item.PropertiesWithoutWO()
+	block := make([]jen.Code, 0, len(props))
+	for _, k := range nestedFirst(props) {
+		v := props[k]
 		if v.Virtual {
 			// Virtual properties are not present in the API response.
 			continue

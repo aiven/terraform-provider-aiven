@@ -26,25 +26,25 @@ resource "aiven_mysql_user" "example_mysql_user" {
 
 ### Required
 
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The name of the MySQL service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the MySQL® service user. Changing this property forces recreation of the resource.
+- `username` (String) The name of the MySQL® service user. Maximum length: `64`. Changing this property forces recreation of the resource.
 
 ### Optional
 
 > **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
 
-- `authentication` (String) Authentication details. The possible values are `caching_sha2_password`, `mysql_native_password` and `null`.
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
-- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). Must be used with `password_wo_version`. Must be 8-256 characters.
-- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. Must be >= 1.
+- `authentication` (String) Service specific authentication details. Currently only used for MySQL where accepted options are 'mysql_native_password' and 'caching_sha2_password', latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`. Value must be between `8` and `256`.
+- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Value must be between `8` and `256`.
+- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`. Minimum value: `1`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user.
-- `access_key` (String, Sensitive) Access certificate key for the user.
-- `id` (String) The ID of this resource.
+- `access_cert` (String, Sensitive) Access certificate for TLS client authentication.
+- `access_key` (String, Sensitive) Access key for TLS client authentication.
+- `id` (String) Resource ID composed as: `project/service_name/username`.
 - `type` (String) User account type, such as primary or regular account.
 
 <a id="nestedblock--timeouts"></a>
@@ -52,16 +52,16 @@ resource "aiven_mysql_user" "example_mysql_user" {
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_mysql_user.foo PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_mysql_user.example PROJECT/SERVICE_NAME/USERNAME
 ```

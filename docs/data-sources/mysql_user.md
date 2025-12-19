@@ -25,15 +25,28 @@ data "aiven_mysql_user" "example_mysql_user" {
 
 ### Required
 
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The name of the MySQL service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) Project name.
+- `service_name` (String) The name of the MySQL® service user.
+- `username` (String) The name of the MySQL® service user.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user.
-- `access_key` (String, Sensitive) Access certificate key for the user.
-- `authentication` (String) Authentication details. The possible values are `caching_sha2_password`, `mysql_native_password` and `null`.
-- `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
+- `access_cert` (String, Sensitive) Access certificate for TLS client authentication.
+- `access_key` (String, Sensitive) Access key for TLS client authentication.
+- `authentication` (String) Service specific authentication details. Currently only used for MySQL where accepted options are 'mysql_native_password' and 'caching_sha2_password', latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `id` (String) Resource ID composed as: `project/service_name/username`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
+- `password_wo` (String, Sensitive) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`.
+- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`.
 - `type` (String) User account type, such as primary or regular account.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

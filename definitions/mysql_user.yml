@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/mysql/user
+resource:
+  description: Creates and manages an Aiven for MySQL® service user.
+datasource:
+  description: Gets information about an Aiven for MySQL® service user.
+clientHandler: service
+idAttributeComposed: [project, service_name, username]
+legacyTimeouts: true
+refreshState: true
+flattenModifier: true
+operations:
+  - id: ServiceUserCreate
+    type: create
+    resultKey: user
+    disableView: true
+  - id: ServiceUserDelete
+    type: delete
+  - id: ServiceUserGet
+    type: read
+    resultKey: user
+rename:
+  service_username: username
+remove:
+  - access_cert_not_valid_after_time
+  - access_control
+  - expiring_cert_not_valid_after_time
+  - password_updated_time
+schema:
+  authentication:
+    forceNew: false # The field is updated by ServiceUserCredentialsModify
+    computed: true
+  type:
+    description: User account type, such as primary or regular account.
+  service_name:
+    description: The name of the MySQL® service user.
+  username:
+    description: The name of the MySQL® service user.
+  password:
+    type: string
+    optional: true
+    sensitive: true
+    minimum: 8
+    maximum: 256
+    conflictsWith: [password_wo]
+    description: The password of the service user (auto-generated if not provided).
+  password_wo:
+    type: string
+    optional: true
+    writeOnly: true
+    sensitive: true
+    description: The password of the service user (write-only, not stored in state).
+    minimum: 8
+    maximum: 256
+    conflictsWith: [password]
+    alsoRequires: [password_wo_version]
+  password_wo_version:
+    type: integer
+    optional: true
+    description: Version number for `password_wo`. Increment this to rotate the password.
+    alsoRequires: [password_wo]
+    minimum: 1

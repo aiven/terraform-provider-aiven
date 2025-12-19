@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"maps"
 	"slices"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/samber/lo"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -28,12 +28,16 @@ func exampleRoot(isResource bool, item *Item) (string, error) {
 	return string(f.Bytes()), nil
 }
 
-func sortedKeysPriority(isResource bool, m map[string]*Item) []string {
-	keys := slices.Collect(maps.Keys(m))
+func sortedKeysPriority(isResource bool, item *Item) []string {
+	props := item.Properties
+	if !isResource {
+		props = item.PropertiesWithoutWO()
+	}
 
+	keys := lo.Keys(props)
 	slices.SortFunc(keys, func(i, j string) int {
-		itemI := m[i]
-		itemJ := m[j]
+		itemI := props[i]
+		itemJ := props[j]
 
 		priorityI := getExampleItemPriority(isResource, itemI)
 		priorityJ := getExampleItemPriority(isResource, itemJ)
@@ -70,8 +74,7 @@ func getExampleItemPriority(isResource bool, item *Item) int {
 
 func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 	var seenComputed bool
-
-	for _, k := range sortedKeysPriority(isResource, item.Properties) {
+	for _, k := range sortedKeysPriority(isResource, item) {
 		v := item.Properties[k]
 		if v.Virtual {
 			// Don't expose internal virtual properties, like "id"

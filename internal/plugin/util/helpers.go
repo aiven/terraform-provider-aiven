@@ -15,13 +15,14 @@ func ToPtr[T any](v T) *T {
 }
 
 // NilIfZero returns a pointer to the value, or nil if the value equals its zero value
-func NilIfZero[T comparable](v T) *T {
+func NilIfZero[T comparable](args ...T) *T {
 	var zero T
-	if v == zero {
-		return nil
+	for _, v := range args {
+		if v != zero {
+			return &v
+		}
 	}
-
-	return &v
+	return nil
 }
 
 func EnvBool(key string, defaultValue bool) bool {

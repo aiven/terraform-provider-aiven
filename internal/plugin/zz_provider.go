@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
@@ -29,6 +30,7 @@ func Resources() map[string]func() resource.Resource {
 	return map[string]func() resource.Resource{
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database.ResourceOptions),
+		"aiven_mysql_user":                          adapter.NewLazyResource(user.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),
 		"aiven_organization_application_user":       adapter.NewLazyResource(applicationuser.ResourceOptions),
 		"aiven_organization_application_user_token": adapter.NewLazyResource(applicationusertoken.ResourceOptions),
@@ -43,6 +45,7 @@ func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database.DataSourceOptions),
+		"aiven_mysql_user":                          adapter.NewLazyDataSource(user.DataSourceOptions),
 		"aiven_organization_address":                adapter.NewLazyDataSource(address.DataSourceOptions),
 		"aiven_organization_application_user":       adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
 		"aiven_organization_billing_group":          adapter.NewLazyDataSource(billinggroup1.DataSourceOptions),

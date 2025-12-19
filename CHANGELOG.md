@@ -13,8 +13,9 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Migrate `aiven_organizational_unit` to the Plugin Framework
-- Added field `kafka_ssl_ca` to `aiven_service_component` data source
 - Migrate `aiven_mysql_database` to the Plugin Framework
+- Migrate `aiven_mysql_user` to the Plugin Framework
+- Added field `kafka_ssl_ca` to `aiven_service_component` data source
 - Change `aiven_organization_project` to validate that the `base_port` value is between `10000` and `30000`.
 - Deprecated `termination_protection` for `aiven_mysql_database`.
   Use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion) instead.

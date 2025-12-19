@@ -230,6 +230,10 @@ definitions:
       optional:
         type: boolean
         $comment: Set to true if this attribute is optional
+      writeOnly:
+        type: boolean
+        $comment: |
+          Set to true if this attribute is write-only. See https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
       properties:
         type: object
         additionalProperties:
