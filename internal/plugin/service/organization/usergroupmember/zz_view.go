@@ -14,7 +14,6 @@ import (
 )
 
 var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Beta:         false,
 	Create:       createView,
 	Delete:       deleteView,
 	IDFields:     idFields(),

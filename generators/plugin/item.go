@@ -130,6 +130,7 @@ type SchemaMeta struct {
 	DeprecationMessage    string   `yaml:"deprecationMessage,omitempty"`
 	ExactlyOneOf          []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
 	TerminationProtection bool     `yaml:"terminationProtection,omitempty"`
+	RefreshState          bool     `yaml:"refreshState,omitempty"`
 }
 
 type Definition struct {
@@ -147,7 +148,6 @@ type Definition struct {
 	Operations          Operations        `yaml:"operations"`
 	Version             *int              `yaml:"version"`
 	ClientHandler       string            `yaml:"clientHandler,omitempty"`
-	RefreshState        bool              `yaml:"refreshState,omitempty"`
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
