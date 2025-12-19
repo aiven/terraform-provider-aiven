@@ -32,9 +32,12 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 		acc.WithCloud("google-europe-west1"),
 	)
 
+	client, err := acc.GetTestGenAivenClient()
+	require.NoError(t, err)
+
 	t.Run("backward compatibility test", func(t *testing.T) {
 		dbName := acc.RandName("compatibility")
-		config := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "")
+		config := testAccMySQLDatabaseWithDatasource(projectName, serviceName, dbName, "")
 		resource.ParallelTest(t, resource.TestCase{
 			PreCheck: func() { acc.TestAccPreCheck(t) },
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
@@ -58,9 +61,9 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 
 	t.Run("base test", func(t *testing.T) {
 		dbName := acc.RandName("basic")
-		configTerminationNil := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "")
-		configTerminationTrue := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "termination_protection=true")
-		configTerminationFalse := testAccMySQLDatabaseResource(projectName, serviceName, dbName, "termination_protection=false")
+		configTerminationNil := testAccMySQLDatabaseWithDatasource(projectName, serviceName, dbName, "")
+		configTerminationTrue := testAccMySQLDatabaseWithDatasource(projectName, serviceName, dbName, "termination_protection=true")
+		configTerminationFalse := testAccMySQLDatabaseWithDatasource(projectName, serviceName, dbName, "termination_protection=false")
 		resource.ParallelTest(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
 			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -146,6 +149,37 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 						return nil
 					},
 				},
+				{
+					// This resource has RemoveMissing set to true, so it should be recreated if it's missing (deleted).
+					Config: testAccMySQLDatabase(projectName, serviceName, dbName),
+					PreConfig: func() {
+						err := client.ServiceDatabaseDelete(t.Context(), projectName, serviceName, dbName)
+						require.NoError(t, err)
+					},
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Check: resource.ComposeTestCheckFunc(
+						// Doesn't have ID as it will be recreated
+						resource.TestCheckNoResourceAttr(resourceName, "id"),
+					),
+				},
+				{
+					// Resource is recreated after being applied
+					Config: testAccMySQLDatabase(projectName, serviceName, dbName),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "id", fmt.Sprintf("%s/%s/%s", projectName, serviceName, dbName)),
+						func(state *terraform.State) error {
+							list, err := client.ServiceDatabaseList(t.Context(), projectName, serviceName)
+							require.NoError(t, err)
+							for _, db := range list {
+								if db.DatabaseName == dbName {
+									return nil
+								}
+							}
+							return fmt.Errorf("mysql database %q not found after recreation", dbName)
+						},
+					),
+				},
 			},
 		})
 	})
@@ -185,7 +219,17 @@ func testAccCheckAivenMySQLDatabaseResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccMySQLDatabaseResource(project string, serviceName, dbName, terminationProtection string) string {
+func testAccMySQLDatabase(project, serviceName, dbName string) string {
+	return fmt.Sprintf(`
+resource "aiven_mysql_database" "foo" {
+  project       = %q
+  service_name  = %q
+  database_name = %q
+}
+`, project, serviceName, dbName)
+}
+
+func testAccMySQLDatabaseWithDatasource(project string, serviceName, dbName, terminationProtection string) string {
 	return fmt.Sprintf(`
 resource "aiven_mysql_database" "foo" {
   project       = %q

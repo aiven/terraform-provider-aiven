@@ -37,7 +37,11 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 				return
 			}
 		}
-		diags.AddError("Resource Not Found", "`aiven_organization_user_group_member` with given `user_id` not found")
+		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
+			Message:     "`aiven_organization_user_group_member` with given `user_id` not found",
+			OperationID: "UserGroupMemberList",
+			Status:      404,
+		}))
 	}()
 	return diags
 }

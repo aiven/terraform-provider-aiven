@@ -30,7 +30,7 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 		return diags
 	}
 
-	diags.Append(resetPassword(ctx, client, plan, plan.PasswordWo.String())...)
+	diags.Append(resetPassword(ctx, client, plan, plan)...)
 	return diags
 }
 
@@ -44,15 +44,15 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 	}
 
 	// PasswordWO is available only in config, not in plan.
-	return resetPassword(ctx, client, plan, config.PasswordWo.ValueString())
+	return resetPassword(ctx, client, plan, config)
 }
 
-func resetPassword(ctx context.Context, client avngen.Client, plan *tfModel, passwordWO string) diag.Diagnostics {
+func resetPassword(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	req := service.ServiceUserCredentialsModifyIn{
 		Operation:      service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 		Authentication: service.AuthenticationType(plan.Authentication.ValueString()),
-		NewPassword:    util.NilIfZero(plan.Password.ValueString(), passwordWO),
+		NewPassword:    util.NilIfZero(plan.Password.ValueString(), config.PasswordWo.ValueString()),
 	}
 
 	_, err := client.ServiceUserCredentialsModify(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.Username.ValueString(), &req)

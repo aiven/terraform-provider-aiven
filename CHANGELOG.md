@@ -15,6 +15,7 @@ nav_order: 1
 - Migrate `aiven_organizational_unit` to the Plugin Framework
 - Migrate `aiven_mysql_database` to the Plugin Framework
 - Migrate `aiven_mysql_user` to the Plugin Framework
+- Fix `aiven_mysql_user`: writing to the `password_wo` field now properly updates the MySQL user's password in Aiven
 - Added field `kafka_ssl_ca` to `aiven_service_component` data source
 - Change `aiven_organization_project` to validate that the `base_port` value is between `10000` and `30000`.
 - Deprecated `termination_protection` for `aiven_mysql_database`.

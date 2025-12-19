@@ -131,6 +131,7 @@ type SchemaMeta struct {
 	ExactlyOneOf          []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
 	TerminationProtection bool     `yaml:"terminationProtection,omitempty"`
 	RefreshState          bool     `yaml:"refreshState,omitempty"`
+	RemoveMissing         bool     `yaml:"removeMissing,omitempty"`
 }
 
 type Definition struct {

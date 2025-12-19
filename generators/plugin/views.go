@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"maps"
+	"net/http"
 	"slices"
 	"sort"
 
@@ -75,6 +76,10 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 
 		if def.Resource.RefreshState {
 			values["RefreshState"] = jen.True()
+		}
+
+		if def.Resource.RemoveMissing {
+			values["RemoveMissing"] = jen.True()
 		}
 
 		if def.Resource.TerminationProtection {
@@ -325,9 +330,15 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 	// If passed the "for" loop, then no item was found - adds error
 	values := lo.Values(operation.ResultListLookupKeys)
 	slices.Sort(values)
-	g.Id("diags").Dot("AddError").Call(
-		jen.Lit("Resource Not Found"),
-		jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
+	g.Id("diags").Dot("Append").Call(
+		jen.Qual(errMsgPackage, "FromError").Call(
+			jen.Lit("Resource Not Found"),
+			jen.Qual(avnGenPackage, "Error").Values(jen.Dict{
+				jen.Id("Status"):      jen.Lit(http.StatusNotFound),
+				jen.Id("Message"):     jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
+				jen.Id("OperationID"): jen.Lit(string(operation.ID)),
+			}),
+		),
 	)
 
 	return nil
