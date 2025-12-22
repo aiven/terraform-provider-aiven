@@ -20,6 +20,7 @@ var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
 	IDFields:              idFields(),
 	Read:                  readView,
 	RefreshState:          true,
+	RemoveMissing:         true,
 	Schema:                resourceSchema,
 	TerminationProtection: true,
 	TypeName:              typeName,
@@ -63,7 +64,11 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 				return
 			}
 		}
-		diags.AddError("Resource Not Found", "`aiven_mysql_database` with given `database_name` not found")
+		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
+			Message:     "`aiven_mysql_database` with given `database_name` not found",
+			OperationID: "ServiceDatabaseList",
+			Status:      404,
+		}))
 	}()
 	return diags
 }

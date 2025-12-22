@@ -2,6 +2,7 @@
 location: internal/plugin/service/mysql/database
 resource:
   refreshState: true
+  removeMissing: true
   terminationProtection: true
   description: Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.
 datasource:

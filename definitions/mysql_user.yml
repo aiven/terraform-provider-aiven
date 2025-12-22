@@ -2,6 +2,7 @@
 location: internal/plugin/service/mysql/user
 resource:
   refreshState: true
+  removeMissing: true
   description: Creates and manages an Aiven for MySQL® service user.
 datasource:
   description: Gets information about an Aiven for MySQL® service user.

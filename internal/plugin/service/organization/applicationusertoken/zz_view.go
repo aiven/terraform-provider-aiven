@@ -57,7 +57,11 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 				return
 			}
 		}
-		diags.AddError("Resource Not Found", "`aiven_organization_application_user_token` with given `token_prefix` not found")
+		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
+			Message:     "`aiven_organization_application_user_token` with given `token_prefix` not found",
+			OperationID: "ApplicationUserAccessTokensList",
+			Status:      404,
+		}))
 	}()
 	return diags
 }

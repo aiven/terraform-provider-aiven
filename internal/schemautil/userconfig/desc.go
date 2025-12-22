@@ -57,6 +57,9 @@ type DescriptionBuilder struct {
 	// TF validators https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
 	withRequiredWith, withConflictsWith, withExactlyOneOf, withAtLeastOneOf []string
 
+	// withRemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
+	withRemoveMissing bool
+
 	deprecationMessage string
 }
 
@@ -145,6 +148,11 @@ func (db *DescriptionBuilder) ForceNew() *DescriptionBuilder {
 
 func (db *DescriptionBuilder) Deprecated(msg string) *DescriptionBuilder {
 	db.deprecationMessage = msg
+	return db
+}
+
+func (db *DescriptionBuilder) RemoveMissing() *DescriptionBuilder {
+	db.withRemoveMissing = true
 	return db
 }
 
@@ -254,6 +262,11 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		builder.WriteString(fmt.Sprintf(
 			"Changing this property forces recreation of the %s.", db.entityType.String(),
 		))
+	}
+
+	if db.withRemoveMissing {
+		builder.WriteRune(' ')
+		builder.WriteString("If this resource is missing (e.g., after a service power off), it will be removed from the state and a new create plan will be generated.")
 	}
 
 	// Avoids redundant descriptions.

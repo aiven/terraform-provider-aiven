@@ -24,11 +24,14 @@ func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error)
 		attrs[jen.Id("DeprecationMessage")] = jen.Lit(item.DeprecationMessage)
 	}
 
-	desc := fmtDescription(def, entity, item)
+	desc := userconfig.Desc(fmtDescription(def, entity, item))
 	if lo.FromPtr(def.Beta) {
-		desc = userconfig.Desc(desc).AvailabilityType(userconfig.Beta).Build()
+		desc = desc.AvailabilityType(userconfig.Beta)
 	}
-	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
+	if entity.isResource() && def.Resource.RemoveMissing {
+		desc = desc.RemoveMissing()
+	}
+	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc.Build())
 
 	if entity.isResource() && def.Version != nil {
 		// Only resources have Version field

@@ -39,6 +39,11 @@ properties:
         $comment: |
           Set to true to refresh the state after the resource is created/updated/deleted.
           Example: refreshState: true
+      removeMissing:
+        type: boolean
+        $comment: |
+          Set to true to remove the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
+          Useful for resources that Aiven may automatically delete, such as users or databases when a service has been turned off and then on again.
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.

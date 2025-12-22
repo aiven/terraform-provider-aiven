@@ -60,3 +60,11 @@ func DropDiagError(diags diag.Diagnostics, f func(error) bool) diag.Diagnostics 
 		return ok && f(e.Error)
 	})
 }
+
+// HasDiagError checks if any of the diagnostics match the filter function.
+func HasDiagError(diags diag.Diagnostics, f func(error) bool) bool {
+	return slices.ContainsFunc(diags, func(d diag.Diagnostic) bool {
+		e, ok := d.(DiagError)
+		return ok && f(e.Error)
+	})
+}

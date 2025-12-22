@@ -53,6 +53,12 @@ type ResourceOptions[M Model[T], T any] struct {
 	// Retries common errors like 404 and 403 (see the implementation for details).
 	RefreshState bool
 
+	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
+	// This is useful for resources that Aiven may automatically delete,
+	// such as users or databases when a service has been turned off and then on again.
+	// Instead of forcing users to manually clean up the state, Terraform will plan to "create" the resource again.
+	RemoveMissing bool
+
 	// Throws an error if the resource is marked for deletion and `termination_protection` field is set to true.
 	// "Virtual" fields (not managed by the API) should be deprecated. Instead, use "prevent_destroy":
 	// https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion
@@ -203,7 +209,16 @@ func (a *resourceAdapter[M, T]) Read(
 	}
 	defer cancel()
 
-	diags.Append(a.resource.Read(ctx, a.client, state.SharedModel())...)
+	// When RemoveResource is enabled, we remove the resource from the state if it's missing.
+	// See ResourceOptions.RemoveMissing for more details.
+	readDiags := a.resource.Read(ctx, a.client, state.SharedModel())
+	if a.resource.RemoveMissing && errmsg.HasDiagError(readDiags, avngen.IsNotFound) {
+		// Ignores all the other diagnostics and removes the resource from the state.
+		rsp.State.RemoveResource(ctx)
+		return
+	}
+
+	diags.Append(readDiags...)
 	if diags.HasError() {
 		return
 	}

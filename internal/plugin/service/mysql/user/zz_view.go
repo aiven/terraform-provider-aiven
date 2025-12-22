@@ -14,13 +14,14 @@ import (
 )
 
 var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:       createView,
-	Delete:       deleteView,
-	IDFields:     idFields(),
-	Read:         readView,
-	RefreshState: true,
-	Schema:       resourceSchema,
-	TypeName:     typeName,
+	Create:        createView,
+	Delete:        deleteView,
+	IDFields:      idFields(),
+	Read:          readView,
+	RefreshState:  true,
+	RemoveMissing: true,
+	Schema:        resourceSchema,
+	TypeName:      typeName,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
