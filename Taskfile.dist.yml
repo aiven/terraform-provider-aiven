@@ -129,6 +129,8 @@ tasks:
   #################################################
 
   generate:
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
     desc: Generate Go code, documentation, and mocks
     vars:
       no_spec: '{{.no_spec | default "false"}}'
