@@ -12,15 +12,14 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-
-	"github.com/aiven/terraform-provider-aiven/internal/common"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 )
 
 // defaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
@@ -551,9 +550,8 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
-	err = client.ProjectServiceTagsReplace(ctx, project, s.ServiceName, &service.ProjectServiceTagsReplaceIn{
 	username := adminUsername(s, serviceType)
-	if err := upsertServicePassword(ctx, d, avnGen, username); err != nil {
+	if err := upsertServicePassword(ctx, d, client, username); err != nil {
 		return diag.Errorf("error setting service password for %s/%s: %s", project, s.ServiceName, err)
 	}
 
@@ -656,9 +654,14 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 	if _, err = WaitForServiceUpdate(ctx, d, client); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
 	}
+	//
+	//s, err = client.ServiceGet(ctx, projectName, serviceName)
+	//if err != nil {
+	//	return diag.Errorf("error getting service %q: %s", serviceName, err)
+	//}
 
 	username := adminUsername(s, serviceType)
-	if err := upsertServicePassword(ctx, d, avnGen, username); err != nil {
+	if err := upsertServicePassword(ctx, d, client, username); err != nil {
 		return diag.Errorf("error updating service password for %s/%s: %s", projectName, serviceName, err)
 	}
 
