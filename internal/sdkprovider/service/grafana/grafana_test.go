@@ -846,3 +846,11 @@ resource "aiven_grafana" "foo" {
 		},
 	})
 }
+
+func TestAccAivenGrafana_WriteOnlyPassword(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_grafana",
+		Username:     "avnadmin",
+		Plan:         "startup-1", // Grafana uses startup-1 instead of startup-4
+	})
+}

@@ -50,7 +50,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasGeneratedPassword(singleUserResourceName),
+					acc.TestAccPasswordHasGeneratedPassword(singleUserResourceName),
 				),
 			},
 			{
@@ -63,7 +63,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(singleUserResourceName, "acc-custom-Optional$Pass123"),
+					acc.TestAccPasswordHasCustomPassword(singleUserResourceName, "acc-custom-Optional$Pass123"),
 				),
 			},
 			{
@@ -76,7 +76,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasWOPassword(singleUserResourceName),
+					acc.TestAccPasswordHasWOPassword(singleUserResourceName),
 				),
 			},
 			{
@@ -89,7 +89,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasWOPassword(singleUserResourceName),
+					acc.TestAccPasswordHasWOPassword(singleUserResourceName),
 				),
 			},
 			{
@@ -102,7 +102,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasGeneratedPassword(singleUserResourceName),
+					acc.TestAccPasswordHasGeneratedPassword(singleUserResourceName),
 				),
 			},
 			{
@@ -115,7 +115,7 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(singleUserResourceName, "acc-custom-FinalPass$456"),
+					acc.TestAccPasswordHasCustomPassword(singleUserResourceName, "acc-custom-FinalPass$456"),
 				),
 			},
 			{

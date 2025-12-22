@@ -95,6 +95,28 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 		integrationType.ValidateFunc = validation.StringInSlice(FlattenToString(integrations), false)
 	}
 
+	// add write-only password fields for supported services
+	if supportsWriteOnlyPassword(kind) {
+		s["service_password"].Description = "Password used for connecting to the service, if applicable. To avoid storing passwords in state, use service_password_wo instead if available. **WARNING:** When using write-only password field (service_password_wo), this field will be cleared from state and return an empty string. Any downstream resources or interpolations referencing this attribute will receive an empty value."
+
+		s["service_password_wo"] = &schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			Sensitive:    true,
+			WriteOnly:    true,
+			RequiredWith: []string{"service_password_wo_version"},
+			ValidateFunc: validation.StringLenBetween(8, 256),
+			Description:  "Password used for connecting to the service, if applicable (write-only, not stored in state). Must be used with service_password_wo_version. Cannot be empty. **WARNING:** Enabling this feature will clear service_password from state. Update any references to service_password in downstream resources before enabling.",
+		}
+		s["service_password_wo_version"] = &schema.Schema{
+			Type:         schema.TypeInt,
+			Optional:     true,
+			RequiredWith: []string{"service_password_wo"},
+			ValidateFunc: validation.IntAtLeast(1),
+			Description:  "Version number for service_password_wo. Increment this to rotate the password. Must be >= 1. When transitioning from auto-generated passwords (version 0), the service_password field will be cleared from state.",
+		}
+	}
+
 	return s
 }
 
@@ -112,6 +134,16 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 	}
 
 	return list
+}
+
+// supportsWriteOnlyPassword returns true if the service type supports write-only password management
+// Some services may not support password rotation, or has not been implemented yet.
+// This function can be extended in the future to include more services.
+func supportsWriteOnlyPassword(serviceType string) bool {
+	// empty list for now, will be extended in the future PRs
+	supportedServices := []string{}
+
+	return slices.Contains(supportedServices, serviceType)
 }
 
 const diskSpaceDeprecation = "Please use `additional_disk_space` to specify the space to be added to the default disk space defined by the plan."
@@ -519,6 +551,12 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
+	username := adminUsername(s, serviceType)
+	if err := upsertServicePassword(ctx, d, avnGen, username); err != nil {
+		return diag.Errorf("error setting service password for %s/%s: %s", project, s.ServiceName, err)
+	}
+
+	_, err = client.ServiceTags.Set(ctx, project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
 	err = client.ProjectServiceTagsReplace(ctx, project, s.ServiceName, &service.ProjectServiceTagsReplaceIn{
 		Tags: GetTagsFromSchema(d),
 	})
@@ -616,6 +654,11 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 
 	if _, err = WaitForServiceUpdate(ctx, d, client); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
+	}
+
+	username := adminUsername(s, serviceType)
+	if err := upsertServicePassword(ctx, d, avnGen, username); err != nil {
+		return diag.Errorf("error updating service password for %s/%s: %s", projectName, serviceName, err)
 	}
 
 	if len(dis) > 0 {
@@ -822,8 +865,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	password, passwordOK := params["password"]
 	username, usernameOK := params["user"]
+
 	if passwordOK {
-		if err := d.Set("service_password", password); err != nil {
+		if err := setServicePassword(d, password); err != nil {
 			return err
 		}
 	}
@@ -840,7 +884,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 				if err := d.Set("service_username", u.Username); err != nil {
 					return err
 				}
-				if err := d.Set("service_password", u.Password); err != nil {
+				if err := setServicePassword(d, u.Password); err != nil {
 					return err
 				}
 			}
@@ -1025,6 +1069,143 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	return d.Set(serviceType, []map[string]any{props})
+}
+
+// setServicePassword updates the service_password field based on password type used.
+// When write-only password field is active (service_password_wo_version > 0), it sets service_password
+// to empty string to suppress the plaintext password. Otherwise, it sets service_password to the provided value.
+func setServicePassword(d ResourceData, password interface{}) error {
+	serviceType := d.Get("service_type").(string)
+
+	if supportsWriteOnlyPassword(serviceType) {
+		// clear the plain text password field when using write-only passwords
+		if version, ok := d.GetOk("service_password_wo_version"); ok && version.(int) > 0 {
+			return d.Set("service_password", "")
+		}
+	}
+
+	return d.Set("service_password", password)
+}
+
+// DefaultServiceUsername returns the default admin username managed by Aiven for a given service type.
+// Different services use different default usernames (e.g., avnadmin, default, etc.).
+func DefaultServiceUsername(serviceType string) string {
+	switch serviceType {
+	case ServiceTypeRedis, ServiceTypeDragonfly, ServiceTypeValkey:
+		return "default"
+	default:
+		return "avnadmin" // most services use avnadmin
+	}
+}
+
+// adminUsername resolves the admin username from the service state or falls back to default
+// some services may override the default admin username via configuration during creation
+func adminUsername(s *service.ServiceGetOut, serviceType string) string {
+	// check ServiceUriParams for the actual username
+	if username, ok := s.ServiceUriParams["user"]; ok && username != "" {
+		return fmt.Sprintf("%v", username)
+	}
+
+	// fall back to service type default
+	return DefaultServiceUsername(serviceType)
+}
+
+// upsertServicePassword updates the default user password.
+// If the service does not support password management, we ignore the operation.
+// If the write-only password field is removed, resets the password to auto-generated.
+func upsertServicePassword(ctx context.Context, d ResourceData, client avngen.Client, username string) error {
+	serviceType := d.Get("service_type").(string)
+
+	// only process if this service type supports write-only passwords
+	if !supportsWriteOnlyPassword(serviceType) {
+		return nil
+	}
+
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+
+	// we use GetRawConfig because service_password_wo is WriteOnly, so it's not present in the state.
+	passwordWoAttr := d.GetRawConfig().GetAttr("service_password_wo")
+
+	// for new resources, we update only if the write-only password field is present in config
+	if d.IsNewResource() && passwordWoAttr.IsNull() {
+		return nil
+	}
+
+	// for existing resources, we update only if the version changed.
+	if !d.IsNewResource() && !d.HasChange("service_password_wo_version") {
+		return nil
+	}
+
+	// check if write-only password was provided or present for update
+	var password string
+	if !passwordWoAttr.IsNull() {
+		password = passwordWoAttr.AsString()
+	}
+
+	// update the default user password with custom value
+	_, err := client.ServiceUserCredentialsModify(
+		ctx,
+		project,
+		serviceName,
+		username,
+		&service.ServiceUserCredentialsModifyIn{
+			NewPassword: NilIfZero(password),
+			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update %s password for service %s/%s: %w", username, project, serviceName, err)
+	}
+
+	return nil
+}
+
+// customizeDiffPasswordWoVersion is a helper that ensures a password write-only version field only increases.
+// Allows removal of write-only password by setting version to 0.
+// This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
+func customizeDiffPasswordWoVersion(fieldName string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ any) error {
+		if !diff.HasChange(fieldName) {
+			return nil
+		}
+
+		oldRaw, newRaw := diff.GetChange(fieldName)
+
+		var oldVersion int
+		if oldRaw != nil {
+			oldVersion = oldRaw.(int)
+		}
+
+		// initial setting or upgrade from old provider version
+		if oldVersion == 0 {
+			return nil
+		}
+
+		var newVersion int
+		if newRaw != nil {
+			newVersion = newRaw.(int)
+		}
+
+		// allow removal (transition back to auto-generated password)
+		if newVersion == 0 {
+			return nil
+		}
+
+		// prevent decrement
+		if newVersion < oldVersion {
+			return fmt.Errorf("%s must be incremented (old: %d, new: %d). Decrementing version is not allowed", fieldName, oldVersion, newVersion)
+		}
+
+		return nil
+	}
+}
+
+// CustomizeDiffServicePasswordWoVersion ensures that service_password_wo_version only increases.
+// Allows removal of write-only password by removing service_password_wo_version.
+// This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
+func CustomizeDiffServicePasswordWoVersion(ctx context.Context, diff *schema.ResourceDiff, m any) error {
+	return customizeDiffPasswordWoVersion("service_password_wo_version")(ctx, diff, m)
 }
 
 func setProp[T comparable](m map[string]any, k string, v *T) {

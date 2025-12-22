@@ -190,3 +190,15 @@ func StringToDiagWarning(msg string) diag.Diagnostics {
 func ErrorToDiagWarning(err error) diag.Diagnostics {
 	return StringToDiagWarning(err.Error())
 }
+
+// NilIfZero returns a pointer to the value, or nil if the value equals its zero value
+// Note: duplicated to avoid circular imports
+func NilIfZero[T comparable](args ...T) *T {
+	var zero T
+	for _, v := range args {
+		if v != zero {
+			return &v
+		}
+	}
+	return nil
+}

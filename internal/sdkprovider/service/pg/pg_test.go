@@ -1227,3 +1227,180 @@ resource "aiven_pg" "foo" {
 }
 `, projectName, serviceName, userConfig)
 }
+
+// TestAccAivenPGPasswordRotation tests password rotation for Aiven PG service.
+func TestAccAivenPGPasswordRotation(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_pg",
+		Username:     "avnadmin",
+	})
+}
+
+// TestAccAivenPG_AdminPasswordConflicts tests conflicts between service_password_wo and admin_password
+func TestAccAivenPG_AdminPasswordConflicts(t *testing.T) {
+	t.Skip("This test will be enabled once service support write-only passwords")
+
+	resourceName := "aiven_pg.test"
+
+	// it is not possible to set both service_password_wo and admin_password at the same time
+	t.Run("direct conflict at creation", func(t *testing.T) {
+		serviceName := acc.RandName("pg")
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithBothPasswords(serviceName, "custompass123!", 1),
+					ExpectError: regexp.MustCompile(
+						`cannot set 'service_password_wo' and 'pg_user_config\.0\.admin_password' simultaneously`,
+					),
+				},
+			},
+		})
+	})
+
+	// create a service with only admin_password
+	t.Run("admin_password works independently", func(t *testing.T) {
+		serviceName := acc.RandName("pg")
+		adminPassword := acctest.RandStringFromCharSet(16, acctest.CharSetAlphaNum) + "_Aa1"
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithAdminPassword(serviceName, adminPassword),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.admin_password", adminPassword),
+						resource.TestCheckResourceAttrSet(resourceName, "service_password"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					),
+				},
+			},
+		})
+	})
+
+	// migrate from admin_password to write-only password
+	t.Run("migration path: admin_password to write-only", func(t *testing.T) {
+		serviceName := acc.RandName("pg")
+		adminPassword := acctest.RandStringFromCharSet(16, acctest.CharSetAlphaNum) + "_Aa1"
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithAdminPassword(serviceName, adminPassword),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.admin_password", adminPassword),
+						resource.TestCheckResourceAttrSet(resourceName, "service_password"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					),
+				},
+				{
+					Config: testAccPGResourceWithBothPasswordsAfterCreation(serviceName, adminPassword, "newpass123!", 1),
+					ExpectError: regexp.MustCompile(
+						`cannot set 'service_password_wo' and 'pg_user_config\.0\.admin_password' simultaneously`,
+					),
+				},
+				{
+					Config: testAccPGResourceWithWriteOnlyPasswordOnly(serviceName, "newpass123!", 1),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+						resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					),
+				},
+			},
+		})
+	})
+
+	// admin password cannot be added after creation
+	t.Run("reverse migration blocked: write-only to admin_password", func(t *testing.T) {
+		serviceName := acc.RandName("pg")
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithWriteOnlyPasswordOnly(serviceName, "testpass123!", 1),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+						resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					),
+				},
+				{
+					Config:      testAccPGResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123!", "writeonly123!", 1),
+					ExpectError: regexp.MustCompile(`cannot set 'service_password_wo' and 'pg_user_config\.0\.admin_password' simultaneously`),
+				},
+			},
+		})
+	})
+}
+
+func testAccPGResourceWithBothPasswords(name, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  service_password_wo         = %[3]q
+  service_password_wo_version = %[4]d
+
+  pg_user_config {
+    admin_password = "ConflictingPassword123!"
+  }
+}
+`, acc.ProjectName(), name, woPassword, version)
+}
+
+func testAccPGResourceWithAdminPassword(name, adminPassword string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  pg_user_config {
+    admin_password = %[3]q
+  }
+}
+`, acc.ProjectName(), name, adminPassword)
+}
+
+func testAccPGResourceWithBothPasswordsAfterCreation(name, adminPassword, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-pg-%[2]s"
+
+  service_password_wo         = %[4]q
+  service_password_wo_version = %[5]d
+
+  pg_user_config {
+    admin_password = %[3]q
+  }
+}
+`, acc.ProjectName(), name, adminPassword, woPassword, version)
+}
+
+func testAccPGResourceWithWriteOnlyPasswordOnly(name, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  service_password_wo         = %[3]q
+  service_password_wo_version = %[4]d
+}
+`, acc.ProjectName(), name, woPassword, version)
+}
