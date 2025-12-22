@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/mysql/user
 resource:
+  refreshState: true
   description: Creates and manages an Aiven for MySQL® service user.
 datasource:
   description: Gets information about an Aiven for MySQL® service user.
 clientHandler: service
 idAttributeComposed: [project, service_name, username]
 legacyTimeouts: true
-refreshState: true
 flattenModifier: true
 operations:
   - id: ServiceUserCreate

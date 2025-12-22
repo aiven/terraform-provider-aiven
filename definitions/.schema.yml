@@ -34,6 +34,11 @@ properties:
         description: |
           Set to true to enable termination protection validation for this resource.
           The `termination_protection` attribute generated automatically.
+      refreshState:
+        type: boolean
+        $comment: |
+          Set to true to refresh the state after the resource is created/updated/deleted.
+          Example: refreshState: true
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
@@ -102,11 +107,6 @@ properties:
     type: boolean
   flattenModifier:
     type: boolean
-  refreshState:
-    type: boolean
-    $comment: |
-      Set to true to refresh the state after the resource is created/updated/deleted.
-      Example: refreshState: true
 required:
   - location
   - operations

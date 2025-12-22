@@ -14,7 +14,6 @@ import (
 )
 
 var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Beta:         false,
 	Create:       createView,
 	Delete:       deleteView,
 	IDFields:     idFields(),
@@ -25,7 +24,6 @@ var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Beta:     false,
 	Read:     readView,
 	Schema:   datasourceSchema,
 	TypeName: typeName,

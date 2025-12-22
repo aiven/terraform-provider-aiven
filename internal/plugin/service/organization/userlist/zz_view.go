@@ -17,7 +17,6 @@ import (
 )
 
 var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Beta:             false,
 	ConfigValidators: datasourceConfigValidators,
 	Read:             readView,
 	Schema:           datasourceSchema,

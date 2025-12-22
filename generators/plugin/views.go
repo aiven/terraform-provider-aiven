@@ -53,9 +53,12 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	// Resource might have multiple read operations.
 	// We use here a dict, so we don't need to handle duplicates.
 	values := map[string]jen.Code{
-		"Beta":     jen.Lit(lo.FromPtr(def.Beta)),
 		"TypeName": jen.Id(typeName),
 		"Schema":   jen.Id(string(entity) + schemaSuffix),
+	}
+
+	if lo.FromPtr(def.Beta) {
+		values["Beta"] = jen.True()
 	}
 
 	for _, v := range def.Operations {
@@ -69,10 +72,13 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	entityName := string(entity)
 	if entity.isResource() {
 		values["IDFields"] = jen.Id(funcIDFields).Call()
-		values["RefreshState"] = jen.Lit(def.RefreshState)
+
+		if def.Resource.RefreshState {
+			values["RefreshState"] = jen.True()
+		}
 
 		if def.Resource.TerminationProtection {
-			values["TerminationProtection"] = jen.Lit(true)
+			values["TerminationProtection"] = jen.True()
 		}
 	}
 
