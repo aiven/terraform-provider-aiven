@@ -112,7 +112,7 @@ func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m
 
 	pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 	if err != nil {
-		return diag.Errorf("Error getting Azure privatelink: %s", err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("user_subscription_ids", pl.UserSubscriptionIDs); err != nil {

@@ -128,7 +128,7 @@ func resourceOrganizationVPCRead(ctx context.Context, d *schema.ResourceData, cl
 
 	resp, err := client.OrganizationVpcGet(ctx, orgID, vpcID)
 	if err != nil {
-		return err
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	// currently we support only 1 cloud per VPC

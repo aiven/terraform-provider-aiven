@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
@@ -100,7 +99,8 @@ func resourceAccountTeamProjectRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if project.ProjectName == "" {
-		return fmt.Errorf("account team project %q not found", d.Id())
+		d.SetId("") // project not found in list, remove from state
+		return nil
 	}
 
 	if err = d.Set("account_id", accountID); err != nil {

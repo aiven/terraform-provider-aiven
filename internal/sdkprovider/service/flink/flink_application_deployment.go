@@ -170,7 +170,7 @@ func resourceFlinkApplicationDeploymentRead(ctx context.Context, d *schema.Resou
 
 	r, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
 	if err != nil {
-		return diag.Errorf("cannot get Flink Application Deployment: %v", err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

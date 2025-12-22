@@ -131,7 +131,7 @@ func resourceKafkaNativeACLRead(ctx context.Context, d *schema.ResourceData, cli
 		aclID,
 	)
 	if err != nil {
-		return err
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	err = schemautil.ResourceDataSet(

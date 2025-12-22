@@ -176,7 +176,7 @@ func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceDa
 
 	resp, err := client.AccountAuthenticationMethodGet(ctx, accountID, authID)
 	if err != nil {
-		return err
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	if err = d.Set("account_id", resp.AccountId); err != nil {
