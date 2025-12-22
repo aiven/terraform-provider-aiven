@@ -17,6 +17,10 @@ nav_order: 1
 - Migrate `aiven_mysql_database` to the Plugin Framework
 - Migrate `aiven_mysql_user` to the Plugin Framework
 - Fix `aiven_mysql_user`: writing to the `password_wo` field now properly updates the MySQL user's password in Aiven
+- Add service resources fields `service_password_wo` and `service_password_wo_version`: support for write-only passwords
+  to manage the service's avnadmin user password securely without storing it in state for `aiven_alloydbomni`,
+  `aiven_cassandra`, `aiven_clickhouse`, `aiven_dragonfly`, `aiven_influxdb`, `aiven_kafka`, `aiven_m3db`, `aiven_mysql`,
+  `aiven_opensearch`, `aiven_pg`, `aiven_redis`, `aiven_thanos`, `aiven_valkey`
 - Added field `kafka_ssl_ca` to `aiven_service_component` data source
 - Change `aiven_organization_project` to validate that the `base_port` value is between `10000` and `30000`.
 - Deprecated `termination_protection` for `aiven_mysql_database`.

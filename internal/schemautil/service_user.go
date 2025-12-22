@@ -190,32 +190,8 @@ func ServiceUserPasswordSchema() map[string]*schema.Schema {
 // CustomizeDiffServiceUserPasswordWoVersion ensures that password_wo_version only increases.
 // Allows removal of write-only password by removing password_wo_version.
 // This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
-func CustomizeDiffServiceUserPasswordWoVersion(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	if !diff.HasChange("password_wo_version") {
-		return nil
-	}
-
-	oldRaw, newRaw := diff.GetChange("password_wo_version")
-
-	// initial setting or upgrade from old provider version
-	if oldRaw == nil || oldRaw.(int) == 0 {
-		return nil
-	}
-
-	oldVersion := oldRaw.(int)
-	newVersion := newRaw.(int)
-
-	// allow removal (transition back to auto-generated password)
-	if newVersion == 0 {
-		return nil
-	}
-
-	// prevent decrement
-	if newVersion < oldVersion {
-		return fmt.Errorf("password_wo_version must be incremented (old: %d, new: %d). Decrementing version is not allowed", oldVersion, newVersion)
-	}
-
-	return nil
+func CustomizeDiffServiceUserPasswordWoVersion(ctx context.Context, diff *schema.ResourceDiff, m any) error {
+	return customizeDiffPasswordWoVersion("password_wo_version")(ctx, diff, m)
 }
 
 // ClearPasswordIfWriteOnly clears the password field if using write-only mode.

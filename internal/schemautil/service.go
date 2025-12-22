@@ -251,13 +251,29 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"service_password": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Password used for connecting to the service, if applicable",
+			Description: "Password used for connecting to the service, if applicable. To avoid storing passwords in state, use service_password_wo instead.",
 			Sensitive:   true,
 		},
 		"service_username": {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "Username used for connecting to the service, if applicable",
+		},
+		"service_password_wo": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Sensitive:    true,
+			WriteOnly:    true,
+			RequiredWith: []string{"service_password_wo_version"},
+			ValidateFunc: validation.StringIsNotEmpty,
+			Description:  "Password used for connecting to the service, if applicable (write-only, not stored in state). Must be used with service_password_wo_version. Cannot be empty.",
+		},
+		"service_password_wo_version": {
+			Type:         schema.TypeInt,
+			Optional:     true,
+			RequiredWith: []string{"service_password_wo"},
+			ValidateFunc: validation.IntAtLeast(1),
+			Description:  "Version number for service_password_wo. Increment this to rotate the password. Must be >= 1.",
 		},
 		"state": {
 			Type:        schema.TypeString,
@@ -526,6 +542,10 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
+	if err := upsertServicePassword(ctx, d, project, s.ServiceName); err != nil {
+		return diag.Errorf("error setting service password: %s", err)
+	}
+
 	_, err = client.ServiceTags.Set(ctx, project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
 		Tags: GetTagsFromSchema(d),
 	})
@@ -629,6 +649,28 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if _, err = WaitForServiceUpdate(ctx, d, avnGen); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
+	}
+
+	// handle password changes, we need to check both HasChange and the raw config because:
+	// 1. service_password_wo is WriteOnly, so it's never in state
+	// 2. when removing fields, we need to detect the transition
+	oldVersion, newVersion := d.GetChange("service_password_wo_version")
+	rawConfig := d.GetRawConfig()
+	passwordWoAttr := rawConfig.GetAttr("service_password_wo")
+
+	shouldUpdatePassword := oldVersion != newVersion
+
+	if shouldUpdatePassword {
+		if err := upsertServicePassword(ctx, d, projectName, serviceName); err != nil {
+			return diag.Errorf("error updating service password: %s", err)
+		}
+
+		// set version to 0 if write-only password was removed
+		if passwordWoAttr.IsNull() {
+			if err := d.Set("service_password_wo_version", 0); err != nil {
+				return diag.Errorf("error resetting service_password_wo_version: %s", err)
+			}
+		}
 	}
 
 	if len(dis) > 0 {
@@ -837,8 +879,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	password, passwordOK := params["password"]
 	username, usernameOK := params["user"]
+
 	if passwordOK {
-		if err := d.Set("service_password", password); err != nil {
+		if err := setServicePassword(d, password); err != nil {
 			return err
 		}
 	}
@@ -855,7 +898,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 				if err := d.Set("service_username", u.Username); err != nil {
 					return err
 				}
-				if err := d.Set("service_password", u.Password); err != nil {
+				if err := setServicePassword(d, u.Password); err != nil {
 					return err
 				}
 			}
@@ -1040,6 +1083,100 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	return d.Set(serviceType, []map[string]any{props})
+}
+
+// setServicePassword sets the service_password field, clearing it if write-only password mode is enabled
+func setServicePassword(d ResourceData, password interface{}) error {
+	// check if using write-only password mode
+	if version, ok := d.GetOk("service_password_wo_version"); ok && version.(int) > 0 {
+		// clear the password field when using write-only mode
+		return d.Set("service_password", "")
+	}
+
+	return d.Set("service_password", password)
+}
+
+// upsertServicePassword updates the avnadmin user password if using write-only password mode
+func upsertServicePassword(ctx context.Context, d *schema.ResourceData, project, serviceName string) error {
+	avnGen, err := common.GenClient()
+	if err != nil {
+		return fmt.Errorf("failed to get generated client: %w", err)
+	}
+
+	// check if using write-only password
+	rawConfig := d.GetRawConfig()
+	passwordWoAttr := rawConfig.GetAttr("service_password_wo")
+
+	if passwordWoAttr.IsNull() {
+		// write-only password removed - reset to auto-generated
+		// when switching from write-only back to auto-generated
+		// we need to actually reset the password, otherwise it stays at the old value
+		_, err = avnGen.ServiceUserCredentialsReset(ctx, project, serviceName, "avnadmin")
+		if err != nil {
+			return fmt.Errorf("failed to reset avnadmin password to auto-generated: %w", err)
+		}
+
+		return nil
+	}
+
+	customPassword := passwordWoAttr.AsString()
+
+	// update the avnadmin user password with custom value
+	_, err = avnGen.ServiceUserCredentialsModify(
+		ctx,
+		project,
+		serviceName,
+		"avnadmin",
+		&service.ServiceUserCredentialsModifyIn{
+			NewPassword: &customPassword,
+			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update avnadmin password: %w", err)
+	}
+
+	return nil
+}
+
+// customizeDiffPasswordWoVersion is a helper that ensures a password write-only version field only increases.
+// Allows removal of write-only password by setting version to 0.
+// This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
+func customizeDiffPasswordWoVersion(fieldName string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ any) error {
+		if !diff.HasChange(fieldName) {
+			return nil
+		}
+
+		oldRaw, newRaw := diff.GetChange(fieldName)
+
+		// initial setting or upgrade from old provider version
+		if oldRaw == nil || oldRaw.(int) == 0 {
+			return nil
+		}
+
+		oldVersion := oldRaw.(int)
+		newVersion := newRaw.(int)
+
+		// allow removal (transition back to auto-generated password)
+		if newVersion == 0 {
+			return nil
+		}
+
+		// prevent decrement
+		if newVersion < oldVersion {
+			return fmt.Errorf("%s must be incremented (old: %d, new: %d). Decrementing version is not allowed", fieldName, oldVersion, newVersion)
+		}
+
+		return nil
+	}
+}
+
+// CustomizeDiffServicePasswordWoVersion ensures that service_password_wo_version only increases.
+// Allows removal of write-only password by removing service_password_wo_version.
+// This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
+func CustomizeDiffServicePasswordWoVersion(ctx context.Context, diff *schema.ResourceDiff, m any) error {
+	return customizeDiffPasswordWoVersion("service_password_wo_version")(ctx, diff, m)
 }
 
 func setProp[T comparable](m map[string]any, k string, v *T) {

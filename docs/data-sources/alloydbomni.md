@@ -71,7 +71,7 @@ account team.
 - `service_account_credentials` (String, Sensitive) Your [Google service account key](https://cloud.google.com/iam/docs/service-account-creds#key-types) in JSON format.
 - `service_host` (String) The hostname of the service.
 - `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
-- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable. To avoid storing passwords in state, use service_password_wo instead.
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.

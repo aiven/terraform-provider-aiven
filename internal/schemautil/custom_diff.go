@@ -53,6 +53,7 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 			CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			CustomizeDiffCheckStaticIPDisassociation,
 		),
+		CustomizeDiffServicePasswordWoVersion,
 	)
 }
 
