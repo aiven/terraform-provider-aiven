@@ -2,13 +2,12 @@ package kafka_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -34,6 +33,19 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
 				),
+			},
+			{
+				Config: testAccKafkaConnectorResourceUpdate(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "config.type.name", "es-connector-updated"),
+					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{},
 			},
 			{
 				Config:      testAccKafkaConnectorWrongConfigNameResource(rName),
@@ -70,7 +82,10 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 }
 
 func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	genClient, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return err
+	}
 
 	ctx := context.Background()
 
@@ -85,40 +100,26 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = c.Services.Get(ctx, projectName, serviceName)
+		_, err = genClient.ServiceGet(ctx, projectName, serviceName)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status == 404 {
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
 			return err
 		}
 
-		list, err := c.KafkaConnectors.List(ctx, projectName, serviceName)
+		connectors, err := genClient.ServiceKafkaConnectList(ctx, projectName, serviceName)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status == 404 {
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
 			return err
 		}
 
-		for _, connector := range list.Connectors {
-			res, err := c.KafkaConnectors.GetByName(ctx, projectName, serviceName, connector.Name)
-			if err != nil {
-				var e aiven.Error
-				if errors.As(err, &e) && e.Status == 404 {
-					return nil
-				}
-
-				return err
-			}
-
-			if res != nil {
-				return fmt.Errorf("kafka connector (%s) still exists", connector.Name)
-			}
+		if len(connectors) > 0 {
+			return fmt.Errorf("kafka connector (%s) still exists", connectors[0].Name)
 		}
 
 	}
@@ -176,6 +177,70 @@ resource "aiven_kafka_connector" "foo" {
     "topics"          = aiven_kafka_topic.foo.topic_name
     "connector.class" = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
     "type.name"       = "es-connector"
+    "name"            = "test-acc-con-%s"
+    "connection.url"  = aiven_opensearch.dest.service_uri
+  }
+}
+
+data "aiven_kafka_connector" "connector" {
+  project        = aiven_kafka_connector.foo.project
+  service_name   = aiven_kafka_connector.foo.service_name
+  connector_name = aiven_kafka_connector.foo.connector_name
+
+  depends_on = [aiven_kafka_connector.foo]
+}`, acc.ProjectName(), name, name, name, name, name)
+}
+
+func testAccKafkaConnectorResourceUpdate(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_connect = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_opensearch" "dest" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr2-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_connector" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_kafka.bar.service_name
+  connector_name = "test-acc-con-%s"
+
+  config = {
+    "topics"          = aiven_kafka_topic.foo.topic_name
+    "connector.class" = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "type.name"       = "es-connector-updated"
     "name"            = "test-acc-con-%s"
     "connection.url"  = aiven_opensearch.dest.service_uri
   }
@@ -358,6 +423,10 @@ func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc 
 
 		if a["plugin_type"] != "sink" {
 			return fmt.Errorf("expected to get a correct plugin_type from Aiven)")
+		}
+
+		if a["task.#"] == "" || a["task.#"] == "0" {
+			return fmt.Errorf("expected to get at least one task from Aiven)")
 		}
 
 		return nil
