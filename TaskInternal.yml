@@ -180,6 +180,8 @@ tasks:
     desc: "Run all code generation tasks"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - task: gen-go
       - task: gen-plugin
