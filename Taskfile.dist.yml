@@ -129,8 +129,6 @@ tasks:
   #################################################
 
   generate:
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     desc: Generate Go code, documentation, and mocks
     vars:
       no_spec: '{{.no_spec | default "false"}}'
@@ -152,6 +150,8 @@ tasks:
 
   update-schemas:
     desc: "Update Go client codegen and API schemas, regenerate mocks, and update CHANGELOG.md"
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - defer:
           task: fmt
