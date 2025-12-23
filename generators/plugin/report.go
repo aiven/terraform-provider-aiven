@@ -8,6 +8,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
@@ -15,6 +16,12 @@ const reportFileName = "PLUGIN_MIGRATION.md"
 
 // genReport writes a table with: resource name, plugin indicator, count to reportFileName.
 func genReport() error {
+	// Needs to enable beta to load all resources.
+	err := os.Setenv(util.AivenEnableBeta, "true")
+	if err != nil {
+		return err
+	}
+
 	sdkProvider, err := provider.Provider("foo")
 	if err != nil {
 		return err
