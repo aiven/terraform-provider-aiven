@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -19,6 +20,7 @@ type flags struct {
 	diff          bool
 	schemaFile    string
 	changelogFile string
+	format        bool
 	reformat      bool
 }
 
@@ -36,6 +38,10 @@ func exec() error {
 	flags, err := parseFlags()
 	if err != nil {
 		return err
+	}
+
+	if flags.format {
+		return writeChangelog(flags.changelogFile, flags.reformat, nil)
 	}
 
 	sdkProvider, err := loadSDKProvider()
@@ -82,10 +88,16 @@ func parseFlags() (*flags, error) {
 	flag.StringVar(&f.schemaFile, "schema", "", "schema file path (for save/diff)")
 	flag.StringVar(&f.changelogFile, "changelog", "", "changelog output file path")
 	flag.BoolVar(&f.reformat, "reformat", false, "reformat the whole changelog file")
+	flag.BoolVar(&f.format, "format", false, "formats the unreleased section of the changelog")
 	flag.Parse()
 
-	if f.save == f.diff {
-		return nil, fmt.Errorf("either --save or --diff must be set")
+	actions := []bool{f.format, f.save, f.diff}
+	if lo.Count(actions, true) != 1 {
+		return nil, fmt.Errorf("exactly one of --format, --save, or --diff must be set")
+	}
+
+	if f.format && f.changelogFile == "" {
+		return nil, fmt.Errorf("changelog file path is required when using --format")
 	}
 
 	if f.diff && f.schemaFile == "" {
