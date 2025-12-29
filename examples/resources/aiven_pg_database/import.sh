@@ -1,1 +1,1 @@
-terraform import aiven_pg_database.main PROJECT/SERVICE_NAME/DATABASE_NAME
+terraform import aiven_pg_database.example PROJECT/SERVICE_NAME/DATABASE_NAME
