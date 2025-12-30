@@ -4,11 +4,20 @@ page_title: "aiven_kafka Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages an Aiven for Apache Kafka® https://aiven.io/docs/products/kafka service.
+  Required permissions
+  The following permissions https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission are required to create and manage services:
+  project:services:writeread_only
 ---
 
 # aiven_kafka (Resource)
 
 Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.
+
+## Required permissions
+
+The following [permissions](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_permission) are required to create and manage services:
+- `project:services:write`
+- `read_only`
 
 ## Example Usage
 
