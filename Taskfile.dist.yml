@@ -10,6 +10,9 @@ vars:
   CHANGELOG_BACKUP: CHANGELOG.md.bak
   VERSION_PATTERN: '^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$'
 
+env:
+  PROVIDER_AIVEN_ENABLE_BETA: true
+
 tasks:
   default:
     desc: Lists available tasks defined in this file
@@ -22,6 +25,8 @@ tasks:
   #################################################
   build:
     desc: Build the provider binary
+    env:
+      PROVIDER_AIVEN_ENABLE_BETA: false
     cmds:
       - "{{.GO_CMD}} build"
 
@@ -51,7 +56,6 @@ tasks:
       - unit
     env:
       TF_ACC: 0
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - env -u AIVEN_TOKEN
         {{.TESTSUM}}
@@ -66,7 +70,6 @@ tasks:
     desc: "Run acceptance tests (e.g., task test-acc -- -run TestAccResourceMyThing)"
     env:
       TF_ACC: 1
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     vars:
       EFFECTIVE_PKG_PATH: '{{env "PKG_PATH" | default .PKG_PATH}}'
       TAGS: '{{.TAGS | default (env "GO_BUILD_TAGS")}}'
@@ -81,7 +84,6 @@ tasks:
       - internal:clean-examples
     env:
       AIVEN_PROVIDER_PATH: "{{.BUILD_DEV_DIR}}"
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - "{{.TESTSUM}}
         --format testname
@@ -122,6 +124,7 @@ tasks:
           task: internal:fmt-imports
       - task: internal:fmt-go
       - task: internal:fmt-test
+      - task: internal:fmt-changelog
       - task: '{{if ne .FAST_FORMAT "true"}}internal:fmt-precommit{{else}}internal:fmt-fast{{end}}'
 
   #################################################

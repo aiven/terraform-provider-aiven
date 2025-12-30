@@ -16,10 +16,8 @@ const reportFileName = "PLUGIN_MIGRATION.md"
 
 // genReport writes a table with: resource name, plugin indicator, count to reportFileName.
 func genReport() error {
-	// Needs to enable beta to load all resources.
-	err := os.Setenv(util.AivenEnableBeta, "true")
-	if err != nil {
-		return err
+	if !util.IsBeta() {
+		return fmt.Errorf("please enable beta mode, i.e. set %s=1", util.AivenEnableBeta)
 	}
 
 	sdkProvider, err := provider.Provider("foo")

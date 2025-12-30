@@ -39,6 +39,7 @@ vars:
   SWEEP: global                          # Default scope for resource sweeper
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
+  CHANGELOG_FILE: CHANGELOG.md
 
   # --- Docs ---
   DEPRECATED_RESOURCES: "influxdb m3 redis"   # List of deprecated resources and data sources to exclude from docs
@@ -62,8 +63,6 @@ tasks:
 
   lint-docs:
     desc: "Validate provider documentation consistency"
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - "{{.TFPLUGINDOCS}} generate --rendered-website-dir tmp"
       - mkdir -p docs/data-sources docs/resources
@@ -125,6 +124,11 @@ tasks:
       - find docs -name "*.md" -type f -exec sed -i'' -e 's/[[:space:]]*$//' {} +
       - find docs -name "*.md" -type f -exec sed -i'' -e '${/^$/d}' {} +
 
+  fmt-changelog:
+    desc: "Format CHANGELOG.md using changelog generator"
+    cmds:
+      - "{{.CHANGELOG_CMD}} -format -changelog={{.CHANGELOG_FILE}}"
+
   #-------------------------------------
   # Generate Sub-Tasks
   #-------------------------------------
@@ -164,8 +168,6 @@ tasks:
 
   gen-docs:
     desc: "Generate Terraform provider documentation"
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - rm -f docs/.DS_Store
       - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
@@ -180,8 +182,6 @@ tasks:
     desc: "Run all code generation tasks"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - task: gen-go
       - task: gen-plugin
@@ -195,21 +195,17 @@ tasks:
   #-------------------------------------
   dump-schemas:
     desc: "Save current provider schemas to {{.OLD_SCHEMA}} for later diffing"
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
       - "{{.CHANGELOG_CMD}} -save -schema={{.OLD_SCHEMA}}"
     generates: ["{{.OLD_SCHEMA}}"]
 
   diff-schemas:
     desc: "Compare current schemas against {{.OLD_SCHEMA}} and update CHANGELOG.md"
-    env:
-      PROVIDER_AIVEN_ENABLE_BETA: 1
     cmds:
-      - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog=CHANGELOG.md"
+      - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog={{.CHANGELOG_FILE}}"
       - rm {{.OLD_SCHEMA}}
     sources: ["**/*.go"]
-    generates: ["CHANGELOG.md"]
+    generates: ["{{.CHANGELOG_FILE}}"]
 
   load-codegen:
     desc: "Update go-client-codegen module dependency"

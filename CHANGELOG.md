@@ -23,9 +23,9 @@ nav_order: 1
   Use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion) instead.
 - Add `aiven_mysql` field `mysql_user_config.migration.reestablish_replication`: Skip dump-restore part and start replication
 - Fix resources not properly removing from state when deleted externally or when delete fails with transient API errors:
-  `aiven_account_authentication`, `aiven_account_team_project`, `aiven_azure_privatelink`, `aiven_azure_privatelink_connection_approval`,
-  `aiven_flink_application_deployment`, `aiven_flink_application_version`, `aiven_gcp_privatelink`, `aiven_gcp_privatelink_connection_approval`,
-  `aiven_kafka_connector`, `aiven_kafka_native_acl`, `aiven_organization_vpc`
+  `aiven_account_authentication`, `aiven_account_team_project`, `aiven_azure_privatelink`,
+  `aiven_azure_privatelink_connection_approval`, `aiven_flink_application_deployment`, `aiven_flink_application_version`,
+  `aiven_gcp_privatelink`, `aiven_gcp_privatelink_connection_approval`, `aiven_kafka_connector`, `aiven_kafka_native_acl`, `aiven_organization_vpc`
 
 ## [4.48.0] - 2025-12-11
 

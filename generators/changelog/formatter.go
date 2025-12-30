@@ -30,10 +30,6 @@ var (
 // Soft-wraps lines to the given lineLength
 // When reformat is true, reformats the whole given content
 func updateChangelog(content string, lineLength int, reformat bool, addLines ...string) (string, error) {
-	if len(addLines) == 0 && !reformat {
-		return content, nil
-	}
-
 	lines := strings.Split(reTrailingSpace.ReplaceAllString(content, ""), "\n")
 	items, start, end := parseItems(lines)
 	addText := strings.Join(addLines, "\n")
