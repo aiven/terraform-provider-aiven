@@ -20,8 +20,9 @@ import (
 )
 
 func TestAccAivenPGDatabase(t *testing.T) {
-	resourceName := "aiven_pg_database.foo"
-	datasourceName := "data.aiven_pg_database.foo"
+	const resourceName = "aiven_pg_database.foo"
+	const datasourceName = "data.aiven_pg_database.foo"
+	const oldProviderVersion = "4.47.0"
 	projectName := acc.ProjectName()
 
 	// Creates shared PG
@@ -38,7 +39,7 @@ func TestAccAivenPGDatabase(t *testing.T) {
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)
 
-	t.Run("backward compatibility test", func(t *testing.T) {
+	t.Run("backward compatibility test (default lc_*)", func(t *testing.T) {
 		dbName := acc.RandName("compatibility")
 		config := testAccPGDatabaseWithDatasource(projectName, serviceName, dbName, "")
 		resource.Test(t, resource.TestCase{
@@ -46,13 +47,68 @@ func TestAccAivenPGDatabase(t *testing.T) {
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 				PreConfig:          func() { require.NoError(t, <-serviceIsReady) },
 				TFConfig:           config,
-				OldProviderVersion: "4.47.0",
+				OldProviderVersion: oldProviderVersion,
 				Checks: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "database_name", dbName),
 					resource.TestCheckResourceAttr(resourceName, "lc_collate", "en_US.UTF-8"),
 					resource.TestCheckResourceAttr(resourceName, "lc_ctype", "en_US.UTF-8"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+
+					// Datasource checks
+					resource.TestCheckResourceAttr(datasourceName, "project", projectName),
+					resource.TestCheckResourceAttr(datasourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(datasourceName, "database_name", dbName),
+				),
+			}),
+		})
+	})
+
+	t.Run("backward compatibility test (explicit lc_*)", func(t *testing.T) {
+		dbName := acc.RandName("compatibility-explicitlc")
+		config := testAccPGDatabaseWithDatasource(projectName, serviceName, dbName, `  lc_collate = "en_US.UTF-8"
+  lc_ctype   = "en_US.UTF-8"`)
+		resource.Test(t, resource.TestCase{
+			PreCheck: func() { acc.TestAccPreCheck(t) },
+			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+				PreConfig:          func() { require.NoError(t, <-serviceIsReady) },
+				TFConfig:           config,
+				OldProviderVersion: oldProviderVersion,
+				Checks: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "database_name", dbName),
+					resource.TestCheckResourceAttr(resourceName, "lc_collate", "en_US.UTF-8"),
+					resource.TestCheckResourceAttr(resourceName, "lc_ctype", "en_US.UTF-8"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+
+					// Datasource checks
+					resource.TestCheckResourceAttr(datasourceName, "project", projectName),
+					resource.TestCheckResourceAttr(datasourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(datasourceName, "database_name", dbName),
+				),
+			}),
+		})
+	})
+
+	t.Run("backward compatibility test (empty lc_*)", func(t *testing.T) {
+		dbName := acc.RandName("compatibility-empty-lc")
+		config := testAccPGDatabaseWithDatasource(projectName, serviceName, dbName, `  lc_collate = ""
+  lc_ctype   = ""`)
+		resource.Test(t, resource.TestCase{
+			PreCheck: func() { acc.TestAccPreCheck(t) },
+			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+				PreConfig:          func() { require.NoError(t, <-serviceIsReady) },
+				TFConfig:           config,
+				OldProviderVersion: oldProviderVersion,
+				PlanOnly:           true,
+				Checks: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "database_name", dbName),
+					testCheckResourceAttrOneOf(resourceName, "lc_collate", "", "en_US.UTF-8"),
+					testCheckResourceAttrOneOf(resourceName, "lc_ctype", "", "en_US.UTF-8"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 
 					// Datasource checks
@@ -315,4 +371,26 @@ data "aiven_pg_database" "foo" {
 
   depends_on = [aiven_pg_database.foo]
 }`, project, serviceName, dbName, extra)
+}
+
+func testCheckResourceAttrOneOf(resourceName, attribute string, values ...string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("expected resource %q to exist in state", resourceName)
+		}
+
+		v, ok := rs.Primary.Attributes[attribute]
+		if !ok {
+			return fmt.Errorf("expected attribute %q to be present in %q state", attribute, resourceName)
+		}
+
+		for _, expected := range values {
+			if v == expected {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("expected %s.%s to be one of %v, got %q", resourceName, attribute, values, v)
+	}
 }
