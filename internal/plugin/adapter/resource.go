@@ -412,7 +412,6 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 
 	if req.Plan.Raw.IsNull() {
 		// There is no plan to modify if the resource is marked for deletion
-		// TODO: should we allow ModifyPlan to handle deletions?
 		return
 	}
 
