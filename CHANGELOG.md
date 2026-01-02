@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_service_list` data source: list all services in a project
 - Change `aiven_kafka_connector` resource: migrate to use generated client
 - Migrate `aiven_organizational_unit` to the Plugin Framework
 - Migrate `aiven_mysql_database` to the Plugin Framework
