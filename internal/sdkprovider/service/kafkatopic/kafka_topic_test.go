@@ -44,9 +44,12 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)
 
-	t.Run("basic", func(t *testing.T) {
-		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
+	ctx := context.Background()
+	list, err := client.ServiceKafkaTopicList(ctx, projectName, kafkaName)
+	require.NoError(t, err)
+	require.Empty(t, list, "This test assumes there are no pre-existing topics in the Kafka service")
 
+	t.Run("basic", func(t *testing.T) {
 		resourceName := "aiven_kafka_topic.foo"
 		topic2ResourceName := "aiven_kafka_topic.topic2"
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -81,8 +84,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 
 	// The test proves that TF can create hundreds of topics without hitting any server issues
 	t.Run("many_topics", func(t *testing.T) {
-		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
-
 		topicName := acc.RandName("topic")
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -105,8 +106,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	// This test proves the "termination_protection" field doesn't mess up with the state in various scenarios,
 	// despite being a virtual field (not sent to or returned from the API).
 	t.Run("termination_protection", func(t *testing.T) {
-		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
-
 		topicName := acc.RandName("topic")
 		resourceName := "aiven_kafka_topic.foo"
 		resource.Test(t, resource.TestCase{
@@ -135,8 +134,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	// TestAccAivenKafkaTopic_recreate validates that topic is recreated if it is missing
 	// Kafka loses all topics on turn off/on, then TF recreates topics. This test imitates the case.
 	t.Run("recreate_missing", func(t *testing.T) {
-		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
-
 		topicResource := "aiven_kafka_topic.topic"
 		topicName := acc.RandName("topic")
 		kafkaID := fmt.Sprintf("%s/%s", projectName, kafkaName)
@@ -236,8 +233,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	})
 
 	t.Run("conflicts_if_exists", func(t *testing.T) {
-		defer kafkatopicrepository.ForgetService(projectName, kafkaName)
-
 		topicName := acc.RandName("topic")
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -376,53 +371,73 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 		return err
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+	defer cancel()
+
+	// There is a test that creates hundreds of topics, so we cache topic lists per service.
+	// Instead of checking each topic individually, we check the whole topic list is empty.
+	topicListEmpty := make(map[string]bool)
 
 	// loop through the resources in state, verifying each created resource is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "aiven_kafka_topic" {
-			project, serviceName, topicName, err := schemautil.SplitResourceID3(rs.Primary.ID)
-			if err != nil {
-				return err
-			}
-
-			_, err = c.ServiceGet(ctx, project, serviceName)
-			if err != nil {
-				if avngen.IsNotFound(err) {
-					return nil
-				}
-				return err
-			}
-
-			t, err := c.ServiceKafkaTopicGet(ctx, project, serviceName, topicName)
-			if err != nil {
-				if avngen.IsNotFound(err) {
-					return nil
-				}
-				return err
-			}
-
-			if t != nil {
-				return fmt.Errorf("kafka topic (%s) still exists, id %s", topicName, rs.Primary.ID)
-			}
+		if rs.Type != "aiven_kafka_topic" {
+			continue
 		}
-		if rs.Type == "aiven_organization_user_group" {
-			orgID, userGroupID, err := schemautil.SplitResourceID2(rs.Primary.ID)
-			if err != nil {
-				return err
+
+		project, serviceName, _, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		serviceKey := fmt.Sprintf("%s/%s", project, serviceName)
+		if topicListEmpty[serviceKey] {
+			// Proved already empty
+			continue
+		}
+
+		// Polls ServiceKafkaTopicList till it is empty or timeout.
+		// There might be some cache on the Aiven side, and this list might return deleted topics for some time.
+		err = retry.Do(func() error {
+			topics, err := c.ServiceKafkaTopicList(ctx, project, serviceName)
+			if avngen.IsNotFound(err) || len(topics) == 0 {
+				topicListEmpty[serviceKey] = true
+
+				// Removes from the cache just in case
+				kafkatopicrepository.ForgetService(project, serviceName)
+				return nil
 			}
 
-			r, err := c.UserGroupGet(ctx, orgID, userGroupID)
-			if err != nil {
-				if avngen.IsNotFound(err) {
-					return nil
-				}
-				return err
+			if len(topics) != 0 {
+				return fmt.Errorf("kafka topic list for service %s is not empty", serviceKey)
 			}
 
-			if r != nil {
-				return fmt.Errorf("organization user group (%s) still exists", rs.Primary.ID)
+			return err
+		}, retry.Context(ctx), retry.Delay(5*time.Second))
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "aiven_organization_user_group" {
+			continue
+		}
+
+		orgID, userGroupID, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		r, err := c.UserGroupGet(ctx, orgID, userGroupID)
+		if err != nil {
+			if avngen.IsNotFound(err) {
+				return nil
 			}
+			return err
+		}
+
+		if r != nil {
+			return fmt.Errorf("organization user group (%s) still exists", rs.Primary.ID)
 		}
 	}
 
@@ -478,17 +493,16 @@ resource "aiven_kafka_topic" "topic_conflict" {
 }
 
 func TestAccAivenKafkaTopic_local_retention_bytes_overflow_error(t *testing.T) {
-	project := acc.ProjectName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
+				PlanOnly: true,
+				Config: `
 resource "aiven_kafka_topic" "topic" {
-  project      = %q
-  service_name = "kafka-1c4a85e2"
+  project      = "foo"
+  service_name = "bar"
   topic_name   = "foo"
   partitions   = 5
   replication  = 2
@@ -497,8 +511,7 @@ resource "aiven_kafka_topic" "topic" {
     local_retention_bytes = 3
     retention_bytes       = 1
   }
-
-}`, project),
+}`,
 				ExpectError: regexp.MustCompile(`local_retention_bytes must not be more than retention_bytes value`),
 			},
 		},
@@ -506,17 +519,16 @@ resource "aiven_kafka_topic" "topic" {
 }
 
 func TestAccAivenKafkaTopic_local_retention_bytes_overflow_dependency(t *testing.T) {
-	project := acc.ProjectName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
+				PlanOnly: true,
+				Config: `
 resource "aiven_kafka_topic" "topic" {
-  project      = %q
-  service_name = "kafka-1c4a85e2"
+  project      = "foo"
+  service_name = "bar"
   topic_name   = "foo"
   partitions   = 5
   replication  = 2
@@ -525,7 +537,7 @@ resource "aiven_kafka_topic" "topic" {
     local_retention_bytes = 3
   }
 
-}`, project),
+}`,
 				ExpectError: regexp.MustCompile(`local_retention_bytes can't be set without retention_bytes`),
 			},
 		},
