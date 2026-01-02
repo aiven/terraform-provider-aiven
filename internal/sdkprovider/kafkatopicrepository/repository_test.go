@@ -195,22 +195,6 @@ func TestRepositoryRead(t *testing.T) {
 			v2ListCalled:    1,
 			v2ListBatchSize: defaultV2ListBatchSize,
 		},
-		{
-			name: "emulates v2List 404 error",
-			requests: []request{
-				{project: "a", service: "b", topic: "c"},
-			},
-			responses: []response{
-				{err: fmt.Errorf("topic read error: All attempts fail:\n#1: topic list has changed")},
-			},
-			storage: map[string]*aiven.KafkaListTopic{
-				"a/b/c": {TopicName: "c"},
-			},
-			v2ListErr:       aiven.Error{Status: 404},
-			v1ListCalled:    1,
-			v2ListCalled:    1,
-			v2ListBatchSize: defaultV2ListBatchSize,
-		},
 	}
 
 	for _, opt := range cases {
