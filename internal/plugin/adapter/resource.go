@@ -410,21 +410,32 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 		return
 	}
 
+	if req.Plan.Raw.IsNull() {
+		// There is no plan to modify if the resource is marked for deletion
+		return
+	}
+
 	var (
 		plan   = instantiate[M]()
-		state  = instantiate[M]()
 		config = instantiate[M]()
 		diags  = &rsp.Diagnostics
 	)
 
-	if !req.Plan.Raw.IsNull() {
-		// If resource is not marked for deletion.
-		diags.Append(req.Plan.Get(ctx, plan)...)
-		diags.Append(req.Config.Get(ctx, config)...)
-	}
-	diags.Append(req.State.Get(ctx, state)...)
+	diags.Append(req.Plan.Get(ctx, plan)...)
+	diags.Append(req.Config.Get(ctx, config)...)
 	if diags.HasError() {
 		return
+	}
+
+	var sharedState *T
+	if !req.State.Raw.IsNull() {
+		// During create planning, state is null. Let the ModifyPlan hook decide how to handle a nil state
+		state := instantiate[M]()
+		diags.Append(req.State.Get(ctx, state)...)
+		if diags.HasError() {
+			return
+		}
+		sharedState = state.SharedModel()
 	}
 
 	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutRead)
@@ -434,7 +445,7 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 	}
 	defer cancel()
 
-	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), sharedState, config.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
