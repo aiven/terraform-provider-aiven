@@ -133,10 +133,12 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 			err := retry.Do(func() error {
 				rspList, err := rep.client.V2List(ctx, project, service, chunk)
 
-				// 404 means that there is "not found" on the list
-				// But repository.exists should have checked these, so now this is a fail
+				// A 404 means that the "chunk" contains a topic not found on the backend,
+				// even though repository.exists confirmed the topic exists.
+				// The backend uses a cache, and the two endpoints might be inconsistent.
+				// Keeps retrying.
 				if aiven.IsNotFound(err) {
-					return retry.Unrecoverable(fmt.Errorf("topic list has changed"))
+					return fmt.Errorf("topic list is inconsistent: %w", err)
 				}
 
 				// Something else happened
