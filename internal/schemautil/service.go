@@ -1096,12 +1096,32 @@ func setServicePassword(d ResourceData, password interface{}) error {
 	return d.Set("service_password", password)
 }
 
-// upsertServicePassword updates the avnadmin user password if using write-only password mode
+// getDefaultServiceUsername returns the default username for a given service type
+// Different services use different default usernames:
+// - PG, AlloyDBOmni, MySQL, OpenSearch, Cassandra, ClickHouse, InfluxDB, Grafana, Flink, Thanos, M3: avnadmin
+// - Redis, Dragonfly, Valkey: default
+// - Kafka, KafkaConnect, KafkaMirrormaker: avnadmin (but uses cert auth, may not have password)
+func getDefaultServiceUsername(serviceType string) string {
+	switch serviceType {
+	case ServiceTypeRedis, ServiceTypeDragonfly, ServiceTypeValkey:
+		return "default"
+	default:
+		// Most services use avnadmin
+		return "avnadmin"
+	}
+}
+
+// upsertServicePassword updates the default user password if using write-only password mode
+// Note: Not all services support password management (e.g., Kafka uses certificates).
+// This function gracefully handles services without password management by ignoring 404 errors.
 func upsertServicePassword(ctx context.Context, d *schema.ResourceData, project, serviceName string) error {
 	avnGen, err := common.GenClient()
 	if err != nil {
 		return fmt.Errorf("failed to get generated client: %w", err)
 	}
+
+	serviceType := d.Get("service_type").(string)
+	username := getDefaultServiceUsername(serviceType)
 
 	// check if using write-only password
 	rawConfig := d.GetRawConfig()
@@ -1113,9 +1133,12 @@ func upsertServicePassword(ctx context.Context, d *schema.ResourceData, project,
 		// During update, when the user removes the write-only password, we need to reset
 		// During initial creation, the service already has an auto-generated password
 		if !d.IsNewResource() {
-			_, err = avnGen.ServiceUserCredentialsReset(ctx, project, serviceName, "avnadmin")
+			_, err = avnGen.ServiceUserCredentialsReset(ctx, project, serviceName, username)
 			if err != nil {
-				return fmt.Errorf("failed to reset avnadmin password to auto-generated: %w", err)
+				// Ignore 404 errors - service doesn't support password management
+				if !IsNotFound(err) {
+					return fmt.Errorf("failed to reset %s password to auto-generated: %w", username, err)
+				}
 			}
 		}
 
@@ -1124,19 +1147,22 @@ func upsertServicePassword(ctx context.Context, d *schema.ResourceData, project,
 
 	customPassword := passwordWoAttr.AsString()
 
-	// update the avnadmin user password with custom value
+	// update the default user password with custom value
 	_, err = avnGen.ServiceUserCredentialsModify(
 		ctx,
 		project,
 		serviceName,
-		"avnadmin",
+		username,
 		&service.ServiceUserCredentialsModifyIn{
 			NewPassword: &customPassword,
 			Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update avnadmin password: %w", err)
+		// Ignore 404 errors - service doesn't support password management
+		if !IsNotFound(err) {
+			return fmt.Errorf("failed to update %s password: %w", username, err)
+		}
 	}
 
 	return nil

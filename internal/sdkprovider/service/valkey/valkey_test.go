@@ -1,6 +1,7 @@
 package valkey_test
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAiven_valkey(t *testing.T) {
@@ -266,4 +268,169 @@ func testAccCheckAivenServiceValkeyAttributes(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func TestAccAivenValkey_WriteOnlyPassword(t *testing.T) {
+	resourceName := "aiven_valkey.test"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	password1 := "CustomPassword123!@#"
+	password2 := "RotatedPassword456$%^"
+	password3 := "FinalPassword789&*("
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				Source:            "hashicorp/random",
+				VersionConstraint: ">= 3.0.0",
+			},
+		},
+		CheckDestroy: acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Create service with auto-generated password
+				Config: testAccValkeyResourceBasic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-valkey-%s", rName)),
+					resource.TestCheckResourceAttrSet(resourceName, "service_username"),
+					resource.TestCheckResourceAttrSet(resourceName, "service_password"), // verify password is in state
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					testAccCheckValkeyServicePasswordExists(resourceName),
+				),
+			},
+			{
+				// Step 2: Migrate to write-only password with explicit value
+				Config: testAccValkeyResourceWriteOnlyExplicit(rName, password1, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-valkey-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"), // verify WO password NOT in state
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),  // verify old password cleared
+					testAccCheckValkeyServicePasswordMatches(resourceName, password1),     // verify actual password
+				),
+			},
+			{
+				// Step 3: Rotate password by incrementing version
+				Config: testAccValkeyResourceWriteOnlyExplicit(rName, password2, 2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "2"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					testAccCheckValkeyServicePasswordMatches(resourceName, password2), // verify password rotated
+				),
+			},
+			{
+				// Step 4: Another rotation
+				Config: testAccValkeyResourceWriteOnlyExplicit(rName, password3, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "3"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					testAccCheckValkeyServicePasswordMatches(resourceName, password3),
+				),
+			},
+			{
+				// Step 5: Switch back to auto-generated password
+				Config: testAccValkeyResourceBasic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-valkey-%s", rName)),
+					resource.TestCheckResourceAttrSet(resourceName, "service_password"), // password back in state
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "0"), // version reset to 0
+					testAccCheckValkeyServicePasswordExists(resourceName),
+					// Verify password changed from the custom one
+					testAccCheckValkeyServicePasswordNotMatches(resourceName, password3),
+				),
+			},
+		},
+	})
+}
+
+func testAccValkeyResourceBasic(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_valkey" "test" {
+  project                 = "%[1]s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-valkey-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+`, acc.ProjectName(), name)
+}
+
+func testAccValkeyResourceWriteOnlyExplicit(name, password string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_valkey" "test" {
+  project                     = "%[1]s"
+  cloud_name                  = "google-europe-west1"
+  plan                        = "startup-4"
+  service_name                = "test-acc-valkey-%[2]s"
+  maintenance_window_dow      = "monday"
+  maintenance_window_time     = "10:00:00"
+  service_password_wo         = "%[3]s"
+  service_password_wo_version = %[4]d
+}
+`, acc.ProjectName(), name, password, version)
+}
+
+// testAccCheckValkeyServicePassword is a generic helper that validates the Valkey service password using a custom validation function
+func testAccCheckValkeyServicePassword(resourceName string, validateFn func(password string) error) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		projectName, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("error parsing resource ID: %w", err)
+		}
+
+		client, err := acc.GetTestGenAivenClient()
+		if err != nil {
+			return fmt.Errorf("error getting client: %w", err)
+		}
+
+		// Valkey uses "default" as the default username, not "avnadmin"
+		user, err := client.ServiceUserGet(context.Background(), projectName, serviceName, "default")
+		if err != nil {
+			return fmt.Errorf("error getting default user: %w", err)
+		}
+
+		if user.Password == "" {
+			return fmt.Errorf("default user password is empty in API response")
+		}
+
+		return validateFn(user.Password)
+	}
+}
+
+// testAccCheckValkeyServicePasswordExists verifies that the service password exists and is not empty
+func testAccCheckValkeyServicePasswordExists(resourceName string) resource.TestCheckFunc {
+	return testAccCheckValkeyServicePassword(resourceName, func(password string) error {
+		return nil // Password existence already checked in the generic function
+	})
+}
+
+// testAccCheckValkeyServicePasswordMatches verifies that the actual password matches the expected value
+func testAccCheckValkeyServicePasswordMatches(resourceName, expectedPassword string) resource.TestCheckFunc {
+	return testAccCheckValkeyServicePassword(resourceName, func(password string) error {
+		if password != expectedPassword {
+			return fmt.Errorf("default user password does not match expected value: got %q, want %q", password, expectedPassword)
+		}
+		return nil
+	})
+}
+
+// testAccCheckValkeyServicePasswordNotMatches verifies that the password has changed from a previous value
+func testAccCheckValkeyServicePasswordNotMatches(resourceName, oldPassword string) resource.TestCheckFunc {
+	return testAccCheckValkeyServicePassword(resourceName, func(password string) error {
+		if password == oldPassword {
+			return fmt.Errorf("default user password still matches old value: %q", oldPassword)
+		}
+		return nil
+	})
 }
