@@ -47,7 +47,7 @@ data "aiven_opensearch" "example_opensearch" {
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set, the service runs on the Public Internet. When set, the value should be given as a reference to set up dependencies correctly, and the VPC must be in the same cloud and region as the service itself. The service can be freely moved to and from VPC after creation, but doing so triggers migration to new servers, so the operation can take a significant amount of time to complete if the service has a lot of data.
 - `service_host` (String) The hostname of the service.
 - `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
-- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable. To avoid storing passwords in state, use service_password_wo instead.
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.

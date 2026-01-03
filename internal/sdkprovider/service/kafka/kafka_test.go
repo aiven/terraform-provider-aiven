@@ -12,6 +12,7 @@ import (
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAiven_kafka(t *testing.T) {
@@ -503,5 +504,171 @@ kafka_user_config {
 				),
 			},
 		},
+	})
+}
+
+func TestAccAivenKafka_WriteOnlyPassword(t *testing.T) {
+	resourceName := "aiven_kafka.test"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	password1 := "CustomPassword123!@#"
+	password2 := "RotatedPassword456$%^"
+	password3 := "FinalPassword789&*("
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				Source:            "hashicorp/random",
+				VersionConstraint: ">= 3.0.0",
+			},
+		},
+		CheckDestroy: acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Create service with auto-generated password
+				Config: testAccKafkaResourceBasic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-kafka-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_username", "avnadmin"),
+					resource.TestCheckResourceAttrSet(resourceName, "service_password"), // verify password is in state
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					testAccCheckKafkaServicePasswordExists(resourceName),
+				),
+			},
+			{
+				// Step 2: Migrate to write-only password with explicit value
+				Config: testAccKafkaResourceWriteOnlyExplicit(rName, password1, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-kafka-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_username", "avnadmin"),
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"), // verify WO password NOT in state
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),  // verify old password cleared
+					testAccCheckKafkaServicePasswordMatches(resourceName, password1),      // verify actual password
+				),
+			},
+			{
+				// Step 3: Rotate password by incrementing version
+				Config: testAccKafkaResourceWriteOnlyExplicit(rName, password2, 2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "2"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					testAccCheckKafkaServicePasswordMatches(resourceName, password2), // verify password rotated
+				),
+			},
+			{
+				// Step 4: Another rotation
+				Config: testAccKafkaResourceWriteOnlyExplicit(rName, password3, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "3"),
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					testAccCheckKafkaServicePasswordMatches(resourceName, password3),
+				),
+			},
+			{
+				// Step 5: Switch back to auto-generated password
+				Config: testAccKafkaResourceBasic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-kafka-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_username", "avnadmin"),
+					resource.TestCheckResourceAttrSet(resourceName, "service_password"), // password back in state
+					resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+					resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "0"), // version reset to 0
+					testAccCheckKafkaServicePasswordExists(resourceName),
+					// Verify password changed from the custom one
+					testAccCheckKafkaServicePasswordNotMatches(resourceName, password3),
+				),
+			},
+		},
+	})
+}
+
+func testAccKafkaResourceBasic(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka" "test" {
+  project                 = "%[1]s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-kafka-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+`, acc.ProjectName(), name)
+}
+
+func testAccKafkaResourceWriteOnlyExplicit(name, password string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka" "test" {
+  project                     = "%[1]s"
+  cloud_name                  = "google-europe-west1"
+  plan                        = "startup-4"
+  service_name                = "test-acc-kafka-%[2]s"
+  maintenance_window_dow      = "monday"
+  maintenance_window_time     = "10:00:00"
+  service_password_wo         = "%[3]s"
+  service_password_wo_version = %[4]d
+}
+`, acc.ProjectName(), name, password, version)
+}
+
+// testAccCheckKafkaServicePassword is a generic helper that validates the service password using a custom validation function
+func testAccCheckKafkaServicePassword(resourceName string, validateFn func(password string) error) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		projectName, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("error parsing resource ID: %w", err)
+		}
+
+		client, err := acc.GetTestGenAivenClient()
+		if err != nil {
+			return fmt.Errorf("error getting client: %w", err)
+		}
+
+		user, err := client.ServiceUserGet(context.Background(), projectName, serviceName, "avnadmin")
+		if err != nil {
+			return fmt.Errorf("error getting avnadmin user: %w", err)
+		}
+
+		if user.Password == "" {
+			return fmt.Errorf("avnadmin password is empty in API response")
+		}
+
+		return validateFn(user.Password)
+	}
+}
+
+// testAccCheckKafkaServicePasswordExists verifies that the service password exists and is not empty
+func testAccCheckKafkaServicePasswordExists(resourceName string) resource.TestCheckFunc {
+	return testAccCheckKafkaServicePassword(resourceName, func(password string) error {
+		return nil // Password existence already checked in the generic function
+	})
+}
+
+// testAccCheckKafkaServicePasswordMatches verifies that the actual password matches the expected value
+func testAccCheckKafkaServicePasswordMatches(resourceName, expectedPassword string) resource.TestCheckFunc {
+	return testAccCheckKafkaServicePassword(resourceName, func(password string) error {
+		if password != expectedPassword {
+			return fmt.Errorf("avnadmin password does not match expected value: got %q, want %q", password, expectedPassword)
+		}
+		return nil
+	})
+}
+
+// testAccCheckKafkaServicePasswordNotMatches verifies that the password has changed from a previous value
+func testAccCheckKafkaServicePasswordNotMatches(resourceName, oldPassword string) resource.TestCheckFunc {
+	return testAccCheckKafkaServicePassword(resourceName, func(password string) error {
+		if password == oldPassword {
+			return fmt.Errorf("avnadmin password still matches old value: %q", oldPassword)
+		}
+		return nil
 	})
 }
