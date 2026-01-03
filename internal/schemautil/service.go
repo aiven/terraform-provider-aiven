@@ -1109,11 +1109,14 @@ func upsertServicePassword(ctx context.Context, d *schema.ResourceData, project,
 
 	if passwordWoAttr.IsNull() {
 		// write-only password removed - reset to auto-generated
-		// when switching from write-only back to auto-generated
-		// we need to actually reset the password, otherwise it stays at the old value
-		_, err = avnGen.ServiceUserCredentialsReset(ctx, project, serviceName, "avnadmin")
-		if err != nil {
-			return fmt.Errorf("failed to reset avnadmin password to auto-generated: %w", err)
+		// Only reset if this is an update operation (not initial creation)
+		// During update, when the user removes the write-only password, we need to reset
+		// During initial creation, the service already has an auto-generated password
+		if !d.IsNewResource() {
+			_, err = avnGen.ServiceUserCredentialsReset(ctx, project, serviceName, "avnadmin")
+			if err != nil {
+				return fmt.Errorf("failed to reset avnadmin password to auto-generated: %w", err)
+			}
 		}
 
 		return nil
