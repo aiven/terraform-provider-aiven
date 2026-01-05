@@ -551,6 +551,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
+	err = client.ProjectServiceTagsReplace(ctx, project, s.ServiceName, &service.ProjectServiceTagsReplaceIn{
 	username := adminUsername(s, serviceType)
 	if err := upsertServicePassword(ctx, d, avnGen, username); err != nil {
 		return diag.Errorf("error setting service password for %s/%s: %s", project, s.ServiceName, err)
