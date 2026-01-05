@@ -83,7 +83,7 @@ Read-Only:
 - `service_name` (String) Service name.
 - `service_type` (String) Service type code.
 - `service_type_description` (String) Single line description of the service.
-- `service_uri` (String) URI for connecting to the service (may be null).
+- `service_uri` (String, Sensitive) URI for connecting to the service (may be null).
 - `state` (String) State of the service. The possible values are `POWEROFF`, `REBALANCING`, `REBUILDING` and `RUNNING`.
 - `termination_protection` (Boolean) Service is protected against termination and powering off.
 - `update_time` (String) Service last update timestamp (ISO 8601).

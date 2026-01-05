@@ -119,6 +119,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					"service_uri": schema.StringAttribute{
 						Computed:            true,
 						MarkdownDescription: "URI for connecting to the service (may be null).",
+						Sensitive:           true,
 					},
 					"state": schema.StringAttribute{
 						Computed:            true,

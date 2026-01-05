@@ -24,6 +24,17 @@ const (
 	importFileName   = "import.sh" // Terraform import command for the documentation page
 )
 
+// sensitiveFields is a list of field names that should be marked as sensitive by default
+// even if not marked in the definitions list.
+var sensitiveFields = []string{
+	"access_cert",
+	"access_key",
+	"private_key",
+	"password",
+	"password_wo",
+	"service_uri",
+}
+
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: ""})
 
@@ -487,8 +498,7 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		item.Name = newName
 	}
 
-	switch item.Name {
-	case "access_cert", "access_key", "private_key", "password", "password_wo":
+	if slices.Contains(sensitiveFields, item.Name) {
 		item.Sensitive = true
 	}
 
