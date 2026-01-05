@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=.schema.yml
+beta: false
+location: internal/plugin/service/servicelist
+datasource:
+  description: >
+    A list of all services in a project.
+idAttributeComposed: [project]
+clientHandler: project
+remove:
+  # Remove all complex nested objects - keep only essential flat attributes
+  - services/acl
+  - services/additional_regions
+  - services/backups
+  - services/components
+  - services/connection_info
+  - services/connection_pools
+  - services/databases
+  - services/features
+  - services/group_list
+  - services/kafka_acl
+  - services/maintenance
+  - services/metadata
+  - services/node_states
+  - services/schema_registry_acl
+  - services/server_group
+  - services/service_integrations
+  - services/service_notifications
+  - services/service_uri_params
+  - services/tags
+  - services/tech_emails
+  - services/topics
+  - services/user_config
+  - services/users
+operations:
+  - id: ServiceList
+    type: read
+    resultToKey: services
+schema:
+  services:
+    # The plugin framework very slow on "set of objects"
+    # Uses ordered array (list) instead of set
+    type: arrayOrdered
+
