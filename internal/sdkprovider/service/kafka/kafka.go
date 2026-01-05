@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
-	"strconv"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
@@ -90,8 +90,8 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 func ResourceKafka() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.",
-		CreateContext: resourceKafkaCreate,
-		ReadContext:   resourceKafkaRead,
+		CreateContext: common.WithGenClientDiag(resourceKafkaCreate),
+		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		Importer: &schema.ResourceImporter{
@@ -102,42 +102,19 @@ func ResourceKafka() *schema.Resource {
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeKafka),
-
-			// if a kafka_version is >= 3.0 then this schema field is not applicable
-			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
-				project := d.Get("project").(string)
-				serviceName := d.Get("service_name").(string)
-				client := m.(*aiven.Client)
-
-				kafka, err := client.Services.Get(ctx, project, serviceName)
-				if err != nil {
-					return false
-				}
-
-				if v, ok := kafka.UserConfig["kafka_version"]; ok {
-					if version, err := strconv.ParseFloat(v.(string), 64); err == nil {
-						if version >= 3 {
-							return true
-						}
-					}
-				}
-
-				return false
-			}),
 		),
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.Kafka(),
 	}
 }
 
-func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	if di := schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafka)(ctx, d, m); di.HasError() {
+func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	if di := schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafka)(ctx, d, client); di.HasError() {
 		return di
 	}
 
 	// if default_acl=false delete default wildcard Kafka ACL and ACLs for Schema Registry that are automatically created
 	if !d.Get("default_acl").(bool) {
-		client := m.(*aiven.Client)
 		project := d.Get("project").(string)
 		serviceName := d.Get("service_name").(string)
 
@@ -147,7 +124,8 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			defaultSchemaRegistryACLSubject = "default-sr-admin-subject"
 		)
 
-		if err := client.KafkaACLs.Delete(ctx, project, serviceName, defaultACLId); err != nil && !aiven.IsNotFound(err) {
+		_, err := client.ServiceKafkaAclDelete(ctx, project, serviceName, defaultACLId)
+		if err != nil && !avngen.IsNotFound(err) {
 			return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
 		}
 
@@ -156,60 +134,12 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			defaultSchemaRegistryACLSubject,
 		}
 		for _, acl := range defaultSchemaACLLs {
-			if err := client.KafkaSchemaRegistryACLs.Delete(ctx, project, serviceName, acl); err != nil && !aiven.IsNotFound(err) {
+			_, err := client.ServiceSchemaRegistryAclDelete(ctx, project, serviceName, acl)
+			if err != nil && !avngen.IsNotFound(err) {
 				return diag.Errorf("cannot delete `%s` kafka ACL for Schema Registry: %s", acl, err)
 			}
 		}
 	}
 
 	return nil
-}
-
-func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	project, service, err := schemautil.SplitResourceID2(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	kafka, err := client.Services.Get(ctx, project, service)
-	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
-	}
-
-	var diags diag.Diagnostics
-	var kafkaVersion float64
-	var schemaRegistry bool
-	var kafkaRest bool
-
-	if v, ok := kafka.UserConfig["kafka_version"]; ok {
-		if version, err := strconv.ParseFloat(v.(string), 64); err == nil {
-			kafkaVersion = version
-		}
-	}
-
-	if v, ok := kafka.UserConfig["schema_registry"]; ok && v.(bool) {
-		schemaRegistry = true
-	}
-
-	if v, ok := kafka.UserConfig["kafka_rest"]; ok && v.(bool) {
-		kafkaRest = true
-	}
-
-	// Checking is Confluent SR/REST -> Karapace migration is available
-	if kafkaVersion < 3.0 &&
-		((schemaRegistry && !kafka.Features.Karapace) ||
-			(kafkaRest && !kafka.Features.KafkaRest)) {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Warning,
-			Summary: "You are using Confluent Schema Registry v5.0 that is no longer supported " +
-				"on Kafka v3.0. Please switch to Karapace, a drop-in open source replacement " +
-				"before proceeding with the upgrade. To do that use aiven_kafka.karapace=true " +
-				"that will switch the service to use Karapace for schema registry and REST proxy. " +
-				"More information about Karpace is available in our documentation: https://aiven.io/docs/products/kafka/karapace",
-		})
-	}
-
-	return append(diags, schemautil.ResourceServiceRead(ctx, d, m)...)
 }

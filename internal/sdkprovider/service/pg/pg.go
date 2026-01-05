@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -188,7 +189,7 @@ func ResourcePG() *schema.Resource {
 		Description:   "Creates and manages an Aiven for PostgreSQL® service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypePG),
 		ReadContext:   schemautil.ResourceServiceRead,
-		UpdateContext: resourceServicePGUpdate,
+		UpdateContext: common.WithGenClientDiag(resourceServicePGUpdate),
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypePG),
 		Importer: &schema.ResourceImporter{
@@ -201,9 +202,7 @@ func ResourcePG() *schema.Resource {
 	}
 }
 
-func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -214,15 +213,17 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 	if userConfig["pg_version"] != nil {
-		s, err := client.Services.Get(ctx, projectName, serviceName)
+		s, err := client.ServiceGet(ctx, projectName, serviceName)
 		if err != nil {
 			return diag.Errorf("cannot get a common: %s", err)
 		}
 
-		if userConfig["pg_version"].(string) != s.UserConfig["pg_version"].(string) {
-			t, err := client.ServiceTask.Create(ctx, projectName, serviceName, aiven.ServiceTaskRequest{
-				TargetVersion: userConfig["pg_version"].(string),
-				TaskType:      "upgrade_check",
+		oldVersion := s.UserConfig["pg_version"].(string)
+		newVersion := userConfig["pg_version"].(string)
+		if oldVersion != newVersion {
+			t, err := client.ServiceTaskCreate(ctx, projectName, serviceName, &service.ServiceTaskCreateIn{
+				TargetVersion: service.TargetVersionType(newVersion),
+				TaskType:      service.TaskTypeUpgradeCheck,
 			})
 			if err != nil {
 				return diag.Errorf("cannot create PG upgrade check task: %s", err)
@@ -230,10 +231,10 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 			w := &ServiceTaskWaiter{
 				Context:     ctx,
-				Client:      m.(*aiven.Client),
+				Client:      client,
 				Project:     projectName,
 				ServiceName: serviceName,
-				TaskID:      t.Task.Id,
+				TaskID:      t.TaskId,
 			}
 
 			taskI, err := w.Conf(d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
@@ -241,25 +242,25 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				return diag.Errorf("error waiting for Aiven service task to be DONE: %s", err)
 			}
 
-			task := taskI.(*aiven.ServiceTaskResponse)
-			if !*task.Task.Success {
+			task := taskI.(*service.ServiceTaskGetOut)
+			if !task.Success {
 				return diag.Errorf(
 					"PG service upgrade check error, version upgrade from %s to %s, result: %s",
-					task.Task.SourcePgVersion, task.Task.TargetPgVersion, task.Task.Result)
+					oldVersion, newVersion, task.Result)
 			}
 
-			log.Printf("[DEBUG] PG service upgrade check result: %s", task.Task.Result)
+			log.Printf("[DEBUG] PG service upgrade check result: %s", task.Result)
 		}
 	}
 
-	return schemautil.ResourceServiceUpdate(ctx, d, m)
+	return schemautil.ResourceServiceUpdate(ctx, d, client)
 }
 
 // ServiceTaskWaiter is used to refresh the Aiven Service Task endpoints when
 // provisioning.
 type ServiceTaskWaiter struct {
 	Context     context.Context
-	Client      *aiven.Client
+	Client      avngen.Client
 	Project     string
 	ServiceName string
 	TaskID      string
@@ -268,7 +269,7 @@ type ServiceTaskWaiter struct {
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *ServiceTaskWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		t, err := w.Client.ServiceTask.Get(
+		t, err := w.Client.ServiceTaskGet(
 			w.Context,
 			w.Project,
 			w.ServiceName,
@@ -278,7 +279,7 @@ func (w *ServiceTaskWaiter) RefreshFunc() retry.StateRefreshFunc {
 			return nil, "", err
 		}
 
-		if t.Task.Success == nil {
+		if t.Result == "" {
 			return nil, "IN_PROGRESS", nil
 		}
 

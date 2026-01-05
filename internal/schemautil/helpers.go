@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
@@ -88,11 +90,11 @@ func ConvertToDiskSpaceMB(b string) int {
 	return int(diskSizeMB / units.MiB)
 }
 
-func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, s *service.ServiceGetOut) (PlanParameters, error) {
+func GetServicePlanParametersFromServiceResponse(ctx context.Context, client avngen.Client, project string, s *service.ServiceGetOut) (PlanParameters, error) {
 	return getServicePlanParametersInternal(ctx, client, project, s.ServiceType, s.Plan)
 }
 
-func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
+func GetServicePlanParametersFromSchema(ctx context.Context, client avngen.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
 	project := d.Get("project").(string)
 	serviceType := d.Get("service_type").(string)
 	servicePlan := d.Get("plan").(string)
@@ -100,21 +102,19 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
 }
 
-// fixme: GetPlane is not available in the generated client
-func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
-	servicePlanResponse, err := client.ServiceTypes.GetPlan(ctx, project, serviceType, servicePlan)
+func getServicePlanParametersInternal(ctx context.Context, client avngen.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
+	servicePlanResponse, err := client.ProjectServicePlanSpecsGet(ctx, project, serviceType, servicePlan)
 	if err != nil {
 		return PlanParameters{}, err
 	}
 	return PlanParameters{
-		DiskSizeMBDefault: servicePlanResponse.DiskSpaceMB,
-		DiskSizeMBMax:     servicePlanResponse.DiskSpaceCapMB,
-		DiskSizeMBStep:    servicePlanResponse.DiskSpaceStepMB,
+		DiskSizeMBDefault: servicePlanResponse.DiskSpaceMb,
+		DiskSizeMBMax:     lo.FromPtr(servicePlanResponse.DiskSpaceCapMb),
+		DiskSizeMBStep:    lo.FromPtr(servicePlanResponse.DiskSpaceStepMb),
 	}, nil
 }
 
-// fixme: GetPlanPricing is not available in the generated client
-func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
+func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client avngen.Client, d ResourceStateOrResourceDiff) (bool, error) {
 	// to check if dynamic disk space is allowed, we currently have to check
 	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
 
@@ -123,11 +123,11 @@ func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Clien
 	servicePlan := d.Get("plan").(string)
 	cloudName := d.Get("cloud_name").(string)
 
-	servicePlanPricingResponse, err := client.ServiceTypes.GetPlanPricing(ctx, project, serviceType, servicePlan, cloudName)
+	servicePlanPricingResponse, err := client.ProjectServicePlanPriceGet(ctx, project, serviceType, servicePlan, cloudName)
 	if err != nil {
 		return false, fmt.Errorf("unable to get service plan pricing from api: %w", err)
 	}
-	return len(servicePlanPricingResponse.ExtraDiskPricePerGBUSD) > 0, nil
+	return lo.FromPtr(servicePlanPricingResponse.ExtraDiskPricePerGbUsd) != "", nil
 }
 
 func HumanReadableByteSize(s int) string {

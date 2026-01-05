@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
@@ -132,7 +131,7 @@ func WaitForServiceUpdate(ctx context.Context, d ResourceData, client avngen.Cli
 	return aux.(*service.ServiceGetOut), nil
 }
 
-func WaitStaticIpsDissociation(ctx context.Context, d ResourceData, m interface{}) error {
+func WaitStaticIpsDissociation(ctx context.Context, d ResourceData, client avngen.Client) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
 
@@ -144,7 +143,7 @@ func WaitStaticIpsDissociation(ctx context.Context, d ResourceData, m interface{
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			if dis, err := staticIpsAreDisassociated(ctx, d, m); err != nil {
+			if dis, err := staticIpsAreDisassociated(ctx, d, client); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
 				log.Printf("[DEBUG] still waiting for static ips to be disassociated")
@@ -161,9 +160,7 @@ func WaitStaticIpsDissociation(ctx context.Context, d ResourceData, m interface{
 	return nil
 }
 
-func WaitForDeletion(ctx context.Context, d ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
-
+func WaitForDeletion(ctx context.Context, d ResourceData, client avngen.Client) error {
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -177,14 +174,14 @@ func WaitForDeletion(ctx context.Context, d ResourceData, m interface{}) error {
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			_, err := client.Services.Get(ctx, projectName, serviceName)
+			_, err := client.ServiceGet(ctx, projectName, serviceName)
 			if common.IsCritical(err) {
 				return nil, "", fmt.Errorf("unable to check if service is gone: %w", err)
 			}
 
 			log.Printf("[DEBUG] service gone, still waiting for static ips to be disassociated")
 
-			if dis, err := staticIpsDisassociatedAfterServiceDeletion(ctx, d, m); err != nil {
+			if dis, err := staticIpsDisassociatedAfterServiceDeletion(ctx, d, client); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
 				return struct{}{}, "deleting", nil
@@ -298,27 +295,26 @@ func staticIpsReady(ctx context.Context, d ResourceData, client avngen.Client) (
 func staticIpsDisassociatedAfterServiceDeletion(
 	ctx context.Context,
 	d ResourceData,
-	m interface{},
+	client avngen.Client,
 ) (bool, error) {
 	expectedStaticIps := staticIpsForServiceFromSchema(d)
 	if len(expectedStaticIps) == 0 {
 		return true, nil
 	}
 
-	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 
-	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
+	staticIpsList, err := client.StaticIPList(ctx, projectName)
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}
 
 	for _, eip := range expectedStaticIps {
-		for _, sip := range staticIpsList.StaticIPs {
+		for _, sip := range staticIpsList {
 			// no check for service name since after deletion the field is gone, but the
 			// static ip lingers in the assigned state for a while until it gets usable again
-			ipIsAssigned := sip.State == StaticIPAssigned
-			isExpectedIP := sip.StaticIPAddressID == eip
+			ipIsAssigned := sip.State == staticip.StaticIpStateTypeAssigned
+			isExpectedIP := sip.StaticIpAddressId == eip
 
 			if isExpectedIP && ipIsAssigned {
 				return false, nil
@@ -330,24 +326,23 @@ func staticIpsDisassociatedAfterServiceDeletion(
 
 // staticIpsAreDisassociated checks that after service update
 // all static ips that are not used by the service anymore are available again
-func staticIpsAreDisassociated(ctx context.Context, d ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
+func staticIpsAreDisassociated(ctx context.Context, d ResourceData, client avngen.Client) (bool, error) {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
+	staticIpsList, err := client.StaticIPList(ctx, projectName)
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}
 	currentStaticIps := staticIpsForServiceFromSchema(d)
 L:
-	for _, sip := range staticIpsList.StaticIPs {
+	for _, sip := range staticIpsList {
 		ipBelongsToService := sip.ServiceName == serviceName
 		if !ipBelongsToService {
 			continue L
 		}
 		for _, csip := range currentStaticIps {
-			if sip.StaticIPAddressID == csip {
+			if sip.StaticIpAddressId == csip {
 				continue L
 			}
 		}
