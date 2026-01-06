@@ -14,6 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
@@ -102,7 +104,7 @@ func ResourceServiceUserDelete(ctx context.Context, d ResourceData, client avnge
 	}
 
 	err = client.ServiceUserDelete(ctx, projectName, serviceName, username)
-	return OmitNotFound(err)
+	return common.OmitNotFound(err)
 }
 
 func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {

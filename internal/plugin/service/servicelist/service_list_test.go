@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 // TestAccAivenServiceListDataSource tests the aiven_service_list data source

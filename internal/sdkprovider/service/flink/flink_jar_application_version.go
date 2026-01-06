@@ -148,7 +148,7 @@ func flinkJarApplicationVersionDelete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	_, err = client.ServiceFlinkDeleteJarApplicationVersion(ctx, project, serviceName, applicationID, version)
-	return schemautil.OmitNotFound(err)
+	return common.OmitNotFound(err)
 }
 
 func uploadJarFile(ctx context.Context, sourcePath, sourceChecksum, urlPath string) error {
