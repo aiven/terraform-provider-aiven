@@ -596,7 +596,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var diskSpaceMb *int
 	s, err := avnGen.ServiceGet(ctx, projectName, serviceName)
 	if err != nil {
-		return nil
+		return diag.Errorf("error getting service %q: %s", serviceName, err)
 	}
 
 	if len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
