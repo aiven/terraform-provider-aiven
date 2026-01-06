@@ -14,6 +14,7 @@ nav_order: 1
 
 - Add `aiven_service_list` data source: list all services in a project
 - Fix `aiven_kafka_topic`: retry 404 errors from `KafkaTopicListV2` endpoint
+- Fix services: previously, if `ServiceGet` returned an error, the update could have been skipped
 - Change `aiven_kafka_connector` resource: migrate to use generated client
 - Migrate `aiven_organizational_unit` to the Plugin Framework
 - Migrate `aiven_mysql_database` to the Plugin Framework
