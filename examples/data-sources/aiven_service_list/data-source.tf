@@ -25,4 +25,3 @@ locals {
 output "kafka_service_names" {
   value = [for service in local.kafka_services : service.name]
 }
-

@@ -98,14 +98,15 @@
 |  92 | aiven_service_component                     |        |     1 |
 |  93 | aiven_service_integration                   |        |     2 |
 |  94 | aiven_service_integration_endpoint          |        |     2 |
-|  95 | aiven_service_plan                          | yes    |     1 |
-|  96 | aiven_service_plan_list                     | yes    |     1 |
-|  97 | aiven_static_ip                             |        |     1 |
-|  98 | aiven_thanos                                |        |     2 |
-|  99 | aiven_transit_gateway_vpc_attachment        |        |     2 |
-| 100 | aiven_valkey                                |        |     2 |
-| 101 | aiven_valkey_user                           |        |     2 |
+|  95 | aiven_service_list                          | yes    |     1 |
+|  96 | aiven_service_plan                          | yes    |     1 |
+|  97 | aiven_service_plan_list                     | yes    |     1 |
+|  98 | aiven_static_ip                             |        |     1 |
+|  99 | aiven_thanos                                |        |     2 |
+| 100 | aiven_transit_gateway_vpc_attachment        |        |     2 |
+| 101 | aiven_valkey                                |        |     2 |
+| 102 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 17%                          | 30     |   178 |
+|     | TOTAL MIGRATED 17%                          | 31     |   179 |
 +-----+---------------------------------------------+--------+-------+
 ```

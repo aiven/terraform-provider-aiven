@@ -40,4 +40,3 @@ schema:
     # The plugin framework very slow on "set of objects"
     # Uses ordered array (list) instead of set
     type: arrayOrdered
-
