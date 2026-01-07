@@ -369,7 +369,7 @@ func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc,
 	}
 	return retryGo.Do(
 		func() error {
-			return OmitNotFound(retryableFunc())
+			return common.OmitNotFound(retryableFunc())
 		},
 		append(options, opts...)...,
 	)

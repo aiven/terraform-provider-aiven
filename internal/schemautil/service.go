@@ -4,13 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 	"path/filepath"
 	"slices"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -1048,46 +1045,8 @@ func setProp[T comparable](m map[string]any, k string, v *T) {
 	}
 }
 
-// NewNotFound creates a new not found error
-// There are lots of endpoints that return a list of objects which might not contain the object we are looking for.
-// In this case, we should still return 404.
-func NewNotFound(msg string, args ...any) error {
-	return aiven.Error{Status: http.StatusNotFound, Message: fmt.Sprintf(msg, args...)}
-}
-
-func IsNotFound(err error) bool {
-	return aiven.IsNotFound(err) || avngen.IsNotFound(err)
-}
-
-func OmitNotFound(err error) error {
-	if IsNotFound(err) {
-		return nil
-	}
-	return err
-}
-
-// IsUnknownRole checks if the database returned an error because of an unknown role
-// to make deletions idempotent
-func IsUnknownRole(err error) bool {
-	var oldError aiven.Error
-	var newError avngen.Error
-	var msg string
-	switch {
-	case errors.As(err, &oldError):
-		msg = oldError.Message
-	case errors.As(err, &newError):
-		msg = newError.Message
-	}
-	return strings.Contains(msg, "Code: 511")
-}
-
-// IsUnknownResource is a function to handle errors that we want to treat as "Not Found"
-func IsUnknownResource(err error) bool {
-	return IsNotFound(err) || IsUnknownRole(err)
-}
-
 func ResourceReadHandleNotFound(err error, d ResourceData) error {
-	if err != nil && IsUnknownResource(err) && !d.IsNewResource() {
+	if err != nil && common.IsUnknownResource(err) && !d.IsNewResource() {
 		d.SetId("")
 		return nil
 	}

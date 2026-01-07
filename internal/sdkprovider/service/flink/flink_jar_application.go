@@ -97,5 +97,5 @@ func flinkJarApplicationDelete(ctx context.Context, d *schema.ResourceData, clie
 	}
 
 	_, err = client.ServiceFlinkDeleteJarApplication(ctx, project, serviceName, applicationID)
-	return schemautil.OmitNotFound(err)
+	return common.OmitNotFound(err)
 }

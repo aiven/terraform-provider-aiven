@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
@@ -443,7 +444,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		}
 
 		// This might help with knowing what ResourceReadHandleNotFound has set
-		log.Printf("[DEBUG] KafkaTopic get error %s, known=%v, is_new=%v", err, schemautil.IsUnknownResource(err), d.IsNewResource())
+		log.Printf("[DEBUG] KafkaTopic get error %s, known=%v, is_new=%v", err, common.IsUnknownResource(err), d.IsNewResource())
 
 		// Datasource sets id to find, this might drop id to empty
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))

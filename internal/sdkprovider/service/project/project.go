@@ -384,21 +384,6 @@ func resourceProjectGetCACert(
 	return nil
 }
 
-func getLongCardID(ctx context.Context, client *aiven.Client, cardID string) (*string, error) {
-	if cardID == "" {
-		return nil, nil
-	}
-
-	card, err := client.CardsHandler.Get(ctx, cardID)
-	if err != nil {
-		return nil, err
-	}
-	if card != nil {
-		return &card.CardID, nil
-	}
-	return &cardID, nil
-}
-
 func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bool) *[]*aiven.ContactEmail {
 	var results []*aiven.ContactEmail
 	// We don't want to send empty list for new resource if data is copied from other

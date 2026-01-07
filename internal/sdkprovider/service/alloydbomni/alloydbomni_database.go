@@ -129,5 +129,5 @@ func getDatabase(ctx context.Context, client avngen.Client, projectName, service
 		}
 	}
 
-	return nil, schemautil.NewNotFound("service database %q not found", dbName)
+	return nil, common.NewNotFound("service database %q not found", dbName)
 }

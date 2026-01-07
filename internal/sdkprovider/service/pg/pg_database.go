@@ -184,5 +184,5 @@ func getDatabaseByName(ctx context.Context, client avngen.Client, project, servi
 			return &db, nil
 		}
 	}
-	return nil, schemautil.NewNotFound("database %q not found", dbName)
+	return nil, common.NewNotFound("database %q not found", dbName)
 }
