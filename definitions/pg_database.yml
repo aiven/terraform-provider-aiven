@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/pg/database
+resource:
+  refreshState: true
+  removeMissing: true
+  terminationProtection: true
+  description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.
+datasource:
+  description: Gets information about an Aiven for PostgreSQL® database.
+clientHandler: service
+idAttributeComposed: [project, service_name, database_name]
+legacyTimeouts: true
+rename:
+  dbname: database_name
+  database: database_name
+operations:
+  - id: ServiceDatabaseCreate
+    type: create
+  - id: ServiceDatabaseDelete
+    type: delete
+  - id: ServiceDatabaseList
+    type: read
+    resultKey: databases
+    resultListLookupKeys:
+      DatabaseName: database_name
+schema:
+  lc_collate:
+    optional: true
+    default: en_US.UTF-8
+    forceNew: true
+    minLength: 1
+    description: Default string sort order (`LC_COLLATE`) of the database.
+  lc_ctype:
+    optional: true
+    default: en_US.UTF-8
+    forceNew: true
+    minLength: 1
+    description: Default character classification (`LC_CTYPE`) of the database.
