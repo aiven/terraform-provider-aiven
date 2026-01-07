@@ -387,23 +387,27 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 	req resource.ModifyPlanRequest,
 	rsp *resource.ModifyPlanResponse,
 ) {
-	// Checks if termination protection is enabled for this resource
-	if a.resource.TerminationProtection && req.Plan.Raw.IsNull() {
-		// req.Plan.Raw.IsNull() means "marked for deletion":
-		// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-destroy-plan-diagnostics
-		enabled := false
-		rsp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("termination_protection"), &enabled)...)
-		if rsp.Diagnostics.HasError() {
-			return
+	if req.Plan.Raw.IsNull() {
+		// Checks if termination protection is enabled for this resource
+		if a.resource.TerminationProtection {
+			// req.Plan.Raw.IsNull() means "marked for deletion":
+			// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-destroy-plan-diagnostics
+			enabled := false
+			rsp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("termination_protection"), &enabled)...)
+			if rsp.Diagnostics.HasError() {
+				return
+			}
+
+			if enabled {
+				rsp.Diagnostics.AddError(
+					errmsg.SummaryErrorDeletingResource,
+					fmt.Sprintf("The resource `%s` has termination protection enabled and cannot be deleted.", a.resource.TypeName),
+				)
+			}
 		}
 
-		if enabled {
-			rsp.Diagnostics.AddError(
-				errmsg.SummaryErrorDeletingResource,
-				fmt.Sprintf("The resource `%s` has termination protection enabled and cannot be deleted.", a.resource.TypeName),
-			)
-			return
-		}
+		// There is no plan to modify if the resource is marked for deletion
+		return
 	}
 
 	if a.resource.ModifyPlan == nil {
@@ -412,19 +416,25 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 
 	var (
 		plan   = instantiate[M]()
-		state  = instantiate[M]()
 		config = instantiate[M]()
 		diags  = &rsp.Diagnostics
 	)
 
-	if !req.Plan.Raw.IsNull() {
-		// If resource is not marked for deletion.
-		diags.Append(req.Plan.Get(ctx, plan)...)
-		diags.Append(req.Config.Get(ctx, config)...)
-	}
-	diags.Append(req.State.Get(ctx, state)...)
+	diags.Append(req.Plan.Get(ctx, plan)...)
+	diags.Append(req.Config.Get(ctx, config)...)
 	if diags.HasError() {
 		return
+	}
+
+	var stateOrNil *T
+	if !req.State.Raw.IsNull() {
+		// During create planning, state is null. Let the ModifyPlan hook decide how to handle a nil state
+		state := instantiate[M]()
+		diags.Append(req.State.Get(ctx, state)...)
+		if diags.HasError() {
+			return
+		}
+		stateOrNil = state.SharedModel()
 	}
 
 	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutRead)
@@ -434,7 +444,7 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 	}
 	defer cancel()
 
-	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
+	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), stateOrNil, config.SharedModel())...)
 	if diags.HasError() {
 		return
 	}
