@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.49.0] - 2026-01-08
+
 - Add `aiven_service_list` data source: list all services in a project
 - Fix `aiven_kafka_topic`: retry 404 errors from `KafkaTopicListV2` endpoint
 - Fix services: previously, if `ServiceGet` returned an error, the update could have been skipped
