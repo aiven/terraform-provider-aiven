@@ -14,6 +14,7 @@ nav_order: 1
 
 ## [4.49.0] - 2026-01-08
 
+- Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Add `aiven_service_list` data source: list all services in a project
 - Fix `aiven_kafka_topic`: retry 404 errors from `KafkaTopicListV2` endpoint
 - Fix services: previously, if `ServiceGet` returned an error, the update could have been skipped
