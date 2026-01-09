@@ -166,6 +166,11 @@ tasks:
     cmds:
       - "{{.GO_CMD}} run ./generators/plugin/..."
 
+  gen-plugin-report:
+    desc: "Generate plugin migration report"
+    cmds:
+      - "{{.GO_CMD}} run ./generators/pluginreport/..."
+
   gen-docs:
     desc: "Generate Terraform provider documentation"
     cmds:
@@ -187,6 +192,7 @@ tasks:
       - task: gen-plugin
         vars:
           no_spec: '{{.no_spec}}'
+      - task: gen-plugin-report
       - task: gen-docs
       - task: mockery
 

@@ -24,6 +24,7 @@ var (
 	reBulletLevel   = regexp.MustCompile(`^ *- +`)
 	reSpaces        = regexp.MustCompile(`\s+`)
 	reTrailingSpace = regexp.MustCompile(`\s+$`)
+	reEmptyLines    = regexp.MustCompile(`(?m)^\s*$\n`)
 )
 
 // updateChangelog updates the changelog with the given addLines
@@ -57,7 +58,7 @@ func updateChangelog(content string, lineLength int, reformat bool, addLines ...
 	}
 
 	result = append(result, lines[end+1:]...) // Adds the rest of the file
-	return strings.Join(result, "\n"), nil
+	return reEmptyLines.ReplaceAllString(strings.Join(result, "\n"), "\n"), nil
 }
 
 func parseItems(lines []string) ([]*changelogItem, int, int) {
