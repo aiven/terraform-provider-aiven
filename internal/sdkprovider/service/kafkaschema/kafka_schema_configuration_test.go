@@ -22,7 +22,25 @@ func TestAccAivenKafkaSchemaConfiguration_basic(t *testing.T) {
 		CheckDestroy:              testAccCheckAivenKafkaSchemaConfigurationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKafkaSchemaConfigurationResource(rName),
+				Config: testAccKafkaSchemaConfigurationResource(rName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "compatibility_level", "BACKWARD"),
+				),
+			},
+			{
+				// disable schema registry and remove the configuration resource simultaneously.
+				// provider should handle the 403 Forbidden error (due to disabled API)
+				Config: testAccKafkaSchemaConfigurationResource(rName, false, false),
+			},
+			{
+				// enable schema registry again, but without the configuration resource
+				Config: testAccKafkaSchemaConfigurationResource(rName, true, false),
+			},
+			{
+				// add the configuration resource back
+				Config: testAccKafkaSchemaConfigurationResource(rName, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
@@ -38,8 +56,8 @@ func testAccCheckAivenKafkaSchemaConfigurationResourceDestroy(_ *terraform.State
 	return nil
 }
 
-func testAccKafkaSchemaConfigurationResource(name string) string {
-	return fmt.Sprintf(`
+func testAccKafkaSchemaConfigurationResource(name string, schemaRegistry bool, includeConfig bool) string {
+	config := fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
@@ -53,17 +71,22 @@ resource "aiven_kafka" "bar" {
   maintenance_window_time = "10:00:00"
 
   kafka_user_config {
-    schema_registry = true
+    schema_registry = %t
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
     }
   }
 }
+`, acc.ProjectName(), name, schemaRegistry)
 
+	if includeConfig {
+		config += `
 resource "aiven_kafka_schema_configuration" "foo" {
   project             = data.aiven_project.foo.project
   service_name        = aiven_kafka.bar.service_name
   compatibility_level = "BACKWARD"
-}`, acc.ProjectName(), name)
+}`
+	}
+	return config
 }
