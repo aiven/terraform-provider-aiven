@@ -84,7 +84,7 @@ func exec() error {
 		return fmt.Errorf("could not save file %s: %w", providerPath, err)
 	}
 
-	return genReport()
+	return nil
 }
 
 const (

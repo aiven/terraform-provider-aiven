@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"maps"
 	"os"
-	"strings"
+	"slices"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/rs/zerolog/log"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -14,8 +17,25 @@ import (
 
 const reportFileName = "PLUGIN_MIGRATION.md"
 
-// genReport writes a table with: resource name, plugin indicator, count to reportFileName.
-func genReport() error {
+func main() {
+	if err := exec(); err != nil {
+		log.Fatal().Err(err).Msg("failed to generate report")
+	}
+}
+
+func exec() error {
+	file, err := os.Create(reportFileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return report(file)
+}
+
+// report generates a migration status report comparing plugin framework resources
+// and data sources with SDK provider resources and data sources.
+func report(w io.Writer) error {
 	if !util.IsBeta() {
 		return fmt.Errorf("please enable beta mode, i.e. set %s=1", util.AivenEnableBeta)
 	}
@@ -25,6 +45,7 @@ func genReport() error {
 		return err
 	}
 
+	// Collect all resources and data sources, marking which ones use the plugin framework
 	allRes := make(map[string]int)
 	pluginRes := make(map[string]bool)
 	for k := range plugin.ResourcesMap() {
@@ -42,7 +63,7 @@ func genReport() error {
 		allRes[k]++
 	}
 
-	// Write table to reportFileName.
+	// Build table with migration status
 	totalSdk := 0
 	totalPlugin := 0
 	tw := table.NewWriter()
@@ -65,10 +86,13 @@ func genReport() error {
 		table.Row{"", totalMigrated, totalPlugin, totalCount},
 	)
 
-	builder := strings.Builder{}
-	builder.WriteString("# Plugin Framework Migration Status\n\n")
-	builder.WriteString("```\n")
-	builder.WriteString(tw.Render())
-	builder.WriteString("\n```\n")
-	return os.WriteFile(reportFileName, []byte(builder.String()), 0o644)
+	_, err = fmt.Fprintf(w, "# Plugin Framework Migration Status\n\n```\n%s\n```\n", tw.Render())
+	return err
+}
+
+// sortedKeys sorts the keys alphabetically
+func sortedKeys[K ~string, V any](m map[K]V) []K {
+	keys := slices.Collect(maps.Keys(m))
+	slices.Sort(keys)
+	return keys
 }
