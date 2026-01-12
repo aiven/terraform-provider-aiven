@@ -73,9 +73,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_redis_user": redis.DatasourceRedisUser(),
 
 			// pg
-			"aiven_pg":          pg.DatasourcePG(),
-			"aiven_pg_user":     pg.DatasourcePGUser(),
-			"aiven_pg_database": pg.DatasourcePGDatabase(),
+			"aiven_pg":      pg.DatasourcePG(),
+			"aiven_pg_user": pg.DatasourcePGUser(),
 
 			// alloydbomni
 			"aiven_alloydbomni":          alloydbomni.DatasourceAlloyDBOmni(),
@@ -185,9 +184,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_redis_user": redis.ResourceRedisUser(),
 
 			// pg
-			"aiven_pg":          pg.ResourcePG(),
-			"aiven_pg_user":     pg.ResourcePGUser(),
-			"aiven_pg_database": pg.ResourcePGDatabase(),
+			"aiven_pg":      pg.ResourcePG(),
+			"aiven_pg_user": pg.ResourcePGUser(),
 
 			// alloydbomni
 			"aiven_alloydbomni":          alloydbomni.ResourceAlloyDBOmni(),

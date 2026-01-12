@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_pg_database` to the Plugin Framework
+
 ## [4.49.0] - 2026-01-08
 
 - Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
