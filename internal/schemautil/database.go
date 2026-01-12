@@ -48,16 +48,14 @@ func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeCon
 }
 
 var (
-	initialDatabases     sync.Map
-	initialDatabasesCall DoOnce
-	ErrDbAlreadyExists   = fmt.Errorf("database already exists")
+	seenDatabases       sync.Map
+	serviceDatabaseList DoOnce[bool]
+	ErrDbAlreadyExists  = fmt.Errorf("database already exists")
 )
 
 func ForgetDatabase(projectName, serviceName, dbName string) {
-	serviceKey := filepath.Join(projectName, serviceName)
-	dbKey := filepath.Join(serviceKey, dbName)
-	initialDatabasesCall.Forget(serviceKey)
-	initialDatabases.Delete(dbKey)
+	dbKey := filepath.Join(projectName, serviceName, dbName)
+	seenDatabases.Delete(dbKey)
 }
 
 // CheckDbConflict sometimes the API might return 5xx, but it actually creates the database.
@@ -72,30 +70,28 @@ func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, ser
 
 	// First loads the remote state to share this data across all resources.
 	serviceKey := filepath.Join(projectName, serviceName)
-	err = initialDatabasesCall.Do(serviceKey, func() error {
+	_, err = serviceDatabaseList.Do(func() (bool, error) {
 		list, err := client.ServiceDatabaseList(ctx, projectName, serviceName)
 		if err != nil {
-			return err
+			return false, err
 		}
-
 		for _, db := range list {
 			k := filepath.Join(serviceKey, db.DatabaseName)
-			initialDatabases.Store(k, true)
+			seenDatabases.Store(k, true)
 		}
-
-		return nil
-	})
+		return true, nil
+	}, serviceKey)
 	if err != nil {
 		// Super important to override this error: ServiceDatabaseList is widely used in the provider,
 		// we need to ensure where the error comes from.
 		return fmt.Errorf("error checking databases for conflict: %w", err)
 	}
 
-	// initialDatabases not contains the remote list of databases.
+	// serviceDatabaseList not contains the remote list of databases.
 	// Checks if the database on the list.
 	// Additionally, it stores new keys to prevent creating duplicates on TF level.
 	dbKey := filepath.Join(serviceKey, dbName)
-	_, ok := initialDatabases.LoadOrStore(dbKey, true)
+	_, ok := seenDatabases.LoadOrStore(dbKey, true)
 	if ok {
 		return fmt.Errorf("%w: %s", ErrDbAlreadyExists, dbName)
 	}

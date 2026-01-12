@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/agnivade/levenshtein"
 	"github.com/aiven/aiven-go-client/v2"
@@ -329,10 +328,7 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	return diff.SetNew(k, "0B")
 }
 
-var (
-	planListCache sync.Map
-	planListOnce  DoOnce
-)
+var projectServicePlanList DoOnce[[]projectpkg.ServicePlanOut]
 
 // CustomizeDiffCheckPlan validates that the service plan exists and suggests similar plans if not found
 func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
@@ -353,29 +349,17 @@ func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ inter
 		maxSuggestions = 3
 	)
 
-	key := fmt.Sprintf("%s/%s", project, serviceType)
-	err = planListOnce.Do(key, func() error {
+	plans, err := projectServicePlanList.Do(func() ([]projectpkg.ServicePlanOut, error) {
 		plans, err := client.ProjectServicePlanList(ctx, project, serviceType)
-		if err == nil {
-			planListCache.Store(key, plans)
-			return nil
-		}
-
 		if avngen.IsNotFound(err) {
-			return nil // project may not exist yet, we cannot validate the plan
+			return nil, nil // project may not exist yet, we cannot validate the plan
 		}
 
-		return err
-	})
+		return plans, err
+	}, project, serviceType)
 	if err != nil {
 		return fmt.Errorf("unable to fetch service plans: %w", err)
 	}
-
-	load, ok := planListCache.Load(key)
-	if !ok {
-		return nil
-	}
-	plans := load.([]projectpkg.ServicePlanOut)
 
 	planNames := make([]string, 0, len(plans))
 	for _, p := range plans {

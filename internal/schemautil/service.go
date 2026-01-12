@@ -5,10 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -1112,16 +1110,13 @@ func ContainsRedactedCreds(config map[string]any) error {
 }
 
 var (
-	servicePoweredMap    sync.Map
-	servicePoweredGroup  DoOnce
+	servicePoweredOff    DoOnce[bool]
 	ErrServicePoweredOff = fmt.Errorf("the service is powered off")
 )
 
-// ServicePoweredForget for test purposes only.
-func ServicePoweredForget(project, serviceName string) {
-	key := filepath.Join(project, serviceName)
-	servicePoweredGroup.Forget(key)
-	servicePoweredMap.Delete(key)
+// ServicePoweredOffForget for test purposes only.
+func ServicePoweredOffForget(project, serviceName string) {
+	servicePoweredOff.Forget(project, serviceName)
 }
 
 // CheckServiceIsPowered checks if a service is powered on before performing operations that require it.
@@ -1130,21 +1125,16 @@ func ServicePoweredForget(project, serviceName string) {
 // "503: An error occurred. Please try again later."
 // This function provides a clearer error message by explicitly checking the service power state first.
 func CheckServiceIsPowered(ctx context.Context, client avngen.Client, project, serviceName string) error {
-	key := filepath.Join(project, serviceName)
-	err := servicePoweredGroup.Do(key, func() error {
+	isOff, err := servicePoweredOff.Do(func() (bool, error) {
 		s, err := client.ServiceGet(ctx, project, serviceName)
-		if err == nil {
-			servicePoweredMap.Store(key, s.State != service.ServiceStateTypePoweroff)
+		if err != nil {
+			return false, err
 		}
-		return err
-	})
-	if err != nil {
-		return err
-	}
+		return s.State == service.ServiceStateTypePoweroff, nil
+	}, project, serviceName)
 
-	isOn, _ := servicePoweredMap.Load(key)
-	if !isOn.(bool) {
+	if err == nil && isOff {
 		return ErrServicePoweredOff
 	}
-	return nil
+	return err
 }
