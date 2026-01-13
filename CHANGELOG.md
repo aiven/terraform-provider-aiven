@@ -13,6 +13,14 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Migrate `aiven_pg_database` to the Plugin Framework
+- Add `aiven_kafka` field `kafka_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum
+  value is 3 hours
+- Add `aiven_kafka` field `kafka_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups
+  older than this value will be automatically deleted
+- Change `aiven_kafka` field `kafka_user_config.kafka_diskless.enabled`: force new ~~`true`~~ → `false`
+- Add `aiven_pg` field `pg_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum value is 3 hours
+- Add `aiven_pg` field `pg_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups older
+  than this value will be automatically deleted
 
 ## [4.49.0] - 2026-01-08
 
