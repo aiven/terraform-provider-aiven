@@ -2,25 +2,21 @@ package kafkaschema
 
 import (
 	"context"
-	"errors"
 	"path/filepath"
-	"sync"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var (
-	schemaRegistryAvailabilityCache schemautil.DoOnce
-	schemaRegistryState             sync.Map
-)
+var schemaRegistryCheckGroup singleflight.Group
 
 var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -102,16 +98,18 @@ func resourceKafkaSchemaConfigurationRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
+	// if Schema Registry is disabled, the resource is considered deleted
+	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !enabled {
+		d.SetId("")
+		return nil
+	}
+
 	compatibilityLevel, err := client.ServiceSchemaRegistryGlobalConfigGet(ctx, project, serviceName)
 	if err != nil {
-		if isSchemaRegistryAPIError(err) {
-			enabled, checkErr := isSchemaRegistryEnabled(ctx, client, project, serviceName)
-			if checkErr == nil && !enabled {
-				d.SetId("")
-				return nil
-			}
-		}
-
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
@@ -136,6 +134,14 @@ func resourceKafkaSchemaConfigurationDelete(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
+	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !enabled {
+		return nil
+	}
+
 	_, err = client.ServiceSchemaRegistryGlobalConfigPut(
 		ctx,
 		project,
@@ -144,59 +150,34 @@ func resourceKafkaSchemaConfigurationDelete(ctx context.Context, d *schema.Resou
 			Compatibility: kafkaschemaregistry.CompatibilityTypeBackward,
 		})
 	if err != nil {
-		if isSchemaRegistryAPIError(err) {
-			enabled, checkErr := isSchemaRegistryEnabled(ctx, client, project, serviceName)
-			if checkErr == nil && !enabled {
-				return nil
-			}
-		}
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-// isSchemaRegistryEnabled checks if the Schema Registry is enabled in the parent Kafka service.
-// This is used to verify if a 403 Forbidden error from the Schema Registry API is due to the feature
-// being intentionally disabled, allowing the provider to handle it gracefully.
+// isSchemaRegistryEnabled checks if the Schema Registry is enabled
 func isSchemaRegistryEnabled(ctx context.Context, client avngen.Client, project, serviceName string) (bool, error) {
 	key := filepath.Join(project, serviceName)
 
-	err := schemaRegistryAvailabilityCache.Do(key, func() error {
+	v, err, _ := schemaRegistryCheckGroup.Do(key, func() (any, error) {
 		service, err := client.ServiceGet(ctx, project, serviceName)
 		if err != nil {
-			return err
+			return false, err
 		}
 
-		var enabled bool
 		if v, ok := service.UserConfig["schema_registry"]; ok {
 			if val, ok := v.(bool); ok {
-				enabled = val
+				return val, nil
 			}
 		}
 
-		schemaRegistryState.Store(key, enabled)
-
-		return nil
+		return false, nil
 	})
+
 	if err != nil {
 		return false, err
 	}
 
-	if v, ok := schemaRegistryState.Load(key); ok {
-		return v.(bool), nil
-	}
-
-	return false, nil
-}
-
-// isSchemaRegistryAPIError checks if the error is a 403 Forbidden error.
-// The Aiven API returns 403 when an optional feature (like Schema Registry) is disabled.
-func isSchemaRegistryAPIError(err error) bool {
-	var avngenErr avngen.Error
-	if errors.As(err, &avngenErr) {
-		return avngenErr.Status == 403
-	}
-
-	return false
+	return v.(bool), nil
 }
