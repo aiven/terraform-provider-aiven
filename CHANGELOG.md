@@ -9,6 +9,12 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+## [4.37.1] - 2026-01-14
+- Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
+- Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
+
 ## [4.37.0] - 2025-03-12
 
 - Fix user config plan suppresses `false` values 

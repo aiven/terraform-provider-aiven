@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hamba/avro/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -122,10 +122,10 @@ func normalizeJSONOrProtobufString(i any) string {
 func ResourceKafkaSchema() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.",
-		CreateContext: resourceKafkaSchemaUpsert,
-		UpdateContext: resourceKafkaSchemaUpsert,
-		ReadContext:   resourceKafkaSchemaRead,
-		DeleteContext: resourceKafkaSchemaDelete,
+		CreateContext: common.WithGenClientDiag(resourceKafkaSchemaUpsert),
+		UpdateContext: common.WithGenClientDiag(resourceKafkaSchemaUpsert),
+		ReadContext:   common.WithGenClientDiag(resourceKafkaSchemaRead),
+		DeleteContext: common.WithGenClientDiag(resourceKafkaSchemaDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -136,31 +136,29 @@ func ResourceKafkaSchema() *schema.Resource {
 	}
 }
 
-func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	subjectName := d.Get("subject_name").(string)
 
-	client := m.(*aiven.Client)
 	if d.HasChange("schema") {
 		// This call returns Schema ID, not its version
-		s, err := client.KafkaSubjectSchemas.Add(
+		schemaId, err := client.ServiceSchemaRegistrySubjectVersionPost(
 			ctx,
 			project,
 			serviceName,
 			subjectName,
-			aiven.KafkaSchemaSubject{
+			&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionPostIn{
 				Schema:     d.Get("schema").(string),
-				SchemaType: d.Get("schema_type").(string),
+				SchemaType: kafkaschemaregistry.SchemaType(d.Get("schema_type").(string)),
 			},
 		)
-
 		if err != nil {
 			return diag.Errorf("unable to add schema: %s", err)
 		}
 
 		// Gets Schema's version by its ID
-		version, err := getSchemaVersion(ctx, client, project, serviceName, subjectName, s.Id)
+		version, err := getSchemaVersion(ctx, client, project, serviceName, subjectName, schemaId)
 		if err != nil {
 			return diag.Errorf("unable to get schema version: %s", err)
 		}
@@ -172,75 +170,85 @@ func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, m in
 
 	// if compatibility_level has changed and the new value is not empty
 	if compatibility, ok := d.GetOk("compatibility_level"); ok {
-		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
+		_, err := client.ServiceSchemaRegistrySubjectConfigPut(
 			ctx,
 			project,
 			serviceName,
 			subjectName,
-			compatibility.(string),
+			&kafkaschemaregistry.ServiceSchemaRegistrySubjectConfigPutIn{
+				Compatibility: kafkaschemaregistry.CompatibilityType(compatibility.(string)),
+			},
 		)
-
 		if err != nil {
 			return diag.Errorf("unable to update configuration: %s", err)
 		}
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, subjectName))
-	return resourceKafkaSchemaRead(ctx, d, m)
+	return resourceKafkaSchemaRead(ctx, d, client)
 }
 
 // getSchemaVersion polls until the version with given Schema ID appears in the version list
-func getSchemaVersion(ctx context.Context, client *aiven.Client, project, serviceName, subjectName string, id int) (int, error) {
+func getSchemaVersion(ctx context.Context, client avngen.Client, project, serviceName, subjectName string, id int) (int, error) {
 	for {
 		select {
 		case <-ctx.Done():
 			return 0, ctx.Err()
 		case <-time.After(time.Second):
-			versions, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
+			versions, err := client.ServiceSchemaRegistrySubjectVersionsGet(ctx, project, serviceName, subjectName)
 			if err != nil {
 				return 0, err
 			}
 
-			for _, v := range versions.Versions {
-				s, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, v)
+			for _, v := range versions {
+				s, err := client.ServiceSchemaRegistrySubjectVersionGet(ctx, project, serviceName, subjectName, v)
 				if err != nil {
 					return 0, err
 				}
 
-				if s.Version.Id == id {
-					return s.Version.Version, nil
+				if s.Id == id {
+					return s.Version, nil
 				}
 			}
 		}
 	}
 }
 
-func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project, serviceName, subjectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	client := m.(*aiven.Client)
+	// if Schema Registry is disabled, the resource is considered deleted
+	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !enabled {
+		d.SetId("")
+		return nil
+	}
+
 	version := d.Get("version").(int)
 	if version == 0 {
 		// For data source type and "import"
-		r, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
+		versions, err := client.ServiceSchemaRegistrySubjectVersionsGet(ctx, project, serviceName, subjectName)
 		if err != nil {
 			return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 		}
-		version = slices.Max(r.Versions)
+		version = slices.Max(versions)
 		if err := d.Set("version", version); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	s, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, version)
+	s, err := client.ServiceSchemaRegistrySubjectVersionGet(ctx, project, serviceName, subjectName, version)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if err := d.Set("schema", s.Version.Schema); err != nil {
+	if err := d.Set("schema", s.Schema); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -254,29 +262,47 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	c, err := client.KafkaSubjectSchemas.GetConfiguration(ctx, project, serviceName, subjectName)
+	compatibilityLevel, err := client.ServiceSchemaRegistrySubjectConfigGet(
+		ctx,
+		project,
+		serviceName,
+		subjectName,
+		kafkaschemaregistry.ServiceSchemaRegistrySubjectConfigGetGlobalDefaultFallback(false),
+	)
 	if err != nil {
-		if !aiven.IsNotFound(err) {
-			return diag.FromErr(err)
+		if avngen.IsNotFound(err) {
+			return nil
 		}
-	} else {
-		if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
-			return diag.FromErr(err)
-		}
+
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("compatibility_level", string(compatibilityLevel)); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project, serviceName, schemaName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = m.(*aiven.Client).KafkaSubjectSchemas.Delete(ctx, project, serviceName, schemaName)
-	if common.IsCritical(err) {
+	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !enabled {
+		return nil
+	}
+
+	err = client.ServiceSchemaRegistrySubjectDelete(ctx, project, serviceName, schemaName)
+	if err != nil {
+		if common.IsCritical(err) {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
@@ -313,8 +339,17 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 			SchemaType: schemaType,
 		},
 	)
-
 	if err != nil {
+		// if Schema Registry is disabled, skip compatibility check
+		project := d.Get("project").(string)
+		serviceName := d.Get("service_name").(string)
+		enabled, checkErr := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+		if checkErr != nil {
+			return fmt.Errorf("unable to check schema registry status: %w", checkErr)
+		}
+		if !enabled {
+			return nil
+		}
 		return fmt.Errorf("unable to check schema validity: %w", err)
 	}
 

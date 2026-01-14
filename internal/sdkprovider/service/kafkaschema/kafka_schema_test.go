@@ -2,13 +2,12 @@ package kafkaschema_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -20,7 +19,7 @@ import (
 // TestAccAivenKafkaSchema_import_compatibility_level
 // checks that compatibility_level doesn't appear in plan after KafkaSchema import
 func TestAccAivenKafkaSchema_import_compatibility_level(t *testing.T) {
-	project := os.Getenv("AIVEN_PROJECT_NAME")
+	project := ProjectName()
 	serviceName := "test-acc-sr-" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resourceName := "aiven_kafka_schema.schema"
 	resource.ParallelTest(t, resource.TestCase{
@@ -61,7 +60,7 @@ resource "aiven_kafka" "kafka" {
   project      = %q
   service_name = %q
   cloud_name   = "google-europe-west1"
-  plan         = "startup-2"
+  plan         = "startup-4"
 
   kafka_user_config {
     schema_registry = true
@@ -112,7 +111,7 @@ func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema2"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
 					),
@@ -121,7 +120,7 @@ func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "schema_type", "JSON"),
-					resource.TestCheckResourceAttr(resourceName2, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName2, "project", ProjectName()),
 					resource.TestCheckResourceAttr(
 						resourceName2, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
 					),
@@ -130,6 +129,69 @@ func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(resourceName2, "version", "1"),
 					resource.TestCheckResourceAttr(resourceName2, "schema_type", "PROTOBUF"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccAivenKafkaSchema_schema_registry_lifecycle tests the complete lifecycle of managing
+// Kafka schemas when Schema Registry is enabled and disabled.
+func TestAccAivenKafkaSchema_schema_registry_lifecycle(t *testing.T) {
+	resourceName := "aiven_kafka_schema.foo"
+	sName := fmt.Sprintf("test-acc-sr-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                  func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories:  acc.TestProtoV6ProviderFactories,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// create schema with schema registry enabled
+				Config: testAccKafkaSchemaWithSchemaRegistryConfig(sName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "service_name", sName),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", "kafka-schema-lifecycle"),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+				),
+			},
+			{
+				// disable registry while keeping schema in config
+				// provider should handle 403 error and remove schema from state
+				Config:             testAccKafkaSchemaWithSchemaRegistryConfig(sName, false, true),
+				ExpectNonEmptyPlan: true, // schema removed from state, plan will want to recreate it
+			},
+			{
+				// re-enable registry, keep schema in config, schema should be recreated
+				Config: testAccKafkaSchemaWithSchemaRegistryConfig(sName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "service_name", sName),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", "kafka-schema-lifecycle"),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+				),
+			},
+			{
+				// disable registry and remove schema resource simultaneously, provider should handle 403 error during deletion
+				Config: testAccKafkaSchemaWithSchemaRegistryConfig(sName, false, false),
+			},
+			{
+				// re-enable registry without schema resource
+				// ensures service is in clean state after delete test
+				Config: testAccKafkaSchemaWithSchemaRegistryConfig(sName, true, false),
+			},
+			{
+				// add schema resource back
+				// Note: Version is "2" because Schema Registry maintains version history;
+				// the schema deleted in Step 4 was version 1, so recreating it assigns version 2
+				Config: testAccKafkaSchemaWithSchemaRegistryConfig(sName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "service_name", sName),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", "kafka-schema-lifecycle"),
+					resource.TestCheckResourceAttr(resourceName, "version", "2"),
 				),
 			},
 		},
@@ -149,7 +211,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 				Config: testAccKafkaSchemaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
@@ -160,7 +222,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 				Config: testAccKafkaSchemaResourceGoodUpdate(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "project", ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "2"),
@@ -185,7 +247,10 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 }
 
 func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return err
+	}
 
 	ctx := context.Background()
 
@@ -200,39 +265,36 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = c.Services.Get(ctx, projectName, serviceName)
+		_, err = c.ServiceGet(ctx, projectName, serviceName)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status == 404 {
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
 			return err
 		}
 
-		schemaList, err := c.KafkaSubjectSchemas.List(ctx, projectName, serviceName)
+		subjects, err := c.ServiceSchemaRegistrySubjects(ctx, projectName, serviceName)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status == 404 {
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
 			return err
 		}
 
-		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
-			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
+		for _, subject := range subjects {
+			versions, err := c.ServiceSchemaRegistrySubjectVersionsGet(ctx, projectName, serviceName, subject)
 			if err != nil {
-				var e aiven.Error
-				if errors.As(err, &e) && e.Status == 404 {
+				if avngen.IsNotFound(err) {
 					return nil
 				}
 
 				return err
 			}
 
-			if len(versions.Versions) > 0 {
-				return fmt.Errorf("kafka schema (%s) still exists", s)
+			if len(versions) > 0 {
+				return fmt.Errorf("kafka schema (%s) still exists", subject)
 			}
 		}
 
@@ -251,7 +313,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%[2]s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -323,7 +385,69 @@ data "aiven_kafka_schema" "schema2" {
   subject_name = aiven_kafka_schema.bar.subject_name
 
   depends_on = [aiven_kafka_schema.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, ProjectName(), name)
+}
+
+func testAccKafkaSchemaWithSchemaRegistryConfig(sName string, schemaRegistry bool, includeSchema bool) string {
+	config := fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    schema_registry = %t
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+`, sName, schemaRegistry)
+
+	if includeSchema {
+		config += `
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = aiven_kafka.bar.project
+  service_name        = aiven_kafka.bar.service_name
+  compatibility_level = "BACKWARD"
+}
+
+resource "aiven_kafka_schema" "foo" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = "kafka-schema-lifecycle"
+
+  schema = <<EOT
+    {
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
+    }
+  EOT
+}
+`
+	}
+
+	return fmt.Sprintf(config, ProjectName())
 }
 
 func testAccKafkaSchemaResource(name string) string {
@@ -335,7 +459,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -386,7 +510,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, ProjectName(), name, name)
 }
 
 func testAccKafkaSchemaResourceInvalidUpdate(name string) string {
@@ -398,7 +522,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -448,7 +572,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, ProjectName(), name, name)
 }
 
 func testAccKafkaSchemaResourceGoodUpdate(name string) string {
@@ -460,7 +584,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -517,7 +641,7 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}`, ProjectName(), name, name)
 }
 
 func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {
@@ -582,4 +706,23 @@ func TestAccAivenKafkaSchema_invalid_avro_schema(t *testing.T) {
 			},
 		},
 	})
+}
+
+const (
+	// Environment variables used in tests
+	envProjectName = "AIVEN_PROJECT_NAME"
+)
+
+// ProjectName returns the Aiven project name
+func ProjectName() string {
+	return getEnvVar(envProjectName)
+}
+
+// getEnvVar returns environment variable value or empty string if not set
+func getEnvVar(name string) string {
+	val, ok := os.LookupEnv(name)
+	if !ok {
+		return ""
+	}
+	return val
 }
