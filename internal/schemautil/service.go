@@ -653,11 +653,6 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 	if _, err = WaitForServiceUpdate(ctx, d, client); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
 	}
-	//
-	//s, err = client.ServiceGet(ctx, projectName, serviceName)
-	//if err != nil {
-	//	return diag.Errorf("error getting service %q: %s", serviceName, err)
-	//}
 
 	username := adminUsername(s, serviceType)
 	if err := upsertServicePassword(ctx, d, client, username); err != nil {
