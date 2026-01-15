@@ -30,6 +30,16 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"backup_interval_hours": {
+				Description: "Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"backup_retention_days": {
+				Description: "Number of days to retain automatic backups. Backups older than this value will be automatically deleted. (Applicable to ACU plans only). Example: `7`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"custom_domain": {
 				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.",
 				Optional:    true,
@@ -549,7 +559,6 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka Diskless configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
 					Description: "Whether to enable the Diskless functionality.",
-					ForceNew:    true,
 					Required:    true,
 					Type:        schema.TypeBool,
 				}}},
