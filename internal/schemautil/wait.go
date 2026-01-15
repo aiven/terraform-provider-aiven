@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -379,31 +380,36 @@ func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc,
 const RetryNotFoundAttempts = 10
 
 // DoOnce provides functionality similar to sync.Once but supports multiple keys.
-// It caches the result of each function call (either error or nil).
-type DoOnce struct {
+// It caches the result of given function call.
+type DoOnce[T any] struct {
 	mutexes sync.Map
 	results sync.Map
 }
 
-func (d *DoOnce) Do(key string, fn func() error) error {
-	mtx, _ := d.mutexes.LoadOrStore(key, &sync.Mutex{})
+type doOnceResult[T any] struct {
+	val T
+	err error
+}
+
+func (d *DoOnce[T]) Do(fn func() (T, error), key ...string) (T, error) {
+	k := filepath.Join(key...)
+	mtx, _ := d.mutexes.LoadOrStore(k, &sync.Mutex{})
 	m := mtx.(*sync.Mutex)
 	m.Lock()
 	defer m.Unlock()
 
-	v, ok := d.results.Load(key)
+	v, ok := d.results.Load(k)
 	if ok {
-		if v == nil {
-			return nil
-		}
-		return v.(error)
+		res := v.(*doOnceResult[T])
+		return res.val, res.err
 	}
 
-	err := fn()
-	d.results.Store(key, err)
-	return err
+	val, err := fn()
+	d.results.Store(k, &doOnceResult[T]{val: val, err: err})
+	return val, err
 }
 
-func (d *DoOnce) Forget(key string) {
-	d.results.Delete(key)
+func (d *DoOnce[T]) Forget(key ...string) {
+	k := filepath.Join(key...)
+	d.results.Delete(k)
 }
