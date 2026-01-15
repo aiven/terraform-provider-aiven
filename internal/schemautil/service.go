@@ -555,7 +555,6 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error setting service password for %s/%s: %s", project, s.ServiceName, err)
 	}
 
-	_, err = client.ServiceTags.Set(ctx, project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
 	err = client.ProjectServiceTagsReplace(ctx, project, s.ServiceName, &service.ProjectServiceTagsReplaceIn{
 		Tags: GetTagsFromSchema(d),
 	})
