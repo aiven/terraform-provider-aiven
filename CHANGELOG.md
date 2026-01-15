@@ -13,11 +13,14 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Migrate `aiven_pg_database` to the Plugin Framework
+- Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
+- Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
+- Change all service types to use generated client: `aiven_alloydbomni`, `aiven_cassandra`, `aiven_clickhouse`,
+  `aiven_dragonfly`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`, `aiven_kafka_mirrormaker`,
+  `aiven_m3aggregator`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos`, `aiven_valkey`
 
 ## [4.49.0] - 2026-01-08
 
-- Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
-- Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Add `aiven_service_list` data source: list all services in a project
 - Fix `aiven_kafka_topic`: retry 404 errors from `KafkaTopicListV2` endpoint
 - Fix services: previously, if `ServiceGet` returned an error, the update could have been skipped

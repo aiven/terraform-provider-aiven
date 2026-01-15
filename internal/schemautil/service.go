@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
@@ -371,28 +370,33 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 }
 
 func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
-	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return common.WithGenClientDiag(func(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 		if err := d.Set("service_type", serviceType); err != nil {
 			return diag.Errorf("error setting service_type: %s", err)
 		}
-		return resourceServiceCreate(ctx, d, m)
-	}
+		return resourceServiceCreate(ctx, d, client)
+	})
 }
 
-func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+	return common.WithGenClientDiag(resourceServiceRead)(ctx, d, m)
+}
 
+func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+	return common.WithGenClientDiag(resourceServiceUpdate)(ctx, d, m)
+}
+
+func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+	return common.WithGenClientDiag(resourceServiceDelete)(ctx, d, m)
+}
+
+func resourceServiceRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, err := SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	avnGen, err := common.GenClient()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	s, err := avnGen.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
+	s, err := client.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
 			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
@@ -416,7 +420,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to copy api response into terraform schema: %s", err)
 	}
 
-	serviceIps, err := ServiceStaticIpsList(ctx, avnGen, projectName, serviceName)
+	serviceIps, err := ServiceStaticIpsList(ctx, client, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("unable to currently allocated static ips: %s", err)
 	}
@@ -424,7 +428,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
 
-	tags, err := avnGen.ProjectServiceTagsList(ctx, projectName, serviceName)
+	tags, err := client.ProjectServiceTagsList(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("unable to get service tags: %s", err)
 	}
@@ -456,13 +460,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	avnGen, err := common.GenClient()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
 
@@ -511,17 +509,17 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		TechEmails:            technicalEmails,
 	}
 
-	if _, err = avnGen.ServiceCreate(ctx, project, serviceCreate); err != nil {
+	if _, err = client.ServiceCreate(ctx, project, serviceCreate); err != nil {
 		return diag.Errorf("error creating a service: %s", err)
 	}
 
 	// Create already takes care of static ip associations, no need to explictely associate them here
-	s, err := WaitForServiceCreation(ctx, d, avnGen)
+	s, err := WaitForServiceCreation(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
-	_, err = client.ServiceTags.Set(ctx, project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
+	err = client.ProjectServiceTagsReplace(ctx, project, s.ServiceName, &service.ProjectServiceTagsReplaceIn{
 		Tags: GetTagsFromSchema(d),
 	})
 	if err != nil {
@@ -530,16 +528,10 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	d.SetId(BuildResourceID(project, s.ServiceName))
 
-	return ResourceServiceRead(ctx, d, m)
+	return ResourceServiceRead(ctx, d, client)
 }
 
-func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	avnGen, err := common.GenClient()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	var karapace *bool
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
 		if k, ok := v.(bool); ok && k {
@@ -552,14 +544,14 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error splitting service id (%s): %s", d.Id(), err)
 	}
 
-	ass, dis, err := DiffStaticIps(ctx, d, avnGen)
+	ass, dis, err := DiffStaticIps(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("error diff static ips: %s", err)
 	}
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if _, err := avnGen.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpassociateIn{
+		if _, err := client.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpassociateIn{
 			ServiceName: serviceName,
 		}); err != nil {
 			return diag.Errorf("error associating Static IP (%s) to a service: %s", aip, err)
@@ -589,7 +581,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// Sends disk size only when there is no autoscaler enabled
 	var diskSpaceMb *int
-	s, err := avnGen.ServiceGet(ctx, projectName, serviceName)
+	s, err := client.ServiceGet(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("error getting service %q: %s", serviceName, err)
 	}
@@ -618,40 +610,40 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		TechEmails:            technicalEmails,
 	}
 
-	if _, err := avnGen.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
+	if _, err := client.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
 	}
 
-	if _, err = WaitForServiceUpdate(ctx, d, avnGen); err != nil {
+	if _, err = WaitForServiceUpdate(ctx, d, client); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
 	}
 
 	if len(dis) > 0 {
 		for _, dip := range dis {
-			if _, err := avnGen.ProjectStaticIPDissociate(ctx, projectName, dip); err != nil {
+			if _, err := client.ProjectStaticIPDissociate(ctx, projectName, dip); err != nil {
 				return diag.Errorf("error dissociating Static IP (%s) from the service (%s): %s", dip, serviceName, err)
 			}
 		}
-		if err = WaitStaticIpsDissociation(ctx, d, m); err != nil {
+		if err = WaitStaticIpsDissociation(ctx, d, client); err != nil {
 			return diag.Errorf("error waiting for Static IPs dissociation: %s", err)
 		}
 	}
 
-	_, err = client.ServiceTags.Set(ctx, projectName, serviceName, aiven.ServiceTagsRequest{
+	err = client.ProjectServiceTagsReplace(ctx, projectName, serviceName, &service.ProjectServiceTagsReplaceIn{
 		Tags: GetTagsFromSchema(d),
 	})
 	if err != nil {
 		return diag.Errorf("error setting service tags: %s", err)
 	}
 
-	return ResourceServiceRead(ctx, d, m)
+	return ResourceServiceRead(ctx, d, client)
 }
 
 // getDiskSpaceFromStateOrDiff three cases:
 // 1. disk_space is set
 // 2. plan disk space
 // 3. plan disk space + additional_disk_space
-func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client *aiven.Client) (int, error) {
+func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client avngen.Client) (int, error) {
 	if v, ok := d.GetOk("disk_space"); ok {
 		return ConvertToDiskSpaceMB(v.(string)), nil
 	}
@@ -659,7 +651,7 @@ func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceD
 	// Get service plan specific defaults
 	plan, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
-		if aiven.IsNotFound(err) {
+		if avngen.IsNotFound(err) {
 			return 0, nil
 		}
 		return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
@@ -705,21 +697,19 @@ func flattenIntegrations(integrations []service.ServiceIntegrationOut, kinds ...
 	return result
 }
 
-func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServiceDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, err := SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	if err := client.Services.Delete(ctx, projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
+	if err := client.ServiceDelete(ctx, projectName, serviceName); err != nil && !avngen.IsNotFound(err) {
 		return diag.Errorf("error deleting a service: %s", err)
 	}
 
 	// Delete already takes care of static IPs disassociation; no need to explicitly disassociate them here
 
-	if err := WaitForDeletion(ctx, d, m); err != nil {
+	if err := WaitForDeletion(ctx, d, client); err != nil {
 		return diag.Errorf("error waiting for service deletion: %s", err)
 	}
 	return nil
@@ -1051,25 +1041,25 @@ func ResourceReadHandleNotFound(err error, d ResourceData) error {
 	return err
 }
 
-func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+	return common.WithGenClientDiag(datasourceServiceRead)(ctx, d, m)
+}
 
+func datasourceServiceRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	d.SetId(BuildResourceID(projectName, serviceName))
 
-	services, err := client.Services.List(ctx, projectName)
-	if err != nil {
-		return diag.Errorf("error getting a list of services: %s", err)
+	diags := ResourceServiceRead(ctx, d, client)
+	if diags.HasError() {
+		return diags
 	}
 
-	for _, s := range services {
-		if s.Name == serviceName {
-			return ResourceServiceRead(ctx, d, m)
-		}
+	// When service is not found, ResourceReadHandleNotFound resets the ID.
+	if d.Id() == "" {
+		diags = append(diags, diag.Errorf("service %q not found in project %q", serviceName, projectName)...)
 	}
-
-	return diag.Errorf("common %s/%s not found", projectName, serviceName)
+	return diags
 }
 
 func getContactEmailListForAPI(d ResourceData) (*[]service.TechEmailIn, error) {

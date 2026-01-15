@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/agnivade/levenshtein"
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	projectpkg "github.com/aiven/go-client-codegen/handler/project"
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -90,7 +89,10 @@ func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ in
 }
 
 func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	client := m.(*aiven.Client)
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
 
 	if d.Get("service_type").(string) == "" {
 		return fmt.Errorf("cannot check dynamic disk space because service_type is empty")
@@ -98,7 +100,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 
 	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
-		if aiven.IsNotFound(err) {
+		if avngen.IsNotFound(err) {
 			return nil
 		}
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
@@ -179,7 +181,10 @@ func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.Res
 		return nil
 	}
 
-	client := m.(*aiven.Client)
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 	var plannedStaticIps []string
@@ -187,16 +192,16 @@ func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.Res
 		plannedStaticIps = FlattenToString(staticIps.(*schema.Set).List())
 	}
 
-	resp, err := client.StaticIPs.List(ctx, projectName)
+	resp, err := client.StaticIPList(ctx, projectName)
 	if err != nil {
 		return fmt.Errorf("unable to get static ips for project '%s': %w", projectName, err)
 	}
 
 	// Check that we block deletions that will fail because the ip belongs to the service
-	for _, sip := range resp.StaticIPs {
+	for _, sip := range resp {
 		associatedWithDifferentService := sip.ServiceName != "" && sip.ServiceName != serviceName
-		if associatedWithDifferentService && contains(plannedStaticIps, sip.StaticIPAddressID) {
-			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIPAddressID, sip.ServiceName)
+		if associatedWithDifferentService && contains(plannedStaticIps, sip.StaticIpAddressId) {
+			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIpAddressId, sip.ServiceName)
 		}
 
 	}

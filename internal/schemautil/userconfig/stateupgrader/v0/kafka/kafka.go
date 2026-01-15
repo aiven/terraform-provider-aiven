@@ -2,10 +2,8 @@ package kafka
 
 import (
 	"context"
-	"strconv"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -117,28 +115,6 @@ func ResourceKafka() *schema.Resource {
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
-
-			// if a kafka_version is >= 3.0 then this schema field is not applicable
-			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m any) bool {
-				project := d.Get("project").(string)
-				serviceName := d.Get("service_name").(string)
-				client := m.(*aiven.Client)
-
-				kafka, err := client.Services.Get(ctx, project, serviceName)
-				if err != nil {
-					return false
-				}
-
-				if v, ok := kafka.UserConfig["kafka_version"]; ok {
-					if version, err := strconv.ParseFloat(v.(string), 64); err == nil {
-						if version >= 3 {
-							return true
-						}
-					}
-				}
-
-				return false
-			}),
 		),
 	}
 }
