@@ -505,3 +505,10 @@ kafka_user_config {
 		},
 	})
 }
+
+func TestAccAivenKafkaPasswordRotation(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_kafka",
+		Username:     "avnadmin",
+	})
+}

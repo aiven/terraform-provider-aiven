@@ -312,3 +312,10 @@ func testAccCheckAivenServiceDragonflyAttributes(n string) resource.TestCheckFun
 		return nil
 	}
 }
+
+func TestAccAivenDragonfly_WriteOnlyPassword(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_dragonfly",
+		Username:     "default",
+	})
+}

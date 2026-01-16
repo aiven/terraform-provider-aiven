@@ -32,7 +32,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-Test$1234"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-Test$1234"),
 				),
 			},
 			{
@@ -42,7 +42,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-UpdatedPass$123"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-UpdatedPass$123"),
 				),
 			},
 			{
@@ -52,7 +52,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasGeneratedPassword(resourceName),
+					acc.TestAccPasswordHasGeneratedPassword(resourceName),
 				),
 			},
 			{
@@ -62,7 +62,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-Optional$Pass123"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-Optional$Pass123"),
 				),
 			},
 			{
@@ -72,7 +72,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasWOPassword(resourceName),
+					acc.TestAccPasswordHasWOPassword(resourceName),
 				),
 			},
 			{
@@ -82,7 +82,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasWOPassword(resourceName),
+					acc.TestAccPasswordHasWOPassword(resourceName),
 				),
 			},
 			{
@@ -92,7 +92,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasGeneratedPassword(resourceName),
+					acc.TestAccPasswordHasGeneratedPassword(resourceName),
 				),
 			},
 			{
@@ -102,7 +102,7 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
 				),
 			},
 		},

@@ -21,7 +21,7 @@ import (
 )
 
 func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
-	return customdiff.Sequence(
+	diffs := []schema.CustomizeDiffFunc{
 		SetServiceTypeIfEmpty(serviceType),
 		CustomizeDiffDisallowMultipleManyToOneKeys,
 		customdiff.IfValueChange("plan",
@@ -51,6 +51,81 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 			CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			CustomizeDiffCheckStaticIPDisassociation,
 		),
+	}
+
+	// only add password WO validation for services that support it
+	if supportsWriteOnlyPassword(serviceType) {
+		diffs = append(diffs,
+			CustomizeDiffServicePasswordWoVersion,
+			CustomizeDiffWriteOnlyPasswordTransitionWarning("service_password", "service_password_wo_version"),
+			CustomizeDiffCheckServicePasswordWoAndAdminPassword,
+		)
+	}
+
+	return customdiff.Sequence(diffs...)
+}
+
+// CustomizeDiffCheckServicePasswordWoAndAdminPassword checks that service_password_wo and admin_password
+// are not used simultaneously for services which supports it.
+// The admin_password field in user_config allows setting a custom password at service creation time,
+// while service_password_wo provides password management.
+// These two approaches manage the same password and cannot be used together.
+func CustomizeDiffCheckServicePasswordWoAndAdminPassword(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	woVersion := d.Get("service_password_wo_version").(int)
+	// if not using write-only password skip this check
+	if woVersion == 0 {
+		return nil
+	}
+
+	// iterate over all configuration keys to find user config blocks
+	for configKey, configValue := range d.GetRawConfig().AsValueMap() {
+		if !strings.HasSuffix(configKey, "_user_config") {
+			continue
+		}
+
+		// check if the config value is valid and non-empty
+		if configValue.IsNull() || !configValue.IsKnown() || len(configValue.AsValueSlice()) == 0 {
+			continue
+		}
+
+		// user_config blocks are lists with MaxItems: 1, so get the first only element
+		// ensure the config block is a map/object that we can iterate
+		val := configValue.AsValueSlice()
+		if !val[0].CanIterateElements() {
+			continue
+		}
+
+		// iterate through the config block fields to find admin_password
+		for key, value := range val[0].AsValueMap() {
+			if key == "admin_password" && !value.IsNull() && value.IsKnown() {
+				return fmt.Errorf("cannot set 'service_password_wo' and '%s.0.admin_password' simultaneously", configKey)
+			}
+		}
+	}
+
+	return nil
+}
+
+// CustomizeDiffWriteOnlyPasswordTransitionWarning checks for a transition from plaintext
+// password field to write-only field (version 0 -> >0). If detected, it forces the password field to be re-computed.
+// This ensures the plan shows that the plaintext password is being cleared from the state,
+// warning the user about potential breaking changes in downstream interpolations.
+func CustomizeDiffWriteOnlyPasswordTransitionWarning(passwordField, versionField string) schema.CustomizeDiffFunc {
+	return customdiff.If(
+		func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+			oldV, newV := d.GetChange(versionField)
+			var oldInt, newInt int
+			if oldV != nil {
+				oldInt = oldV.(int)
+			}
+			if newV != nil {
+				newInt = newV.(int)
+			}
+			return oldInt == 0 && newInt > 0
+		},
+		func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			return d.SetNewComputed(passwordField)
+		},
 	)
 }
 

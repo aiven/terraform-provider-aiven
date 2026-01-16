@@ -249,3 +249,179 @@ func testAccCheckAivenServiceMysqlAttributes(n string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+func TestAccAivenMySQLPasswordRotation(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_mysql",
+		Username:     "avnadmin",
+	})
+}
+
+// TestAccAivenMySQL_AdminPasswordConflicts tests conflicts between service_password_wo and admin_password
+func TestAccAivenMySQL_AdminPasswordConflicts(t *testing.T) {
+	t.Skip("This test will be enabled once service support write-only passwords")
+
+	resourceName := "aiven_mysql.test"
+
+	// create a service with only admin_password
+	t.Run("direct conflict at creation", func(t *testing.T) {
+		serviceName := acc.RandName("mysql")
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccMySQLResourceWithBothPasswords(serviceName, "custompass123!", 1),
+					ExpectError: regexp.MustCompile(
+						`cannot set 'service_password_wo' and 'mysql_user_config\.0\.admin_password' simultaneously`,
+					),
+				},
+			},
+		})
+	})
+
+	// create a service with only admin_password
+	t.Run("admin_password works independently", func(t *testing.T) {
+		serviceName := acc.RandName("mysql")
+		adminPassword := acctest.RandStringFromCharSet(16, acctest.CharSetAlphaNum) + "_Aa1"
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccMySQLResourceWithAdminPassword(serviceName, adminPassword),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "mysql_user_config.0.admin_password", adminPassword),
+						resource.TestCheckResourceAttrSet(resourceName, "service_password"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					),
+				},
+			},
+		})
+	})
+
+	// migrate from admin_password to write-only password
+	t.Run("migration path: admin_password to write-only", func(t *testing.T) {
+		serviceName := acc.RandName("mysql")
+		adminPassword := acctest.RandStringFromCharSet(16, acctest.CharSetAlphaNum) + "_Aa1"
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccMySQLResourceWithAdminPassword(serviceName, adminPassword),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(resourceName, "mysql_user_config.0.admin_password", adminPassword),
+						resource.TestCheckResourceAttrSet(resourceName, "service_password"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo_version"),
+					),
+				},
+				{
+					Config: testAccMySQLResourceWithBothPasswordsAfterCreation(serviceName, adminPassword, "newpass123!", 1),
+					ExpectError: regexp.MustCompile(
+						`cannot set 'service_password_wo' and 'mysql_user_config\.0\.admin_password' simultaneously`,
+					),
+				},
+				{
+					Config: testAccMySQLResourceWithWriteOnlyPasswordOnly(serviceName, "newpass123!", 1),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+						resource.TestCheckNoResourceAttr(resourceName, "service_password_wo"),
+						resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					),
+				},
+			},
+		})
+	})
+
+	// admin password cannot be added after creation
+	t.Run("reverse migration blocked: write-only to admin_password", func(t *testing.T) {
+		serviceName := acc.RandName("mysql")
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccMySQLResourceWithWriteOnlyPasswordOnly(serviceName, "testpass123!", 1),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_password_wo_version", "1"),
+						resource.TestCheckResourceAttr(resourceName, "service_password", ""),
+					),
+				},
+				{
+					Config:      testAccMySQLResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123!", "writeonly123!", 1),
+					ExpectError: regexp.MustCompile(`cannot set 'service_password_wo' and 'mysql_user_config\.0\.admin_password' simultaneously`),
+				},
+			},
+		})
+	})
+}
+
+func testAccMySQLResourceWithBothPasswords(name, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_mysql" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  service_password_wo         = %[3]q
+  service_password_wo_version = %[4]d
+
+  mysql_user_config {
+    admin_password = "ConflictingPassword123!"
+  }
+}
+`, acc.ProjectName(), name, woPassword, version)
+}
+
+func testAccMySQLResourceWithAdminPassword(name, adminPassword string) string {
+	return fmt.Sprintf(`
+resource "aiven_mysql" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  mysql_user_config {
+    admin_password = %[3]q
+  }
+}
+`, acc.ProjectName(), name, adminPassword)
+}
+
+func testAccMySQLResourceWithBothPasswordsAfterCreation(name, adminPassword, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_mysql" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-mysql-%[2]s"
+
+  service_password_wo         = %[4]q
+  service_password_wo_version = %[5]d
+
+  mysql_user_config {
+    admin_password = %[3]q
+  }
+}
+`, acc.ProjectName(), name, adminPassword, woPassword, version)
+}
+
+func testAccMySQLResourceWithWriteOnlyPasswordOnly(name, woPassword string, version int) string {
+	return fmt.Sprintf(`
+resource "aiven_mysql" "test" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+
+  service_password_wo         = %[3]q
+  service_password_wo_version = %[4]d
+}
+`, acc.ProjectName(), name, woPassword, version)
+}

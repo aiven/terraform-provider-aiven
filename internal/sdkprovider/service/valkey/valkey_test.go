@@ -267,3 +267,10 @@ func testAccCheckAivenServiceValkeyAttributes(n string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+func TestAccAivenValkeyPasswordRotation(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_valkey",
+		Username:     "default", // Valkey uses "default" not "avnadmin"
+	})
+}

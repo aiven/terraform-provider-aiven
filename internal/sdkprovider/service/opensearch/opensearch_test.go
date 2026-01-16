@@ -278,3 +278,10 @@ resource "aiven_opensearch" "os2" {
   }
 }`, strings.Join(options, "\n"))
 }
+
+func TestAccAivenOpenSearchPasswordRotation(t *testing.T) {
+	acc.TestAccCheckAivenServiceWriteOnlyPassword(t, acc.ServicePasswordTestOptions{
+		ResourceType: "aiven_opensearch",
+		Username:     "avnadmin",
+	})
+}

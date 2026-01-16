@@ -71,7 +71,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-Test$1234"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-Test$1234"),
 
 					// Data source
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_kafka_user.user"),
@@ -87,7 +87,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-UpdatedP@ss5678"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-UpdatedP@ss5678"),
 
 					// Data source
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_kafka_user.user"),
@@ -103,7 +103,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasGeneratedPassword(resourceName),
+					acc.TestAccPasswordHasGeneratedPassword(resourceName),
 				),
 			},
 			{
@@ -116,7 +116,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-Optional$Pass123"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-Optional$Pass123"),
 				),
 			},
 			{
@@ -129,7 +129,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasWOPassword(resourceName),
+					acc.TestAccPasswordHasWOPassword(resourceName),
 				),
 			},
 			{
@@ -142,7 +142,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasWOPassword(resourceName),
+					acc.TestAccPasswordHasWOPassword(resourceName),
 				),
 			},
 			{
@@ -155,7 +155,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasGeneratedPassword(resourceName),
+					acc.TestAccPasswordHasGeneratedPassword(resourceName),
 				),
 			},
 			{
@@ -168,7 +168,7 @@ resource "aiven_kafka_user" "foo" {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 
 					// Password validation
-					acc.TestAccServiceUserHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
 				),
 			},
 		},
