@@ -96,6 +96,8 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `aiven_kafka_topic_messages` (Boolean)
+- `backup_interval_hours` (Number)
+- `backup_retention_days` (Number)
 - `custom_domain` (String)
 - `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
 - `ip_filter` (Set of String)
