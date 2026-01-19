@@ -445,7 +445,11 @@ func servicePrefix(opts ServicePasswordTestOptions) string {
 		return opts.ServicePrefix
 	}
 
-	return "test-acc-" + strings.TrimPrefix(opts.ResourceType, "aiven_")
+	return fmt.Sprintf(
+		"%s-%s",
+		DefaultResourceNamePrefix,
+		strings.TrimPrefix(opts.ResourceType, "aiven_"),
+	)
 }
 
 // configBasic returns the config function to use (custom or generated)

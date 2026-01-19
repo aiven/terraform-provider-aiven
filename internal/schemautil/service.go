@@ -99,14 +99,21 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 	if supportsWriteOnlyPassword(kind) {
 		s["service_password"].Description = "Password used for connecting to the service, if applicable. To avoid storing passwords in state, use service_password_wo instead if available. **WARNING:** When using write-only password field (service_password_wo), this field will be cleared from state and return an empty string. Any downstream resources or interpolations referencing this attribute will receive an empty value."
 
+		// only PG, MySQL have admin_password in user_config
+		var conflictsWith []string
+		if slices.Contains([]string{ServiceTypePG, ServiceTypeMySQL}, kind) {
+			conflictsWith = []string{kind + "_user_config.0.admin_password"}
+		}
+
 		s["service_password_wo"] = &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			Sensitive:    true,
-			WriteOnly:    true,
-			RequiredWith: []string{"service_password_wo_version"},
-			ValidateFunc: validation.StringLenBetween(8, 256),
-			Description:  "Password used for connecting to the service, if applicable (write-only, not stored in state). Must be used with service_password_wo_version. Cannot be empty. **WARNING:** Enabling this feature will clear service_password from state. Update any references to service_password in downstream resources before enabling.",
+			Type:          schema.TypeString,
+			Optional:      true,
+			Sensitive:     true,
+			WriteOnly:     true,
+			RequiredWith:  []string{"service_password_wo_version"},
+			ConflictsWith: conflictsWith,
+			ValidateFunc:  validation.StringLenBetween(8, 256),
+			Description:   "Password used for connecting to the service, if applicable (write-only, not stored in state). Must be used with service_password_wo_version. Cannot be empty. **WARNING:** Enabling this feature will clear service_password from state. Update any references to service_password in downstream resources before enabling.",
 		}
 		s["service_password_wo_version"] = &schema.Schema{
 			Type:         schema.TypeInt,

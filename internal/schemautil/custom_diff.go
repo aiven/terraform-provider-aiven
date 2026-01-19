@@ -58,52 +58,10 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 		diffs = append(diffs,
 			CustomizeDiffServicePasswordWoVersion,
 			CustomizeDiffWriteOnlyPasswordTransitionWarning("service_password", "service_password_wo_version"),
-			CustomizeDiffCheckServicePasswordWoAndAdminPassword,
 		)
 	}
 
 	return customdiff.Sequence(diffs...)
-}
-
-// CustomizeDiffCheckServicePasswordWoAndAdminPassword checks that service_password_wo and admin_password
-// are not used simultaneously for services which supports it.
-// The admin_password field in user_config allows setting a custom password at service creation time,
-// while service_password_wo provides password management.
-// These two approaches manage the same password and cannot be used together.
-func CustomizeDiffCheckServicePasswordWoAndAdminPassword(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	woVersion := d.Get("service_password_wo_version").(int)
-	// if not using write-only password skip this check
-	if woVersion == 0 {
-		return nil
-	}
-
-	// iterate over all configuration keys to find user config blocks
-	for configKey, configValue := range d.GetRawConfig().AsValueMap() {
-		if !strings.HasSuffix(configKey, "_user_config") {
-			continue
-		}
-
-		// check if the config value is valid and non-empty
-		if configValue.IsNull() || !configValue.IsKnown() || len(configValue.AsValueSlice()) == 0 {
-			continue
-		}
-
-		// user_config blocks are lists with MaxItems: 1, so get the first only element
-		// ensure the config block is a map/object that we can iterate
-		val := configValue.AsValueSlice()
-		if !val[0].CanIterateElements() {
-			continue
-		}
-
-		// iterate through the config block fields to find admin_password
-		for key, value := range val[0].AsValueMap() {
-			if key == "admin_password" && !value.IsNull() && value.IsKnown() {
-				return fmt.Errorf("cannot set 'service_password_wo' and '%s.0.admin_password' simultaneously", configKey)
-			}
-		}
-	}
-
-	return nil
 }
 
 // CustomizeDiffWriteOnlyPasswordTransitionWarning checks for a transition from plaintext
@@ -439,6 +397,13 @@ func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ inter
 	}, project, serviceType)
 	if err != nil {
 		return fmt.Errorf("unable to fetch service plans: %w", err)
+	}
+
+	// skip validation if the project doesn't exist,
+	// the project might be created in the same TF config,
+	// so we can't validate the plan until apply time
+	if plans == nil {
+		return nil
 	}
 
 	planNames := make([]string, 0, len(plans))
