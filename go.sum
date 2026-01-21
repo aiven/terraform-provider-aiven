@@ -395,8 +395,8 @@ github.com/gostaticanalysis/nilerr v0.1.1/go.mod h1:wZYb6YI5YAxxq0i1+VJbY0s2YONW
 github.com/gostaticanalysis/testutil v0.3.1-0.20210208050101-bfb5c8eec0e4/go.mod h1:D+FIZ+7OahH3ePw/izIEeH5I06eKs1IKI4Xr64/Am3M=
 github.com/gostaticanalysis/testutil v0.5.0 h1:Dq4wT1DdTwTGCQQv3rl3IvD5Ld0E6HiY+3Zh0sUGqw8=
 github.com/gostaticanalysis/testutil v0.5.0/go.mod h1:OLQSbuM6zw2EvCcXTz1lVq5unyoNft372msDY0nY5Hs=
-github.com/gruntwork-io/terratest v0.54.0 h1:JOVATYDpU0NAPbEkgYUP50BR2m45UGiR4dbs20sKzck=
-github.com/gruntwork-io/terratest v0.54.0/go.mod h1:QvwQWZMTJmJB4E0d1Uc18quQm7+X53liKKp+fJSuaKA=
+github.com/gruntwork-io/terratest v0.55.0 h1:NgG6lm2dArdQ3KcOofw6PTfVRK1Flt7L3NNhFSBo72A=
+github.com/gruntwork-io/terratest v0.55.0/go.mod h1:OE0Jsc8Wn5kw/QySLbBd53g9Gt+xfDyDKChwRHwkKvI=
 github.com/hamba/avro/v2 v2.31.0 h1:wv3nmua7lCEIwWsb6vqsTS3pXktTxcKg5eoyNu0VhrU=
 github.com/hamba/avro/v2 v2.31.0/go.mod h1:t6lJYAGE5Mswfn17zjtyQsssRQgnqO6TXLBCHHWRqrw=
 github.com/hashicorp/cli v1.1.7 h1:/fZJ+hNdwfTSfsxMBa9WWMlfjUZbX8/LnUxgAd7lCVU=
