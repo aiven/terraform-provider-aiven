@@ -226,6 +226,11 @@ tasks:
       - "{{.GO_CMD}} get github.com/aiven/go-api-schemas@latest"
       - "{{.GO_CMD}} mod tidy"
 
+  dump-mockery:
+    desc: "Generate mocks after client updates"
+    cmds:
+      - task: mockery
+
   mockery:
     desc: "Generate mocks for interfaces"
     preconditions:

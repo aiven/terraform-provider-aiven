@@ -29,6 +29,7 @@ nav_order: 1
 - Add `aiven_pg` field `pg_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum value is 3 hours
 - Add `aiven_pg` field `pg_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups older
   than this value will be automatically deleted
+- Add `follower_fetching_enabled` field to `aiven_mirrormaker_replication_flow`: Assigns a Rack ID based on the availability-zone to enable follower fetching and rack awareness per replication flow
 
 ## [4.49.0] - 2026-01-08
 
