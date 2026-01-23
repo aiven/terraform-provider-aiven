@@ -18,6 +18,14 @@ nav_order: 1
 - Change all service types to use generated client: `aiven_alloydbomni`, `aiven_cassandra`, `aiven_clickhouse`,
   `aiven_dragonfly`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`, `aiven_kafka_mirrormaker`,
   `aiven_m3aggregator`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos`, `aiven_valkey`
+- Add `aiven_kafka` field `kafka_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum
+  value is 3 hours
+- Add `aiven_kafka` field `kafka_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups
+  older than this value will be automatically deleted
+- Change `aiven_kafka` field `kafka_user_config.kafka_diskless.enabled`: force new ~~`true`~~ → `false`
+- Add `aiven_pg` field `pg_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum value is 3 hours
+- Add `aiven_pg` field `pg_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups older
+  than this value will be automatically deleted
 
 ## [4.49.0] - 2026-01-08
 
