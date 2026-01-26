@@ -142,3 +142,39 @@ func TestAccAivenBillingGroupDataSource_basic(t *testing.T) {
 		},
 	})
 }
+
+// TestAccAivenBillingGroup_backward_compatibility tests that resources created with the old SDK provider
+// can be read by the new Plugin Framework provider.
+// This is a regression test for the state migration issue where the old SDK state only had `id`
+// but the new Plugin Framework expects `billing_group_id` attribute.
+func TestAccAivenBillingGroup_backward_compatibility(t *testing.T) {
+	resourceName := "aiven_billing_group.compat"
+	rName := acc.RandName("compat-bg")
+	orgName := acc.OrganizationName()
+
+	config := fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = "%[1]s"
+}
+
+resource "aiven_billing_group" "compat" {
+  name             = "%[2]s"
+  parent_id        = data.aiven_organization.org.id
+  billing_currency = "EUR"
+}
+`, orgName, rName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: testAccCheckAivenBillingGroupResourceDestroy,
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			TFConfig:           config,
+			OldProviderVersion: "4.47.0",
+			Checks: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttrSet(resourceName, "id"),
+				resource.TestCheckResourceAttr(resourceName, "name", rName),
+				resource.TestCheckResourceAttr(resourceName, "billing_currency", "EUR"),
+			),
+		}),
+	})
+}
