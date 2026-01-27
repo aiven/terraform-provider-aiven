@@ -12,7 +12,6 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
-	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -153,8 +152,6 @@ func supportsWriteOnlyPassword(serviceType string) bool {
 	return slices.Contains(supportedServices, serviceType)
 }
 
-const diskSpaceDeprecation = "Please use `additional_disk_space` to specify the space to be added to the default disk space defined by the plan."
-
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
@@ -232,15 +229,14 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"disk_space": {
 			Type:          schema.TypeString,
 			Optional:      true,
-			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing. " + diskSpaceDeprecation,
+			Description:   "Service disk space to set. Possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"additional_disk_space"},
-			Deprecated:    diskSpaceDeprecation,
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "The disk space that the service is currently using. This is the sum of `disk_space` and `additional_disk_space` in human-readable format (for example: `90GiB`).",
+			Description: "The disk space that the service is currently using. This is the sum of the `plan` default disk space and `additional_disk_space` in human-readable format (for example: `90GiB`).",
 		},
 		"disk_space_default": {
 			Type:        schema.TypeString,
@@ -251,7 +247,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:          schema.TypeString,
 			Optional:      true,
 			Computed:      true,
-			Description:   "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes.",
+			Description:   "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30 GiB to the default disk space defined by the `plan`. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes.",
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"disk_space"},
 		},
@@ -449,7 +445,7 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, client avn
 		return diag.FromErr(err)
 	}
 
-	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
+	servicePlanParams, err := getServicePlanParametersInternal(ctx, client, projectName, s.ServiceType, s.Plan)
 	if err != nil {
 		return diag.Errorf("unable to get service plan parameters: %s", err)
 	}
@@ -523,7 +519,6 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.FromErr(err)
 	}
 
-	cloud := d.Get("cloud_name").(string)
 	terminationProtection := d.Get("termination_protection").(bool)
 	staticIps := FlattenToString(d.Get("static_ips").(*schema.Set).List())
 	serviceIntegrations := GetAPIServiceIntegrations(d)
@@ -534,7 +529,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 	}
 
 	serviceCreate := &service.ServiceCreateIn{
-		Cloud:                 &cloud,
+		Cloud:                 NilIfZero(d.Get("cloud_name").(string)),
 		Plan:                  d.Get("plan").(string),
 		ProjectVpcId:          vpcID,
 		ServiceIntegrations:   &serviceIntegrations,
@@ -693,25 +688,29 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 // 2. plan disk space
 // 3. plan disk space + additional_disk_space
 func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client avngen.Client) (int, error) {
-	if v, ok := d.GetOk("disk_space"); ok {
-		return ConvertToDiskSpaceMB(v.(string)), nil
+	if HasConfigValue(d, "disk_space") {
+		return ConvertToDiskSpaceMB(d.Get("disk_space").(string)), nil
 	}
 
 	// Get service plan specific defaults
 	plan, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
-		if avngen.IsNotFound(err) {
-			return 0, nil
-		}
 		return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 
-	// Adds additional_disk_space only if it is in the config
 	diskSpace := plan.DiskSizeMBDefault
 	if HasConfigValue(d, "additional_disk_space") {
+		if plan.IsEmpty() {
+			// Plan wasn't found in the old endpoint, can't use additional disk space.
+			servicePlan := d.Get("plan").(string)
+			return 0, fmt.Errorf("additional disk space can't be used with plan %q", servicePlan)
+		}
+
+		// Adds additional_disk_space to the plan values
 		diskSpace += ConvertToDiskSpaceMB(d.Get("additional_disk_space").(string))
 	}
 
+	// Zero when plan is empty
 	return diskSpace, nil
 }
 
@@ -803,33 +802,31 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	diskSpace := 0
-	if s.DiskSpaceMb != nil {
-		diskSpace = *s.DiskSpaceMb
-	}
-
-	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
-	if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
-		return err
-	}
-
-	_, isDiskSpaceSet := d.GetOk("disk_space")
-	if isDiskSpaceSet && diskSpace > 0 {
-		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+	diskSpace := lo.FromPtr(s.DiskSpaceMb)
+	if HasConfigValue(d, "disk_space") {
+		if err := d.Set("disk_space", HumanReadableByteSizeMB(diskSpace)); err != nil {
 			return err
 		}
 	}
 
-	if err := d.Set("disk_space_used", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+	diskSpaceAddMB := ""
+	if !servicePlanParams.IsEmpty() && diskSpace > servicePlanParams.DiskSizeMBDefault {
+		diskSpaceAddMB = HumanReadableByteSizeMB(diskSpace - servicePlanParams.DiskSizeMBDefault)
+	}
+
+	if err := d.Set("additional_disk_space", diskSpaceAddMB); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_default", HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
+	if err := d.Set("disk_space_used", HumanReadableByteSizeMB(diskSpace)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_step", HumanReadableByteSize(servicePlanParams.DiskSizeMBStep*units.MiB)); err != nil {
+	if err := d.Set("disk_space_default", HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBDefault)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_cap", HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
+	if err := d.Set("disk_space_step", HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBStep)); err != nil {
+		return err
+	}
+	if err := d.Set("disk_space_cap", HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBMax)); err != nil {
 		return err
 	}
 	if err := d.Set("service_uri", s.ServiceUri); err != nil {

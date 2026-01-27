@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 
-	"github.com/agnivade/levenshtein"
 	avngen "github.com/aiven/go-client-codegen"
-	projectpkg "github.com/aiven/go-client-codegen/handler/project"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,10 +20,6 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	diffs := []schema.CustomizeDiffFunc{
 		SetServiceTypeIfEmpty(serviceType),
 		CustomizeDiffDisallowMultipleManyToOneKeys,
-		customdiff.IfValueChange("plan",
-			ShouldNotBeEmpty,
-			CustomizeDiffCheckPlan,
-		),
 		customdiff.IfValueChange("tag",
 			ShouldNotBeEmpty,
 			CustomizeDiffCheckUniqueTag,
@@ -133,10 +125,11 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 
 	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
-		if avngen.IsNotFound(err) {
-			return nil
-		}
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
+	}
+
+	if servicePlanParams.IsEmpty() {
+		return nil
 	}
 
 	requestedDiskSpaceMB, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
@@ -162,10 +155,10 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 		}
 	}
 
-	humanReadableDiskSpaceDefault := HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault * units.MiB)
-	humanReadableDiskSpaceMax := HumanReadableByteSize(servicePlanParams.DiskSizeMBMax * units.MiB)
-	humanReadableDiskSpaceStep := HumanReadableByteSize(servicePlanParams.DiskSizeMBStep * units.MiB)
-	humanReadableRequestedDiskSpace := HumanReadableByteSize(requestedDiskSpaceMB * units.MiB)
+	humanReadableDiskSpaceDefault := HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBDefault)
+	humanReadableDiskSpaceMax := HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBMax)
+	humanReadableDiskSpaceStep := HumanReadableByteSizeMB(servicePlanParams.DiskSizeMBStep)
+	humanReadableRequestedDiskSpace := HumanReadableByteSizeMB(requestedDiskSpaceMB)
 
 	if requestedDiskSpaceMB < servicePlanParams.DiskSizeMBDefault {
 		return fmt.Errorf("requested disk size is too small: '%s' < '%s'", humanReadableRequestedDiskSpace, humanReadableDiskSpaceDefault)
@@ -364,106 +357,4 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	// We must output a diff for the computed field,
 	// which otherwise will be suppressed by TF
 	return diff.SetNew(k, "0B")
-}
-
-var projectServicePlanList DoOnce[[]projectpkg.ServicePlanOut]
-
-// CustomizeDiffCheckPlan validates that the service plan exists and suggests similar plans if not found
-func CustomizeDiffCheckPlan(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if !d.HasChange("plan") {
-		return nil
-	}
-
-	client, err := common.GenClient()
-	if err != nil {
-		return err
-	}
-
-	var (
-		project     = d.Get("project").(string)
-		serviceType = d.Get("service_type").(string)
-		plan        = d.Get("plan").(string)
-
-		maxSuggestions = 3
-	)
-
-	plans, err := projectServicePlanList.Do(func() ([]projectpkg.ServicePlanOut, error) {
-		plans, err := client.ProjectServicePlanList(ctx, project, serviceType)
-		if avngen.IsNotFound(err) {
-			return nil, nil // project may not exist yet, we cannot validate the plan
-		}
-
-		return plans, err
-	}, project, serviceType)
-	if err != nil {
-		return fmt.Errorf("unable to fetch service plans: %w", err)
-	}
-
-	// skip validation if the project doesn't exist,
-	// the project might be created in the same TF config,
-	// so we can't validate the plan until apply time
-	if plans == nil {
-		return nil
-	}
-
-	planNames := make([]string, 0, len(plans))
-	for _, p := range plans {
-		planNames = append(planNames, p.ServicePlan)
-		if p.ServicePlan == plan {
-			return nil
-		} // valid
-	}
-
-	suggestions := findSimilar(plan, planNames, maxSuggestions)
-
-	errMsg := fmt.Sprintf("invalid service plan %q for service type %q. ", plan, serviceType)
-	switch len(suggestions) {
-	case 0:
-	case 1:
-		errMsg += fmt.Sprintf("Did you mean: %s", suggestions[0])
-	default:
-		errMsg += fmt.Sprintf("Did you mean one of: %s", strings.Join(suggestions, ", "))
-	}
-
-	return fmt.Errorf("%s", errMsg)
-}
-
-// findSimilar finds the most similar strings using Levenshtein distance
-func findSimilar(target string, candidates []string, maxSuggestions int) []string {
-	type suggestion struct {
-		str      string
-		distance int
-	}
-
-	suggestions := make([]suggestion, 0, len(candidates))
-	targetLower := strings.ToLower(target)
-
-	// check for case-insensitive match
-	for _, candidate := range candidates {
-		if strings.EqualFold(target, candidate) {
-			return []string{candidate}
-		}
-	}
-
-	// max ~30% of string length
-	maxDistance := max(2, len(targetLower)*3/10)
-
-	for _, candidate := range candidates {
-		distance := levenshtein.ComputeDistance(targetLower, strings.ToLower(candidate))
-		if distance <= maxDistance {
-			suggestions = append(suggestions, suggestion{str: candidate, distance: distance})
-		}
-	}
-
-	sort.Slice(suggestions, func(i, j int) bool {
-		return suggestions[i].distance < suggestions[j].distance
-	})
-
-	lim := min(len(suggestions), maxSuggestions)
-	result := make([]string, lim)
-	for i := 0; i < lim; i++ {
-		result[i] = suggestions[i].str
-	}
-
-	return result
 }
