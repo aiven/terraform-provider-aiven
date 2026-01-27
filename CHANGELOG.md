@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.50.0] - 2026-01-27
+
 - Fix `aiven_billing_group`: fixed billing group compatibility issue
 - Migrate `aiven_pg_database` to the Plugin Framework
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
