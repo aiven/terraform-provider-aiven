@@ -131,6 +131,12 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 			"Enables exactly-once message delivery. Set this to `enabled` for new replications.",
 		).DefaultValue(false).Build(),
 	},
+	"follower_fetching_enabled": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+		Description: userconfig.Desc("Assigns a Rack ID based on the availability-zone to enable follower fetching and rack awareness per replication flow. Defaults to enabled by the service for new flows, but is left unchanged for existing ones when not set.").Build(),
+	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {

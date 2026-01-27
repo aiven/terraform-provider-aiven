@@ -38,6 +38,7 @@ data "aiven_mirrormaker_replication_flow" "example_replication_flow" {
 - `emit_heartbeats_enabled` (Boolean) Enables emitting heartbeats to the target cluster. The default value is `false`.
 - `enable` (Boolean) Enables replication flow for a service.
 - `exactly_once_delivery_enabled` (Boolean) Enables exactly-once message delivery. Set this to `enabled` for new replications. The default value is `false`.
+- `follower_fetching_enabled` (Boolean) Assigns a Rack ID based on the availability-zone to enable follower fetching and rack awareness per replication flow. Defaults to enabled by the service for new flows, but is left unchanged for existing ones when not set.
 - `id` (String) The ID of this resource.
 - `offset_syncs_topic_location` (String) Offset syncs topic location. The possible values are `source` and `target`.
 - `replication_factor` (Number) Replication factor, `>= 1`.
