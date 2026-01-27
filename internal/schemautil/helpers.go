@@ -35,6 +35,13 @@ type PlanParameters struct {
 	DiskSizeMBMax     int
 }
 
+// IsEmpty checks whether PlanParameters contains only zero values,
+// which usually indicates that the service plan is not compatible with legacy endpoints.
+// In such cases, calculations are performed with zero values as placeholders.
+func (p PlanParameters) IsEmpty() bool {
+	return p.DiskSizeMBDefault == 0
+}
+
 func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceIntegrationIn {
 	tfServiceIntegrations := d.Get("service_integrations").(*schema.Set).List()
 	apiServiceIntegrations := make([]service.ServiceIntegrationIn, 0, len(tfServiceIntegrations))
@@ -90,10 +97,6 @@ func ConvertToDiskSpaceMB(b string) int {
 	return int(diskSizeMB / units.MiB)
 }
 
-func GetServicePlanParametersFromServiceResponse(ctx context.Context, client avngen.Client, project string, s *service.ServiceGetOut) (PlanParameters, error) {
-	return getServicePlanParametersInternal(ctx, client, project, s.ServiceType, s.Plan)
-}
-
 func GetServicePlanParametersFromSchema(ctx context.Context, client avngen.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
 	project := d.Get("project").(string)
 	serviceType := d.Get("service_type").(string)
@@ -104,6 +107,11 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client avngen.Clien
 
 func getServicePlanParametersInternal(ctx context.Context, client avngen.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
 	servicePlanResponse, err := client.ProjectServicePlanSpecsGet(ctx, project, serviceType, servicePlan)
+	if avngen.IsNotFound(err) {
+		// It might be a new plan type, it's not available in ProjectServicePlanSpecsGet
+		return PlanParameters{}, nil
+	}
+
 	if err != nil {
 		return PlanParameters{}, err
 	}
@@ -130,12 +138,16 @@ func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client avngen.Clien
 	return lo.FromPtr(servicePlanPricingResponse.ExtraDiskPricePerGbUsd) != "", nil
 }
 
-func HumanReadableByteSize(s int) string {
+func humanReadableByteSize(s int) string {
 	// we only allow GiB as unit and show decimal places to MiB precision, this should fix rounding issues
 	// when converting from mb to human readable and back
 	suffixes := []string{"B", "KiB", "MiB", "GiB"}
 
 	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
+}
+
+func HumanReadableByteSizeMB(s int) string {
+	return humanReadableByteSize(s * units.MiB)
 }
 
 // IsOrganizationID is a helper function that returns true if the string is an organization ID.
