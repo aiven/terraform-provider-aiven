@@ -32,15 +32,25 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Optional
 
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text. Maximum length: `256`.
+- `payment_method` (Block List) Payment method. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--payment_method))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) VAT ID.
 
 ### Read-Only
 
 - `billing_group_id` (String) Billing group ID.
+- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
+
+<a id="nestedblock--payment_method"></a>
+### Nested Schema for `payment_method`
+
+Required:
+
+- `payment_method_id` (String) Payment method ID. Maximum length: `36`. Changing this property forces recreation of the resource.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`. Changing this property forces recreation of the resource.
+
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

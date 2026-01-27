@@ -41,9 +41,13 @@ datasourceSchema:
 	  billing_group_name     = "test"
 	  currency               = "AUD"
 	  custom_invoice_text    = "foo"
-	  payment_method_id      = "foo"
-	  shipping_address_id    = "foo"
-	  vat_id                 = "foo"
+	  payment_method {
+	    payment_method_id   = "foo"
+	    payment_method_type = "aws_subscription"
+	  }
+	  payment_method_id   = "foo"
+	  shipping_address_id = "foo"
+	  vat_id              = "foo"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -101,7 +105,22 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "VAT ID.",
 			},
 		},
-		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
+		Blocks: map[string]schema.Block{
+			"payment_method": schema.ListNestedBlock{
+				MarkdownDescription: "Payment method.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+					"payment_method_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Payment method ID.",
+					},
+					"payment_method_type": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.",
+					},
+				}},
+			},
+			"timeouts": timeouts.Block(ctx),
+		},
 		MarkdownDescription: "Gets information about a billing group. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

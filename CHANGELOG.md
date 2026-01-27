@@ -27,6 +27,11 @@ nav_order: 1
 - Add `aiven_pg` field `pg_user_config.backup_interval_hours`: Interval in hours between automatic backups. Minimum value is 3 hours
 - Add `aiven_pg` field `pg_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups older
   than this value will be automatically deleted
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3`
+- Add `aiven_organization_billing_group` resource field `payment_method`: Payment method. Changing this property forces
+  recreation of the resource.
+- Add `aiven_organization_billing_group` datasource field `payment_method`: Payment method.
+- Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
 
 ## [4.49.0] - 2026-01-08
 
