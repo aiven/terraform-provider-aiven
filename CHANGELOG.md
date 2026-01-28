@@ -12,6 +12,13 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix service `cloud_name`: was incorrectly sent as an empty string when not set
+- Remove plan name validation: newer plan names aren't available from default endpoints, so we can't distinguish between
+  "a typo" and "a new plan"
+- The service `disk_space` field is no longer deprecated; it is now marked as computed and optional. It can be used when
+  the plan disk size is "unknown", in which case `additional_disk_space` cannot be used.
+- Deprecate `disk_space_used`: the field duplicates `disk_space`.
+
 ## [4.50.0] - 2026-01-27
 
 - Fix `aiven_billing_group`: fixed billing group compatibility issue
