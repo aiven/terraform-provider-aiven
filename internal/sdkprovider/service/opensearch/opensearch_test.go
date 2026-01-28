@@ -205,7 +205,8 @@ func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
 // TestAccAivenOpenSearchUser_user_config_zero_values
 // Tests that user config diff suppress doesn't suppress zero values for new resources, and they appear in the plan.
 func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
-	resourceName := "aiven_opensearch.foo"
+	resourceName := "aiven_opensearch.os2"
+	projectName := acc.ProjectName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -213,7 +214,7 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// 1. No user config at all
-				Config:             testAccAivenOpenSearchUserUserConfigZeroValues(),
+				Config:             testAccAivenOpenSearchUserUserConfigZeroValues(projectName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
@@ -222,7 +223,7 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 			},
 			{
 				// 2. All values are non-zero
-				Config: testAccAivenOpenSearchUserUserConfigZeroValues(
+				Config: testAccAivenOpenSearchUserUserConfigZeroValues(projectName,
 					"action_destructive_requires_name", "true",
 					"override_main_response_version", "true",
 					"knn_memory_circuit_breaker_limit", "1",
@@ -239,7 +240,7 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 			},
 			{
 				// 2. All values are zero
-				Config: testAccAivenOpenSearchUserUserConfigZeroValues(
+				Config: testAccAivenOpenSearchUserUserConfigZeroValues(projectName,
 					"action_destructive_requires_name", "false",
 					"override_main_response_version", "true",
 					"knn_memory_circuit_breaker_limit", "0",
@@ -259,14 +260,14 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 	})
 }
 
-func testAccAivenOpenSearchUserUserConfigZeroValues(kv ...string) string {
+func testAccAivenOpenSearchUserUserConfigZeroValues(projectName string, kv ...string) string {
 	options := make([]string, 0)
 	for i := 0; i < len(kv); i += 2 {
 		options = append(options, fmt.Sprintf(`%s = "%s"`, kv[i], kv[i+1]))
 	}
 	return fmt.Sprintf(`
 resource "aiven_opensearch" "os2" {
-  project      = "foo"
+  project      = %q
   cloud_name   = "google-europe-west1"
   plan         = "startup-4"
   service_name = "bar"
@@ -276,7 +277,7 @@ resource "aiven_opensearch" "os2" {
 		  %s
     }
   }
-}`, strings.Join(options, "\n"))
+}`, projectName, strings.Join(options, "\n"))
 }
 
 func TestAccAivenOpenSearchPasswordRotation(t *testing.T) {

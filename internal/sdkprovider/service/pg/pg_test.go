@@ -1379,7 +1379,7 @@ resource "aiven_pg" "test" {
   project      = %[1]q
   cloud_name   = "google-europe-west1"
   plan         = "startup-4"
-  service_name = "test-acc-pg-%[2]s"
+  service_name = %[2]q
 
   service_password_wo         = %[4]q
   service_password_wo_version = %[5]d
