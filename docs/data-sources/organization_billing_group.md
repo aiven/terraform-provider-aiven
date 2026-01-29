@@ -38,6 +38,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
+- `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
 - `payment_method_id` (String) Payment method ID.
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
@@ -48,3 +49,12 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedblock--payment_method"></a>
+### Nested Schema for `payment_method`
+
+Read-Only:
+
+- `payment_method_id` (String) Payment method ID.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.
