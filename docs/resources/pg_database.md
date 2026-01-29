@@ -33,7 +33,7 @@ resource "aiven_pg_database" "main" {
 
 - `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. Maximum length: `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
 - `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. Maximum length: `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
-- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**. The default value is `false`. **Deprecated**: Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

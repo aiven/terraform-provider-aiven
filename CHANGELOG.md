@@ -25,6 +25,7 @@ nav_order: 1
 
 - Fix `aiven_billing_group`: fixed billing group compatibility issue
 - Migrate `aiven_pg_database` to the Plugin Framework
+- Change `aiven_pg_database`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Change all service types to use generated client: `aiven_alloydbomni`, `aiven_cassandra`, `aiven_clickhouse`,
