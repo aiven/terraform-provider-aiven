@@ -14,6 +14,8 @@ The generator creates Terraform resources by combining:
 1. **OpenAPI Spec** (`openapi.json`) - Aiven's API schema
 2. **YAML Definitions** (`definitions/*.yml`) - Configuration for resource generation
 
+**Note**: This skill is the canonical reference for YAML syntax and generation workflow. The **tf-resource-migration** skill builds on this for migrating existing SDK resources.
+
 **Generated outputs:**
 - `zz_resource.go` / `zz_datasource.go` - Terraform schema
 - `zz_converter.go` - Data conversion (expand/flatten)
@@ -229,7 +231,7 @@ Then implement functions in a `.go` file in the resource package. Common utiliti
 
 ## Common Resource Patterns
 
-Instead of copying examples here, search the codebase for similar patterns:
+Search the codebase for similar patterns:
 
 ### Data Source (List)
 `grep -l "datasource:" definitions/*.yml | xargs grep -l "resultToKey"`
@@ -314,7 +316,7 @@ Test that the data source:
 2. Filters/matches resources properly (if applicable)
 
 ### If Both Resource + Data Source Added
-Create separate tests for each, ensuring:
+Create separate test steps for each, ensuring:
 - Resource test covers full CRUD + import
 - Data source test reads from a created resource
 
@@ -337,7 +339,7 @@ task test-acc -- -run TestName         # Specific acceptance test
 - New resources go in `internal/plugin/` (Plugin Framework), NOT `internal/sdkprovider/` (legacy)
 - Generated files have `zz_` prefix - never edit them manually
 - Custom logic goes in separate `.go` files in the same package (e.g., `billing_group.go`)
-- Run `task lint` before committing
+- Run `task lint` when done to ensure code quality
 - File name in `definitions/` determines resource name: `my_resource.yml` → `aiven_my_resource`
 
 ## Migrating Existing Resources
@@ -346,4 +348,3 @@ task test-acc -- -run TestName         # Specific acceptance test
 - Analyzing existing SDK code
 - Preserving state compatibility
 - Ensuring behavior parity
-- Deprecation strategy
