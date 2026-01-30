@@ -38,13 +38,17 @@ resourceSchema:
 	  billing_contact_emails = ["test@example.com"]
 	  billing_emails         = ["test@example.com"]
 	  billing_group_name     = "test"
-	  currency               = "AUD"
 	  custom_invoice_text    = "foo"
-	  payment_method_id      = "foo"
-	  shipping_address_id    = "foo"
-	  vat_id                 = "foo"
+	  payment_method {
+	    payment_method_id   = "foo"
+	    payment_method_type = "aws_subscription"
+	  }
+	  payment_method_id   = "foo"
+	  shipping_address_id = "foo"
+	  vat_id              = "foo"
 
 	  // COMPUTED FIELDS
+	  currency         = "AUD"
 	  billing_group_id = "foo"
 	}
 */
@@ -76,9 +80,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"currency": schema.StringAttribute{
+				Computed:            true,
 				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-				Optional:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "SGD", "USD")},
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `256`.",
@@ -110,7 +113,24 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Optional:            true,
 			},
 		},
-		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
+		Blocks: map[string]schema.Block{
+			"payment_method": schema.ListNestedBlock{
+				MarkdownDescription: "Payment method.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+					"payment_method_id": schema.StringAttribute{
+						MarkdownDescription: "Payment method ID. Maximum length: `36`.",
+						Required:            true,
+						Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
+					},
+					"payment_method_type": schema.StringAttribute{
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.",
+						Required:            true,
+						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "disabled", "gcp_subscription", "marketplace_subscription", "no_payment_expected", "partner")},
+					},
+				}},
+			},
+			"timeouts": timeouts.BlockAll(ctx),
+		},
 		MarkdownDescription: "Creates and manages an organization billing group. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3`
+- Add `aiven_organization_billing_group` field `payment_method`: Payment method.
+- Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
+
 ## [4.50.0] - 2026-01-27
 
 - Fix `aiven_billing_group`: fixed billing group compatibility issue
