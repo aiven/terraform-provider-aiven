@@ -62,8 +62,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.List{listvalidator.SizeBetween(1, 5)},
 			},
 			"city": schema.StringAttribute{
-				MarkdownDescription: "City.",
+				MarkdownDescription: "City. Maximum length: `512`.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(512)},
 			},
 			"country_code": schema.StringAttribute{
 				MarkdownDescription: "Country Code.",

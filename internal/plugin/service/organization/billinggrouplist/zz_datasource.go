@@ -41,9 +41,13 @@ datasourceSchema:
 	    currency               = "AUD"
 	    custom_invoice_text    = "foo"
 	    organization_id        = "org1a23f456789"
-	    payment_method_id      = "foo"
-	    shipping_address_id    = "foo"
-	    vat_id                 = "foo"
+	    payment_method {
+	      payment_method_id   = "foo"
+	      payment_method_type = "aws_subscription"
+	    }
+	    payment_method_id   = "foo"
+	    shipping_address_id = "foo"
+	    vat_id              = "foo"
 	  }
 	}
 */
@@ -62,54 +66,69 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Blocks: map[string]schema.Block{
 			"billing_groups": schema.SetNestedBlock{
 				MarkdownDescription: "A list of all billing groups belonging to the organization.",
-				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
-					"billing_address_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Billing address ID.",
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						"billing_address_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Billing address ID.",
+						},
+						"billing_contact_emails": schema.SetAttribute{
+							Computed:            true,
+							ElementType:         types.StringType,
+							MarkdownDescription: "List of billing contact emails.",
+						},
+						"billing_emails": schema.SetAttribute{
+							Computed:            true,
+							ElementType:         types.StringType,
+							MarkdownDescription: "List of billing contact emails.",
+						},
+						"billing_group_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Billing group ID.",
+						},
+						"billing_group_name": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Billing Group Name.",
+						},
+						"currency": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
+						},
+						"custom_invoice_text": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Extra billing text.",
+						},
+						"organization_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Organization ID.",
+						},
+						"payment_method_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Payment method ID.",
+						},
+						"shipping_address_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Shipping address ID.",
+						},
+						"vat_id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "VAT ID.",
+						},
 					},
-					"billing_contact_emails": schema.SetAttribute{
-						Computed:            true,
-						ElementType:         types.StringType,
-						MarkdownDescription: "List of billing contact emails.",
-					},
-					"billing_emails": schema.SetAttribute{
-						Computed:            true,
-						ElementType:         types.StringType,
-						MarkdownDescription: "List of billing contact emails.",
-					},
-					"billing_group_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Billing group ID.",
-					},
-					"billing_group_name": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Billing Group Name.",
-					},
-					"currency": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-					},
-					"custom_invoice_text": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Extra billing text.",
-					},
-					"organization_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Organization ID.",
-					},
-					"payment_method_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Payment method ID.",
-					},
-					"shipping_address_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Shipping address ID.",
-					},
-					"vat_id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "VAT ID.",
-					},
-				}},
+					Blocks: map[string]schema.Block{"payment_method": schema.ListNestedBlock{
+						MarkdownDescription: "Payment method.",
+						NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+							"payment_method_id": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Payment method ID.",
+							},
+							"payment_method_type": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.",
+							},
+						}},
+					}},
+				},
 			},
 			"timeouts": timeouts.Block(ctx),
 		},

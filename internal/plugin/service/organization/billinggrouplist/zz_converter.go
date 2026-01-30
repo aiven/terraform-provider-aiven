@@ -38,9 +38,15 @@ type tfModelBillingGroups struct {
 	Currency             types.String `tfsdk:"currency"`
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
+	PaymentMethod        types.List   `tfsdk:"payment_method"`
 	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
 	ShippingAddressID    types.String `tfsdk:"shipping_address_id"`
 	VatID                types.String `tfsdk:"vat_id"`
+}
+
+type tfModelBillingGroupsPaymentMethod struct {
+	PaymentMethodID   types.String `tfsdk:"payment_method_id"`
+	PaymentMethodType types.String `tfsdk:"payment_method_type"`
 }
 
 type apiModel struct {
@@ -49,17 +55,23 @@ type apiModel struct {
 }
 
 type apiModelBillingGroups struct {
-	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
-	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
-	BillingEmails        *[]string `json:"billing_emails,omitempty"`
-	BillingGroupID       *string   `json:"billing_group_id,omitempty"`
-	BillingGroupName     *string   `json:"billing_group_name,omitempty"`
-	Currency             *string   `json:"currency,omitempty"`
-	CustomInvoiceText    *string   `json:"custom_invoice_text,omitempty"`
-	OrganizationID       *string   `json:"organization_id,omitempty"`
-	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
-	ShippingAddressID    *string   `json:"shipping_address_id,omitempty"`
-	VatID                *string   `json:"vat_id,omitempty"`
+	BillingAddressID     *string                             `json:"billing_address_id,omitempty"`
+	BillingContactEmails *[]string                           `json:"billing_contact_emails,omitempty"`
+	BillingEmails        *[]string                           `json:"billing_emails,omitempty"`
+	BillingGroupID       *string                             `json:"billing_group_id,omitempty"`
+	BillingGroupName     *string                             `json:"billing_group_name,omitempty"`
+	Currency             *string                             `json:"currency,omitempty"`
+	CustomInvoiceText    *string                             `json:"custom_invoice_text,omitempty"`
+	OrganizationID       *string                             `json:"organization_id,omitempty"`
+	PaymentMethod        *apiModelBillingGroupsPaymentMethod `json:"payment_method,omitempty"`
+	PaymentMethodID      *string                             `json:"payment_method_id,omitempty"`
+	ShippingAddressID    *string                             `json:"shipping_address_id,omitempty"`
+	VatID                *string                             `json:"vat_id,omitempty"`
+}
+
+type apiModelBillingGroupsPaymentMethod struct {
+	PaymentMethodID   *string `json:"payment_method_id,omitempty"`
+	PaymentMethodType *string `json:"payment_method_type,omitempty"`
 }
 
 // flattenData turns Response into TF object
@@ -112,6 +124,13 @@ func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfM
 		}
 		state.BillingEmails = vBillingEmails
 	}
+	if api.PaymentMethod != nil {
+		vPaymentMethod, diags := util.FlattenSingleNested(ctx, flattenBillingGroupsPaymentMethod, api.PaymentMethod, attrsBillingGroupsPaymentMethod())
+		if diags.HasError() {
+			return nil, diags
+		}
+		state.PaymentMethod = vPaymentMethod
+	}
 	if api.BillingAddressID != nil {
 		state.BillingAddressID = util.StringPointerValue(api.BillingAddressID)
 	}
@@ -142,6 +161,17 @@ func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfM
 	return state, nil
 }
 
+func flattenBillingGroupsPaymentMethod(ctx context.Context, api *apiModelBillingGroupsPaymentMethod) (*tfModelBillingGroupsPaymentMethod, diag.Diagnostics) {
+	state := new(tfModelBillingGroupsPaymentMethod)
+	if api.PaymentMethodID != nil {
+		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
+	}
+	if api.PaymentMethodType != nil {
+		state.PaymentMethodType = util.StringPointerValue(api.PaymentMethodType)
+	}
+	return state, nil
+}
+
 func attrsBillingGroups() types.ObjectType {
 	return types.ObjectType{AttrTypes: map[string]attr.Type{
 		"billing_address_id":     types.StringType,
@@ -152,8 +182,16 @@ func attrsBillingGroups() types.ObjectType {
 		"currency":               types.StringType,
 		"custom_invoice_text":    types.StringType,
 		"organization_id":        types.StringType,
+		"payment_method":         types.ListType{ElemType: attrsBillingGroupsPaymentMethod()},
 		"payment_method_id":      types.StringType,
 		"shipping_address_id":    types.StringType,
 		"vat_id":                 types.StringType,
+	}}
+}
+
+func attrsBillingGroupsPaymentMethod() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{
+		"payment_method_id":   types.StringType,
+		"payment_method_type": types.StringType,
 	}}
 }
