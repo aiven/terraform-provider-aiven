@@ -38,7 +38,7 @@ data "aiven_pg_database" "main" {
 - `id` (String) Resource ID composed as: `project/service_name/database_name`.
 - `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`.
 - `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. The default value is `en_US.UTF-8`.
-- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**. The default value is `false`. **Deprecated**: Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

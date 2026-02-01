@@ -331,8 +331,8 @@ func createRootItem(scope *Scope) (*Item, error) {
 				Type:               SchemaTypeBoolean,
 				Optional:           true,
 				Default:            false,
-				DeprecationMessage: "Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
-				Description:        "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**",
+				DeprecationMessage: "Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
+				Description:        "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**",
 			}
 		}
 	}
