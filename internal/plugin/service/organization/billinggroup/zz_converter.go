@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -27,6 +28,7 @@ type tfModel struct {
 	Currency             types.String `tfsdk:"currency"`
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
+	PaymentMethod        types.List   `tfsdk:"payment_method"`
 	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
 	ShippingAddressID    types.String `tfsdk:"shipping_address_id"`
 	VatID                types.String `tfsdk:"vat_id"`
@@ -38,18 +40,29 @@ func (tf *tfModel) SetID(vOrganizationID string, vBillingGroupID string) {
 	tf.ID = types.StringValue(filepath.Join(vOrganizationID, vBillingGroupID))
 }
 
+type tfModelPaymentMethod struct {
+	PaymentMethodID   types.String `tfsdk:"payment_method_id"`
+	PaymentMethodType types.String `tfsdk:"payment_method_type"`
+}
+
 type apiModel struct {
-	BillingAddressID     *string   `json:"billing_address_id,omitempty"`
-	BillingContactEmails *[]string `json:"billing_contact_emails,omitempty"`
-	BillingEmails        *[]string `json:"billing_emails,omitempty"`
-	BillingGroupID       *string   `json:"billing_group_id,omitempty"`
-	BillingGroupName     *string   `json:"billing_group_name,omitempty"`
-	Currency             *string   `json:"currency,omitempty"`
-	CustomInvoiceText    *string   `json:"custom_invoice_text,omitempty"`
-	OrganizationID       *string   `json:"organization_id,omitempty"`
-	PaymentMethodID      *string   `json:"payment_method_id,omitempty"`
-	ShippingAddressID    *string   `json:"shipping_address_id,omitempty"`
-	VatID                *string   `json:"vat_id,omitempty"`
+	BillingAddressID     *string                `json:"billing_address_id,omitempty"`
+	BillingContactEmails *[]string              `json:"billing_contact_emails,omitempty"`
+	BillingEmails        *[]string              `json:"billing_emails,omitempty"`
+	BillingGroupID       *string                `json:"billing_group_id,omitempty"`
+	BillingGroupName     *string                `json:"billing_group_name,omitempty"`
+	Currency             *string                `json:"currency,omitempty"`
+	CustomInvoiceText    *string                `json:"custom_invoice_text,omitempty"`
+	OrganizationID       *string                `json:"organization_id,omitempty"`
+	PaymentMethod        *apiModelPaymentMethod `json:"payment_method,omitempty"`
+	PaymentMethodID      *string                `json:"payment_method_id,omitempty"`
+	ShippingAddressID    *string                `json:"shipping_address_id,omitempty"`
+	VatID                *string                `json:"vat_id,omitempty"`
+}
+
+type apiModelPaymentMethod struct {
+	PaymentMethodID   *string `json:"payment_method_id,omitempty"`
+	PaymentMethodType *string `json:"payment_method_type,omitempty"`
 }
 
 // idFields the ID attribute fields, i.e.:
@@ -77,6 +90,13 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		}
 		api.BillingEmails = &vBillingEmails
 	}
+	if !plan.PaymentMethod.IsNull() || state != nil && !state.PaymentMethod.IsNull() {
+		vPaymentMethod, diags := util.ExpandSingleNested(ctx, expandPaymentMethod, plan.PaymentMethod)
+		if diags.HasError() {
+			return diags
+		}
+		api.PaymentMethod = vPaymentMethod
+	}
 	if !plan.BillingAddressID.IsNull() || state != nil && !state.BillingAddressID.IsNull() {
 		vBillingAddressID := plan.BillingAddressID.ValueString()
 		api.BillingAddressID = &vBillingAddressID
@@ -84,10 +104,6 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 	if !plan.BillingGroupName.IsNull() || state != nil && !state.BillingGroupName.IsNull() {
 		vBillingGroupName := plan.BillingGroupName.ValueString()
 		api.BillingGroupName = &vBillingGroupName
-	}
-	if !plan.Currency.IsNull() || state != nil && !state.Currency.IsNull() {
-		vCurrency := plan.Currency.ValueString()
-		api.Currency = &vCurrency
 	}
 	if !plan.CustomInvoiceText.IsNull() || state != nil && !state.CustomInvoiceText.IsNull() {
 		vCustomInvoiceText := plan.CustomInvoiceText.ValueString()
@@ -118,6 +134,19 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 	return nil
 }
 
+func expandPaymentMethod(ctx context.Context, plan *tfModelPaymentMethod) (*apiModelPaymentMethod, diag.Diagnostics) {
+	api := new(apiModelPaymentMethod)
+	if !plan.PaymentMethodID.IsNull() {
+		vPaymentMethodID := plan.PaymentMethodID.ValueString()
+		api.PaymentMethodID = &vPaymentMethodID
+	}
+	if !plan.PaymentMethodType.IsNull() {
+		vPaymentMethodType := plan.PaymentMethodType.ValueString()
+		api.PaymentMethodType = &vPaymentMethodType
+	}
+	return api, nil
+}
+
 // flattenData turns Response into TF object
 func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers ...util.MapModifier[tfModel]) diag.Diagnostics {
 	api := new(apiModel)
@@ -141,6 +170,13 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		}
 		state.BillingEmails = vBillingEmails
 	}
+	if api.PaymentMethod != nil && !state.PaymentMethod.IsUnknown() {
+		vPaymentMethod, diags := util.FlattenSingleNested(ctx, flattenPaymentMethod, api.PaymentMethod, attrsPaymentMethod())
+		if diags.HasError() {
+			return diags
+		}
+		state.PaymentMethod = vPaymentMethod
+	}
 	if api.BillingAddressID != nil && !state.BillingAddressID.IsUnknown() {
 		state.BillingAddressID = util.StringPointerValue(api.BillingAddressID)
 	}
@@ -150,7 +186,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.BillingGroupName != nil && !state.BillingGroupName.IsUnknown() {
 		state.BillingGroupName = util.StringPointerValue(api.BillingGroupName)
 	}
-	if api.Currency != nil && !state.Currency.IsUnknown() {
+	if api.Currency != nil || state.Currency.IsUnknown() {
 		state.Currency = util.StringPointerValue(api.Currency)
 	}
 	if api.CustomInvoiceText != nil && !state.CustomInvoiceText.IsUnknown() {
@@ -184,4 +220,22 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	}
 	state.SetID(state.OrganizationID.ValueString(), state.BillingGroupID.ValueString())
 	return nil
+}
+
+func flattenPaymentMethod(ctx context.Context, api *apiModelPaymentMethod) (*tfModelPaymentMethod, diag.Diagnostics) {
+	state := new(tfModelPaymentMethod)
+	if api.PaymentMethodID != nil {
+		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
+	}
+	if api.PaymentMethodType != nil {
+		state.PaymentMethodType = util.StringPointerValue(api.PaymentMethodType)
+	}
+	return state, nil
+}
+
+func attrsPaymentMethod() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{
+		"payment_method_id":   types.StringType,
+		"payment_method_type": types.StringType,
+	}}
 }
