@@ -39,7 +39,6 @@ datasourceSchema:
 	  billing_contact_emails = ["test@example.com"]
 	  billing_emails         = ["test@example.com"]
 	  billing_group_name     = "test"
-	  currency               = "AUD"
 	  custom_invoice_text    = "foo"
 	  payment_method {
 	    payment_method_id   = "foo"
@@ -74,10 +73,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing Group Name.",
-			},
-			"currency": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				Computed:            true,
@@ -115,7 +110,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"payment_method_type": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.",
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
 					},
 				}},
 			},

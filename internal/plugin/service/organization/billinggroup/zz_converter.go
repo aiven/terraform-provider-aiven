@@ -25,7 +25,6 @@ type tfModel struct {
 	BillingEmails        types.Set    `tfsdk:"billing_emails"`
 	BillingGroupID       types.String `tfsdk:"billing_group_id"`
 	BillingGroupName     types.String `tfsdk:"billing_group_name"`
-	Currency             types.String `tfsdk:"currency"`
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
 	PaymentMethod        types.List   `tfsdk:"payment_method"`
@@ -51,7 +50,6 @@ type apiModel struct {
 	BillingEmails        *[]string              `json:"billing_emails,omitempty"`
 	BillingGroupID       *string                `json:"billing_group_id,omitempty"`
 	BillingGroupName     *string                `json:"billing_group_name,omitempty"`
-	Currency             *string                `json:"currency,omitempty"`
 	CustomInvoiceText    *string                `json:"custom_invoice_text,omitempty"`
 	OrganizationID       *string                `json:"organization_id,omitempty"`
 	PaymentMethod        *apiModelPaymentMethod `json:"payment_method,omitempty"`
@@ -185,9 +183,6 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	}
 	if api.BillingGroupName != nil && !state.BillingGroupName.IsUnknown() {
 		state.BillingGroupName = util.StringPointerValue(api.BillingGroupName)
-	}
-	if api.Currency != nil || state.Currency.IsUnknown() {
-		state.Currency = util.StringPointerValue(api.Currency)
 	}
 	if api.CustomInvoiceText != nil && !state.CustomInvoiceText.IsUnknown() {
 		state.CustomInvoiceText = util.StringPointerValue(api.CustomInvoiceText)

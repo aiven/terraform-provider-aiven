@@ -35,7 +35,6 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_contact_emails` (Set of String) Aiven contacts these email addresses when there are billing issues or questions.
 - `billing_emails` (Set of String) PDF invoices are sent to these email addresses.
 - `billing_group_name` (String) Billing Group Name.
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `custom_invoice_text` (String) Extra billing text.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
@@ -57,4 +56,4 @@ Optional:
 Read-Only:
 
 - `payment_method_id` (String) Payment method ID.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
