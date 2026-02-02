@@ -127,6 +127,14 @@ func TestAccAivenMySQLUser_basic(t *testing.T) {
 
 						// Password - auto-generated
 						resource.TestCheckResourceAttrSet(resourceName, "password"),
+						func(state *terraform.State) error {
+							r := state.RootModule().Resources[resourceName]
+							password := r.Primary.Attributes["password"]
+							if !strings.HasPrefix(password, "AVN") {
+								return fmt.Errorf("expected AVN prefix for auto-generated password, got %q", password)
+							}
+							return nil
+						},
 						resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
 						resource.TestCheckNoResourceAttr(resourceName, "password_wo_version"),
 					),
