@@ -27,13 +27,13 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_emails` (Set of String) PDF invoices are sent to these email addresses.
 - `billing_group_name` (String) Billing Group Name. Maximum length: `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
-- `payment_method_id` (String) Payment method ID.
 - `shipping_address_id` (String) Shipping address ID. Maximum length: `36`.
 
 ### Optional
 
 - `custom_invoice_text` (String) Extra billing text. Maximum length: `256`.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
+- `payment_method_id` (String) Payment method ID.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) VAT ID.
 
@@ -49,7 +49,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 Required:
 
 - `payment_method_id` (String) Payment method ID. Maximum length: `36`.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
 
 
 <a id="nestedblock--timeouts"></a>
