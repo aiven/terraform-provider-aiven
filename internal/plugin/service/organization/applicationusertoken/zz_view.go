@@ -24,7 +24,7 @@ var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
 	TypeName:     typeName,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
+func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	func() {
 		var req applicationuser.ApplicationUserAccessTokenCreateIn

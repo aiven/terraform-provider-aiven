@@ -23,7 +23,7 @@
 |  17 | aiven_cassandra                             |        |     2 |
 |  18 | aiven_cassandra_user                        |        |     2 |
 |  19 | aiven_clickhouse                            |        |     2 |
-|  20 | aiven_clickhouse_database                   |        |     2 |
+|  20 | aiven_clickhouse_database                   | yes    |     2 |
 |  21 | aiven_clickhouse_grant                      |        |     1 |
 |  22 | aiven_clickhouse_role                       |        |     1 |
 |  23 | aiven_clickhouse_user                       |        |     2 |
@@ -107,6 +107,6 @@
 | 101 | aiven_valkey                                |        |     2 |
 | 102 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 18%                          | 33     |   179 |
+|     | TOTAL MIGRATED 20%                          | 35     |   179 |
 +-----+---------------------------------------------+--------+-------+
 ```
