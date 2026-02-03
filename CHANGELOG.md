@@ -13,8 +13,6 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix service `cloud_name`: was incorrectly sent as an empty string when not set
-- Remove plan name validation: newer plan names aren't available from default endpoints, so we can't distinguish between
-  "a typo" and "a new plan"
 - The service `disk_space` field is no longer deprecated. It can be used when the plan disk size is "unknown", in which
   case `additional_disk_space` cannot be used.
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3`

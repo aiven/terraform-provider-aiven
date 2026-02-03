@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -152,6 +154,8 @@ func supportsWriteOnlyPassword(serviceType string) bool {
 	return slices.Contains(supportedServices, serviceType)
 }
 
+var planNameRegex = regexp.MustCompile("^[a-z][a-z0-9_-]*[a-z0-9]$")
+
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
@@ -169,9 +173,24 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			},
 		},
 		"plan": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).",
+			Type:     schema.TypeString,
+			Required: true,
+			ValidateFunc: validation.All(
+				validation.StringLenBetween(1, 128),
+				func(v any, k string) ([]string, []error) {
+					planName := v.(string)
+					if planName != strings.ToLower(planName) {
+						return nil, []error{fmt.Errorf("plan name should be lowercase, possible fix: %q", strings.ToLower(planName))}
+					}
+
+					if !planNameRegex.MatchString(planName) {
+						return nil, []error{fmt.Errorf(`plan name should be lowercase alphanumeric (e.g. "business-8", "my_plan_16")`)}
+					}
+
+					return nil, nil
+				},
+			),
+			Description: "Defines what kind of computing resources are allocated for the service. Plan names must be lowercase alphanumeric (e.g., `business-8`, `my_plan_16`). It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seen from the [Aiven pricing page](https://aiven.io/pricing).",
 		},
 		"service_name": {
 			Type:        schema.TypeString,
