@@ -36,7 +36,7 @@ data "aiven_mysql_database" "example_database" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_name/database_name`.
-- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console.**. The default value is `false`. **Deprecated**: Instead use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+- `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
