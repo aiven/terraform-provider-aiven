@@ -48,7 +48,6 @@ resourceSchema:
 	  vat_id              = "foo"
 
 	  // COMPUTED FIELDS
-	  currency         = "AUD"
 	  billing_group_id = "foo"
 	}
 */
@@ -79,10 +78,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
-			"currency": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
-			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `256`.",
 				Optional:            true,
@@ -101,7 +96,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"payment_method_id": schema.StringAttribute{
 				MarkdownDescription: "Payment method ID.",
-				Required:            true,
+				Optional:            true,
 			},
 			"shipping_address_id": schema.StringAttribute{
 				MarkdownDescription: "Shipping address ID. Maximum length: `36`.",
@@ -123,9 +118,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 					},
 					"payment_method_type": schema.StringAttribute{
-						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `marketplace_subscription`, `no_payment_expected` and `partner`.",
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
 						Required:            true,
-						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "disabled", "gcp_subscription", "marketplace_subscription", "no_payment_expected", "partner")},
+						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "disabled", "gcp_subscription", "no_payment_expected", "partner")},
 					},
 				}},
 			},

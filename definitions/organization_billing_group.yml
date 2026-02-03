@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/organization/billinggroup
+remove: ["currency"]
 resource:
   description: Creates and manages an organization billing group.
 datasource:

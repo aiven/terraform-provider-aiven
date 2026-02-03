@@ -51,7 +51,6 @@ resource "aiven_organization_address" "shipping_address" {
 }`, organizationName)
 
 	// Initial configuration creates a billing group with:
-	// - USD currency
 	// - Single billing contact email
 	// - Single billing email
 	// - Basic billing group name and invoice text
@@ -60,7 +59,6 @@ resource "aiven_organization_billing_group" "billing_group" {
   organization_id        = data.aiven_organization.org.id
   billing_address_id     = aiven_organization_address.billing_address.address_id
   billing_contact_emails = ["billing@example.com"]
-  currency               = "USD"
   billing_emails         = ["invoices@example.com"]
   billing_group_name     = "Test Billing Group"
   custom_invoice_text    = "Custom invoice text"
@@ -70,7 +68,6 @@ resource "aiven_organization_billing_group" "billing_group" {
 }`, paymentMethodID)
 
 	// Updated configuration modifies the billing group with:
-	// - Changed currency to EUR
 	// - Added additional billing contact email
 	// - Added additional billing email
 	// - Updated billing group name and invoice text
@@ -80,7 +77,6 @@ resource "aiven_organization_billing_group" "billing_group" {
   organization_id        = data.aiven_organization.org.id
   billing_address_id     = aiven_organization_address.billing_address.address_id
   billing_contact_emails = ["billing@example.com", "billing2@example.com"]
-  currency               = "EUR"
   billing_emails         = ["invoices@example.com", "invoices2@example.com"]
   billing_group_name     = "Test ACC Updated Billing Group"
   custom_invoice_text    = "Updated invoice text"
@@ -116,7 +112,6 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check other fields
 					resource.TestCheckResourceAttr(name, "payment_method_id", paymentMethodID),
-					resource.TestCheckResourceAttr(name, "currency", "USD"),
 					resource.TestCheckResourceAttr(name, "billing_group_name", "Test Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Custom invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT123"),
@@ -138,7 +133,6 @@ resource "aiven_organization_billing_group" "billing_group" {
 					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices@example.com"),
 
 					// Check updated fields
-					resource.TestCheckResourceAttr(name, "currency", "EUR"),
 					resource.TestCheckResourceAttr(name, "billing_group_name", "Test ACC Updated Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Updated invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT456"),
