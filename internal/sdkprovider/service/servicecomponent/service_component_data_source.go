@@ -87,6 +87,12 @@ func DatasourceServiceComponent() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(service.UsageTypeChoices(), false),
 				Description:  userconfig.Desc("DNS usage name").PossibleValuesString(service.UsageTypeChoices()...).Build(),
 			},
+			"privatelink_connection_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Privatelink connection ID",
+			},
 			"host": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -134,6 +140,12 @@ func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData,
 				continue
 			}
 
+			if plConnID, ok := d.GetOk("privatelink_connection_id"); ok {
+				if c.PrivatelinkConnectionId == nil || *c.PrivatelinkConnectionId != plConnID {
+					continue
+				}
+			}
+
 			filteredResult = append(filteredResult, &c)
 		}
 	}
@@ -177,6 +189,12 @@ func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData,
 
 	if c.Ssl != nil {
 		if err := d.Set("ssl", *c.Ssl); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if c.PrivatelinkConnectionId != nil {
+		if err := d.Set("privatelink_connection_id", *c.PrivatelinkConnectionId); err != nil {
 			return diag.FromErr(err)
 		}
 	}

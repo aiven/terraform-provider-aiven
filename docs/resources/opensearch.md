@@ -702,6 +702,7 @@ Read-Only:
 - `kafka_authentication_method` (String)
 - `kafka_ssl_ca` (String)
 - `port` (Number)
+- `privatelink_connection_id` (String)
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
