@@ -23,7 +23,7 @@ resource "aiven_organization" "main" {
 
 ### Required
 
-- `name` (String) Name of the organization. Maximum length: `128`.
+- `name` (String) Name of the organization. Maximum length: `83`.
 
 ### Optional
 
