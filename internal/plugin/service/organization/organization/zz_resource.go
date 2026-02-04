@@ -55,9 +55,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of the organization. Maximum length: `128`.",
+				MarkdownDescription: "Name of the organization. Maximum length: `83`.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(83)},
 			},
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,
