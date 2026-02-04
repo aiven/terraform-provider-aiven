@@ -1404,3 +1404,56 @@ resource "aiven_pg" "test" {
 }
 `, acc.ProjectName(), name, woPassword, version)
 }
+
+func TestAccAivenPG_invalid_plan_name(t *testing.T) {
+	t.Parallel()
+
+	type planTest struct {
+		name        string
+		plan        string
+		expectError *regexp.Regexp
+	}
+
+	tests := []planTest{
+		{
+			name:        "upper case in plan name",
+			plan:        "Business-4",
+			expectError: regexp.MustCompile("plan name should be lowercase, possible fix: \"business-4\""),
+		},
+		{
+			name:        "invalid characters in plan name",
+			plan:        "business@4",
+			expectError: regexp.MustCompile(`plan name should be lowercase alphanumeric \(e.g. "business-8", "my_plan_16"\)`),
+		},
+		{
+			name:        "plan name too long (>128)",
+			plan:        strings.Repeat("a", 129),
+			expectError: regexp.MustCompile(`expected length of plan to be in the range \(1 - 128\), got`),
+		},
+		{
+			name:        "plan name empty",
+			plan:        "",
+			expectError: regexp.MustCompile(`expected length of plan to be in the range \(1 - 128\), got`),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resource.ParallelTest(t, resource.TestCase{
+				ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+				Steps: []resource.TestStep{
+					{
+						Config: fmt.Sprintf(`resource "aiven_pg" "bar" {
+  project      = "foo"
+  service_name = "foo"
+  cloud_name   = "foo"
+  plan         = %q
+}`, tt.plan),
+						PlanOnly:    true,
+						ExpectError: tt.expectError,
+					},
+				},
+			})
+		})
+	}
+}
