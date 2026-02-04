@@ -17,9 +17,10 @@ nav_order: 1
   "a typo" and "a new plan"
 - The service `disk_space` field is no longer deprecated. It can be used when the plan disk size is "unknown", in which
   case `additional_disk_space` cannot be used.
-
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3`
-- Remove `aiven_organization_billing_group` field `currency`: field removed from resource and data source
+- Add `aiven_organization_billing_group` field `payment_method`: Payment method.
+- Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
+- Change `aiven_organization_billing_group` resource field `payment_method_id`: optional ~~`false`~~ → `true`
 
 ## [4.50.0] - 2026-01-27
 

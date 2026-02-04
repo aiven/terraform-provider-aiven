@@ -24,7 +24,7 @@ resource "aiven_organizational_unit" "example_unit" {
 
 ### Required
 
-- `name` (String) The name of the organizational unit. Maximum length: `128`.
+- `name` (String) The name of the organizational unit. Maximum length: `83`.
 - `parent_id` (String) The ID of the organization that the unit is created in. Maximum length: `36`.
 
 ### Optional
