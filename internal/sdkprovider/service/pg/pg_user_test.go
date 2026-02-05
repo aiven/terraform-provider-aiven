@@ -3,6 +3,7 @@ package pg_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -102,6 +103,14 @@ func TestAccAivenPGUser(t *testing.T) {
 					resource.TestCheckResourceAttr(singleUserResourceName, "username", fmt.Sprintf("single-%s", userName)),
 
 					// Password validation
+					func(state *terraform.State) error {
+						r := state.RootModule().Resources[singleUserResourceName]
+						password := r.Primary.Attributes["password"]
+						if !strings.HasPrefix(password, "AVN") {
+							return fmt.Errorf("expected AVN prefix for auto-generated password, got %q", password)
+						}
+						return nil
+					},
 					acc.TestAccPasswordHasGeneratedPassword(singleUserResourceName),
 				),
 			},
