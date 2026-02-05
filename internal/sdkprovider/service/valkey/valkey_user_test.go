@@ -103,7 +103,43 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
 					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.0", "+set"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.#", "1"),
 				),
+			},
+			{
+				// update ACL fields in-place (no recreation)
+				Config: testAccValkeyUserUpdatedACL(serviceName, userName, "acc-custom-FinalPass$456"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", userName)),
+					acc.TestAccPasswordHasCustomPassword(resourceName, "acc-custom-FinalPass$456"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.0", "+set"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.1", "+get"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.0", "prefix*"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.1", "another_key"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.2", "new_key*"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.0", "-@all"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.1", "+@admin"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.2", "+@read"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.0", "test"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.1", "notifications"),
+				),
+			},
+			{
+				// test import - verifies backward compatibility with existing state
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
@@ -247,4 +283,40 @@ data "aiven_valkey_user" "user" {
 
   depends_on = [aiven_valkey_user.foo]
 }`, acc.ProjectName(), serviceName, userName, version)
+}
+
+func testAccValkeyUserUpdatedACL(serviceName, userName, password string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_valkey" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "%[2]s"
+}
+
+resource "aiven_valkey_user" "foo" {
+  service_name = aiven_valkey.bar.service_name
+  project      = aiven_valkey.bar.project
+  username     = "user-%[3]s"
+  password     = "%[4]s"
+
+  valkey_acl_commands   = ["+set", "+get"]
+  valkey_acl_keys       = ["prefix*", "another_key", "new_key*"]
+  valkey_acl_categories = ["-@all", "+@admin", "+@read"]
+  valkey_acl_channels   = ["test", "notifications"]
+
+  depends_on = [aiven_valkey.bar]
+}
+
+data "aiven_valkey_user" "user" {
+  service_name = aiven_valkey_user.foo.service_name
+  project      = aiven_valkey_user.foo.project
+  username     = aiven_valkey_user.foo.username
+
+  depends_on = [aiven_valkey_user.foo]
+}`, acc.ProjectName(), serviceName, userName, password)
 }

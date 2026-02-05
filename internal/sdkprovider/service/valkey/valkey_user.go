@@ -2,6 +2,7 @@ package valkey
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -27,9 +28,8 @@ func aivenValkeyUserSchema() map[string]*schema.Schema {
 		"valkey_acl_categories": {
 			Type:         schema.TypeList,
 			Optional:     true,
-			ForceNew:     true,
 			RequiredWith: []string{"valkey_acl_commands", "valkey_acl_keys"},
-			Description:  userconfig.Desc("Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").ForceNew().Build(),
+			Description:  userconfig.Desc("Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").Build(),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -37,9 +37,8 @@ func aivenValkeyUserSchema() map[string]*schema.Schema {
 		"valkey_acl_commands": {
 			Type:         schema.TypeList,
 			Optional:     true,
-			ForceNew:     true,
 			RequiredWith: []string{"valkey_acl_categories", "valkey_acl_keys"},
-			Description:  userconfig.Desc("Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+			Description:  userconfig.Desc("Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").Build(),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -47,9 +46,8 @@ func aivenValkeyUserSchema() map[string]*schema.Schema {
 		"valkey_acl_keys": {
 			Type:         schema.TypeList,
 			Optional:     true,
-			ForceNew:     true,
 			RequiredWith: []string{"valkey_acl_categories", "valkey_acl_commands"},
-			Description:  userconfig.Desc("Key access rules. Entries are defined as standard glob patterns.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+			Description:  userconfig.Desc("Key access rules. Entries are defined as standard glob patterns.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").Build(),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -57,8 +55,7 @@ func aivenValkeyUserSchema() map[string]*schema.Schema {
 		"valkey_acl_channels": {
 			Type:        schema.TypeList,
 			Optional:    true,
-			ForceNew:    true,
-			Description: userconfig.Desc("Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.").ForceNew().Build(),
+			Description: userconfig.Desc("Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.").Build(),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -130,7 +127,44 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 }
 
 func resourceValkeyUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
-	err := schemautil.UpsertPassword(ctx, d, client)
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return err
+	}
+
+	// check if any ACL fields have changed
+	aclChanged := d.HasChange("valkey_acl_categories") ||
+		d.HasChange("valkey_acl_commands") ||
+		d.HasChange("valkey_acl_keys") ||
+		d.HasChange("valkey_acl_channels")
+
+	if aclChanged {
+		categories := schemautil.FlattenToString(d.Get("valkey_acl_categories").([]any))
+		commands := schemautil.FlattenToString(d.Get("valkey_acl_commands").([]any))
+		keys := schemautil.FlattenToString(d.Get("valkey_acl_keys").([]any))
+		channels := schemautil.FlattenToString(d.Get("valkey_acl_channels").([]any))
+
+		_, err = client.ServiceUserCredentialsModify(
+			ctx,
+			projectName,
+			serviceName,
+			username,
+			&service.ServiceUserCredentialsModifyIn{
+				Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
+				AccessControl: &service.AccessControlIn{
+					ValkeyAclCategories: &categories,
+					ValkeyAclCommands:   &commands,
+					ValkeyAclKeys:       &keys,
+					ValkeyAclChannels:   &channels,
+				},
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to update Valkey user ACLs: %w", err)
+		}
+	}
+
+	err = schemautil.UpsertPassword(ctx, d, client)
 	if err != nil {
 		return err
 	}
