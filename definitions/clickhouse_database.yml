@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/clickhouse/database
+resource:
+  refreshState: true
+  removeMissing: true
+  terminationProtection: true
+  description: |
+    Creates and manages an [Aiven for ClickHouse](https://aiven.io/docs/products/clickhouse) database.
+
+    -> Tables cannot be created using Aiven Terraform Provider. To create a table,
+    use the [Aiven Console or CLI](https://aiven.io/docs/products/clickhouse/howto/manage-databases-tables#create-a-table).
+datasource:
+  description: Gets information about an Aiven for ClickHouse database.
+clientHandler: clickhouse
+idAttributeComposed: [project, service_name, name]
+legacyTimeouts: true
+rename:
+  database: name
+remove: [engine, required, state] # These fields from API are not useful for users
+operations:
+  - id: ServiceClickHouseDatabaseCreate
+    type: create
+  - id: ServiceClickHouseDatabaseDelete
+    type: delete
+  - id: ServiceClickHouseDatabaseList
+    type: read
+    resultKey: databases
+    resultListLookupKeys:
+      Name: name

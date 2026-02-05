@@ -1,1 +1,1 @@
-terraform import aiven_clickhouse_database.example_db PROJECT/SERVICE_NAME/DATABASE_NAME
+terraform import aiven_clickhouse_database.example PROJECT/SERVICE_NAME/NAME

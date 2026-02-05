@@ -149,9 +149,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_mirrormaker":            kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse":          clickhouse.DatasourceClickhouse(),
-			"aiven_clickhouse_database": clickhouse.DatasourceClickhouseDatabase(),
-			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
+			"aiven_clickhouse":      clickhouse.DatasourceClickhouse(),
+			"aiven_clickhouse_user": clickhouse.DatasourceClickhouseUser(),
 
 			// dragonfly
 			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
@@ -268,11 +267,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_quota":                  kafka.ResourceKafkaQuota(),
 
 			// clickhouse
-			"aiven_clickhouse":          clickhouse.ResourceClickhouse(),
-			"aiven_clickhouse_database": clickhouse.ResourceClickhouseDatabase(),
-			"aiven_clickhouse_user":     clickhouse.ResourceClickhouseUser(),
-			"aiven_clickhouse_role":     clickhouse.ResourceClickhouseRole(),
-			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
+			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),
+			"aiven_clickhouse_user":  clickhouse.ResourceClickhouseUser(),
+			"aiven_clickhouse_role":  clickhouse.ResourceClickhouseRole(),
+			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
 
 			// dragonfly
 			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
