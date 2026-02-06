@@ -32,7 +32,42 @@ func TestAccAivenValkeyUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.0", "+set"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.#", "1"),
 				),
+			},
+			{
+				// update ACL fields in-place (no recreation)
+				Config: testAccValkeyUserUpdatedACL(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.0", "+set"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_commands.1", "+get"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.0", "prefix*"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.1", "another_key"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_keys.2", "new_key*"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.0", "-@all"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.1", "+@admin"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_categories.2", "+@read"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.0", "test"),
+					resource.TestCheckResourceAttr(resourceName, "valkey_acl_channels.1", "notifications"),
+				),
+			},
+			{
+				// test import - verifies backward compatibility with existing state
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
@@ -93,6 +128,42 @@ resource "aiven_valkey_user" "foo" {
   valkey_acl_keys       = ["prefix*", "another_key"]
   valkey_acl_categories = ["-@all", "+@admin"]
   valkey_acl_channels   = ["test"]
+
+  depends_on = [aiven_valkey.bar]
+}
+
+data "aiven_valkey_user" "user" {
+  service_name = aiven_valkey_user.foo.service_name
+  project      = aiven_valkey_user.foo.project
+  username     = aiven_valkey_user.foo.username
+
+  depends_on = [aiven_valkey_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func testAccValkeyUserUpdatedACL(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_valkey" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_valkey_user" "foo" {
+  service_name = aiven_valkey.bar.service_name
+  project      = aiven_valkey.bar.project
+  username     = "user-%s"
+  password     = "Test$1234"
+
+  valkey_acl_commands   = ["+set", "+get"]
+  valkey_acl_keys       = ["prefix*", "another_key", "new_key*"]
+  valkey_acl_categories = ["-@all", "+@admin", "+@read"]
+  valkey_acl_channels   = ["test", "notifications"]
 
   depends_on = [aiven_valkey.bar]
 }
