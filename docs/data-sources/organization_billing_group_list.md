@@ -65,4 +65,4 @@ Read-Only:
 Read-Only:
 
 - `payment_method_id` (String) Payment method ID.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.
