@@ -29,7 +29,6 @@ type tfModel struct {
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
 	PaymentMethod        types.List   `tfsdk:"payment_method"`
-	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
 	ShippingAddressID    types.String `tfsdk:"shipping_address_id"`
 	VatID                types.String `tfsdk:"vat_id"`
 }
@@ -55,7 +54,6 @@ type apiModel struct {
 	CustomInvoiceText    *string                `json:"custom_invoice_text,omitempty"`
 	OrganizationID       *string                `json:"organization_id,omitempty"`
 	PaymentMethod        *apiModelPaymentMethod `json:"payment_method,omitempty"`
-	PaymentMethodID      *string                `json:"payment_method_id,omitempty"`
 	ShippingAddressID    *string                `json:"shipping_address_id,omitempty"`
 	VatID                *string                `json:"vat_id,omitempty"`
 }
@@ -112,10 +110,6 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 	if !plan.OrganizationID.IsNull() || state != nil && !state.OrganizationID.IsNull() {
 		vOrganizationID := plan.OrganizationID.ValueString()
 		api.OrganizationID = &vOrganizationID
-	}
-	if !plan.PaymentMethodID.IsNull() || state != nil && !state.PaymentMethodID.IsNull() {
-		vPaymentMethodID := plan.PaymentMethodID.ValueString()
-		api.PaymentMethodID = &vPaymentMethodID
 	}
 	if !plan.ShippingAddressID.IsNull() || state != nil && !state.ShippingAddressID.IsNull() {
 		vShippingAddressID := plan.ShippingAddressID.ValueString()
@@ -194,9 +188,6 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	}
 	if api.OrganizationID != nil && !state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
-	}
-	if api.PaymentMethodID != nil && !state.PaymentMethodID.IsUnknown() {
-		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
 	}
 	if api.ShippingAddressID != nil && !state.ShippingAddressID.IsUnknown() {
 		state.ShippingAddressID = util.StringPointerValue(api.ShippingAddressID)
