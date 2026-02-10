@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -43,7 +44,6 @@ resourceSchema:
 	    payment_method_id   = "foo"
 	    payment_method_type = "aws_subscription"
 	  }
-	  payment_method_id   = "foo"
 	  shipping_address_id = "foo"
 	  vat_id              = "foo"
 
@@ -94,10 +94,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
-			"payment_method_id": schema.StringAttribute{
-				MarkdownDescription: "Payment method ID.",
-				Optional:            true,
-			},
 			"shipping_address_id": schema.StringAttribute{
 				MarkdownDescription: "Shipping address ID. Maximum length: `36`.",
 				Required:            true,
@@ -110,7 +106,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"payment_method": schema.ListNestedBlock{
-				MarkdownDescription: "Payment method.",
+				MarkdownDescription: "Required property. Payment method.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"payment_method_id": schema.StringAttribute{
 						MarkdownDescription: "Payment method ID. Maximum length: `36`.",
@@ -118,11 +114,12 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 					},
 					"payment_method_type": schema.StringAttribute{
-						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.",
 						Required:            true,
-						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "disabled", "gcp_subscription", "no_payment_expected", "partner")},
+						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "disabled", "gcp_subscription", "no_payment_expected", "none", "partner")},
 					},
 				}},
+				Validators: []validator.List{listvalidator.IsRequired(), listvalidator.SizeAtMost(1)},
 			},
 			"timeouts": timeouts.BlockAll(ctx),
 		},

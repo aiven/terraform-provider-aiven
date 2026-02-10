@@ -38,7 +38,6 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `custom_invoice_text` (String) Extra billing text.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
-- `payment_method_id` (String) Payment method ID.
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
 
@@ -56,4 +55,4 @@ Optional:
 Read-Only:
 
 - `payment_method_id` (String) Payment method ID.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.
