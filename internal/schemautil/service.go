@@ -392,6 +392,11 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Computed:    true,
 						Description: "DNS usage name",
 					},
+					"privatelink_connection_id": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "Privatelink connection ID",
+					},
 				},
 			},
 		},
@@ -940,8 +945,9 @@ func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]interface{}
 			"route":                       c.Route,
 			// By default, endpoints are always encrypted and
 			// this property is only included for service components that may disable encryption.
-			"ssl":   PointerValueOrDefault(c.Ssl, true),
-			"usage": c.Usage,
+			"ssl":                       PointerValueOrDefault(c.Ssl, true),
+			"usage":                     c.Usage,
+			"privatelink_connection_id": PointerValueOrDefault(c.PrivatelinkConnectionId, ""),
 		}
 		components[i] = component
 	}

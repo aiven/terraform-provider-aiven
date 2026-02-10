@@ -15,6 +15,8 @@ nav_order: 1
 - Migrate `aiven_clickhouse_database` to the Plugin Framework
 - Change `aiven_clickhouse_database`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - Fix `aiven_mysql_user`: `password_wo` now properly updates password when creating the resource
+- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources
+- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
 - Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`,
   `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
 - Fix service `cloud_name`: was incorrectly sent as an empty string when not set
