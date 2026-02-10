@@ -32,6 +32,7 @@ resource "aiven_project" "example_project" {
 ### Required
 
 - `name` (String) Billing group name. Maximum length: `128`.
+- `parent_id` (String) Link a billing group to an existing organization by using its ID.
 
 ### Optional
 
@@ -46,7 +47,6 @@ resource "aiven_project" "example_project" {
 - `company` (String) Name of a company. Maximum length: `128`.
 - `copy_from_billing_group` (String) Billing group ID. Maximum length: `36`. Changing this property forces recreation of the resource.
 - `country_code` (String) Two letter country code for billing country. Maximum length: `2`.
-- `parent_id` (String) Link a billing group to an existing organization by using its ID.
 - `state` (String) Address state or province. Maximum length: `128`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) EU VAT Identification Number. Maximum length: `64`.

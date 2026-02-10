@@ -51,6 +51,10 @@ func createView(ctx context.Context, client avngen.Client, plan, config *tfModel
 
 func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
+	diags.Append(planModifier(ctx, client, state)...)
+	if diags.HasError() {
+		return diags
+	}
 	func() {
 		rsp, err := client.BillingGroupGet(ctx, state.BillingGroupID.ValueString())
 		if err != nil {

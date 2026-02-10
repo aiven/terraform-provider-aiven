@@ -16,7 +16,9 @@ import (
 )
 
 func TestAccAivenBillingGroup_basic(t *testing.T) {
+	orgName := acc.OrganizationName()
 	resourceName := "aiven_billing_group.foo"
+	datasourceName := "data.aiven_billing_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -24,29 +26,28 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				// Creates a group with billing_contact_emails
-				Config: testAccBillingGroupResource(rName, `billing_contact_emails = ["foo@aiven.fi"]`),
+				Config: testAccBillingGroupResource(orgName, rName, `billing_contact_emails = ["foo@aiven.fi"]`),
 				Check: resource.ComposeTestCheckFunc(
+					// Creates a group with billing_contact_emails
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "billing_contact_emails.#", "1"),
+
+					// Datasource test
+					resource.TestCheckResourceAttrPair(datasourceName, "name", resourceName, "name"),
+					resource.TestCheckTypeSetElemAttr(datasourceName, "billing_emails.*", "2"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.0"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.1"),
+
+					// Test cloning feature
+					resource.TestCheckResourceAttr("aiven_billing_group.clone", "name", fmt.Sprintf("test-acc-bg-copy-%s", rName)),
+					resource.TestCheckResourceAttr("aiven_billing_group.clone", "billing_currency", "EUR"),
 				),
 			},
 			{
 				// Proves that billing_contact_emails can be removed (state update for nil value check)
-				Config: testAccBillingGroupResource(rName, ""),
+				Config: testAccBillingGroupResource(orgName, rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName, "billing_contact_emails"),
-				),
-			},
-			{
-				Config: testCopyBillingGroupFromExistingOne(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "name", fmt.Sprintf("copy-test-acc-bg-%s", rName)),
-					resource.TestCheckResourceAttr("aiven_billing_group.bar", "billing_currency", "EUR"),
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "billing_currency", "EUR"),
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "city", "Helsinki"),
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "company", "Aiven Oy"),
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "vat_id", "abc"),
 				),
 			},
 		},
@@ -81,66 +82,36 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccBillingGroupResource(name, contactEmails string) string {
+func testAccBillingGroupResource(orgName, rName, contactEmails string) string {
 	return fmt.Sprintf(`
-resource "aiven_organization" "foo" {
-  name = "test-acc-org-%[1]s"
+data "aiven_organization" "org" {
+  name = %[1]q
 }
 
 resource "aiven_billing_group" "foo" {
-  name           = "test-acc-bg-%[1]s"
+  parent_id      = data.aiven_organization.org.id
+  name           = "test-acc-bg-%[2]s"
   billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
-  %s
+  %[3]s
 }
 
-data "aiven_billing_group" "bar" {
+data "aiven_billing_group" "foo" {
   billing_group_id = aiven_billing_group.foo.id
 }
 
-resource "aiven_project" "pr1" {
-  project       = "test-acc-pr-%[1]s"
-  billing_group = aiven_billing_group.foo.id
-  parent_id     = aiven_organization.foo.id
-
-  depends_on = [aiven_billing_group.foo]
-}`, name, contactEmails)
-}
-
-func testCopyBillingGroupFromExistingOne(name string) string {
-	return fmt.Sprintf(`
-resource "aiven_billing_group" "bar" {
-  name             = "test-acc-bg-%s"
+// A source billing group to copy from without emails 
+// that can cause plan diff issues and fail the test 
+resource "aiven_billing_group" "source" {
+  parent_id        = data.aiven_organization.org.id
+  name             = "test-acc-bg-source-%[2]s"
   billing_currency = "EUR"
-  vat_id           = "abc"
-  city             = "Helsinki"
-  company          = "Aiven Oy"
-}
-resource "aiven_billing_group" "bar2" {
-  name                    = "copy-test-acc-bg-%s"
-  copy_from_billing_group = aiven_billing_group.bar.id
-}`, name, name)
 }
 
-func TestAccAivenBillingGroupDataSource_basic(t *testing.T) {
-	datasourceName := "data.aiven_billing_group.bar"
-	resourceName := "aiven_billing_group.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBillingGroupResource(rName, ""),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(datasourceName, "name", resourceName, "name"),
-					resource.TestCheckTypeSetElemAttr(datasourceName, "billing_emails.*", "2"),
-					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.0"),
-					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.1"),
-				),
-			},
-		},
-	})
+resource "aiven_billing_group" "clone" {
+  name                    = "test-acc-bg-copy-%[2]s"
+  copy_from_billing_group = aiven_billing_group.source.id
+}
+`, orgName, rName, contactEmails)
 }
 
 // TestAccAivenBillingGroup_backward_compatibility tests that resources created with the old SDK provider

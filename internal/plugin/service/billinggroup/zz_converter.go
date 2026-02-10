@@ -132,7 +132,7 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 		vName := plan.Name.ValueString()
 		api.Name = &vName
 	}
-	if !plan.ParentID.IsNull() && !plan.ParentID.IsUnknown() {
+	if !plan.ParentID.IsNull() || state != nil && !state.ParentID.IsNull() {
 		vParentID := plan.ParentID.ValueString()
 		api.ParentID = &vParentID
 	}
@@ -217,7 +217,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	if api.Name != nil && !state.Name.IsUnknown() {
 		state.Name = util.StringPointerValue(api.Name)
 	}
-	if api.ParentID != nil || state.ParentID.IsUnknown() {
+	if api.ParentID != nil && !state.ParentID.IsUnknown() {
 		state.ParentID = util.StringPointerValue(api.ParentID)
 	}
 	if api.State != nil && !state.State.IsUnknown() {
