@@ -45,7 +45,6 @@ datasourceSchema:
 	    payment_method_id   = "foo"
 	    payment_method_type = "aws_subscription"
 	  }
-	  payment_method_id   = "foo"
 	  shipping_address_id = "foo"
 	  vat_id              = "foo"
 	}
@@ -92,10 +91,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
-			"payment_method_id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Payment method ID.",
-			},
 			"shipping_address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Shipping address ID.",
@@ -115,7 +110,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"payment_method_type": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.",
 					},
 				}},
 			},

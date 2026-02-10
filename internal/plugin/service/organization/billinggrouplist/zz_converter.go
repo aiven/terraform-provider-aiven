@@ -39,7 +39,6 @@ type tfModelBillingGroups struct {
 	CustomInvoiceText    types.String `tfsdk:"custom_invoice_text"`
 	OrganizationID       types.String `tfsdk:"organization_id"`
 	PaymentMethod        types.List   `tfsdk:"payment_method"`
-	PaymentMethodID      types.String `tfsdk:"payment_method_id"`
 	ShippingAddressID    types.String `tfsdk:"shipping_address_id"`
 	VatID                types.String `tfsdk:"vat_id"`
 }
@@ -64,7 +63,6 @@ type apiModelBillingGroups struct {
 	CustomInvoiceText    *string                             `json:"custom_invoice_text,omitempty"`
 	OrganizationID       *string                             `json:"organization_id,omitempty"`
 	PaymentMethod        *apiModelBillingGroupsPaymentMethod `json:"payment_method,omitempty"`
-	PaymentMethodID      *string                             `json:"payment_method_id,omitempty"`
 	ShippingAddressID    *string                             `json:"shipping_address_id,omitempty"`
 	VatID                *string                             `json:"vat_id,omitempty"`
 }
@@ -149,9 +147,6 @@ func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfM
 	if api.OrganizationID != nil {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.PaymentMethodID != nil {
-		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
-	}
 	if api.ShippingAddressID != nil {
 		state.ShippingAddressID = util.StringPointerValue(api.ShippingAddressID)
 	}
@@ -183,7 +178,6 @@ func attrsBillingGroups() types.ObjectType {
 		"custom_invoice_text":    types.StringType,
 		"organization_id":        types.StringType,
 		"payment_method":         types.ListType{ElemType: attrsBillingGroupsPaymentMethod()},
-		"payment_method_id":      types.StringType,
 		"shipping_address_id":    types.StringType,
 		"vat_id":                 types.StringType,
 	}}
