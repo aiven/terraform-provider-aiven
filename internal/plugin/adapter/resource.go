@@ -71,7 +71,7 @@ type ResourceOptions[M Model[T], T any] struct {
 	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
 	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
 	Delete func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
-	Create func(ctx context.Context, client avngen.Client, plan *T) diag.Diagnostics
+	Create func(ctx context.Context, client avngen.Client, plan, config *T) diag.Diagnostics
 	Update func(ctx context.Context, client avngen.Client, plan, state, config *T) diag.Diagnostics
 
 	// ModifyPlan implements resource.ResourceWithModifyPlan.
@@ -156,11 +156,13 @@ func (a *resourceAdapter[M, T]) Create(
 	rsp *resource.CreateResponse,
 ) {
 	var (
-		plan  = instantiate[M]()
-		diags = &rsp.Diagnostics
+		plan   = instantiate[M]()
+		config = instantiate[M]()
+		diags  = &rsp.Diagnostics
 	)
 
 	diags.Append(req.Plan.Get(ctx, plan)...)
+	diags.Append(req.Config.Get(ctx, config)...)
 	if diags.HasError() {
 		return
 	}
@@ -172,7 +174,7 @@ func (a *resourceAdapter[M, T]) Create(
 	}
 	defer cancel()
 
-	diags.Append(a.resource.Create(ctx, a.client, plan.SharedModel())...)
+	diags.Append(a.resource.Create(ctx, a.client, plan.SharedModel(), config.SharedModel())...)
 	if diags.HasError() {
 		return
 	}

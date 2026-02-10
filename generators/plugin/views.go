@@ -118,7 +118,7 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 		// See ResourceOptions for parameter details.
 		switch operation {
 		case OperationCreate:
-			g.Id("plan").Op("*").Id(tfRootModel)
+			g.List(jen.Id("plan"), jen.Id("config")).Op("*").Id(tfRootModel)
 		case OperationUpdate:
 			g.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel)
 		default:

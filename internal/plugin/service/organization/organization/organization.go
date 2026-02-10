@@ -74,7 +74,7 @@ func datasourceConfigValidators(ctx context.Context, client avngen.Client) []dat
 	}
 }
 
-func createOrganization(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func createOrganization(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
 	var req account.AccountCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {

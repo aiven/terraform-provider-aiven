@@ -23,7 +23,7 @@ func NewResource() resource.Resource {
 	})
 }
 
-func createAccess(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func createAccess(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
 	var req organizationgovernance.OrganizationGovernanceAccessCreateIn
 	diags := expandData(ctx, plan, nil, &req)
 	if diags.HasError() {

@@ -16,7 +16,7 @@ func init() {
 	ResourceOptions.Update = updateView
 }
 
-func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var req service.ServiceUserCreateIn
 	diags.Append(expandData(ctx, plan, nil, &req)...)
@@ -30,7 +30,7 @@ func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.D
 		return diags
 	}
 
-	diags.Append(resetPassword(ctx, client, plan, plan)...)
+	diags.Append(resetPassword(ctx, client, plan, config)...)
 	return diags
 }
 

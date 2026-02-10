@@ -53,7 +53,7 @@ func patchedSchema(ctx context.Context) schema.Schema {
 	return s
 }
 
-func createPermission(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func createPermission(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
 	permissionLock.Lock()
 	defer permissionLock.Unlock()
 	diags := validateConflict(ctx, client, plan)
