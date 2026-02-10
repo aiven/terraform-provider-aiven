@@ -298,7 +298,8 @@ func ResourceKafkaTopic() *schema.Resource {
 					return err
 				}
 
-				if r < l {
+				const infinite = -1
+				if r != infinite && r < l {
 					return errLocalRetentionBytesOverflow
 				}
 			}
