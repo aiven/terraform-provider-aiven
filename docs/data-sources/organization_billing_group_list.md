@@ -55,7 +55,6 @@ Read-Only:
 - `custom_invoice_text` (String) Extra billing text.
 - `organization_id` (String) Organization ID.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--billing_groups--payment_method))
-- `payment_method_id` (String) Payment method ID.
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
 
@@ -65,4 +64,4 @@ Read-Only:
 Read-Only:
 
 - `payment_method_id` (String) Payment method ID.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.
