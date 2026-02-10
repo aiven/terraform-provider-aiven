@@ -10,7 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-func createView(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func createView(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
 	return upsert(ctx, client, plan, usergroup.OperationTypeAddMembers)
 }
 

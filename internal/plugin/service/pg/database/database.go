@@ -19,7 +19,7 @@ func init() {
 	DataSourceOptions.Read = read
 }
 
-func create(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
+func create(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	err := schemautil.CheckDbConflict(ctx, client, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.DatabaseName.ValueString())
@@ -28,7 +28,7 @@ func create(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagn
 		return diags
 	}
 
-	diags.Append(createView(ctx, client, plan)...)
+	diags.Append(createView(ctx, client, plan, config)...)
 	// We have already checked for the existence of the database.
 	// Getting a conflict here means the client retried the request.
 	return errmsg.DropDiagError(diags, avngen.IsAlreadyExists)

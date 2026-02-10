@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_mysql_user`: `password_wo` now properly updates password when creating the resource
 - Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`,
   `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
 - Fix service `cloud_name`: was incorrectly sent as an empty string when not set

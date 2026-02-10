@@ -136,8 +136,8 @@ func testConfigFromPlan(s schema.Schema, plan tfsdk.Plan) tfsdk.Config {
 
 func mockResourceOptions(m *mock.Mock) func(opts *ResourceOptions[*testModel, testModel]) {
 	return func(opts *ResourceOptions[*testModel, testModel]) {
-		opts.Create = func(ctx context.Context, cl avngen.Client, plan *testModel) diag.Diagnostics {
-			args := m.MethodCalled("Create", ctx, cl, plan)
+		opts.Create = func(ctx context.Context, cl avngen.Client, plan, config *testModel) diag.Diagnostics {
+			args := m.MethodCalled("Create", ctx, cl, plan, config)
 			return args.Get(0).(diag.Diagnostics)
 		}
 		opts.Read = func(ctx context.Context, cl avngen.Client, plan *testModel) diag.Diagnostics {
@@ -278,7 +278,7 @@ func requireDiagnostics(t *testing.T, got diag.Diagnostics, want ...diagExp) {
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
 func TestNewLazyResource(t *testing.T) {
 	r := NewLazyResource(ResourceOptions[*testModel, testModel]{
@@ -351,7 +351,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 		a := newTestAdapter(withDefaults)
 
 		badPlan := tfsdk.Plan{Schema: s, Raw: tftypes.NewValue(tftypes.String, "bad")}
-		req := resource.CreateRequest{Plan: badPlan}
+		req := resource.CreateRequest{Plan: badPlan, Config: testConfigFromPlan(s, badPlan)}
 		rsp := &resource.CreateResponse{State: testNullState(ctx, s)}
 
 		a.Create(ctx, req, rsp)
@@ -370,7 +370,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 		}
 		plan := testPlanFromModel(t, ctx, s, model)
 
-		req := resource.CreateRequest{Plan: plan}
+		req := resource.CreateRequest{Plan: plan, Config: testConfigFromPlan(s, plan)}
 		rsp := &resource.CreateResponse{State: testNullState(ctx, s)}
 
 		a.Create(ctx, req, rsp)
@@ -383,7 +383,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 
 	t.Run("It errors and doesn't set state when Create returns errors", func(t *testing.T) {
 		m := &mock.Mock{}
-		m.On("Create", mock.Anything, mock.Anything, mock.Anything).
+		m.On("Create", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return(diag.Diagnostics{errmsg.FromError("boom", avngen.Error{Status: 500})}).Once()
 		t.Cleanup(func() { m.AssertExpectations(t) })
 
@@ -404,7 +404,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 
 	t.Run("It errors and doesn't set state when refresh Read returns errors", func(t *testing.T) {
 		m := &mock.Mock{}
-		m.On("Create", mock.Anything, mock.Anything, mock.Anything).
+		m.On("Create", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Run(func(args mock.Arguments) {
 				args.Get(2).(*testModel).ID = types.StringValue("created")
 			}).Return((diag.Diagnostics)(nil)).Once().
@@ -431,7 +431,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 
 	t.Run("It calls Create without calling Read when RefreshState is disabled", func(t *testing.T) {
 		m := &mock.Mock{}
-		m.On("Create", mock.Anything, mock.Anything, mock.Anything).
+		m.On("Create", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Run(func(args mock.Arguments) {
 				args.Get(2).(*testModel).ID = types.StringValue("created")
 			}).Return((diag.Diagnostics)(nil)).Once()
@@ -467,7 +467,7 @@ func TestResourceAdapter_Create(t *testing.T) {
 
 	t.Run("It calls Create and then Read when RefreshState is enabled", func(t *testing.T) {
 		m := &mock.Mock{}
-		m.On("Create", mock.Anything, mock.Anything, mock.Anything).
+		m.On("Create", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Run(func(args mock.Arguments) {
 				args.Get(2).(*testModel).ID = types.StringValue("created")
 			}).Return((diag.Diagnostics)(nil)).Once().
