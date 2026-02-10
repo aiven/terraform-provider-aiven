@@ -241,6 +241,7 @@ Before marking migration complete:
 - [ ] Existing state can be used without migration
 - [ ] Backward compatibility test added using `acc.BackwardCompatibilitySteps()`
 - [ ] All SDK test scenarios pass with Plugin version
+- [ ] Changelog entry added to `CHANGELOG.md`
 
 ## Common Migration Issues
 
@@ -286,5 +287,9 @@ Once all tests pass and state compatibility is verified:
 1. **Remove SDK resource** - Delete from `internal/sdkprovider/` and remove provider registration
 2. **Update documentation** - Ensure docs reflect the Plugin Framework version
 3. **Add migration notes if needed** - Document any unavoidable behavioral differences
+4. **Add changelog entry** - Add record to `CHANGELOG.md` under the unreleased section:
+```markdown
+- Migrate `aiven_resource_name` to the Plugin Framework
+```
 
 **Do not maintain both versions** - this creates maintenance burden and user confusion.

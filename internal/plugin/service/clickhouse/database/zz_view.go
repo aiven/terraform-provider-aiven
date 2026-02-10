@@ -7,7 +7,7 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/aiven/go-client-codegen/handler/clickhouse"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -35,15 +35,15 @@ var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
 func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	func() {
-		var req service.ServiceDatabaseCreateIn
+		var req clickhouse.ServiceClickHouseDatabaseCreateIn
 		diags.Append(expandData(ctx, plan, nil, &req)...)
 		if diags.HasError() {
 			return
 		}
 
-		err := client.ServiceDatabaseCreate(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), &req)
+		err := client.ServiceClickHouseDatabaseCreate(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), &req)
 		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseCreate Error", err))
+			diags.Append(errmsg.FromError("ServiceClickHouseDatabaseCreate Error", err))
 			return
 		}
 	}()
@@ -53,20 +53,20 @@ func createView(ctx context.Context, client avngen.Client, plan, config *tfModel
 func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	func() {
-		rsp, err := client.ServiceDatabaseList(ctx, state.Project.ValueString(), state.ServiceName.ValueString())
+		rsp, err := client.ServiceClickHouseDatabaseList(ctx, state.Project.ValueString(), state.ServiceName.ValueString())
 		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseList Error", err))
+			diags.Append(errmsg.FromError("ServiceClickHouseDatabaseList Error", err))
 			return
 		}
 		for _, v := range rsp {
-			if v.DatabaseName == state.DatabaseName.ValueString() {
+			if v.Name == state.Name.ValueString() {
 				diags.Append(flattenData(ctx, state, &v)...)
 				return
 			}
 		}
 		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
-			Message:     "`aiven_pg_database` with given `database_name` not found",
-			OperationID: "ServiceDatabaseList",
+			Message:     "`aiven_clickhouse_database` with given `name` not found",
+			OperationID: "ServiceClickHouseDatabaseList",
 			Status:      404,
 		}))
 	}()
@@ -76,9 +76,9 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 	func() {
-		err := client.ServiceDatabaseDelete(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.DatabaseName.ValueString())
+		err := client.ServiceClickHouseDatabaseDelete(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.Name.ValueString())
 		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseDelete Error", err))
+			diags.Append(errmsg.FromError("ServiceClickHouseDatabaseDelete Error", err))
 			return
 		}
 	}()
