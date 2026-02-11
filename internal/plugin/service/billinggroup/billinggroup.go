@@ -8,48 +8,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func init() {
-	ResourceOptions.Read = read
-	DataSourceOptions.Read = read
-}
-
-// read wraps the read operation with ID fallback logic for backward compatibility.
-// This handles state migration from SDK provider (<=v4.47).
-func read(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
+func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
 	// SDK provider stored the ID only in the "id" field, not "billing_group_id"
 	// we need to fall back to id for backward compatibility
-	billingGroupID := state.BillingGroupID.ValueString()
-	if billingGroupID == "" {
-		billingGroupID = state.ID.ValueString()
-	}
-	if billingGroupID == "" {
-		diags.AddError("Missing billing group ID", "Neither billing_group_id nor id is set in state")
-		return diags
-	}
+	if state.BillingGroupID.ValueString() == "" {
+		if state.ID.ValueString() == "" {
+			var diags diag.Diagnostics
+			diags.AddError("Missing billing group ID", "Neither billing_group_id nor id is set in state")
+			return diags
+		}
 
-	rsp, err := client.BillingGroupGet(ctx, billingGroupID)
-	if err != nil {
-		diags.Append(errmsg.FromError("BillingGroupGet Error", err))
-		return diags
+		state.BillingGroupID = state.ID
 	}
-
-	diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
-
-	// convert empty string to null for backward compatibility.
-	// SDK provider stored card_id="" in state, but Plugin Framework treats "" and null differently
-	// without this normalization, TF would detect a drift
-	if state.CardID.ValueString() == "" && !state.CardID.IsNull() {
-		state.CardID = types.StringNull()
-	}
-
-	return diags
+	return nil
 }
 
 func expandModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
@@ -63,6 +38,7 @@ func expandModifier(ctx context.Context, client avngen.Client) util.MapModifier[
 
 func flattenModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
 	return util.ComposeModifiers(
+		flattenCardID,
 		flattenParentID(ctx, client),
 		util.FlattenObjectsToArray[tfModel]("email", "billing_contact_emails"),
 		util.FlattenObjectsToArray[tfModel]("email", "billing_emails"),
@@ -107,6 +83,17 @@ func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[
 		}
 		return r.Set(parentID, "account_id")
 	}
+}
+
+// flattenCardID
+// Converts empty string to null for backward compatibility.
+// SDK provider stored card_id="" in state, but Plugin Framework treats "" and null differently
+// without this normalization, TF would detect a drift
+func flattenCardID(_ util.RawMap, state *tfModel) error {
+	if state.CardID.ValueString() == "" {
+		state.CardID = types.StringNull()
+	}
+	return nil
 }
 
 // flattenParentID preserves parent_id format in the state: either OrganizationID or AccountID.

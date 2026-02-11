@@ -28,6 +28,7 @@ nav_order: 1
 - Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
 - Change `aiven_organization_billing_group` resource field `payment_method_id`: optional ~~`false`~~ → `true`
 - Remove `aiven_organization_billing_group` field `payment_method_id`: Payment method ID.
+- Change `aiven_billing_group`: `parent_id` is required
 
 ## [4.50.0] - 2026-01-27
 

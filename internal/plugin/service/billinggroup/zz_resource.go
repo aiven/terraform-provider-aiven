@@ -140,9 +140,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"parent_id": schema.StringAttribute{
-				Computed:            true,
 				MarkdownDescription: "Link a billing group to an existing organization by using its ID.",
-				Optional:            true,
+				Required:            true,
 			},
 			"state": schema.StringAttribute{
 				MarkdownDescription: "Address state or province. Maximum length: `128`.",

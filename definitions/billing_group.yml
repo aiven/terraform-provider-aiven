@@ -7,6 +7,7 @@ datasource:
 clientHandler: billinggroup
 expandModifier: true
 flattenModifier: true
+planModifier: true
 legacyTimeouts: true
 operations:
   - id: BillingGroupCreate
@@ -44,8 +45,7 @@ schema:
     deprecationMessage: Use `parent_id` instead. This field will be removed in the next major release.
   parent_id:
     type: string
-    optional: true
-    computed: true
+    required: true
     description: Link a billing group to an existing organization by using its ID.
   address_lines:
     description: Address lines 1 and 2. For example, street, PO box, or building.
