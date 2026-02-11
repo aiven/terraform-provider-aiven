@@ -63,7 +63,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.UserGroups != nil {
+	if api.UserGroups != nil || state.UserGroups.IsUnknown() || state.UserGroups.IsNull() {
 		vUserGroups, diags := util.FlattenSetNested(ctx, flattenUserGroups, *api.UserGroups, attrsUserGroups())
 		if diags.HasError() {
 			return diags
@@ -90,25 +90,25 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenUserGroups(ctx context.Context, api *apiModelUserGroups) (*tfModelUserGroups, diag.Diagnostics) {
 	state := new(tfModelUserGroups)
-	if api.CreateTime != nil {
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
 		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.Description != nil {
+	if api.Description != nil || state.Description.IsUnknown() {
 		state.Description = util.StringPointerValue(api.Description)
 	}
-	if api.ManagedByScim != nil {
+	if api.ManagedByScim != nil || state.ManagedByScim.IsUnknown() {
 		state.ManagedByScim = types.BoolPointerValue(api.ManagedByScim)
 	}
-	if api.MemberCount != nil {
+	if api.MemberCount != nil || state.MemberCount.IsUnknown() {
 		state.MemberCount = types.Int64PointerValue(api.MemberCount)
 	}
-	if api.UpdateTime != nil {
+	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
 		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
-	if api.UserGroupID != nil {
+	if api.UserGroupID != nil || state.UserGroupID.IsUnknown() {
 		state.UserGroupID = util.StringPointerValue(api.UserGroupID)
 	}
-	if api.UserGroupName != nil {
+	if api.UserGroupName != nil || state.UserGroupName.IsUnknown() {
 		state.UserGroupName = util.StringPointerValue(api.UserGroupName)
 	}
 	return state, nil

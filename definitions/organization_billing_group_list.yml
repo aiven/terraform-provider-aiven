@@ -8,18 +8,3 @@ operations:
     type: read
     resultToKey: billing_groups
 clientHandler: organizationbilling
-flattenModifier: true
-schema:
-  billing_groups:
-    items:
-      properties:
-        billing_contact_emails:
-          type: array
-          items:
-            type: string
-          description: List of billing contact emails.
-        billing_emails:
-          type: array
-          items:
-            type: string
-          description: List of billing contact emails.

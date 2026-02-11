@@ -88,7 +88,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.BackupConfig != nil {
+	if api.BackupConfig != nil || state.BackupConfig.IsUnknown() || state.BackupConfig.IsNull() {
 		vBackupConfig, diags := util.FlattenSingleNested(ctx, flattenBackupConfig, api.BackupConfig, attrsBackupConfig())
 		if diags.HasError() {
 			return diags
@@ -157,25 +157,25 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenBackupConfig(ctx context.Context, api *apiModelBackupConfig) (*tfModelBackupConfig, diag.Diagnostics) {
 	state := new(tfModelBackupConfig)
-	if api.FrequentIntervalMinutes != nil {
+	if api.FrequentIntervalMinutes != nil || state.FrequentIntervalMinutes.IsUnknown() {
 		state.FrequentIntervalMinutes = types.Int64PointerValue(api.FrequentIntervalMinutes)
 	}
-	if api.FrequentOldestAgeMinutes != nil {
+	if api.FrequentOldestAgeMinutes != nil || state.FrequentOldestAgeMinutes.IsUnknown() {
 		state.FrequentOldestAgeMinutes = types.Int64PointerValue(api.FrequentOldestAgeMinutes)
 	}
-	if api.InfrequentIntervalMinutes != nil {
+	if api.InfrequentIntervalMinutes != nil || state.InfrequentIntervalMinutes.IsUnknown() {
 		state.InfrequentIntervalMinutes = types.Int64PointerValue(api.InfrequentIntervalMinutes)
 	}
-	if api.InfrequentOldestAgeMinutes != nil {
+	if api.InfrequentOldestAgeMinutes != nil || state.InfrequentOldestAgeMinutes.IsUnknown() {
 		state.InfrequentOldestAgeMinutes = types.Int64PointerValue(api.InfrequentOldestAgeMinutes)
 	}
-	if api.Interval != nil {
+	if api.Interval != nil || state.Interval.IsUnknown() {
 		state.Interval = types.Int64PointerValue(api.Interval)
 	}
-	if api.MaxCount != nil {
+	if api.MaxCount != nil || state.MaxCount.IsUnknown() {
 		state.MaxCount = types.Int64PointerValue(api.MaxCount)
 	}
-	if api.RecoveryMode != nil {
+	if api.RecoveryMode != nil || state.RecoveryMode.IsUnknown() {
 		state.RecoveryMode = util.StringPointerValue(api.RecoveryMode)
 	}
 	return state, nil

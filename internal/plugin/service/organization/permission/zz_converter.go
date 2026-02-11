@@ -169,7 +169,7 @@ func flattenPermissions(ctx context.Context, api *apiModelPermissions) (*tfModel
 		}
 		state.Permissions = vPermissions
 	}
-	if api.CreateTime != nil {
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
 		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
 	if api.PrincipalID != nil {
@@ -178,7 +178,7 @@ func flattenPermissions(ctx context.Context, api *apiModelPermissions) (*tfModel
 	if api.PrincipalType != nil {
 		state.PrincipalType = util.StringPointerValue(api.PrincipalType)
 	}
-	if api.UpdateTime != nil {
+	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
 		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
 	return state, nil

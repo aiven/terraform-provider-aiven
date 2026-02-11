@@ -43,6 +43,14 @@ type tfModelBillingGroups struct {
 	VatID                types.String `tfsdk:"vat_id"`
 }
 
+type tfModelBillingGroupsBillingContactEmails struct {
+	Email types.String `tfsdk:"email"`
+}
+
+type tfModelBillingGroupsBillingEmails struct {
+	Email types.String `tfsdk:"email"`
+}
+
 type tfModelBillingGroupsPaymentMethod struct {
 	PaymentMethodID   types.String `tfsdk:"payment_method_id"`
 	PaymentMethodType types.String `tfsdk:"payment_method_type"`
@@ -54,17 +62,25 @@ type apiModel struct {
 }
 
 type apiModelBillingGroups struct {
-	BillingAddressID     *string                             `json:"billing_address_id,omitempty"`
-	BillingContactEmails *[]string                           `json:"billing_contact_emails,omitempty"`
-	BillingEmails        *[]string                           `json:"billing_emails,omitempty"`
-	BillingGroupID       *string                             `json:"billing_group_id,omitempty"`
-	BillingGroupName     *string                             `json:"billing_group_name,omitempty"`
-	Currency             *string                             `json:"currency,omitempty"`
-	CustomInvoiceText    *string                             `json:"custom_invoice_text,omitempty"`
-	OrganizationID       *string                             `json:"organization_id,omitempty"`
-	PaymentMethod        *apiModelBillingGroupsPaymentMethod `json:"payment_method,omitempty"`
-	ShippingAddressID    *string                             `json:"shipping_address_id,omitempty"`
-	VatID                *string                             `json:"vat_id,omitempty"`
+	BillingAddressID     *string                                       `json:"billing_address_id,omitempty"`
+	BillingContactEmails *[]*apiModelBillingGroupsBillingContactEmails `json:"billing_contact_emails,omitempty"`
+	BillingEmails        *[]*apiModelBillingGroupsBillingEmails        `json:"billing_emails,omitempty"`
+	BillingGroupID       *string                                       `json:"billing_group_id,omitempty"`
+	BillingGroupName     *string                                       `json:"billing_group_name,omitempty"`
+	Currency             *string                                       `json:"currency,omitempty"`
+	CustomInvoiceText    *string                                       `json:"custom_invoice_text,omitempty"`
+	OrganizationID       *string                                       `json:"organization_id,omitempty"`
+	PaymentMethod        *apiModelBillingGroupsPaymentMethod           `json:"payment_method,omitempty"`
+	ShippingAddressID    *string                                       `json:"shipping_address_id,omitempty"`
+	VatID                *string                                       `json:"vat_id,omitempty"`
+}
+
+type apiModelBillingGroupsBillingContactEmails struct {
+	Email *string `json:"email,omitempty"`
+}
+
+type apiModelBillingGroupsBillingEmails struct {
+	Email *string `json:"email,omitempty"`
 }
 
 type apiModelBillingGroupsPaymentMethod struct {
@@ -81,7 +97,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.BillingGroups != nil {
+	if api.BillingGroups != nil || state.BillingGroups.IsUnknown() || state.BillingGroups.IsNull() {
 		vBillingGroups, diags := util.FlattenSetNested(ctx, flattenBillingGroups, *api.BillingGroups, attrsBillingGroups())
 		if diags.HasError() {
 			return diags
@@ -108,60 +124,76 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenBillingGroups(ctx context.Context, api *apiModelBillingGroups) (*tfModelBillingGroups, diag.Diagnostics) {
 	state := new(tfModelBillingGroups)
-	if api.BillingContactEmails != nil {
-		vBillingContactEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
+	if api.BillingContactEmails != nil || state.BillingContactEmails.IsUnknown() || state.BillingContactEmails.IsNull() {
+		vBillingContactEmails, diags := util.FlattenSetNested(ctx, flattenBillingGroupsBillingContactEmails, *api.BillingContactEmails, attrsBillingGroupsBillingContactEmails())
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.BillingContactEmails = vBillingContactEmails
 	}
-	if api.BillingEmails != nil {
-		vBillingEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingEmails)
+	if api.BillingEmails != nil || state.BillingEmails.IsUnknown() || state.BillingEmails.IsNull() {
+		vBillingEmails, diags := util.FlattenSetNested(ctx, flattenBillingGroupsBillingEmails, *api.BillingEmails, attrsBillingGroupsBillingEmails())
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.BillingEmails = vBillingEmails
 	}
-	if api.PaymentMethod != nil {
+	if api.PaymentMethod != nil || state.PaymentMethod.IsUnknown() || state.PaymentMethod.IsNull() {
 		vPaymentMethod, diags := util.FlattenSingleNested(ctx, flattenBillingGroupsPaymentMethod, api.PaymentMethod, attrsBillingGroupsPaymentMethod())
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.PaymentMethod = vPaymentMethod
 	}
-	if api.BillingAddressID != nil {
+	if api.BillingAddressID != nil || state.BillingAddressID.IsUnknown() {
 		state.BillingAddressID = util.StringPointerValue(api.BillingAddressID)
 	}
-	if api.BillingGroupID != nil {
+	if api.BillingGroupID != nil || state.BillingGroupID.IsUnknown() {
 		state.BillingGroupID = util.StringPointerValue(api.BillingGroupID)
 	}
-	if api.BillingGroupName != nil {
+	if api.BillingGroupName != nil || state.BillingGroupName.IsUnknown() {
 		state.BillingGroupName = util.StringPointerValue(api.BillingGroupName)
 	}
-	if api.Currency != nil {
+	if api.Currency != nil || state.Currency.IsUnknown() {
 		state.Currency = util.StringPointerValue(api.Currency)
 	}
-	if api.CustomInvoiceText != nil {
+	if api.CustomInvoiceText != nil || state.CustomInvoiceText.IsUnknown() {
 		state.CustomInvoiceText = util.StringPointerValue(api.CustomInvoiceText)
 	}
-	if api.OrganizationID != nil {
+	if api.OrganizationID != nil || state.OrganizationID.IsUnknown() {
 		state.OrganizationID = util.StringPointerValue(api.OrganizationID)
 	}
-	if api.ShippingAddressID != nil {
+	if api.ShippingAddressID != nil || state.ShippingAddressID.IsUnknown() {
 		state.ShippingAddressID = util.StringPointerValue(api.ShippingAddressID)
 	}
-	if api.VatID != nil {
+	if api.VatID != nil || state.VatID.IsUnknown() {
 		state.VatID = util.StringPointerValue(api.VatID)
+	}
+	return state, nil
+}
+
+func flattenBillingGroupsBillingContactEmails(ctx context.Context, api *apiModelBillingGroupsBillingContactEmails) (*tfModelBillingGroupsBillingContactEmails, diag.Diagnostics) {
+	state := new(tfModelBillingGroupsBillingContactEmails)
+	if api.Email != nil || state.Email.IsUnknown() {
+		state.Email = util.StringPointerValue(api.Email)
+	}
+	return state, nil
+}
+
+func flattenBillingGroupsBillingEmails(ctx context.Context, api *apiModelBillingGroupsBillingEmails) (*tfModelBillingGroupsBillingEmails, diag.Diagnostics) {
+	state := new(tfModelBillingGroupsBillingEmails)
+	if api.Email != nil || state.Email.IsUnknown() {
+		state.Email = util.StringPointerValue(api.Email)
 	}
 	return state, nil
 }
 
 func flattenBillingGroupsPaymentMethod(ctx context.Context, api *apiModelBillingGroupsPaymentMethod) (*tfModelBillingGroupsPaymentMethod, diag.Diagnostics) {
 	state := new(tfModelBillingGroupsPaymentMethod)
-	if api.PaymentMethodID != nil {
+	if api.PaymentMethodID != nil || state.PaymentMethodID.IsUnknown() {
 		state.PaymentMethodID = util.StringPointerValue(api.PaymentMethodID)
 	}
-	if api.PaymentMethodType != nil {
+	if api.PaymentMethodType != nil || state.PaymentMethodType.IsUnknown() {
 		state.PaymentMethodType = util.StringPointerValue(api.PaymentMethodType)
 	}
 	return state, nil
@@ -170,8 +202,8 @@ func flattenBillingGroupsPaymentMethod(ctx context.Context, api *apiModelBilling
 func attrsBillingGroups() types.ObjectType {
 	return types.ObjectType{AttrTypes: map[string]attr.Type{
 		"billing_address_id":     types.StringType,
-		"billing_contact_emails": types.SetType{ElemType: types.StringType},
-		"billing_emails":         types.SetType{ElemType: types.StringType},
+		"billing_contact_emails": types.SetType{ElemType: attrsBillingGroupsBillingContactEmails()},
+		"billing_emails":         types.SetType{ElemType: attrsBillingGroupsBillingEmails()},
 		"billing_group_id":       types.StringType,
 		"billing_group_name":     types.StringType,
 		"currency":               types.StringType,
@@ -181,6 +213,14 @@ func attrsBillingGroups() types.ObjectType {
 		"shipping_address_id":    types.StringType,
 		"vat_id":                 types.StringType,
 	}}
+}
+
+func attrsBillingGroupsBillingContactEmails() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{"email": types.StringType}}
+}
+
+func attrsBillingGroupsBillingEmails() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{"email": types.StringType}}
 }
 
 func attrsBillingGroupsPaymentMethod() types.ObjectType {

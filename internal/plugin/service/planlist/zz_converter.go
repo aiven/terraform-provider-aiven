@@ -86,7 +86,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.ServicePlans != nil {
+	if api.ServicePlans != nil || state.ServicePlans.IsUnknown() || state.ServicePlans.IsNull() {
 		vServicePlans, diags := util.FlattenListNested(ctx, flattenServicePlans, *api.ServicePlans, attrsServicePlans())
 		if diags.HasError() {
 			return diags
@@ -119,26 +119,26 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenServicePlans(ctx context.Context, api *apiModelServicePlans) (*tfModelServicePlans, diag.Diagnostics) {
 	state := new(tfModelServicePlans)
-	if api.Regions != nil {
+	if api.Regions != nil || state.Regions.IsUnknown() || state.Regions.IsNull() {
 		vRegions, diags := util.FlattenMapNested(ctx, flattenServicePlansRegions, *api.Regions, attrsServicePlansRegions())
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.Regions = vRegions
 	}
-	if api.MaxMemoryPercent != nil {
+	if api.MaxMemoryPercent != nil || state.MaxMemoryPercent.IsUnknown() {
 		state.MaxMemoryPercent = types.Int64PointerValue(api.MaxMemoryPercent)
 	}
-	if api.NodeCount != nil {
+	if api.NodeCount != nil || state.NodeCount.IsUnknown() {
 		state.NodeCount = types.Int64PointerValue(api.NodeCount)
 	}
-	if api.ServicePlan != nil {
+	if api.ServicePlan != nil || state.ServicePlan.IsUnknown() {
 		state.ServicePlan = util.StringPointerValue(api.ServicePlan)
 	}
-	if api.ServiceType != nil {
+	if api.ServiceType != nil || state.ServiceType.IsUnknown() {
 		state.ServiceType = util.StringPointerValue(api.ServiceType)
 	}
-	if api.ShardCount != nil {
+	if api.ShardCount != nil || state.ShardCount.IsUnknown() {
 		state.ShardCount = types.Int64PointerValue(api.ShardCount)
 	}
 	return state, nil
@@ -146,28 +146,28 @@ func flattenServicePlans(ctx context.Context, api *apiModelServicePlans) (*tfMod
 
 func flattenServicePlansRegions(ctx context.Context, api *apiModelServicePlansRegions) (*tfModelServicePlansRegions, diag.Diagnostics) {
 	state := new(tfModelServicePlansRegions)
-	if api.DiskSpaceCapMb != nil {
+	if api.DiskSpaceCapMb != nil || state.DiskSpaceCapMb.IsUnknown() {
 		state.DiskSpaceCapMb = types.Int64PointerValue(api.DiskSpaceCapMb)
 	}
-	if api.DiskSpaceGbPriceUsd != nil {
+	if api.DiskSpaceGbPriceUsd != nil || state.DiskSpaceGbPriceUsd.IsUnknown() {
 		state.DiskSpaceGbPriceUsd = util.StringPointerValue(api.DiskSpaceGbPriceUsd)
 	}
-	if api.DiskSpaceMb != nil {
+	if api.DiskSpaceMb != nil || state.DiskSpaceMb.IsUnknown() {
 		state.DiskSpaceMb = types.Int64PointerValue(api.DiskSpaceMb)
 	}
-	if api.DiskSpaceStepMb != nil {
+	if api.DiskSpaceStepMb != nil || state.DiskSpaceStepMb.IsUnknown() {
 		state.DiskSpaceStepMb = types.Int64PointerValue(api.DiskSpaceStepMb)
 	}
-	if api.NodeCPUCount != nil {
+	if api.NodeCPUCount != nil || state.NodeCPUCount.IsUnknown() {
 		state.NodeCPUCount = types.Int64PointerValue(api.NodeCPUCount)
 	}
-	if api.NodeMemoryMb != nil {
+	if api.NodeMemoryMb != nil || state.NodeMemoryMb.IsUnknown() {
 		state.NodeMemoryMb = types.Int64PointerValue(api.NodeMemoryMb)
 	}
-	if api.ObjectStorageGbPriceUsd != nil {
+	if api.ObjectStorageGbPriceUsd != nil || state.ObjectStorageGbPriceUsd.IsUnknown() {
 		state.ObjectStorageGbPriceUsd = util.StringPointerValue(api.ObjectStorageGbPriceUsd)
 	}
-	if api.PriceUsd != nil {
+	if api.PriceUsd != nil || state.PriceUsd.IsUnknown() {
 		state.PriceUsd = util.StringPointerValue(api.PriceUsd)
 	}
 	return state, nil

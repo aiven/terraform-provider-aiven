@@ -33,14 +33,18 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  billing_groups {
-	    billing_address_id     = "foo"
-	    billing_contact_emails = ["test@example.com"]
-	    billing_emails         = ["test@example.com"]
-	    billing_group_id       = "foo"
-	    billing_group_name     = "test"
-	    currency               = "AUD"
-	    custom_invoice_text    = "foo"
-	    organization_id        = "org1a23f456789"
+	    billing_address_id = "foo"
+	    billing_contact_emails {
+	      email = "test@example.com"
+	    }
+	    billing_emails {
+	      email = "test@example.com"
+	    }
+	    billing_group_id    = "foo"
+	    billing_group_name  = "test"
+	    currency            = "AUD"
+	    custom_invoice_text = "foo"
+	    organization_id     = "org1a23f456789"
 	    payment_method {
 	      payment_method_id   = "foo"
 	      payment_method_type = "aws_subscription"
@@ -71,16 +75,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							MarkdownDescription: "Billing address ID.",
 						},
-						"billing_contact_emails": schema.SetAttribute{
-							Computed:            true,
-							ElementType:         types.StringType,
-							MarkdownDescription: "List of billing contact emails.",
-						},
-						"billing_emails": schema.SetAttribute{
-							Computed:            true,
-							ElementType:         types.StringType,
-							MarkdownDescription: "List of billing contact emails.",
-						},
 						"billing_group_id": schema.StringAttribute{
 							Computed:            true,
 							MarkdownDescription: "Billing group ID.",
@@ -110,19 +104,35 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "VAT ID.",
 						},
 					},
-					Blocks: map[string]schema.Block{"payment_method": schema.ListNestedBlock{
-						MarkdownDescription: "Payment method.",
-						NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
-							"payment_method_id": schema.StringAttribute{
+					Blocks: map[string]schema.Block{
+						"billing_contact_emails": schema.SetNestedBlock{
+							MarkdownDescription: "List of billing contact emails.",
+							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "Payment method ID.",
-							},
-							"payment_method_type": schema.StringAttribute{
+								MarkdownDescription: "Email.",
+							}}},
+						},
+						"billing_emails": schema.SetNestedBlock{
+							MarkdownDescription: "List of billing contact emails.",
+							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.",
-							},
-						}},
-					}},
+								MarkdownDescription: "Email.",
+							}}},
+						},
+						"payment_method": schema.ListNestedBlock{
+							MarkdownDescription: "Payment method.",
+							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+								"payment_method_id": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "Payment method ID.",
+								},
+								"payment_method_type": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.",
+								},
+							}},
+						},
+					},
 				},
 			},
 			"timeouts": timeouts.Block(ctx),

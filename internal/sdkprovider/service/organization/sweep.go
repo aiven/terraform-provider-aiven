@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -57,12 +58,12 @@ func init() {
 
 func sweepOrganizations(ctx context.Context) func(string) error {
 	return func(_ string) error {
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
 
-		organizations, err := client.Accounts.List(ctx)
+		organizations, err := client.AccountList(ctx)
 		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organizations: %w", err)
 		}
@@ -71,14 +72,14 @@ func sweepOrganizations(ctx context.Context) func(string) error {
 			return nil
 		}
 
-		for _, organization := range organizations.Accounts {
-			if !strings.HasPrefix(organization.Name, "test-acc") {
+		for _, o := range organizations {
+			if !strings.HasPrefix(o.AccountName, "test-acc") {
 				continue
 			}
 
-			err = client.Accounts.Delete(ctx, organization.Id)
+			err = client.OrganizationDelete(ctx, o.OrganizationId, organization.OrganizationDeleteRecursive(true))
 			if common.IsCritical(err) {
-				return fmt.Errorf("error deleting organization %s: %w", organization.Name, err)
+				return fmt.Errorf("error deleting organization %s: %w", o.AccountName, err)
 			}
 		}
 

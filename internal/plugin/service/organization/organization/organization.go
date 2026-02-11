@@ -8,6 +8,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
+	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -120,22 +121,27 @@ func updateOrganization(ctx context.Context, client avngen.Client, plan, state, 
 }
 
 func deleteOrganization(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
+	var err error
 	var diags diag.Diagnostics
-	accountID, err := getAccountID(ctx, client, state)
-	if err != nil {
-		diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
-		return diags
+	orgID := state.ID.ValueString()
+	if strings.HasPrefix(orgID, "org") {
+		err = client.OrganizationDelete(ctx, orgID, organization.OrganizationDeleteRecursive(true))
+	} else {
+		orgID, err = getAccountID(ctx, client, state)
+		if err != nil {
+			diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
+			return diags
+		}
+		err = client.AccountDelete(ctx, orgID)
 	}
 
-	err = client.AccountDelete(ctx, accountID)
 	if err != nil {
 		diags.AddError(
 			errmsg.SummaryErrorDeletingResource,
-			fmt.Sprintf("%q: %s", accountID, err.Error()),
+			fmt.Sprintf("%q: %s", orgID, err.Error()),
 		)
 		return diags
 	}
-
 	return nil
 }
 

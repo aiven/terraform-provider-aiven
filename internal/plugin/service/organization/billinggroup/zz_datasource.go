@@ -35,12 +35,16 @@ datasourceSchema:
 	  billing_group_id = "foo"
 
 	  // COMPUTED FIELDS
-	  billing_address_id     = "foo"
-	  billing_contact_emails = ["test@example.com"]
-	  billing_emails         = ["test@example.com"]
-	  billing_group_name     = "test"
-	  currency               = "AUD"
-	  custom_invoice_text    = "foo"
+	  billing_address_id = "foo"
+	  billing_contact_emails {
+	    email = "test@example.com"
+	  }
+	  billing_emails {
+	    email = "test@example.com"
+	  }
+	  billing_group_name  = "test"
+	  currency            = "AUD"
+	  custom_invoice_text = "foo"
 	  payment_method {
 	    payment_method_id   = "foo"
 	    payment_method_type = "aws_subscription"
@@ -55,16 +59,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing address ID.",
-			},
-			"billing_contact_emails": schema.SetAttribute{
-				Computed:            true,
-				ElementType:         types.StringType,
-				MarkdownDescription: "Aiven contacts these email addresses when there are billing issues or questions.",
-			},
-			"billing_emails": schema.SetAttribute{
-				Computed:            true,
-				ElementType:         types.StringType,
-				MarkdownDescription: "PDF invoices are sent to these email addresses.",
 			},
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID.",
@@ -101,6 +95,20 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks: map[string]schema.Block{
+			"billing_contact_emails": schema.SetNestedBlock{
+				MarkdownDescription: "List of billing contact emails.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
+					Computed:            true,
+					MarkdownDescription: "Email.",
+				}}},
+			},
+			"billing_emails": schema.SetNestedBlock{
+				MarkdownDescription: "List of billing contact emails.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
+					Computed:            true,
+					MarkdownDescription: "Email.",
+				}}},
+			},
 			"payment_method": schema.ListNestedBlock{
 				MarkdownDescription: "Payment method.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{

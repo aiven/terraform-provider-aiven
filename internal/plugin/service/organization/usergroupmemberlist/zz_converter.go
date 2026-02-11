@@ -86,7 +86,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.Members != nil {
+	if api.Members != nil || state.Members.IsUnknown() || state.Members.IsNull() {
 		vMembers, diags := util.FlattenSetNested(ctx, flattenMembers, *api.Members, attrsMembers())
 		if diags.HasError() {
 			return diags
@@ -119,17 +119,17 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenMembers(ctx context.Context, api *apiModelMembers) (*tfModelMembers, diag.Diagnostics) {
 	state := new(tfModelMembers)
-	if api.UserInfo != nil {
+	if api.UserInfo != nil || state.UserInfo.IsUnknown() || state.UserInfo.IsNull() {
 		vUserInfo, diags := util.FlattenSingleNested(ctx, flattenMembersUserInfo, api.UserInfo, attrsMembersUserInfo())
 		if diags.HasError() {
 			return nil, diags
 		}
 		state.UserInfo = vUserInfo
 	}
-	if api.LastActivityTime != nil {
+	if api.LastActivityTime != nil || state.LastActivityTime.IsUnknown() {
 		state.LastActivityTime = util.StringPointerValue(api.LastActivityTime)
 	}
-	if api.UserID != nil {
+	if api.UserID != nil || state.UserID.IsUnknown() {
 		state.UserID = util.StringPointerValue(api.UserID)
 	}
 	return state, nil
@@ -137,37 +137,37 @@ func flattenMembers(ctx context.Context, api *apiModelMembers) (*tfModelMembers,
 
 func flattenMembersUserInfo(ctx context.Context, api *apiModelMembersUserInfo) (*tfModelMembersUserInfo, diag.Diagnostics) {
 	state := new(tfModelMembersUserInfo)
-	if api.City != nil {
+	if api.City != nil || state.City.IsUnknown() {
 		state.City = util.StringPointerValue(api.City)
 	}
-	if api.Country != nil {
+	if api.Country != nil || state.Country.IsUnknown() {
 		state.Country = util.StringPointerValue(api.Country)
 	}
-	if api.CreateTime != nil {
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
 		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.Department != nil {
+	if api.Department != nil || state.Department.IsUnknown() {
 		state.Department = util.StringPointerValue(api.Department)
 	}
-	if api.IsApplicationUser != nil {
+	if api.IsApplicationUser != nil || state.IsApplicationUser.IsUnknown() {
 		state.IsApplicationUser = types.BoolPointerValue(api.IsApplicationUser)
 	}
-	if api.JobTitle != nil {
+	if api.JobTitle != nil || state.JobTitle.IsUnknown() {
 		state.JobTitle = util.StringPointerValue(api.JobTitle)
 	}
-	if api.ManagedByScim != nil {
+	if api.ManagedByScim != nil || state.ManagedByScim.IsUnknown() {
 		state.ManagedByScim = types.BoolPointerValue(api.ManagedByScim)
 	}
-	if api.ManagingOrganizationID != nil {
+	if api.ManagingOrganizationID != nil || state.ManagingOrganizationID.IsUnknown() {
 		state.ManagingOrganizationID = util.StringPointerValue(api.ManagingOrganizationID)
 	}
-	if api.RealName != nil {
+	if api.RealName != nil || state.RealName.IsUnknown() {
 		state.RealName = util.StringPointerValue(api.RealName)
 	}
-	if api.State != nil {
+	if api.State != nil || state.State.IsUnknown() {
 		state.State = util.StringPointerValue(api.State)
 	}
-	if api.UserEmail != nil {
+	if api.UserEmail != nil || state.UserEmail.IsUnknown() {
 		state.UserEmail = util.StringPointerValue(api.UserEmail)
 	}
 	return state, nil

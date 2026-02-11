@@ -113,13 +113,6 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		}
 
 		value.Qual(pkg, item.TFType()+"PointerValue").Call(val)
-		if item.IsRootProperty() && item.Computed {
-			// For "computed" fields, Terraform expects their state to be resolved during flatten.
-			// This ensures that every computed field is either fully populated or explicitly set to "nil" by the end.
-			// The state is available in the root flatten function only, that's why we check for IsRootProperty().
-			notNil.Op("||").Id(stateVar).Dot(item.GoFieldName()).Dot("IsUnknown").Call()
-		}
-
 	case item.IsNested():
 		// A struct or an array of structs.
 		value.Id(item.GoVarName())
@@ -180,6 +173,16 @@ func genFlattenAttribute(item *Item, rootLevel bool) (*jen.Statement, error) {
 		// WARNING: For migrated resources, these fields MUST have Computed=true,
 		// or else their values will be lost during the first apply after migration.
 		notNil.Op("&&").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsUnknown").Call()
+	} else if item.Computed {
+		// For "computed" fields, Terraform expects their state to be resolved during flatten.
+		// This ensures that every computed field is either fully populated or explicitly set to "nil" by the end.
+		notNil.Op("||").
+			Id(stateVar).Dot(item.GoFieldName()).Dot("IsUnknown").Call()
+
+		if item.IsObject() || item.Items != nil {
+			// Nested objects (list, objects) must get "typed" null from Flatten(Set/List/Map)
+			notNil.Op("||").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call()
+		}
 	}
 
 	return jen.If(notNil).Block(append(block, value)...), nil

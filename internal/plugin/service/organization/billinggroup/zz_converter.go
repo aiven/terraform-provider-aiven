@@ -39,23 +39,39 @@ func (tf *tfModel) SetID(vOrganizationID string, vBillingGroupID string) {
 	tf.ID = types.StringValue(filepath.Join(vOrganizationID, vBillingGroupID))
 }
 
+type tfModelBillingContactEmails struct {
+	Email types.String `tfsdk:"email"`
+}
+
+type tfModelBillingEmails struct {
+	Email types.String `tfsdk:"email"`
+}
+
 type tfModelPaymentMethod struct {
 	PaymentMethodID   types.String `tfsdk:"payment_method_id"`
 	PaymentMethodType types.String `tfsdk:"payment_method_type"`
 }
 
 type apiModel struct {
-	BillingAddressID     *string                `json:"billing_address_id,omitempty"`
-	BillingContactEmails *[]string              `json:"billing_contact_emails,omitempty"`
-	BillingEmails        *[]string              `json:"billing_emails,omitempty"`
-	BillingGroupID       *string                `json:"billing_group_id,omitempty"`
-	BillingGroupName     *string                `json:"billing_group_name,omitempty"`
-	Currency             *string                `json:"currency,omitempty"`
-	CustomInvoiceText    *string                `json:"custom_invoice_text,omitempty"`
-	OrganizationID       *string                `json:"organization_id,omitempty"`
-	PaymentMethod        *apiModelPaymentMethod `json:"payment_method,omitempty"`
-	ShippingAddressID    *string                `json:"shipping_address_id,omitempty"`
-	VatID                *string                `json:"vat_id,omitempty"`
+	BillingAddressID     *string                          `json:"billing_address_id,omitempty"`
+	BillingContactEmails *[]*apiModelBillingContactEmails `json:"billing_contact_emails,omitempty"`
+	BillingEmails        *[]*apiModelBillingEmails        `json:"billing_emails,omitempty"`
+	BillingGroupID       *string                          `json:"billing_group_id,omitempty"`
+	BillingGroupName     *string                          `json:"billing_group_name,omitempty"`
+	Currency             *string                          `json:"currency,omitempty"`
+	CustomInvoiceText    *string                          `json:"custom_invoice_text,omitempty"`
+	OrganizationID       *string                          `json:"organization_id,omitempty"`
+	PaymentMethod        *apiModelPaymentMethod           `json:"payment_method,omitempty"`
+	ShippingAddressID    *string                          `json:"shipping_address_id,omitempty"`
+	VatID                *string                          `json:"vat_id,omitempty"`
+}
+
+type apiModelBillingContactEmails struct {
+	Email *string `json:"email,omitempty"`
+}
+
+type apiModelBillingEmails struct {
+	Email *string `json:"email,omitempty"`
 }
 
 type apiModelPaymentMethod struct {
@@ -73,16 +89,14 @@ func idFields() []string {
 func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifiers ...util.MapModifier[tfModel]) diag.Diagnostics {
 	api := new(apiModel)
 	if !plan.BillingContactEmails.IsNull() || state != nil && !state.BillingContactEmails.IsNull() {
-		vBillingContactEmails := make([]string, 0)
-		diags := plan.BillingContactEmails.ElementsAs(ctx, &vBillingContactEmails, false)
+		vBillingContactEmails, diags := util.ExpandSetNested(ctx, expandBillingContactEmails, plan.BillingContactEmails)
 		if diags.HasError() {
 			return diags
 		}
 		api.BillingContactEmails = &vBillingContactEmails
 	}
 	if !plan.BillingEmails.IsNull() || state != nil && !state.BillingEmails.IsNull() {
-		vBillingEmails := make([]string, 0)
-		diags := plan.BillingEmails.ElementsAs(ctx, &vBillingEmails, false)
+		vBillingEmails, diags := util.ExpandSetNested(ctx, expandBillingEmails, plan.BillingEmails)
 		if diags.HasError() {
 			return diags
 		}
@@ -128,6 +142,24 @@ func expandData[R any](ctx context.Context, plan, state *tfModel, req *R, modifi
 	return nil
 }
 
+func expandBillingContactEmails(ctx context.Context, plan *tfModelBillingContactEmails) (*apiModelBillingContactEmails, diag.Diagnostics) {
+	api := new(apiModelBillingContactEmails)
+	if !plan.Email.IsNull() {
+		vEmail := plan.Email.ValueString()
+		api.Email = &vEmail
+	}
+	return api, nil
+}
+
+func expandBillingEmails(ctx context.Context, plan *tfModelBillingEmails) (*apiModelBillingEmails, diag.Diagnostics) {
+	api := new(apiModelBillingEmails)
+	if !plan.Email.IsNull() {
+		vEmail := plan.Email.ValueString()
+		api.Email = &vEmail
+	}
+	return api, nil
+}
+
 func expandPaymentMethod(ctx context.Context, plan *tfModelPaymentMethod) (*apiModelPaymentMethod, diag.Diagnostics) {
 	api := new(apiModelPaymentMethod)
 	if !plan.PaymentMethodID.IsNull() {
@@ -151,14 +183,14 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		return diags
 	}
 	if api.BillingContactEmails != nil && !state.BillingContactEmails.IsUnknown() {
-		vBillingContactEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingContactEmails)
+		vBillingContactEmails, diags := util.FlattenSetNested(ctx, flattenBillingContactEmails, *api.BillingContactEmails, attrsBillingContactEmails())
 		if diags.HasError() {
 			return diags
 		}
 		state.BillingContactEmails = vBillingContactEmails
 	}
 	if api.BillingEmails != nil && !state.BillingEmails.IsUnknown() {
-		vBillingEmails, diags := util.SetValueFrom(ctx, types.StringType, api.BillingEmails)
+		vBillingEmails, diags := util.FlattenSetNested(ctx, flattenBillingEmails, *api.BillingEmails, attrsBillingEmails())
 		if diags.HasError() {
 			return diags
 		}
@@ -213,6 +245,22 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 	return nil
 }
 
+func flattenBillingContactEmails(ctx context.Context, api *apiModelBillingContactEmails) (*tfModelBillingContactEmails, diag.Diagnostics) {
+	state := new(tfModelBillingContactEmails)
+	if api.Email != nil {
+		state.Email = util.StringPointerValue(api.Email)
+	}
+	return state, nil
+}
+
+func flattenBillingEmails(ctx context.Context, api *apiModelBillingEmails) (*tfModelBillingEmails, diag.Diagnostics) {
+	state := new(tfModelBillingEmails)
+	if api.Email != nil {
+		state.Email = util.StringPointerValue(api.Email)
+	}
+	return state, nil
+}
+
 func flattenPaymentMethod(ctx context.Context, api *apiModelPaymentMethod) (*tfModelPaymentMethod, diag.Diagnostics) {
 	state := new(tfModelPaymentMethod)
 	if api.PaymentMethodID != nil {
@@ -222,6 +270,14 @@ func flattenPaymentMethod(ctx context.Context, api *apiModelPaymentMethod) (*tfM
 		state.PaymentMethodType = util.StringPointerValue(api.PaymentMethodType)
 	}
 	return state, nil
+}
+
+func attrsBillingContactEmails() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{"email": types.StringType}}
+}
+
+func attrsBillingEmails() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{"email": types.StringType}}
 }
 
 func attrsPaymentMethod() types.ObjectType {

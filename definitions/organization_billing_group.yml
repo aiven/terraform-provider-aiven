@@ -6,8 +6,6 @@ datasource:
   description: Gets information about a billing group.
 idAttributeComposed: [organization_id, billing_group_id]
 clientHandler: organizationbilling
-expandModifier: true
-flattenModifier: true
 operations:
   - id: OrganizationBillingGroupCreate
     type: create
@@ -18,12 +16,3 @@ operations:
   - id: OrganizationBillingGroupGet
     type: read
     resultKey: billing_group
-schema:
-  billing_contact_emails:
-    description: Aiven contacts these email addresses when there are billing issues or questions.
-    items:
-      type: string
-  billing_emails:
-    description: PDF invoices are sent to these email addresses.
-    items:
-      type: string

@@ -42,7 +42,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_organizational_unit", &resource.Sweeper{
 		Name: "aiven_organizational_unit",
-		F:    sweepAccounts(ctx),
+		F:    sweepOrganizationalUnits(ctx),
 	})
 
 	sweep.AddTestSweepers("aiven_account_authentication", &resource.Sweeper{
@@ -126,6 +126,35 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 		})
 
 		for _, a := range accounts {
+			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
+				if common.IsCritical(err) {
+					return fmt.Errorf("error destroying account %q during sweep: %w", a.AccountName, err)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
+func sweepOrganizationalUnits(ctx context.Context) func(region string) error {
+	return func(_ string) error {
+		client, err := sweep.SharedGenClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of accounts : %w", err)
+		}
+
+		for _, a := range accounts {
+			if a.ParentAccountId == nil {
+				// Root accounts are organizations
+				continue
+			}
+
 			if err = client.AccountDelete(ctx, a.AccountId); err != nil {
 				if common.IsCritical(err) {
 					return fmt.Errorf("error destroying account %q during sweep: %w", a.AccountName, err)
