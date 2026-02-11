@@ -99,8 +99,8 @@ data "aiven_billing_group" "foo" {
   billing_group_id = aiven_billing_group.foo.id
 }
 
-// A source billing group to copy from without emails 
-// that can cause plan diff issues and fail the test 
+// A source billing group to copy from without emails
+// that can cause plan diff issues and fail the test
 resource "aiven_billing_group" "source" {
   parent_id        = data.aiven_organization.org.id
   name             = "test-acc-bg-source-%[2]s"
@@ -109,6 +109,7 @@ resource "aiven_billing_group" "source" {
 
 resource "aiven_billing_group" "clone" {
   name                    = "test-acc-bg-copy-%[2]s"
+  parent_id               = data.aiven_organization.org.id
   copy_from_billing_group = aiven_billing_group.source.id
 }
 `, orgName, rName, contactEmails)
