@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_clickhouse_database` to the Plugin Framework
 - Add `aiven_kafka_topic_list` data source: lists all Kafka topics for a service
 - Migrate `aiven_flink_application` to the Plugin Framework
 - Add `aiven_organization_payment_method_list` data source: lists payment methods for an organization (beta)
@@ -1039,11 +1040,11 @@ nav_order: 1
 
 - `aiven_service` and `aiven_elasticsearch` resources were deleted
 - `aiven_project` resource previously deprecated schema field were deleted
-Deprecated resources and data-sources:
+  Deprecated resources and data-sources:
 - `aiven_database`
 - `aiven_service_user`
 - `aiven_vpc_peering_connection`
-New resources and data-sources:
+  New resources and data-sources:
 - `aiven_aws_vpc_peering_connection`
 - `aiven_azure_vpc_peering_connection`
 - `aiven_gcp_vpc_peering_connection`
@@ -1202,8 +1203,8 @@ New resources and data-sources:
 - Add database deletion waiter
 - Remove default values for user configuration options
 - Improve documentation and examples
-    - Add Prometheus integration example
-    - Add example for Datadog metrics integration
+  - Add Prometheus integration example
+  - Add example for Datadog metrics integration
 
 ## [2.1.14] - 2021-05-18
 
@@ -1212,11 +1213,11 @@ New resources and data-sources:
 - Use golang 1.16
 - Remove GitHub pages and supporting code
 - Rework documentation and examples
-    - New README file structure
-    - Removed the Getting Started guide and merged its contents on `docs/index.md`
-    - Splitting `docs/index.md` contents in other pages on the guides
-    - In examples use data source for the Aiven Project instead of resource
-    - In examples use `aiven_<svc>` resource instead of `aiven_service`
+  - New README file structure
+  - Removed the Getting Started guide and merged its contents on `docs/index.md`
+  - Splitting `docs/index.md` contents in other pages on the guides
+  - In examples use data source for the Aiven Project instead of resource
+  - In examples use `aiven_<svc>` resource instead of `aiven_service`
 
 ## [2.1.13] - 2021-05-07
 
@@ -1225,10 +1226,10 @@ New resources and data-sources:
 ## [2.1.12] - 2021-04-20
 
 - Improve documentation
-    - Add missing import instructions
-    - Add `aiven_billing_group` documentation
-    - Fix required and optional `aiven_connection_pool` options
-    - Updates to `MirrorMaker` arguments list
+  - Add missing import instructions
+  - Add `aiven_billing_group` documentation
+  - Fix required and optional `aiven_connection_pool` options
+  - Updates to `MirrorMaker` arguments list
 - Fix error message for prometheus user creation
 - Fix project `technical_emails` and `billing_emails` fields schema
 - Add support for new user configuration options
@@ -1383,11 +1384,11 @@ New resources and data-sources:
 ## [2.0.5] - 2020-09-17
 
 - Extend service integration endpoint, add user configuration options
-    - `external_aws_cloudwatch_logs`
-    - `external_google_cloud_logging`
-    - `external_kafka`
-    - `jolokia`
-    - `signalfx`
+  - `external_aws_cloudwatch_logs`
+  - `external_google_cloud_logging`
+  - `external_kafka`
+  - `jolokia`
+  - `signalfx`
 - Add support for new user configuration options
 - Add Azure specific behaviour for VPC peering connection resource
 
@@ -1423,16 +1424,16 @@ New resources and data-sources:
 - Add mongo sink connector examples and tests
 - Kafka ACL regex modification
 - New resources:
-    - `aiven_pg` PostgreSQL service
-    - `aiven_cassandra` Cassandra service
-    - `aiven_elasticsearch` Elasticsearch service
-    - `aiven_grafana` Grafana service
-    - `aiven_influxdb` Influxdb service
-    - `aiven_redis` Redis service
-    - `aiven_mysql` MySQL service
-    - `aiven_kafka` Kafka service
-    - `aiven_kafka_connect` Kafka Connect service
-    - `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
+  - `aiven_pg` PostgreSQL service
+  - `aiven_cassandra` Cassandra service
+  - `aiven_elasticsearch` Elasticsearch service
+  - `aiven_grafana` Grafana service
+  - `aiven_influxdb` Influxdb service
+  - `aiven_redis` Redis service
+  - `aiven_mysql` MySQL service
+  - `aiven_kafka` Kafka service
+  - `aiven_kafka_connect` Kafka Connect service
+  - `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
 
 ## [1.3.5] - 2020-08-11
 
@@ -1475,10 +1476,10 @@ Improve vpc_id error handling for vpc peering connection
 - Speed up kafka topic availability waiter
 - Kafka Connect examples
 - TF client timings added for the following resources:
-    - aiven_vpc_peering_connection
-    - aiven_project_vpc
-    - aiven_service
-    - aiven_kafka_topic
+  - aiven_vpc_peering_connection
+  - aiven_project_vpc
+  - aiven_service
+  - aiven_kafka_topic
 
 ## [1.2.3] - 2020-03-30
 
@@ -1500,10 +1501,10 @@ Terraform client-side termination protection for resources:
 ## [1.2.0] - 2020-02-18
 
 - Following new types of resources have been added:
-    - account
-    - account_team
-    - account_team_member
-    - account_team_project
+  - account
+  - account_team
+  - account_team_member
+  - account_team_project
 - New configuration options
 - Fix for a read-only replica service types
 - Service specific acceptance tests
