@@ -11,6 +11,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources: allows correlating GCP Private Service Connect connection IDs with their corresponding hostnames
+- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
+- Migrate `aiven_service_component` data source to use generated client
 - Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`, `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
 
 ## [4.37.1] - 2026-01-14

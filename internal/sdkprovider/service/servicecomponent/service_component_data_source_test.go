@@ -75,6 +75,11 @@ func testAccServiceComponentAttributes(n, component, route string) resource.Test
 			return fmt.Errorf("expected to get a usage from Aiven")
 		}
 
+		// privatelink_connection_id should be empty for non-privatelink routes
+		if route != "privatelink" && a["privatelink_connection_id"] != "" {
+			return fmt.Errorf("expected privatelink_connection_id to be empty for non-privatelink route, got: %s", a["privatelink_connection_id"])
+		}
+
 		return nil
 	}
 }
