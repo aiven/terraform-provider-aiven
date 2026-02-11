@@ -492,7 +492,7 @@ resource "aiven_kafka_topic" "topic_conflict" {
 `, projectName, kafkaName, topicName)
 }
 
-func TestAccAivenKafkaTopic_local_retention_bytes_overflow_error(t *testing.T) {
+func TestAccAivenKafkaTopic_local_retention_bytes_validation(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -513,6 +513,24 @@ resource "aiven_kafka_topic" "topic" {
   }
 }`,
 				ExpectError: regexp.MustCompile(`local_retention_bytes must not be more than retention_bytes value`),
+			},
+			{
+				// retention_bytes = -1 means Infinite
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config: `
+resource "aiven_kafka_topic" "topic" {
+  project      = "foo"
+  service_name = "bar"
+  topic_name   = "foo"
+  partitions   = 5
+  replication  = 2
+
+  config {
+    local_retention_bytes = 15000000000
+    retention_bytes       = -1
+  }
+}`,
 			},
 		},
 	})
