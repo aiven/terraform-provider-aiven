@@ -36,7 +36,7 @@ func createView(ctx context.Context, client avngen.Client, plan, config *tfModel
 	var diags diag.Diagnostics
 	func() {
 		var req organizationbilling.OrganizationBillingGroupCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req, expandModifier(ctx, client))...)
+		diags.Append(expandData(ctx, plan, nil, &req)...)
 		if diags.HasError() {
 			return
 		}
@@ -46,7 +46,7 @@ func createView(ctx context.Context, client avngen.Client, plan, config *tfModel
 			diags.Append(errmsg.FromError("OrganizationBillingGroupCreate Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
+		diags.Append(flattenData(ctx, plan, rsp)...)
 	}()
 	return diags
 }
@@ -59,7 +59,7 @@ func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Di
 			diags.Append(errmsg.FromError("OrganizationBillingGroupGet Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
+		diags.Append(flattenData(ctx, state, rsp)...)
 	}()
 	return diags
 }
@@ -68,7 +68,7 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 	var diags diag.Diagnostics
 	func() {
 		var req organizationbilling.OrganizationBillingGroupUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req, expandModifier(ctx, client))...)
+		diags.Append(expandData(ctx, plan, state, &req)...)
 		if diags.HasError() {
 			return
 		}
@@ -78,7 +78,7 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 			diags.Append(errmsg.FromError("OrganizationBillingGroupUpdate Error", err))
 			return
 		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
+		diags.Append(flattenData(ctx, plan, rsp)...)
 	}()
 	return diags
 }

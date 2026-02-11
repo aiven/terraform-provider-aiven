@@ -126,7 +126,8 @@ resource "aiven_organization" "foo" {
 }
 
 resource "aiven_billing_group" "foo" {
-  name = "test-acc-bg-%[1]s"
+  name      = "test-acc-bg-%[1]s"
+  parent_id = aiven_organization.foo.id
 }
 
 resource "aiven_organizational_unit" "foo" {
@@ -353,7 +354,7 @@ resource "aiven_organization_project" "foo" {
   parent_id        = aiven_organizational_unit.foo.id
 }
 `, projectID),
-				ExpectError: regexp.MustCompile(`Can't assign project to a billing group\s+belonging to a different org`),
+				ExpectError: regexp.MustCompile(`Resources must belong to the same\s+organization\.?`),
 			},
 			{
 				// update parent_id group which belongs to a different organization, should fail
@@ -365,7 +366,7 @@ resource "aiven_organization_project" "foo" {
   parent_id        = aiven_organizational_unit.bar.id
 }
 `, projectID),
-				ExpectError: regexp.MustCompile(`Resources must belong to the same`),
+				ExpectError: regexp.MustCompile(`Resources must belong to the same\s+organization\.?`),
 			},
 			{
 				// update project_id leads to new resource creation

@@ -203,6 +203,7 @@ resource "aiven_billing_group" "foo" {
   name             = "test-acc-bg-%[1]s"
   billing_currency = "USD"
   vat_id           = "123"
+  parent_id        = aiven_account.bar.account_id
 }
 
 resource "aiven_project" "source" {

@@ -37,16 +37,22 @@ resource "aiven_organization_address" "address" {
 }
 
 resource "aiven_organization_billing_group" "group" {
-  organization_id        = data.aiven_organization.org.id
-  billing_group_name     = "Test Billing Group"
-  currency               = "EUR"
-  billing_emails         = ["test@example.com"]
-  billing_contact_emails = ["contact@example.com"]
-  billing_address_id     = aiven_organization_address.address.address_id
-  payment_method_id      = %q
-  shipping_address_id    = aiven_organization_address.address.address_id
-  vat_id                 = "TEST123456"
-  custom_invoice_text    = "Test Invoice Text"
+  organization_id    = data.aiven_organization.org.id
+  billing_group_name = "Test Billing Group"
+  billing_emails {
+    email = "test@example.com"
+  }
+  billing_contact_emails {
+    email = "contact@example.com"
+  }
+  billing_address_id = aiven_organization_address.address.address_id
+  payment_method {
+    payment_method_id   = %q
+    payment_method_type = "credit_card"
+  }
+  shipping_address_id = aiven_organization_address.address.address_id
+  vat_id              = "TEST123456"
+  custom_invoice_text = "Test Invoice Text"
 }
 
 data "aiven_organization_billing_group_list" "ds" {
