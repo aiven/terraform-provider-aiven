@@ -27,6 +27,10 @@ nav_order: 1
 - Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
 - Change `aiven_organization_billing_group` resource field `payment_method_id`: optional ~~`false`~~ → `true`
 - Remove `aiven_organization_billing_group` field `payment_method_id`: Payment method ID.
+- Add `aiven_kafka` field `kafka_user_config.gcp_auth_allowed_urls`: Allow-list of HTTPS URLs used to validate
+  GCP credential_source requests for Kafka Connect.
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.gcp_auth_allowed_urls`: Allow-list of HTTPS URLs used
+  to validate GCP credential_source requests for Kafka Connect.
 
 ## [4.50.0] - 2026-01-27
 
