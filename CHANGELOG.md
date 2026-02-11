@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_pg_user` to the Plugin Framework
 - Migrate `aiven_clickhouse_database` to the Plugin Framework
 - Change `aiven_clickhouse_database`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - Fix `aiven_kafka_topic`: handle `retention_bytes = -1` for infinite retention
