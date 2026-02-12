@@ -2,43 +2,35 @@ package usergroupmember
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/usergroup"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-func createView(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
-	return upsert(ctx, client, plan, usergroup.OperationTypeAddMembers)
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return upsert(ctx, client, d, usergroup.OperationTypeAddMembers)
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	return upsert(ctx, client, state, usergroup.OperationTypeRemoveMembers)
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return upsert(ctx, client, d, usergroup.OperationTypeRemoveMembers)
 }
 
-func upsert(ctx context.Context, client avngen.Client, state *tfModel, operation usergroup.OperationType) diag.Diagnostics {
+func upsert(ctx context.Context, client avngen.Client, d adapter.ResourceData, operation usergroup.OperationType) error {
 	err := client.UserGroupMembersUpdate(
 		ctx,
-		state.OrganizationID.ValueString(),
-		state.GroupID.ValueString(),
+		d.Get("organization_id").(string),
+		d.Get("group_id").(string),
 		&usergroup.UserGroupMembersUpdateIn{
 			Operation: operation,
-			MemberIds: []string{state.UserID.ValueString()},
+			MemberIds: []string{d.Get("user_id").(string)},
 		},
 	)
-
-	var diags diag.Diagnostics
 	if err != nil {
-		summary := errmsg.SummaryErrorCreatingResource
-		if operation == usergroup.OperationTypeRemoveMembers {
-			summary = errmsg.SummaryErrorDeletingResource
-		}
-
-		diags.Append(errmsg.FromError(summary, err))
-		return diags
+		return fmt.Errorf("operation %s failed: %w", operation, err)
 	}
 
-	return diags
+	return nil
 }

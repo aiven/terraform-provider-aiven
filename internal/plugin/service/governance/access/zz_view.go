@@ -8,62 +8,51 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationgovernance"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Beta:     true,
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
-	Schema:   resourceSchema,
-	TypeName: typeName,
+const typeName = "aiven_governance_access"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_governance_access.foo ORGANIZATION_ID/ACCESS_ID
+func idFields() []string {
+	return []string{"organization_id", "access_id"}
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req organizationgovernance.OrganizationGovernanceAccessCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.OrganizationGovernanceAccessCreate(ctx, plan.OrganizationID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationGovernanceAccessCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+var ResourceOptions = adapter.ResourceOptions{
+	Beta:           true,
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.OrganizationGovernanceAccessGet(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationGovernanceAccessGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(organizationgovernance.OrganizationGovernanceAccessCreateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.OrganizationGovernanceAccessCreate(ctx, d.Get("organization_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp)
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		_, err := client.OrganizationGovernanceAccessDelete(ctx, state.OrganizationID.ValueString(), state.SusbcriptionID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationGovernanceAccessDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.OrganizationGovernanceAccessGet(ctx, d.Get("organization_id").(string), d.Get("access_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp)
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	_, err := client.OrganizationGovernanceAccessDelete(ctx, d.Get("organization_id").(string), d.Get("access_id").(string))
+	return err
 }

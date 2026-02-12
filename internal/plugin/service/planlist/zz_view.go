@@ -7,27 +7,30 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+const typeName = "aiven_service_plan_list"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_service_plan_list.foo PROJECT/SERVICE_TYPE
+func idFields() []string {
+	return []string{"project", "service_type"}
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ProjectServicePlanList(ctx, state.Project.ValueString(), state.ServiceType.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ProjectServicePlanList Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"service_plans": rsp})...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ProjectServicePlanList(ctx, d.Get("project").(string), d.Get("service_type").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"service_plans": rsp})
 }

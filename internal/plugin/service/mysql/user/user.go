@@ -5,9 +5,8 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -16,50 +15,37 @@ func init() {
 	ResourceOptions.Update = updateView
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	var req service.ServiceUserCreateIn
-	diags.Append(expandData(ctx, plan, nil, &req)...)
-	if diags.HasError() {
-		return diags
-	}
-
-	_, err := client.ServiceUserCreate(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), &req)
+	err := d.Expand(&req)
 	if err != nil {
-		diags.Append(errmsg.FromError("ServiceUserCreate Error", err))
-		return diags
+		return err
 	}
 
-	diags.Append(resetPassword(ctx, client, plan, config)...)
-	return diags
+	_, err = client.ServiceUserCreate(ctx, d.Get("project").(string), d.Get("service_name").(string), &req)
+	if err != nil {
+		return err
+	}
+	return resetPassword(ctx, client, d)
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	hasChanged := plan.Password.ValueString() != state.Password.ValueString() ||
-		plan.PasswordWoVersion.ValueInt64() != state.PasswordWoVersion.ValueInt64() ||
-		plan.Authentication.ValueString() != state.Authentication.ValueString()
-
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	hasChanged := d.HasChange("password") || d.HasChange("password_wo_version") || d.HasChange("authentication")
 	if !hasChanged {
 		return nil
 	}
-
-	// PasswordWO is available only in config, not in plan.
-	return resetPassword(ctx, client, plan, config)
+	return resetPassword(ctx, client, d)
 }
 
-func resetPassword(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
+func resetPassword(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	req := service.ServiceUserCredentialsModifyIn{
 		Operation:      service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-		Authentication: service.AuthenticationType(plan.Authentication.ValueString()),
-		NewPassword:    util.NilIfZero(plan.Password.ValueString(), config.PasswordWo.ValueString()),
+		Authentication: service.AuthenticationType(d.Get("authentication").(string)),
+		NewPassword:    util.NilIfZero(d.Get("password_wo").(string), d.Get("password").(string)),
 	}
 
-	_, err := client.ServiceUserCredentialsModify(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.Username.ValueString(), &req)
-	if err != nil {
-		diags.Append(errmsg.FromError("ServiceUserCredentialsModify Error", err))
-	}
-	return diags
+	_, err := client.ServiceUserCredentialsModify(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string), &req)
+	return err
 }
 
 // flattenModifier adjusts the API response before it is unmarshalled into the state.
@@ -69,25 +55,19 @@ func resetPassword(ctx context.Context, client avngen.Client, plan, config *tfMo
 // inconsistent result after apply errors.
 // On import or auto-generated passwords, the plan value is null/unknown,
 // so the API response passes through unchanged.
-func flattenModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
-	return func(r util.RawMap, plan *tfModel) error {
-		// password: use plan value if known (custom password), otherwise let the API value through (auto-generated).
-		if !plan.Password.IsNull() && !plan.Password.IsUnknown() {
-			if err := r.Set(plan.Password.ValueString(), "password"); err != nil {
-				return err
-			}
-		}
-
+func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModifier {
+	return func(d adapter.ResourceData, dto map[string]any) error {
 		// authentication: use plan value if known, otherwise let the API value through.
-		if !plan.Authentication.IsNull() && !plan.Authentication.IsUnknown() {
-			if err := r.Set(plan.Authentication.ValueString(), "authentication"); err != nil {
-				return err
-			}
+		if v := d.Get("authentication").(string); v != "" {
+			dto["authentication"] = v
 		}
 
 		// Clear password from state when using write-only password.
-		if plan.PasswordWoVersion.ValueInt64() != 0 {
-			return r.Delete("password")
+		if d.Get("password_wo_version").(int) != 0 {
+			delete(dto, "password")
+		} else if v, ok := d.GetOk("password"); ok {
+			// password: use plan value if known (custom password), otherwise let the API value through.
+			dto["password"] = v
 		}
 		return nil
 	}

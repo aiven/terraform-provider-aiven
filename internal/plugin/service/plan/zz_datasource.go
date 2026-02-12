@@ -10,22 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -152,5 +139,97 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.Block(ctx),
 		},
 		MarkdownDescription: "Gets detailed information about a specific service plan, including specifications and pricing for a cloud region. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"backup_config": &adapter.Schema{
+				IsObject: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"frequent_interval_minutes": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"frequent_oldest_age_minutes": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"infrequent_interval_minutes": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"infrequent_oldest_age_minutes": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"interval": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"max_count": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"recovery_mode": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+			"base_price_usd": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"cloud_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"disk_space_cap_mb": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"disk_space_mb": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"disk_space_step_mb": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"max_memory_percent": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"node_count": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"object_storage_gb_price_usd": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_plan": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_type": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"shard_count": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

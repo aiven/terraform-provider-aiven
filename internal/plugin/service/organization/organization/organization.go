@@ -12,30 +12,32 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
 func NewResource() resource.Resource {
-	return adapter.NewResource(adapter.ResourceOptions[*resourceModel, tfModel]{
-		TypeName: typeName,
-		IDFields: idFields(),
-		Schema:   resourceSchema,
-		Read:     readOrganization,
-		Create:   createOrganization,
-		Update:   updateOrganization,
-		Delete:   deleteOrganization,
+	return adapter.NewResource(adapter.ResourceOptions{
+		TypeName:       typeName,
+		IDFields:       idFields(),
+		Schema:         resourceSchema,
+		SchemaInternal: resourceSchemaInternal(),
+		RefreshState:   true,
+		Read:           readOrganization,
+		Create:         createOrganization,
+		Update:         updateOrganization,
+		Delete:         deleteOrganization,
 	})
 }
 
 func NewDataSource() datasource.DataSource {
-	return adapter.NewDataSource(adapter.DataSourceOptions[*datasourceModel, tfModel]{
+	return adapter.NewDataSource(adapter.DataSourceOptions{
 		TypeName:         typeName,
+		IDFields:         idFields(),
 		Schema:           datasourceSchema,
+		SchemaInternal:   datasourceSchemaInternal(),
 		Read:             readOrganization,
 		ConfigValidators: datasourceConfigValidators,
 	})
@@ -53,99 +55,72 @@ func datasourceConfigValidators(ctx context.Context, client avngen.Client) []dat
 	}
 }
 
-func createOrganization(ctx context.Context, client avngen.Client, plan, _ *tfModel) diag.Diagnostics {
+func createOrganization(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	var req account.AccountCreateIn
-	diags := expandData(ctx, plan, nil, &req)
-	if diags.HasError() {
-		return diags
+	err := d.Expand(&req, adapter.RenameFields(map[string]string{"name": "account_name"}))
+	if err != nil {
+		return err
 	}
-
 	rsp, err := client.AccountCreate(ctx, &req)
 	if err != nil {
-		diags.AddError(errmsg.SummaryErrorCreatingResource, err.Error())
-		return diags
+		return err
 	}
-
-	// Sets ID field to Read() the resource
-	plan.SetID(rsp.OrganizationId)
-	return readOrganization(ctx, client, plan)
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"organization_id": "id", "account_name": "name"}))
 }
 
-func updateOrganization(ctx context.Context, client avngen.Client, plan, state, _ *tfModel) diag.Diagnostics {
+func updateOrganization(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	var req account.AccountUpdateIn
-	diags := expandData(ctx, plan, state, &req)
-	if diags.HasError() {
-		return diags
+	err := d.Expand(&req, adapter.RenameFields(map[string]string{"name": "account_name"}))
+	if err != nil {
+		return err
 	}
 
-	accountID, err := getAccountID(ctx, client, state)
+	accountID, err := getAccountID(ctx, client, d)
 	if err != nil {
-		diags.AddError(errmsg.SummaryErrorUpdatingResource, err.Error())
-		return diags
+		return err
 	}
 
 	rsp, err := client.AccountUpdate(ctx, accountID, &req)
 	if err != nil {
-		diags.AddError(
-			errmsg.SummaryErrorUpdatingResource,
-			fmt.Sprintf("%q: %s", accountID, err.Error()),
-		)
-		return diags
+		return err
 	}
 
-	// Sets ID field to Read() the resource
-	plan.SetID(rsp.OrganizationId)
-	return readOrganization(ctx, client, plan)
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"organization_id": "id", "account_name": "name"}))
 }
 
-func deleteOrganization(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
+func deleteOrganization(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	var err error
-	var diags diag.Diagnostics
-	orgID := state.ID.ValueString()
+	orgID := d.ID()
 	if strings.HasPrefix(orgID, "org") {
-		err = client.OrganizationDelete(ctx, orgID, organization.OrganizationDeleteRecursive(true))
-	} else {
-		orgID, err = getAccountID(ctx, client, state)
-		if err != nil {
-			diags.AddError(errmsg.SummaryErrorDeletingResource, err.Error())
-			return diags
-		}
-		err = client.AccountDelete(ctx, orgID)
+		return client.OrganizationDelete(ctx, orgID, organization.OrganizationDeleteRecursive(true))
 	}
 
+	orgID, err = getAccountID(ctx, client, d)
 	if err != nil {
-		diags.AddError(
-			errmsg.SummaryErrorDeletingResource,
-			fmt.Sprintf("%q: %s", orgID, err.Error()),
-		)
-		return diags
+		return err
 	}
-	return nil
+	return client.AccountDelete(ctx, orgID)
 }
 
-func readOrganization(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	accountID, err := getAccountID(ctx, client, state)
+func readOrganization(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	accountID, err := getAccountID(ctx, client, d)
 	if err != nil {
-		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
-		return diags
+		return err
 	}
 
 	rsp, err := client.AccountGet(ctx, accountID)
 	if err != nil {
-		diags.AddError(
-			errmsg.SummaryErrorReadingResource,
-			fmt.Sprintf("%q: %s", accountID, err.Error()),
-		)
-		return diags
+		return err
 	}
-
-	return flattenData(ctx, state, rsp)
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"organization_id": "id",
+		"account_name":    "name",
+	}))
 }
 
 // getAccountID is a helper function that returns the account ID to use for API calls.
-func getAccountID(ctx context.Context, client avngen.Client, state *tfModel) (string, error) {
-	id := state.ID.ValueString()
+func getAccountID(ctx context.Context, client avngen.Client, d adapter.ResourceData) (string, error) {
+	id := d.ID()
 	switch {
 	case strings.HasPrefix(id, "org"):
 		// This is an organization ID (org123456) format
@@ -159,7 +134,7 @@ func getAccountID(ctx context.Context, client avngen.Client, state *tfModel) (st
 		return id, nil
 	}
 
-	orgName := state.Name.ValueString()
+	orgName := d.Get("name").(string)
 	if orgName == "" {
 		return "", fmt.Errorf("no Organization ID or name provided")
 	}

@@ -6,9 +6,8 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -19,63 +18,63 @@ func init() {
 	DataSourceOptions.Read = read
 }
 
-func create(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	err := schemautil.CheckDbConflict(ctx, client, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.DatabaseName.ValueString())
+func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := schemautil.CheckDbConflict(ctx, client, d.Get("project").(string), d.Get("service_name").(string), d.Get("database_name").(string))
 	if err != nil {
-		diags.Append(errmsg.FromError("Database conflict check error", err))
-		return diags
+		return err
 	}
 
-	diags.Append(createView(ctx, client, plan, config)...)
+	err = createView(ctx, client, d)
+	if err != nil {
+		return err
+	}
+
 	// We have already checked for the existence of the database.
 	// Getting a conflict here means the client retried the request.
-	return errmsg.DropDiagError(diags, avngen.IsAlreadyExists)
+	if avngen.IsAlreadyExists(err) {
+		return nil
+	}
+	return err
 }
 
-func read(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	err := schemautil.CheckServiceIsPowered(ctx, client, state.Project.ValueString(), state.ServiceName.ValueString())
+func read(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := schemautil.CheckServiceIsPowered(ctx, client, d.Get("project").(string), d.Get("service_name").(string))
 	if err != nil {
-		diags.Append(errmsg.FromError("Service is powered off", err))
-		return diags
+		return fmt.Errorf("service is powered off: %w", err)
 	}
 
-	diags.Append(readView(ctx, client, state)...)
-
-	return diags
+	return readView(ctx, client, d)
 }
 
-func delete(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
+func delete(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	dbName := d.Get("database_name").(string)
 
-	diags.Append(deleteView(ctx, client, state)...)
-	if errmsg.HasDiagError(diags, avngen.IsNotFound) {
+	err := deleteView(ctx, client, d)
+	if avngen.IsNotFound(err) {
 		// The resource is already gone.
-		schemautil.ForgetDatabase(state.Project.ValueString(), state.ServiceName.ValueString(), state.DatabaseName.ValueString())
-		return errmsg.DropDiagError(diags, avngen.IsNotFound)
+		schemautil.ForgetDatabase(project, serviceName, dbName)
+		return nil
 	}
-	if diags.HasError() {
-		return diags
+	if err != nil {
+		return err
 	}
 
 	// Waits until database is deleted.
-	err := schemautil.WaitUntilNotFound(ctx, func() error {
-		_, err := findDatabaseByName(ctx, client, state.Project.ValueString(), state.ServiceName.ValueString(), state.DatabaseName.ValueString())
+	err = schemautil.WaitUntilNotFound(ctx, func() error {
+		_, err := findDatabaseByName(ctx, client, project, serviceName, dbName)
 		if err == nil {
-			return fmt.Errorf("database %q still exists", state.DatabaseName.ValueString())
+			return fmt.Errorf("database %q still exists", dbName)
 		}
 		return err
 	})
 	if err != nil {
-		diags.Append(errmsg.FromError("Waiting for database deletion failed", err))
-		return diags
+		return fmt.Errorf("waiting for database deletion failed: %w", err)
 	}
 
-	schemautil.ForgetDatabase(state.Project.ValueString(), state.ServiceName.ValueString(), state.DatabaseName.ValueString())
-	return diags
+	schemautil.ForgetDatabase(project, serviceName, dbName)
+	return nil
 }
 
 func findDatabaseByName(ctx context.Context, client avngen.Client, project, serviceName, dbName string) (*service.DatabaseOut, error) {

@@ -7,10 +7,8 @@ import (
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
 func init() {
@@ -19,11 +17,11 @@ func init() {
 
 // planModifier extracts deployment_id from the composite ID if it's not set,
 // which happens during migration from the SDK provider that didn't store deployment_id as a separate attribute.
-func planModifier(_ context.Context, _ avngen.Client, state *tfModel) diag.Diagnostics {
-	if state.DeploymentID.ValueString() == "" && state.ID.ValueString() != "" {
-		parts := strings.SplitN(state.ID.ValueString(), "/", 4)
+func planModifier(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+	if d.Get("deployment_id").(string) == "" && d.ID() != "" {
+		parts := strings.SplitN(d.ID(), "/", 4)
 		if len(parts) == 4 {
-			state.DeploymentID = types.StringValue(parts[3])
+			return d.Set("deployment_id", parts[3])
 		}
 	}
 	return nil
@@ -32,13 +30,11 @@ func planModifier(_ context.Context, _ avngen.Client, state *tfModel) diag.Diagn
 // deleteView handles the complex state machine for Flink Application Deployment deletion.
 // The deployment must be canceled before it can be deleted.
 // Retries until the deployment is gone or the context times out.
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	project := state.Project.ValueString()
-	serviceName := state.ServiceName.ValueString()
-	applicationID := state.ApplicationID.ValueString()
-	deploymentID := state.DeploymentID.ValueString()
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	applicationID := d.Get("application_id").(string)
+	deploymentID := d.Get("deployment_id").(string)
 
 	// Flink Application Deployment has a quite complicated state machine
 	// https://api.aiven.io/doc/#tag/Service:_Flink/operation/ServiceFlinkDeleteApplicationDeployment
@@ -58,8 +54,7 @@ func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.
 
 		select {
 		case <-ctx.Done():
-			diags.Append(errmsg.FromError("Delete Error", fmt.Errorf("can't delete Flink Application Deployment: %w", ctx.Err())))
-			return diags
+			return fmt.Errorf("can't delete Flink Application Deployment: %w", ctx.Err())
 		case <-time.After(time.Second):
 			continue
 		}

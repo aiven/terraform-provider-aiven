@@ -5,16 +5,24 @@ package database
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
+const typeName = "aiven_pg_database"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_pg_database.foo PROJECT/SERVICE_NAME/DATABASE_NAME
+func idFields() []string {
+	return []string{"project", "service_name", "database_name"}
+}
+
+var ResourceOptions = adapter.ResourceOptions{
 	Create:                createView,
 	Delete:                deleteView,
 	IDFields:              idFields(),
@@ -22,65 +30,45 @@ var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
 	RefreshState:          true,
 	RemoveMissing:         true,
 	Schema:                resourceSchema,
+	SchemaInternal:        resourceSchemaInternal(),
 	TerminationProtection: true,
 	TypeName:              typeName,
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req service.ServiceDatabaseCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		err := client.ServiceDatabaseCreate(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseCreate Error", err))
-			return
-		}
-	}()
-	return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(service.ServiceDatabaseCreateIn)
+	err := d.Expand(req, adapter.RenameFields(map[string]string{"database_name": "database"}))
+	if err != nil {
+		return err
+	}
+	return client.ServiceDatabaseCreate(ctx, d.Get("project").(string), d.Get("service_name").(string), req)
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ServiceDatabaseList(ctx, state.Project.ValueString(), state.ServiceName.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseList Error", err))
-			return
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ServiceDatabaseList(ctx, d.Get("project").(string), d.Get("service_name").(string))
+	if err != nil {
+		return err
+	}
+	for _, v := range rsp {
+		if v.DatabaseName == d.Get("database_name").(string) {
+			return d.Flatten(&v)
 		}
-		for _, v := range rsp {
-			if v.DatabaseName == state.DatabaseName.ValueString() {
-				diags.Append(flattenData(ctx, state, &v)...)
-				return
-			}
-		}
-		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
-			Message:     "`aiven_pg_database` with given `database_name` not found",
-			OperationID: "ServiceDatabaseList",
-			Status:      404,
-		}))
-	}()
-	return diags
+	}
+	return avngen.Error{
+		Message:     fmt.Sprintf("`aiven_pg_database` with given `database_name` not found"),
+		OperationID: "ServiceDatabaseList",
+		Status:      http.StatusNotFound,
+	}
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.ServiceDatabaseDelete(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.DatabaseName.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceDatabaseDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.ServiceDatabaseDelete(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("database_name").(string))
 }

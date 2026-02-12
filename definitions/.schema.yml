@@ -39,6 +39,14 @@ properties:
         $comment: |
           Set to true to refresh the state after the resource is created/updated/deleted.
           Example: refreshState: true
+      refreshStateDelay:
+        type: string
+        example: 10s
+        $comment: |
+          The duration to sleep after the resource is created/updated.
+          This is useful to avoid race conditions with the backend.
+          For instance, when a new user is created, the backend might hit a read-replica.
+          So we sleep for a few seconds to give the backend time to catch up.
       removeMissing:
         type: boolean
         $comment: |

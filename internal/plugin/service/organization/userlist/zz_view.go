@@ -9,35 +9,38 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
+const typeName = "aiven_organization_user_list"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_user_list.foo ID
+func idFields() []string {
+	return []string{"id"}
+}
+
+var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
+	IDFields:         idFields(),
 	Read:             readView,
 	Schema:           datasourceSchema,
+	SchemaInternal:   datasourceSchemaInternal(),
 	TypeName:         typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	diags.Append(planModifier(ctx, client, state)...)
-	if diags.HasError() {
-		return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := planModifier(ctx, client, d)
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.OrganizationUserList(ctx, state.ID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationUserList Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"users": rsp})...)
-	}()
-	return diags
+	rsp, err := client.OrganizationUserList(ctx, d.Get("id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"users": rsp})
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {

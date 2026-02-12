@@ -3,41 +3,42 @@ package application
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
 // planModifier resolves application name to application_id for the data source.
 // When name is provided instead of application_id, it lists all applications and finds the matching one.
-func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	if state.ApplicationID.ValueString() != "" {
+func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	if d.Get("application_id").(string) != "" {
 		return nil
 	}
 
-	var diags diag.Diagnostics
-
-	apps, err := client.ServiceFlinkListApplications(ctx, state.Project.ValueString(), state.ServiceName.ValueString())
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	name := d.Get("name").(string)
+	apps, err := client.ServiceFlinkListApplications(ctx, project, serviceName)
 	if err != nil {
-		diags.Append(errmsg.FromError("ServiceFlinkListApplications Error", err))
-		return diags
+		return err
 	}
 
 	for _, app := range apps {
-		if app.Name == state.Name.ValueString() {
-			state.ApplicationID = types.StringValue(app.Id)
-			state.SetID(state.Project.ValueString(), state.ServiceName.ValueString(), app.Id)
-			return nil
+		if app.Name == name {
+			err = d.Set("application_id", app.Id)
+			if err != nil {
+				return err
+			}
+
+			return d.SetID(project, serviceName, app.Id)
 		}
 	}
 
-	diags.AddError(
-		"Not Found",
-		fmt.Sprintf("flink application %q not found in project %q, service %q",
-			state.Name.ValueString(), state.Project.ValueString(), state.ServiceName.ValueString()),
-	)
-	return diags
+	return &avngen.Error{
+		Status:      http.StatusNotFound,
+		OperationID: "ServiceFlinkListApplications",
+		Message:     fmt.Sprintf("flink application %q not found in project %q, service %q", name, project, serviceName),
+	}
 }

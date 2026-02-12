@@ -8,22 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -136,5 +123,94 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.Block(ctx),
 		},
 		MarkdownDescription: "List members of a user group.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"members": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"last_activity_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"user_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"user_info": &adapter.Schema{
+							IsObject: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"city": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"country": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"create_time": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"department": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"is_application_user": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeBool,
+									},
+									"job_title": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"managed_by_scim": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeBool,
+									},
+									"managing_organization_id": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"real_name": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"state": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"user_email": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeList,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+			"user_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

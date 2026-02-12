@@ -8,87 +8,71 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
-	Schema:   resourceSchema,
-	TypeName: typeName,
-	Update:   updateView,
+const typeName = "aiven_organization_application_user"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_application_user.foo ORGANIZATION_ID/USER_ID
+func idFields() []string {
+	return []string{"organization_id", "user_id"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req applicationuser.ApplicationUserCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ApplicationUserCreate(ctx, plan.OrganizationID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ApplicationUserGet(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(applicationuser.ApplicationUserCreateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ApplicationUserCreate(ctx, d.Get("organization_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"user_email": "email"}))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req applicationuser.ApplicationUserUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ApplicationUserUpdate(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserUpdate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ApplicationUserGet(ctx, d.Get("organization_id").(string), d.Get("user_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"user_email": "email"}))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.ApplicationUserDelete(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(applicationuser.ApplicationUserUpdateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ApplicationUserUpdate(ctx, d.Get("organization_id").(string), d.Get("user_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"user_email": "email"}))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.ApplicationUserDelete(ctx, d.Get("organization_id").(string), d.Get("user_id").(string))
 }

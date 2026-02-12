@@ -7,28 +7,31 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Beta:     true,
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+const typeName = "aiven_organization_billing_group_list"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_billing_group_list.foo ORGANIZATION_ID
+func idFields() []string {
+	return []string{"organization_id"}
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.OrganizationBillingGroupList(ctx, state.OrganizationID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationBillingGroupList Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"billing_groups": rsp})...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	Beta:           true,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.OrganizationBillingGroupList(ctx, d.Get("organization_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"billing_groups": rsp})
 }

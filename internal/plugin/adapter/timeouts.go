@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -26,15 +24,19 @@ const (
 
 // withTimeout returns a new context with the specified timeout from the timeouts object.
 // Uses schemautil.GetDefaultTimeout() value from "ldflags" as the fallback.
-func withTimeout(ctx context.Context, timeouts types.Object, timeoutKey timeoutType) (context.Context, func(), diag.Diagnostics) {
-	timeout, diags := getTimeoutValue(ctx, timeouts, timeoutKey, schemautil.GetDefaultTimeout())
-	if diags.HasError() {
+func withTimeout(ctx context.Context, d resourceDataTimeouts, timeoutKey timeoutType) (context.Context, func(), error) {
+	timeout, err := getTimeoutValue(ctx, d, timeoutKey, schemautil.GetDefaultTimeout())
+	if err != nil {
 		// Return original context if timeout value is invalid to avoid nil pointer dereference.
-		return ctx, nil, diags
+		return ctx, nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	return ctx, cancel, nil
+}
+
+type resourceDataTimeouts interface {
+	GetOk(key string) (any, bool)
 }
 
 // getTimeoutValue retrieves the timeout value in SDKv2 legacy manner (the plugin framework doesn't have "default" key):
@@ -44,37 +46,27 @@ func withTimeout(ctx context.Context, timeouts types.Object, timeoutKey timeoutT
 // Returns the resolved duration and any validation diagnostics.
 func getTimeoutValue(
 	ctx context.Context,
-	timeouts types.Object,
+	d resourceDataTimeouts,
 	timeoutKey timeoutType,
 	fallback time.Duration,
-) (time.Duration, diag.Diagnostics) {
-	values := make(map[timeoutType]time.Duration)
-	for k, v := range timeouts.Attributes() {
-		if v.IsNull() || v.IsUnknown() {
-			continue
+) (time.Duration, error) {
+	v, ok := d.GetOk(fmt.Sprintf("timeouts.0.%s", timeoutKey))
+	if ok {
+		tflog.Info(ctx, fmt.Sprintf("Using user %q timeout: %s", timeoutKey, v))
+	} else {
+		v, ok = d.GetOk(fmt.Sprintf("timeouts.0.%s", timeoutDefault))
+		if ok {
+			tflog.Info(ctx, fmt.Sprintf("Using %q value for %q timeout: %s", timeoutDefault, timeoutKey, v))
+		} else {
+			tflog.Info(ctx, fmt.Sprintf("Using fallback timeout for %q: %s", timeoutKey, fallback))
+			return fallback, nil
 		}
-
-		// The schema ensures that the value is a string.
-		duration, err := time.ParseDuration(v.(types.String).ValueString())
-		if err != nil {
-			return 0, diag.Diagnostics{diag.NewErrorDiagnostic(
-				"Invalid Timeout Value",
-				fmt.Sprintf("Failed to parse timeout value for %q: %s", timeoutKey, err.Error()),
-			)}
-		}
-		values[timeoutType(k)] = duration
 	}
 
-	if v, ok := values[timeoutKey]; ok {
-		tflog.Info(ctx, fmt.Sprintf("Using %q timeout: %s", timeoutKey, v))
-		return v, nil
+	duration, err := time.ParseDuration(v.(string))
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse timeout value for %q: %w", timeoutKey, err)
 	}
 
-	if v, ok := values[timeoutDefault]; ok {
-		tflog.Info(ctx, fmt.Sprintf("Using %q value for %q timeout: %s", timeoutDefault, timeoutKey, v))
-		return v, nil
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Using fallback timeout for %q: %s", timeoutKey, fallback))
-	return fallback, nil
+	return duration, nil
 }

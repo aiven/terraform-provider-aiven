@@ -14,22 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -46,7 +33,7 @@ resourceSchema:
 	      pattern_type    = "LITERAL"
 	      principal       = "foo"
 	    }
-	    project      = "foo" // Force new
+	    project_name = "test" // Force new
 	    service_name = "test" // Force new
 	    username     = "test" // Force new
 	  }
@@ -56,12 +43,16 @@ resourceSchema:
 	  owner_user_group_id = "foo" // Force new
 
 	  // COMPUTED FIELDS
-	  susbcription_id = "foo"
+	  access_id = "foo"
 	}
 */
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"access_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The ID of the access.",
+			},
 			"access_name": schema.StringAttribute{
 				MarkdownDescription: "Label to describe the access. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
@@ -75,7 +66,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID composed as: `organization_id/susbcription_id`.",
+				MarkdownDescription: "Resource ID composed as: `organization_id/access_id`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"organization_id": schema.StringAttribute{
@@ -89,17 +80,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
-			"susbcription_id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The ID of the access.",
-			},
 		},
 		Blocks: map[string]schema.Block{
 			"access_data": schema.ListNestedBlock{
 				MarkdownDescription: "Required property. access type specific data. Changing this property forces recreation of the resource.",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"project": schema.StringAttribute{
+						"project_name": schema.StringAttribute{
 							MarkdownDescription: "Project name. Changing this property forces recreation of the resource.",
 							PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 							Required:            true,
@@ -171,5 +158,76 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.BlockAll(ctx),
 		},
 		MarkdownDescription: "Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals). \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"access_data": &adapter.Schema{
+				IsObject: true,
+				Items: &adapter.Schema{
+					Properties: map[string]*adapter.Schema{
+						"acls": &adapter.Schema{
+							Items: &adapter.Schema{
+								Properties: map[string]*adapter.Schema{
+									"host": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"id": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"operation": &adapter.Schema{Type: adapter.SchemaTypeString},
+									"pattern_type": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"permission_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+									"principal": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"resource_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+									"resource_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeSet,
+						},
+						"project_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"username": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+			"access_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"access_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"access_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id":     &adapter.Schema{Type: adapter.SchemaTypeString},
+			"owner_user_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

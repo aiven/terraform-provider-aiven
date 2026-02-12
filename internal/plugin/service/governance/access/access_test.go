@@ -32,9 +32,10 @@ func TestGovernanceAccess(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(tfResourceID, "organization_id"),
+					resource.TestCheckResourceAttrSet(tfResourceID, "access_id"),
 					resource.TestCheckResourceAttrSet(tfResourceID, "access_name"),
 					resource.TestCheckResourceAttrSet(tfResourceID, "access_type"),
-					resource.TestCheckResourceAttrSet(tfResourceID, "access_data.0.project"),
+					resource.TestCheckResourceAttrSet(tfResourceID, "access_data.0.project_name"),
 					resource.TestCheckResourceAttrSet(tfResourceID, "access_data.0.service_name"),
 					resource.TestCheckResourceAttrSet(tfResourceID, "access_data.0.username"),
 					resource.TestCheckResourceAttrSet(tfResourceID, "access_data.0.acls.0.resource_name"),
@@ -94,7 +95,7 @@ resource "aiven_governance_access" "foo" {
   owner_user_group_id = aiven_organization_user_group.foo.group_id
 
   access_data {
-    project      = data.aiven_project.foo.project
+    project_name = data.aiven_project.foo.project
     service_name = aiven_kafka.foo.service_name
 
     acls {

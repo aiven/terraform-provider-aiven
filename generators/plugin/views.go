@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"maps"
-	"net/http"
 	"slices"
 	"sort"
 
@@ -17,6 +16,10 @@ const (
 	optionsSuffix              = "Options"
 	configValidatorsFuncSuffix = "ConfigValidators"
 	planModifier               = "planModifier"
+	resourceData               = "ResourceData"
+	renameFieldsModifier       = "RenameFields"
+	flattenModifier            = "flattenModifier"
+	expandModifier             = "expandModifier"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -54,8 +57,10 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	// Resource might have multiple read operations.
 	// We use here a dict, so we don't need to handle duplicates.
 	values := map[string]jen.Code{
-		"TypeName": jen.Id(typeName),
-		"Schema":   jen.Id(string(entity) + schemaSuffix),
+		"TypeName":       jen.Id(typeName),
+		"Schema":         jen.Id(string(entity) + schemaSuffix),
+		"SchemaInternal": jen.Id(fmt.Sprintf(schemaInternalFmt, entity)).Call(),
+		"IDFields":       jen.Id(funcIDFields).Call(),
 	}
 
 	if lo.FromPtr(def.Beta) {
@@ -70,12 +75,12 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 		values[firstUpper(v.Type)] = jen.Id(fmt.Sprintf("%s%s", v.Type, viewSuffix))
 	}
 
-	entityName := string(entity)
 	if entity.isResource() {
-		values["IDFields"] = jen.Id(funcIDFields).Call()
-
 		if def.Resource.RefreshState {
 			values["RefreshState"] = jen.True()
+			if def.Resource.RefreshStateDelay != 0 {
+				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(def.Resource.RefreshStateDelay.String()))
+			}
 		}
 
 		if def.Resource.RemoveMissing {
@@ -92,13 +97,12 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	title := entity.Title() + optionsSuffix
-	genericType := jen.List(jen.Op("*").Id(entityName+"Model"), jen.Id(tfRootModel))
-	returnValue := jen.Qual(adapterPackage, title).Index(genericType).Values(dictFromMap(values, false))
+	returnValue := jen.Qual(adapterPackage, title).Values(dictFromMap(values, false))
 	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
 func genGenericView(item *Item, def *Definition, operation OperationType) (jen.Code, error) {
-	operations := make([]Operation, 0)
+	operations := make([]*Operation, 0)
 	for _, op := range def.Operations {
 		if op.Type == operation && !op.DisableView {
 			operations = append(operations, op)
@@ -113,60 +117,36 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	view.ParamsFunc(func(g *jen.Group) {
 		g.Id("ctx").Qual("context", "Context")
 		g.Id("client").Qual(avnGenPackage, "Client")
-
-		// Generates the view function.
-		// See ResourceOptions for parameter details.
-		switch operation {
-		case OperationCreate:
-			g.List(jen.Id("plan"), jen.Id("config")).Op("*").Id(tfRootModel)
-		case OperationUpdate:
-			g.List(jen.Id("plan"), jen.Id("state"), jen.Id("config")).Op("*").Id(tfRootModel)
-		default:
-			g.Id("state").Op("*").Id(tfRootModel)
-		}
+		g.Id("d").Qual(adapterPackage, resourceData)
 	})
 
 	// The return value
-	view.Qual(diagPackage, "Diagnostics")
+	view.Error()
 
 	// The function block
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
-		g.Var().Id("diags").Qual(diagPackage, "Diagnostics")
 		if def.PlanModifier && operation == OperationRead {
-			state := "state"
-			switch operation {
-			case OperationUpdate, OperationCreate:
-				state = "plan"
-			}
-			g.Id("diags").Dot("Append").Call(jen.Id(planModifier).Call(
+			g.Err().Op(":=").Id(planModifier).Call(
 				jen.Id("ctx"),
 				jen.Id("client"),
-				jen.Id(state),
-			).Op("..."))
-			g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
+				jen.Id("d"),
+			)
+			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 		}
 
 		for i, op := range operations {
-			if i != 0 {
-				g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return().Id("diags"))
+			err := genGenericViewOperation(g, i, len(operations), item, def, op)
+			if err != nil {
+				errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", op.ID, err))
 			}
-
-			g.Func().Params().BlockFunc(func(f *jen.Group) {
-				err := genGenericViewOperation(f, item, def, op)
-				if err != nil {
-					errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", op.ID, err))
-				}
-			}).Call()
 		}
-
-		g.Return().Id("diags")
 	})
 
 	return view, errM.ErrorOrNil()
 }
 
-func genGenericViewOperation(g *jen.Group, item *Item, def *Definition, operation Operation) error {
+func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item, def *Definition, operation *Operation) error {
 	inPath := def.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
 	inRequest := def.Operations.AppearsInID(operation.ID, operation.Type, RequestBody)
 	inResponse := def.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
@@ -182,122 +162,140 @@ func genGenericViewOperation(g *jen.Group, item *Item, def *Definition, operatio
 
 	// Generates the code that converts the TF model into the Client request struct
 	if hasRequest {
-		state := jen.Id("state")
-		if operation.Type == OperationCreate {
-			state = jen.Nil()
-		}
-
 		// Creates the request var
 		pkgName := avnGenHandlerPackage + def.ClientHandler
-		g.Var().Id("req").Qual(pkgName, string(operation.ID)+"In")
+		g.Id("req").Op(":=").New(jen.Qual(pkgName, string(operation.ID)+"In"))
+		g.Err().Op(":=").Id("d").Dot("Expand").CallFunc(func(g *jen.Group) {
+			g.Id("req")
+			if def.ExpandModifier {
+				g.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client"))
+			}
+			if len(def.Rename) > 0 && operation.Request != nil {
+				renameFields := make(jen.Dict)
+				for jsonName, tfName := range def.Rename {
+					_, ok := operation.Request.Properties[jsonName]
+					if ok {
+						renameFields[jen.Lit(tfName)] = jen.Lit(jsonName)
+					}
+				}
 
-		// Expands data into the request
-		callArgs := []jen.Code{
-			jen.Id("ctx"),
-			jen.Id("plan"),
-			state,
-			jen.Id("&req"),
-		}
-		if def.ExpandModifier {
-			callArgs = append(callArgs, jen.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client")))
-		}
-
-		g.Id("diags").Dot("Append").Call(
-			jen.Id(expandDataFunc).Call(callArgs...).Op("..."),
-		)
-
-		// If HasError, then return
-		g.If(jen.Id("diags").Dot("HasError").Call()).Block(jen.Return())
-		g.Line()
+				if len(renameFields) > 0 {
+					g.Qual(adapterPackage, renameFieldsModifier).Call(jen.Map(jen.String()).String().Values(renameFields))
+				}
+			}
+		})
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	}
+
+	// If this is the last function without response, just return the error
+	mustReturnResult := funcIndex == funcCount-1 && !hasResponse
 
 	// Generates the Client request block
 	// If there is a response for Delete operation, then renders "_, err :="
 	// otherwise "rsp, err :="
-	clientCall := jen.Err()
+	var clientCall *jen.Statement
 	switch {
-	case hasResponse && operation.Type == OperationDelete:
-		clientCall = jen.List(jen.Id("_"), jen.Err())
-	case hasResponse:
-		clientCall = jen.List(jen.Id("rsp"), jen.Err())
+	case mustReturnResult:
+		clientCall = jen.Return()
+	case funcIndex == 0:
+		clientCall = jen.Err().Op(":=")
+	default:
+		clientCall = jen.Err().Op("=")
 	}
 
-	g.Add(clientCall.Op(":=").
+	rspName := "rsp"
+	if funcIndex > 0 {
+		rspName = fmt.Sprintf("rsp%d", funcIndex+1)
+	}
+
+	switch {
+	case operation.Type == OperationDelete && hasResponse:
+		clientCall = jen.List(jen.Id("_"), jen.Err()).Op(":=")
+	case hasResponse:
+		clientCall = jen.List(jen.Id(rspName), jen.Err()).Op(":=")
+	}
+
+	g.Add(clientCall.
 		Id("client").Dot(string(operation.ID)).
 		CallFunc(func(params *jen.Group) {
-			// Read, Update, Delete use the "state"
-			state := "state"
-			if operation.Type == OperationCreate {
-				state = "plan"
-			}
-
 			idFields := filterAppearsIn(properties, inPath)
 			sort.Slice(idFields, func(i, j int) bool {
 				return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
 			})
 
+			// Some resources might change the ID fields during Update operation,
+			// so we need to use get values from the state instead of the plan.
+			method := "Get"
+			if operation.Type == OperationUpdate && !item.Properties["id"].UseStateForUnknown {
+				method = "GetState"
+			}
+
 			// Gathers parameters: ctx and path parameters to call the client method
 			params.Id("ctx")
 			for _, v := range idFields {
-				params.Id(state).Dot(v.GoFieldName()).Dot("Value" + v.TFType()).Call()
+				params.Id("d").Dot(method).Call(jen.Lit(v.Name)).Op(".").Parens(jen.Id(v.GoType()))
 			}
 
 			if hasRequest {
-				params.Id("&req")
+				params.Id("req")
 			}
 		}),
 	)
 
-	// If the client returned the error
-	g.If(jen.Err().Op("!=").Nil()).
-		Block(
-			jen.Id("diags").Dot("Append").Call(
-				jen.Qual(errMsgPackage, "FromError").Call(
-					jen.Lit(fmt.Sprintf(`%s Error`, firstUpper(operation.ID))),
-					jen.Err(),
-				),
-			),
-			jen.Return(),
-		)
+	if mustReturnResult {
+		return nil
+	}
+
+	if !hasResponse || operation.Type == OperationDelete {
+		g.Return().Err()
+		return nil
+	}
 
 	// Reads the response from the previous call
-	if hasResponse && operation.Type != OperationDelete {
-		err := viewResponse(g, item, def, operation)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation) error {
-	state := "plan"
-	if operation.Type == OperationRead {
-		state = "state"
-	}
-
-	// Flatten depends on whether the result is a list or a single object
+	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	flatten := func(rsp jen.Code) jen.Code {
-		callArgs := []jen.Code{jen.Id("ctx"), jen.Id(state), rsp}
-		if def.FlattenModifier {
-			callArgs = append(callArgs, jen.Id(flattenModifier).Call(jen.Id("ctx"), jen.Id("client")))
+		v := jen.Id("d").Dot("Flatten").CallFunc(func(g *jen.Group) {
+			g.Add(rsp)
+
+			if len(def.Rename) > 0 && operation.Response != nil {
+				renameFields := make(jen.Dict)
+				for jsonName, tfName := range def.Rename {
+					_, ok := operation.Response.Properties[jsonName]
+					if ok {
+						renameFields[jen.Lit(jsonName)] = jen.Lit(tfName)
+					}
+				}
+
+				if len(renameFields) > 0 {
+					g.Qual(adapterPackage, renameFieldsModifier).Call(jen.Map(jen.String()).String().Values(renameFields))
+				}
+			}
+
+			if def.FlattenModifier {
+				g.Id(flattenModifier).Call(jen.Id("ctx"), jen.Id("client"))
+			}
+		})
+
+		if funcCount == 1 || funcIndex == funcCount-1 {
+			v = jen.Return(v)
+		} else {
+			v = jen.Err().Op("=").Add(v).
+				Line().
+				If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 		}
-		return jen.Id("diags").Dot("Append").Call(
-			jen.Id(flattenDataFunc).Call(callArgs...).Op("..."),
-		)
+		return v
 	}
 
 	// Wraps the result into a map by the specified key
 	if operation.ResultToKey != "" {
 		m := jen.Op("&").Map(jen.String()).Any()
-		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultToKey): jen.Id("rsp")})))
+		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultToKey): jen.Id(rspName)})))
 		return nil
 	}
 
 	// Flattens the response directly, because it is not a list but an object
 	if len(operation.ResultListLookupKeys) == 0 {
-		g.Add(flatten(jen.Id("rsp")))
+		g.Add(flatten(jen.Id(rspName)))
 		return nil
 	}
 
@@ -319,27 +317,25 @@ func viewResponse(g *jen.Group, item *Item, def *Definition, operation Operation
 			fieldsMatch,
 			jen.Id("v").Dot(key).
 				Op("==").
-				Id(state).Dot(field.GoFieldName()).Dot("Value"+field.TFType()).Call(),
+				Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType())),
 		)
 	}
 
 	// Flattens the item on the list if all key fields match.
-	g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id("rsp")).
-		Block(jen.If(fieldsMatch...).Block(flatten(jen.Id("&v")), jen.Return()))
+	g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(rspName)).
+		Block(jen.If(fieldsMatch...).Block(jen.Add(flatten(jen.Id("&v")))))
 
 	// If passed the "for" loop, then no item was found - adds error
 	values := lo.Values(operation.ResultListLookupKeys)
 	slices.Sort(values)
-	g.Id("diags").Dot("Append").Call(
-		jen.Qual(errMsgPackage, "FromError").Call(
-			jen.Lit("Resource Not Found"),
-			jen.Qual(avnGenPackage, "Error").Values(jen.Dict{
-				jen.Id("Status"):      jen.Lit(http.StatusNotFound),
-				jen.Id("Message"):     jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
-				jen.Id("OperationID"): jen.Lit(string(operation.ID)),
-			}),
+	g.Return().
+		Qual(avnGenPackage, "Error").Values(jen.Dict{
+		jen.Id("OperationID"): jen.Lit(string(operation.ID)),
+		jen.Id("Status"):      jen.Qual("net/http", "StatusNotFound"),
+		jen.Id("Message"): jen.Qual("fmt", "Sprintf").Call(
+			jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
 		),
-	)
+	})
 
 	return nil
 }

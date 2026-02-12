@@ -8,82 +8,68 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/cmk"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Beta:     true,
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
-	Schema:   resourceSchema,
-	TypeName: typeName,
-	Update:   updateView,
+const typeName = "aiven_cmk"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_cmk.foo PROJECT/CMK_ID
+func idFields() []string {
+	return []string{"project", "cmk_id"}
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req cmk.CMKCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.CMKCreate(ctx, plan.Project.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("CMKCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+var ResourceOptions = adapter.ResourceOptions{
+	Beta:           true,
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.CMKGet(ctx, state.Project.ValueString(), state.CmkID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("CMKGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(cmk.CMKCreateIn)
+	err := d.Expand(req, adapter.RenameFields(map[string]string{"cmk_provider": "provider"}))
+	if err != nil {
+		return err
+	}
+	rsp, err := client.CMKCreate(ctx, d.Get("project").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"id":       "cmk_id",
+		"provider": "cmk_provider",
+	}))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req cmk.CMKUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.CMKUpdate(ctx, state.Project.ValueString(), state.CmkID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("CMKUpdate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.CMKGet(ctx, d.Get("project").(string), d.Get("cmk_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "cmk_id"}))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		_, err := client.CMKDelete(ctx, state.Project.ValueString(), state.CmkID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("CMKDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(cmk.CMKUpdateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.CMKUpdate(ctx, d.Get("project").(string), d.Get("cmk_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "cmk_id"}))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	_, err := client.CMKDelete(ctx, d.Get("project").(string), d.Get("cmk_id").(string))
+	return err
 }

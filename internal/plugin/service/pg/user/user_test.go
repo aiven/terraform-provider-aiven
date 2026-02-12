@@ -256,6 +256,8 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 
 	t.Run("bulk creation", func(t *testing.T) {
 		resourceName := "aiven_pg_user.foo.0"
+		rName := acc.RandStr()
+		userName := fmt.Sprintf("user-%s-1", rName)
 
 		resource.ParallelTest(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -266,16 +268,16 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 					PreConfig: func() {
 						require.NoError(t, <-serviceIsReady)
 					},
-					Config: testAccPGUserBulk(projectName, serviceName),
+					Config: testAccPGUserBulk(projectName, serviceName, rName),
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "project", projectName),
 						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-						resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
 						resource.TestCheckResourceAttrSet(resourceName, "password"),
 						schemautil.TestAccCheckAivenServiceUserAttributes(resourceName),
 						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "project", projectName),
 						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "service_name", serviceName),
-						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "username", "user-1"),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "username", userName),
 						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "type", "normal"),
 					),
 				},
@@ -395,13 +397,13 @@ data "aiven_pg_user" "user" {
 }`, projectName, serviceName, userName, password, allowReplication)
 }
 
-func testAccPGUserBulk(projectName, serviceName string) string {
+func testAccPGUserBulk(projectName, serviceName, rName string) string {
 	return fmt.Sprintf(`
 resource "aiven_pg_user" "foo" {
   count        = 42
   project      = %[1]q
   service_name = %[2]q
-  username     = "user-${count.index + 1}"
+  username     = "user-%[3]s-${count.index + 1}"
 }
 
 data "aiven_pg_user" "user" {
@@ -410,7 +412,7 @@ data "aiven_pg_user" "user" {
   username     = aiven_pg_user.foo.0.username
 
   depends_on = [aiven_pg_user.foo]
-}`, projectName, serviceName)
+}`, projectName, serviceName, rName)
 }
 
 func testAccPGUserTemplateInterpolation(projectName, serviceName, userName string) string {

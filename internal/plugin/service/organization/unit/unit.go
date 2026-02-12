@@ -2,31 +2,30 @@ package unit
 
 import (
 	"context"
+	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func expandModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
-	return util.ComposeModifiers(
+func expandModifier(ctx context.Context, client avngen.Client) adapter.MapModifier {
+	return adapter.ComposeMapModifiers(
 		expandParentID(ctx, client),
 	)
 }
 
-func flattenModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
-	return util.ComposeModifiers(
+func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModifier {
+	return adapter.ComposeMapModifiers(
 		flattenParentID,
 	)
 }
 
 // expandParentID if parent_account_id is an OrganizationID, converts it to AccountID for the API request.parent_account_id field.
-func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
-	return func(r util.RawMap, plan *tfModel) error {
-		pID := plan.ParentID.ValueString()
+func expandParentID(ctx context.Context, client avngen.Client) adapter.MapModifier {
+	return func(d adapter.ResourceData, dto map[string]any) error {
+		pID := d.Get("parent_id").(string)
 		if pID == "" {
 			return nil
 		}
@@ -35,14 +34,16 @@ func expandParentID(ctx context.Context, client avngen.Client) util.MapModifier[
 		if err != nil {
 			return err
 		}
-		return r.Set(parentID, "parent_account_id")
+		dto["parent_id"] = parentID
+		return nil
 	}
 }
 
 // flattenParentID preserves parent_account_id format in the state: either OrganizationID or AccountID.
-func flattenParentID(r util.RawMap, plan *tfModel) error {
-	if plan.ParentID.ValueString() != "" {
-		return r.Set(plan.ParentID.ValueString(), "parent_account_id")
+func flattenParentID(d adapter.ResourceData, dto map[string]any) error {
+	if p := d.Get("parent_id").(string); p != "" {
+		dto["parent_id"] = p
+		return nil
 	}
 	return nil
 }
@@ -50,26 +51,23 @@ func flattenParentID(r util.RawMap, plan *tfModel) error {
 // planModifier user must provide either ID or Name to read the view data source.
 // When Name is provided, we need to resolve it to ID first.
 // For the datasource only.
-func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	if state.ID.ValueString() != "" {
+func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	if d.ID() != "" {
 		// Resource has ID set, no need to modify the plan.
 		return nil
 	}
 
-	var diags diag.Diagnostics
 	list, err := client.AccountList(ctx)
 	if err != nil {
-		diags.Append(errmsg.FromError("Plan Modifier Error", err))
-		return diags
+		return err
 	}
 
+	name := d.Get("name").(string)
 	for _, a := range list {
-		if a.AccountName == state.Name.ValueString() {
-			state.SetID(a.AccountId)
-			return nil
+		if a.AccountName == name {
+			return d.SetID(a.AccountId)
 		}
 	}
 
-	diags.AddError("Not Found", "organization unit with the specified name was not found")
-	return diags
+	return &avngen.Error{Status: http.StatusNotFound, Message: "organization unit with the specified name was not found"}
 }

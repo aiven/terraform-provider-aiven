@@ -6,7 +6,6 @@ package billinggroup
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,22 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -162,5 +148,79 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"account_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"address_lines": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
+			},
+			"billing_contact_emails": &adapter.Schema{
+				Items: &adapter.Schema{
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
+					Type:       adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"billing_currency": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"billing_emails": &adapter.Schema{
+				Items: &adapter.Schema{
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
+					Type:       adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"billing_extra_text": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"card_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"city": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"company": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"copy_from_billing_group": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"country_code": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"name":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"parent_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"state":     &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create":  &adapter.Schema{Type: adapter.SchemaTypeString},
+					"default": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete":  &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":    &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update":  &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+			"vat_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"zip_code": &adapter.Schema{Type: adapter.SchemaTypeString},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

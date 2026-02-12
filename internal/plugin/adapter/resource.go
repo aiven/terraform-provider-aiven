@@ -2,18 +2,17 @@ package adapter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
@@ -21,25 +20,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-// Model implements resource or datasource model with the shared fields model.
-type Model[T any] interface {
-	// SharedModel returns the shared fields model between resource and datasource.
-	SharedModel() *T
-	TimeoutsObject() types.Object
-}
-
-// instantiate creates a new instance of the model using reflection since we can't
-// directly instantiate an interface type.
-func instantiate[M Model[T], T any]() M {
-	var m M
-	return reflect.New(reflect.TypeOf(m).Elem()).Interface().(M)
-}
-
-type ResourceOptions[M Model[T], T any] struct {
+type ResourceOptions struct {
 	// TypeName is the name of resource,
 	// for instance, "aiven_organization_address"
-	TypeName string
-	Schema   func(ctx context.Context) schema.Schema
+	TypeName       string
+	Schema         func(ctx context.Context) schema.Schema
+	SchemaInternal *Schema
 
 	// Indicates whether the resource is in beta.
 	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
@@ -52,6 +38,9 @@ type ResourceOptions[M Model[T], T any] struct {
 	// Whether to call Read after Create and Update operations.
 	// Retries common errors like 404 and 403 (see the implementation for details).
 	RefreshState bool
+
+	// Time to wait after creating or updating the resource to let the backend catch up.
+	RefreshStateDelay time.Duration
 
 	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
 	// This is useful for resources that Aiven may automatically delete,
@@ -69,53 +58,54 @@ type ResourceOptions[M Model[T], T any] struct {
 	// This design allows internal retry logic for operations that can fail transiently.
 	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState=true to trigger a post-operation Read.
 	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
-	Read   func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
-	Delete func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
-	Create func(ctx context.Context, client avngen.Client, plan, config *T) diag.Diagnostics
-	Update func(ctx context.Context, client avngen.Client, plan, state, config *T) diag.Diagnostics
+
+	Create func(ctx context.Context, client avngen.Client, d ResourceData) error
+	Update func(ctx context.Context, client avngen.Client, d ResourceData) error
+	Delete func(ctx context.Context, client avngen.Client, d ResourceData) error
+	Read   func(ctx context.Context, client avngen.Client, d ResourceData) error
 
 	// ModifyPlan implements resource.ResourceWithModifyPlan.
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
-	ModifyPlan func(ctx context.Context, client avngen.Client, plan, state, config *T) diag.Diagnostics
+	ModifyPlan func(ctx context.Context, client avngen.Client, d ResourceData) error
 
 	// ValidateConfig implements resource.ResourceWithValidateConfig.
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
-	ValidateConfig func(ctx context.Context, client avngen.Client, config *T) diag.Diagnostics
+	ValidateConfig func(ctx context.Context, client avngen.Client, d ResourceData) error
 
 	// ConfigValidators implements resource.ResourceWithConfigValidators.
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []resource.ConfigValidator
 }
 
-func NewResource[M Model[T], T any](options ResourceOptions[M, T]) resource.Resource {
-	return &resourceAdapter[M, T]{
+func NewResource(options ResourceOptions) resource.Resource {
+	return &resourceAdapter{
 		resource: options,
 	}
 }
 
 // NewLazyResource creates a lazy resource constructor.
 // The provider.Provider.Resources requires a function that returns a resource.Resource.
-func NewLazyResource[M Model[T], T any](options ResourceOptions[M, T]) func() resource.Resource {
+func NewLazyResource(options ResourceOptions) func() resource.Resource {
 	return func() resource.Resource {
 		return NewResource(options)
 	}
 }
 
 var (
-	_ resource.Resource                     = (*resourceAdapter[Model[any], any])(nil)
-	_ resource.ResourceWithConfigure        = (*resourceAdapter[Model[any], any])(nil)
-	_ resource.ResourceWithImportState      = (*resourceAdapter[Model[any], any])(nil)
-	_ resource.ResourceWithValidateConfig   = (*resourceAdapter[Model[any], any])(nil)
-	_ resource.ResourceWithConfigValidators = (*resourceAdapter[Model[any], any])(nil)
-	_ resource.ResourceWithModifyPlan       = (*resourceAdapter[Model[any], any])(nil)
+	_ resource.Resource                     = (*resourceAdapter)(nil)
+	_ resource.ResourceWithConfigure        = (*resourceAdapter)(nil)
+	_ resource.ResourceWithImportState      = (*resourceAdapter)(nil)
+	_ resource.ResourceWithValidateConfig   = (*resourceAdapter)(nil)
+	_ resource.ResourceWithConfigValidators = (*resourceAdapter)(nil)
+	_ resource.ResourceWithModifyPlan       = (*resourceAdapter)(nil)
 )
 
-type resourceAdapter[M Model[T], T any] struct {
+type resourceAdapter struct {
 	client   avngen.Client
-	resource ResourceOptions[M, T]
+	resource ResourceOptions
 }
 
-func (a *resourceAdapter[M, T]) Configure(
+func (a *resourceAdapter) Configure(
 	_ context.Context,
 	req resource.ConfigureRequest,
 	rsp *resource.ConfigureResponse,
@@ -134,7 +124,7 @@ func (a *resourceAdapter[M, T]) Configure(
 	a.client = p.GetGenClient()
 }
 
-func (a *resourceAdapter[M, T]) Metadata(
+func (a *resourceAdapter) Metadata(
 	_ context.Context,
 	_ resource.MetadataRequest,
 	rsp *resource.MetadataResponse,
@@ -142,7 +132,7 @@ func (a *resourceAdapter[M, T]) Metadata(
 	rsp.TypeName = a.resource.TypeName
 }
 
-func (a *resourceAdapter[M, T]) Schema(
+func (a *resourceAdapter) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
 	rsp *resource.SchemaResponse,
@@ -150,181 +140,185 @@ func (a *resourceAdapter[M, T]) Schema(
 	rsp.Schema = a.resource.Schema(ctx)
 }
 
-func (a *resourceAdapter[M, T]) Create(
+func (a *resourceAdapter) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	rsp *resource.CreateResponse,
 ) {
-	var (
-		plan   = instantiate[M]()
-		config = instantiate[M]()
-		diags  = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
 
-	diags.Append(req.Plan.Get(ctx, plan)...)
-	diags.Append(req.Config.Get(ctx, config)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, nil, &req.Config)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
-	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutCreate)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutCreate)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
-	diags.Append(a.resource.Create(ctx, a.client, plan.SharedModel(), config.SharedModel())...)
-	if diags.HasError() {
+	err = a.resource.Create(ctx, a.client, d)
+	if err != nil {
+		diags.AddError("failed to create resource", err.Error())
 		return
 	}
 
 	if a.resource.RefreshState {
-		diags.Append(a.refreshState(ctx, plan)...)
-		if diags.HasError() {
+		err = a.refreshState(ctx, d)
+		if err != nil {
+			diags.AddError("failed to refresh state", err.Error())
 			return
 		}
 	}
 
-	diags.Append(rsp.State.Set(ctx, plan)...)
+	rsp.State.Raw = d.tfValue()
 }
 
-func (a *resourceAdapter[M, T]) Read(
+func (a *resourceAdapter) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
 	rsp *resource.ReadResponse,
 ) {
-	var (
-		state = instantiate[M]()
-		diags = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
 
-	diags.Append(req.State.Get(ctx, state)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
-	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutRead)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
 	// When RemoveResource is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
-	readDiags := a.resource.Read(ctx, a.client, state.SharedModel())
-	if a.resource.RemoveMissing && errmsg.HasDiagError(readDiags, avngen.IsNotFound) {
+	err = a.resource.Read(ctx, a.client, d)
+	if a.resource.RemoveMissing && avngen.IsNotFound(err) {
 		// Ignores all the other diagnostics and removes the resource from the state.
 		rsp.State.RemoveResource(ctx)
 		return
 	}
 
-	diags.Append(readDiags...)
-	if diags.HasError() {
+	if err != nil {
+		diags.AddError("failed to read resource", err.Error())
 		return
 	}
 
-	diags.Append(rsp.State.Set(ctx, state)...)
+	rsp.State.Raw = d.tfValue()
 }
 
 // refreshState reads the resource state after Create or Update operation.
-// In rare cases, the backend might be inconsistent right after yet, retries known errors.
-func (a *resourceAdapter[M, T]) refreshState(ctx context.Context, plan M) diag.Diagnostics {
-	return errmsg.RetryDiags(
-		ctx,
-		func() diag.Diagnostics {
-			return a.resource.Read(ctx, a.client, plan.SharedModel())
+// Optionally waits RefreshStateDelay before reading. In rare cases, the backend might be
+// inconsistent right after the operation; retries known errors.
+func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) error {
+	if a.resource.RefreshStateDelay != 0 {
+		delay := time.NewTimer(a.resource.RefreshStateDelay)
+		defer delay.Stop()
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-delay.C:
+		}
+	}
+	return retry.Do(
+		func() error {
+			return a.resource.Read(ctx, a.client, rd)
 		},
 		retry.Delay(time.Second*5),
 		retry.Attempts(10),
 		retry.LastErrorOnly(true),
-		errmsg.RetryIfAivenStatus(
-			http.StatusNotFound,  // The API is inconsistent, returns 404 after Create/Update
-			http.StatusForbidden, // Eventual consistency might cause permission errors, for instance for "organization_project"
-		),
+		retry.RetryIf(func(err error) bool {
+			var e avngen.Error
+			// 404: The API is inconsistent, returns 404 after Create/Update
+			// 403: Eventual consistency might cause permission errors, for instance for "organization_project"
+			return errors.As(err, &e) && (e.Status == http.StatusNotFound || e.Status == http.StatusForbidden)
+		}),
 	)
 }
 
-func (a *resourceAdapter[M, T]) Update(
+func (a *resourceAdapter) Update(
 	ctx context.Context,
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
 ) {
-	var (
-		plan   = instantiate[M]()
-		state  = instantiate[M]()
-		config = instantiate[M]()
-		diags  = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
 
-	diags.Append(req.Plan.Get(ctx, plan)...)
-	diags.Append(req.State.Get(ctx, state)...)
-	diags.Append(req.Config.Get(ctx, config)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, &req.State, &req.Config)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
+
+	ctx, cancel, err := withTimeout(ctx, d, timeoutUpdate)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
+		return
+	}
+	defer cancel()
 
 	// Some resources might have "virtual" fields, like "termination_protection".
 	// Those fields can be technically updated, but they don't require an API call.
 	// So we skip the Update call if it's not implemented.
 	if a.resource.Update != nil {
-		ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutUpdate)
-		diags.Append(d...)
-		if diags.HasError() {
-			return
-		}
-		defer cancel()
-
-		diags.Append(a.resource.Update(ctx, a.client, plan.SharedModel(), state.SharedModel(), config.SharedModel())...)
-		if diags.HasError() {
+		err = a.resource.Update(ctx, a.client, d)
+		if err != nil {
+			diags.AddError("failed to update resource", err.Error())
 			return
 		}
 	}
 
 	if a.resource.RefreshState {
-		diags.Append(a.refreshState(ctx, plan)...)
-		if diags.HasError() {
+		err = a.refreshState(ctx, d)
+		if err != nil {
+			diags.AddError("failed to refresh state", err.Error())
 			return
 		}
 	}
 
-	diags.Append(rsp.State.Set(ctx, plan)...)
+	rsp.State.Raw = d.tfValue()
 }
 
-func (a *resourceAdapter[M, T]) Delete(
+func (a *resourceAdapter) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
 	rsp *resource.DeleteResponse,
 ) {
-	var (
-		state = instantiate[M]()
-		diags = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
 
-	diags.Append(req.State.Get(ctx, state)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
-	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutDelete)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutDelete)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
-	d = a.resource.Delete(ctx, a.client, state.SharedModel())
-	diags.Append(errmsg.DropDiagError(d, avngen.IsNotFound)...)
+	err = a.resource.Delete(ctx, a.client, d)
+	if err != nil && !avngen.IsNotFound(err) {
+		diags.AddError("failed to delete resource", err.Error())
+	}
 }
 
-func (a *resourceAdapter[M, T]) ImportState(
+func (a *resourceAdapter) ImportState(
 	ctx context.Context,
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
+	// Set only ID fields here; Terraform runs Read afterward to populate full state.
 	values, err := schemautil.SplitResourceID(req.ID, len(a.resource.IDFields))
 	if err != nil {
 		importPath := schemautil.BuildResourceID(a.resource.IDFields...)
@@ -340,14 +334,14 @@ func (a *resourceAdapter[M, T]) ImportState(
 	}
 }
 
-func (a *resourceAdapter[M, T]) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+func (a *resourceAdapter) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	if a.resource.ConfigValidators == nil {
 		return nil
 	}
 	return a.resource.ConfigValidators(ctx, a.client)
 }
 
-func (a *resourceAdapter[M, T]) ValidateConfig(
+func (a *resourceAdapter) ValidateConfig(
 	ctx context.Context,
 	req resource.ValidateConfigRequest,
 	rsp *resource.ValidateConfigResponse,
@@ -364,27 +358,30 @@ func (a *resourceAdapter[M, T]) ValidateConfig(
 		return
 	}
 
-	var (
-		config = instantiate[M]()
-		diags  = &rsp.Diagnostics
-	)
-	diags.Append(req.Config.Get(ctx, config)...)
-	if diags.HasError() {
+	diags := &rsp.Diagnostics
+
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, nil, &req.Config)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
 	// Some resources might run API calls to validate the configuration.
-	ctx, cancel, d := withTimeout(ctx, config.TimeoutsObject(), timeoutRead)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
-	diags.Append(a.resource.ValidateConfig(ctx, a.client, config.SharedModel())...)
+	err = a.resource.ValidateConfig(ctx, a.client, d)
+	if err != nil {
+		diags.AddError("failed to validate config", err.Error())
+		return
+	}
 }
 
-func (a *resourceAdapter[M, T]) ModifyPlan(
+func (a *resourceAdapter) ModifyPlan(
 	ctx context.Context,
 	req resource.ModifyPlanRequest,
 	rsp *resource.ModifyPlanResponse,
@@ -416,40 +413,38 @@ func (a *resourceAdapter[M, T]) ModifyPlan(
 		return
 	}
 
-	var (
-		plan   = instantiate[M]()
-		config = instantiate[M]()
-		diags  = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
+	var stateOrNil *tfsdk.State
+	if !req.State.Raw.IsNull() {
+		stateOrNil = &req.State
+	}
 
-	diags.Append(req.Plan.Get(ctx, plan)...)
-	diags.Append(req.Config.Get(ctx, config)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, stateOrNil, &req.Config)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
-	var stateOrNil *T
-	if !req.State.Raw.IsNull() {
-		// During create planning, state is null. Let the ModifyPlan hook decide how to handle a nil state
-		state := instantiate[M]()
-		diags.Append(req.State.Get(ctx, state)...)
-		if diags.HasError() {
-			return
-		}
-		stateOrNil = state.SharedModel()
-	}
-
-	ctx, cancel, d := withTimeout(ctx, plan.TimeoutsObject(), timeoutRead)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
-	diags.Append(a.resource.ModifyPlan(ctx, a.client, plan.SharedModel(), stateOrNil, config.SharedModel())...)
-	if diags.HasError() {
+	err = a.resource.ModifyPlan(ctx, a.client, d)
+	if err != nil {
+		diags.AddError("failed to modify plan", err.Error())
 		return
 	}
 
-	diags.Append(rsp.Plan.Set(ctx, plan)...)
+	rsp.Plan.Raw = d.tfValue()
+}
+
+func MustParseDuration(s string) time.Duration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		panic(fmt.Errorf("failed to parse duration: %w", err))
+	}
+	return d
 }
