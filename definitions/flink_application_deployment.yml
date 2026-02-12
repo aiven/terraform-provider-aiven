@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/flink/deployment
+resource:
+  refreshState: true
+  removeMissing: true
+  description: Creates and manages the deployment of an Aiven for Apache Flink® application.
+clientHandler: flinkapplicationdeployment
+idAttributeComposed: [project, service_name, application_id, deployment_id]
+legacyTimeouts: true
+planModifier: true
+rename:
+  id: deployment_id
+remove:
+  - error_msg
+  - job_id
+  - last_savepoint
+  - status
+operations:
+  - id: ServiceFlinkCreateApplicationDeployment
+    type: create
+  - id: ServiceFlinkGetApplicationDeployment
+    type: read
+schema:
+  parallelism:
+    default: 1
+    forceNew: true
+  restart_enabled:
+    default: true
+    forceNew: true
+  starting_savepoint:
+    forceNew: true
+  version_id:
+    forceNew: true
+  application_id:
+    forceNew: true
+  created_at:
+    useStateForUnknown: true
+  created_by:
+    useStateForUnknown: true
+  deployment_id:
+    useStateForUnknown: true

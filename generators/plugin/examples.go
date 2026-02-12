@@ -214,7 +214,14 @@ func exampleScalarItem(item *Item) (cty.Value, error) {
 		if anyValue == nil {
 			anyValue = int64(42)
 		}
-		return cty.NumberIntVal(anyValue.(int64)), nil
+		switch v := anyValue.(type) {
+		case int:
+			return cty.NumberIntVal(int64(v)), nil
+		case int64:
+			return cty.NumberIntVal(v), nil
+		default:
+			return cty.NilVal, fmt.Errorf("unexpected integer type %T for %q", anyValue, item.Path())
+		}
 	case SchemaTypeNumber:
 		if anyValue == nil {
 			anyValue = 3.14

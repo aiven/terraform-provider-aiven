@@ -17,6 +17,7 @@ nav_order: 1
 - Add `aiven_organization_payment_method_list` data source: lists payment methods for an organization (beta)
 - Remove docs for `aiven_alloydbomni`, `aiven_alloydbomni_database`, and `aiven_alloydbomni_user` resources: The AlloyDB
   Omni service has reached end of life.
+- Migrate `aiven_flink_application_deployment` to the Plugin Framework
 
 ## [4.51.0] - 2026-02-17
 
