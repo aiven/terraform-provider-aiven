@@ -614,7 +614,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if _, err := client.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpassociateIn{
+		if _, err := client.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpAssociateIn{
 			ServiceName: serviceName,
 		}); err != nil {
 			return diag.Errorf("error associating Static IP (%s) to a service: %s", aip, err)
