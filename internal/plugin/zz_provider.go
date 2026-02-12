@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	database1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
@@ -33,6 +34,7 @@ func Resources() map[string]func() resource.Resource {
 	return map[string]func() resource.Resource{
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(database.ResourceOptions),
+		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(user.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),
@@ -50,6 +52,7 @@ func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
+		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(user.DataSourceOptions),
 		"aiven_organization_address":                adapter.NewLazyDataSource(address.DataSourceOptions),

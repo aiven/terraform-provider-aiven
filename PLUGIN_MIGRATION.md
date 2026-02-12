@@ -31,7 +31,7 @@
 |  25 | aiven_dragonfly                             |        |     2 |
 |  26 | aiven_external_identity                     | yes    |     1 |
 |  27 | aiven_flink                                 |        |     2 |
-|  28 | aiven_flink_application                     |        |     2 |
+|  28 | aiven_flink_application                     | yes    |     2 |
 |  29 | aiven_flink_application_deployment          |        |     1 |
 |  30 | aiven_flink_application_version             |        |     2 |
 |  31 | aiven_flink_jar_application                 |        |     1 |
@@ -107,6 +107,6 @@
 | 101 | aiven_valkey                                |        |     2 |
 | 102 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 20%                          | 35     |   179 |
+|     | TOTAL MIGRATED 21%                          | 37     |   179 |
 +-----+---------------------------------------------+--------+-------+
 ```
