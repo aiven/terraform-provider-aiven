@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 	"unsafe"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -46,15 +47,30 @@ func newApprovalResourceData(t *testing.T, userIPAddress string) *schema.Resourc
 	})
 }
 
+func newApprovalResourceDataWithPSCConnectionID(t *testing.T, userIPAddress, pscConnectionID string) *schema.ResourceData {
+	t.Helper()
+
+	return schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+		"project":           testProject,
+		"service_name":      testService,
+		"user_ip_address":   userIPAddress,
+		"psc_connection_id": pscConnectionID,
+	})
+}
+
 type fakeGCPPrivatelink struct {
 	project string
 	service string
+
+	refreshErr         error
+	connectionsListErr error
 
 	connections   []aiven.GCPPrivatelinkConnectionResponse
 	approveCalls  []string
 	approveUserIP []string
 
 	connectionsListCalls                int
+	connectionsListSequence             [][]aiven.GCPPrivatelinkConnectionResponse
 	emptyConnectionsListCallsRemaining  int
 	returnedEmptyConnectionsListAtLeast bool
 }
@@ -81,6 +97,10 @@ func (f *fakeGCPPrivatelink) AddConnection(conn aiven.GCPPrivatelinkConnectionRe
 }
 
 func (f *fakeGCPPrivatelink) Refresh(_ context.Context, project, serviceName string) error {
+	if f.refreshErr != nil {
+		return f.refreshErr
+	}
+
 	return f.assertProjectService(project, serviceName)
 }
 
@@ -89,6 +109,10 @@ func (f *fakeGCPPrivatelink) ConnectionsList(
 	project,
 	serviceName string,
 ) (*aiven.GCPPrivatelinkConnectionsResponse, error) {
+	if f.connectionsListErr != nil {
+		return nil, f.connectionsListErr
+	}
+
 	if err := f.assertProjectService(project, serviceName); err != nil {
 		return nil, err
 	}
@@ -98,6 +122,12 @@ func (f *fakeGCPPrivatelink) ConnectionsList(
 		f.emptyConnectionsListCallsRemaining--
 		f.returnedEmptyConnectionsListAtLeast = true
 		return &aiven.GCPPrivatelinkConnectionsResponse{Connections: nil}, nil
+	}
+
+	if seq := f.connectionsListSequence; len(seq) > 0 && f.connectionsListCalls <= len(seq) {
+		return &aiven.GCPPrivatelinkConnectionsResponse{
+			Connections: append([]aiven.GCPPrivatelinkConnectionResponse(nil), seq[f.connectionsListCalls-1]...),
+		}, nil
 	}
 
 	return &aiven.GCPPrivatelinkConnectionsResponse{
@@ -219,7 +249,7 @@ func TestGCPPrivatelinkConnectionApprovalUpdate(t *testing.T) {
 		require.Equal(t, []string{"plc1"}, fake.approveCalls)
 	})
 
-	t.Run("Errors when multiple connections exist", func(t *testing.T) {
+	t.Run("Errors when multiple connections exist without PSC selector", func(t *testing.T) {
 		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
 			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "connected", UserIPAddress: "10.0.0.2"},
 			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "pending-user-approval"},
@@ -229,10 +259,10 @@ func TestGCPPrivatelinkConnectionApprovalUpdate(t *testing.T) {
 
 		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
 		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
-		require.Contains(t, diags[0].Summary, "number of privatelink connections != 1")
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections found")
 	})
 
-	t.Run("Errors when another connection exists", func(t *testing.T) {
+	t.Run("Errors when another connection exists without PSC selector", func(t *testing.T) {
 		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
 			{
 				PrivatelinkConnectionID: "plc1",
@@ -256,7 +286,266 @@ func TestGCPPrivatelinkConnectionApprovalUpdate(t *testing.T) {
 
 		diags2 := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d2, fake)
 		require.True(t, diags2.HasError(), "expected error, got: %#v", diags2)
-		require.Contains(t, diags2[0].Summary, "number of privatelink connections != 1")
+		require.Contains(t, diags2[0].Summary, "multiple privatelink connections found")
+	})
+
+	t.Run("Approves selected by PSC connection ID when multiple connections exist", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "connected", UserIPAddress: "10.0.0.2"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "pending-user-approval"},
+		})
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.3", "psc2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.False(t, diags.HasError())
+		require.Equal(t, testProject+"/"+testService, d.Id())
+		require.Equal(t, "plc2", d.Get("privatelink_connection_id").(string))
+		require.Equal(t, "psc2", d.Get("psc_connection_id").(string))
+		require.Equal(t, []string{"plc2"}, fake.approveCalls)
+		require.Equal(t, []string{"10.0.0.3"}, fake.approveUserIP)
+	})
+
+	t.Run("Errors when PSC connection ID matches multiple connections", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc1", State: "pending-user-approval"},
+		})
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.3", "psc1")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections match psc_connection_id")
+	})
+
+	t.Run("Errors when PSC connection ID isn't found (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: make it succeed (target includes pending-user-approval).
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc2", State: "pending-user-approval"},
+			},
+			// selection in Update: make it fail (psc2 disappeared).
+			{
+				{PrivatelinkConnectionID: "plc-other", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			},
+		}
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.2", "psc2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "psc_connection_id \"psc2\" not found")
+	})
+
+	t.Run("Errors when PSC connection ID isn't found among multiple connections (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: single match so it succeeds.
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc2", State: "pending-user-approval"},
+			},
+			// selection in Update: multiple connections, but none match psc2.
+			{
+				{PrivatelinkConnectionID: "plc-1", PSCConnectionID: "psc1", State: "pending-user-approval"},
+				{PrivatelinkConnectionID: "plc-2", PSCConnectionID: "psc3", State: "pending-user-approval"},
+			},
+		}
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.2", "psc2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "psc_connection_id \"psc2\" not found")
+	})
+
+	t.Run("Errors when PSC connection ID isn't found because connections list becomes empty (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: single match so it succeeds.
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc2", State: "pending-user-approval"},
+			},
+			// selection in Update: now it's empty.
+			nil,
+		}
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.2", "psc2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "psc_connection_id \"psc2\" not found")
+	})
+
+	t.Run("Errors when PSC connection ID matches multiple connections (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: single match so it doesn't error.
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			},
+			// selection in Update: now it's ambiguous.
+			{
+				{PrivatelinkConnectionID: "plc-1", PSCConnectionID: "psc1", State: "pending-user-approval"},
+				{PrivatelinkConnectionID: "plc-2", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			},
+		}
+
+		d := newApprovalResourceDataWithPSCConnectionID(t, "10.0.0.2", "psc1")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections match psc_connection_id")
+	})
+
+	t.Run("Errors when connections list becomes empty without PSC selector (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: single connection so it succeeds.
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			},
+			// selection in Update: now it's empty.
+			nil,
+		}
+
+		d := newApprovalResourceData(t, "10.0.0.2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "no privatelink connections found")
+	})
+
+	t.Run("Errors when multiple connections exist without PSC selector (selection step)", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListSequence = [][]aiven.GCPPrivatelinkConnectionResponse{
+			// waitForGCPConnectionState: single connection so it doesn't error.
+			{
+				{PrivatelinkConnectionID: "plc-ok", PSCConnectionID: "psc1", State: "pending-user-approval"},
+			},
+			// selection in Update: now there are two.
+			{
+				{PrivatelinkConnectionID: "plc-1", PSCConnectionID: "psc1", State: "pending-user-approval"},
+				{PrivatelinkConnectionID: "plc-2", PSCConnectionID: "psc2", State: "pending-user-approval"},
+			},
+		}
+
+		d := newApprovalResourceData(t, "10.0.0.2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalUpdate(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections found")
+	})
+}
+
+func TestWaitForGCPConnectionState(t *testing.T) {
+	useInstantStateChangeTimings(t)
+
+	t.Run("Propagates Refresh error", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.refreshErr = fmt.Errorf("refresh failed")
+
+		conf := waitForGCPConnectionState(
+			t.Context(),
+			fake,
+			testProject,
+			testService,
+			"",
+			time.Second,
+			[]string{""},
+			[]string{"active"},
+		)
+
+		_, _, err := conf.Refresh()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "refresh failed")
+	})
+
+	t.Run("Propagates ConnectionsList error", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.connectionsListErr = fmt.Errorf("list failed")
+
+		conf := waitForGCPConnectionState(
+			t.Context(),
+			fake,
+			testProject,
+			testService,
+			"",
+			time.Second,
+			[]string{""},
+			[]string{"active"},
+		)
+
+		_, _, err := conf.Refresh()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "list failed")
+	})
+
+	t.Run("Waits when no connections exist yet", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink(nil)
+		fake.emptyConnectionsListCallsRemaining = 1
+
+		conf := waitForGCPConnectionState(
+			t.Context(),
+			fake,
+			testProject,
+			testService,
+			"",
+			time.Second,
+			[]string{""},
+			[]string{"active"},
+		)
+
+		obj, state, err := conf.Refresh()
+		require.NoError(t, err)
+		require.Nil(t, obj)
+		require.Empty(t, state)
+	})
+
+	t.Run("Waits when PSC selector is set but no matching connection exists yet", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "active"},
+		})
+
+		conf := waitForGCPConnectionState(
+			t.Context(),
+			fake,
+			testProject,
+			testService,
+			"pscX",
+			time.Second,
+			[]string{""},
+			[]string{"active"},
+		)
+
+		obj, state, err := conf.Refresh()
+		require.NoError(t, err)
+		require.Nil(t, obj)
+		require.Empty(t, state)
+	})
+
+	t.Run("Waits when selected PSC connection does not exist yet", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+		})
+
+		conf := waitForGCPConnectionState(
+			t.Context(),
+			fake,
+			testProject,
+			testService,
+			"psc2",
+			time.Second,
+			[]string{""},
+			[]string{"active"},
+		)
+
+		obj, state, err := conf.Refresh()
+		require.NoError(t, err)
+		require.Nil(t, obj)
+		require.Empty(t, state)
 	})
 }
 

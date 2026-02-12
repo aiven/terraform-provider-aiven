@@ -31,13 +31,13 @@ resource "aiven_gcp_privatelink_connection_approval" "approve" {
 
 ### Optional
 
+- `psc_connection_id` (String) The Google Private Service Connect connection ID.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 - `privatelink_connection_id` (String) Aiven internal ID for the private link connection.
-- `psc_connection_id` (String) The Google Private Service Connect connection ID.
 - `state` (String) The state of the connection.
 
 <a id="nestedblock--timeouts"></a>
