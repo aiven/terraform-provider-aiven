@@ -110,7 +110,7 @@ Optional:
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with. Example: `8`.
 - `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers. Example: `60`.
 - `max_partition_contexts` (Number) Maximum number of partition contexts to send. Example: `32000`.
-- `site` (String) Enum: `ap1.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us3.datadoghq.com`, `us5.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
+- `site` (String) Enum: `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us3.datadoghq.com`, `us5.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
