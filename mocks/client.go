@@ -17142,8 +17142,8 @@ func (_c *MockClient_ServiceSchemaRegistrySchemaGet_Call) RunAndReturn(run func(
 	return _c
 }
 
-// ServiceSchemaRegistrySubjectConfigGet provides a mock function with given fields: ctx, _a1, serviceName, subjectName
-func (_m *MockClient) ServiceSchemaRegistrySubjectConfigGet(ctx context.Context, _a1 string, serviceName string, subjectName string) (kafkaschemaregistry.CompatibilityType, error) {
+// ServiceSchemaRegistrySubjectConfigGet provides a mock function with given fields: ctx, _a1, serviceName, subjectName, query
+func (_m *MockClient) ServiceSchemaRegistrySubjectConfigGet(ctx context.Context, _a1 string, serviceName string, subjectName string, query ...[2]string) (kafkaschemaregistry.CompatibilityType, error) {
 	ret := _m.Called(ctx, _a1, serviceName, subjectName)
 
 	if len(ret) == 0 {
