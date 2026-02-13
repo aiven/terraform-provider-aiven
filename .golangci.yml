@@ -41,7 +41,6 @@ linters:
         path: internal/sdkprovider/service/account/account_team.*
       - linters:
           - staticcheck
-        path: internal/sdkprovider/service/account/sweep.go
         text: 'SA1019: (.*) is deprecated'
       - linters:
          - staticcheck

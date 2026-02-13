@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/cmk
+resource:
+  description: Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data.
+clientHandler: cmk
+idAttributeComposed: [project, cmk_id]
+operations:
+  - id: CMKCreate
+    type: create
+    resultKey: cmk
+  - id: CMKGet
+    type: read
+    resultKey: cmk
+  - id: CMKUpdate
+    type: update
+    resultKey: cmk
+  - id: CMKDelete
+    type: delete
+    resultKey: cmk # Delete returns the object as well
+rename:
+  id: cmk_id # some endpoints return "id" some "cmk_id"
+  provider: cmk_provider # the name "provider" is reserved by Terraform
