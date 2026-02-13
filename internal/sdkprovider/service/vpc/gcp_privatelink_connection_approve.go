@@ -52,6 +52,7 @@ var aivenGCPPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 	"psc_connection_id": {
 		Type:        schema.TypeString,
 		Optional:    true,
+		ForceNew:    true,
 		Computed:    true,
 		Description: "The Google Private Service Connect connection ID.",
 	},
