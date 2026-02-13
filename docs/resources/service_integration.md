@@ -14,10 +14,11 @@ service. For example, you can send metrics from an Aiven service to a Grafana se
 into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an
 [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).
 
-You can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).
+You can also use service integrations to enable and use features like the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler)
+and [service autoscaling for Diskless Topics](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/autoscaler-diskless-topics).
 
 ~> **Warning**
-For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
+For services managed by Terraform, removing a disk autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
 See [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.
 
 ## Example Usage
