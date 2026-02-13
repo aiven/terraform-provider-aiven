@@ -550,6 +550,120 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 }
 
 func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
+	t.Run("Populates state when privatelink_connection_id is missing and there is exactly one connection", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{
+				PrivatelinkConnectionID: "plc1",
+				PSCConnectionID:         "psc1",
+				State:                   "active",
+				UserIPAddress:           "10.0.0.2",
+			},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, nil)
+		d.SetId(testProject + "/" + testService)
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.False(t, diags.HasError(), "unexpected diagnostics: %#v", diags)
+		require.Equal(t, testProject, d.Get("project").(string))
+		require.Equal(t, testService, d.Get("service_name").(string))
+		require.Equal(t, "plc1", d.Get("privatelink_connection_id").(string))
+		require.Equal(t, "psc1", d.Get("psc_connection_id").(string))
+		require.Equal(t, "active", d.Get("state").(string))
+		require.Equal(t, "10.0.0.2", d.Get("user_ip_address").(string))
+	})
+
+	t.Run("Normalizes legacy 3-part ID and uses PSC selector when multiple connections exist", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "active"},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, nil)
+		d.SetId(testProject + "/" + testService + "/psc2")
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.False(t, diags.HasError(), "unexpected diagnostics: %#v", diags)
+		require.Equal(t, testProject+"/"+testService, d.Id())
+		require.Equal(t, testProject, d.Get("project").(string))
+		require.Equal(t, testService, d.Get("service_name").(string))
+		require.Equal(t, "plc2", d.Get("privatelink_connection_id").(string))
+		require.Equal(t, "psc2", d.Get("psc_connection_id").(string))
+	})
+
+	t.Run("Populates state when privatelink_connection_id is missing and PSC selector matches exactly one connection", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{
+				PrivatelinkConnectionID: "plc1",
+				PSCConnectionID:         "psc1",
+				State:                   "active",
+				UserIPAddress:           "10.0.0.2",
+			},
+			{
+				PrivatelinkConnectionID: "plc2",
+				PSCConnectionID:         "psc2",
+				State:                   "pending-user-approval",
+			},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+			"psc_connection_id": "psc2",
+		})
+		d.SetId(testProject + "/" + testService)
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.False(t, diags.HasError(), "unexpected diagnostics: %#v", diags)
+		require.Equal(t, "plc2", d.Get("privatelink_connection_id").(string))
+		require.Equal(t, "psc2", d.Get("psc_connection_id").(string))
+		require.Equal(t, "pending-user-approval", d.Get("state").(string))
+	})
+
+	t.Run("Errors when privatelink_connection_id is missing and PSC selector isn't found among multiple connections", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "active"},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+			"psc_connection_id": "pscX",
+		})
+		d.SetId(testProject + "/" + testService)
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "psc_connection_id \"pscX\" not found")
+	})
+
+	t.Run("Errors when privatelink_connection_id is missing and PSC selector matches multiple connections", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc1", State: "active"},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+			"psc_connection_id": "psc1",
+		})
+		d.SetId(testProject + "/" + testService)
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections match psc_connection_id")
+	})
+
+	t.Run("Errors when privatelink_connection_id is missing and multiple connections exist without PSC selector", func(t *testing.T) {
+		fake := newFakeGCPPrivatelink([]aiven.GCPPrivatelinkConnectionResponse{
+			{PrivatelinkConnectionID: "plc1", PSCConnectionID: "psc1", State: "active"},
+			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "active"},
+		})
+
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, nil)
+		d.SetId(testProject + "/" + testService)
+
+		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
+		require.True(t, diags.HasError(), "expected error, got: %#v", diags)
+		require.Contains(t, diags[0].Summary, "multiple privatelink connections found; set psc_connection_id to select one")
+	})
+
 	t.Run("Clears ID on 404", func(t *testing.T) {
 		fake := newFakeGCPPrivatelink(nil)
 
@@ -565,5 +679,31 @@ func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
 		diags := resourceGCPPrivatelinkConnectionApprovalRead(t.Context(), d, fake)
 		require.False(t, diags.HasError())
 		require.Empty(t, d.Id())
+	})
+}
+
+func TestGCPPrivatelinkConnectionApprovalImport(t *testing.T) {
+	t.Run("Parses 2-part ID", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, nil)
+		d.SetId("p/s")
+
+		_, err := resourceGCPPrivatelinkConnectionApprovalImport(t.Context(), d, nil)
+		require.NoError(t, err)
+		require.Equal(t, "p/s", d.Id())
+		require.Equal(t, "p", d.Get("project").(string))
+		require.Equal(t, "s", d.Get("service_name").(string))
+		require.Empty(t, d.Get("psc_connection_id").(string))
+	})
+
+	t.Run("Parses 3-part ID and stores selector", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, nil)
+		d.SetId("p/s/psc1")
+
+		_, err := resourceGCPPrivatelinkConnectionApprovalImport(t.Context(), d, nil)
+		require.NoError(t, err)
+		require.Equal(t, "p/s", d.Id())
+		require.Equal(t, "p", d.Get("project").(string))
+		require.Equal(t, "s", d.Get("service_name").(string))
+		require.Equal(t, "psc1", d.Get("psc_connection_id").(string))
 	})
 }

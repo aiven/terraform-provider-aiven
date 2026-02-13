@@ -76,6 +76,51 @@ func findGCPPrivatelinkConnectionByPSCConnectionID(
 	return idx, found
 }
 
+type gcpPSCApprovalID struct {
+	project         string
+	service         string
+	pscConnectionID string
+	normalizedID    string
+}
+
+func parseGCPPSCApprovalID(resourceID string) (gcpPSCApprovalID, error) {
+	project, service, pscConnectionID, err := schemautil.SplitResourceID3(resourceID)
+	if err == nil {
+		return gcpPSCApprovalID{
+			project:         project,
+			service:         service,
+			pscConnectionID: pscConnectionID,
+			normalizedID:    schemautil.BuildResourceID(project, service),
+		}, nil
+	}
+
+	project, service, err = schemautil.SplitResourceID2(resourceID)
+	if err != nil {
+		return gcpPSCApprovalID{}, err
+	}
+	return gcpPSCApprovalID{
+		project:      project,
+		service:      service,
+		normalizedID: schemautil.BuildResourceID(project, service),
+	}, nil
+}
+
+func applyGCPPSCApprovalID(d *schema.ResourceData, approvalID gcpPSCApprovalID) error {
+	if err := d.Set("project", approvalID.project); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", approvalID.service); err != nil {
+		return err
+	}
+	if approvalID.pscConnectionID != "" {
+		if err := d.Set("psc_connection_id", approvalID.pscConnectionID); err != nil {
+			return err
+		}
+	}
+	d.SetId(approvalID.normalizedID)
+	return nil
+}
+
 func resourceGCPPrivatelinkConnectionApprovalUpdateAdapter(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return resourceGCPPrivatelinkConnectionApprovalUpdate(ctx, d, m.(*aiven.Client).GCPPrivatelink)
 }
@@ -92,12 +137,32 @@ func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 		UpdateContext: resourceGCPPrivatelinkConnectionApprovalUpdateAdapter,
 		DeleteContext: resourceGCPPrivatelinkConnectionApprovalDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceGCPPrivatelinkConnectionApprovalImport,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenGCPPrivatelinkConnectionApprovalSchema,
 	}
+}
+
+// resourceGCPPrivatelinkConnectionApprovalImport supports:
+// - "<project>/<service_name>" (single-connection)
+// - "<project>/<service_name>/<psc_connection_id>" (multi-connection)
+//
+// It always normalizes the Terraform ID to "<project>/<service_name>".
+func resourceGCPPrivatelinkConnectionApprovalImport(
+	_ context.Context,
+	d *schema.ResourceData,
+	_ interface{},
+) ([]*schema.ResourceData, error) {
+	approvalID, err := parseGCPPSCApprovalID(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	if err := applyGCPPSCApprovalID(d, approvalID); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func waitForGCPConnectionState(
@@ -268,13 +333,80 @@ func resourceGCPPrivatelinkConnectionApprovalRead(
 	d *schema.ResourceData,
 	client gcpPrivatelinkHandler,
 ) diag.Diagnostics {
-	project, service, err := schemautil.SplitResourceID2(d.Id())
+	approvalID, err := parseGCPPSCApprovalID(d.Id())
 	if err != nil {
+		return diag.FromErr(err)
+	}
+	// Backward compatibility: if the imported 3-part ID contains the PSC selector,
+	// store it only if configuration/state doesn't have it already.
+	if approvalID.pscConnectionID != "" && d.Get("psc_connection_id").(string) != "" {
+		approvalID.pscConnectionID = ""
+	}
+	if err := applyGCPPSCApprovalID(d, approvalID); err != nil {
 		return diag.FromErr(err)
 	}
 
 	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
-	plConnection, err := client.ConnectionGet(ctx, project, service, plConnectionID)
+	if plConnectionID == nil || *plConnectionID == "" {
+		plConnections, err := client.ConnectionsList(ctx, approvalID.project, approvalID.service)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		conns := plConnections.Connections
+		switch len(conns) {
+		case 0:
+			return diag.Errorf("no privatelink connections found")
+		case 1:
+			pscConnectionID := d.Get("psc_connection_id").(string)
+			if pscConnectionID != "" && conns[0].PSCConnectionID != pscConnectionID {
+				return diag.Errorf("psc_connection_id %q not found", pscConnectionID)
+			}
+
+			if err := d.Set("privatelink_connection_id", conns[0].PrivatelinkConnectionID); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("state", conns[0].State); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("user_ip_address", conns[0].UserIPAddress); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("psc_connection_id", conns[0].PSCConnectionID); err != nil {
+				return diag.FromErr(err)
+			}
+			return nil
+		default:
+			pscConnectionID := d.Get("psc_connection_id").(string)
+			if pscConnectionID == "" {
+				return diag.Errorf("multiple privatelink connections found; set psc_connection_id to select one")
+			}
+
+			idx, found := findGCPPrivatelinkConnectionByPSCConnectionID(conns, pscConnectionID)
+			switch found {
+			case 1:
+				if err := d.Set("privatelink_connection_id", conns[idx].PrivatelinkConnectionID); err != nil {
+					return diag.FromErr(err)
+				}
+				if err := d.Set("state", conns[idx].State); err != nil {
+					return diag.FromErr(err)
+				}
+				if err := d.Set("user_ip_address", conns[idx].UserIPAddress); err != nil {
+					return diag.FromErr(err)
+				}
+				if err := d.Set("psc_connection_id", conns[idx].PSCConnectionID); err != nil {
+					return diag.FromErr(err)
+				}
+				return nil
+			case 0:
+				return diag.Errorf("psc_connection_id %q not found", pscConnectionID)
+			default:
+				return diag.Errorf("multiple privatelink connections match psc_connection_id %q", pscConnectionID)
+			}
+		}
+	}
+
+	plConnection, err := client.ConnectionGet(ctx, approvalID.project, approvalID.service, plConnectionID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}

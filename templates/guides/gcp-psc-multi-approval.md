@@ -61,6 +61,22 @@ Notes:
 - You don't need an explicit `depends_on`. Referencing `google_compute_forwarding_rule.psc[each.key].psc_connection_id` already creates the dependency.
 - `user_ip_address` should be the internal IP address used for that PSC endpoint.
 
+## Importing existing approvals
+
+If your service has **multiple** PSC connections, importing the approval requires a selector.
+
+Use:
+
+```
+<project>/<service_name>/<psc_connection_id>
+```
+
+Example:
+
+```bash
+terraform import aiven_gcp_privatelink_connection_approval.approval "<project>/<service_name>/<psc_connection_id>"
+```
+
 ## Troubleshooting
 
 If Terraform fails with an error like:
