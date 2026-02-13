@@ -4,12 +4,13 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -17,7 +18,7 @@ import (
 func DatasourceServiceComponent() *schema.Resource {
 	return &schema.Resource{
 		Description: "The Service Component data source provides information about the existing Aiven service Component.",
-		ReadContext: datasourceServiceComponentRead,
+		ReadContext: common.WithGenClientDiag(datasourceServiceComponentRead),
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:        schema.TypeString,
@@ -79,6 +80,12 @@ func DatasourceServiceComponent() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(service.UsageTypeChoices(), false),
 				Description:  userconfig.Desc("DNS usage name").PossibleValuesString(service.UsageTypeChoices()...).Build(),
 			},
+			"privatelink_connection_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Privatelink connection ID",
+			},
 			"host": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -93,38 +100,42 @@ func DatasourceServiceComponent() *schema.Resource {
 	}
 }
 
-func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	componentName := d.Get("component").(string)
 	route := d.Get("route").(string)
 	usage := d.Get("usage").(string)
 
-	service, err := client.Services.Get(ctx, projectName, serviceName)
+	svc, err := client.ServiceGet(ctx, projectName, serviceName)
 	if err != nil {
-		return diag.Errorf("common %s/%s not found: %s", projectName, serviceName, err)
+		return diag.Errorf("service %s/%s not found: %s", projectName, serviceName, err)
 	}
 
-	if len(service.Components) == 0 {
+	if len(svc.Components) == 0 {
 		return diag.Errorf("cannot find component %s/%s for service %s",
 			componentName, route, serviceName)
 	}
 
-	filteredResult := make([]*aiven.ServiceComponents, 0)
+	filteredResult := make([]*service.ComponentOut, 0)
 
-	for _, c := range service.Components {
-		if c.Component == componentName && c.Route == route && c.Usage == usage {
+	for _, c := range svc.Components {
+		if c.Component == componentName && string(c.Route) == route && string(c.Usage) == usage {
 			if ssl, ok := d.GetOk("ssl"); ok && *c.Ssl != ssl {
 				continue
 			}
 
-			if m, ok := d.GetOk("kafka_authentication_method"); ok && c.KafkaAuthenticationMethod != m {
+			if m, ok := d.GetOk("kafka_authentication_method"); ok && string(c.KafkaAuthenticationMethod) != m {
 				continue
 			}
 
-			filteredResult = append(filteredResult, c)
+			if plConnID, ok := d.GetOk("privatelink_connection_id"); ok {
+				if c.PrivatelinkConnectionId == nil || *c.PrivatelinkConnectionId != plConnID {
+					continue
+				}
+			}
+
+			filteredResult = append(filteredResult, &c)
 		}
 	}
 
@@ -155,10 +166,10 @@ func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData,
 	if err := d.Set("port", c.Port); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("usage", c.Usage); err != nil {
+	if err := d.Set("usage", string(c.Usage)); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
+	if err := d.Set("kafka_authentication_method", string(c.KafkaAuthenticationMethod)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -168,6 +179,11 @@ func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	return nil
+	if c.PrivatelinkConnectionId != nil {
+		if err := d.Set("privatelink_connection_id", *c.PrivatelinkConnectionId); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
+	return nil
 }

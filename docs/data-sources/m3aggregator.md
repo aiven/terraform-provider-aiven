@@ -67,6 +67,7 @@ Read-Only:
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
+- `privatelink_connection_id` (String)
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)

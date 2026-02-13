@@ -11,6 +11,13 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
+  when multiple PSC connections exist for the same service
+- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources: allows correlating GCP Private Service Connect connection IDs with their corresponding hostnames
+- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
+- Migrate `aiven_service_component` data source to use generated client
+- Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`, `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
+
 ## [4.37.1] - 2026-01-14
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
