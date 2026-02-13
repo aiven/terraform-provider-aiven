@@ -19,6 +19,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
 	billinggroup1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/paymentmethodlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/unit"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
@@ -61,6 +62,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_application_user":       adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
 		"aiven_organization_billing_group":          adapter.NewLazyDataSource(billinggroup1.DataSourceOptions),
 		"aiven_organization_billing_group_list":     adapter.NewLazyDataSource(billinggrouplist.DataSourceOptions),
+		"aiven_organization_payment_method_list":    adapter.NewLazyDataSource(paymentmethodlist.DataSourceOptions),
 		"aiven_organization_project":                adapter.NewLazyDataSource(project.DataSourceOptions),
 		"aiven_organization_user_group_list":        adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
 		"aiven_organization_user_group_member_list": adapter.NewLazyDataSource(usergroupmemberlist.DataSourceOptions),

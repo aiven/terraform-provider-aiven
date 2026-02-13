@@ -78,36 +78,37 @@
 |  72 | aiven_organization_billing_group            | yes    |     2 |
 |  73 | aiven_organization_billing_group_list       | yes    |     1 |
 |  74 | aiven_organization_group_project            | yes    |     1 |
-|  75 | aiven_organization_permission               | yes    |     1 |
-|  76 | aiven_organization_project                  | yes    |     2 |
-|  77 | aiven_organization_user                     |        |     2 |
-|  78 | aiven_organization_user_group               |        |     2 |
-|  79 | aiven_organization_user_group_list          | yes    |     1 |
-|  80 | aiven_organization_user_group_member        | yes    |     1 |
-|  81 | aiven_organization_user_group_member_list   | yes    |     1 |
-|  82 | aiven_organization_user_list                | yes    |     1 |
-|  83 | aiven_organization_vpc                      |        |     2 |
-|  84 | aiven_organizational_unit                   | yes    |     2 |
-|  85 | aiven_pg                                    |        |     2 |
-|  86 | aiven_pg_database                           | yes    |     2 |
-|  87 | aiven_pg_user                               |        |     2 |
-|  88 | aiven_project                               |        |     2 |
-|  89 | aiven_project_user                          |        |     2 |
-|  90 | aiven_project_vpc                           |        |     2 |
-|  91 | aiven_redis                                 |        |     2 |
-|  92 | aiven_redis_user                            |        |     2 |
-|  93 | aiven_service_component                     |        |     1 |
-|  94 | aiven_service_integration                   |        |     2 |
-|  95 | aiven_service_integration_endpoint          |        |     2 |
-|  96 | aiven_service_list                          | yes    |     1 |
-|  97 | aiven_service_plan                          | yes    |     1 |
-|  98 | aiven_service_plan_list                     | yes    |     1 |
-|  99 | aiven_static_ip                             |        |     1 |
-| 100 | aiven_thanos                                |        |     2 |
-| 101 | aiven_transit_gateway_vpc_attachment        |        |     2 |
-| 102 | aiven_valkey                                |        |     2 |
-| 103 | aiven_valkey_user                           |        |     2 |
+|  75 | aiven_organization_payment_method_list      | yes    |     1 |
+|  76 | aiven_organization_permission               | yes    |     1 |
+|  77 | aiven_organization_project                  | yes    |     2 |
+|  78 | aiven_organization_user                     |        |     2 |
+|  79 | aiven_organization_user_group               |        |     2 |
+|  80 | aiven_organization_user_group_list          | yes    |     1 |
+|  81 | aiven_organization_user_group_member        | yes    |     1 |
+|  82 | aiven_organization_user_group_member_list   | yes    |     1 |
+|  83 | aiven_organization_user_list                | yes    |     1 |
+|  84 | aiven_organization_vpc                      |        |     2 |
+|  85 | aiven_organizational_unit                   | yes    |     2 |
+|  86 | aiven_pg                                    |        |     2 |
+|  87 | aiven_pg_database                           | yes    |     2 |
+|  88 | aiven_pg_user                               |        |     2 |
+|  89 | aiven_project                               |        |     2 |
+|  90 | aiven_project_user                          |        |     2 |
+|  91 | aiven_project_vpc                           |        |     2 |
+|  92 | aiven_redis                                 |        |     2 |
+|  93 | aiven_redis_user                            |        |     2 |
+|  94 | aiven_service_component                     |        |     1 |
+|  95 | aiven_service_integration                   |        |     2 |
+|  96 | aiven_service_integration_endpoint          |        |     2 |
+|  97 | aiven_service_list                          | yes    |     1 |
+|  98 | aiven_service_plan                          | yes    |     1 |
+|  99 | aiven_service_plan_list                     | yes    |     1 |
+| 100 | aiven_static_ip                             |        |     1 |
+| 101 | aiven_thanos                                |        |     2 |
+| 102 | aiven_transit_gateway_vpc_attachment        |        |     2 |
+| 103 | aiven_valkey                                |        |     2 |
+| 104 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 21%                          | 38     |   180 |
+|     | TOTAL MIGRATED 22%                          | 39     |   181 |
 +-----+---------------------------------------------+--------+-------+
 ```

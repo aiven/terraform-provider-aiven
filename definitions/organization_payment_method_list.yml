@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/paymentmethodlist
+datasource:
+  description: Lists payment methods for an organization.
+idAttributeComposed: [organization_id]
+operations:
+  - id: PaymentMethodsList
+    type: read
+    resultToKey: payment_methods
+clientHandler: organization

@@ -13,6 +13,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Migrate `aiven_flink_application` to the Plugin Framework
+- Add `aiven_organization_payment_method_list` data source: lists payment methods for an organization (beta)
 
 ## [4.51.0] - 2026-02-17
 
