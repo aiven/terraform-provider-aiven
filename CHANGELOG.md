@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
+  when multiple PSC connections exist for the same service
 - Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources: allows correlating GCP Private Service Connect connection IDs with their corresponding hostnames
 - Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
 - Migrate `aiven_service_component` data source to use generated client
