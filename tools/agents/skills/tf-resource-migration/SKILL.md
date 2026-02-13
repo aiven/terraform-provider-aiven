@@ -53,11 +53,20 @@ find internal/sdkprovider -name "*datasource_*.go" | grep -i "resource_name"
 
 Check what API operations the SDK resource uses:
 ```bash
-# Search for API client calls
+# Search for API client calls in the resource
 grep -A 5 "client\." internal/sdkprovider/service/resource_name.go
+
+# IMPORTANT: Also check the data source — it may use a different API operation
+grep -A 5 "client\." internal/sdkprovider/service/resource_name_data_source.go
 ```
 
 Then find corresponding OpenAPI operation IDs. See **tf-resource-generator** for OpenAPI search patterns.
+
+**Determine `clientHandler`**: The `clientHandler` YAML value is the Go package name under `github.com/aiven/go-client-codegen/handler/`. Find it by searching for the operation ID in the module cache:
+```bash
+grep -r "OperationID" $(go env GOMODCACHE)/github.com/aiven/go-client-codegen*/handler/
+```
+For example, `ServiceFlinkCreateApplication` lives in `handler/flinkapplication/`, so `clientHandler: flinkapplication`.
 
 ### 3. Map SDK Schema to YAML
 
@@ -253,6 +262,26 @@ Before marking migration complete:
 | Custom validation lost | Implement in custom modifier or use schema validation |
 | State upgrade needed | Implement state upgrader in Plugin Framework |
 | DiffSuppressFunc behavior | Implement plan modifier for custom diff logic |
+| Data source lookup key differs from resource ID | Override `DataSourceOptions.Read` and `DataSourceOptions.Schema` via `init()` (see below) |
+
+## Data Source Lookup Key Differs from Resource ID
+
+The generator derives the data source schema from `idAttributeComposed` — ID fields become Required, everything else becomes Computed. This works when the data source looks up by the same fields as the resource ID.
+
+**Problem**: The SDK data source may look up by a different field (e.g., `name`) than what's in the resource ID (e.g., `application_id`). The generator has no way to express "the resource ID uses `application_id`, but the data source should require `name`."
+
+**Detection**: Always read the SDK data source implementation. If it uses a List endpoint and filters by a field that's NOT in `idAttributeComposed`, you need a custom override.
+
+**Solution**: Create a non-generated file that overrides `DataSourceOptions` via `init()`:
+1. Override `DataSourceOptions.Schema` — wrap the generated `datasourceSchema()` and swap only the attributes that differ (don't duplicate the whole schema)
+2. Override `DataSourceOptions.Read` — use the List endpoint to find by name, then Get by ID for full details
+
+**Key points**:
+- Wrap the generated `datasourceSchema()` — don't duplicate it. Only override the attributes that differ.
+- The read function uses List + filter by name, then Get by ID for full details (same pattern the SDK data source used).
+- This preserves backward compatibility: existing configs using `name` keep working.
+
+**Reference**: See `internal/plugin/service/flink/application/application.go` for a complete implementation.
 
 ## Migration-Specific Commands
 

@@ -3,12 +3,12 @@
 page_title: "aiven_flink_application Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Apache Flink® application https://aiven.io/docs/products/flink/concepts/flink-applications.
+  Creates and manages an Aiven for Apache Flink® application https://aiven.io/docs/products/flink/concepts/flink-applications. If this resource is missing (e.g., after a service power off), it will be removed from the state and a new create plan will be generated.
 ---
 
 # aiven_flink_application (Resource)
 
-Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).
+Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications). If this resource is missing (e.g., after a service power off), it will be removed from the state and a new create plan will be generated.
 
 ## Example Usage
 
@@ -25,9 +25,9 @@ resource "aiven_flink_application" "example_app" {
 
 ### Required
 
-- `name` (String) The name of the application.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `name` (String) Application name. Maximum length: `128`.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -36,27 +36,27 @@ resource "aiven_flink_application" "example_app" {
 ### Read-Only
 
 - `application_id` (String) Application ID.
-- `created_at` (String) Application creation time.
-- `created_by` (String) The user who created the application.
-- `id` (String) The ID of this resource.
-- `updated_at` (String) When the application was updated.
-- `updated_by` (String) The user who updated the application.
+- `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
+- `created_by` (String) The creator of this entity.
+- `id` (String) Resource ID composed as: `project/service_name/application_id`.
+- `updated_at` (String) The update timestamp of this entity in ISO 8601 format, always in UTC.
+- `updated_by` (String) The latest updater of this entity.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application.example_app PROJECT/SERVICE_NAME/APPLICATION_ID
+terraform import aiven_flink_application.example PROJECT/SERVICE_NAME/APPLICATION_ID
 ```

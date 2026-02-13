@@ -25,15 +25,26 @@ data "aiven_flink_application" "example_app" {
 
 ### Required
 
-- `name` (String) The name of the application.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `name` (String) Application name.
+- `project` (String) Project name.
+- `service_name` (String) Service name.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `application_id` (String) Application ID.
-- `created_at` (String) Application creation time.
-- `created_by` (String) The user who created the application.
-- `id` (String) The ID of this resource.
-- `updated_at` (String) When the application was updated.
-- `updated_by` (String) The user who updated the application.
+- `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
+- `created_by` (String) The creator of this entity.
+- `id` (String) Resource ID composed as: `project/service_name/application_id`.
+- `updated_at` (String) The update timestamp of this entity in ISO 8601 format, always in UTC.
+- `updated_by` (String) The latest updater of this entity.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

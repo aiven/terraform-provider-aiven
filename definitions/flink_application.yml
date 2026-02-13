@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/flink/application
+resource:
+  refreshState: true
+  removeMissing: true
+  description: |
+    Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).
+datasource:
+  description: Gets information about an Aiven for Apache Flink® application.
+clientHandler: flinkapplication
+idAttributeComposed: [project, service_name, application_id]
+legacyTimeouts: true
+rename:
+  id: application_id
+remove:
+  - application_versions
+  - current_deployment
+  - message
+  - errors
+  - application_version
+operations:
+  - id: ServiceFlinkCreateApplication
+    type: create
+  - id: ServiceFlinkDeleteApplication
+    type: delete
+  - id: ServiceFlinkGetApplication
+    type: read
+  - id: ServiceFlinkUpdateApplication
+    type: update

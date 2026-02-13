@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_flink_application` to the Plugin Framework
 - Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
   when multiple PSC connections exist for the same service
 - Migrate `aiven_clickhouse_database` to the Plugin Framework
