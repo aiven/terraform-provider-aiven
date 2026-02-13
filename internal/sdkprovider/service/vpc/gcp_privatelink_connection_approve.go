@@ -63,6 +63,8 @@ var (
 	gcpPSCApprovalStateChangeMinTimeout = common.DefaultStateChangeMinTimeout
 )
 
+const gcpPSCApprovalNotReady = "not-ready"
+
 func findGCPPrivatelinkConnectionByPSCConnectionID(
 	conns []aiven.GCPPrivatelinkConnectionResponse,
 	pscConnectionID string,
@@ -194,11 +196,11 @@ func waitForGCPConnectionState(
 			switch len(conns) {
 			case 0:
 				log.Printf("[DEBUG] No gcp privatelink connections yet, will refresh again")
-				return nil, "", nil
+				return nil, gcpPSCApprovalNotReady, nil
 			case 1:
 				if pscConnectionID != "" && conns[0].PSCConnectionID != pscConnectionID {
 					log.Printf("[DEBUG] No gcp privatelink connection with psc_connection_id=%q yet, will refresh again", pscConnectionID)
-					return nil, "", nil
+					return nil, gcpPSCApprovalNotReady, nil
 				}
 
 				log.Printf("[DEBUG] Got %s state while waiting for GCP privatelink connection state.", conns[0].State)
@@ -212,7 +214,7 @@ func waitForGCPConnectionState(
 				switch found {
 				case 0:
 					log.Printf("[DEBUG] No gcp privatelink connection with psc_connection_id=%q yet, will refresh again", pscConnectionID)
-					return nil, "", nil
+					return nil, gcpPSCApprovalNotReady, nil
 				case 1:
 					log.Printf("[DEBUG] Got %s state while waiting for GCP privatelink connection state.", conns[idx].State)
 					return conns[idx], conns[idx].State, nil
@@ -241,7 +243,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 		return diag.FromErr(err)
 	}
 
-	pending := []string{""}
+	pending := []string{gcpPSCApprovalNotReady}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
@@ -310,7 +312,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 		}
 	}
 
-	pending = []string{"", "pending-user-approval", "user-approved"}
+	pending = []string{gcpPSCApprovalNotReady, "pending-user-approval", "user-approved"}
 	target = []string{"user-approved", "connected", "active"}
 
 	_, err = waitForGCPConnectionState(

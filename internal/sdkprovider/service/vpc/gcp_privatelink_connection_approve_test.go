@@ -453,7 +453,7 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 			testService,
 			"",
 			time.Second,
-			[]string{""},
+			[]string{gcpPSCApprovalNotReady},
 			[]string{"active"},
 		)
 
@@ -473,7 +473,7 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 			testService,
 			"",
 			time.Second,
-			[]string{""},
+			[]string{gcpPSCApprovalNotReady},
 			[]string{"active"},
 		)
 
@@ -493,14 +493,14 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 			testService,
 			"",
 			time.Second,
-			[]string{""},
+			[]string{gcpPSCApprovalNotReady},
 			[]string{"active"},
 		)
 
 		obj, state, err := conf.Refresh()
 		require.NoError(t, err)
 		require.Nil(t, obj)
-		require.Empty(t, state)
+		require.Equal(t, gcpPSCApprovalNotReady, state)
 	})
 
 	t.Run("Waits when PSC selector is set but no matching connection exists yet", func(t *testing.T) {
@@ -516,14 +516,14 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 			testService,
 			"pscX",
 			time.Second,
-			[]string{""},
+			[]string{gcpPSCApprovalNotReady},
 			[]string{"active"},
 		)
 
 		obj, state, err := conf.Refresh()
 		require.NoError(t, err)
 		require.Nil(t, obj)
-		require.Empty(t, state)
+		require.Equal(t, gcpPSCApprovalNotReady, state)
 	})
 
 	t.Run("Waits when selected PSC connection does not exist yet", func(t *testing.T) {
@@ -538,14 +538,14 @@ func TestWaitForGCPConnectionState(t *testing.T) {
 			testService,
 			"psc2",
 			time.Second,
-			[]string{""},
+			[]string{gcpPSCApprovalNotReady},
 			[]string{"active"},
 		)
 
 		obj, state, err := conf.Refresh()
 		require.NoError(t, err)
 		require.Nil(t, obj)
-		require.Empty(t, state)
+		require.Equal(t, gcpPSCApprovalNotReady, state)
 	})
 }
 
