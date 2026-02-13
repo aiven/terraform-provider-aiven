@@ -12,26 +12,28 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Remove docs for `aiven_cassandra` and `aiven_cassandra_user` resources: The Cassandra service has reached end of life. 
 - Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
-  when multiple PSC connections exist for the same service
+  when multiple PSC connections exist for the same service 
 - Add `aiven_cmk` resource: Creates and manages [customer managed
-  keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data.
-- Migrate `aiven_clickhouse_database` to the Plugin Framework
-- Change `aiven_clickhouse_database`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
-- Fix `aiven_kafka_topic`: handle `retention_bytes = -1` for infinite retention
-- Fix `aiven_mysql_user`: `password_wo` now properly updates password when creating the resource
-- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources
-- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
+  keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data. 
+- Migrate `aiven_clickhouse_database` to the Plugin Framework 
+- Change `aiven_clickhouse_database`: deprecate `termination_protection` field. Instead,
+  use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion) 
+- Fix `aiven_kafka_topic`: handle `retention_bytes = -1` for infinite retention 
+- Fix `aiven_mysql_user`: `password_wo` now properly updates password when creating the resource 
+- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources 
+- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID 
 - Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`,
-  `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
-- Fix service `cloud_name`: was incorrectly sent as an empty string when not set
+  `valkey_acl_channels`) can now be updated in-place without forcing resource recreation 
+- Fix service `cloud_name`: was incorrectly sent as an empty string when not set 
 - The service `disk_space` field is no longer deprecated. It can be used when the plan disk size is "unknown", in which
-  case `additional_disk_space` cannot be used.
-- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3`
-- Add `aiven_organization_billing_group` field `payment_method`: Payment method.
-- Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false`
-- Change `aiven_organization_billing_group` resource field `payment_method_id`: optional ~~`false`~~ → `true`
-- Remove `aiven_organization_billing_group` field `payment_method_id`: Payment method ID.
+  case `additional_disk_space` cannot be used. 
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.3` 
+- Add `aiven_organization_billing_group` field `payment_method`: Payment method. 
+- Change `aiven_organization_billing_group` resource field `currency` (enum): optional ~~`true`~~ → `false` 
+- Change `aiven_organization_billing_group` resource field `payment_method_id`: optional ~~`false`~~ → `true` 
+- Remove `aiven_organization_billing_group` field `payment_method_id`: Payment method ID. 
 - Change `aiven_billing_group`: `parent_id` is required
 
 ## [4.50.0] - 2026-01-27
