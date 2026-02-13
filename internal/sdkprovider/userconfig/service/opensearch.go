@@ -997,7 +997,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"window_size": {
-										Description: "The window size of the top N queries by the metric.",
+										Description: "Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
@@ -1020,7 +1020,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"window_size": {
-										Description: "The window size of the top N queries by the metric.",
+										Description: "Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
@@ -1043,7 +1043,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"window_size": {
-										Description: "The window size of the top N queries by the metric.",
+										Description: "Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
