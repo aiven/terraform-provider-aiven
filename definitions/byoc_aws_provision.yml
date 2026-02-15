@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/aws_provision
+resource:
+  description: |
+    Provisions a BYOC custom cloud environment on AWS.
+
+    **This resource is in the beta stage and may change without notice.** Set
+    the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentProvision
+    type: create
+    disableView: true
+  - id: CustomCloudEnvironmentGet
+    type: read
+    resultKey: custom_cloud_environment
+remove:
+  - custom_cloud_environment
+  - aiven_google_account_principal
+  - google_bastion_cidr
+  - google_privilege_bearing_service_account_id
+  - google_workload_cidr
+  - oracle_compartment_id
+  - oracle_subnet_bastion
+  - oracle_subnet_workload
+  - tags
+  - aiven_object_storage_credentials_creator_user
+  - aws_subnets_bastion
+  - aws_subnets_workload
+rename:
+  aiven_aws_assume_role_external_id: aiven_assume_role_external_id
+  aiven_aws_object_storage_user_arn: aiven_object_storage_user_arn
+  aiven_aws_object_storage_credentials_creator_arn: aiven_object_storage_credentials_creator_arn
+  byoc_resource_tags: custom_tags
+  byoc_unique_name: byoc_name
+schema:
+  aws_iam_role_arn:
+    required: true
