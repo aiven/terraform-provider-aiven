@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_byoc_aws_entity` beta resource for managing BYOC custom cloud environments on AWS
+- Add `aiven_byoc_aws_provision` beta resource for provisioning BYOC custom cloud environments
+- Add `aiven_byoc_permissions` beta resource for granting accounts and projects access to BYOC custom cloud environments
+- Fix `aiven_byoc_aws_entity` create not setting `custom_cloud_environment_id` before read
 - Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
   when multiple PSC connections exist for the same service
 - Add `aiven_cmk` resource: Creates and manages [customer managed

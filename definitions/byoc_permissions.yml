@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/permissions
+resource:
+  description: |
+    Grants accounts and projects access to a BYOC custom cloud environment.
+
+    **This resource is in the beta stage and may change without notice.** Set
+    the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentPermissionsSet
+    type: create
+  - id: CustomCloudEnvironmentPermissionsGet
+    type: read
+rename:
+  projects: project_names
+schema:
+  accounts:
+    forceNew: false
+  project_names:
+    forceNew: false

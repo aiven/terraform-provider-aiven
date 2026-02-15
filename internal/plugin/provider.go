@@ -17,6 +17,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
+	awsentity "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_entity"
+	awsprovision "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_provision"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/permissions"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
@@ -174,6 +177,9 @@ func ResourcesMap() map[string]func() resource.Resource {
 		"aiven_organization_group_project": groupproject.NewResource,
 		"aiven_governance_access":          access.NewResource,
 		"aiven_organization_permission":    permission.NewResource,
+		"aiven_byoc_aws_entity":            awsentity.NewResource,
+		"aiven_byoc_aws_provision":         awsprovision.NewResource,
+		"aiven_byoc_permissions":           permissions.NewResource,
 	}
 
 	return lo.Assign(result, Resources())
