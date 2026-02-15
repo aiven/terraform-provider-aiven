@@ -29,7 +29,10 @@ func TestAccAivenAccount_basic(t *testing.T) {
 					testAccCheckAivenAccountAttributes("data.aiven_account.account"),
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-ac-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "tenant_id", "aiven"),
-					resource.TestCheckResourceAttrSet(resourceName, "primary_billing_group_id"),
+					// This check is commented out because a billing group now requires an organization or account to be set as the "parent_id".
+					// This causes a dependency cycle that must be resolved in several steps, which is not Terraform-friendly.
+					// We are aware this previously worked, but since `aiven_account` is deprecated, continued support is unnecessary.
+					// resource.TestCheckResourceAttrSet(resourceName, "primary_billing_group_id"),
 				),
 			},
 			{
@@ -50,18 +53,13 @@ func TestAccAivenAccount_basic(t *testing.T) {
 
 func testAccAccountResource(name string) string {
 	return fmt.Sprintf(`
-resource "aiven_billing_group" "bar" {
-  name = "test-acc-bg-%s"
-}
-
 resource "aiven_account" "foo" {
-  name                     = "test-acc-ac-%s"
-  primary_billing_group_id = aiven_billing_group.bar.id
+  name = "test-acc-ac-%s"
 }
 
 data "aiven_account" "account" {
   name = aiven_account.foo.name
-}`, name, name)
+}`, name)
 }
 
 func testAccAccountToProject(name string) string {

@@ -23,14 +23,14 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Required
 
 - `billing_address_id` (String) Billing address ID. Maximum length: `36`.
-- `billing_contact_emails` (Set of String) Aiven contacts these email addresses when there are billing issues or questions.
-- `billing_emails` (Set of String) PDF invoices are sent to these email addresses.
 - `billing_group_name` (String) Billing Group Name. Maximum length: `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 - `shipping_address_id` (String) Shipping address ID. Maximum length: `36`.
 
 ### Optional
 
+- `billing_contact_emails` (Block Set) Required property. List of billing contact emails. (see [below for nested schema](#nestedblock--billing_contact_emails))
+- `billing_emails` (Block Set) Required property. List of billing contact emails. (see [below for nested schema](#nestedblock--billing_emails))
 - `custom_invoice_text` (String) Extra billing text. Maximum length: `256`.
 - `payment_method` (Block List) Required property. Payment method. (see [below for nested schema](#nestedblock--payment_method))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -41,6 +41,22 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_group_id` (String) Billing group ID.
 - `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
+
+<a id="nestedblock--billing_contact_emails"></a>
+### Nested Schema for `billing_contact_emails`
+
+Required:
+
+- `email` (String) Email. Maximum length: `254`.
+
+
+<a id="nestedblock--billing_emails"></a>
+### Nested Schema for `billing_emails`
+
+Required:
+
+- `email` (String) Email. Maximum length: `254`.
+
 
 <a id="nestedblock--payment_method"></a>
 ### Nested Schema for `payment_method`

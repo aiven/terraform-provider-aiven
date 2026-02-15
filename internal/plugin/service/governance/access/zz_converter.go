@@ -233,7 +233,7 @@ func flattenAccessData(ctx context.Context, api *apiModelAccessData) (*tfModelAc
 	if api.ServiceName != nil {
 		state.ServiceName = util.StringPointerValue(api.ServiceName)
 	}
-	if api.Username != nil {
+	if api.Username != nil || state.Username.IsUnknown() {
 		state.Username = util.StringPointerValue(api.Username)
 	}
 	return state, nil
@@ -241,22 +241,22 @@ func flattenAccessData(ctx context.Context, api *apiModelAccessData) (*tfModelAc
 
 func flattenAccessDataAcls(ctx context.Context, api *apiModelAccessDataAcls) (*tfModelAccessDataAcls, diag.Diagnostics) {
 	state := new(tfModelAccessDataAcls)
-	if api.Host != nil {
+	if api.Host != nil || state.Host.IsUnknown() {
 		state.Host = util.StringPointerValue(api.Host)
 	}
-	if api.ID != nil {
+	if api.ID != nil || state.ID.IsUnknown() {
 		state.ID = util.StringPointerValue(api.ID)
 	}
 	if api.Operation != nil {
 		state.Operation = util.StringPointerValue(api.Operation)
 	}
-	if api.PatternType != nil {
+	if api.PatternType != nil || state.PatternType.IsUnknown() {
 		state.PatternType = util.StringPointerValue(api.PatternType)
 	}
 	if api.PermissionType != nil {
 		state.PermissionType = util.StringPointerValue(api.PermissionType)
 	}
-	if api.Principal != nil {
+	if api.Principal != nil || state.Principal.IsUnknown() {
 		state.Principal = util.StringPointerValue(api.Principal)
 	}
 	if api.ResourceName != nil {

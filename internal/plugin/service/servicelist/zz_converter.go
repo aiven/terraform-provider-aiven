@@ -81,7 +81,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		diags.AddError("Remarshal error", fmt.Sprintf("Failed to remarshal Response to dtoModel: %s", err.Error()))
 		return diags
 	}
-	if api.Services != nil {
+	if api.Services != nil || state.Services.IsUnknown() || state.Services.IsNull() {
 		vServices, diags := util.FlattenListNested(ctx, flattenServices, *api.Services, attrsServices())
 		if diags.HasError() {
 			return diags
@@ -108,52 +108,52 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 
 func flattenServices(ctx context.Context, api *apiModelServices) (*tfModelServices, diag.Diagnostics) {
 	state := new(tfModelServices)
-	if api.CloudDescription != nil {
+	if api.CloudDescription != nil || state.CloudDescription.IsUnknown() {
 		state.CloudDescription = util.StringPointerValue(api.CloudDescription)
 	}
-	if api.CloudName != nil {
+	if api.CloudName != nil || state.CloudName.IsUnknown() {
 		state.CloudName = util.StringPointerValue(api.CloudName)
 	}
-	if api.CreateTime != nil {
+	if api.CreateTime != nil || state.CreateTime.IsUnknown() {
 		state.CreateTime = util.StringPointerValue(api.CreateTime)
 	}
-	if api.DiskSpaceMb != nil {
+	if api.DiskSpaceMb != nil || state.DiskSpaceMb.IsUnknown() {
 		state.DiskSpaceMb = types.Int64PointerValue(api.DiskSpaceMb)
 	}
-	if api.NodeCount != nil {
+	if api.NodeCount != nil || state.NodeCount.IsUnknown() {
 		state.NodeCount = types.Int64PointerValue(api.NodeCount)
 	}
-	if api.NodeCPUCount != nil {
+	if api.NodeCPUCount != nil || state.NodeCPUCount.IsUnknown() {
 		state.NodeCPUCount = types.Int64PointerValue(api.NodeCPUCount)
 	}
-	if api.NodeMemoryMb != nil {
+	if api.NodeMemoryMb != nil || state.NodeMemoryMb.IsUnknown() {
 		state.NodeMemoryMb = types.Float64PointerValue(api.NodeMemoryMb)
 	}
-	if api.Plan != nil {
+	if api.Plan != nil || state.Plan.IsUnknown() {
 		state.Plan = util.StringPointerValue(api.Plan)
 	}
-	if api.ProjectVpcID != nil {
+	if api.ProjectVpcID != nil || state.ProjectVpcID.IsUnknown() {
 		state.ProjectVpcID = util.StringPointerValue(api.ProjectVpcID)
 	}
-	if api.ServiceName != nil {
+	if api.ServiceName != nil || state.ServiceName.IsUnknown() {
 		state.ServiceName = util.StringPointerValue(api.ServiceName)
 	}
-	if api.ServiceType != nil {
+	if api.ServiceType != nil || state.ServiceType.IsUnknown() {
 		state.ServiceType = util.StringPointerValue(api.ServiceType)
 	}
-	if api.ServiceTypeDescription != nil {
+	if api.ServiceTypeDescription != nil || state.ServiceTypeDescription.IsUnknown() {
 		state.ServiceTypeDescription = util.StringPointerValue(api.ServiceTypeDescription)
 	}
-	if api.ServiceURI != nil {
+	if api.ServiceURI != nil || state.ServiceURI.IsUnknown() {
 		state.ServiceURI = util.StringPointerValue(api.ServiceURI)
 	}
-	if api.State != nil {
+	if api.State != nil || state.State.IsUnknown() {
 		state.State = util.StringPointerValue(api.State)
 	}
-	if api.TerminationProtection != nil {
+	if api.TerminationProtection != nil || state.TerminationProtection.IsUnknown() {
 		state.TerminationProtection = types.BoolPointerValue(api.TerminationProtection)
 	}
-	if api.UpdateTime != nil {
+	if api.UpdateTime != nil || state.UpdateTime.IsUnknown() {
 		state.UpdateTime = util.StringPointerValue(api.UpdateTime)
 	}
 	return state, nil

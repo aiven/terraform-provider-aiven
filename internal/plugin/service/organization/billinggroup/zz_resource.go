@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -34,12 +35,16 @@ func (tf *resourceModel) TimeoutsObject() types.Object {
 resourceSchema:
 
 	resource "aiven_organization_billing_group" "example" {
-	  organization_id        = "org1a23f456789" // Force new
-	  billing_address_id     = "foo"
-	  billing_contact_emails = ["test@example.com"]
-	  billing_emails         = ["test@example.com"]
-	  billing_group_name     = "test"
-	  custom_invoice_text    = "foo"
+	  organization_id    = "org1a23f456789" // Force new
+	  billing_address_id = "foo"
+	  billing_contact_emails {
+	    email = "test@example.com"
+	  }
+	  billing_emails {
+	    email = "test@example.com"
+	  }
+	  billing_group_name  = "test"
+	  custom_invoice_text = "foo"
 	  payment_method {
 	    payment_method_id   = "foo"
 	    payment_method_type = "aws_subscription"
@@ -59,16 +64,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Billing address ID. Maximum length: `36`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
-			},
-			"billing_contact_emails": schema.SetAttribute{
-				ElementType:         types.StringType,
-				MarkdownDescription: "Aiven contacts these email addresses when there are billing issues or questions.",
-				Required:            true,
-			},
-			"billing_emails": schema.SetAttribute{
-				ElementType:         types.StringType,
-				MarkdownDescription: "PDF invoices are sent to these email addresses.",
-				Required:            true,
 			},
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
@@ -110,6 +105,24 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks: map[string]schema.Block{
+			"billing_contact_emails": schema.SetNestedBlock{
+				MarkdownDescription: "Required property. List of billing contact emails.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
+					MarkdownDescription: "Email. Maximum length: `254`.",
+					Required:            true,
+					Validators:          []validator.String{stringvalidator.LengthAtMost(254)},
+				}}},
+				Validators: []validator.Set{setvalidator.IsRequired()},
+			},
+			"billing_emails": schema.SetNestedBlock{
+				MarkdownDescription: "Required property. List of billing contact emails.",
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
+					MarkdownDescription: "Email. Maximum length: `254`.",
+					Required:            true,
+					Validators:          []validator.String{stringvalidator.LengthAtMost(254)},
+				}}},
+				Validators: []validator.Set{setvalidator.IsRequired()},
+			},
 			"payment_method": schema.ListNestedBlock{
 				MarkdownDescription: "Required property. Payment method.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{

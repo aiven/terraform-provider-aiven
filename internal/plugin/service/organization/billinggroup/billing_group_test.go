@@ -51,42 +51,58 @@ resource "aiven_organization_address" "shipping_address" {
 }`, organizationName)
 
 	// Initial configuration creates a billing group with:
-	// - USD currency
 	// - Single billing contact email
 	// - Single billing email
 	// - Basic billing group name and invoice text
 	initialConfig := baseConfig + fmt.Sprintf(`
 resource "aiven_organization_billing_group" "billing_group" {
-  organization_id        = data.aiven_organization.org.id
-  billing_address_id     = aiven_organization_address.billing_address.address_id
-  billing_contact_emails = ["billing@example.com"]
-  currency               = "USD"
-  billing_emails         = ["invoices@example.com"]
-  billing_group_name     = "Test Billing Group"
-  custom_invoice_text    = "Custom invoice text"
-  payment_method_id      = %q
-  shipping_address_id    = aiven_organization_address.shipping_address.address_id
-  vat_id                 = "VAT123"
+  organization_id    = data.aiven_organization.org.id
+  billing_address_id = aiven_organization_address.billing_address.address_id
+  billing_contact_emails {
+    email = "billing@example.com"
+  }
+  billing_emails {
+    email = "invoices@example.com"
+  }
+  billing_group_name  = "Test Billing Group"
+  custom_invoice_text = "Custom invoice text"
+  payment_method {
+    payment_method_id   = %q
+    payment_method_type = "credit_card"
+  }
+  shipping_address_id = aiven_organization_address.shipping_address.address_id
+  vat_id              = "VAT123"
 }`, paymentMethodID)
 
 	// Updated configuration modifies the billing group with:
-	// - Changed currency to EUR
 	// - Added additional billing contact email
 	// - Added additional billing email
 	// - Updated billing group name and invoice text
 	// - Updated VAT ID
 	updatedConfig := baseConfig + fmt.Sprintf(`
 resource "aiven_organization_billing_group" "billing_group" {
-  organization_id        = data.aiven_organization.org.id
-  billing_address_id     = aiven_organization_address.billing_address.address_id
-  billing_contact_emails = ["billing@example.com", "billing2@example.com"]
-  currency               = "EUR"
-  billing_emails         = ["invoices@example.com", "invoices2@example.com"]
-  billing_group_name     = "Test ACC Updated Billing Group"
-  custom_invoice_text    = "Updated invoice text"
-  payment_method_id      = %q
-  shipping_address_id    = aiven_organization_address.shipping_address.address_id
-  vat_id                 = "VAT456"
+  organization_id    = data.aiven_organization.org.id
+  billing_address_id = aiven_organization_address.billing_address.address_id
+  billing_contact_emails {
+    email = "billing@example.com"
+  }
+  billing_contact_emails {
+    email = "billing2@example.com"
+  }
+  billing_emails {
+    email = "invoices@example.com"
+  }
+  billing_emails {
+    email = "invoices2@example.com"
+  }
+  billing_group_name  = "Test ACC Updated Billing Group"
+  custom_invoice_text = "Updated invoice text"
+  payment_method {
+    payment_method_id   = %q
+    payment_method_type = "credit_card"
+  }
+  shipping_address_id = aiven_organization_address.shipping_address.address_id
+  vat_id              = "VAT456"
 }`, paymentMethodID)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -110,12 +126,12 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check email lists
 					resource.TestCheckResourceAttr(name, "billing_contact_emails.#", "1"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing@example.com"),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_contact_emails.*", map[string]string{"email": "billing@example.com"}),
 					resource.TestCheckResourceAttr(name, "billing_emails.#", "1"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices@example.com"),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_emails.*", map[string]string{"email": "invoices@example.com"}),
 
 					// Check other fields
-					resource.TestCheckResourceAttr(name, "payment_method_id", paymentMethodID),
+					resource.TestCheckResourceAttr(name, "payment_method.0.payment_method_id", paymentMethodID),
 					resource.TestCheckResourceAttr(name, "currency", "USD"),
 					resource.TestCheckResourceAttr(name, "billing_group_name", "Test Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Custom invoice text"),
@@ -131,14 +147,13 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check email lists
 					resource.TestCheckResourceAttr(name, "billing_contact_emails.#", "2"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing2@example.com"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_contact_emails.*", "billing@example.com"),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_contact_emails.*", map[string]string{"email": "billing2@example.com"}),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_contact_emails.*", map[string]string{"email": "billing@example.com"}),
 					resource.TestCheckResourceAttr(name, "billing_emails.#", "2"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices2@example.com"),
-					resource.TestCheckTypeSetElemAttr(name, "billing_emails.*", "invoices@example.com"),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_emails.*", map[string]string{"email": "invoices2@example.com"}),
+					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_emails.*", map[string]string{"email": "invoices@example.com"}),
 
 					// Check updated fields
-					resource.TestCheckResourceAttr(name, "currency", "EUR"),
 					resource.TestCheckResourceAttr(name, "billing_group_name", "Test ACC Updated Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Updated invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT456"),

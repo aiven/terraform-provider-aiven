@@ -137,6 +137,10 @@ func genExpandField(item *Item, rootLevel bool) (*jen.Statement, error) {
 		ifOk.Op("&&").Op(" !").Add(dataField.Clone()).Dot("IsUnknown").Call()
 	} else if item.IsRootProperty() {
 		// Compares root fields with state.
+		// When a field is removed quite often, we need to send a zero value to the BE to reset the remote value.
+		// For instance, when a list is removed, we send an empty list.
+		// The same, unfortunately, applies to strings and probably other types: a string can represent a joined list of tags,
+		// when removed, we send an empty string.
 		ifOk.Op("||").Id(stateVar).Op("!=").Nil().
 			Op("&&").Op("!").Id(stateVar).Dot(item.GoFieldName()).Dot("IsNull").Call()
 	}

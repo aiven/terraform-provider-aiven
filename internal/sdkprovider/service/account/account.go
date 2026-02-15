@@ -7,6 +7,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
+	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -140,6 +141,18 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, client a
 }
 
 func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	// Tries to delete account through organization endpoint, because it has "recursive" mode.
+	ac, err := client.AccountGet(ctx, d.Id())
+	if err != nil {
+		return err
+	}
+
+	// Likely every account has "OrganizationId" but if not, tries to remove the account using AccountDelete
+	if ac.OrganizationId != "" {
+		err = client.OrganizationDelete(ctx, ac.OrganizationId, organization.OrganizationDeleteRecursive(true))
+		return err
+	}
+
 	// Sometimes deleting an account fails with "Billing group with existing projects cannot be deleted", which
 	// happens due to a race condition between deleting projects and deleting the account. To avoid this, we retry
 	// the deletion until it succeeds or fails with a different error.
