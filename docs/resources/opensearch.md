@@ -485,7 +485,7 @@ Optional:
 
 - `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
 - `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
-- `window_size` (String) The window size of the top N queries by the metric.
+- `window_size` (String) Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--latency"></a>
@@ -495,7 +495,7 @@ Optional:
 
 - `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
 - `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
-- `window_size` (String) The window size of the top N queries by the metric.
+- `window_size` (String) Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--memory"></a>
@@ -505,7 +505,7 @@ Optional:
 
 - `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
 - `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
-- `window_size` (String) The window size of the top N queries by the metric.
+- `window_size` (String) Configure the window size of the top N queries. The value should be a time value with unit, e.g. 1m, 5s, 1h.
 
 
 

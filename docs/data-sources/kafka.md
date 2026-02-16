@@ -101,6 +101,7 @@ Read-Only:
 - `backup_retention_days` (Number)
 - `custom_domain` (String)
 - `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
+- `gcp_auth_allowed_urls` (List of String)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)

@@ -56,6 +56,12 @@ func kafkaUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"gcp_auth_allowed_urls": {
+				Description: "Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
