@@ -125,7 +125,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// flink
 			"aiven_flink":                     flink.DatasourceFlink(),
-			"aiven_flink_application":         flink.DatasourceFlinkApplication(),
 			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
@@ -237,7 +236,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// flink
 			"aiven_flink":                            flink.ResourceFlink(),
-			"aiven_flink_application":                flink.ResourceFlinkApplication(),
 			"aiven_flink_application_version":        flink.ResourceFlinkApplicationVersion(),
 			"aiven_flink_application_deployment":     flink.ResourceFlinkApplicationDeployment(),
 			"aiven_flink_jar_application":            flink.ResourceFlinkJarApplication(),

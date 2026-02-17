@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_flink_application` to the Plugin Framework
+
 ## [4.51.0] - 2026-02-17
 
 - Remove docs for `aiven_cassandra` and `aiven_cassandra_user` resources: The Cassandra service has reached end of life.
