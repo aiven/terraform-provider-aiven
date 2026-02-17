@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.51.0] - 2026-02-17
+
 - Remove docs for `aiven_cassandra` and `aiven_cassandra_user` resources: The Cassandra service has reached end of life.
 - Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
   when multiple PSC connections exist for the same service
