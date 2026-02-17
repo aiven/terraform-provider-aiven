@@ -26,6 +26,8 @@ operations:
   - id: PermissionsGet
     type: read
 schema:
+  resource_id:
+    description: The ID of the organization, unit, or project to grant permissions for. The project ID is the name of the project.
   permissions:
     items:
       properties:

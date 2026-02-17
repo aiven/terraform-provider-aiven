@@ -60,7 +60,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"resource_id": schema.StringAttribute{
-				MarkdownDescription: "Resource Id. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The ID of the organization, unit, or project to grant permissions for. The project ID is the name of the project. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 			},
