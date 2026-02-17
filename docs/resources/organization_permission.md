@@ -78,7 +78,7 @@ resource "aiven_organization_permission" "example_org_permissions" {
 ### Required
 
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `resource_id` (String) Resource Id. Changing this property forces recreation of the resource.
+- `resource_id` (String) The ID of the organization, unit, or project to grant permissions for. The project ID is the name of the project. Changing this property forces recreation of the resource.
 - `resource_type` (String) Resource type. The possible values are `organization`, `organization_unit` and `project`. Changing this property forces recreation of the resource.
 
 ### Optional
