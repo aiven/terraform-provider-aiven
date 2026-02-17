@@ -148,7 +148,12 @@ type Flatten[R, T any] func(ctx context.Context, response *R) (*T, diag.Diagnost
 
 // FlattenSetNested reads values from Response for a set of objects.
 // Same as types.SetValueFrom() returns unknown type on error.
-func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], set []*R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+func FlattenSetNested[R, T any](ctx context.Context, flatten Flatten[R, T], setPtr *[]*R, oType types.ObjectType) (types.Set, diag.Diagnostics) {
+	if setPtr == nil {
+		return types.SetNull(oType), nil
+	}
+
+	set := *setPtr
 	if len(set) == 0 {
 		return types.SetNull(oType), nil
 	}
@@ -181,11 +186,16 @@ func FlattenSingleNested[R, T any](ctx context.Context, flatten Flatten[R, T], d
 	if dto != nil {
 		items = append(items, dto)
 	}
-	return FlattenListNested(ctx, flatten, items, oType)
+	return FlattenListNested(ctx, flatten, &items, oType)
 }
 
 // FlattenListNested reads values from Response for a list of objects.
-func FlattenListNested[R, T any](ctx context.Context, flatten Flatten[R, T], list []*R, oType types.ObjectType) (types.List, diag.Diagnostics) {
+func FlattenListNested[R, T any](ctx context.Context, flatten Flatten[R, T], listPtr *[]*R, oType types.ObjectType) (types.List, diag.Diagnostics) {
+	if listPtr == nil {
+		return types.ListNull(oType), nil
+	}
+
+	list := *listPtr
 	if len(list) == 0 {
 		return types.ListNull(oType), nil
 	}
@@ -213,7 +223,12 @@ func FlattenListNested[R, T any](ctx context.Context, flatten Flatten[R, T], lis
 
 // FlattenMapNested reads values from Response for a map of objects.
 // Same as types.MapValueFrom() returns unknown type on error.
-func FlattenMapNested[R, T any](ctx context.Context, flatten Flatten[R, T], dict map[string]*R, oType types.ObjectType) (types.Map, diag.Diagnostics) {
+func FlattenMapNested[R, T any](ctx context.Context, flatten Flatten[R, T], dictPtr *map[string]*R, oType types.ObjectType) (types.Map, diag.Diagnostics) {
+	if dictPtr == nil {
+		return types.MapNull(oType), nil
+	}
+
+	dict := *dictPtr
 	if len(dict) == 0 {
 		return types.MapNull(oType), nil
 	}

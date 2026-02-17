@@ -47,8 +47,8 @@ Optional:
 Read-Only:
 
 - `billing_address_id` (String) Billing address ID.
-- `billing_contact_emails` (Set of String) List of billing contact emails.
-- `billing_emails` (Set of String) List of billing contact emails.
+- `billing_contact_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_groups--billing_contact_emails))
+- `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_groups--billing_emails))
 - `billing_group_id` (String) Billing group ID.
 - `billing_group_name` (String) Billing Group Name.
 - `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
@@ -58,10 +58,26 @@ Read-Only:
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
 
+<a id="nestedblock--billing_groups--billing_contact_emails"></a>
+### Nested Schema for `billing_groups.billing_contact_emails`
+
+Read-Only:
+
+- `email` (String) Email.
+
+
+<a id="nestedblock--billing_groups--billing_emails"></a>
+### Nested Schema for `billing_groups.billing_emails`
+
+Read-Only:
+
+- `email` (String) Email.
+
+
 <a id="nestedblock--billing_groups--payment_method"></a>
 ### Nested Schema for `billing_groups.payment_method`
 
 Read-Only:
 
 - `payment_method_id` (String) Payment method ID.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `disabled`, `gcp_subscription`, `no_payment_expected`, `none` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.

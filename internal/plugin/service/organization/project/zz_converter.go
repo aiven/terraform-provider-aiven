@@ -133,7 +133,7 @@ func flattenData[R any](ctx context.Context, state *tfModel, rsp *R, modifiers .
 		return diags
 	}
 	if api.Tag != nil && !state.Tag.IsUnknown() {
-		vTag, diags := util.FlattenSetNested(ctx, flattenTag, *api.Tag, attrsTag())
+		vTag, diags := util.FlattenSetNested(ctx, flattenTag, api.Tag, attrsTag())
 		if diags.HasError() {
 			return diags
 		}
