@@ -58,57 +58,58 @@
 |  52 | aiven_kafka_schema_configuration            |        |     2 |
 |  53 | aiven_kafka_schema_registry_acl             |        |     2 |
 |  54 | aiven_kafka_topic                           |        |     2 |
-|  55 | aiven_kafka_user                            |        |     2 |
-|  56 | aiven_m3aggregator                          |        |     2 |
-|  57 | aiven_m3db                                  |        |     2 |
-|  58 | aiven_m3db_user                             |        |     2 |
-|  59 | aiven_mirrormaker_replication_flow          |        |     2 |
-|  60 | aiven_mysql                                 |        |     2 |
-|  61 | aiven_mysql_database                        | yes    |     2 |
-|  62 | aiven_mysql_user                            | yes    |     2 |
-|  63 | aiven_opensearch                            |        |     2 |
-|  64 | aiven_opensearch_acl_config                 |        |     2 |
-|  65 | aiven_opensearch_acl_rule                   |        |     2 |
-|  66 | aiven_opensearch_security_plugin_config     |        |     2 |
-|  67 | aiven_opensearch_user                       |        |     2 |
-|  68 | aiven_organization                          | yes    |     2 |
-|  69 | aiven_organization_address                  | yes    |     2 |
-|  70 | aiven_organization_application_user         | yes    |     2 |
-|  71 | aiven_organization_application_user_token   | yes    |     1 |
-|  72 | aiven_organization_billing_group            | yes    |     2 |
-|  73 | aiven_organization_billing_group_list       | yes    |     1 |
-|  74 | aiven_organization_group_project            | yes    |     1 |
-|  75 | aiven_organization_payment_method_list      | yes    |     1 |
-|  76 | aiven_organization_permission               | yes    |     1 |
-|  77 | aiven_organization_project                  | yes    |     2 |
-|  78 | aiven_organization_user                     |        |     2 |
-|  79 | aiven_organization_user_group               |        |     2 |
-|  80 | aiven_organization_user_group_list          | yes    |     1 |
-|  81 | aiven_organization_user_group_member        | yes    |     1 |
-|  82 | aiven_organization_user_group_member_list   | yes    |     1 |
-|  83 | aiven_organization_user_list                | yes    |     1 |
-|  84 | aiven_organization_vpc                      |        |     2 |
-|  85 | aiven_organizational_unit                   | yes    |     2 |
-|  86 | aiven_pg                                    |        |     2 |
-|  87 | aiven_pg_database                           | yes    |     2 |
-|  88 | aiven_pg_user                               |        |     2 |
-|  89 | aiven_project                               |        |     2 |
-|  90 | aiven_project_user                          |        |     2 |
-|  91 | aiven_project_vpc                           |        |     2 |
-|  92 | aiven_redis                                 |        |     2 |
-|  93 | aiven_redis_user                            |        |     2 |
-|  94 | aiven_service_component                     |        |     1 |
-|  95 | aiven_service_integration                   |        |     2 |
-|  96 | aiven_service_integration_endpoint          |        |     2 |
-|  97 | aiven_service_list                          | yes    |     1 |
-|  98 | aiven_service_plan                          | yes    |     1 |
-|  99 | aiven_service_plan_list                     | yes    |     1 |
-| 100 | aiven_static_ip                             |        |     1 |
-| 101 | aiven_thanos                                |        |     2 |
-| 102 | aiven_transit_gateway_vpc_attachment        |        |     2 |
-| 103 | aiven_valkey                                |        |     2 |
-| 104 | aiven_valkey_user                           |        |     2 |
+|  55 | aiven_kafka_topic_list                      | yes    |     1 |
+|  56 | aiven_kafka_user                            |        |     2 |
+|  57 | aiven_m3aggregator                          |        |     2 |
+|  58 | aiven_m3db                                  |        |     2 |
+|  59 | aiven_m3db_user                             |        |     2 |
+|  60 | aiven_mirrormaker_replication_flow          |        |     2 |
+|  61 | aiven_mysql                                 |        |     2 |
+|  62 | aiven_mysql_database                        | yes    |     2 |
+|  63 | aiven_mysql_user                            | yes    |     2 |
+|  64 | aiven_opensearch                            |        |     2 |
+|  65 | aiven_opensearch_acl_config                 |        |     2 |
+|  66 | aiven_opensearch_acl_rule                   |        |     2 |
+|  67 | aiven_opensearch_security_plugin_config     |        |     2 |
+|  68 | aiven_opensearch_user                       |        |     2 |
+|  69 | aiven_organization                          | yes    |     2 |
+|  70 | aiven_organization_address                  | yes    |     2 |
+|  71 | aiven_organization_application_user         | yes    |     2 |
+|  72 | aiven_organization_application_user_token   | yes    |     1 |
+|  73 | aiven_organization_billing_group            | yes    |     2 |
+|  74 | aiven_organization_billing_group_list       | yes    |     1 |
+|  75 | aiven_organization_group_project            | yes    |     1 |
+|  76 | aiven_organization_payment_method_list      | yes    |     1 |
+|  77 | aiven_organization_permission               | yes    |     1 |
+|  78 | aiven_organization_project                  | yes    |     2 |
+|  79 | aiven_organization_user                     |        |     2 |
+|  80 | aiven_organization_user_group               |        |     2 |
+|  81 | aiven_organization_user_group_list          | yes    |     1 |
+|  82 | aiven_organization_user_group_member        | yes    |     1 |
+|  83 | aiven_organization_user_group_member_list   | yes    |     1 |
+|  84 | aiven_organization_user_list                | yes    |     1 |
+|  85 | aiven_organization_vpc                      |        |     2 |
+|  86 | aiven_organizational_unit                   | yes    |     2 |
+|  87 | aiven_pg                                    |        |     2 |
+|  88 | aiven_pg_database                           | yes    |     2 |
+|  89 | aiven_pg_user                               |        |     2 |
+|  90 | aiven_project                               |        |     2 |
+|  91 | aiven_project_user                          |        |     2 |
+|  92 | aiven_project_vpc                           |        |     2 |
+|  93 | aiven_redis                                 |        |     2 |
+|  94 | aiven_redis_user                            |        |     2 |
+|  95 | aiven_service_component                     |        |     1 |
+|  96 | aiven_service_integration                   |        |     2 |
+|  97 | aiven_service_integration_endpoint          |        |     2 |
+|  98 | aiven_service_list                          | yes    |     1 |
+|  99 | aiven_service_plan                          | yes    |     1 |
+| 100 | aiven_service_plan_list                     | yes    |     1 |
+| 101 | aiven_static_ip                             |        |     1 |
+| 102 | aiven_thanos                                |        |     2 |
+| 103 | aiven_transit_gateway_vpc_attachment        |        |     2 |
+| 104 | aiven_valkey                                |        |     2 |
+| 105 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 22%                          | 39     |   181 |
+|     | TOTAL MIGRATED 22%                          | 40     |   182 |
 +-----+---------------------------------------------+--------+-------+
 ```

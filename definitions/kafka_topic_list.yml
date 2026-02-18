@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafka/topiclist
+datasource:
+  description: >
+    Lists Kafka topics for a service.
+idAttributeComposed: [project, service_name]
+clientHandler: kafkatopic
+operations:
+  - id: ServiceKafkaTopicList
+    type: read
+    resultToKey: topics
+schema:
+  topics:
+    type: arrayOrdered

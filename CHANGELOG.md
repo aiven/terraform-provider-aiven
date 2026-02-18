@@ -12,10 +12,11 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka_topic_list` data source: lists all Kafka topics for a service
 - Migrate `aiven_flink_application` to the Plugin Framework
 - Add `aiven_organization_payment_method_list` data source: lists payment methods for an organization (beta)
-- Remove docs for `aiven_alloydbomni`, `aiven_alloydbomni_database`, and `aiven_alloydbomni_user` resources: The AlloyDB Omni service has reached end of life.
-
+- Remove docs for `aiven_alloydbomni`, `aiven_alloydbomni_database`, and `aiven_alloydbomni_user` resources: The AlloyDB
+  Omni service has reached end of life.
 
 ## [4.51.0] - 2026-02-17
 
