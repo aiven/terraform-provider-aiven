@@ -263,6 +263,9 @@ Before marking migration complete:
 | State upgrade needed | Implement state upgrader in Plugin Framework |
 | DiffSuppressFunc behavior | Implement plan modifier for custom diff logic |
 | Data source lookup key differs from resource ID | Override `DataSourceOptions.Read` and `DataSourceOptions.Schema` via `init()` (see below) |
+| DiffSuppressFunc behavior | Use `planModifier: true` for custom diff logic |
+| Renamed ID field missing in old state | Use `planModifier: true` to extract from composite ID (see **tf-resource-generator** skill) |
+| Read fails with 404 after migration | Likely a renamed ID field is empty — use `planModifier` to populate it before the API call |
 
 ## Data Source Lookup Key Differs from Resource ID
 

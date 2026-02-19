@@ -3,12 +3,12 @@
 page_title: "aiven_flink_application_deployment Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages the deployment of an Aiven for Apache Flink® application.
+  Creates and manages the deployment of an Aiven for Apache Flink® application. If this resource is missing (e.g., after a service power off), it will be removed from the state and a new create plan will be generated.
 ---
 
 # aiven_flink_application_deployment (Resource)
 
-Creates and manages the deployment of an Aiven for Apache Flink® application.
+Creates and manages the deployment of an Aiven for Apache Flink® application. If this resource is missing (e.g., after a service power off), it will be removed from the state and a new create plan will be generated.
 
 ## Example Usage
 
@@ -71,39 +71,40 @@ resource "aiven_flink_application_deployment" "main" {
 
 ### Required
 
-- `application_id` (String) Application ID.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `version_id` (String) Application version ID.
+- `application_id` (String) Application Id. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
+- `version_id` (String) ApplicationVersion ID. Maximum length: `36`. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `parallelism` (Number) The number of parallel instances for the task.
-- `restart_enabled` (Boolean) Restart a Flink job if it fails.
-- `starting_savepoint` (String) The savepoint to deploy from.
+- `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail. Value must be between `1` and `128`. The default value is `1`. Changing this property forces recreation of the resource.
+- `restart_enabled` (Boolean) Specifies whether a Flink Job is restarted in case it fails. The default value is `true`. Changing this property forces recreation of the resource.
+- `starting_savepoint` (String) Job savepoint. Maximum length: `2048`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `created_at` (String) Application deployment creation time.
-- `created_by` (String) The user who deployed the application.
-- `id` (String) The ID of this resource.
+- `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
+- `created_by` (String) The creator of this entity.
+- `deployment_id` (String) Deployment ID.
+- `id` (String) Resource ID composed as: `project/service_name/application_id/deployment_id`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application_deployment.main PROJECT/SERVICE_NAME/APPLICATION_ID/DEPLOYMENT_ID
+terraform import aiven_flink_application_deployment.example PROJECT/SERVICE_NAME/APPLICATION_ID/DEPLOYMENT_ID
 ```

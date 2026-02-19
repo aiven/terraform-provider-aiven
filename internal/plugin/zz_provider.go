@@ -12,6 +12,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
 	database1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
@@ -39,6 +40,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(database.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
+		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(user.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),

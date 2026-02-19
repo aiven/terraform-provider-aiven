@@ -217,17 +217,61 @@ schema:
 For complex data transformations, enable modifiers in YAML:
 
 ```yaml
-expandModifier: true      # TF state -> API
-flattenModifier: true     # API -> TF state
-planModifier: true        # Modify planned changes
+expandModifier: true      # TF state -> API request
+flattenModifier: true     # API response -> TF state
+planModifier: true        # Pre-process state before read API call
 ```
 
-Then implement functions in a `.go` file in the resource package. Common utilities:
+Then implement functions in a `.go` file in the resource package.
+
+### expandModifier / flattenModifier
+
+Transform data between Terraform state and API request/response formats.
+
+**Signature:**
+```go
+func expandModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel]
+func flattenModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel]
+```
+
+Common utilities:
 - `util.ExpandArrayToObjects[T]()` - Convert string array to object array
 - `util.FlattenObjectsToArray[T]()` - Convert object array to string array
 - `util.ComposeModifiers()` - Combine multiple modifiers
 
-**Find examples**: `grep -l "Modifier" internal/plugin/service/*/billing_group.go`
+**Find examples**: `grep -l "flattenModifier\|expandModifier" internal/plugin/service/**/*.go`
+
+### planModifier
+
+Runs at the start of the generated `readView`, **before** the API call. Use it to pre-process or fix up state so the read has all the data it needs.
+
+**Signature:**
+```go
+func planModifier(_ context.Context, _ avngen.Client, state *tfModel) diag.Diagnostics
+```
+
+**When to use:**
+- A renamed ID field (`rename: {id: deployment_id}`) isn't in old SDK state — extract it from the composite `id`
+- A field needs to be resolved before the read (e.g., name → ID lookup via API)
+- Any state pre-processing required before the generated read API call
+
+**How it works:** Setting `planModifier: true` in YAML causes the generator to insert `planModifier(ctx, client, state)` at the top of `readView`:
+```go
+// generated readView
+func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
+    var diags diag.Diagnostics
+    diags.Append(planModifier(ctx, client, state)...)  // <-- inserted by generator
+    if diags.HasError() {
+        return diags
+    }
+    // ... API call using state fields
+}
+```
+
+**Reference implementations:**
+- `internal/plugin/service/billinggroup/billinggroup.go` — extracts `billing_group_id` from composite `id` for SDK backward compat
+- `internal/plugin/service/flink/deployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
+- `internal/plugin/service/organization/unit/unit.go` — resolves organization name to ID via API call
 
 ## Common Resource Patterns
 
