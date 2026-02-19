@@ -53,7 +53,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Customer Managed Key identifier (CMK ID).",
 			},
 			"cmk_provider": schema.StringAttribute{
-				MarkdownDescription: "CMK provider. The possible values are `aws`, `gcp` and `oci`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The cloud provider hosting the key management service (KMS). The possible values are `aws`, `gcp` and `oci`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("aws", "gcp", "oci")},
@@ -77,7 +77,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"resource": schema.StringAttribute{
-				MarkdownDescription: "Resource name. Maximum length: `512`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID. Maximum length: `512`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 512)},
@@ -92,6 +92,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data. Use your own CMKs from your cloud provider's key management service (KMS) to encrypt data for all services in an Aiven project. This gives you complete control over your encryption keys, meaning you can independently manage the key lifecycle and access policies. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }

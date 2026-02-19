@@ -2,7 +2,10 @@
 beta: true
 location: internal/plugin/service/cmk
 resource:
-  description: Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data.
+  description: |
+    Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data.
+    Use your own CMKs from your cloud provider's key management service (KMS) to encrypt data for all services in an Aiven project. This gives you complete control over your encryption keys,
+    meaning you can independently manage the key lifecycle and access policies.
 clientHandler: cmk
 idAttributeComposed: [project, cmk_id]
 operations:
@@ -21,3 +24,8 @@ operations:
 rename:
   id: cmk_id # some endpoints return "id" some "cmk_id"
   provider: cmk_provider # the name "provider" is reserved by Terraform
+schema:
+  cmk_provider:
+    description: The cloud provider hosting the key management service (KMS).
+  resource:
+    description: The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID.
