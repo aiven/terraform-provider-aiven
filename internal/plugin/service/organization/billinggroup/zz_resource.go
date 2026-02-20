@@ -132,9 +132,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 					},
 					"payment_method_type": schema.StringAttribute{
-						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
+						MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom` and `gcp_subscription`.",
 						Required:            true,
-						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "custom", "disabled", "gcp_subscription", "no_payment_expected", "partner")},
+						Validators:          []validator.String{stringvalidator.OneOf("aws_subscription", "azure_subscription", "bank_transfer", "credit_card", "custom", "gcp_subscription")},
 					},
 				}},
 				Validators: []validator.List{listvalidator.IsRequired(), listvalidator.SizeAtMost(1)},

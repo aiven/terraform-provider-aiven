@@ -64,7 +64,7 @@ Required:
 Required:
 
 - `payment_method_id` (String) Payment method ID. Maximum length: `36`.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom` and `gcp_subscription`.
 
 
 <a id="nestedblock--timeouts"></a>
