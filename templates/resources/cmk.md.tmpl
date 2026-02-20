@@ -1,0 +1,22 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+# {{.Name}} ({{.Type}})
+{{ .Description | trimspace }}
+
+~> **Warning**
+If you remove a CMK, the services linked to the key will stop working. Migrate the services to another CMK or an Aiven-managed key before removing the CMK.
+
+{{ if .HasExample -}}
+## Example Usage
+{{ tffile .ExampleFile }}
+{{- end }}
+{{ .SchemaMarkdown | trimspace }}
+{{ if .HasImport -}}
+## Import
+Import is supported using the following syntax:
+{{ codefile "shell" .ImportFile }}
+{{- end }}
