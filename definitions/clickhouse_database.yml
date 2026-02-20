@@ -6,9 +6,6 @@ resource:
   terminationProtection: true
   description: |
     Creates and manages an [Aiven for ClickHouse](https://aiven.io/docs/products/clickhouse) database.
-
-    -> Tables cannot be created using Aiven Terraform Provider. To create a table,
-    use the [Aiven Console or CLI](https://aiven.io/docs/products/clickhouse/howto/manage-databases-tables#create-a-table).
 datasource:
   description: Gets information about an Aiven for ClickHouse database.
 clientHandler: clickhouse
