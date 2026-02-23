@@ -78,10 +78,6 @@ github.com/aiven/aiven-go-client/v2 v2.38.0 h1:QnCmvoYHiNLBHO6vWcXNRobadvbHaIhjV
 github.com/aiven/aiven-go-client/v2 v2.38.0/go.mod h1:KFAL6y8R+S+lR6WcM1IxVpJXkRRWQMFROyGCttnw15M=
 github.com/aiven/go-api-schemas v1.167.0 h1:jDSZRqKkf1zrprOGfZ8MF7Aq3c9qWlOYLnWe4W29+Jk=
 github.com/aiven/go-api-schemas v1.167.0/go.mod h1:WTWdlammndlBvINEUP2F8JDmOef6rEWkpNVhJS33GcQ=
-github.com/aiven/go-client-codegen v0.151.0 h1:6vGQIdQPCRYNcPNpr6NconSeXW1QkqiQmWxc5M109iY=
-github.com/aiven/go-client-codegen v0.151.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
-github.com/aiven/go-client-codegen v0.152.0 h1:aOoO1cCfCdRWYN2myiZWoRtjo8GEFgFdrZA8i8MluiU=
-github.com/aiven/go-client-codegen v0.152.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
 github.com/aiven/go-client-codegen v0.153.0 h1:0IrJ/lctOGVF/x0pUsOGtdSWAxayrl10x7waur+Wks0=
 github.com/aiven/go-client-codegen v0.153.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
@@ -399,8 +395,8 @@ github.com/gostaticanalysis/nilerr v0.1.1/go.mod h1:wZYb6YI5YAxxq0i1+VJbY0s2YONW
 github.com/gostaticanalysis/testutil v0.3.1-0.20210208050101-bfb5c8eec0e4/go.mod h1:D+FIZ+7OahH3ePw/izIEeH5I06eKs1IKI4Xr64/Am3M=
 github.com/gostaticanalysis/testutil v0.5.0 h1:Dq4wT1DdTwTGCQQv3rl3IvD5Ld0E6HiY+3Zh0sUGqw8=
 github.com/gostaticanalysis/testutil v0.5.0/go.mod h1:OLQSbuM6zw2EvCcXTz1lVq5unyoNft372msDY0nY5Hs=
-github.com/gruntwork-io/terratest v0.55.0 h1:NgG6lm2dArdQ3KcOofw6PTfVRK1Flt7L3NNhFSBo72A=
-github.com/gruntwork-io/terratest v0.55.0/go.mod h1:OE0Jsc8Wn5kw/QySLbBd53g9Gt+xfDyDKChwRHwkKvI=
+github.com/gruntwork-io/terratest v0.56.0 h1:Z01eNpWsgEqVQbMpdS5HzUZDBIxyib7Psqzias+HbqQ=
+github.com/gruntwork-io/terratest v0.56.0/go.mod h1:gflMQk8AYbzJSwKQzgt0vmF8Js+GTBA0nbE/vQe811o=
 github.com/hamba/avro/v2 v2.31.0 h1:wv3nmua7lCEIwWsb6vqsTS3pXktTxcKg5eoyNu0VhrU=
 github.com/hamba/avro/v2 v2.31.0/go.mod h1:t6lJYAGE5Mswfn17zjtyQsssRQgnqO6TXLBCHHWRqrw=
 github.com/hashicorp/cli v1.1.7 h1:/fZJ+hNdwfTSfsxMBa9WWMlfjUZbX8/LnUxgAd7lCVU=
