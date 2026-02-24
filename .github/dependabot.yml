@@ -23,6 +23,9 @@ updates:
       # These libs are updated by a Makefile command
       - dependency-name: github.com/aiven/go-client-codegen
       - dependency-name: github.com/aiven/go-api-schemas
+      # Prevent Dependabot from bumping the Go version
+      - dependency-name: go
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       main:
         applies-to: version-updates
