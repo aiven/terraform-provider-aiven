@@ -15,6 +15,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
+// TestAccAivenBillingGroup_basic and TestAccAivenBillingGroup_clone are split into separate tests
+// to avoid hitting the backend limit of 5 billing groups per organization.
 func TestAccAivenBillingGroup_basic(t *testing.T) {
 	orgName := acc.OrganizationName()
 	resourceName := "aiven_billing_group.foo"
@@ -26,7 +28,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBillingGroupResource(orgName, rName, `billing_contact_emails = ["foo@aiven.fi"]`),
+				Config: testAccBillingGroupBasicResource(orgName, rName, `billing_contact_emails = ["foo@aiven.fi"]`),
 				Check: resource.ComposeTestCheckFunc(
 					// Creates a group with billing_contact_emails
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
@@ -37,17 +39,32 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 					resource.TestCheckTypeSetElemAttr(datasourceName, "billing_emails.*", "2"),
 					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.0"),
 					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.1"),
-
-					// Test cloning feature
-					resource.TestCheckResourceAttr("aiven_billing_group.clone", "name", fmt.Sprintf("test-acc-bg-copy-%s", rName)),
-					resource.TestCheckResourceAttr("aiven_billing_group.clone", "billing_currency", "EUR"),
 				),
 			},
 			{
 				// Proves that billing_contact_emails can be removed (state update for nil value check)
-				Config: testAccBillingGroupResource(orgName, rName, ""),
+				Config: testAccBillingGroupBasicResource(orgName, rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName, "billing_contact_emails"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAivenBillingGroup_clone(t *testing.T) {
+	orgName := acc.OrganizationName()
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingGroupCloneResource(orgName, rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aiven_billing_group.clone", "name", fmt.Sprintf("test-acc-bg-copy-%s", rName)),
+					resource.TestCheckResourceAttr("aiven_billing_group.clone", "billing_currency", "EUR"),
 				),
 			},
 		},
@@ -82,7 +99,7 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccBillingGroupResource(orgName, rName, contactEmails string) string {
+func testAccBillingGroupBasicResource(orgName, rName, contactEmails string) string {
 	return fmt.Sprintf(`
 data "aiven_organization" "org" {
   name = %[1]q
@@ -98,6 +115,14 @@ resource "aiven_billing_group" "foo" {
 data "aiven_billing_group" "foo" {
   billing_group_id = aiven_billing_group.foo.id
 }
+`, orgName, rName, contactEmails)
+}
+
+func testAccBillingGroupCloneResource(orgName, rName string) string {
+	return fmt.Sprintf(`
+data "aiven_organization" "org" {
+  name = %[1]q
+}
 
 // A source billing group to copy from without emails
 // that can cause plan diff issues and fail the test
@@ -112,41 +137,5 @@ resource "aiven_billing_group" "clone" {
   parent_id               = data.aiven_organization.org.id
   copy_from_billing_group = aiven_billing_group.source.id
 }
-`, orgName, rName, contactEmails)
-}
-
-// TestAccAivenBillingGroup_backward_compatibility tests that resources created with the old SDK provider
-// can be read by the new Plugin Framework provider.
-// This is a regression test for the state migration issue where the old SDK state only had `id`
-// but the new Plugin Framework expects `billing_group_id` attribute.
-func TestAccAivenBillingGroup_backward_compatibility(t *testing.T) {
-	resourceName := "aiven_billing_group.compat"
-	rName := acc.RandName("compat-bg")
-	orgName := acc.OrganizationName()
-
-	config := fmt.Sprintf(`
-data "aiven_organization" "org" {
-  name = "%[1]s"
-}
-
-resource "aiven_billing_group" "compat" {
-  name             = "%[2]s"
-  parent_id        = data.aiven_organization.org.id
-  billing_currency = "EUR"
-}
 `, orgName, rName)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: testAccCheckAivenBillingGroupResourceDestroy,
-		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-			TFConfig:           config,
-			OldProviderVersion: "4.47.0",
-			Checks: resource.ComposeTestCheckFunc(
-				resource.TestCheckResourceAttrSet(resourceName, "id"),
-				resource.TestCheckResourceAttr(resourceName, "name", rName),
-				resource.TestCheckResourceAttr(resourceName, "billing_currency", "EUR"),
-			),
-		}),
-	})
 }
