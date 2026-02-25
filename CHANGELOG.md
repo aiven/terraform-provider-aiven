@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.52.0] - 2026-02-25
+
 - Migrate `aiven_clickhouse_database` to the Plugin Framework
 - Add `aiven_kafka_topic_list` data source: lists all Kafka topics for a service
 - Migrate `aiven_flink_application` to the Plugin Framework
