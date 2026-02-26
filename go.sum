@@ -78,10 +78,6 @@ github.com/aiven/aiven-go-client/v2 v2.38.0 h1:QnCmvoYHiNLBHO6vWcXNRobadvbHaIhjV
 github.com/aiven/aiven-go-client/v2 v2.38.0/go.mod h1:KFAL6y8R+S+lR6WcM1IxVpJXkRRWQMFROyGCttnw15M=
 github.com/aiven/go-api-schemas v1.167.0 h1:jDSZRqKkf1zrprOGfZ8MF7Aq3c9qWlOYLnWe4W29+Jk=
 github.com/aiven/go-api-schemas v1.167.0/go.mod h1:WTWdlammndlBvINEUP2F8JDmOef6rEWkpNVhJS33GcQ=
-github.com/aiven/go-client-codegen v0.151.0 h1:6vGQIdQPCRYNcPNpr6NconSeXW1QkqiQmWxc5M109iY=
-github.com/aiven/go-client-codegen v0.151.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
-github.com/aiven/go-client-codegen v0.152.0 h1:aOoO1cCfCdRWYN2myiZWoRtjo8GEFgFdrZA8i8MluiU=
-github.com/aiven/go-client-codegen v0.152.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
 github.com/aiven/go-client-codegen v0.153.0 h1:0IrJ/lctOGVF/x0pUsOGtdSWAxayrl10x7waur+Wks0=
 github.com/aiven/go-client-codegen v0.153.0/go.mod h1:YEr6bEA5jvKxDlxLSbTdCZBOaTJ+KzkbVDdGrFQhd2w=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
@@ -185,8 +181,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/ckaznocha/intrange v0.3.1 h1:j1onQyXvHUsPWujDH6WIjhyH26gkRt/txNlV7LspvJs=
 github.com/ckaznocha/intrange v0.3.1/go.mod h1:QVepyz1AkUoFQkpEqksSYpNpUo3c5W7nWh/s6SHIJJk=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/cloudflare/circl v1.6.1 h1:zqIqSPIndyBh1bjLVVDHMPpVKqp8Su/V+6MeDzzQBQ0=
-github.com/cloudflare/circl v1.6.1/go.mod h1:uddAzsPgqdMAYatqJ0lsjX1oECcQLIlRpzZh3pJrofs=
+github.com/cloudflare/circl v1.6.3 h1:9GPOhQGF9MCYUeXyMYlqTR6a5gTrgR/fBLXvUgtVcg8=
+github.com/cloudflare/circl v1.6.3/go.mod h1:2eXP6Qfat4O/Yhh8BznvKnJ+uzEoTQ6jVKJRn81BiS4=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
