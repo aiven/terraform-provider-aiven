@@ -30,6 +30,8 @@ remove:
   - tech_emails # replaced by technical_emails
   - project_name
 rename:
+  tags: tag
+  tech_emails: technical_emails
   certificate: ca_cert
   project: project_id # comes from ProjectKmsGetCA
 schema:

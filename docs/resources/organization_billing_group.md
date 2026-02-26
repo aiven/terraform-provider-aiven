@@ -39,7 +39,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Read-Only
 
 - `billing_group_id` (String) Billing group ID.
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.
+- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 
 <a id="nestedblock--billing_contact_emails"></a>
@@ -64,7 +64,7 @@ Required:
 Required:
 
 - `payment_method_id` (String) Payment method ID. Maximum length: `36`.
-- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.
+- `payment_method_type` (String) An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom` and `gcp_subscription`.
 
 
 <a id="nestedblock--timeouts"></a>

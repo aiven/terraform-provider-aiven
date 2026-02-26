@@ -42,7 +42,7 @@ datasourceSchema:
 	    }
 	    billing_group_id    = "foo"
 	    billing_group_name  = "test"
-	    currency            = "AUD"
+	    currency            = "USD"
 	    custom_invoice_text = "foo"
 	    organization_id     = "org1a23f456789"
 	    payment_method {
@@ -85,7 +85,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"currency": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`.",
+							MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.",
 						},
 						"custom_invoice_text": schema.StringAttribute{
 							Computed:            true,
@@ -128,7 +128,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								},
 								"payment_method_type": schema.StringAttribute{
 									Computed:            true,
-									MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `disabled`, `gcp_subscription`, `no_payment_expected` and `partner`.",
+									MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom` and `gcp_subscription`.",
 								},
 							}},
 						},

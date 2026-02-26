@@ -12,7 +12,6 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -36,31 +35,10 @@ func NewResource() resource.Resource {
 func NewDataSource() datasource.DataSource {
 	return adapter.NewDataSource(adapter.DataSourceOptions[*datasourceModel, tfModel]{
 		TypeName:         typeName,
-		Schema:           datasourceSchemaPatched,
+		Schema:           datasourceSchema,
 		Read:             readOrganization,
 		ConfigValidators: datasourceConfigValidators,
 	})
-}
-
-// datasourceSchemaPatched turns "id" and "name" into optional attributes so it can be found either by ID or name.
-func datasourceSchemaPatched(ctx context.Context) dataschema.Schema {
-	patch := dataschema.Schema{
-		Attributes: map[string]dataschema.Attribute{
-			"id": dataschema.StringAttribute{
-				MarkdownDescription: "ID of the organization.",
-				Optional:            true,
-			},
-			"name": dataschema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Name of the organization.",
-			},
-		},
-	}
-	result := datasourceSchema(ctx)
-	for k, v := range patch.Attributes {
-		result.Attributes[k] = v
-	}
-	return result
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
