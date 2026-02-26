@@ -71,19 +71,6 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 			diags.Append(errmsg.FromError("ServiceUserCredentialsModify Error", err))
 			return diags
 		}
-
-		// Wait for the access control change to propagate.
-		// The adapter's RefreshState Read may return stale data without this.
-		expected := plan.PgAllowReplication.ValueBool()
-		diags.Append(waitForState(ctx, client, plan, func(u *service.ServiceUserGetOut) error {
-			if u.AccessControl == nil || u.AccessControl.PgAllowReplication == nil || *u.AccessControl.PgAllowReplication != expected {
-				return fmt.Errorf("pg_allow_replication not yet propagated")
-			}
-			return nil
-		})...)
-		if diags.HasError() {
-			return diags
-		}
 	}
 
 	if passwordChanged {
@@ -165,16 +152,34 @@ func expandModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel
 	}
 }
 
+// flattenModifier adjusts the API response before it is unmarshalled into the state.
+// After Create/Update, the adapter's refreshState calls ServiceUserGet which may return
+// stale data due to API eventual consistency.
+// When the plan already has a known value for a field, we use it instead of the API response to prevent
+// inconsistent result after apply errors.
+// On import or auto-generated passwords, the plan value is null/unknown,
+// so the API response passes through unchanged.
 func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel] {
 	return func(r util.RawMap, plan *tfModel) error {
-		// Extract pg_allow_replication from access_control in API response
-		if val, ok := r.GetBool("access_control", "pg_allow_replication"); ok {
+		// pg_allow_replication: use plan value if known, otherwise extract from access_control.
+		if !plan.PgAllowReplication.IsNull() && !plan.PgAllowReplication.IsUnknown() {
+			if err := r.Set(plan.PgAllowReplication.ValueBool(), "pg_allow_replication"); err != nil {
+				return err
+			}
+		} else if val, ok := r.GetBool("access_control", "pg_allow_replication"); ok {
 			if err := r.Set(val, "pg_allow_replication"); err != nil {
 				return err
 			}
 		}
 
-		// Clear password if using write-only password
+		// password: use plan value if known (custom password), otherwise let the API value through.
+		if !plan.Password.IsNull() && !plan.Password.IsUnknown() {
+			if err := r.Set(plan.Password.ValueString(), "password"); err != nil {
+				return err
+			}
+		}
+
+		// Clear password from state when using write-only password.
 		if plan.PasswordWoVersion.ValueInt64() != 0 {
 			if err := r.Delete("password"); err != nil {
 				return err
