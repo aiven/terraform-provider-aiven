@@ -64,6 +64,20 @@ func resetPassword(ctx context.Context, client avngen.Client, plan, config *tfMo
 
 func flattenModifier(ctx context.Context, client avngen.Client) util.MapModifier[tfModel] {
 	return func(r util.RawMap, plan *tfModel) error {
+		// For fields affected by API eventual consistency, prefer the plan value
+		// over the API response to avoid "inconsistent result after apply" errors.
+		if !plan.Password.IsNull() && !plan.Password.IsUnknown() {
+			if err := r.Set(plan.Password.ValueString(), "password"); err != nil {
+				return err
+			}
+		}
+
+		if !plan.Authentication.IsNull() && !plan.Authentication.IsUnknown() {
+			if err := r.Set(plan.Authentication.ValueString(), "authentication"); err != nil {
+				return err
+			}
+		}
+
 		if plan.PasswordWoVersion.ValueInt64() != 0 {
 			// Clears previous password if PasswordWo is used
 			return r.Delete("password")
