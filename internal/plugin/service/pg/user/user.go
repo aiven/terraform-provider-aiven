@@ -152,10 +152,16 @@ func expandModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel
 	}
 }
 
+// flattenModifier adjusts the API response before it is unmarshalled into the state.
+// After Create/Update, the adapter's refreshState calls ServiceUserGet which may return
+// stale data due to API eventual consistency.
+// When the plan already has a known value for a field, we use it instead of the API response to prevent
+// inconsistent result after apply errors.
+// On import or auto-generated passwords, the plan value is null/unknown,
+// so the API response passes through unchanged.
 func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel] {
 	return func(r util.RawMap, plan *tfModel) error {
-		// For fields affected by API eventual consistency, prefer the plan value
-		// over the API response to avoid "inconsistent result after apply" errors.
+		// pg_allow_replication: use plan value if known, otherwise extract from access_control.
 		if !plan.PgAllowReplication.IsNull() && !plan.PgAllowReplication.IsUnknown() {
 			if err := r.Set(plan.PgAllowReplication.ValueBool(), "pg_allow_replication"); err != nil {
 				return err
@@ -166,13 +172,14 @@ func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfMode
 			}
 		}
 
+		// password: use plan value if known (custom password), otherwise let the API value through.
 		if !plan.Password.IsNull() && !plan.Password.IsUnknown() {
 			if err := r.Set(plan.Password.ValueString(), "password"); err != nil {
 				return err
 			}
 		}
 
-		// Clear password if using write-only password
+		// Clear password from state when using write-only password.
 		if plan.PasswordWoVersion.ValueInt64() != 0 {
 			if err := r.Delete("password"); err != nil {
 				return err
