@@ -27,6 +27,10 @@ on:
       AIVEN_PAYMENT_METHOD_ID:
         required: true
 
+concurrency:
+  group: acc-tests-${{ inputs.ref }}
+  cancel-in-progress: false
+
 jobs:
   setup_aiven_project_suffix:
     runs-on: ubuntu-latest
@@ -100,11 +104,6 @@ jobs:
       matrix:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).normal }}
     steps:
-      - uses: softprops/turnstyle@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          same-branch-only: true
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -149,11 +148,6 @@ jobs:
       matrix:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).slow }}
     steps:
-      - uses: softprops/turnstyle@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          same-branch-only: true
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -207,11 +201,6 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: softprops/turnstyle@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          same-branch-only: true
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
