@@ -74,6 +74,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
+- `clickhouse_version` (String)
 - `enable_ipv6` (Boolean)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--ip_filter_object))
@@ -86,6 +87,7 @@ Read-Only:
 - `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
+- `tiered_storage_move_factor` (Number)
 
 <a id="nestedobjatt--clickhouse_user_config--ip_filter_object"></a>
 ### Nested Schema for `clickhouse_user_config.ip_filter_object`

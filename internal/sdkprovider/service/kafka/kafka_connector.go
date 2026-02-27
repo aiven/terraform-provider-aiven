@@ -167,7 +167,7 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, cli
 	}
 
 	var found bool
-	for _, r := range connectors {
+	for _, r := range connectors.Connectors {
 		if r.Name == connectorName {
 			found = true
 			if err := d.Set("project", project); err != nil {
@@ -268,7 +268,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, c
 				return nil, "IN_PROGRESS", nil
 			}
 
-			for _, r := range connectors {
+			for _, r := range connectors.Connectors {
 				if r.Name == connectorName {
 					return &r, "OK", nil
 				}

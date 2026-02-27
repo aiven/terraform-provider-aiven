@@ -30,7 +30,7 @@ func datasourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, c
 		return diag.FromErr(err)
 	}
 
-	for _, con := range connectors {
+	for _, con := range connectors.Connectors {
 		if con.Name == connectorName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, connectorName))
 			return resourceKafkaConnectorRead(ctx, d, client)

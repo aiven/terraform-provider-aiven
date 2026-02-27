@@ -34,6 +34,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"clickhouse_version": {
+				Description: "Enum: `25.3`, and newer. ClickHouse major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"enable_ipv6": {
 				Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports.",
 				Optional:    true,
@@ -188,6 +193,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Description: "Use static public IP addresses.",
 				Optional:    true,
 				Type:        schema.TypeBool,
+			},
+			"tiered_storage_move_factor": {
+				Description: "The percentage of free disk space required on local storage before data is moved to object storage. A value of 0.2 means data is moved when local storage has less than 20% free space. Default: `0.2`.",
+				Optional:    true,
+				Type:        schema.TypeFloat,
 			},
 		}},
 		MaxItems: 1,

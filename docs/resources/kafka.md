@@ -111,7 +111,9 @@ Optional:
 - `backup_interval_hours` (Number) Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.
 - `backup_retention_days` (Number) Number of days to retain automatic backups. Backups older than this value will be automatically deleted. (Applicable to ACU plans only). Example: `7`.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
+- `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `follower_fetching` (Block List, Max: 1) Enable follower fetching (see [below for nested schema](#nestedblock--kafka_user_config--follower_fetching))
+- `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.

@@ -12,6 +12,25 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_account_team_project` field `team_type` (enum): add `role:project:admin`
+- Add `aiven_clickhouse` field `clickhouse_user_config.clickhouse_version` (enum): , and newer. ClickHouse major version.
+- Add `aiven_clickhouse` field `clickhouse_user_config.tiered_storage_move_factor`: The percentage of free disk space
+  required on local storage before data is moved to object storage
+- Add `aiven_kafka` field `kafka_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow IPv6
+  packets to service ports.
+- Add `aiven_kafka` field `kafka_user_config.gcp_auth_allowed_urls`: Allow-list of HTTPS URLs used to validate
+  GCP credential_source requests for Kafka Connect.
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.gcp_auth_allowed_urls`: Allow-list of HTTPS URLs used
+  to validate GCP credential_source requests for Kafka Connect.
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch_dashboards.session_keepalive`: Determines whether
+  the session TTL resets (is “kept alive”) on each user activity
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch_dashboards.session_ttl`: Defines the time-to-live (TTL)
+  for user sessions
+- Remove `aiven_organization_billing_group` field `currency` (enum): Acceptable currencies for a billing group.
+  The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`
+- Change `aiven_project_user` field `member_type` (enum): add `role:project:admin`
+- Change `aiven_service_integration_endpoint` field `datadog_user_config.site` (enum): add `ap2.datadoghq.com`
+
 ## [4.52.0] - 2026-02-26
 
 - Migrate `aiven_clickhouse_database` to the Plugin Framework

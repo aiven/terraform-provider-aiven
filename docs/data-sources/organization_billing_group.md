@@ -35,7 +35,6 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `billing_contact_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_contact_emails))
 - `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_emails))
 - `billing_group_name` (String) Billing Group Name.
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.
 - `custom_invoice_text` (String) Extra billing text.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
