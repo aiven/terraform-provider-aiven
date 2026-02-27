@@ -39,7 +39,6 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Read-Only
 
 - `billing_group_id` (String) Billing group ID.
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 
 <a id="nestedblock--billing_contact_emails"></a>

@@ -42,7 +42,6 @@ datasourceSchema:
 	    }
 	    billing_group_id    = "foo"
 	    billing_group_name  = "test"
-	    currency            = "USD"
 	    custom_invoice_text = "foo"
 	    organization_id     = "org1a23f456789"
 	    payment_method {
@@ -82,10 +81,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						"billing_group_name": schema.StringAttribute{
 							Computed:            true,
 							MarkdownDescription: "Billing Group Name.",
-						},
-						"currency": schema.StringAttribute{
-							Computed:            true,
-							MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.",
 						},
 						"custom_invoice_text": schema.StringAttribute{
 							Computed:            true,

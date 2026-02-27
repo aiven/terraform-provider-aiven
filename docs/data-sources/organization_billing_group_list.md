@@ -51,7 +51,6 @@ Read-Only:
 - `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_groups--billing_emails))
 - `billing_group_id` (String) Billing group ID.
 - `billing_group_name` (String) Billing Group Name.
-- `currency` (String) Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.
 - `custom_invoice_text` (String) Extra billing text.
 - `organization_id` (String) Organization ID.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--billing_groups--payment_method))

@@ -549,6 +549,8 @@ Read-Only:
 - `max_old_space_size` (Number)
 - `multiple_data_source_enabled` (Boolean)
 - `opensearch_request_timeout` (Number)
+- `session_keepalive` (Boolean)
+- `session_ttl` (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--private_access"></a>

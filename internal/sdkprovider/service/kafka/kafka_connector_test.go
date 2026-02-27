@@ -118,8 +118,8 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		if len(connectors) > 0 {
-			return fmt.Errorf("kafka connector (%s) still exists", connectors[0].Name)
+		if len(connectors.Connectors) > 0 {
+			return fmt.Errorf("kafka connector (%s) still exists", connectors.Connectors[0].Name)
 		}
 
 	}

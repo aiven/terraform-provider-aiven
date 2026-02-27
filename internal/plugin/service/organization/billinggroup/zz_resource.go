@@ -53,7 +53,6 @@ resourceSchema:
 	  vat_id              = "foo"
 
 	  // COMPUTED FIELDS
-	  currency         = "USD"
 	  billing_group_id = "foo"
 	}
 */
@@ -73,10 +72,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Billing Group Name. Maximum length: `128`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
-			},
-			"currency": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Acceptable currencies for a billing group. The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`. The default value is `USD`.",
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `256`.",

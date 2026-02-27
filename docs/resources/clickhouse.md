@@ -82,6 +82,7 @@ Optional:
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
+- `clickhouse_version` (String) Enum: `25.3`, and newer. ClickHouse major version.
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--clickhouse_user_config--ip_filter_object))
@@ -94,6 +95,7 @@ Optional:
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
+- `tiered_storage_move_factor` (Number) The percentage of free disk space required on local storage before data is moved to object storage. A value of 0.2 means data is moved when local storage has less than 20% free space. Default: `0.2`.
 
 <a id="nestedblock--clickhouse_user_config--ip_filter_object"></a>
 ### Nested Schema for `clickhouse_user_config.ip_filter_object`
