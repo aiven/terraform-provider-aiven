@@ -23,8 +23,8 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Required
 
 - `address_lines` (List of String) Address Lines.
-- `city` (String) City. Maximum length: `512`.
-- `country_code` (String) Country Code.
+- `city` (String) City. Maximum length: `125`.
+- `country_code` (String) Country Code. Maximum length: `2`.
 - `name` (String) Name of a company. Maximum length: `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 
@@ -32,7 +32,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 - `state` (String) State. Maximum length: `128`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `zip_code` (String) Zip Code. Maximum length: `32`.
+- `zip_code` (String) Zip Code. Maximum length: `10`.
 
 ### Read-Only
 

@@ -62,13 +62,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.List{listvalidator.SizeBetween(1, 5)},
 			},
 			"city": schema.StringAttribute{
-				MarkdownDescription: "City. Maximum length: `512`.",
+				MarkdownDescription: "City. Maximum length: `125`.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(512)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(125)},
 			},
 			"country_code": schema.StringAttribute{
-				MarkdownDescription: "Country Code.",
+				MarkdownDescription: "Country Code. Maximum length: `2`.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(2)},
 			},
 			"create_time": schema.StringAttribute{
 				Computed:            true,
@@ -100,9 +101,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Update Time.",
 			},
 			"zip_code": schema.StringAttribute{
-				MarkdownDescription: "Zip Code. Maximum length: `32`.",
+				MarkdownDescription: "Zip Code. Maximum length: `10`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(32)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(10)},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},

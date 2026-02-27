@@ -48,13 +48,15 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Timestamp in ISO 8601 format, always in UTC.",
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "Organization ID.",
-				Required:            true,
+				Computed:            true,
+				MarkdownDescription: "Organization ID. Exactly one of the fields must be specified: `id` or `name`.",
+				Optional:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Name of the organization.",
+				MarkdownDescription: "Name of the organization. Exactly one of the fields must be specified: `id` or `name`.",
+				Optional:            true,
 			},
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,

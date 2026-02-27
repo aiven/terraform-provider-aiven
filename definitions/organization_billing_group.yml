@@ -15,4 +15,3 @@ operations:
     type: update
   - id: OrganizationBillingGroupGet
     type: read
-    resultKey: billing_group
