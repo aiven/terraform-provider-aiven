@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,6 +16,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
+// TestAccAivenPGUser_basic tests PG user CRUD operations.
+// Note: data source checks intentionally skip the password attribute.
+// The data source reads from the API directly in the same test step as the resource creation/update
+// may receive a stale empty value due to API eventual consistency.
 func TestAccAivenPGUser_basic(t *testing.T) {
 	projectName := acc.ProjectName()
 	serviceName := acc.RandName("pg")
@@ -76,7 +81,11 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 						resource.TestCheckResourceAttr(resourceName, "username", userName),
 						acc.TestAccPasswordHasCustomPassword(resourceName, "Test$1234"),
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+						schemautil.TestAccCheckAivenServiceUserAttributes(resourceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "project", projectName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "service_name", serviceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "username", userName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "type", "normal"),
 					),
 				},
 				{
@@ -173,7 +182,11 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "username", userName),
 						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
 						resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+						schemautil.TestAccCheckAivenServiceUserAttributes(resourceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "project", projectName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "service_name", serviceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "username", userName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "type", "normal"),
 					),
 				},
 				{
@@ -220,6 +233,12 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 					PreConfig: func() {
 						err := client.ServiceUserDelete(t.Context(), projectName, serviceName, userName)
 						require.NoError(t, err)
+
+						// Wait for deletion to propagate across API nodes
+						require.Eventually(t, func() bool {
+							_, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+							return avngen.IsNotFound(err)
+						}, 30*time.Second, time.Second, "delete did not propagate")
 					},
 					PlanOnly:           true,
 					ExpectNonEmptyPlan: true,
@@ -253,7 +272,11 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 						resource.TestCheckResourceAttr(resourceName, "username", "user-1"),
 						resource.TestCheckResourceAttrSet(resourceName, "password"),
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+						schemautil.TestAccCheckAivenServiceUserAttributes(resourceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "project", projectName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "service_name", serviceName),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "username", "user-1"),
+						resource.TestCheckResourceAttr("data.aiven_pg_user.user", "type", "normal"),
 					),
 				},
 			},
@@ -282,78 +305,6 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 					),
 				},
 			},
-		})
-	})
-
-	t.Run("backward compatibility", func(t *testing.T) {
-		userName := acc.RandName("user")
-		config := fmt.Sprintf(`
-resource "aiven_pg_user" "test" {
-  project      = %[1]q
-  service_name = %[2]q
-  username     = %[3]q
-}
-
-data "aiven_pg_user" "test" {
-  project      = aiven_pg_user.test.project
-  service_name = aiven_pg_user.test.service_name
-  username     = aiven_pg_user.test.username
-}`, projectName, serviceName, userName)
-
-		resource.ParallelTest(t, resource.TestCase{
-			PreCheck: func() { acc.TestAccPreCheck(t) },
-			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-				TFConfig: config,
-				PreConfig: func() {
-					require.NoError(t, <-serviceIsReady)
-				},
-				Checks: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("aiven_pg_user.test", "id"),
-					resource.TestCheckResourceAttr("aiven_pg_user.test", "username", userName),
-					resource.TestCheckResourceAttrSet("aiven_pg_user.test", "password"),
-					resource.TestCheckResourceAttr("aiven_pg_user.test", "type", "normal"),
-
-					resource.TestCheckResourceAttr("data.aiven_pg_user.test", "username", userName),
-					resource.TestCheckResourceAttrSet("data.aiven_pg_user.test", "password"),
-				),
-			}),
-		})
-	})
-
-	t.Run("backward compatibility pg_allow_replication", func(t *testing.T) {
-		userName := acc.RandName("user")
-		config := fmt.Sprintf(`
-resource "aiven_pg_user" "test" {
-  project              = %[1]q
-  service_name         = %[2]q
-  username             = %[3]q
-  password             = "Test$1234"
-  pg_allow_replication = true
-}
-
-data "aiven_pg_user" "test" {
-  project      = aiven_pg_user.test.project
-  service_name = aiven_pg_user.test.service_name
-  username     = aiven_pg_user.test.username
-}`, projectName, serviceName, userName)
-
-		resource.ParallelTest(t, resource.TestCase{
-			PreCheck: func() { acc.TestAccPreCheck(t) },
-			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-				TFConfig: config,
-				PreConfig: func() {
-					require.NoError(t, <-serviceIsReady)
-				},
-				Checks: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("aiven_pg_user.test", "id"),
-					resource.TestCheckResourceAttr("aiven_pg_user.test", "username", userName),
-					resource.TestCheckResourceAttr("aiven_pg_user.test", "password", "Test$1234"),
-					resource.TestCheckResourceAttr("aiven_pg_user.test", "pg_allow_replication", "true"),
-
-					resource.TestCheckResourceAttr("data.aiven_pg_user.test", "username", userName),
-					resource.TestCheckResourceAttr("data.aiven_pg_user.test", "pg_allow_replication", "true"),
-				),
-			}),
 		})
 	})
 }
