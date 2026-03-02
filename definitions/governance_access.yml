@@ -9,6 +9,7 @@ operations:
     resultKey: access
   - id: OrganizationGovernanceAccessDelete
     type: delete
+clientHandler: organizationgovernance
 resource:
   description: |
     Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance.
