@@ -70,7 +70,7 @@ jobs:
           git config user.email "action@github.com"
           git tag ${{ steps.get_version.outputs.tag }}
           git push origin ${{ steps.get_version.outputs.tag }}
-      - uses: crazy-max/ghaction-import-gpg@v6
+      - uses: crazy-max/ghaction-import-gpg@v7
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
