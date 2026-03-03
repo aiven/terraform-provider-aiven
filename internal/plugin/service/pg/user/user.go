@@ -9,6 +9,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -38,12 +39,11 @@ func createView(ctx context.Context, client avngen.Client, plan, config *tfModel
 		return diags
 	}
 
-	// Wait until the password is delivered by the API.
-	// The adapter's RefreshState retries 404s, but won't retry on empty password.
-	// For custom passwords, wait for the exact value to propagate.
-	// For auto-generated passwords, wait for any non-empty value.
+	// Wait until the password is delivered by the API and capture it on the plan.
+	// For auto-generated passwords, plan.Password is unknown — capturing it here
+	// lets flattenModifier protect it from stale reads during refreshState.
 	if plan.PasswordWoVersion.ValueInt64() == 0 {
-		diags.Append(waitForState(ctx, client, plan, passwordCheck(plan.Password.ValueString()))...)
+		diags.Append(waitAndCapturePassword(ctx, client, plan)...)
 	}
 	return diags
 }
@@ -79,7 +79,9 @@ func updateView(ctx context.Context, client avngen.Client, plan, state, config *
 			return diags
 		}
 
-		diags.Append(waitForState(ctx, client, plan, passwordCheck(plan.Password.ValueString()))...)
+		if plan.PasswordWoVersion.ValueInt64() == 0 {
+			diags.Append(waitAndCapturePassword(ctx, client, plan)...)
+		}
 	}
 
 	return diags
@@ -99,10 +101,12 @@ func resetPassword(ctx context.Context, client avngen.Client, plan, config *tfMo
 	return diags
 }
 
-// waitForState retries ServiceUserGet until the check function returns nil.
-// Handles API eventual consistency where a mutation returns 200 but subsequent reads may return stale data.
-func waitForState(ctx context.Context, client avngen.Client, plan *tfModel, check func(*service.ServiceUserGetOut) error) diag.Diagnostics {
+// waitAndCapturePassword waits for the password to appear in the API and sets it on the plan.
+// For custom passwords, it waits for the exact value. For auto-generated, any non-empty value.
+// Capturing the password on the plan lets flattenModifier protect it from stale reads during refreshState.
+func waitAndCapturePassword(ctx context.Context, client avngen.Client, plan *tfModel) diag.Diagnostics {
 	var diags diag.Diagnostics
+	expected := plan.Password.ValueString()
 	err := retry.Do(
 		func() error {
 			user, err := client.ServiceUserGet(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.Username.ValueString())
@@ -113,31 +117,24 @@ func waitForState(ctx context.Context, client avngen.Client, plan *tfModel, chec
 				}
 				return retry.Unrecoverable(err)
 			}
-			return check(user)
+			if user.Password == "" {
+				return fmt.Errorf("password not received from API")
+			}
+			if expected != "" && user.Password != expected {
+				return fmt.Errorf("custom password not yet propagated")
+			}
+			plan.Password = types.StringValue(user.Password)
+			return nil
 		},
 		retry.Context(ctx),
 		retry.Delay(time.Second),
 		retry.Attempts(10),
 	)
 	if err != nil {
-		diags.Append(errmsg.FromError("Error waiting for expected state", err))
+		diags.Append(errmsg.FromError("Error waiting for password", err))
 	}
-	return diags
-}
 
-// passwordCheck returns a check function for waitForState.
-// For custom passwords, it waits until the exact password propagates.
-// For auto-generated passwords, it waits until any non-empty password appears.
-func passwordCheck(expected string) func(*service.ServiceUserGetOut) error {
-	return func(u *service.ServiceUserGetOut) error {
-		if u.Password == "" {
-			return fmt.Errorf("password not received from API")
-		}
-		if expected != "" && u.Password != expected {
-			return fmt.Errorf("custom password not yet propagated")
-		}
-		return nil
-	}
+	return diags
 }
 
 func expandModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel] {
@@ -157,8 +154,7 @@ func expandModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel
 // stale data due to API eventual consistency.
 // When the plan already has a known value for a field, we use it instead of the API response to prevent
 // inconsistent result after apply errors.
-// On import or auto-generated passwords, the plan value is null/unknown,
-// so the API response passes through unchanged.
+// On import the plan value is null/unknown, so the API response passes through unchanged.
 func flattenModifier(_ context.Context, _ avngen.Client) util.MapModifier[tfModel] {
 	return func(r util.RawMap, plan *tfModel) error {
 		// pg_allow_replication: use plan value if known, otherwise extract from access_control.
