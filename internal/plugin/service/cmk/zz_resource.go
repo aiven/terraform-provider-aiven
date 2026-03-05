@@ -12,22 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -93,5 +80,45 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data. Use your own CMKs from your cloud provider's key management service (KMS) to encrypt data for all services in an Aiven project. This gives you complete control over your encryption keys, meaning you can independently manage the key lifecycle and access policies. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"cmk_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"cmk_provider": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"created_at": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"default_cmk": &adapter.Schema{Type: adapter.SchemaTypeBool},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project":  &adapter.Schema{Type: adapter.SchemaTypeString},
+			"resource": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"status": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+			"updated_at": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

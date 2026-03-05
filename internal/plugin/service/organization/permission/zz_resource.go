@@ -14,21 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -103,5 +91,50 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.BlockAll(ctx),
 		},
 		MarkdownDescription: "Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource. Permissions can be granted at the organization, organizational unit, and project level. Unit-level permissions aren't shown in the Aiven Console. To assign permissions to multiple users and groups on the same combination of organization ID, resource ID and resource type, don't use multiple `aiven_organization_permission` resources. Instead, use multiple permission blocks as in the example usage. **Do not use the `aiven_project_user` or `aiven_organization_group_project` resources with this resource**. By default, Aiven Terraform Provider validates whether the resource already exists in the Aiven API. This validation prevents you from managing permissions for a specific resource using multiple `aiven_organization_group_project` resources, which leads to overwrites and conflicts. In case of a conflict, you can import the resource using the `terraform import` command to continue managing it. Alternatively, you can disable this validation by setting the `AIVEN_ORGANIZATION_PERMISSION_VALIDATE_CONFLICT` environment variable to `false`, which will cause Terraform to override the remote state.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"permissions": &adapter.Schema{
+				Items: &adapter.Schema{
+					Properties: map[string]*adapter.Schema{
+						"create_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"permissions": &adapter.Schema{
+							Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+							Type:  adapter.SchemaTypeSet,
+						},
+						"principal_id":   &adapter.Schema{Type: adapter.SchemaTypeString},
+						"principal_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"update_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"resource_id":   &adapter.Schema{Type: adapter.SchemaTypeString},
+			"resource_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

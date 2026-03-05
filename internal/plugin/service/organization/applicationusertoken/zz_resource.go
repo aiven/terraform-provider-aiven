@@ -19,21 +19,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -155,5 +143,81 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages an application user token. Review the [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"create_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"created_manually": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeBool,
+			},
+			"currently_active": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeBool,
+			},
+			"description": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"expiry_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"extend_when_used": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeBool,
+			},
+			"full_token": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"ip_allowlist": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
+			},
+			"last_ip": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"last_used_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"last_user_agent": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"last_user_agent_human_readable": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"max_age_seconds": &adapter.Schema{Type: adapter.SchemaTypeInt},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"scopes": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+			"token_prefix": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"user_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

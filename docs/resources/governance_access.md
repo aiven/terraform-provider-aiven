@@ -57,15 +57,15 @@ resource "aiven_governance_access" "example_access" {
 
 ### Read-Only
 
-- `id` (String) Resource ID composed as: `organization_id/susbcription_id`.
-- `susbcription_id` (String) The ID of the access.
+- `access_id` (String) The ID of the access.
+- `id` (String) Resource ID composed as: `organization_id/access_id`.
 
 <a id="nestedblock--access_data"></a>
 ### Nested Schema for `access_data`
 
 Required:
 
-- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `project_name` (String) Project name. Changing this property forces recreation of the resource.
 - `service_name` (String) Service name. Changing this property forces recreation of the resource.
 
 Optional:
@@ -110,5 +110,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_governance_access.example ORGANIZATION_ID/SUSBCRIPTION_ID
+terraform import aiven_governance_access.example ORGANIZATION_ID/ACCESS_ID
 ```

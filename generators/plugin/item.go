@@ -6,6 +6,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/ettle/strcase"
 )
@@ -72,9 +73,12 @@ type Operation struct {
 	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
+
+	Request  *OASchema
+	Response *OASchema
 }
 
-type Operations []Operation
+type Operations []*Operation
 
 // AppearsInID returns the AppearsIn bitmask for a given operation ID and handler type and source (such as PathParameter, RequestBody, or ResponseBody).
 // Example: o.AppearsInID("FooReadOperationID", ReadHandler, PathParameter) will include:
@@ -86,7 +90,7 @@ type Operations []Operation
 // or isolating those associated with a particular operation ID and handler type.
 // Different operations may define different sets of parameters, hence we need to distinguish them.
 func (o Operations) AppearsInID(operationID OperationID, handler OperationType, source AppearsIn) AppearsIn {
-	operationIndex := slices.IndexFunc(o, func(op Operation) bool {
+	operationIndex := slices.IndexFunc(o, func(op *Operation) bool {
 		return op.ID == operationID && op.Type == handler
 	})
 
@@ -126,12 +130,13 @@ type Scope struct {
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description           string   `yaml:"description"`
-	DeprecationMessage    string   `yaml:"deprecationMessage,omitempty"`
-	ExactlyOneOf          []string `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
-	TerminationProtection bool     `yaml:"terminationProtection,omitempty"`
-	RefreshState          bool     `yaml:"refreshState,omitempty"`
-	RemoveMissing         bool     `yaml:"removeMissing,omitempty"`
+	Description           string        `yaml:"description"`
+	DeprecationMessage    string        `yaml:"deprecationMessage,omitempty"`
+	ExactlyOneOf          []string      `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
+	TerminationProtection bool          `yaml:"terminationProtection,omitempty"`
+	RefreshState          bool          `yaml:"refreshState,omitempty"`
+	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
+	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
 }
 
 type Definition struct {
@@ -212,53 +217,6 @@ func (item *Item) UniqueName() string {
 	return firstUpper(strcase.ToGoCamel(p))
 }
 
-func (item *Item) GoVarName() string {
-	return "v" + item.GoFieldName()
-}
-
-func (item *Item) GoFieldName() string {
-	if item.Name == "id" {
-		// Manually fix the ID field name
-		return "ID"
-	}
-	return firstUpper(strcase.ToGoCamel(item.Name))
-}
-
-func (item *Item) TFModelName() string {
-	if item.IsRoot() {
-		return tfRootModel
-	}
-	return tfModelPrefix + item.UniqueName()
-}
-
-func (item *Item) ApiModelName() string {
-	if item.IsRoot() {
-		return apiRootModel
-	}
-	return apiModelPrefix + item.UniqueName()
-}
-
-func (item *Item) ApiType() string {
-	if item.IsObject() {
-		return "*" + item.ApiModelName()
-	}
-
-	if item.IsArray() {
-		v := item.Items.ApiType()
-		if item.Items.IsScalar() {
-			// Remove the pointer for scalar types
-			v = v[1:]
-		}
-		return "[]" + v
-	}
-
-	if item.IsMap() {
-		return "map[string]" + item.Items.ApiType()
-	}
-
-	return "*" + strings.ToLower(item.TFType())
-}
-
 func (item *Item) TFType() string {
 	switch {
 	case item.IsObject():
@@ -273,6 +231,10 @@ func (item *Item) TFType() string {
 		return "Map"
 	}
 	return typingMapping()[item.Type]
+}
+
+func (item *Item) GoType() string {
+	return strings.ToLower(item.TFType())
 }
 
 func (item *Item) ancestors() []*Item {

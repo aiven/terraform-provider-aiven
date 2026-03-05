@@ -5,75 +5,64 @@ package applicationusertoken
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:       createView,
-	Delete:       deleteView,
-	IDFields:     idFields(),
-	Read:         readView,
-	RefreshState: true,
-	Schema:       resourceSchema,
-	TypeName:     typeName,
+const typeName = "aiven_organization_application_user_token"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_application_user_token.foo ORGANIZATION_ID/USER_ID/TOKEN_PREFIX
+func idFields() []string {
+	return []string{"organization_id", "user_id", "token_prefix"}
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req applicationuser.ApplicationUserAccessTokenCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ApplicationUserAccessTokenCreate(ctx, plan.OrganizationID.ValueString(), plan.UserID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserAccessTokenCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	RefreshState:   true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ApplicationUserAccessTokensList(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserAccessTokensList Error", err))
-			return
-		}
-		for _, v := range rsp {
-			if v.TokenPrefix == state.TokenPrefix.ValueString() {
-				diags.Append(flattenData(ctx, state, &v)...)
-				return
-			}
-		}
-		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
-			Message:     "`aiven_organization_application_user_token` with given `token_prefix` not found",
-			OperationID: "ApplicationUserAccessTokensList",
-			Status:      404,
-		}))
-	}()
-	return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(applicationuser.ApplicationUserAccessTokenCreateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ApplicationUserAccessTokenCreate(ctx, d.Get("organization_id").(string), d.Get("user_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp)
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.ApplicationUserAccessTokenDelete(ctx, state.OrganizationID.ValueString(), state.UserID.ValueString(), state.TokenPrefix.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ApplicationUserAccessTokenDelete Error", err))
-			return
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ApplicationUserAccessTokensList(ctx, d.Get("organization_id").(string), d.Get("user_id").(string))
+	if err != nil {
+		return err
+	}
+	for _, v := range rsp {
+		if v.TokenPrefix == d.Get("token_prefix").(string) {
+			return d.Flatten(&v)
 		}
-	}()
-	return diags
+	}
+	return avngen.Error{
+		Message:     fmt.Sprintf("`aiven_organization_application_user_token` with given `token_prefix` not found"),
+		OperationID: "ApplicationUserAccessTokensList",
+		Status:      http.StatusNotFound,
+	}
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.ApplicationUserAccessTokenDelete(ctx, d.Get("organization_id").(string), d.Get("user_id").(string), d.Get("token_prefix").(string))
 }

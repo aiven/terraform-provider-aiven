@@ -6,29 +6,22 @@ import (
 	"strings"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
 // planModifier sets the ID field based on the Name field if provided.
-func planModifier(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	if state.ID.ValueString() != "" {
+func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	if d.ID() != "" {
 		// The ID is already set, no need to modify the plan.
-		return diags
+		return nil
 	}
 
-	if state.Name.ValueString() != "" {
-		id, err := GetOrganizationByName(ctx, client, state.Name.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("GetOrganizationByName Error", err))
-			return diags
-		}
-		state.ID = types.StringValue(id)
+	id, err := GetOrganizationByName(ctx, client, d.Get("name").(string))
+	if err != nil {
+		return err
 	}
-	return diags
+	return d.Set("id", id)
 }
 
 func GetOrganizationByName(ctx context.Context, client avngen.Client, name string) (string, error) {

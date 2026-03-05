@@ -94,12 +94,10 @@ const (
 	// typeNamePrefix is a prefix for the resource and datasource names: aiven_pg, aiven_kafka, etc.
 	typeNamePrefix = "aiven_"
 
-	// converterFileName contains expandData and flattenData functions
-	converterFileName = "converter"
-	viewFileName      = "view"
-	providerFilePkg   = "plugin"
-	providerFileName  = "provider"
-	providerFilePath  = "internal/plugin"
+	viewFileName     = "view"
+	providerFilePkg  = "plugin"
+	providerFileName = "provider"
+	providerFilePath = "internal/plugin"
 )
 
 // genDefinition generates zz_datasource.go, zz_resource.go, and zz_converters.go files
@@ -140,6 +138,11 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			return err
 		}
 
+		schemaSimple, err := genSchemaInternal(def, entity, root)
+		if err != nil {
+			return err
+		}
+
 		err = os.MkdirAll(def.Location, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("could not create directory %s: %w", def.Location, err)
@@ -148,68 +151,37 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		pkgName := goPkgName(def.Location)
 		if doOnce {
 			doOnce = false
-			hasResource := def.Resource != nil
 			var codes []jen.Code
 
 			// Renders the resourceName constant
 			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(def.typeName))
 
-			// Generates TF and API models
-			models, err := genModels(root)
-			if err != nil {
-				return fmt.Errorf("could not generate model: %w", err)
-			}
-			codes = append(codes, models...)
-
-			// Resources need idFields and expander
-			if hasResource {
-				codes = append(codes, genIDFields(def.typeName, root))
-				expand, err := genExpand(def, root)
-				if err != nil {
-					return fmt.Errorf("could not generate expand: %w", err)
-				}
-				codes = append(codes, expand...)
-			}
-
-			// Flatten is only needed for both resource and datasource
-			flatten, err := genFlatten(def, root)
-			if err != nil {
-				return fmt.Errorf("could not generate flatten: %w", err)
-			}
-			codes = append(codes, flatten...)
-
-			convertersFile := newFile(pkgName)
-			for _, c := range codes {
-				convertersFile.Add(c).Line()
-			}
-
-			convertersPath := genFilePath(def.Location, converterFileName)
-			err = convertersFile.Save(convertersPath)
-			if err != nil {
-				return fmt.Errorf("could not save file %s: %w", convertersPath, err)
-			}
+			// Even datasources require to set ID
+			codes = append(codes, genIDFields(def.typeName, root))
 
 			// Generates views
 			if def.ClientHandler != "" {
-				codes, err := genViews(root, def)
+				views, err := genViews(root, def)
 				if err != nil {
 					return fmt.Errorf("could not generate views: %w", err)
 				}
 
-				viewFile := newFile(
-					pkgName,
-					avnGenHandlerPackage+def.ClientHandler,
-					entity.Import(entityValidatorPkgFmt),
-				)
-				for _, v := range codes {
-					viewFile.Add(v).Line()
-				}
+				codes = append(codes, views...)
+			}
 
-				viewFilePath := genFilePath(def.Location, viewFileName)
-				err = viewFile.Save(viewFilePath)
-				if err != nil {
-					return fmt.Errorf("could not save file %s: %w", viewFilePath, err)
-				}
+			viewFile := newFile(
+				pkgName,
+				avnGenHandlerPackage+def.ClientHandler,
+				entity.Import(entityValidatorPkgFmt),
+			)
+			for _, v := range codes {
+				viewFile.Add(v).Line()
+			}
+
+			viewFilePath := genFilePath(def.Location, viewFileName)
+			err = viewFile.Save(viewFilePath)
+			if err != nil {
+				return fmt.Errorf("could not save file %s: %w", viewFilePath, err)
 			}
 		}
 
@@ -221,8 +193,8 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			entity.Import(planmodifierPackageFmt),
 			entity.Import(timeoutsPackageFmt),
 		)
-		file.Add(genTFModel(isResource, root)...)
 		file.Add(schema)
+		file.Add(schemaSimple)
 		err = file.Save(filePath)
 		if err != nil {
 			return fmt.Errorf("could not save file %s: %w", filePath, err)
@@ -364,6 +336,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 			Properties: make(map[string]*Item),
 			Virtual:    true,
 			Computed:   true,
+			Parent:     root,
 		}
 		root.Properties["id"] = idField
 	}
@@ -406,7 +379,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-func fromOperationID(scope *Scope, operation Operation, root *Item) error {
+func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 	path, err := getOperationPath(scope, operation.ID)
 	if err != nil {
 		return err
@@ -434,6 +407,8 @@ func fromOperationID(scope *Scope, operation Operation, root *Item) error {
 		if err != nil {
 			return err
 		}
+
+		operation.Request = request
 	}
 
 	if path.Response.OK.Content.ApplicationJSON.Schema.Ref != "" {
@@ -446,11 +421,25 @@ func fromOperationID(scope *Scope, operation Operation, root *Item) error {
 		delete(response.Properties, "message")
 		delete(response.Properties, "errors")
 
+		if operation.ResultKey != "" {
+			rsp, ok := response.Properties[operation.ResultKey]
+			if !ok {
+				return fmt.Errorf("resultKey %q not found", operation.ResultKey)
+			}
+
+			response = rsp
+			if response.Type == SchemaTypeArray {
+				response = response.Items
+			}
+		}
+
 		ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
 		err = fromSchema(scope, operation, root, response, ap)
 		if err != nil {
 			return err
 		}
+
+		operation.Response = response
 	}
 	return nil
 }
@@ -505,15 +494,7 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 	return item
 }
 
-func fromSchema(scope *Scope, operation Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
-	if p, ok := parentSchema.Properties[operation.ResultKey]; ok {
-		// The object is hidden on the root level
-		if p.Type == SchemaTypeArray {
-			return fromSchema(scope, operation, parent, p.Items, appearsIn)
-		}
-		return fromSchema(scope, operation, parent, p, appearsIn)
-	}
-
+func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
 		thisSchema := parentSchema.Properties[thisName]
 
@@ -570,7 +551,7 @@ func fromSchema(scope *Scope, operation Operation, parent *Item, parentSchema *O
 	return nil
 }
 
-func fromParameter(scope *Scope, operation Operation, parent *Item, path *OAPath) error {
+func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPath) error {
 	appearsIn := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
 	for _, param := range path.Parameters {
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)

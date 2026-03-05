@@ -10,22 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -88,5 +75,46 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
 		MarkdownDescription: "Gets information about an Aiven for Apache Flink® application.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"application_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"created_at": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"created_by": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"name": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+			"updated_at": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"updated_by": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

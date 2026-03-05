@@ -6,31 +6,16 @@ package database
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -76,5 +61,33 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"database_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"termination_protection": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeBool,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create":  &adapter.Schema{Type: adapter.SchemaTypeString},
+					"default": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete":  &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":    &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update":  &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

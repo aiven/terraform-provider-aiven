@@ -8,99 +8,95 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organizationprojects"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:       createView,
-	Delete:       deleteView,
-	IDFields:     idFields(),
-	Read:         readView,
-	RefreshState: true,
-	Schema:       resourceSchema,
-	TypeName:     typeName,
-	Update:       updateView,
+const typeName = "aiven_organization_project"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_project.foo ORGANIZATION_ID/PROJECT_ID
+func idFields() []string {
+	return []string{"organization_id", "project_id"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	RefreshState:   true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req organizationprojects.OrganizationProjectsCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.OrganizationProjectsCreate(ctx, plan.OrganizationID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationProjectsCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.OrganizationProjectsGet(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationProjectsGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
-	}()
-	if diags.HasError() {
-		return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(organizationprojects.OrganizationProjectsCreateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{
+		"tag":              "tags",
+		"technical_emails": "tech_emails",
+	}))
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.ProjectKmsGetCA(ctx, state.ProjectID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ProjectKmsGetCA Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"certificate": rsp}, flattenModifier(ctx, client))...)
-	}()
-	return diags
+	rsp, err := client.OrganizationProjectsCreate(ctx, d.Get("organization_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"tags":        "tag",
+		"tech_emails": "technical_emails",
+	}), flattenModifier(ctx, client))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req organizationprojects.OrganizationProjectsUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.OrganizationProjectsUpdate(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationProjectsUpdate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.OrganizationProjectsGet(ctx, d.Get("organization_id").(string), d.Get("project_id").(string))
+	if err != nil {
+		return err
+	}
+	err = d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"tags":        "tag",
+		"tech_emails": "technical_emails",
+	}), flattenModifier(ctx, client))
+	if err != nil {
+		return err
+	}
+	rsp2, err := client.ProjectKmsGetCA(ctx, d.Get("project_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"certificate": rsp2}, adapter.RenameFields(map[string]string{"certificate": "ca_cert"}), flattenModifier(ctx, client))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.OrganizationProjectsDelete(ctx, state.OrganizationID.ValueString(), state.ProjectID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("OrganizationProjectsDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(organizationprojects.OrganizationProjectsUpdateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{
+		"tag":              "tags",
+		"technical_emails": "tech_emails",
+	}))
+	if err != nil {
+		return err
+	}
+	rsp, err := client.OrganizationProjectsUpdate(ctx, d.GetState("organization_id").(string), d.GetState("project_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"tags":        "tag",
+		"tech_emails": "technical_emails",
+	}), flattenModifier(ctx, client))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.OrganizationProjectsDelete(ctx, d.Get("organization_id").(string), d.Get("project_id").(string))
 }

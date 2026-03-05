@@ -8,22 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -141,5 +128,98 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		MarkdownDescription: "Lists Kafka topics for a service.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+			"topics": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"cleanup_policy": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"diskless_enable": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"min_insync_replicas": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"owner_user_group_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"partitions": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"remote_storage_enable": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"replication": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"retention_bytes": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"retention_hours": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"state": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"tags": &adapter.Schema{
+							Computed: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"key": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"value": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeSet,
+						},
+						"topic_description": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"topic_name": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

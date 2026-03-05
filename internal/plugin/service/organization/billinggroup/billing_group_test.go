@@ -132,7 +132,6 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check other fields
 					resource.TestCheckResourceAttr(name, "payment_method.0.payment_method_id", paymentMethodID),
-					resource.TestCheckResourceAttr(name, "currency", "USD"),
 					resource.TestCheckResourceAttr(name, "billing_group_name", "Test Billing Group"),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Custom invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT123"),

@@ -8,22 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:

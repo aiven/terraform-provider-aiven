@@ -8,22 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -67,5 +54,39 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.Block(ctx),
 		},
 		MarkdownDescription: "Lists payment methods for an organization. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"payment_methods": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"payment_method_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"payment_method_type": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

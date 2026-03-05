@@ -10,95 +10,94 @@ import (
 	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
-	Schema:   resourceSchema,
-	TypeName: typeName,
-	Update:   updateView,
+const typeName = "aiven_organizational_unit"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organizational_unit.foo ID
+func idFields() []string {
+	return []string{"id"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
+}
+
+var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
+	IDFields:         idFields(),
 	Read:             readView,
 	Schema:           datasourceSchema,
+	SchemaInternal:   datasourceSchemaInternal(),
 	TypeName:         typeName,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req account.AccountCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.AccountCreate(ctx, &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("AccountCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
-}
-
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	diags.Append(planModifier(ctx, client, state)...)
-	if diags.HasError() {
-		return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(account.AccountCreateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{
+		"name":      "account_name",
+		"parent_id": "parent_account_id",
+	}))
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.AccountGet(ctx, state.ID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("AccountGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+	rsp, err := client.AccountCreate(ctx, req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"account_id":        "id",
+		"account_name":      "name",
+		"parent_account_id": "parent_id",
+	}), flattenModifier(ctx, client))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req account.AccountUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.AccountUpdate(ctx, state.ID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("AccountUpdate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := planModifier(ctx, client, d)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.AccountGet(ctx, d.Get("id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"account_id":        "id",
+		"account_name":      "name",
+		"parent_account_id": "parent_id",
+	}), flattenModifier(ctx, client))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.AccountDelete(ctx, state.ID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("AccountDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(account.AccountUpdateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{"name": "account_name"}))
+	if err != nil {
+		return err
+	}
+	rsp, err := client.AccountUpdate(ctx, d.Get("id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{
+		"account_id":        "id",
+		"account_name":      "name",
+		"parent_account_id": "parent_id",
+	}), flattenModifier(ctx, client))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.AccountDelete(ctx, d.Get("id").(string))
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {

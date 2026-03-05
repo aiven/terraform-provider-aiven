@@ -7,39 +7,39 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Beta:     true,
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+const typeName = "aiven_service_plan"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_service_plan.foo PROJECT/SERVICE_TYPE/SERVICE_PLAN/CLOUD_NAME
+func idFields() []string {
+	return []string{"project", "service_type", "service_plan", "cloud_name"}
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ProjectServicePlanPriceGet(ctx, state.Project.ValueString(), state.ServiceType.ValueString(), state.ServicePlan.ValueString(), state.CloudName.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ProjectServicePlanPriceGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	if diags.HasError() {
-		return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	Beta:           true,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ProjectServicePlanPriceGet(ctx, d.Get("project").(string), d.Get("service_type").(string), d.Get("service_plan").(string), d.Get("cloud_name").(string))
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.ProjectServicePlanSpecsGet(ctx, state.Project.ValueString(), state.ServiceType.ValueString(), state.ServicePlan.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ProjectServicePlanSpecsGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+	err = d.Flatten(rsp)
+	if err != nil {
+		return err
+	}
+	rsp2, err := client.ProjectServicePlanSpecsGet(ctx, d.Get("project").(string), d.Get("service_type").(string), d.Get("service_plan").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp2)
 }

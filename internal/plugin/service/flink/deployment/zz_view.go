@@ -8,54 +8,50 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/flinkapplicationdeployment"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:        createView,
-	IDFields:      idFields(),
-	Read:          readView,
-	RefreshState:  true,
-	RemoveMissing: true,
-	Schema:        resourceSchema,
-	TypeName:      typeName,
+const typeName = "aiven_flink_application_deployment"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_flink_application_deployment.foo PROJECT/SERVICE_NAME/APPLICATION_ID/DEPLOYMENT_ID
+func idFields() []string {
+	return []string{"project", "service_name", "application_id", "deployment_id"}
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req flinkapplicationdeployment.ServiceFlinkCreateApplicationDeploymentIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ServiceFlinkCreateApplicationDeployment(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), plan.ApplicationID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkCreateApplicationDeployment Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	IDFields:       idFields(),
+	Read:           readView,
+	RefreshState:   true,
+	RemoveMissing:  true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	diags.Append(planModifier(ctx, client, state)...)
-	if diags.HasError() {
-		return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(flinkapplicationdeployment.ServiceFlinkCreateApplicationDeploymentIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.ServiceFlinkGetApplicationDeployment(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.ApplicationID.ValueString(), state.DeploymentID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkGetApplicationDeployment Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+	rsp, err := client.ServiceFlinkCreateApplicationDeployment(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "deployment_id"}))
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := planModifier(ctx, client, d)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ServiceFlinkGetApplicationDeployment(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string), d.Get("deployment_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "deployment_id"}))
 }

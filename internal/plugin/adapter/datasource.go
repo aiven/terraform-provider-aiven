@@ -7,61 +7,65 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-type DataSourceOptions[M Model[T], T any] struct {
+type DataSourceOptions struct {
 	// TypeName is the name of resource,
 	// for instance, "aiven_organization_address"
-	TypeName string
-	Schema   func(ctx context.Context) schema.Schema
+	TypeName       string
+	Schema         func(ctx context.Context) schema.Schema
+	SchemaInternal *Schema
 
 	// Indicates whether the datasource is in beta.
 	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
 	Beta bool
 
+	// IDFields are used to build the resource ID.
+	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
+	IDFields []string
+
 	// Read is the only CRUD operation for datasource.
-	Read func(ctx context.Context, client avngen.Client, state *T) diag.Diagnostics
+	Read func(ctx context.Context, client avngen.Client, d ResourceData) error
 
 	// ValidateConfig implements datasource.DataSourceWithValidateConfig.
 	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#validateconfig-method
-	ValidateConfig func(ctx context.Context, client avngen.Client, config *T) diag.Diagnostics
+	ValidateConfig func(ctx context.Context, client avngen.Client, d ResourceData) error
 
 	// ConfigValidators implements datasource.DataSourceWithConfigValidators.
 	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []datasource.ConfigValidator
 }
 
-func NewDataSource[M Model[T], T any](options DataSourceOptions[M, T]) datasource.DataSource {
-	return &datasourceAdapter[M, T]{
+func NewDataSource(options DataSourceOptions) datasource.DataSource {
+	return &datasourceAdapter{
 		datasource: options,
 	}
 }
 
 // NewLazyDataSource creates a lazy resource constructor.
 // The provider.Provider.DataSources requires a function that returns a datasource.DataSource.
-func NewLazyDataSource[M Model[T], T any](options DataSourceOptions[M, T]) func() datasource.DataSource {
+func NewLazyDataSource(options DataSourceOptions) func() datasource.DataSource {
 	return func() datasource.DataSource {
 		return NewDataSource(options)
 	}
 }
 
 var (
-	_ datasource.DataSource                     = (*datasourceAdapter[Model[any], any])(nil)
-	_ datasource.DataSourceWithConfigure        = (*datasourceAdapter[Model[any], any])(nil)
-	_ datasource.DataSourceWithValidateConfig   = (*datasourceAdapter[Model[any], any])(nil)
-	_ datasource.DataSourceWithConfigValidators = (*datasourceAdapter[Model[any], any])(nil)
+	_ datasource.DataSource                     = (*datasourceAdapter)(nil)
+	_ datasource.DataSourceWithConfigure        = (*datasourceAdapter)(nil)
+	_ datasource.DataSourceWithValidateConfig   = (*datasourceAdapter)(nil)
+	_ datasource.DataSourceWithConfigValidators = (*datasourceAdapter)(nil)
 )
 
-type datasourceAdapter[M Model[T], T any] struct {
+type datasourceAdapter struct {
 	client     avngen.Client
-	datasource DataSourceOptions[M, T]
+	datasource DataSourceOptions
 }
 
-func (a *datasourceAdapter[M, T]) Configure(
+func (a *datasourceAdapter) Configure(
 	_ context.Context,
 	req datasource.ConfigureRequest,
 	rsp *datasource.ConfigureResponse,
@@ -80,7 +84,7 @@ func (a *datasourceAdapter[M, T]) Configure(
 	a.client = p.GetGenClient()
 }
 
-func (a *datasourceAdapter[M, T]) Metadata(
+func (a *datasourceAdapter) Metadata(
 	_ context.Context,
 	_ datasource.MetadataRequest,
 	rsp *datasource.MetadataResponse,
@@ -88,7 +92,7 @@ func (a *datasourceAdapter[M, T]) Metadata(
 	rsp.TypeName = a.datasource.TypeName
 }
 
-func (a *datasourceAdapter[M, T]) Schema(
+func (a *datasourceAdapter) Schema(
 	ctx context.Context,
 	_ datasource.SchemaRequest,
 	rsp *datasource.SchemaResponse,
@@ -96,37 +100,36 @@ func (a *datasourceAdapter[M, T]) Schema(
 	rsp.Schema = a.datasource.Schema(ctx)
 }
 
-func (a *datasourceAdapter[M, T]) Read(
+func (a *datasourceAdapter) Read(
 	ctx context.Context,
 	req datasource.ReadRequest,
 	rsp *datasource.ReadResponse,
 ) {
-	var (
-		state = instantiate[M]()
-		diags = &rsp.Diagnostics
-	)
+	diags := &rsp.Diagnostics
 
-	diags.Append(req.Config.Get(ctx, state)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config)
+	if err != nil {
+		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
-	ctx, cancel, d := withTimeout(ctx, state.TimeoutsObject(), timeoutRead)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
-	diags.Append(a.datasource.Read(ctx, a.client, state.SharedModel())...)
-	if diags.HasError() {
+	err = a.datasource.Read(ctx, a.client, d)
+	if err != nil {
+		diags.AddError("failed to read datasource", err.Error())
 		return
 	}
 
-	diags.Append(rsp.State.Set(ctx, state)...)
+	rsp.State.Raw = d.tfValue()
 }
 
-func (a *datasourceAdapter[M, T]) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, rsp *datasource.ValidateConfigResponse) {
+func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, rsp *datasource.ValidateConfigResponse) {
 	if a.datasource.Beta && !util.IsBeta() {
 		rsp.Diagnostics.AddError(
 			"Beta DataSource Not Enabled",
@@ -139,27 +142,30 @@ func (a *datasourceAdapter[M, T]) ValidateConfig(ctx context.Context, req dataso
 		return
 	}
 
-	var (
-		config = instantiate[M]()
-		diags  = &rsp.Diagnostics
-	)
-	diags.Append(req.Config.Get(ctx, config)...)
-	if diags.HasError() {
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config)
+	if err != nil {
+		rsp.Diagnostics.AddError("failed to create ResourceData", err.Error())
 		return
 	}
 
+	diags := &rsp.Diagnostics
+
 	// Some datasources might run API calls to validate the configuration.
-	ctx, cancel, d := withTimeout(ctx, config.TimeoutsObject(), timeoutRead)
-	diags.Append(d...)
-	if diags.HasError() {
+	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
+	if err != nil {
+		diags.AddError("failed to read timeouts block", err.Error())
 		return
 	}
 	defer cancel()
 
-	diags.Append(a.datasource.ValidateConfig(ctx, a.client, config.SharedModel())...)
+	err = a.datasource.ValidateConfig(ctx, a.client, d)
+	if err != nil {
+		diags.AddError("failed to validate config", err.Error())
+		return
+	}
 }
 
-func (a *datasourceAdapter[M, T]) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {
+func (a *datasourceAdapter) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {
 	if a.datasource.ConfigValidators == nil {
 		return nil
 	}

@@ -5,43 +5,46 @@ package usergroupmember
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:       createView,
-	Delete:       deleteView,
-	IDFields:     idFields(),
-	Read:         readView,
-	RefreshState: true,
-	Schema:       resourceSchema,
-	TypeName:     typeName,
+const typeName = "aiven_organization_user_group_member"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_organization_user_group_member.foo ORGANIZATION_ID/GROUP_ID/USER_ID
+func idFields() []string {
+	return []string{"organization_id", "group_id", "user_id"}
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.UserGroupMemberList(ctx, state.OrganizationID.ValueString(), state.GroupID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("UserGroupMemberList Error", err))
-			return
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	RefreshState:   true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.UserGroupMemberList(ctx, d.Get("organization_id").(string), d.Get("group_id").(string))
+	if err != nil {
+		return err
+	}
+	for _, v := range rsp {
+		if v.UserId == d.Get("user_id").(string) {
+			return d.Flatten(&v)
 		}
-		for _, v := range rsp {
-			if v.UserId == state.UserID.ValueString() {
-				diags.Append(flattenData(ctx, state, &v)...)
-				return
-			}
-		}
-		diags.Append(errmsg.FromError("Resource Not Found", avngen.Error{
-			Message:     "`aiven_organization_user_group_member` with given `user_id` not found",
-			OperationID: "UserGroupMemberList",
-			Status:      404,
-		}))
-	}()
-	return diags
+	}
+	return avngen.Error{
+		Message:     fmt.Sprintf("`aiven_organization_user_group_member` with given `user_id` not found"),
+		OperationID: "UserGroupMemberList",
+		Status:      http.StatusNotFound,
+	}
 }

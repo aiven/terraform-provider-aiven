@@ -7,50 +7,47 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:        createView,
-	Delete:        deleteView,
-	IDFields:      idFields(),
-	Read:          readView,
-	RefreshState:  true,
-	RemoveMissing: true,
-	Schema:        resourceSchema,
-	TypeName:      typeName,
+const typeName = "aiven_pg_user"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_pg_user.foo PROJECT/SERVICE_NAME/USERNAME
+func idFields() []string {
+	return []string{"project", "service_name", "username"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+var ResourceOptions = adapter.ResourceOptions{
+	Create:            createView,
+	Delete:            deleteView,
+	IDFields:          idFields(),
+	Read:              readView,
+	RefreshState:      true,
+	RefreshStateDelay: adapter.MustParseDuration("15s"),
+	RemoveMissing:     true,
+	Schema:            resourceSchema,
+	SchemaInternal:    resourceSchemaInternal(),
+	TypeName:          typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ServiceUserGet(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.Username.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceUserGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.ServiceUserDelete(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.Username.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceUserDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ServiceUserGet(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, flattenModifier(ctx, client))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.ServiceUserDelete(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string))
 }

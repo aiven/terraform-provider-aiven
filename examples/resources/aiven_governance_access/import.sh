@@ -1,1 +1,1 @@
-terraform import aiven_governance_access.example ORGANIZATION_ID/SUSBCRIPTION_ID
+terraform import aiven_governance_access.example ORGANIZATION_ID/ACCESS_ID

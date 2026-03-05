@@ -14,21 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -109,5 +97,51 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.BlockAll(ctx),
 		},
 		MarkdownDescription: "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"base_port": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"billing_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"ca_cert": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"parent_id":       &adapter.Schema{Type: adapter.SchemaTypeString},
+			"project_id":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"tag": &adapter.Schema{
+				Items: &adapter.Schema{
+					Properties: map[string]*adapter.Schema{
+						"key":   &adapter.Schema{Type: adapter.SchemaTypeString},
+						"value": &adapter.Schema{Type: adapter.SchemaTypeString},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+			"technical_emails": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

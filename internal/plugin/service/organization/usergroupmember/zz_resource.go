@@ -10,22 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// resourceModel with specific resource timeouts
-type resourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *resourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *resourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 resourceSchema:
@@ -69,5 +56,32 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 		MarkdownDescription: "Adds and manages users in a [user group](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_user_group). You can add organization users and application users to groups. Organization users must be [managed in the Aiven Console](https://aiven.io/docs/platform/howto/manage-org-users). Application users can be created and managed using the `aiven_organization_application_user` resource. Groups are granted roles and permissions using the `aiven_organization_permission` resource.",
+	}
+}
+func resourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"last_activity_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{
+					"create": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"delete": &adapter.Schema{Type: adapter.SchemaTypeString},
+					"read":   &adapter.Schema{Type: adapter.SchemaTypeString},
+					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
+				},
+				Type: adapter.SchemaTypeObject,
+			},
+			"user_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

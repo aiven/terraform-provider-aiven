@@ -7,27 +7,30 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+const typeName = "aiven_kafka_topic_list"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_kafka_topic_list.foo PROJECT/SERVICE_NAME
+func idFields() []string {
+	return []string{"project", "service_name"}
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		rsp, err := client.ServiceKafkaTopicList(ctx, state.Project.ValueString(), state.ServiceName.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceKafkaTopicList Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, &map[string]any{"topics": rsp})...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
+}
+
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	rsp, err := client.ServiceKafkaTopicList(ctx, d.Get("project").(string), d.Get("service_name").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"topics": rsp})
 }

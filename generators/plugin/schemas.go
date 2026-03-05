@@ -254,3 +254,100 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 
 	return values, nil
 }
+
+const schemaInternalFmt = "%sSchemaInternal"
+
+func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code, error) {
+	var kind string
+	switch item.Type {
+	case SchemaTypeObject:
+		kind = "SchemaTypeObject"
+		if item.IsMap() {
+			kind = "SchemaTypeMap"
+		}
+	case SchemaTypeArray:
+		kind = "SchemaTypeSet"
+	case SchemaTypeArrayOrdered:
+		kind = "SchemaTypeList"
+	case SchemaTypeString:
+		kind = "SchemaTypeString"
+	case SchemaTypeInteger:
+		kind = "SchemaTypeInt"
+	case SchemaTypeNumber:
+		kind = "SchemaTypeFloat"
+	case SchemaTypeBoolean:
+		kind = "SchemaTypeBool"
+	}
+
+	params := jen.Dict{
+		jen.Id("Type"): jen.Qual(adapterPackage, kind),
+	}
+
+	if item.Items != nil {
+		items, err := genSchemaInternal(def, entity, item.Items)
+		if err != nil {
+			return nil, err
+		}
+		params[jen.Id("Items")] = items
+	}
+
+	properties := make(jen.Dict)
+	for k, v := range item.Properties {
+		prop, err := genSchemaInternal(def, entity, v)
+		if err != nil {
+			return nil, err
+		}
+		properties[jen.Lit(k)] = prop
+	}
+
+	if item.Computed || item.IsRootProperty() && !entity.isResource() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
+		params[jen.Id("Computed")] = jen.True()
+	}
+
+	s := jen.Op("&").Qual(adapterPackage, "Schema")
+	p := jen.Map(jen.String()).Op("*").Qual(adapterPackage, "Schema")
+	if len(properties) > 0 {
+		if item.IsRoot() {
+			timeout := s.Clone().Values(jen.Dict{
+				jen.Id("Type"): jen.Qual(adapterPackage, "SchemaTypeString"),
+			})
+			timeouts := jen.Dict{
+				jen.Lit("read"): timeout,
+			}
+			if entity.isResource() {
+				timeouts[jen.Lit("create")] = timeout
+				timeouts[jen.Lit("update")] = timeout
+				timeouts[jen.Lit("delete")] = timeout
+
+				if def.LegacyTimeouts {
+					timeouts[jen.Lit("default")] = timeout
+				}
+			}
+
+			properties[jen.Lit("timeouts")] = s.Clone().Values(jen.Dict{
+				jen.Id("Type"):       jen.Qual(adapterPackage, "SchemaTypeObject"),
+				jen.Id("Properties"): p.Clone().Values(timeouts),
+			})
+		}
+		params[jen.Id("Properties")] = p.Clone().Values(properties)
+	}
+
+	if !item.IsRoot() && item.IsObject() && !item.Parent.IsArray() && !item.Parent.IsMap() {
+		params = jen.Dict{
+			jen.Id("Type"):     jen.Qual(adapterPackage, "SchemaTypeList"),
+			jen.Id("Items"):    s.Clone().Values(params),
+			jen.Id("IsObject"): jen.True(),
+		}
+	}
+
+	sch := s.Clone().Values(params)
+	if !item.IsRoot() {
+		return sch, nil
+	}
+
+	f := jen.Func().
+		Id(fmt.Sprintf(schemaInternalFmt, entity)).
+		Params().Op("*").Qual(adapterPackage, "Schema").
+		Block(jen.Return(sch))
+	return f, nil
+}

@@ -8,22 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -92,5 +79,59 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		MarkdownDescription: "List all user groups within an organization.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+			"user_groups": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"create_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"description": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"managed_by_scim": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"member_count": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"update_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"user_group_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"user_group_name": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeSet,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

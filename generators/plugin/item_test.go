@@ -164,7 +164,7 @@ func TestItemRemoveElements(t *testing.T) {
 			root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
 			scope := &Scope{Definition: &Definition{Remove: tt.remove}}
 
-			err := fromSchema(scope, Operation{}, root, tt.schema, ReadHandler)
+			err := fromSchema(scope, &Operation{}, root, tt.schema, ReadHandler)
 			require.NoError(t, err)
 
 			if diff := cmp.Diff(tt.want, root.Properties, transformer); diff != "" {

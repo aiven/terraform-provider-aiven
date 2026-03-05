@@ -8,91 +8,75 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/billinggroup"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
-	Schema:   resourceSchema,
-	TypeName: typeName,
-	Update:   updateView,
+const typeName = "aiven_billing_group"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_billing_group.foo BILLING_GROUP_ID
+func idFields() []string {
+	return []string{"billing_group_id"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
-	Read:     readView,
-	Schema:   datasourceSchema,
-	TypeName: typeName,
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req billinggroup.BillingGroupCreateIn
-		diags.Append(expandData(ctx, plan, nil, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.BillingGroupCreate(ctx, &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("BillingGroupCreate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+var DataSourceOptions = adapter.DataSourceOptions{
+	IDFields:       idFields(),
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	diags.Append(planModifier(ctx, client, state)...)
-	if diags.HasError() {
-		return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(billinggroup.BillingGroupCreateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{"name": "billing_group_name"}))
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.BillingGroupGet(ctx, state.BillingGroupID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("BillingGroupGet Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+	rsp, err := client.BillingGroupCreate(ctx, req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"billing_group_name": "name"}), flattenModifier(ctx, client))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req billinggroup.BillingGroupUpdateIn
-		diags.Append(expandData(ctx, plan, state, &req, expandModifier(ctx, client))...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.BillingGroupUpdate(ctx, state.BillingGroupID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("BillingGroupUpdate Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp, flattenModifier(ctx, client))...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := planModifier(ctx, client, d)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.BillingGroupGet(ctx, d.Get("billing_group_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"billing_group_name": "name"}), flattenModifier(ctx, client))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		err := client.BillingGroupDelete(ctx, state.BillingGroupID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("BillingGroupDelete Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(billinggroup.BillingGroupUpdateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{"name": "billing_group_name"}))
+	if err != nil {
+		return err
+	}
+	rsp, err := client.BillingGroupUpdate(ctx, d.Get("billing_group_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"billing_group_name": "name"}), flattenModifier(ctx, client))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.BillingGroupDelete(ctx, d.Get("billing_group_id").(string))
 }

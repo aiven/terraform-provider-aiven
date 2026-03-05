@@ -11,21 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -98,5 +86,42 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
 		MarkdownDescription: "Gets information about an organization address. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"address_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"address_lines": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeList,
+			},
+			"city":         &adapter.Schema{Type: adapter.SchemaTypeString},
+			"country_code": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"create_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"name":            &adapter.Schema{Type: adapter.SchemaTypeString},
+			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"state":           &adapter.Schema{Type: adapter.SchemaTypeString},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+			"update_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"zip_code": &adapter.Schema{Type: adapter.SchemaTypeString},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }

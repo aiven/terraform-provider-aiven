@@ -10,97 +10,82 @@ import (
 	"github.com/aiven/go-client-codegen/handler/flinkapplication"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
-var ResourceOptions = adapter.ResourceOptions[*resourceModel, tfModel]{
-	Create:        createView,
-	Delete:        deleteView,
-	IDFields:      idFields(),
-	Read:          readView,
-	RefreshState:  true,
-	RemoveMissing: true,
-	Schema:        resourceSchema,
-	TypeName:      typeName,
-	Update:        updateView,
+const typeName = "aiven_flink_application"
+
+// idFields the ID attribute fields, i.e.:
+// terraform import aiven_flink_application.foo PROJECT/SERVICE_NAME/APPLICATION_ID
+func idFields() []string {
+	return []string{"project", "service_name", "application_id"}
 }
 
-var DataSourceOptions = adapter.DataSourceOptions[*datasourceModel, tfModel]{
+var ResourceOptions = adapter.ResourceOptions{
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	Read:           readView,
+	RefreshState:   true,
+	RemoveMissing:  true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
+}
+
+var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
+	IDFields:         idFields(),
 	Read:             readView,
 	Schema:           datasourceSchema,
+	SchemaInternal:   datasourceSchemaInternal(),
 	TypeName:         typeName,
 }
 
-func createView(ctx context.Context, client avngen.Client, plan, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req flinkapplication.ServiceFlinkCreateApplicationIn
-		diags.Append(expandData(ctx, plan, nil, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ServiceFlinkCreateApplication(ctx, plan.Project.ValueString(), plan.ServiceName.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkCreateApplication Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
-}
-
-func readView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	diags.Append(planModifier(ctx, client, state)...)
-	if diags.HasError() {
-		return diags
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(flinkapplication.ServiceFlinkCreateApplicationIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
 	}
-	func() {
-		rsp, err := client.ServiceFlinkGetApplication(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.ApplicationID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkGetApplication Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, state, rsp)...)
-	}()
-	return diags
+	rsp, err := client.ServiceFlinkCreateApplication(ctx, d.Get("project").(string), d.Get("service_name").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "application_id"}))
 }
 
-func updateView(ctx context.Context, client avngen.Client, plan, state, config *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		var req flinkapplication.ServiceFlinkUpdateApplicationIn
-		diags.Append(expandData(ctx, plan, state, &req)...)
-		if diags.HasError() {
-			return
-		}
-
-		rsp, err := client.ServiceFlinkUpdateApplication(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.ApplicationID.ValueString(), &req)
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkUpdateApplication Error", err))
-			return
-		}
-		diags.Append(flattenData(ctx, plan, rsp)...)
-	}()
-	return diags
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := planModifier(ctx, client, d)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ServiceFlinkGetApplication(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "application_id"}))
 }
 
-func deleteView(ctx context.Context, client avngen.Client, state *tfModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-	func() {
-		_, err := client.ServiceFlinkDeleteApplication(ctx, state.Project.ValueString(), state.ServiceName.ValueString(), state.ApplicationID.ValueString())
-		if err != nil {
-			diags.Append(errmsg.FromError("ServiceFlinkDeleteApplication Error", err))
-			return
-		}
-	}()
-	return diags
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(flinkapplication.ServiceFlinkUpdateApplicationIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ServiceFlinkUpdateApplication(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"id": "application_id"}))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	_, err := client.ServiceFlinkDeleteApplication(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string))
+	return err
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {

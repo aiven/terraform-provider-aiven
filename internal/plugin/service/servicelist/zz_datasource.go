@@ -8,22 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
-
-// datasourceModel with specific datasource timeouts
-type datasourceModel struct {
-	tfModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
-
-func (tf *datasourceModel) SharedModel() *tfModel {
-	return &tf.tfModel
-}
-
-func (tf *datasourceModel) TimeoutsObject() types.Object {
-	return tf.Timeouts.Object
-}
 
 /*
 datasourceSchema:
@@ -138,5 +125,95 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"timeouts": timeouts.Block(ctx),
 		},
 		MarkdownDescription: "A list of all services in a project.",
+	}
+}
+func datasourceSchemaInternal() *adapter.Schema {
+	return &adapter.Schema{
+		Properties: map[string]*adapter.Schema{
+			"id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"services": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Properties: map[string]*adapter.Schema{
+						"cloud_description": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"cloud_name": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"create_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"disk_space_mb": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"node_count": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"node_cpu_count": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"node_memory_mb": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeFloat,
+						},
+						"plan": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"project_vpc_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"service_name": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"service_type": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"service_type_description": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"service_uri": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"state": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"termination_protection": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"update_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+					},
+					Type: adapter.SchemaTypeObject,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+			"timeouts": &adapter.Schema{
+				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
+				Type:       adapter.SchemaTypeObject,
+			},
+		},
+		Type: adapter.SchemaTypeObject,
 	}
 }
