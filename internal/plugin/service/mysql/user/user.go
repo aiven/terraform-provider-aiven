@@ -58,10 +58,6 @@ func resetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 }
 
 // flattenModifier adjusts the API response before it is unmarshalled into the state.
-// After Create/Update, the adapter's refreshState calls ServiceUserGet which may return
-// stale data due to API eventual consistency.
-// When the plan already has a known value for a field, we use it instead of the API response to prevent
-// inconsistent result after apply errors.
 // On import or auto-generated passwords, the plan value is null/unknown,
 // so the API response passes through unchanged.
 func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModifier {
@@ -72,11 +68,9 @@ func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModif
 		}
 
 		// Clear password from state when using write-only password.
-		if d.Get("password_wo_version").(int) != 0 {
+		_, ok := d.Schema().Properties["password_wo_version"]
+		if ok && d.Get("password_wo_version").(int) != 0 {
 			delete(dto, "password")
-		} else if v, ok := d.GetOk("password"); ok {
-			// password: use plan value if known (custom password), otherwise let the API value through.
-			dto["password"] = v
 		}
 		return nil
 	}
