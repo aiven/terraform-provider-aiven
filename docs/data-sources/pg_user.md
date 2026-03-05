@@ -39,8 +39,6 @@ data "aiven_pg_user" "example_user" {
 - `access_key` (String, Sensitive) Access key for TLS client authentication.
 - `id` (String) Resource ID composed as: `project/service_name/username`.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
-- `password_wo` (String, Sensitive) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`.
-- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`.
 - `pg_allow_replication` (Boolean) Allows replication. For the default avnadmin user this attribute is required and is always `true`.
 - `type` (String) The service user account type, either primary or regular.
 
