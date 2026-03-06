@@ -1,0 +1,1 @@
+terraform import aiven_byoc_aws_entity.example ORGANIZATION_ID/CUSTOM_CLOUD_ENVIRONMENT_ID

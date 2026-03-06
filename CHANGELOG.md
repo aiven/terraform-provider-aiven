@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add BYOC AWS entity resource
 - Change `aiven_account_team_project` field `team_type` (enum): add `role:project:admin`
 - Add `aiven_clickhouse` field `clickhouse_user_config.clickhouse_version` (enum): , and newer. ClickHouse major version.
 - Add `aiven_clickhouse` field `clickhouse_user_config.tiered_storage_move_factor`: The percentage of free disk space
