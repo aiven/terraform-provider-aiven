@@ -40,8 +40,6 @@ data "aiven_mysql_user" "example_mysql_user" {
 - `authentication` (String) Service specific authentication details. Currently only used for MySQL where accepted options are 'mysql_native_password' and 'caching_sha2_password', latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.
 - `id` (String) Resource ID composed as: `project/service_name/username`.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
-- `password_wo` (String, Sensitive) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`.
-- `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`.
 - `type` (String) User account type, such as primary or regular account.
 
 <a id="nestedblock--timeouts"></a>
