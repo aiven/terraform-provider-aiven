@@ -27,4 +27,3 @@ remove:
   - oracle_compartment_id
   - oracle_subnet_bastion
   - oracle_subnet_workload
-  

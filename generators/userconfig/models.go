@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/samber/lo"
 	"github.com/stoewer/go-strcase"
-	"golang.org/x/exp/slices"
 )
 
 type objectType string

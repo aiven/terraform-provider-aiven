@@ -10,7 +10,7 @@ description: |-
 
 # aiven_byoc_aws_entity (Resource)
 
-Creates and manages a BYOC custom cloud environment on AWS. 
+Creates and manages a BYOC custom cloud environment on AWS.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

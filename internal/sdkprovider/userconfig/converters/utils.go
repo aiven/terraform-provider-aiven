@@ -3,12 +3,12 @@ package converters
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 // castType returns an error on invalid type
@@ -168,7 +168,7 @@ func isZero(v any) bool {
 }
 
 func sortKeys[T any](m map[string]T) []string {
-	keys := maps.Keys(m)
+	keys := slices.Collect(maps.Keys(m))
 	slices.SortFunc(keys, func(a, b string) int {
 		return len(b) - len(a)
 	})

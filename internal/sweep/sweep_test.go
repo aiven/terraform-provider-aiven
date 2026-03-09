@@ -1,12 +1,12 @@
 package sweep_test
 
 import (
+	"maps"
+	"slices"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
@@ -93,7 +93,7 @@ func TestCheckSweepers(t *testing.T) {
 	require.NoError(t, err)
 
 	resourceMap := p.ResourcesMap
-	allResources := maps.Keys(resourceMap)
+	allResources := slices.Collect(maps.Keys(resourceMap))
 	allSweepers := sweep.GetTestSweepersResources()
 	missingSweepers := knownMissingSweepers()
 

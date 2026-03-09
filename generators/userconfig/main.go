@@ -5,16 +5,16 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/aiven/go-api-schemas/pkg/dist"
 	"github.com/dave/jennifer/jen"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
 )
@@ -69,8 +69,7 @@ func generate(kind string, data []byte, exclude []string) error {
 		return err
 	}
 
-	keys := maps.Keys(sch)
-	slices.Sort(keys)
+	keys := slices.Sorted(maps.Keys(sch))
 	doneKeys := make([]string, 0, len(keys))
 	doneNames := make([]string, 0, len(keys))
 

@@ -3,14 +3,15 @@ package sweep
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"golang.org/x/exp/maps"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
@@ -140,5 +141,5 @@ func AddTestSweepers(name string, s *resource.Sweeper) {
 
 // GetTestSweepersResources returns a list of all resources that have sweepers
 func GetTestSweepersResources() []string {
-	return maps.Keys(sweeperFuncs)
+	return slices.Collect(maps.Keys(sweeperFuncs))
 }
