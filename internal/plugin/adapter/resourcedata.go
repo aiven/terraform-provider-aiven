@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -22,6 +23,7 @@ type ResourceData interface {
 	Set(key string, value any) error
 	SetID(parts ...string) error
 	ID() string
+	IsNewResource() bool
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
@@ -39,6 +41,11 @@ var _ ResourceData = (*resourceData)(nil)
 // which is mandatory for all resources and datasources.
 func (d *resourceData) ID() string {
 	return d.Get("id").(string)
+}
+
+// IsNewResource returns true if the resource is being created.
+func (d *resourceData) IsNewResource() bool {
+	return d.ID() == ""
 }
 
 // SetID sets the value of the "id" field in path-like format.
@@ -68,38 +75,45 @@ func (d *resourceData) Get(key string) any {
 	return v
 }
 
-// GetOk returns a value by a path.
-// Tries to get the value from the plan, then from the state, then from the config.
-// Returns false if the value is not found.
+// GetOk looks up a value by key, checking plan, then config, then state. Returns the value and whether it was found.
+// ID fields are read from the state even if the plan is not present.
 func (d *resourceData) GetOk(key string) (any, bool) {
-	v, sch, ok, err := getOk(d.schema, d.plan, key)
+	// getOk doesn't fail if plan is nil.
+	// It returns a typed zero value.
+	v, _, ok, err := getOk(d.schema, d.plan, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get value for %q from plan: %w", key, err))
 	}
 
 	if ok {
-		return v, ok
-	}
-
-	if sch.Computed || d.plan == nil {
-		// 1. Computed fields can be read from the state
-		// 2. Read and Delete operations do not have "plan", everything is read from the state
-		v, _, ok, err = getOk(d.schema, d.state, key)
-		if err != nil {
-			panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
-		}
-
-		if ok {
-			return v, ok
-		}
+		return v, true
 	}
 
 	// 1. Datasource reads config only
 	// 2. WriteOnly fields are read from the config
-	v, _, ok, err = getOk(d.schema, d.config, key)
-	if err != nil {
-		panic(fmt.Errorf("failed to get value for %q from config: %w", key, err))
+	if d.config != nil {
+		v, _, ok, err = getOk(d.schema, d.config, key)
+		if err != nil {
+			panic(fmt.Errorf("failed to get value for %q from config: %w", key, err))
+		}
+
+		if ok {
+			return v, true
+		}
 	}
+
+	// 1. Read and Delete operations do not have a "plan"; in these cases, all values should be read from the state.
+	// 2. During Update (state and plan are present), values should not be read from the state
+	//    so that it is possible to detect when a value has been removed.
+	// 3. A special case applies to the "id" field and its components: they might not be present in the plan,
+	//    but are still needed for API calls.
+	if d.state != nil && (d.plan == nil || key == "id" || slices.Contains(d.idFields, key)) {
+		v, _, ok, err = getOk(d.schema, d.state, key)
+		if err != nil {
+			panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
+		}
+	}
+
 	return v, ok
 }
 
@@ -338,6 +352,10 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 	return data, sch, true, nil
 }
 
+// NewResourceDataFromMaps creates a new ResourceData from maps.
+// Create operation needs plan and config.
+// Update operation needs plan, state and config.
+// Read and Delete operations need state.
 func NewResourceDataFromMaps(schema *Schema, idFields []string, plan, state, config map[string]any) (ResourceData, error) {
 	rd := &resourceData{
 		schema:   schema,
