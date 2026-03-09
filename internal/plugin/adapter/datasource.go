@@ -120,6 +120,9 @@ func (a *datasourceAdapter) Read(
 	}
 	defer cancel()
 
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
+
 	err = a.datasource.Read(ctx, a.client, d)
 	if err != nil {
 		diags.AddError("failed to read datasource", err.Error())
@@ -157,6 +160,9 @@ func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.V
 		return
 	}
 	defer cancel()
+
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
 
 	err = a.datasource.ValidateConfig(ctx, a.client, d)
 	if err != nil {
