@@ -9,6 +9,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -160,6 +161,9 @@ func (a *resourceAdapter) Create(
 	}
 	defer cancel()
 
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
+
 	err = a.resource.Create(ctx, a.client, d)
 	if err != nil {
 		diags.AddError("failed to create resource", err.Error())
@@ -197,6 +201,9 @@ func (a *resourceAdapter) Read(
 	}
 	defer cancel()
 
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
+
 	// When RemoveResource is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
 	err = a.resource.Read(ctx, a.client, d)
@@ -227,13 +234,24 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		case <-delay.C:
 		}
 	}
-	return retry.Do(
+
+	// Create/Update already install the outer warning collector in ctx.
+	// Each retry attempt wraps that ctx in a child ctx with its own collector, so attempt warnings are buffered separately and don't mutate the outer collector directly.
+	// Only the last attempt's warnings are merged back into the outer collector below.
+	var lastAttemptWarnings diag.Diagnostics
+	err := retry.Do(
 		func() error {
-			return a.resource.Read(ctx, a.client, rd)
+			var attemptWarnings diag.Diagnostics
+			ctx, drainWarnings := withWarnings(ctx, &attemptWarnings)
+			err := a.resource.Read(ctx, a.client, rd)
+			drainWarnings()
+			lastAttemptWarnings = attemptWarnings
+			return err
 		},
 		retry.Delay(time.Second*5),
 		retry.Attempts(10),
 		retry.LastErrorOnly(true),
+		retry.Context(ctx),
 		retry.RetryIf(func(err error) bool {
 			var e avngen.Error
 			// 404: The API is inconsistent, returns 404 after Create/Update
@@ -241,6 +259,10 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 			return errors.As(err, &e) && (e.Status == http.StatusNotFound || e.Status == http.StatusForbidden)
 		}),
 	)
+
+	AddWarnings(ctx, lastAttemptWarnings...)
+
+	return err
 }
 
 func (a *resourceAdapter) Update(
@@ -262,6 +284,9 @@ func (a *resourceAdapter) Update(
 		return
 	}
 	defer cancel()
+
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
 
 	// Some resources might have "virtual" fields, like "termination_protection".
 	// Those fields can be technically updated, but they don't require an API call.
@@ -304,6 +329,9 @@ func (a *resourceAdapter) Delete(
 		return
 	}
 	defer cancel()
+
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
 
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
@@ -374,6 +402,9 @@ func (a *resourceAdapter) ValidateConfig(
 	}
 	defer cancel()
 
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
+
 	err = a.resource.ValidateConfig(ctx, a.client, d)
 	if err != nil {
 		diags.AddError("failed to validate config", err.Error())
@@ -431,6 +462,9 @@ func (a *resourceAdapter) ModifyPlan(
 		return
 	}
 	defer cancel()
+
+	ctx, drainWarnings := withWarnings(ctx, diags)
+	defer drainWarnings()
 
 	err = a.resource.ModifyPlan(ctx, a.client, d)
 	if err != nil {
