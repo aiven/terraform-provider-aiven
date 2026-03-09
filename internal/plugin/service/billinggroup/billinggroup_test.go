@@ -15,10 +15,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
-// TestAccAivenBillingGroup_basic and TestAccAivenBillingGroup_clone are split into separate tests
-// to avoid hitting the backend limit of 5 billing groups per organization.
+// TestAccAivenBillingGroup_basic creates a dedicated organization to avoid hitting
+// the backend limit of 5 billing groups per organization when running in parallel CI.
 func TestAccAivenBillingGroup_basic(t *testing.T) {
-	orgName := acc.OrganizationName()
 	resourceName := "aiven_billing_group.foo"
 	datasourceName := "data.aiven_billing_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -28,7 +27,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBillingGroupBasicResource(orgName, rName, `billing_contact_emails = ["foo@aiven.fi"]`),
+				Config: testAccBillingGroupBasicResource(rName, `billing_contact_emails = ["foo@aiven.fi"]`),
 				Check: resource.ComposeTestCheckFunc(
 					// Creates a group with billing_contact_emails
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
@@ -43,7 +42,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 			},
 			{
 				// Proves that billing_contact_emails can be removed (state update for nil value check)
-				Config: testAccBillingGroupBasicResource(orgName, rName, ""),
+				Config: testAccBillingGroupBasicResource(rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName, "billing_contact_emails"),
 				),
@@ -53,7 +52,6 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func TestAccAivenBillingGroup_clone(t *testing.T) {
-	orgName := acc.OrganizationName()
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -61,7 +59,7 @@ func TestAccAivenBillingGroup_clone(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBillingGroupCloneResource(orgName, rName),
+				Config: testAccBillingGroupCloneResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aiven_billing_group.clone", "name", fmt.Sprintf("test-acc-bg-copy-%s", rName)),
 					resource.TestCheckResourceAttr("aiven_billing_group.clone", "billing_currency", "EUR"),
@@ -99,43 +97,43 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccBillingGroupBasicResource(orgName, rName, contactEmails string) string {
+func testAccBillingGroupBasicResource(rName, contactEmails string) string {
 	return fmt.Sprintf(`
-data "aiven_organization" "org" {
-  name = %[1]q
+resource "aiven_organization" "org" {
+  name = "test-acc-bg-org-%[1]s"
 }
 
 resource "aiven_billing_group" "foo" {
-  parent_id      = data.aiven_organization.org.id
-  name           = "test-acc-bg-%[2]s"
+  parent_id      = aiven_organization.org.id
+  name           = "test-acc-bg-%[1]s"
   billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
-  %[3]s
+  %[2]s
 }
 
 data "aiven_billing_group" "foo" {
   billing_group_id = aiven_billing_group.foo.id
 }
-`, orgName, rName, contactEmails)
+`, rName, contactEmails)
 }
 
-func testAccBillingGroupCloneResource(orgName, rName string) string {
+func testAccBillingGroupCloneResource(rName string) string {
 	return fmt.Sprintf(`
-data "aiven_organization" "org" {
-  name = %[1]q
+resource "aiven_organization" "org" {
+  name = "test-acc-bg-clone-org-%[1]s"
 }
 
 // A source billing group to copy from without emails
 // that can cause plan diff issues and fail the test
 resource "aiven_billing_group" "source" {
-  parent_id        = data.aiven_organization.org.id
-  name             = "test-acc-bg-source-%[2]s"
+  parent_id        = aiven_organization.org.id
+  name             = "test-acc-bg-source-%[1]s"
   billing_currency = "EUR"
 }
 
 resource "aiven_billing_group" "clone" {
-  name                    = "test-acc-bg-copy-%[2]s"
-  parent_id               = data.aiven_organization.org.id
+  name                    = "test-acc-bg-copy-%[1]s"
+  parent_id               = aiven_organization.org.id
   copy_from_billing_group = aiven_billing_group.source.id
 }
-`, orgName, rName)
+`, rName)
 }
