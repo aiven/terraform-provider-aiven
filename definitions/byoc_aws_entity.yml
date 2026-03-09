@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/aws_entity
+resource:
+  description: |
+    Creates and manages a BYOC custom cloud environment on AWS.
+
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentCreate
+    type: create
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentGet
+    type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentDelete
+    type: delete
+remove:
+  - aiven_google_account_principal
+  - google_bastion_cidr
+  - google_privilege_bearing_service_account_id
+  - google_workload_cidr
+  - oracle_compartment_id
+  - oracle_subnet_bastion
+  - oracle_subnet_workload
+  
