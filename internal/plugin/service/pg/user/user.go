@@ -90,7 +90,8 @@ func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 		}
 
 		// Clear password from state when using write-only password.
-		if d.Get("password_wo_version").(int) != 0 {
+		_, ok := d.Schema().Properties["password_wo_version"]
+		if ok && d.Get("password_wo_version").(int) != 0 {
 			delete(dto, "password")
 		}
 		return nil

@@ -24,6 +24,7 @@ type ResourceData interface {
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
+	Schema() *Schema
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
@@ -51,6 +52,12 @@ func (d *resourceData) IsNewResource() bool {
 // SetID sets the value of the "id" field in path-like format.
 func (d *resourceData) SetID(parts ...string) error {
 	return d.Set("id", strings.Join(parts, "/"))
+}
+
+// Schema returns the schema of the resource.
+// NOTE: do not modify the schema.
+func (d *resourceData) Schema() *Schema {
+	return d.schema
 }
 
 // currentState returns the current state map.

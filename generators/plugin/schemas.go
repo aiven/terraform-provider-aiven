@@ -76,11 +76,13 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 	attrs := make(jen.Dict)
 	blocks := make(jen.Dict)
 
-	// DataSource must have exactly the same attributes as Resource, including WriteOnly fields.
-	// Otherwise, we need to have separate models and convertors.
-	// That's Terraform Plugin Framework limitation.
 	for _, k := range sortedKeys(item.Properties) {
 		v := item.Properties[k]
+		if !entity.isResource() && isWriteOnly(v) {
+			// Don't add WriteOnly to datasource (read-only resource)
+			continue
+		}
+
 		key := jen.Lit(k)
 		switch {
 		case v.IsMapNested():
@@ -293,6 +295,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 
 	properties := make(jen.Dict)
 	for k, v := range item.Properties {
+		if !entity.isResource() && isWriteOnly(v) {
+			continue
+		}
+
 		prop, err := genSchemaInternal(def, entity, v)
 		if err != nil {
 			return nil, err
@@ -350,4 +356,24 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		Params().Op("*").Qual(adapterPackage, "Schema").
 		Block(jen.Return(sch))
 	return f, nil
+}
+
+// isWriteOnly returns true if Item.WriteOnly or required with Item.WriteOnly.
+func isWriteOnly(item *Item) bool {
+	if item.IsRoot() {
+		// Root can't be write-only
+		return false
+	}
+
+	if item.WriteOnly {
+		return true
+	}
+
+	// Item might be linked to a write-only field
+	for _, k := range item.AlsoRequires {
+		if isWriteOnly(item.Parent.Properties[k]) {
+			return true
+		}
+	}
+	return false
 }

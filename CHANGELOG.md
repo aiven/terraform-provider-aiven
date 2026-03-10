@@ -12,7 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Add BYOC AWS entity resource
+- Add `aiven_byoc_aws_entity` resource: creates and manages a BYOC custom cloud environment on AWS.
+- Remove `WriteOnly` fields from data sources, as these fields are not retrievable via the API.
 - Change `aiven_account_team_project` field `team_type` (enum): add `role:project:admin`
 - Add `aiven_clickhouse` field `clickhouse_user_config.clickhouse_version` (enum): , and newer. ClickHouse major version.
 - Add `aiven_clickhouse` field `clickhouse_user_config.tiered_storage_move_factor`: The percentage of free disk space

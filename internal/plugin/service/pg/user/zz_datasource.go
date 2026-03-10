@@ -52,15 +52,6 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.",
 				Sensitive:           true,
 			},
-			"password_wo": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`.",
-				Sensitive:           true,
-			},
-			"password_wo_version": schema.Int64Attribute{
-				Computed:            true,
-				MarkdownDescription: "Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`.",
-			},
 			"pg_allow_replication": schema.BoolAttribute{
 				Computed:            true,
 				MarkdownDescription: "Allows replication. For the default avnadmin user this attribute is required and is always `true`.",
@@ -106,8 +97,6 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"password_wo":         &adapter.Schema{Type: adapter.SchemaTypeString},
-			"password_wo_version": &adapter.Schema{Type: adapter.SchemaTypeInt},
 			"pg_allow_replication": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,
