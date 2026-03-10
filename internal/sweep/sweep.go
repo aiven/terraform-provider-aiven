@@ -16,6 +16,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
+const DefaultPrefix = "test-acc"
+
 var (
 	sharedClient *aiven.Client
 	sweeperFuncs map[string]struct{}
@@ -29,9 +31,14 @@ func init() {
 	sweeperFuncs = make(map[string]struct{})
 }
 
+// ProjectName returns the AIVEN_PROJECT_NAME environment variable.
+func ProjectName() string {
+	return os.Getenv("AIVEN_PROJECT_NAME")
+}
+
 // SharedClient returns a common Aiven Client setup needed for the sweeper
 func SharedClient() (*aiven.Client, error) {
-	if os.Getenv("AIVEN_PROJECT_NAME") == "" {
+	if ProjectName() == "" {
 		return nil, fmt.Errorf("must provide environment variable AIVEN_PROJECT_NAME ")
 	}
 
@@ -48,7 +55,7 @@ func SharedClient() (*aiven.Client, error) {
 }
 
 func SharedGenClient() (avngen.Client, error) {
-	if os.Getenv("AIVEN_PROJECT_NAME") == "" {
+	if ProjectName() == "" {
 		return nil, fmt.Errorf("must provide environment variable AIVEN_PROJECT_NAME ")
 	}
 
@@ -71,7 +78,7 @@ func SweepServices(ctx context.Context, t string) error {
 		return fmt.Errorf("error getting client: %w", err)
 	}
 
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	projectName := ProjectName()
 
 	services, err := client.Services.List(ctx, projectName)
 	if common.IsCritical(err) {

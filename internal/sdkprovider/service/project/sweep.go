@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -40,6 +41,52 @@ func init() {
 	sweep.AddTestSweepers("aiven_billing_group", &resource.Sweeper{
 		Name: "aiven_billing_group",
 		F:    sweepBillingGroups(ctx),
+		Dependencies: []string{
+			"aiven_project",
+		},
+	})
+
+	sweep.AddTestSweepers("aiven_project_user", &resource.Sweeper{
+		Name: "aiven_project_user",
+		F: func(_ string) error {
+			client, err := sweep.SharedGenClient()
+			if err != nil {
+				return err
+			}
+
+			projectName := sweep.ProjectName()
+
+			result, err := client.ProjectUserList(ctx, projectName)
+			if common.IsCritical(err) {
+				return fmt.Errorf("error retrieving project users for %s: %w", projectName, err)
+			}
+
+			if result == nil {
+				return nil
+			}
+
+			for _, user := range result.Users {
+				if !strings.Contains(user.UserEmail, sweep.DefaultPrefix) {
+					continue
+				}
+
+				if err = client.ProjectUserRemove(ctx, projectName, user.UserEmail); common.IsCritical(err) {
+					return fmt.Errorf("error removing user %s from project %s: %w", user.UserEmail, projectName, err)
+				}
+			}
+
+			for _, invitation := range result.Invitations {
+				if !strings.Contains(invitation.InvitedUserEmail, sweep.DefaultPrefix) {
+					continue
+				}
+
+				if err = client.ProjectInviteDelete(ctx, projectName, invitation.InvitedUserEmail); common.IsCritical(err) {
+					return fmt.Errorf("error deleting invitation for %s from project %s: %w", invitation.InvitedUserEmail, projectName, err)
+				}
+			}
+
+			return nil
+		},
 		Dependencies: []string{
 			"aiven_project",
 		},
