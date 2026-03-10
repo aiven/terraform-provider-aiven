@@ -2,11 +2,11 @@ package diff
 
 import (
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"golang.org/x/exp/slices"
 )
 
 var (
