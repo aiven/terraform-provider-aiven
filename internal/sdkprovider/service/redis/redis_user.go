@@ -103,10 +103,10 @@ func resourceRedisUserCreate(ctx context.Context, d *schema.ResourceData, client
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 
-	categories := schemautil.FlattenToString(d.Get("redis_acl_categories").([]interface{}))
-	commands := schemautil.FlattenToString(d.Get("redis_acl_commands").([]interface{}))
-	keys := schemautil.FlattenToString(d.Get("redis_acl_keys").([]interface{}))
-	channels := schemautil.FlattenToString(d.Get("redis_acl_channels").([]interface{}))
+	categories := schemautil.FlattenToString(d.Get("redis_acl_categories").([]any))
+	commands := schemautil.FlattenToString(d.Get("redis_acl_commands").([]any))
+	keys := schemautil.FlattenToString(d.Get("redis_acl_keys").([]any))
+	channels := schemautil.FlattenToString(d.Get("redis_acl_channels").([]any))
 
 	createIn := &service.ServiceUserCreateIn{
 		Username: username,

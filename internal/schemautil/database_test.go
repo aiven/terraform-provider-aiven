@@ -92,7 +92,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 		Once()
 
 	done := make(chan error, 3)
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		go func() {
 			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, dbName)
 			done <- err
@@ -100,7 +100,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	}
 
 	errorCount := 0
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		err := <-done
 		if err != nil {
 			errorCount++

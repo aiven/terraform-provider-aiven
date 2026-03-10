@@ -36,7 +36,7 @@ func DatasourceProjectVPC() *schema.Resource {
 			Description:   "The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.",
 			Optional:      true,
 			ConflictsWith: []string{"project", "cloud_name"},
-			ValidateDiagFunc: func(i interface{}, _ cty.Path) diag.Diagnostics {
+			ValidateDiagFunc: func(i any, _ cty.Path) diag.Diagnostics {
 				_, err := schemautil.SplitResourceID(i.(string), 2)
 				if err != nil {
 					return diag.Errorf("invalid vpc_id, should have the following format {project_name}/{project_vpc_id}: %s", err)
@@ -63,7 +63,7 @@ func DatasourceProjectVPC() *schema.Resource {
 	}
 }
 
-func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	var vpcID, projectName, cloudName string

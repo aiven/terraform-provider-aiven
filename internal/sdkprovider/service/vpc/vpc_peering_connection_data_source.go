@@ -10,7 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))

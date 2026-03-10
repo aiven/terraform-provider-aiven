@@ -8,7 +8,6 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/go-cty/cty"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -46,7 +45,7 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 	createIn := &service.ServiceUserCreateIn{
 		Username: username,
 		AccessControl: &service.AccessControlIn{
-			PgAllowReplication: lo.ToPtr(true),
+			PgAllowReplication: new(true),
 		},
 	}
 	client.EXPECT().
@@ -57,7 +56,7 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 	// Sets the password
 	modifyIn := &service.ServiceUserCredentialsModifyIn{
 		Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-		NewPassword: lo.ToPtr(password),
+		NewPassword: new(password),
 	}
 	client.EXPECT().
 		ServiceUserCredentialsModify(ctx, projectName, serviceName, username, modifyIn).

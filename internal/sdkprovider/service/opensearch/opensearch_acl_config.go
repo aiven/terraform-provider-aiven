@@ -50,7 +50,7 @@ to manage users and permissions with the OpenSearch Security dashboard.
 	}
 }
 
-func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -78,7 +78,7 @@ func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -95,7 +95,7 @@ func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceOpenSearchACLConfigRead(ctx, d, m)
 }
 
-func resourceOpenSearchACLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)

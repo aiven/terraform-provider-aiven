@@ -24,7 +24,7 @@ func NewFrameworkTemplateGenerator() *FrameworkTemplateGenerator {
 
 // GenerateTemplate generates a Go template string that resembles Terraform HCL configuration
 // for a Framework resource or data source.
-func (g *FrameworkTemplateGenerator) GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) (string, error) {
+func (g *FrameworkTemplateGenerator) GenerateTemplate(schema any, resourceType string, kind ResourceKind) (string, error) {
 	fields, err := g.extractor.ExtractFields(schema)
 	if err != nil {
 		return "", fmt.Errorf("error extracting fields: %w", err)

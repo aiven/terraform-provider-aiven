@@ -264,7 +264,7 @@ func ResourceKafkaTopic() *schema.Resource {
 		Schema:         aivenKafkaTopicSchema,
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.KafkaTopic(),
-		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m any) error {
 			oldPartitions, newPartitions := d.GetChange("partitions")
 
 			assertedOldPartitions, ok := oldPartitions.(int)
@@ -328,7 +328,7 @@ func ResourceKafkaTopic() *schema.Resource {
 	}
 }
 
-func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
@@ -376,7 +376,7 @@ func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
 	tagSet := d.Get("tag").(*schema.Set)
 	tags := make([]aiven.KafkaTopicTag, tagSet.Len())
 	for i, tagD := range tagSet.List() {
-		tagM := tagD.(map[string]interface{})
+		tagM := tagD.(map[string]any)
 		tag := aiven.KafkaTopicTag{
 			Key:   tagM["key"].(string),
 			Value: tagM["value"].(string),
@@ -424,7 +424,7 @@ func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error)
 	return result, err
 }
 
-func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}, isResource bool) diag.Diagnostics {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m any, isResource bool) diag.Diagnostics {
 	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -494,18 +494,18 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceKafkaTopicReadResource(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicReadResource(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return resourceKafkaTopicRead(ctx, d, m, true)
 }
 
-func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return resourceKafkaTopicRead(ctx, d, m, false)
 }
 
-func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} {
-	tags := make([]map[string]interface{}, 0, len(list))
+func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]any {
+	tags := make([]map[string]any, 0, len(list))
 	for _, tagS := range list {
-		tags = append(tags, map[string]interface{}{
+		tags = append(tags, map[string]any{
 			"key":   tagS.Key,
 			"value": tagS.Value,
 		})
@@ -514,7 +514,7 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 	return tags
 }
 
-func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	partitions := d.Get("partitions").(int)
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
@@ -559,7 +559,7 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)

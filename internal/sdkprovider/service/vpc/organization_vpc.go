@@ -97,7 +97,7 @@ func resourceOrganizationVPCCreate(ctx context.Context, d *schema.ResourceData, 
 	stateConf := &retry.StateChangeConf{
 		Pending: []string{string(organizationvpc.VpcStateTypeApproved)},
 		Target:  []string{string(organizationvpc.VpcStateTypeActive)},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			orgVPC, err := client.OrganizationVpcGet(ctx, orgID, resp.OrganizationVpcId)
 			if err != nil {
 				return nil, "", err
@@ -175,7 +175,7 @@ func resourceOrganizationVPCDelete(ctx context.Context, d *schema.ResourceData, 
 	// Wait for VPC to be deleted
 	stateConf := &retry.StateChangeConf{
 		Target: []string{string(organizationvpc.VpcStateTypeDeleted)},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			orgVPC, err := client.OrganizationVpcGet(ctx, orgID, vpcID)
 			if err != nil {
 				if avngen.IsNotFound(err) {

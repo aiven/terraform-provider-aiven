@@ -2,6 +2,7 @@ package vpc
 
 import (
 	"context"
+	"slices"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -79,7 +80,7 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 	}
 }
 
-func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -105,14 +106,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	// prepare a list of new transit gateway vpc attachment that needs to be added
 	add := make([]aiven.TransitGatewayVPCAttachment, 0)
 	for _, fresh := range cidrs {
-		isNew := true
-
-		for _, old := range peeringConnection.UserPeerNetworkCIDRs {
-			if fresh == old {
-				isNew = false
-				break
-			}
-		}
+		isNew := !slices.Contains(peeringConnection.UserPeerNetworkCIDRs, fresh)
 
 		if isNew {
 			var peerResourceGroup *string

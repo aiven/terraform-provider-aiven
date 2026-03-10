@@ -68,7 +68,7 @@ func resourceOpenSearchACLRuleGetPermissionFromACLResponse(cfg aiven.OpenSearchA
 	return "", false
 }
 
-func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, username, index, err := schemautil.SplitResourceID4(d.Id())
@@ -116,7 +116,7 @@ func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiv
 	}
 }
 
-func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -136,7 +136,7 @@ func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceOpenSearchACLRuleRead(ctx, d, m)
 }
 
-func resourceOpenSearchACLRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)

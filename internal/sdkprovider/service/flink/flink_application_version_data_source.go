@@ -18,7 +18,7 @@ func DatasourceFlinkApplicationVersion() *schema.Resource {
 	}
 }
 
-func datasourceFlinkApplicationVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceFlinkApplicationVersionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)

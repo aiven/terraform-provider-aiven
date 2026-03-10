@@ -50,7 +50,7 @@ func ResourceGCPPrivatelink() *schema.Resource {
 	}
 }
 
-func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -77,7 +77,7 @@ func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceGCPPrivatelinkRead(ctx, d, m)
 }
 
-func resourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -120,7 +120,7 @@ func waitForGCPPrivatelinkToBeActive(
 	return &retry.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				return nil, "", err
@@ -136,7 +136,7 @@ func waitForGCPPrivatelinkToBeActive(
 	}
 }
 
-func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -151,7 +151,7 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {

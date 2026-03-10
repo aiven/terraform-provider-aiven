@@ -6,7 +6,6 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -60,7 +59,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("Custom$Pass1"),
+			wantSetPassword:    new("Custom$Pass1"),
 		},
 		{
 			name: "new resource with password and authentication calls Modify",
@@ -72,7 +71,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "mysql_native_password",
-			wantSetPassword:    lo.ToPtr("Custom$Pass1"),
+			wantSetPassword:    new("Custom$Pass1"),
 		},
 		{
 			name: "new resource with password_wo calls Modify",
@@ -84,7 +83,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("WriteOnlyPass$1"),
+			wantSetPassword:    new("WriteOnlyPass$1"),
 		},
 		{
 			name: "existing resource no password or authentication change does not call Modify",
@@ -114,7 +113,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("NewPass456"),
+			wantSetPassword:    new("NewPass456"),
 		},
 		{
 			name: "existing resource authentication changed calls Modify",
@@ -129,7 +128,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "mysql_native_password",
-			wantSetPassword:    lo.ToPtr("SamePass"),
+			wantSetPassword:    new("SamePass"),
 		},
 		{
 			name: "existing resource password_wo_version changed calls Modify",
@@ -144,7 +143,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("Rotated$2"),
+			wantSetPassword:    new("Rotated$2"),
 		},
 		{
 			name: "existing resource password removed calls Modify with nil so backend generates",
@@ -173,7 +172,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("WriteOnlyPass$1"),
+			wantSetPassword:    new("WriteOnlyPass$1"),
 		},
 		{
 			name: "existing resource switch from password_wo back to password calls Modify",
@@ -188,7 +187,7 @@ func TestResetPassword(t *testing.T) {
 			config:             nil,
 			wantModifyCall:     true,
 			wantAuthentication: "",
-			wantSetPassword:    lo.ToPtr("BackToCustom$99"),
+			wantSetPassword:    new("BackToCustom$99"),
 		},
 		{
 			name: "existing resource password_wo removed calls Modify with nil so backend generates",

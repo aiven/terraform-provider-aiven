@@ -22,15 +22,13 @@ func TestCreateConflict(t *testing.T) {
 
 	var conflictErr int32
 	var wg sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func() {
+	for range 100 {
+		wg.Go(func() {
 			err := rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
 			if errors.Is(err, errAlreadyExists) {
 				atomic.AddInt32(&conflictErr, 1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 	wg.Wait()
 	assert.EqualValues(t, 99, conflictErr)

@@ -14,7 +14,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var (
 		pc     *aiven.VPCPeeringConnection
 		err    error
@@ -84,7 +84,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			"DELETED",
 			"DELETED_BY_PEER",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				ctx,
 				projectName,
@@ -154,7 +154,7 @@ func parsePeerVPCID(src string) (*peeringVPCID, error) {
 	return pID, nil
 }
 
-func resourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
@@ -206,7 +206,7 @@ func resourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceDat
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -261,7 +261,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		Target: []string{
 			"DELETED",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			var pc *aiven.VPCPeeringConnection
 			if isAzure {
 				pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
@@ -401,7 +401,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	// user_peer_network_cidrs filed is only available for transit gateway vpc attachment
 	if len(peeringConnection.UserPeerNetworkCIDRs) > 0 {
 		// convert cidrs from []string to []interface {}
-		cidrs := make([]interface{}, len(peeringConnection.UserPeerNetworkCIDRs))
+		cidrs := make([]any, len(peeringConnection.UserPeerNetworkCIDRs))
 		for i, cidr := range peeringConnection.UserPeerNetworkCIDRs {
 			cidrs[i] = cidr
 		}
@@ -418,7 +418,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	return diags
 }
 
-func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
+func ConvertStateInfoToMap(s *map[string]any) map[string]string {
 	if s == nil || len(*s) == 0 {
 		return nil
 	}
@@ -465,7 +465,7 @@ func isAzureVPCPeeringConnection(ctx context.Context, d *schema.ResourceData, c 
 	return false, nil
 }
 
-func validateVPCID(i interface{}, k string) (warnings []string, errors []error) {
+func validateVPCID(i any, k string) (warnings []string, errors []error) {
 	v, ok := i.(string)
 	if !ok {
 		errors = append(errors, fmt.Errorf("expected type of %s to be string", k))

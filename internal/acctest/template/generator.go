@@ -29,13 +29,13 @@ func (k ResourceKind) String() string {
 // TemplateGenerator is the base interface for all template generators
 type TemplateGenerator interface {
 	// GenerateTemplate generates a template for the given schema, resource type, and kind
-	GenerateTemplate(schema interface{}, resourceType string, kind ResourceKind) (string, error)
+	GenerateTemplate(schema any, resourceType string, kind ResourceKind) (string, error)
 }
 
 // SchemaFieldExtractor is an interface for extracting fields from different schema types
 type SchemaFieldExtractor interface {
 	// ExtractFields extracts fields from a schema
-	ExtractFields(schema interface{}) ([]TemplateField, error)
+	ExtractFields(schema any) ([]TemplateField, error)
 }
 
 // TimeoutsConfig defines which timeouts are configured for a resource

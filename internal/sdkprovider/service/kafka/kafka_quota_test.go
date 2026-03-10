@@ -30,11 +30,11 @@ func TestAccAivenKafkaQuota(t *testing.T) {
 		clientID = fmt.Sprintf("acc_test_client_%s", randName)
 
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
-				AddDataSource("aiven_project", map[string]interface{}{
+				AddDataSource("aiven_project", map[string]any{
 				"resource_name": "foo",
 				"project":       projectName,
 			}).
-			AddResource("aiven_kafka", map[string]interface{}{
+			AddResource("aiven_kafka", map[string]any{
 				"resource_name":           "bar",
 				"project":                 projectName,
 				"service_name":            serviceName,

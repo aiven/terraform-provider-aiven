@@ -387,7 +387,7 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 
 	// If the operation is experimental and user has not overridden the beta flag.
 	if path.Experimental && scope.Definition.Beta == nil {
-		scope.Definition.Beta = lo.ToPtr(true)
+		scope.Definition.Beta = new(true)
 	}
 
 	root.Description = path.Summary

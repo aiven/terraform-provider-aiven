@@ -42,12 +42,12 @@ func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) boo
 
 	// Lists, sets and objects (object is list with one item).
 	// But never a set of nested objects: it is impossible to find an object in a set by its hash.
-	if strings.HasSuffix(k, ".#") {
+	if before, ok := strings.CutSuffix(k, ".#"); ok {
 		if d.HasChange(k) {
 			// By some reason terraform might mark objects as "changed".
 			// In that case, terraform returns a list with a nil value.
 			// "nil" means that the object has no value.
-			key := strings.TrimSuffix(k, ".#")
+			key := before
 			v, ok := d.Get(key).([]any)
 			return ok && len(v) == 1 && v[0] == nil
 		}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -145,7 +146,7 @@ func ResourceProject() *schema.Resource {
 	}
 }
 
-func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -206,11 +207,9 @@ func resourceProjectCopyBillingGroupFromProject(
 			return diag.FromErr(err)
 		}
 
-		for _, pr := range projects {
-			if pr == sourceProjectName {
-				log.Printf("[DEBUG] Source project `%s` has billing group `%s`", sourceProjectName, bg.Id)
-				return resourceProjectAssignToBillingGroup(ctx, sourceProjectName, bg.Id, client, d)
-			}
+		if slices.Contains(projects, sourceProjectName) {
+			log.Printf("[DEBUG] Source project `%s` has billing group `%s`", sourceProjectName, bg.Id)
+			return resourceProjectAssignToBillingGroup(ctx, sourceProjectName, bg.Id, client, d)
 		}
 	}
 
@@ -256,7 +255,7 @@ func resourceProjectAssignToBillingGroup(
 	return nil
 }
 
-func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	conf := &retry.StateChangeConf{
@@ -265,7 +264,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		Timeout:    d.Timeout(schema.TimeoutRead),
 		MinTimeout: common.DefaultStateChangeMinTimeout,
 		Delay:      common.DefaultStateChangeDelay,
-		Refresh: func() (result interface{}, state string, err error) {
+		Refresh: func() (result any, state string, err error) {
 			p, err := client.Projects.Get(ctx, d.Id())
 			if isNotProjectMember(err) {
 				return nil, "pending", nil
@@ -284,7 +283,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return setProjectTerraformProperties(ctx, d, client, project.(*aiven.Project))
 }
 
-func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -342,7 +341,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
-func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	err := client.Projects.Delete(ctx, d.Id())

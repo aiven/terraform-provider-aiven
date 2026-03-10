@@ -274,7 +274,7 @@ func roleGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]RoleGrant, e
 	var err error
 	grants := make([]RoleGrant, 0)
 	for i := range data {
-		column := data[i].([]interface{})
+		column := data[i].([]any)
 
 		getMaybeString := func(columnName string) string {
 			f := column[columnNameMap[columnName]]
@@ -329,7 +329,7 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 	var err error
 	grants := make([]PrivilegeGrant, 0)
 	for i := range data {
-		column := data[i].([]interface{})
+		column := data[i].([]any)
 
 		getMaybeString := func(columnName string, defaultValue string) string {
 			f := column[columnNameMap[columnName]]

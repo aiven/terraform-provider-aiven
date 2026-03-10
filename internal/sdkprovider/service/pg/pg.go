@@ -268,7 +268,7 @@ type ServiceTaskWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *ServiceTaskWaiter) RefreshFunc() retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		t, err := w.Client.ServiceTaskGet(
 			w.Context,
 			w.Project,

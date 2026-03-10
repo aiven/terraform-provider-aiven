@@ -49,7 +49,7 @@ func NewFrameworkFieldExtractor() *FrameworkFieldExtractor {
 var _ SchemaFieldExtractor = &FrameworkFieldExtractor{}
 
 // ExtractFields implements SchemaFieldExtractor for Framework schemas
-func (e *FrameworkFieldExtractor) ExtractFields(schema interface{}) ([]TemplateField, error) {
+func (e *FrameworkFieldExtractor) ExtractFields(schema any) ([]TemplateField, error) {
 	var fields []TemplateField
 
 	switch s := schema.(type) {
@@ -73,7 +73,7 @@ func (e *FrameworkFieldExtractor) ExtractFields(schema interface{}) ([]TemplateF
 }
 
 // extractFields extracts fields from either resource or datasource attributes
-func (e *FrameworkFieldExtractor) extractFields(attributes interface{}) []TemplateField {
+func (e *FrameworkFieldExtractor) extractFields(attributes any) []TemplateField {
 	fields := make([]TemplateField, 0)
 
 	// Handle the different attribute map types with a type switch
@@ -92,7 +92,7 @@ func (e *FrameworkFieldExtractor) extractFields(attributes interface{}) []Templa
 }
 
 // processField processes a single field and adds it to the fields list if not skipped
-func (e *FrameworkFieldExtractor) processField(name string, attr interface{}, fields *[]TemplateField) {
+func (e *FrameworkFieldExtractor) processField(name string, attr any, fields *[]TemplateField) {
 	// Create field with common properties
 	field := TemplateField{
 		Name:      name,
@@ -155,7 +155,7 @@ func (e *FrameworkFieldExtractor) processField(name string, attr interface{}, fi
 }
 
 // getFieldBool checks if a boolean field is set on an attribute
-func (e *FrameworkFieldExtractor) getFieldBool(attr interface{}, fieldName string) bool {
+func (e *FrameworkFieldExtractor) getFieldBool(attr any, fieldName string) bool {
 	v := reflect.ValueOf(attr)
 	if v.Kind() == reflect.Struct {
 		if f := v.FieldByName(fieldName); f.IsValid() && f.Kind() == reflect.Bool { // nosemgrep
@@ -166,17 +166,17 @@ func (e *FrameworkFieldExtractor) getFieldBool(attr interface{}, fieldName strin
 }
 
 // isRequired checks if an attribute is required
-func (e *FrameworkFieldExtractor) isRequired(attr interface{}) bool {
+func (e *FrameworkFieldExtractor) isRequired(attr any) bool {
 	return e.getFieldBool(attr, "Required")
 }
 
 // isOptional checks if an attribute is optional
-func (e *FrameworkFieldExtractor) isOptional(attr interface{}) bool {
+func (e *FrameworkFieldExtractor) isOptional(attr any) bool {
 	return e.getFieldBool(attr, "Optional")
 }
 
 // isComputed checks if an attribute is computed
-func (e *FrameworkFieldExtractor) isComputed(attr interface{}) bool {
+func (e *FrameworkFieldExtractor) isComputed(attr any) bool {
 	return e.getFieldBool(attr, "Computed")
 }
 
@@ -191,7 +191,7 @@ func NewSDKFieldExtractor() *SDKFieldExtractor {
 var _ SchemaFieldExtractor = &SDKFieldExtractor{}
 
 // ExtractFields implements SchemaFieldExtractor for SDK schemas
-func (e *SDKFieldExtractor) ExtractFields(schema interface{}) ([]TemplateField, error) {
+func (e *SDKFieldExtractor) ExtractFields(schema any) ([]TemplateField, error) {
 	resource, ok := schema.(*sdkschema.Resource)
 	if !ok {
 		return nil, fmt.Errorf("schema is not a *schema.Resource: %T", schema)

@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -96,10 +95,10 @@ func resourceAzureOrgVPCPeeringConnectionCreate(ctx context.Context, d *schema.R
 		resourceGroup       = d.Get("peer_resource_group").(string)
 
 		req = organizationvpc.OrganizationVpcPeeringConnectionCreateIn{
-			PeerAzureAppId:    util.ToPtr(appID),
-			PeerAzureTenantId: util.ToPtr(tenantID),
+			PeerAzureAppId:    new(appID),
+			PeerAzureTenantId: new(tenantID),
 			PeerCloudAccount:  azureSubscriptionID,
-			PeerResourceGroup: util.ToPtr(resourceGroup),
+			PeerResourceGroup: new(resourceGroup),
 			PeerVpc:           vnetName,
 		}
 	)

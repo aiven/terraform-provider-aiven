@@ -52,7 +52,7 @@ func TestIsDefaultIPFilterList(t *testing.T) {
 
 	// Copies cases for ip_filter_object
 	j := len(cases)
-	for i := 0; i < j; i++ {
+	for i := range j {
 		cases = append(cases, testCase{
 			name:     "ip_filter_object " + cases[i].name,
 			expected: cases[i].expected,
@@ -94,113 +94,113 @@ func TestSuppressIPFilterSet(t *testing.T) {
 	tests := []struct {
 		name           string
 		key            string
-		oldValue       interface{}
-		newValue       interface{}
+		oldValue       any
+		newValue       any
 		shouldSuppress bool
 	}{
 		{
 			name:           "identical default IPv4 values",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"0.0.0.0/0"},
-			newValue:       []interface{}{"0.0.0.0/0"},
+			oldValue:       []any{"0.0.0.0/0"},
+			newValue:       []any{"0.0.0.0/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "identical default IPv4 and IPv6",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"0.0.0.0/0", "::/0"},
-			newValue:       []interface{}{"0.0.0.0/0", "::/0"},
+			oldValue:       []any{"0.0.0.0/0", "::/0"},
+			newValue:       []any{"0.0.0.0/0", "::/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "default values in different order",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"::/0", "0.0.0.0/0"},
-			newValue:       []interface{}{"0.0.0.0/0", "::/0"},
+			oldValue:       []any{"::/0", "0.0.0.0/0"},
+			newValue:       []any{"0.0.0.0/0", "::/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "custom IP filter change",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"192.168.1.0/24"},
-			newValue:       []interface{}{"10.0.0.0/24"},
+			oldValue:       []any{"192.168.1.0/24"},
+			newValue:       []any{"10.0.0.0/24"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "change from default to custom",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"0.0.0.0/0"},
-			newValue:       []interface{}{"192.168.1.0/24"},
+			oldValue:       []any{"0.0.0.0/0"},
+			newValue:       []any{"192.168.1.0/24"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "default IPv4",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"0.0.0.0/0"},
-			newValue:       []interface{}{"0.0.0.0/0"},
+			oldValue:       []any{"0.0.0.0/0"},
+			newValue:       []any{"0.0.0.0/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "default IPv4 and IPv6",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"0.0.0.0/0", "::/0"},
-			newValue:       []interface{}{"0.0.0.0/0", "::/0"},
+			oldValue:       []any{"0.0.0.0/0", "::/0"},
+			newValue:       []any{"0.0.0.0/0", "::/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "default values in different order",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"::/0", "0.0.0.0/0"},
-			newValue:       []interface{}{"0.0.0.0/0", "::/0"},
+			oldValue:       []any{"::/0", "0.0.0.0/0"},
+			newValue:       []any{"0.0.0.0/0", "::/0"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "private network change",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"192.168.1.0/24"},
-			newValue:       []interface{}{"192.168.2.0/24"},
+			oldValue:       []any{"192.168.1.0/24"},
+			newValue:       []any{"192.168.2.0/24"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "private to public network",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"10.0.0.0/8"},
-			newValue:       []interface{}{"203.0.113.0/24"},
+			oldValue:       []any{"10.0.0.0/8"},
+			newValue:       []any{"203.0.113.0/24"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "multiple networks",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"192.168.1.0/24", "10.0.0.0/8", "172.16.0.0/12"},
-			newValue:       []interface{}{"192.168.1.0/24", "10.0.0.0/8", "172.16.0.0/12"},
+			oldValue:       []any{"192.168.1.0/24", "10.0.0.0/8", "172.16.0.0/12"},
+			newValue:       []any{"192.168.1.0/24", "10.0.0.0/8", "172.16.0.0/12"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "IPv6 networks",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"2001:db8::/32", "2001:db8:1234::/48"},
-			newValue:       []interface{}{"2001:db8::/32", "2001:db8:5678::/48"},
+			oldValue:       []any{"2001:db8::/32", "2001:db8:1234::/48"},
+			newValue:       []any{"2001:db8::/32", "2001:db8:5678::/48"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "mixed IPv4 and IPv6",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"192.168.1.0/24", "2001:db8::/32"},
-			newValue:       []interface{}{"192.168.1.0/24", "2001:db8::/32"},
+			oldValue:       []any{"192.168.1.0/24", "2001:db8::/32"},
+			newValue:       []any{"192.168.1.0/24", "2001:db8::/32"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "mixed default changes to mix with custom",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"::/0", "0.0.0.0/0"},
-			newValue:       []interface{}{"::/0", "0.0.0.0/0", "192.168.1.0/24"},
+			oldValue:       []any{"::/0", "0.0.0.0/0"},
+			newValue:       []any{"::/0", "0.0.0.0/0", "192.168.1.0/24"},
 			shouldSuppress: false,
 		},
 		{
 			name:           "mixed custom changes to default",
 			key:            "foo_user_config.0.ip_filter",
-			oldValue:       []interface{}{"::/0", "0.0.0.0/0", "192.168.1.0/24"},
-			newValue:       []interface{}{"::/0", "0.0.0.0/0"},
+			oldValue:       []any{"::/0", "0.0.0.0/0", "192.168.1.0/24"},
+			newValue:       []any{"::/0", "0.0.0.0/0"},
 			shouldSuppress: false,
 		},
 	}
@@ -210,18 +210,18 @@ func TestSuppressIPFilterSet(t *testing.T) {
 			t.Parallel()
 
 			// Create a new resource data with old value
-			d := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
-				"foo_user_config": []interface{}{
-					map[string]interface{}{
+			d := schema.TestResourceDataRaw(t, resourceSchema, map[string]any{
+				"foo_user_config": []any{
+					map[string]any{
 						"ip_filter": tc.oldValue,
 					},
 				},
 			})
 
 			// Set the new value
-			newConfig := map[string]interface{}{
-				"foo_user_config": []interface{}{
-					map[string]interface{}{
+			newConfig := map[string]any{
+				"foo_user_config": []any{
+					map[string]any{
 						"ip_filter": tc.newValue,
 					},
 				},

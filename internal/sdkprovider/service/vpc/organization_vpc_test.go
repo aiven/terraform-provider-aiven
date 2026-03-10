@@ -26,7 +26,7 @@ func TestAccAivenOrganizationVPC(t *testing.T) {
 		orgName = acc.OrganizationName()
 
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
-				AddDataSource("aiven_organization", map[string]interface{}{
+				AddDataSource("aiven_organization", map[string]any{
 				"resource_name": "foo",
 				"name":          orgName,
 			}).Factory()
@@ -53,7 +53,7 @@ resource "aiven_organization_vpc" "test_validation" {
 			{
 				// basic VPC creation
 				Config: templBuilder().
-					AddResource(organizationVPCResource, map[string]interface{}{
+					AddResource(organizationVPCResource, map[string]any{
 						"resource_name":   "test_org_vpc",
 						"organization_id": template.Reference("data.aiven_organization.foo.id"),
 						"cloud_name":      "aws-eu-west-1",
@@ -70,7 +70,7 @@ resource "aiven_organization_vpc" "test_validation" {
 			{
 				// test ForceNew on network_cidr change
 				Config: templBuilder().
-					AddResource(organizationVPCResource, map[string]interface{}{
+					AddResource(organizationVPCResource, map[string]any{
 						"resource_name":   "test_org_vpc",
 						"organization_id": template.Reference("data.aiven_organization.foo.id"),
 						"cloud_name":      "aws-eu-west-1",
@@ -98,13 +98,13 @@ resource "aiven_organization_vpc" "test_validation" {
 			{
 				// test the data source
 				Config: templBuilder().
-					AddResource(organizationVPCResource, map[string]interface{}{
+					AddResource(organizationVPCResource, map[string]any{
 						"resource_name":   "test_org_vpc",
 						"organization_id": template.Reference("data.aiven_organization.foo.id"),
 						"cloud_name":      "aws-eu-west-1",
 						"network_cidr":    "10.0.0.0/24",
 					}).
-					AddDataSource(organizationVPCResource, map[string]interface{}{
+					AddDataSource(organizationVPCResource, map[string]any{
 						"resource_name":       "vpc_ds",
 						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
 						"organization_vpc_id": template.Reference(fmt.Sprintf("%s.organization_vpc_id", resourceName)),

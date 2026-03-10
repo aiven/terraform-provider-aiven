@@ -18,7 +18,7 @@ func DatasourceKafkaTopic() *schema.Resource {
 	}
 }
 
-func datasourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)

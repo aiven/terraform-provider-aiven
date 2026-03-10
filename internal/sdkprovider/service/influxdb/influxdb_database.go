@@ -45,7 +45,7 @@ func ResourceInfluxDBDatabase() *schema.Resource {
 	}
 }
 
-func resourceInfluxDBDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInfluxDBDatabaseCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -70,11 +70,11 @@ func resourceInfluxDBDatabaseCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceInfluxDBDatabaseRead(ctx, d, m)
 }
 
-func resourceInfluxDBDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInfluxDBDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return resourceInfluxDBDatabaseRead(ctx, d, m)
 }
 
-func resourceInfluxDBDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInfluxDBDatabaseRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
@@ -100,7 +100,7 @@ func resourceInfluxDBDatabaseRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceInfluxDBDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInfluxDBDatabaseDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())

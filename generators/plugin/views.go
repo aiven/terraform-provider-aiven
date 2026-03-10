@@ -5,6 +5,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/hashicorp/go-multierror"
@@ -374,17 +375,17 @@ func filterAppearsIn(items []*Item, appearsIn AppearsIn) []*Item {
 
 // humanizeCodeList turns ["foo", "bar", "baz"] -> "`foo`, `bar` and `baz`"
 func humanizeCodeList(args []string) string {
-	list := ""
+	var list strings.Builder
 	last := len(args) - 1
 	for i, v := range args {
 		switch i {
 		case 0:
 		case last:
-			list += " and "
+			list.WriteString(" and ")
 		default:
-			list += ", "
+			list.WriteString(", ")
 		}
-		list += fmt.Sprintf("`%s`", v)
+		list.WriteString(fmt.Sprintf("`%s`", v))
 	}
-	return list
+	return list.String()
 }

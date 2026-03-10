@@ -7,7 +7,6 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/go-cty/cty"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/aiven/terraform-provider-aiven/mocks"
@@ -210,7 +209,7 @@ func TestUpsertPassword(t *testing.T) {
 			client.EXPECT().ServiceUserCredentialsModify(
 				context.Background(), "test-project", "test-service", "test-user",
 				&service.ServiceUserCredentialsModifyIn{
-					NewPassword: lo.ToPtr("Custom123!"),
+					NewPassword: new("Custom123!"),
 					Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 				},
 			).Return(&service.ServiceUserCredentialsModifyOut{}, nil)
@@ -237,7 +236,7 @@ func TestUpsertPassword(t *testing.T) {
 			client.EXPECT().ServiceUserCredentialsModify(
 				context.Background(), "test-project", "test-service", "test-user",
 				&service.ServiceUserCredentialsModifyIn{
-					NewPassword: lo.ToPtr("WriteOnly456!"),
+					NewPassword: new("WriteOnly456!"),
 					Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 				},
 			).Return(&service.ServiceUserCredentialsModifyOut{}, nil)
@@ -290,7 +289,7 @@ func TestUpsertPassword(t *testing.T) {
 			client.EXPECT().ServiceUserCredentialsModify(
 				context.Background(), "test-project", "test-service", "test-user",
 				&service.ServiceUserCredentialsModifyIn{
-					NewPassword: lo.ToPtr("Updated123!"),
+					NewPassword: new("Updated123!"),
 					Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 				},
 			).Return(&service.ServiceUserCredentialsModifyOut{}, nil)
@@ -319,7 +318,7 @@ func TestUpsertPassword(t *testing.T) {
 			client.EXPECT().ServiceUserCredentialsModify(
 				context.Background(), "test-project", "test-service", "test-user",
 				&service.ServiceUserCredentialsModifyIn{
-					NewPassword: lo.ToPtr("Rotated789!"),
+					NewPassword: new("Rotated789!"),
 					Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 				},
 			).Return(&service.ServiceUserCredentialsModifyOut{}, nil)

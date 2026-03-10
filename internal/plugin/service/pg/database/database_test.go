@@ -12,7 +12,6 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -247,7 +246,7 @@ func servicePowerOn(t *testing.T, projectName, serviceName string, on bool) erro
 	}
 
 	ctx := t.Context()
-	req := &service.ServiceUpdateIn{Powered: lo.ToPtr(on)}
+	req := &service.ServiceUpdateIn{Powered: new(on)}
 	_, err = client.ServiceUpdate(ctx, projectName, serviceName, req)
 	if err != nil || !on {
 		// Powering off happens immediately, so we don't need to wait.

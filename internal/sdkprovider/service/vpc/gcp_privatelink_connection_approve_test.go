@@ -40,7 +40,7 @@ func useInstantStateChangeTimings(t *testing.T) {
 func newApprovalResourceData(t *testing.T, userIPAddress string) *schema.ResourceData {
 	t.Helper()
 
-	return schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+	return schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 		"project":         testProject,
 		"service_name":    testService,
 		"user_ip_address": userIPAddress,
@@ -50,7 +50,7 @@ func newApprovalResourceData(t *testing.T, userIPAddress string) *schema.Resourc
 func newApprovalResourceDataWithPSCConnectionID(t *testing.T, userIPAddress, pscConnectionID string) *schema.ResourceData {
 	t.Helper()
 
-	return schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+	return schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 		"project":           testProject,
 		"service_name":      testService,
 		"user_ip_address":   userIPAddress,
@@ -606,7 +606,7 @@ func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
 			},
 		})
 
-		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 			"psc_connection_id": "psc2",
 		})
 		d.SetId(testProject + "/" + testService)
@@ -624,7 +624,7 @@ func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
 			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc2", State: "active"},
 		})
 
-		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 			"psc_connection_id": "pscX",
 		})
 		d.SetId(testProject + "/" + testService)
@@ -640,7 +640,7 @@ func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
 			{PrivatelinkConnectionID: "plc2", PSCConnectionID: "psc1", State: "active"},
 		})
 
-		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 			"psc_connection_id": "psc1",
 		})
 		d.SetId(testProject + "/" + testService)
@@ -667,7 +667,7 @@ func TestGCPPrivatelinkConnectionApprovalRead(t *testing.T) {
 	t.Run("Clears ID on 404", func(t *testing.T) {
 		fake := newFakeGCPPrivatelink(nil)
 
-		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]interface{}{
+		d := schema.TestResourceDataRaw(t, aivenGCPPrivatelinkConnectionApprovalSchema, map[string]any{
 			"privatelink_connection_id": "plc1",
 		})
 		d.SetId(testProject + "/" + testService)

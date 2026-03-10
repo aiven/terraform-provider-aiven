@@ -124,11 +124,11 @@ func applyGCPPSCApprovalID(d *schema.ResourceData, approvalID gcpPSCApprovalID) 
 	return nil
 }
 
-func resourceGCPPrivatelinkConnectionApprovalUpdateAdapter(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkConnectionApprovalUpdateAdapter(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return resourceGCPPrivatelinkConnectionApprovalUpdate(ctx, d, m.(*aiven.Client).GCPPrivatelink)
 }
 
-func resourceGCPPrivatelinkConnectionApprovalReadAdapter(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkConnectionApprovalReadAdapter(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return resourceGCPPrivatelinkConnectionApprovalRead(ctx, d, m.(*aiven.Client).GCPPrivatelink)
 }
 
@@ -156,7 +156,7 @@ func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 func resourceGCPPrivatelinkConnectionApprovalImport(
 	_ context.Context,
 	d *schema.ResourceData,
-	_ interface{},
+	_ any,
 ) ([]*schema.ResourceData, error) {
 	approvalID, err := parseGCPPSCApprovalID(d.Id())
 	if err != nil {
@@ -181,7 +181,7 @@ func waitForGCPConnectionState(
 	return &retry.StateChangeConf{
 		Pending: pending,
 		Target:  target,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			err := client.Refresh(ctx, project, service)
 			if err != nil {
 				return nil, "", err
@@ -436,7 +436,7 @@ func resourceGCPPrivatelinkConnectionApprovalRead(
 func resourceGCPPrivatelinkConnectionApprovalDelete(
 	_ context.Context,
 	_ *schema.ResourceData,
-	_ interface{},
+	_ any,
 ) diag.Diagnostics {
 	// API only supports approve/list/update.
 	// Approved connection is deleted with the associated aiven_gcp_privatelink resource.

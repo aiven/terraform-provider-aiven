@@ -72,7 +72,7 @@ func ResourceConnectionPool() *schema.Resource {
 	}
 }
 
-func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -99,7 +99,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
@@ -120,7 +120,7 @@ func resourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
@@ -147,7 +147,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())

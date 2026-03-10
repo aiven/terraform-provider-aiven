@@ -20,7 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -251,7 +250,7 @@ func WithServiceType(serviceType string) CreateTestServiceOpt {
 
 func WithCloud(cloud string) CreateTestServiceOpt {
 	return func(req *service.ServiceCreateIn) {
-		req.Cloud = lo.ToPtr(cloud)
+		req.Cloud = new(cloud)
 	}
 }
 

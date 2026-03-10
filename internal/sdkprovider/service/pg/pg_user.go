@@ -10,7 +10,6 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -132,7 +131,7 @@ func ResourcePGUserUpdate(ctx context.Context, d schemautil.ResourceData, client
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
-				PgAllowReplication: lo.ToPtr(d.Get("pg_allow_replication").(bool)),
+				PgAllowReplication: new(d.Get("pg_allow_replication").(bool)),
 			},
 		}
 		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, req)

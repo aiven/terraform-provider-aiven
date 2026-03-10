@@ -167,7 +167,7 @@ func ResourceFlinkApplicationVersion() *schema.Resource {
 }
 
 // resourceFlinkApplicationVersionCreate is the create function for the Flink Application Version resource.
-func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -231,10 +231,10 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 }
 
 // expandFlinkApplicationVersionSourcesOrSinks expands the sources or sinks from the Terraform schema to the Aiven API.
-func expandFlinkApplicationVersionSourcesOrSinks(sources []interface{}) []aiven.FlinkApplicationVersionRelation {
+func expandFlinkApplicationVersionSourcesOrSinks(sources []any) []aiven.FlinkApplicationVersionRelation {
 	result := make([]aiven.FlinkApplicationVersionRelation, len(sources))
 	for i, source := range sources {
-		sourceMap := source.(map[string]interface{})
+		sourceMap := source.(map[string]any)
 		result[i] = aiven.FlinkApplicationVersionRelation{
 			CreateTable:   sourceMap["create_table"].(string),
 			IntegrationID: sourceMap["integration_id"].(string),
@@ -245,7 +245,7 @@ func expandFlinkApplicationVersionSourcesOrSinks(sources []interface{}) []aiven.
 }
 
 // resourceFlinkApplicationVersionDelete is the delete function for the Flink Application Version resource.
-func resourceFlinkApplicationVersionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationVersionDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
@@ -262,7 +262,7 @@ func resourceFlinkApplicationVersionDelete(ctx context.Context, d *schema.Resour
 }
 
 // resourceFlinkApplicationVersionRead is the read function for the Flink Application Version resource.
-func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
@@ -324,10 +324,10 @@ func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.Resource
 }
 
 // flattenFlinkApplicationVersionSourcesOrSinks is a helper function to flatten the sources and sinks fields.
-func flattenFlinkApplicationVersionSourcesOrSinks(sources []aiven.FlinkApplicationVersionRelation) []map[string]interface{} {
-	result := make([]map[string]interface{}, len(sources))
+func flattenFlinkApplicationVersionSourcesOrSinks(sources []aiven.FlinkApplicationVersionRelation) []map[string]any {
+	result := make([]map[string]any, len(sources))
 	for i, source := range sources {
-		result[i] = map[string]interface{}{
+		result[i] = map[string]any{
 			"create_table":   source.CreateTable,
 			"integration_id": source.IntegrationID,
 		}

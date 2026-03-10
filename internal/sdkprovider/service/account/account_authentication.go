@@ -237,13 +237,13 @@ func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func flattenSAMLFieldMapping(s *accountauthentication.SamlFieldMappingOut) []map[string]interface{} {
+func flattenSAMLFieldMapping(s *accountauthentication.SamlFieldMappingOut) []map[string]any {
 	if s == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]any, 0)
 	}
 
-	v := make([]map[string]interface{}, 0)
-	return append(v, map[string]interface{}{
+	v := make([]map[string]any, 0)
+	return append(v, map[string]any{
 		"email":      s.Email,
 		"first_name": s.FirstName,
 		"identity":   s.Identity,
@@ -271,12 +271,12 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 	}
 
 	// Handle booleans separately to distinguish between not set and false
-	if enabled, ok := d.GetOk("enabled"); ok {
-		req.AuthenticationMethodEnabled = util.ToPtr(enabled.(bool))
+	if enabled, ok := d.GetOk("enabled"); ok { //nolint:staticcheck // SA4006 false positive: enabled is used via type assertion
+		req.AuthenticationMethodEnabled = new(enabled.(bool))
 	}
 
-	if allowed, ok := d.GetOk("saml_idp_login_allowed"); ok {
-		req.SamlIdpLoginAllowed = util.ToPtr(allowed.(bool))
+	if allowed, ok := d.GetOk("saml_idp_login_allowed"); ok { //nolint:staticcheck // SA4006 false positive: allowed is used via type assertion
+		req.SamlIdpLoginAllowed = new(allowed.(bool))
 	}
 
 	_, err = client.AccountAuthenticationMethodUpdate(ctx, accountID, authID, &req)
@@ -311,7 +311,7 @@ func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *accountauthenticati
 
 	r := accountauthentication.SamlFieldMappingIn{}
 	for _, v := range set {
-		cv := v.(map[string]interface{})
+		cv := v.(map[string]any)
 
 		r.Email = util.NilIfZero(cv["email"].(string))
 		r.FirstName = util.NilIfZero(cv["first_name"].(string))

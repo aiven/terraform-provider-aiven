@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -229,15 +230,11 @@ func mergeItemMaps(sdkMap, pluginMap ItemMap) ItemMap {
 	merged[DataSourceRootKind] = make(map[string]*Item)
 
 	for kind, items := range sdkMap {
-		for path, item := range items {
-			merged[kind][path] = item
-		}
+		maps.Copy(merged[kind], items)
 	}
 
 	for kind, items := range pluginMap {
-		for path, item := range items {
-			merged[kind][path] = item
-		}
+		maps.Copy(merged[kind], items)
 	}
 
 	return merged

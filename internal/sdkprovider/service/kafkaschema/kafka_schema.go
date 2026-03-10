@@ -80,7 +80,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 
 // diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
 func diffSuppressJSONObject(_, oldValue, newValue string, _ *schema.ResourceData) bool {
-	var objOld, objNew interface{}
+	var objOld, objNew any
 
 	if err := json.Unmarshal([]byte(oldValue), &objOld); err != nil {
 		return false

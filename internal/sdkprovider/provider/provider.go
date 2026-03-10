@@ -341,7 +341,7 @@ func Provider(version string) (*schema.Provider, error) {
 		return nil, fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", "))
 	}
 
-	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 		token := d.Get("api_token").(string)
 		if token == "" {
 			token = os.Getenv("AIVEN_TOKEN")

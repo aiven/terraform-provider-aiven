@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -87,7 +86,7 @@ func resourceAWSOrgVPCPeeringConnectionCreate(ctx context.Context, d *schema.Res
 		awsRegion    = d.Get("aws_vpc_region").(string)
 
 		req = organizationvpc.OrganizationVpcPeeringConnectionCreateIn{
-			PeerRegion:       util.ToPtr(awsRegion),
+			PeerRegion:       new(awsRegion),
 			PeerVpc:          awsVPCId,
 			PeerCloudAccount: awsAccountID,
 		}

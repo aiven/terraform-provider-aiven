@@ -83,7 +83,7 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if err != nil {
@@ -149,7 +149,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 			"DELETED",
 			"DELETED_BY_PEER",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				ctx,
 				projectName,
@@ -186,7 +186,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	return append(diags, resourceAzureVPCPeeringConnectionRead(ctx, d, m)...)
 }
 
-func resourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -210,7 +210,7 @@ func resourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -245,7 +245,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		Target: []string{
 			"DELETED",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
 				ctx,
 				p.projectName,

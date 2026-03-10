@@ -60,7 +60,7 @@ func ResourceStaticIP() *schema.Resource {
 	}
 }
 
-func resourceStaticIPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceStaticIPRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
@@ -90,7 +90,7 @@ func resourceStaticIPRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return nil
 }
 
-func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -110,7 +110,7 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceStaticIPRead(ctx, d, m)
 }
 
-func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
@@ -146,7 +146,7 @@ func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m any) error {
 	client := m.(*aiven.Client)
 
 	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
@@ -158,7 +158,7 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 		Target:  []string{schemautil.StaticIPCreated},
 		Pending: []string{"waiting", schemautil.StaticIPCreating},
 		Timeout: d.Timeout(schema.TimeoutCreate),
-		Refresh: func() (result interface{}, state string, err error) {
+		Refresh: func() (result any, state string, err error) {
 			log.Println("[DEBUG] checking if static ip", staticIPAddressID, "is in 'created' state")
 			r, err := client.StaticIPs.List(ctx, project)
 			if err != nil {

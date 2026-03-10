@@ -743,16 +743,16 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 		return nil
 	}
 
-	techEmails := make([]interface{}, len(s.TechEmails))
+	techEmails := make([]any, len(s.TechEmails))
 	for i, e := range s.TechEmails {
-		techEmails[i] = map[string]interface{}{"email": e.Email}
+		techEmails[i] = map[string]any{"email": e.Email}
 	}
 
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
 // flattenIntegrations converts the service integrations into a list of maps
-func flattenIntegrations(integrations []service.ServiceIntegrationOut, kinds ...service.IntegrationType) []map[string]interface{} {
+func flattenIntegrations(integrations []service.ServiceIntegrationOut, kinds ...service.IntegrationType) []map[string]any {
 	result := make([]map[string]any, 0)
 	if len(integrations) == 0 || len(kinds) == 0 {
 		return result
@@ -931,11 +931,11 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
 }
 
-func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]interface{} {
-	components := make([]map[string]interface{}, len(r.Components))
+func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]any {
+	components := make([]map[string]any, len(r.Components))
 
 	for i, c := range r.Components {
-		component := map[string]interface{}{
+		component := map[string]any{
 			"component":                   c.Component,
 			"host":                        c.Host,
 			"port":                        c.Port,
@@ -1102,7 +1102,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 // setServicePassword updates the service_password field based on password type used.
 // When write-only password field is active (service_password_wo_version > 0), it sets service_password
 // to empty string to suppress the plaintext password. Otherwise, it sets service_password to the provided value.
-func setServicePassword(d ResourceData, password interface{}) error {
+func setServicePassword(d ResourceData, password any) error {
 	serviceType := d.Get("service_type").(string)
 
 	if supportsWriteOnlyPassword(serviceType) {
