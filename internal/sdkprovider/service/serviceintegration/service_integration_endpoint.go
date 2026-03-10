@@ -101,7 +101,7 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	req := &service.ServiceIntegrationEndpointCreateIn{
 		EndpointName: d.Get("endpoint_name").(string),
 		EndpointType: service.EndpointType(endpointType),
-		UserConfig:   make(map[string]interface{}),
+		UserConfig:   make(map[string]any),
 	}
 
 	if hasEndpointConfig(endpointType) {
@@ -156,7 +156,7 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 
 	endpointType := d.Get("endpoint_type").(string)
 	req := &service.ServiceIntegrationEndpointUpdateIn{
-		UserConfig: make(map[string]interface{}),
+		UserConfig: make(map[string]any),
 	}
 
 	if hasEndpointConfig(endpointType) {

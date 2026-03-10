@@ -51,7 +51,7 @@ func ResourceAWSPrivatelink() *schema.Resource {
 	}
 }
 
-func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -92,7 +92,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceAWSPrivatelinkRead(ctx, d, m)
 }
 
-func resourceAWSPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -124,7 +124,7 @@ func resourceAWSPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -165,7 +165,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceAWSPrivatelinkRead(ctx, d, m)
 }
 
-func resourceAWSPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -191,7 +191,7 @@ type AWSPrivatelinkWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *AWSPrivatelinkWaiter) RefreshFunc() retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		pc, err := w.Client.AWSPrivatelink.Get(w.Context, w.Project, w.ServiceName)
 		if err != nil {
 			return nil, "", err

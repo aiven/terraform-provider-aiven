@@ -24,7 +24,7 @@ func NewSDKTemplateGenerator() *SDKTemplateGenerator {
 }
 
 // GenerateTemplate implements the TemplateGenerator interface
-func (g *SDKTemplateGenerator) GenerateTemplate(schemaObj interface{}, resourceType string, kind ResourceKind) (string, error) {
+func (g *SDKTemplateGenerator) GenerateTemplate(schemaObj any, resourceType string, kind ResourceKind) (string, error) {
 	// For SDK resources, we expect a *schema.Resource
 	resource, ok := schemaObj.(*schema.Resource)
 	if !ok {

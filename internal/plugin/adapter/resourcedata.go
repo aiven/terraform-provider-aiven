@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"reflect"
 	"slices"
 	"strconv"
@@ -252,9 +253,7 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 
 	// todo: remove stale data
 	state := d.currentState()
-	for k, v := range norm {
-		state[k] = v
-	}
+	maps.Copy(state, norm)
 
 	id := make([]string, len(d.idFields))
 	for i, name := range d.idFields {
@@ -297,8 +296,8 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 		return nil, nil, false, fmt.Errorf("schema is nil")
 	}
 
-	parts := strings.Split(path, ".")
-	for _, part := range parts {
+	parts := strings.SplitSeq(path, ".")
+	for part := range parts {
 		switch sch.Type {
 		case SchemaTypeSet:
 			return nil, nil, false, fmt.Errorf("invalid path %q: set is not supported", path)
@@ -427,7 +426,7 @@ func dereference(value any) (any, error) {
 		}
 
 		val := reflect.ValueOf(value)
-		if val.Kind() == reflect.Ptr && !val.IsNil() {
+		if val.Kind() == reflect.Pointer && !val.IsNil() {
 			value = val.Elem().Interface()
 		} else {
 			break

@@ -63,7 +63,7 @@ func waitForAzureConnectionState(
 	return &retry.StateChangeConf{
 		Pending: pending,
 		Target:  target,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			err := client.AzurePrivatelink.Refresh(ctx, project, service)
 			if err != nil {
 				return nil, "", err
@@ -90,7 +90,7 @@ func waitForAzureConnectionState(
 	}
 }
 
-func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -173,7 +173,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	return resourceAzurePrivatelinkConnectionApprovalRead(ctx, d, m)
 }
 
-func resourceAzurePrivatelinkConnectionApprovalRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, service, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -201,7 +201,7 @@ func resourceAzurePrivatelinkConnectionApprovalRead(ctx context.Context, d *sche
 	return nil
 }
 
-func resourceAzurePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ any) diag.Diagnostics {
 	// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
 	return nil
 }

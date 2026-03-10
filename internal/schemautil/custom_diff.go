@@ -62,7 +62,7 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 // warning the user about potential breaking changes in downstream interpolations.
 func CustomizeDiffWriteOnlyPasswordTransitionWarning(passwordField, versionField string) schema.CustomizeDiffFunc {
 	return customdiff.If(
-		func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+		func(ctx context.Context, d *schema.ResourceDiff, meta any) bool {
 			oldV, newV := d.GetChange(versionField)
 			var oldInt, newInt int
 			if oldV != nil {
@@ -73,17 +73,17 @@ func CustomizeDiffWriteOnlyPasswordTransitionWarning(passwordField, versionField
 			}
 			return oldInt == 0 && newInt > 0
 		},
-		func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		func(ctx context.Context, d *schema.ResourceDiff, meta any) error {
 			return d.SetNewComputed(passwordField)
 		},
 	)
 }
 
-func ShouldNotBeEmpty(_ context.Context, _, newValue, _ interface{}) bool {
+func ShouldNotBeEmpty(_ context.Context, _, newValue, _ any) bool {
 	switch t := newValue.(type) {
 	case string:
 		return t != ""
-	case []interface{}:
+	case []any:
 		return len(t) != 0
 	case *schema.Set:
 		return t.Len() != 0
@@ -92,17 +92,17 @@ func ShouldNotBeEmpty(_ context.Context, _, newValue, _ interface{}) bool {
 	}
 }
 
-func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").(*schema.Set).List()) != 0 {
 		return fmt.Errorf("service_integrations field can only be set during creation of a service")
 	}
 	return nil
 }
 
-func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	t := make(map[string]bool)
 	for _, tag := range d.Get("tag").(*schema.Set).List() {
-		tagVal := tag.(map[string]interface{})
+		tagVal := tag.(map[string]any)
 		k := tagVal["key"].(string)
 		if t[k] {
 			return fmt.Errorf("tag keys should be unique, duplicate with the key: %s", k)
@@ -113,7 +113,7 @@ func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ in
 	return nil
 }
 
-func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m any) error {
 	client, err := common.GenClient()
 	if err != nil {
 		return err
@@ -177,14 +177,14 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 }
 
 func SetServiceTypeIfEmpty(t string) schema.CustomizeDiffFunc {
-	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 		return diff.SetNew("service_type", t)
 	}
 }
 
 // CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether checks that 'plan' and 'static_ips'
 // are not changed in the same plan, since that leads to undefined behaviour
-func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	if d.Id() != "" && d.HasChange("plan") && d.HasChange("static_ips") {
 		return fmt.Errorf("unable to change 'plan' and 'static_ips' in the same diff, please use multiple steps")
 	}
@@ -193,16 +193,7 @@ func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Contex
 
 // CustomizeDiffCheckStaticIPDisassociation checks that we dont disassociate ips we should not
 // and are not assigning ips that are not 'created'
-func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	contains := func(l []string, e string) bool {
-		for i := range l {
-			if l[i] == e {
-				return true
-			}
-		}
-		return false
-	}
-
+func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.ResourceDiff, m any) error {
 	if d.Id() == "" {
 		return nil
 	}
@@ -226,7 +217,7 @@ func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.Res
 	// Check that we block deletions that will fail because the ip belongs to the service
 	for _, sip := range resp {
 		associatedWithDifferentService := sip.ServiceName != "" && sip.ServiceName != serviceName
-		if associatedWithDifferentService && contains(plannedStaticIps, sip.StaticIpAddressId) {
+		if associatedWithDifferentService && slices.Contains(plannedStaticIps, sip.StaticIpAddressId) {
 			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIpAddressId, sip.ServiceName)
 		}
 
@@ -237,7 +228,7 @@ func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.Res
 
 // CustomizeDiffDisallowMultipleManyToOneKeys checks that we don't have multiple keys that are going to be converted to
 // a single key in the API request, e.g. 'ip_filter' and 'ip_filter_object' in the same diff.
-func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	for k, v := range d.GetRawConfig().AsValueMap() {
 		if strings.Contains(k, "_user_config") { // we only care about *_user_config
 			if err := checkForMultipleValues(v); err != nil {
@@ -306,7 +297,7 @@ var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, addit
 // CustomizeDiffAdditionalDiskSpace
 // 1. checks that additional_disk_space is not set if autoscaler is enabled
 // 2. outputs a diff for a computed field, which otherwise would be suppressed when removed
-func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.ResourceDiff, _ any) error {
 	client, err := common.GenClient()
 	if err != nil {
 		return err

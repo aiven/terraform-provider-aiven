@@ -27,7 +27,7 @@ type Matrix struct {
 func GenerateMatrix(root string, slowTestsCSV string, filterServicesCSV string) (*Matrix, error) {
 	// slow tests lookup map
 	slowTestsLookup := make(map[string]struct{})
-	for _, testName := range strings.Split(slowTestsCSV, ",") {
+	for testName := range strings.SplitSeq(slowTestsCSV, ",") {
 		if trimmed := strings.TrimSpace(testName); trimmed != "" {
 			slowTestsLookup[trimmed] = struct{}{}
 		}

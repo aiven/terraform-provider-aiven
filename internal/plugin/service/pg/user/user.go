@@ -35,7 +35,7 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
-				PgAllowReplication: util.ToPtr(d.Get("pg_allow_replication").(bool)),
+				PgAllowReplication: new(d.Get("pg_allow_replication").(bool)),
 			},
 		}
 		_, err := client.ServiceUserCredentialsModify(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string), req)

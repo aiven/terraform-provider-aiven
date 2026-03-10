@@ -19,7 +19,7 @@ func TestFrameworkGenerateTemplate(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		schema       interface{}
+		schema       any
 		resourceType string
 		kind         ResourceKind
 		want         string

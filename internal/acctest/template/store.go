@@ -167,9 +167,9 @@ func (s *Store) registerSDKResource(resourceType string, r *sdkschema.Resource, 
 }
 
 // registerFrameworkComponent is a generic function to handle registration of any framework component
-func (s *Store) registerFrameworkComponent(resourceType string, schemaProvider interface{}, kind ResourceKind) {
+func (s *Store) registerFrameworkComponent(resourceType string, schemaProvider any, kind ResourceKind) {
 	ctx := context.Background()
-	var schema interface{}
+	var schema any
 
 	// Extract schema based on the type of provider
 	switch p := schemaProvider.(type) {

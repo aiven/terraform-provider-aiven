@@ -11,7 +11,7 @@ import (
 
 func Test_validateVPCID(t *testing.T) {
 	type args struct {
-		i interface{}
+		i any
 		k string
 	}
 	tests := []struct {

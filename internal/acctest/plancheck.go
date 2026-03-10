@@ -42,13 +42,13 @@ func (c *attributeChangeCheck) CheckPlan(_ context.Context, req plancheck.CheckP
 		return
 	}
 
-	before, ok := targetResource.Change.Before.(map[string]interface{})
+	before, ok := targetResource.Change.Before.(map[string]any)
 	if !ok {
 		resp.Error = fmt.Errorf("before state for resource %s is not a map", c.resourceAddr)
 		return
 	}
 
-	after, ok := targetResource.Change.After.(map[string]interface{})
+	after, ok := targetResource.Change.After.(map[string]any)
 	if !ok {
 		resp.Error = fmt.Errorf("after state for resource %s is not a map", c.resourceAddr)
 		return

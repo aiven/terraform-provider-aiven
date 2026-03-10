@@ -9,7 +9,7 @@ import (
 
 var _ schema.SchemaValidateDiagFunc = validateServiceAccountCredentials
 
-func validateServiceAccountCredentials(i interface{}, p cty.Path) diag.Diagnostics {
+func validateServiceAccountCredentials(i any, p cty.Path) diag.Diagnostics {
 	s, ok := i.(string)
 	if !ok {
 		return diag.Errorf("expected type of %q to be string", p)

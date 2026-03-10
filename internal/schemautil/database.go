@@ -25,7 +25,7 @@ type DatabaseDeleteWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *DatabaseDeleteWaiter) RefreshFunc() retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		err := w.Client.Databases.Delete(w.Context, w.ProjectName, w.ServiceName, w.Database)
 		if common.IsCritical(err) {
 			return nil, "REMOVING", nil

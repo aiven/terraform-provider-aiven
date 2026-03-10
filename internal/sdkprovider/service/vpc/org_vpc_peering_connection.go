@@ -105,7 +105,7 @@ func deletePeeringConnection(
 
 	stateChangeConf := &retry.StateChangeConf{
 		Target: []string{string(organizationvpc.VpcPeeringConnectionStateTypeDeleted)},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			resp, err := client.OrganizationVpcGet(ctx, orgID, orgVpcID)
 			if err != nil {
 				if avngen.IsNotFound(err) {

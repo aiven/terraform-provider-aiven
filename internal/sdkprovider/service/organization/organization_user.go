@@ -77,7 +77,7 @@ and aiven_organization_permission resources.
 }
 
 // resourceOrganizationUserCreate create is not supported anymore
-func resourceOrganizationUserCreate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceOrganizationUserCreate(_ context.Context, _ *schema.ResourceData, _ any) diag.Diagnostics {
 	return diag.Errorf("creation of organization user is not supported anymore via Terraform. " +
 		"Please use WebUI to create an organization user invitation. And upon receiving an invitation, " +
 		"a user can accept it using WebUI. Once accepted, the user will become a member of the organization " +

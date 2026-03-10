@@ -18,7 +18,7 @@ func DatasourceOpenSearchACLRule() *schema.Resource {
 	}
 }
 
-func datasourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)

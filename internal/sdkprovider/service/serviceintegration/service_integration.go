@@ -228,7 +228,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 
 	if userConfig == nil {
 		// Required by API
-		userConfig = make(map[string]interface{})
+		userConfig = make(map[string]any)
 	}
 
 	_, err = client.ServiceIntegrationUpdate(
@@ -302,7 +302,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{notActive},
 		Target:  []string{active},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			log.Println("[DEBUG] Service Integration: waiting until active")
 
 			ii, err := client.ServiceIntegrationGet(ctx, projectName, integrationID)

@@ -61,7 +61,7 @@ func ResourceKafkaSchemaRegistryACL() *schema.Resource {
 	}
 }
 
-func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -86,7 +86,7 @@ func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.Resourc
 	return resourceKafkaSchemaRegistryACLRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaRegistryACLRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRegistryACLRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -107,7 +107,7 @@ func resourceKafkaSchemaRegistryACLRead(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceKafkaSchemaRegistryACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRegistryACLDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())

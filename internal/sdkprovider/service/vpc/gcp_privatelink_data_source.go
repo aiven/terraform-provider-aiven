@@ -17,7 +17,7 @@ func DatasourceGCPPrivatelink() *schema.Resource {
 	}
 }
 
-func datasourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName))

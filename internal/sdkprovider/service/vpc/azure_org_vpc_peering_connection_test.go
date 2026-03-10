@@ -26,7 +26,7 @@ func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 	var (
 		orgName      = acc.OrganizationName()
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
-				AddDataSource("aiven_organization", map[string]interface{}{
+				AddDataSource("aiven_organization", map[string]any{
 				"resource_name": "foo",
 				"name":          orgName,
 			})

@@ -58,7 +58,7 @@ func OptionalBoolPointer(d ResourceData, key string) *bool {
 	return &boolValue
 }
 
-func ToOptionalString(val interface{}) string {
+func ToOptionalString(val any) string {
 	switch v := val.(type) {
 	case int:
 		return strconv.Itoa(v)
@@ -147,7 +147,7 @@ func IPFilterArrayDiffSuppressFunc(k, oldValue, newValue string, d *schema.Resou
 	// TODO: Add support for ip_filter_object.
 
 	if oldValue == "1" && newValue == "0" && strings.HasSuffix(k, ".ip_filter.#") {
-		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
+		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]any); ok {
 			if len(list) == 1 {
 				return list[0] == "0.0.0.0/0"
 			}
@@ -169,7 +169,7 @@ func TrimSpaceDiffSuppressFunc(_, oldValue, newValue string, _ *schema.ResourceD
 
 // ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
 // as units.Bytes format
-func ValidateHumanByteSizeString(v interface{}, k string) (ws []string, errors []error) {
+func ValidateHumanByteSizeString(v any, k string) (ws []string, errors []error) {
 	// only allow `^[1-9][0-9]*(GiB|G)*` without fractions
 	if ok, _ := regexp.MatchString("^[1-9][0-9]*(GiB|G)$", v.(string)); !ok {
 		return ws, append(errors, fmt.Errorf("%q: configured string must match ^[1-9][0-9]*(G|GiB)", k))

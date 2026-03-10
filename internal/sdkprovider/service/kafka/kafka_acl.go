@@ -66,7 +66,7 @@ Aiven ACLs provide simplified topic-level control with basic permissions and wil
 	}
 }
 
-func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -91,7 +91,7 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceKafkaACLRead(ctx, d, m)
 }
 
-func resourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -112,7 +112,7 @@ func resourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return nil
 }
 
-func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())

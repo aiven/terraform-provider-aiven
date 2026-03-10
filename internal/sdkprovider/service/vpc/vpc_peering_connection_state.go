@@ -51,7 +51,7 @@ func getDiagnosticsFromState(pc peeringConnectionState) diag.Diagnostics {
 }
 
 // stateInfoToString converts VPC peering connection state_info to a string
-func stateInfoToString(s *map[string]interface{}) string {
+func stateInfoToString(s *map[string]any) string {
 	if s == nil || len(*s) == 0 {
 		return ""
 	}

@@ -156,7 +156,7 @@ There are some limitations and considerations to be aware of when using this res
 	}
 }
 
-func resourceClickhouseGrantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseGrantCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	serviceName := d.Get("service_name").(string)
@@ -203,7 +203,7 @@ func setUserOrRole(d *schema.ResourceData, granteeType, userOrRole string) error
 	return nil
 }
 
-func resourceClickhouseGrantRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseGrantRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, granteeType, userOrRole, err := schemautil.SplitResourceID4(d.Id())
@@ -241,7 +241,7 @@ func resourceClickhouseGrantRead(ctx context.Context, d *schema.ResourceData, m 
 	return nil
 }
 
-func resourceClickhouseGrantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseGrantDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -266,7 +266,7 @@ func readPrivilegeGrantsFromSchema(d *schema.ResourceData) (grants []PrivilegeGr
 	grants = make([]PrivilegeGrant, 0)
 
 	for _, grant := range d.Get("privilege_grant").(*schema.Set).List() {
-		grantVal := grant.(map[string]interface{})
+		grantVal := grant.(map[string]any)
 
 		grants = append(grants, PrivilegeGrant{
 			Grantee: Grantee{
@@ -284,15 +284,15 @@ func readPrivilegeGrantsFromSchema(d *schema.ResourceData) (grants []PrivilegeGr
 }
 
 func setPrivilegeGrantsInSchema(d *schema.ResourceData, grants []PrivilegeGrant) error {
-	res := make([]map[string]interface{}, 0)
+	res := make([]map[string]any, 0)
 	for _, grant := range grants {
 		res = append(res, privilegeGrantToSchema(grant))
 	}
 	return d.Set("privilege_grant", res)
 }
 
-func privilegeGrantToSchema(grant PrivilegeGrant) map[string]interface{} {
-	return map[string]interface{}{
+func privilegeGrantToSchema(grant PrivilegeGrant) map[string]any {
+	return map[string]any{
 		"database":   grant.Database,
 		"table":      grant.Table,
 		"column":     grant.Column,
@@ -305,7 +305,7 @@ func readRoleGrantsFromSchema(d *schema.ResourceData) (grants []RoleGrant) {
 	grants = make([]RoleGrant, 0)
 
 	for _, grant := range d.Get("role_grant").(*schema.Set).List() {
-		grantVal := grant.(map[string]interface{})
+		grantVal := grant.(map[string]any)
 
 		grants = append(grants, RoleGrant{
 			Grantee: Grantee{
@@ -319,15 +319,15 @@ func readRoleGrantsFromSchema(d *schema.ResourceData) (grants []RoleGrant) {
 }
 
 func setRoleGrantsInSchema(d *schema.ResourceData, grants []RoleGrant) error {
-	res := make([]map[string]interface{}, 0)
+	res := make([]map[string]any, 0)
 	for _, grant := range grants {
 		res = append(res, roleGrantToSchema(grant))
 	}
 	return d.Set("role_grant", res)
 }
 
-func roleGrantToSchema(grant RoleGrant) map[string]interface{} {
-	return map[string]interface{}{
+func roleGrantToSchema(grant RoleGrant) map[string]any {
+	return map[string]any{
 		"role": grant.Role,
 	}
 }

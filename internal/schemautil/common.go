@@ -43,11 +43,11 @@ var (
 	}
 )
 
-func SetTagsTerraformProperties(t map[string]string) []map[string]interface{} {
-	tags := make([]map[string]interface{}, len(t))
+func SetTagsTerraformProperties(t map[string]string) []map[string]any {
+	tags := make([]map[string]any, len(t))
 	var i int
 	for k, v := range t {
-		tags[i] = map[string]interface{}{
+		tags[i] = map[string]any{
 			"key":   k,
 			"value": v,
 		}
@@ -61,7 +61,7 @@ func GetTagsFromSchema(d ResourceData) map[string]string {
 	tags := make(map[string]string)
 
 	for _, tag := range d.Get("tag").(*schema.Set).List() {
-		tagVal := tag.(map[string]interface{})
+		tagVal := tag.(map[string]any)
 		tags[tagVal["key"].(string)] = tagVal["value"].(string)
 	}
 

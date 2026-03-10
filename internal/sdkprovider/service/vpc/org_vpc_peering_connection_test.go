@@ -13,7 +13,6 @@ import (
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -211,10 +210,10 @@ func setTimeouts(t *testing.T, rd *schema.ResourceData, delay, interval, timeout
 	})
 
 	timeouts := &schema.ResourceTimeout{
-		Create: lo.ToPtr(timeout),
-		Read:   lo.ToPtr(timeout),
-		Update: lo.ToPtr(timeout),
-		Delete: lo.ToPtr(timeout),
+		Create: new(timeout),
+		Read:   new(timeout),
+		Update: new(timeout),
+		Delete: new(timeout),
 	}
 
 	val := reflect.ValueOf(rd).Elem()

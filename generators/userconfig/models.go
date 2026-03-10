@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"maps"
 	"regexp"
 	"slices"
 	"sort"
@@ -125,7 +126,7 @@ func (o *object) init(name string) {
 	// Types can be list of strings, or a string
 	if v, ok := o.OrigType.(string); ok {
 		o.Type = objectType(v)
-	} else if v, ok := o.OrigType.([]interface{}); ok {
+	} else if v, ok := o.OrigType.([]any); ok {
 		types := 0
 		for _, t := range v {
 			switch s := t.(string); s {
@@ -277,7 +278,7 @@ func unwrapArrayMultipleTypes(o *object) {
 		fields := make(map[string]*object)
 
 		// Unwraps multiple _type names_, e.g. [string, object]
-		types, ok := p.ArrayItems.OrigType.([]interface{})
+		types, ok := p.ArrayItems.OrigType.([]any)
 		if ok {
 			strTypes := make([]string, 0)
 			for _, t := range types {
@@ -337,9 +338,7 @@ func unwrapArrayMultipleTypes(o *object) {
 			fields[key] = orig
 		}
 
-		for k, c := range fields {
-			o.Properties[k] = c
-		}
+		maps.Copy(o.Properties, fields)
 	}
 }
 

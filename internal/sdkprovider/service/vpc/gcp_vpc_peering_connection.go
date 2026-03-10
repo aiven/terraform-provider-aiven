@@ -68,7 +68,7 @@ func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var (
 		pc  *aiven.VPCPeeringConnection
 		err error
@@ -122,7 +122,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			"DELETED",
 			"DELETED_BY_PEER",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				ctx,
 				projectName,
@@ -159,7 +159,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	return append(diags, resourceGCPVPCPeeringConnectionRead(ctx, d, m)...)
 }
 
-func resourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -183,7 +183,7 @@ func resourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.Resource
 	return copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
@@ -215,7 +215,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		Target: []string{
 			"DELETED",
 		},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				ctx,
 				p.projectName,

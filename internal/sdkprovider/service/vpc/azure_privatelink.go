@@ -64,7 +64,7 @@ func ResourceAzurePrivatelink() *schema.Resource {
 	}
 }
 
-func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -103,7 +103,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceAzurePrivatelinkRead(ctx, d, m)
 }
 
-func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -140,7 +140,7 @@ func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -190,7 +190,7 @@ func waitForAzurePrivatelinkToBeActive(
 	return &retry.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				return nil, "", err
@@ -206,7 +206,7 @@ func waitForAzurePrivatelinkToBeActive(
 	}
 }
 
-func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -221,7 +221,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {

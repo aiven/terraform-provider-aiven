@@ -7,7 +7,6 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/go-cty/cty"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/aiven/terraform-provider-aiven/mocks"
@@ -114,7 +113,7 @@ func TestUpsertServicePassword(t *testing.T) {
 					client.EXPECT().ServiceUserCredentialsModify(
 						context.Background(), "test-project", "test-service", svc.defaultUsername,
 						&service.ServiceUserCredentialsModifyIn{
-							NewPassword: lo.ToPtr("CustomPassword123!"),
+							NewPassword: new("CustomPassword123!"),
 							Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 						},
 					).Return(&service.ServiceUserCredentialsModifyOut{}, nil)
@@ -143,7 +142,7 @@ func TestUpsertServicePassword(t *testing.T) {
 					client.EXPECT().ServiceUserCredentialsModify(
 						context.Background(), "test-project", "test-service", svc.defaultUsername,
 						&service.ServiceUserCredentialsModifyIn{
-							NewPassword: lo.ToPtr("CustomPassword123!"),
+							NewPassword: new("CustomPassword123!"),
 							Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
 						},
 					).Return(&service.ServiceUserCredentialsModifyOut{}, nil)
@@ -230,7 +229,7 @@ func TestFlattenServiceComponents(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *service.ServiceGetOut
-		expected []map[string]interface{}
+		expected []map[string]any
 	}{
 		{
 			name: "component with privatelink_connection_id",
@@ -247,7 +246,7 @@ func TestFlattenServiceComponents(t *testing.T) {
 					},
 				},
 			},
-			expected: []map[string]interface{}{
+			expected: []map[string]any{
 				{
 					"component":                   "pg",
 					"host":                        "privatelink-1-pg1-test.aivencloud.com",
@@ -276,7 +275,7 @@ func TestFlattenServiceComponents(t *testing.T) {
 					},
 				},
 			},
-			expected: []map[string]interface{}{
+			expected: []map[string]any{
 				{
 					"component":                   "pg",
 					"host":                        "pg1-test.aivencloud.com",
@@ -314,7 +313,7 @@ func TestFlattenServiceComponents(t *testing.T) {
 					},
 				},
 			},
-			expected: []map[string]interface{}{
+			expected: []map[string]any{
 				{
 					"component":                   "pg",
 					"host":                        "pg1-test.aivencloud.com",

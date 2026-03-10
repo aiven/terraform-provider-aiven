@@ -19,8 +19,8 @@ import (
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
 type ResourceStateOrResourceDiff interface {
 	GetRawConfig() cty.Value
-	GetOk(key string) (interface{}, bool)
-	Get(key string) interface{}
+	GetOk(key string) (any, bool)
+	Get(key string) any
 }
 
 func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
@@ -46,7 +46,7 @@ func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceI
 	tfServiceIntegrations := d.Get("service_integrations").(*schema.Set).List()
 	apiServiceIntegrations := make([]service.ServiceIntegrationIn, 0, len(tfServiceIntegrations))
 	for _, definition := range tfServiceIntegrations {
-		definitionMap := definition.(map[string]interface{})
+		definitionMap := definition.(map[string]any)
 		sourceService := definitionMap["source_service_name"].(string)
 		userConfig := make(map[string]any)
 		integrationType := definitionMap["integration_type"].(string)

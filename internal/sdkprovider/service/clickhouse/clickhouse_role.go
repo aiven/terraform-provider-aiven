@@ -38,7 +38,7 @@ func ResourceClickhouseRole() *schema.Resource {
 	}
 }
 
-func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -54,7 +54,7 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceClickhouseRoleRead(ctx, d, m)
 }
 
-func resourceClickhouseRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseRoleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())
@@ -80,7 +80,7 @@ func resourceClickhouseRoleRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourceClickhouseRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseRoleDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())

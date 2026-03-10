@@ -54,7 +54,7 @@ func ResourceProjectVPC() *schema.Resource {
 	}
 }
 
-func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	vpc, err := client.VPCs.Create(
@@ -88,7 +88,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 	return resourceProjectVPCRead(ctx, d, m)
 }
 
-func resourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Id())
@@ -109,7 +109,7 @@ func resourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Id())
@@ -160,7 +160,7 @@ type ProjectVPCActiveWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *ProjectVPCActiveWaiter) RefreshFunc() retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
 			return nil, "", err
@@ -196,7 +196,7 @@ type ProjectVPCDeleteWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh its state.
 func (w *ProjectVPCDeleteWaiter) RefreshFunc() retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
 			// might be already gone after deletion

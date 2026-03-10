@@ -17,7 +17,7 @@ func DatasourceAWSPrivatelink() *schema.Resource {
 	}
 }
 
-func datasourceAWSPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceAWSPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName))

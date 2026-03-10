@@ -18,7 +18,7 @@ func DatasourceOpenSearchACLConfig() *schema.Resource {
 	}
 }
 
-func datasourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)

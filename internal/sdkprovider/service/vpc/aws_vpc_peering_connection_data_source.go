@@ -19,7 +19,7 @@ func DatasourceAWSVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func datasourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))

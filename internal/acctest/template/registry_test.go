@@ -95,7 +95,7 @@ func TestRegistry(t *testing.T) {
 			validate: func(t *testing.T, r *registry) {
 				cases := []struct {
 					name     string
-					input    interface{}
+					input    any
 					expected string
 				}{
 					{"string", "hello", `"hello"`},

@@ -3,6 +3,7 @@ package template
 import (
 	"fmt"
 	"html/template"
+	"maps"
 	"sort"
 	"strings"
 )
@@ -33,7 +34,7 @@ func (tf *templateFunctions) registerDefaults() {
 		return v
 	})
 
-	tf.register("renderValue", func(v interface{}) template.HTML {
+	tf.register("renderValue", func(v any) template.HTML {
 		var result string
 		switch val := v.(type) {
 		case Value:
@@ -48,7 +49,7 @@ func (tf *templateFunctions) registerDefaults() {
 			result = fmt.Sprintf("%v", val)
 		case bool:
 			result = fmt.Sprintf("%v", val)
-		case []interface{}:
+		case []any:
 			var elements []string
 			for _, elem := range val {
 				elements = append(elements, fmt.Sprintf("%v", elem))
@@ -60,7 +61,7 @@ func (tf *templateFunctions) registerDefaults() {
 				elements = append(elements, fmt.Sprintf("%q", elem))
 			}
 			result = fmt.Sprintf("[%s]", strings.Join(elements, ", "))
-		case map[string]interface{}:
+		case map[string]any:
 			var pairs []string
 			keys := make([]string, 0, len(val))
 			for k := range val {
@@ -86,8 +87,6 @@ func (tf *templateFunctions) register(name string, fn any) {
 // getFuncMap returns a copy of the template function map
 func (tf *templateFunctions) getFuncMap() template.FuncMap {
 	funcs := make(template.FuncMap, len(tf.funcMap))
-	for k, v := range tf.funcMap {
-		funcs[k] = v
-	}
+	maps.Copy(funcs, tf.funcMap)
 	return funcs
 }

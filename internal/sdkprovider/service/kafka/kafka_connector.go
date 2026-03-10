@@ -129,9 +129,9 @@ func customizeDiffKafkaConnectorConfigName() func(ctx context.Context, diff *sch
 }
 
 // kafkaConnectorConfigNameShouldNotBeEmpty `config.name` should not be empty
-func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldValue interface{}, newValue interface{}, meta interface{}) bool {
-	return func(_ context.Context, _, newValue, _ interface{}) bool {
-		for k, cS := range newValue.(map[string]interface{}) {
+func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldValue any, newValue any, meta any) bool {
+	return func(_ context.Context, _, newValue, _ any) bool {
+		for k, cS := range newValue.(map[string]any) {
 			if k == "name" && cS.(string) != "" {
 				return true
 			}
@@ -140,11 +140,11 @@ func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldVal
 	}
 }
 
-func flattenKafkaConnectorTasks(tasks []kafkaconnect.TaskOut) []map[string]interface{} {
-	result := make([]map[string]interface{}, len(tasks))
+func flattenKafkaConnectorTasks(tasks []kafkaconnect.TaskOut) []map[string]any {
+	result := make([]map[string]any, len(tasks))
 
 	for i, taskS := range tasks {
-		task := map[string]interface{}{
+		task := map[string]any{
 			"connector": taskS.Connector,
 			"task":      taskS.Task,
 		}

@@ -42,7 +42,7 @@ func WaitForServiceCreation(ctx context.Context, d ResourceData, client avngen.C
 		Timeout:                   timeout,
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			s, err := client.ServiceGet(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
@@ -95,7 +95,7 @@ func WaitForServiceUpdate(ctx context.Context, d ResourceData, client avngen.Cli
 		Timeout:                   timeout,
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			s, err := client.ServiceGet(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
@@ -142,7 +142,7 @@ func WaitStaticIpsDissociation(ctx context.Context, d ResourceData, client avnge
 		Timeout:                   timeout,
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			if dis, err := staticIpsAreDisassociated(ctx, d, client); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
@@ -173,7 +173,7 @@ func WaitForDeletion(ctx context.Context, d ResourceData, client avngen.Client) 
 		Timeout:                   timeout,
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
-		Refresh: func() (interface{}, string, error) {
+		Refresh: func() (any, string, error) {
 			_, err := client.ServiceGet(ctx, projectName, serviceName)
 			if common.IsCritical(err) {
 				return nil, "", fmt.Errorf("unable to check if service is gone: %w", err)
