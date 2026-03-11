@@ -281,7 +281,7 @@ func staticIpsReady(ctx context.Context, d ResourceData, client avngen.Client) (
 
 	for _, v := range resourceIPs {
 		switch serviceIPs[v] {
-		case staticip.StaticIpStateTypeAvailable, staticip.StaticIpStateTypeAssigned:
+		case staticip.StaticIPStateTypeAvailable, staticip.StaticIPStateTypeAssigned:
 		default:
 			return false, nil
 		}
@@ -313,8 +313,8 @@ func staticIpsDisassociatedAfterServiceDeletion(
 		for _, sip := range staticIpsList {
 			// no check for service name since after deletion the field is gone, but the
 			// static ip lingers in the assigned state for a while until it gets usable again
-			ipIsAssigned := sip.State == staticip.StaticIpStateTypeAssigned
-			isExpectedIP := sip.StaticIpAddressId == eip
+			ipIsAssigned := sip.State == staticip.StaticIPStateTypeAssigned
+			isExpectedIP := sip.StaticIPAddressId == eip
 
 			if isExpectedIP && ipIsAssigned {
 				return false, nil
@@ -342,7 +342,7 @@ L:
 			continue L
 		}
 		for _, csip := range currentStaticIps {
-			if sip.StaticIpAddressId == csip {
+			if sip.StaticIPAddressId == csip {
 				continue L
 			}
 		}

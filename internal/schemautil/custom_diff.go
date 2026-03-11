@@ -217,8 +217,8 @@ func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.Res
 	// Check that we block deletions that will fail because the ip belongs to the service
 	for _, sip := range resp {
 		associatedWithDifferentService := sip.ServiceName != "" && sip.ServiceName != serviceName
-		if associatedWithDifferentService && slices.Contains(plannedStaticIps, sip.StaticIpAddressId) {
-			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIpAddressId, sip.ServiceName)
+		if associatedWithDifferentService && slices.Contains(plannedStaticIps, sip.StaticIPAddressId) {
+			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIPAddressId, sip.ServiceName)
 		}
 
 	}
