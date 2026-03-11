@@ -51,7 +51,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"default_cmk": schema.BoolAttribute{
 				MarkdownDescription: "Mark the created CMK as default for all newly created services.",
-				Required:            true,
+				Optional:            true,
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
