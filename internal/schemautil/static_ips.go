@@ -18,16 +18,16 @@ const (
 	StaticIPAssigned  = "assigned"
 )
 
-func ServiceStaticIps(ctx context.Context, client avngen.Client, projectName, serviceName string) (map[string]staticip.StaticIpStateType, error) {
+func ServiceStaticIps(ctx context.Context, client avngen.Client, projectName, serviceName string) (map[string]staticip.StaticIPStateType, error) {
 	projectIPs, err := client.StaticIPList(ctx, projectName)
 	if err != nil {
 		return nil, fmt.Errorf(`unable to fetch static ips for project %q: "%w"`, projectName, err)
 	}
 
-	result := make(map[string]staticip.StaticIpStateType)
+	result := make(map[string]staticip.StaticIPStateType)
 	for _, v := range projectIPs {
 		if v.ServiceName == serviceName {
-			result[v.StaticIpAddressId] = v.State
+			result[v.StaticIPAddressId] = v.State
 		}
 	}
 
