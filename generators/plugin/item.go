@@ -136,6 +136,7 @@ type SchemaMeta struct {
 	TerminationProtection bool          `yaml:"terminationProtection,omitempty"`
 	RefreshState          bool          `yaml:"refreshState,omitempty"`
 	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
+	RefreshStateWaiter    bool          `yaml:"refreshStateWaiter,omitempty"`
 	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
 }
 

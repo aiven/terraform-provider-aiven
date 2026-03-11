@@ -43,6 +43,10 @@ type ResourceOptions struct {
 	// Time to wait after creating or updating the resource to let the backend catch up.
 	RefreshStateDelay time.Duration
 
+	// RefreshStateWaiter is a function that waits for the resource to be in the desired state.
+	// It is called after the resource is created/updated and before the state is refreshed.
+	RefreshStateWaiter func(ctx context.Context, client avngen.Client, d ResourceData) error
+
 	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
 	// This is useful for resources that Aiven may automatically delete,
 	// such as users or databases when a service has been turned off and then on again.
@@ -237,6 +241,13 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-delay.C:
+		}
+	}
+
+	if a.resource.RefreshStateWaiter != nil {
+		err := a.resource.RefreshStateWaiter(ctx, a.client, rd)
+		if err != nil {
+			return fmt.Errorf("failed to wait for resource to be in desired state: %w", err)
 		}
 	}
 

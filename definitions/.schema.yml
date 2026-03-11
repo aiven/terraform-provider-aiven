@@ -47,6 +47,14 @@ properties:
           This is useful to avoid race conditions with the backend.
           For instance, when a new user is created, the backend might hit a read-replica.
           So we sleep for a few seconds to give the backend time to catch up.
+        dependencies:
+          - refreshState
+      refreshStateWaiter:
+        type: boolean
+        $comment: |
+          Set to true to generate a function placeholder that waits for the resource to be in the desired state before calling refreshState.
+        dependencies:
+          - refreshState
       removeMissing:
         type: boolean
         $comment: |
