@@ -12,14 +12,14 @@ import (
 )
 
 // exampleRoot generates example usage for the TF resource or data source.
-func exampleRoot(isResource bool, item *Item) (string, error) {
+func exampleRoot(isResource bool, def *Definition, item *Item) (string, error) {
 	t := "data"
 	if isResource {
 		t = "resource"
 	}
 
 	f := hclwrite.NewEmptyFile()
-	rootBody := f.Body().AppendNewBlock(t, []string{typeNamePrefix + item.Name, "example"}).Body()
+	rootBody := f.Body().AppendNewBlock(t, []string{def.typeName, "example"}).Body()
 	err := exampleObjectItem(isResource, item, rootBody)
 	if err != nil {
 		return "", err

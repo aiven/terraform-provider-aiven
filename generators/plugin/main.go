@@ -607,7 +607,7 @@ func addProperty(scope *Scope, parent, prop *Item) error {
 
 // listDefinitionFiles returns go file names
 func listDefinitionFiles(dir string) ([]*Definition, error) {
-	pattern := regexp.MustCompile(`^[a-z_]+\.yml$`)
+	pattern := regexp.MustCompile(`^aiven_[a-z_]+\.yml$`)
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -635,7 +635,7 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 			return nil, fmt.Errorf("could not parse definition file %q: %w", name, err)
 		}
 		def.fileName = name
-		def.typeName = typeNamePrefix + strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+		def.typeName = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
 		defs = append(defs, def)
 	}
 
