@@ -16,18 +16,17 @@ This skill guides migration of resources from:
 
 **Key Challenge**: Preserve exact behavior and state compatibility so users don't experience breaking changes.
 
-**Prerequisites**: This skill builds on **tf-resource-generator**. For YAML syntax, generation commands, and testing patterns, see that skill.
+**Prerequisites**: This skill builds on **tf-resource-generator**. For YAML syntax, adapter API, modifier patterns, custom view overrides, write-only fields, and all implementation details, see that skill.
 
 ## When to Use This Skill
 
 **Use this skill when:**
 - Migrating existing `aiven_*` resources from SDK to Plugin Framework
 - User says: "migrate", "convert", "port", "move to Plugin Framework"
-- Modernizing legacy resources
 
 **Use tf-resource-generator skill when:**
 - Creating brand new resources from scratch
-- Adding resources that don't exist yet
+- Questions about YAML syntax, adapter API, or implementation patterns
 
 ## Migration Workflow
 
@@ -70,7 +69,7 @@ For example, `ServiceFlinkCreateApplication` lives in `handler/flinkapplication/
 
 ### 3. Map SDK Schema to YAML
 
-#### SDK Type → YAML Type
+#### SDK Type -> YAML Type
 
 | SDK Type | YAML Type |
 |----------|-----------|
@@ -82,7 +81,7 @@ For example, `ServiceFlinkCreateApplication` lives in `handler/flinkapplication/
 | `schema.TypeSet` | `type: array` (or `arrayOrdered` for performance) |
 | `schema.TypeMap` | `additionalProperties: {type: string}` |
 
-#### SDK Attributes → YAML Attributes
+#### SDK Attributes -> YAML Attributes
 
 | SDK Attribute | YAML Attribute |
 |---------------|----------------|
@@ -147,16 +146,26 @@ idAttributeComposed: [project, service_name, database_name]
 
 ### 5. Handle Custom Logic
 
-**Identify in SDK code:**
-- `StateUpgraders` → May need state upgrader in Plugin Framework
-- `CustomizeDiff` → Use `planModifier: true`
-- Flatten/Expand functions → Use `expandModifier: true` / `flattenModifier: true`
+**Identify in SDK code and map to generator features:**
 
-For modifier implementation details, see **tf-resource-generator** skill.
+| SDK Pattern | Generator Feature |
+|-------------|------------------|
+| `StateUpgraders` | May need `version` in YAML + state upgrader |
+| `CustomizeDiff` | `planModifier: true` or `ModifyPlan` |
+| Flatten/Expand functions | `expandModifier: true` / `flattenModifier: true` |
+| `DiffSuppressFunc` | `planModifier: true` |
+| Multiple API calls in Update | Custom `updateView` via `init()` override |
+| Complex delete (cancel + delete) | Custom `deleteView` via `init()` override |
+| Data source looks up by name, not ID | `datasource.exactlyOneOf` + `planModifier` |
+| Sensitive field not stored in state | `writeOnly: true` |
+
+For implementation details of each, see **tf-resource-generator** skill.
 
 ### 6. Create YAML Definition
 
-Create `definitions/resource_name.yml`. For complete YAML syntax reference, see **tf-resource-generator** skill.
+Create `definitions/aiven_resource_name.yml`. For complete YAML syntax reference, see **tf-resource-generator** skill.
+
+**IMPORTANT**: Definition files MUST have the `aiven_` prefix. The filename becomes the resource name directly.
 
 Focus on migration-specific concerns:
 - Match all SDK schema fields exactly
@@ -217,7 +226,9 @@ head -20 CHANGELOG.md
 2. Applies with NEW Plugin Framework version
 3. Verifies state is compatible and attributes match
 
-**Example**: See `internal/plugin/service/mysql/database/database_test.go`
+**Examples**:
+- `internal/plugin/service/mysql/database/database_test.go` - Basic backward compatibility
+- `internal/plugin/service/pg/user/user_test.go` - Complex resource with custom update logic
 
 ### 10. Parity Testing
 
@@ -261,30 +272,13 @@ Before marking migration complete:
 | Computed field becomes required | Keep as `computed: true` if API provides it |
 | Custom validation lost | Implement in custom modifier or use schema validation |
 | State upgrade needed | Implement state upgrader in Plugin Framework |
-| DiffSuppressFunc behavior | Implement plan modifier for custom diff logic |
-| Data source lookup key differs from resource ID | Override `DataSourceOptions.Read` and `DataSourceOptions.Schema` via `init()` (see below) |
 | DiffSuppressFunc behavior | Use `planModifier: true` for custom diff logic |
-| Renamed ID field missing in old state | Use `planModifier: true` to extract from composite ID (see **tf-resource-generator** skill) |
-| Read fails with 404 after migration | Likely a renamed ID field is empty — use `planModifier` to populate it before the API call |
-
-## Data Source Lookup Key Differs from Resource ID
-
-The generator derives the data source schema from `idAttributeComposed` — ID fields become Required, everything else becomes Computed. This works when the data source looks up by the same fields as the resource ID.
-
-**Problem**: The SDK data source may look up by a different field (e.g., `name`) than what's in the resource ID (e.g., `application_id`). The generator has no way to express "the resource ID uses `application_id`, but the data source should require `name`."
-
-**Detection**: Always read the SDK data source implementation. If it uses a List endpoint and filters by a field that's NOT in `idAttributeComposed`, you need a custom override.
-
-**Solution**: Create a non-generated file that overrides `DataSourceOptions` via `init()`:
-1. Override `DataSourceOptions.Schema` — wrap the generated `datasourceSchema()` and swap only the attributes that differ (don't duplicate the whole schema)
-2. Override `DataSourceOptions.Read` — use the List endpoint to find by name, then Get by ID for full details
-
-**Key points**:
-- Wrap the generated `datasourceSchema()` — don't duplicate it. Only override the attributes that differ.
-- The read function uses List + filter by name, then Get by ID for full details (same pattern the SDK data source used).
-- This preserves backward compatibility: existing configs using `name` keep working.
-
-**Reference**: See `internal/plugin/service/flink/application/application.go` for a complete implementation.
+| Renamed ID field missing in old state | Use `planModifier: true` to extract from composite ID |
+| Read fails with 404 after migration | Likely a renamed ID field is empty — use `planModifier` |
+| "was null, but now cty.X" error | Add `computed: true` + `useStateForUnknown: true` (see generator skill) |
+| Field nested differently in API | Use `expandModifier` and `flattenModifier` (see generator skill) |
+| Multiple update operations needed | Override `updateView` via `init()` (see generator skill) |
+| Data source lookup key differs | Use `datasource.exactlyOneOf` + `planModifier` (see generator skill) |
 
 ## Migration-Specific Commands
 
@@ -305,13 +299,6 @@ diff internal/sdkprovider/service/resource.go internal/plugin/service/resource/z
 task test-acc -- -run TestAccAivenResource_backwardCompat
 ```
 
-## Key Principles
-
-1. **State compatibility first** - Users should not need to recreate resources
-2. **Preserve exact behavior** - Match SDK resource behavior precisely
-3. **Test thoroughly** - All SDK test scenarios must pass with Plugin version
-4. **Remove SDK version** - Once verified, delete SDK resource to avoid maintenance burden
-
 ## After Migration
 
 Once all tests pass and state compatibility is verified:
@@ -320,8 +307,16 @@ Once all tests pass and state compatibility is verified:
 2. **Update documentation** - Ensure docs reflect the Plugin Framework version
 3. **Add migration notes if needed** - Document any unavoidable behavioral differences
 4. **Add changelog entry** - Add record to `CHANGELOG.md` under the unreleased section:
-```markdown
-- Migrate `aiven_resource_name` to the Plugin Framework
-```
+   ```markdown
+   - Migrate `aiven_resource_name` to the Plugin Framework
+   - Change `aiven_resource_name`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+   ```
 
 **Do not maintain both versions** - this creates maintenance burden and user confusion.
+
+## Key Principles
+
+1. **State compatibility first** - Users should not need to recreate resources
+2. **Preserve exact behavior** - Match SDK resource behavior precisely
+3. **Test thoroughly** - All SDK test scenarios must pass with Plugin version
+4. **Remove SDK version** - Once verified, delete SDK resource to avoid maintenance burden
