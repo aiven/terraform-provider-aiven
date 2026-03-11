@@ -38,7 +38,7 @@ func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error)
 		attrs[jen.Id("Version")] = jen.Lit(*def.Version)
 	}
 
-	example, err := exampleRoot(entity.isResource(), item)
+	example, err := exampleRoot(entity.isResource(), def, item)
 	if err != nil {
 		return nil, fmt.Errorf("example error: %w", err)
 	}

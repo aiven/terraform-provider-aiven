@@ -9,6 +9,9 @@ import (
 )
 
 func TestExampleMap(t *testing.T) {
+	def := &Definition{
+		typeName: "aiven_example",
+	}
 	item := &Item{
 		Name: "example",
 		Type: SchemaTypeObject,
@@ -49,7 +52,7 @@ resource "aiven_example" "example" {
     }
   }
 }`)
-	result, err := exampleRoot(true, item)
+	result, err := exampleRoot(true, def, item)
 	require.NoError(t, err)
 	assert.Equal(t, expected, strings.TrimSpace(result))
 }
