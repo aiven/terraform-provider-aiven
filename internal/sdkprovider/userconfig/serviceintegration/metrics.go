@@ -68,6 +68,11 @@ func metricsUserConfig() *schema.Schema {
 							Optional:    true,
 							Type:        schema.TypeBool,
 						},
+						"gather_replica_status": {
+							Description: "Gather metrics from SHOW REPLICA STATUS command output.",
+							Optional:    true,
+							Type:        schema.TypeBool,
+						},
 						"gather_slave_status": {
 							Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 							Optional:    true,

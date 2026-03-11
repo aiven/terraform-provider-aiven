@@ -179,6 +179,7 @@ Read-Only:
 - `internal_tmp_mem_storage_engine` (String)
 - `log_output` (String)
 - `long_query_time` (Number)
+- `lower_case_table_names` (Number)
 - `max_allowed_packet` (Number)
 - `max_heap_table_size` (Number)
 - `net_buffer_length` (Number)

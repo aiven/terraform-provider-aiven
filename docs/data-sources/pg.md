@@ -146,6 +146,7 @@ Read-Only:
 - `service_to_fork_from` (String)
 - `shared_buffers_percentage` (Number)
 - `static_ips` (Boolean)
+- `switchover_windows` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--switchover_windows))
 - `synchronous_replication` (String)
 - `timescaledb` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--timescaledb))
 - `variant` (String)
@@ -326,6 +327,16 @@ Read-Only:
 - `pg` (Boolean)
 - `pgbouncer` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--pg_user_config--switchover_windows"></a>
+### Nested Schema for `pg_user_config.switchover_windows`
+
+Read-Only:
+
+- `dow` (String)
+- `end_time` (String)
+- `start_time` (String)
 
 
 <a id="nestedobjatt--pg_user_config--timescaledb"></a>

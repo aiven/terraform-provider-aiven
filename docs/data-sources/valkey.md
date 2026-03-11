@@ -146,6 +146,7 @@ Read-Only:
 - `valkey_pubsub_client_output_buffer_limit` (Number)
 - `valkey_ssl` (Boolean)
 - `valkey_timeout` (Number)
+- `valkey_version` (String)
 
 <a id="nestedobjatt--valkey_user_config--ip_filter_object"></a>
 ### Nested Schema for `valkey_user_config.ip_filter_object`

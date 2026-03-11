@@ -166,6 +166,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. Changing this parameter causes a service restart. Example: `41.5`.
 - `static_ips` (Boolean) Use static public IP addresses.
+- `switchover_windows` (Block List, Max: 28) (see [below for nested schema](#nestedblock--pg_user_config--switchover_windows))
 - `synchronous_replication` (String) Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.
 - `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
 - `variant` (String) Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
@@ -234,10 +235,10 @@ Optional:
 - `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
-- `max_connections` (Number) Sets the PostgreSQL maximum number of concurrent connections to the database server. This is a limited-release parameter. Contact your account team to confirm your eligibility. You cannot decrease this parameter value when set. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.
+- `max_connections` (Number) Sets the PostgreSQL maximum number of concurrent connections to the database server. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process. The default is `1000` (upstream default). Changing this parameter causes a service restart.
 - `max_locks_per_transaction` (Number) PostgreSQL maximum locks per transaction. Changing this parameter causes a service restart.
-- `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers). The default is `4` (upstream default). Changing this parameter causes a service restart.
+- `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool defined by max_worker_processes). The default is `4` (upstream default). Changing this parameter causes a service restart.
 - `max_parallel_workers` (Number) Sets the maximum number of workers that the system can support for parallel queries. The default is `8` (upstream default).
 - `max_parallel_workers_per_gather` (Number) Sets the maximum number of workers that can be started by a single Gather or Gather Merge node. The default is `2` (upstream default).
 - `max_pred_locks_per_transaction` (Number) PostgreSQL maximum predicate locks per transaction. The default is `64` (upstream default). Changing this parameter causes a service restart.
@@ -352,6 +353,16 @@ Optional:
 - `pg` (Boolean) Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network.
 - `pgbouncer` (Boolean) Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+
+
+<a id="nestedblock--pg_user_config--switchover_windows"></a>
+### Nested Schema for `pg_user_config.switchover_windows`
+
+Required:
+
+- `dow` (String) Enum: `friday`, `monday`, `saturday`, `sunday`, `thursday`, `tuesday`, `wednesday`.
+- `end_time` (String) Example: `12:30:00`.
+- `start_time` (String) Example: `12:30:00`.
 
 
 <a id="nestedblock--pg_user_config--timescaledb"></a>

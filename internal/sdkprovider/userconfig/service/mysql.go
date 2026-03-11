@@ -262,6 +262,13 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
+					"lower_case_table_names": {
+						Description:  "Enum: `0`, `1`. Sets how table and database names are stored and compared. 0 = case-sensitive (default), 1 = names stored lowercase, comparisons are case-insensitive. This option can only be set when creating the service and cannot be changed later. See https://dev.mysql.com/doc/refman/8.0/en/identifier-case-sensitivity.html for details.",
+						ForceNew:     true,
+						Optional:     true,
+						Type:         schema.TypeInt,
+						ValidateFunc: validation.IntInSlice([]int{0, 1}),
+					},
 					"max_allowed_packet": {
 						Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).",
 						Optional:    true,

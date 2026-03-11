@@ -32,6 +32,16 @@ nav_order: 1
   The possible values are `AUD`, `CAD`, `CHF`, `DKK`, `EUR`, `GBP`, `JPY`, `NOK`, `NZD`, `SEK`, `SGD` and `USD`
 - Change `aiven_project_user` field `member_type` (enum): add `role:project:admin`
 - Change `aiven_service_integration_endpoint` field `datadog_user_config.site` (enum): add `ap2.datadoghq.com`
+- Change `aiven_cassandra` resource field `cassandra_user_config`: deprecate: This property is deprecated
+- Add `aiven_kafka` field `kafka_user_config.inkless`: Inkless configuration values
+- Add `aiven_mysql` field `mysql_user_config.mysql.lower_case_table_names` (enum): Sets how table and database names
+  are stored and compared
+- Add `aiven_pg` field `pg_user_config.switchover_windows`
+- Add `aiven_service_integration` field `metrics_user_config.source_mysql.telegraf.gather_replica_status`: Gather metrics
+  from SHOW REPLICA STATUS command output.
+- Add `aiven_service_integration` field `prometheus_user_config.source_mysql.telegraf.gather_replica_status`: Gather
+  metrics from SHOW REPLICA STATUS command output.
+- Add `aiven_valkey` field `valkey_user_config.valkey_version` (enum): , and newer. Valkey major version.
 
 ## [4.52.0] - 2026-02-26
 

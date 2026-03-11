@@ -309,7 +309,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_connections": {
-						Description: "Sets the PostgreSQL maximum number of concurrent connections to the database server. This is a limited-release parameter. Contact your account team to confirm your eligibility. You cannot decrease this parameter value when set. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.",
+						Description: "Sets the PostgreSQL maximum number of concurrent connections to the database server. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -324,7 +324,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_logical_replication_workers": {
-						Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers). The default is `4` (upstream default). Changing this parameter causes a service restart.",
+						Description: "PostgreSQL maximum logical replication workers (taken from the pool defined by max_worker_processes). The default is `4` (upstream default). Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -789,6 +789,29 @@ func pgUserConfig() *schema.Schema {
 				Description: "Use static public IP addresses.",
 				Optional:    true,
 				Type:        schema.TypeBool,
+			},
+			"switchover_windows": {
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"dow": {
+						Description:  "Enum: `friday`, `monday`, `saturday`, `sunday`, `thursday`, `tuesday`, `wednesday`.",
+						Required:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"friday", "monday", "saturday", "sunday", "thursday", "tuesday", "wednesday"}, false),
+					},
+					"end_time": {
+						Description: "Example: `12:30:00`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"start_time": {
+						Description: "Example: `12:30:00`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 28,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"synchronous_replication": {
 				Description:  "Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.",

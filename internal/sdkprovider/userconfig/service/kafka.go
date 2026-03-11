@@ -67,6 +67,18 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
+			"inkless": {
+				Description: "Inkless configuration values",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
+					Description: "Whether to enable the Inkless functionality.",
+					ForceNew:    true,
+					Required:    true,
+					Type:        schema.TypeBool,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
