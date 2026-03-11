@@ -49,9 +49,14 @@ type ResourceOptions struct {
 	// Instead of forcing users to manually clean up the state, Terraform will plan to "create" the resource again.
 	RemoveMissing bool
 
-	// Throws an error if the resource is marked for deletion and `termination_protection` field is set to true.
-	// "Virtual" fields (not managed by the API) should be deprecated. Instead, use "prevent_destroy":
-	// https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion
+	// Returns an error on "plan" if the resource is marked for deletion and the `termination_protection` field is set to true.
+	// There are two types of resources with a `termination_protection` field in our provider:
+	// 1. API-level termination protection: defined in the API schema and prevents deletion through the API.
+	// 2. Client-side termination protection: defined only in Terraform and prevents deletion in Terraform,
+	//    but the resource can still be deleted via the Aiven Console, CLI, etc.
+	//    These "virtual" fields should be deprecated and removed in the future.
+	//    Instead, use the recommended "prevent_destroy":
+	//    https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion
 	TerminationProtection bool
 
 	// CRUD operations.
