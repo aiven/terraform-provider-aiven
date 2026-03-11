@@ -384,6 +384,7 @@ Optional:
 - `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
 - `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
 - `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_replica_status` (Boolean) Gather metrics from SHOW REPLICA STATUS command output.
 - `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
 - `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
 - `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
@@ -421,6 +422,7 @@ Optional:
 - `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
 - `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
 - `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_replica_status` (Boolean) Gather metrics from SHOW REPLICA STATUS command output.
 - `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
 - `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
 - `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.

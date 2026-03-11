@@ -103,6 +103,7 @@ Read-Only:
 - `enable_ipv6` (Boolean)
 - `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
 - `gcp_auth_allowed_urls` (List of String)
+- `inkless` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--inkless))
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
@@ -133,6 +134,14 @@ Read-Only:
 
 <a id="nestedobjatt--kafka_user_config--follower_fetching"></a>
 ### Nested Schema for `kafka_user_config.follower_fetching`
+
+Read-Only:
+
+- `enabled` (Boolean)
+
+
+<a id="nestedobjatt--kafka_user_config--inkless"></a>
+### Nested Schema for `kafka_user_config.inkless`
 
 Read-Only:
 

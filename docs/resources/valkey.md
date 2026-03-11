@@ -154,6 +154,7 @@ Optional:
 - `valkey_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan. Example: `64`.
 - `valkey_ssl` (Boolean) Require SSL to access Valkey. Default: `true`.
 - `valkey_timeout` (Number) Valkey idle connection timeout in seconds. Default: `300`.
+- `valkey_version` (String) Enum: `8.1`, and newer. Valkey major version.
 
 <a id="nestedblock--valkey_user_config--ip_filter_object"></a>
 ### Nested Schema for `valkey_user_config.ip_filter_object`

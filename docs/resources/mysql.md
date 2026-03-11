@@ -192,6 +192,7 @@ Optional:
 - `internal_tmp_mem_storage_engine` (String) Enum: `MEMORY`, `TempTable`. The storage engine for in-memory internal temporary tables.
 - `log_output` (String) Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.
 - `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.
+- `lower_case_table_names` (Number) Enum: `0`, `1`. Sets how table and database names are stored and compared. 0 = case-sensitive (default), 1 = names stored lowercase, comparisons are case-insensitive. This option can only be set when creating the service and cannot be changed later. See https://dev.mysql.com/doc/refman/8.0/en/identifier-case-sensitivity.html for details.
 - `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).
 - `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).
 - `net_buffer_length` (Number) Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service. Example: `16384`.
