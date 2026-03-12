@@ -105,12 +105,12 @@
 |  99 | aiven_service_list                          | yes    |     1 |
 | 100 | aiven_service_plan                          | yes    |     1 |
 | 101 | aiven_service_plan_list                     | yes    |     1 |
-| 102 | aiven_static_ip                             |        |     1 |
+| 102 | aiven_static_ip                             | yes    |     1 |
 | 103 | aiven_thanos                                |        |     2 |
 | 104 | aiven_transit_gateway_vpc_attachment        |        |     2 |
 | 105 | aiven_valkey                                |        |     2 |
 | 106 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 25%                          | 46     |   183 |
+|     | TOTAL MIGRATED 26%                          | 47     |   183 |
 +-----+---------------------------------------------+--------+-------+
 ```

@@ -34,7 +34,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
@@ -162,8 +161,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
-			"aiven_static_ip":       staticip.ResourceStaticIP(),
-
 			// influxdb
 			"aiven_influxdb":          influxdb.ResourceInfluxDB(),
 			"aiven_influxdb_user":     influxdb.ResourceInfluxDBUser(),

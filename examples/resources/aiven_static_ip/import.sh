@@ -1,0 +1,1 @@
+terraform import aiven_static_ip.example PROJECT/STATIC_IP_ADDRESS_ID

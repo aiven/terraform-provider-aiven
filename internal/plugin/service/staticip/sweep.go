@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -40,23 +39,22 @@ func init() {
 func sweepStaticIPs(ctx context.Context) func(region string) error {
 	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
-		client, err := sweep.SharedClient()
+		client, err := sweep.SharedGenClient()
 		if err != nil {
 			return err
 		}
 
-		r, err := client.StaticIPs.List(ctx, projectName)
+		r, err := client.StaticIPList(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of static_ips : %w", err)
 		}
 
-		for _, ip := range r.StaticIPs {
-			err := client.StaticIPs.Delete(
+		for _, ip := range r {
+			_, err := client.StaticIPDelete(
 				ctx,
 				projectName,
-				aiven.DeleteStaticIPRequest{
-					StaticIPAddressID: ip.StaticIPAddressID,
-				})
+				ip.StaticIPAddressId,
+			)
 			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting staticip: %w", err)
 			}

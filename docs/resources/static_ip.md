@@ -17,28 +17,37 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 
 ### Required
 
-- `cloud_name` (String) Specifies the cloud that the static ip belongs to. Changing this property forces recreation of the resource.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `cloud_name` (String) Target cloud. Maximum length: `256`. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
 
 ### Optional
 
+- `termination_protection` (Boolean) Static IP address is protected against deletion. The default value is `false`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `ip_address` (String) The address of the static ip.
-- `service_name` (String) The service name the static ip is associated with.
-- `state` (String) The state the static ip is in.
-- `static_ip_address_id` (String) The static ip id of the resource. Should be used as a reference elsewhere.
+- `id` (String) Resource ID composed as: `project/static_ip_address_id`.
+- `ip_address` (String) IPv4 address.
+- `service_name` (String) Service name.
+- `state` (String) Static IP address state. The possible values are `assigned`, `available`, `created`, `creating`, `deleted` and `deleting`.
+- `static_ip_address_id` (String) Static IP address identifier.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_static_ip.example PROJECT/STATIC_IP_ADDRESS_ID
+```

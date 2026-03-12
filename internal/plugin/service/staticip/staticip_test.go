@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -14,13 +15,21 @@ import (
 )
 
 func TestAccAivenResourceStaticIp(t *testing.T) {
-	resourceName := "aiven_static_ip.foo"
 	projectName := acc.ProjectName()
+	resourceName := "aiven_static_ip.foo"
 	cloudName := "google-europe-west1"
+
 	manifest := fmt.Sprintf(`
 resource "aiven_static_ip" "foo" {
   project    = "%s"
   cloud_name = "%s"
+}`, projectName, cloudName)
+
+	manifestWithTerminationProtection := fmt.Sprintf(`
+resource "aiven_static_ip" "foo" {
+  project                = "%s"
+  cloud_name             = "%s"
+  termination_protection = true
 }`, projectName, cloudName)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -30,6 +39,31 @@ resource "aiven_static_ip" "foo" {
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", cloudName),
+					resource.TestCheckResourceAttrSet(resourceName, "static_ip_address_id"),
+					resource.TestCheckResourceAttr(resourceName, "state", string(staticip.StaticIPStateTypeCreated)),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
+			{
+				Config: manifestWithTerminationProtection,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
+				),
+			},
+			{
+				Config:      manifestWithTerminationProtection,
+				Destroy:     true,
+				ExpectError: regexp.MustCompile(`The resource ` + "`aiven_static_ip`" + ` has termination protection enabled`),
+			},
+			{
+				// Removing termination protection goes true -> false.
+				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
 			},
 			{
 				Config:       manifest,
@@ -70,33 +104,27 @@ resource "aiven_static_ip" "foo" {
 	})
 }
 
-func TestAccAivenResourceStaticIpNonExistentIdentifier(t *testing.T) {
+func TestAccAivenStaticIP_backwardCompat(t *testing.T) {
 	resourceName := "aiven_static_ip.foo"
 	projectName := acc.ProjectName()
 	cloudName := "google-europe-west1"
-	manifest := fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "aiven_static_ip" "foo" {
   project    = "%s"
   cloud_name = "%s"
 }`, projectName, cloudName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: manifest,
-			},
-			{
-				Config:       manifest,
-				ResourceName: resourceName,
-				ImportState:  true,
-				ImportStateIdFunc: func(_ *terraform.State) (string, error) {
-					return "non-existent/identifier", nil
-				},
-				ExpectError: regexp.MustCompile(`Cannot import non-existent remote object`),
-			},
-		},
+		PreCheck: func() { acc.TestAccPreCheck(t) },
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			TFConfig:           config,
+			OldProviderVersion: "4.47.0",
+			Checks: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "project", projectName),
+				resource.TestCheckResourceAttr(resourceName, "cloud_name", cloudName),
+				resource.TestCheckResourceAttrSet(resourceName, "static_ip_address_id"),
+				resource.TestCheckResourceAttrSet(resourceName, "state"),
+			),
+		}),
 	})
 }
