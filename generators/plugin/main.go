@@ -508,10 +508,9 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
 		thisSchema := parentSchema.Properties[thisName]
 
-		// Some fields are marked as required, because they are required for the Response.
-		// Additionally, checks if the field is required for the Request.
-		// If there is only one field, it is always required
-		required := appearsIn&RequestBody > 0 && slices.Contains(parentSchema.Required, thisName) || len(parentSchema.Properties) == 1
+		// 1. Only the create operation can have required fields.
+		// 2. Some fields are marked as required because they are required in the response, so we check if it's a request.
+		required := operation.Type == OperationCreate && appearsIn&RequestBody > 0 && slices.Contains(parentSchema.Required, thisName)
 		thisItem := newItem(scope, parent, thisName, thisSchema, required, appearsIn)
 
 		// With the patching workaround we have,
