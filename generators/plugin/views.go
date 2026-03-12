@@ -21,6 +21,7 @@ const (
 	renameFieldsModifier       = "RenameFields"
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
+	refreshStateWaiter         = "refreshStateWaiter"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -79,8 +80,13 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	if entity.isResource() {
 		if def.Resource.RefreshState {
 			values["RefreshState"] = jen.True()
+
 			if def.Resource.RefreshStateDelay != 0 {
 				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(def.Resource.RefreshStateDelay.String()))
+			}
+
+			if def.Resource.RefreshStateWaiter {
+				values["RefreshStateWaiter"] = jen.Id(refreshStateWaiter)
 			}
 		}
 
