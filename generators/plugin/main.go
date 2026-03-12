@@ -291,20 +291,30 @@ func createRootItem(scope *Scope) (*Item, error) {
 		root.DeprecationMessage = or(scope.CurrentMeta.DeprecationMessage, root.DeprecationMessage)
 	}
 
-	// When termination protection is enabled, adds the field if missing
-	if scope.Definition.Resource != nil && scope.Definition.Resource.TerminationProtection {
-		_, ok := scope.Definition.Schema["termination_protection"]
-		if !ok {
-			if scope.Definition.Schema == nil {
-				scope.Definition.Schema = make(map[string]*Item)
-			}
+	// Resources can be protected against deletion.
+	if scope.Definition.Resource != nil {
+		_, ok := root.Properties["termination_protection"]
+		if ok {
+			// If spec comes with termination_protection, it means it exists in the API.
+			// But we can still add a client-side protection for early feedback.
+			scope.Definition.Resource.TerminationProtection = true
+		} else if scope.Definition.Resource.TerminationProtection {
+			// Field is not defined in the schema.
+			// This means, it is a client-side protection against deletion.
+			// Adds it to the schema user has not defined it.
+			_, ok := scope.Definition.Schema["termination_protection"]
+			if !ok {
+				if scope.Definition.Schema == nil {
+					scope.Definition.Schema = make(map[string]*Item)
+				}
 
-			scope.Definition.Schema["termination_protection"] = &Item{
-				Type:               SchemaTypeBoolean,
-				Optional:           true,
-				Default:            false,
-				DeprecationMessage: "Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
-				Description:        "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**",
+				scope.Definition.Schema["termination_protection"] = &Item{
+					Type:               SchemaTypeBoolean,
+					Optional:           true,
+					Default:            false,
+					DeprecationMessage: "Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
+					Description:        "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**",
+				}
 			}
 		}
 	}
