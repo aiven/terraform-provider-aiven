@@ -176,7 +176,7 @@ Optional:
 
 Optional:
 
-- `auto_create_topics_enable` (Boolean) Enable auto-creation of topics. (Default: true).
+- `auto_create_topics_enable` (Boolean) Enable auto-creation of topics. (Default: false).
 - `compression_type` (String) Enum: `gzip`, `lz4`, `producer`, `snappy`, `uncompressed`, `zstd`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.
 - `default_replication_factor` (Number) Replication factor for auto-created topics (Default: 3).
@@ -277,6 +277,7 @@ Required:
 Optional:
 
 - `aws` (Block List, Max: 1) AWS secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--aws))
+- `env` (Block List, Max: 1) ENV secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--env))
 - `vault` (Block List, Max: 1) Vault secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--vault))
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--aws"></a>
@@ -291,6 +292,14 @@ Optional:
 
 - `access_key` (String) Access key used to authenticate with aws.
 - `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
+
+
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--env"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.env`
+
+Required:
+
+- `secrets` (Map of String) Key/value map of secrets for ENV secret provider.
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--vault"></a>

@@ -277,6 +277,17 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"env": {
+						Description: "ENV secret provider configuration",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"secrets": {
+							Description: "Key/value map of secrets for ENV secret provider.",
+							Required:    true,
+							Type:        schema.TypeMap,
+						}}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"name": {
 						Description: "Name of the secret provider. Used to reference secrets in connector config.",
 						Required:    true,

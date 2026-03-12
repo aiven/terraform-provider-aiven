@@ -122,7 +122,7 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka broker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"auto_create_topics_enable": {
-						Description: "Enable auto-creation of topics. (Default: true).",
+						Description: "Enable auto-creation of topics. (Default: false).",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -530,6 +530,17 @@ func kafkaUserConfig() *schema.Schema {
 								Type:        schema.TypeString,
 							},
 						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"env": {
+						Description: "ENV secret provider configuration",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"secrets": {
+							Description: "Key/value map of secrets for ENV secret provider.",
+							Required:    true,
+							Type:        schema.TypeMap,
+						}}},
 						MaxItems: 1,
 						Optional: true,
 						Type:     schema.TypeList,
