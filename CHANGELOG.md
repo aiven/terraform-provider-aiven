@@ -42,6 +42,8 @@ nav_order: 1
 - Add `aiven_service_integration` field `prometheus_user_config.source_mysql.telegraf.gather_replica_status`: Gather
   metrics from SHOW REPLICA STATUS command output.
 - Add `aiven_valkey` field `valkey_user_config.valkey_version` (enum): , and newer. Valkey major version.
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.env`: ENV secret provider configuration
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.secret_providers.env`: ENV secret provider configuration
 
 ## [4.52.0] - 2026-02-26
 
