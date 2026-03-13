@@ -3,12 +3,12 @@
 page_title: "aiven_clickhouse_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Gets information about a ClickHouse user.
+  Gets information about an Aiven for ClickHouse user.
 ---
 
 # aiven_clickhouse_user (Data Source)
 
-Gets information about a ClickHouse user.
+Gets information about an Aiven for ClickHouse user.
 
 ## Example Usage
 
@@ -25,13 +25,24 @@ data "aiven_clickhouse_user" "example_user" {
 
 ### Required
 
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The name of the ClickHouse user. Changing this property forces recreation of the resource.
+- `project` (String) Project name.
+- `service_name` (String) The name of the ClickHouse service.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `username` (String) The name of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.
+- `uuid` (String) UUID of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
+- `id` (String) Resource ID composed as: `project/service_name/uuid`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
 - `required` (Boolean) Indicates if a ClickHouse user is required.
-- `uuid` (String) UUID of the ClickHouse user.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

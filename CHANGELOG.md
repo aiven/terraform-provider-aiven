@@ -14,6 +14,7 @@ nav_order: 1
 
 ## [4.53.0] - 2026-03-16
 
+- Migrate `aiven_clickhouse_user` to the Plugin Framework
 - Add `aiven_byoc_aws_entity` resource: creates and manages a BYOC custom cloud environment on AWS.
 - Remove `WriteOnly` fields from data sources, as these fields are not retrievable via the API.
 - Change `aiven_account_team_project` field `team_type` (enum): add `role:project:admin`

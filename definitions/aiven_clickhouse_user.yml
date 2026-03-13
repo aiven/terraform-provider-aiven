@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/clickhouse/user
+resource:
+  refreshState: true
+  removeMissing: true
+  description: Creates and manages an Aiven for ClickHouse user.
+datasource:
+  description: Gets information about an Aiven for ClickHouse user.
+  exactlyOneOf: [uuid, username]
+clientHandler: clickhouse
+idAttributeComposed: [project, service_name, uuid]
+legacyTimeouts: true
+flattenModifier: true
+planModifier: true
+operations:
+  - id: ServiceClickHouseUserCreate
+    type: create
+    resultKey: user
+    disableView: true
+  - id: ServiceClickHouseUserDelete
+    type: delete
+  - id: ServiceClickHouseUserList
+    type: read
+    resultKey: users
+    resultListLookupKeys:
+      Uuid: uuid
+rename:
+  name: username
+  user_uuid: uuid
+remove:
+  - privileges
+  - roles
+schema:
+  service_name:
+    description: The name of the ClickHouse service.
+  username:
+    description: The name of the ClickHouse user.
+    forceNew: true
+  uuid:
+    computed: true
+    description: UUID of the ClickHouse user.
+  required:
+    type: boolean
+    computed: true
+    description: Indicates if a ClickHouse user is required.
+  password:
+    type: string
+    optional: true
+    computed: true
+    forceNew: false
+    sensitive: true
+    minimum: 8
+    maximum: 256
+    conflictsWith: [password_wo]
+    description: The password of the service user (auto-generated if not provided).
+  password_wo:
+    type: string
+    optional: true
+    writeOnly: true
+    sensitive: true
+    description: The password of the service user (write-only, not stored in state).
+    minimum: 8
+    maximum: 256
+    conflictsWith: [password]
+    alsoRequires: [password_wo_version]
+  password_wo_version:
+    type: integer
+    optional: true
+    description: Version number for `password_wo`. Increment this to rotate the password.
+    alsoRequires: [password_wo]
+    minimum: 1

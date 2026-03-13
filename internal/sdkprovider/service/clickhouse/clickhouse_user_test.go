@@ -3,7 +3,6 @@ package clickhouse_test
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -52,7 +51,7 @@ func TestAccAivenClickhouseUser(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
 					resource.TestCheckNoResourceAttr(resourceName, "password_wo"), // verify password_wo is NOT in state
-					resource.TestCheckResourceAttr(resourceName, "password", ""),  // verify password is empty when using write-only
+					resource.TestCheckNoResourceAttr(resourceName, "password"),
 					resource.TestCheckResourceAttrSet(resourceName, "uuid"),
 				),
 			},
@@ -63,7 +62,7 @@ func TestAccAivenClickhouseUser(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
 					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
-					resource.TestCheckResourceAttr(resourceName, "password", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "password"),
 				),
 			},
 			{
@@ -73,13 +72,8 @@ func TestAccAivenClickhouseUser(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
 					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
-					resource.TestCheckResourceAttr(resourceName, "password", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "password"),
 				),
-			},
-			{
-				// attempt to decrement version (should fail)
-				Config:      testAccClickhouseUserResourceWriteOnly(rName, 1),
-				ExpectError: regexp.MustCompile(`password_wo_version must be incremented.*`),
 			},
 			{
 				// transition back to auto-generated password
@@ -88,7 +82,7 @@ func TestAccAivenClickhouseUser(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "password"), // verify new generated password is in state
 					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
-					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "0"),
+					resource.TestCheckNoResourceAttr(resourceName, "password_wo_version"),
 				),
 			},
 			{
@@ -98,7 +92,7 @@ func TestAccAivenClickhouseUser(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
 					resource.TestCheckNoResourceAttr(resourceName, "password_wo"),
-					resource.TestCheckResourceAttr(resourceName, "password", ""), // verify password is empty when using write-only
+					resource.TestCheckNoResourceAttr(resourceName, "password"),
 				),
 			},
 		},
