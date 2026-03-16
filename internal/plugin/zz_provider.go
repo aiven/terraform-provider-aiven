@@ -19,6 +19,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
 	database1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
 	user1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
+	user2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
@@ -32,7 +33,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmemberlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
 	database2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/database"
-	user2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/user"
+	user3 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
@@ -51,6 +52,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(user1.ResourceOptions),
+		"aiven_opensearch_user":                     adapter.NewLazyResource(user2.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),
 		"aiven_organization_application_user":       adapter.NewLazyResource(applicationuser.ResourceOptions),
 		"aiven_organization_application_user_token": adapter.NewLazyResource(applicationusertoken.ResourceOptions),
@@ -59,7 +61,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organization_user_group_member":      adapter.NewLazyResource(usergroupmember.ResourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyResource(unit.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(database2.ResourceOptions),
-		"aiven_pg_user":                             adapter.NewLazyResource(user2.ResourceOptions),
+		"aiven_pg_user":                             adapter.NewLazyResource(user3.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 	}
 }
@@ -73,6 +75,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(topiclist.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(user1.DataSourceOptions),
+		"aiven_opensearch_user":                     adapter.NewLazyDataSource(user2.DataSourceOptions),
 		"aiven_organization_address":                adapter.NewLazyDataSource(address.DataSourceOptions),
 		"aiven_organization_application_user":       adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
 		"aiven_organization_billing_group":          adapter.NewLazyDataSource(billinggroup1.DataSourceOptions),
@@ -84,7 +87,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_user_list":              adapter.NewLazyDataSource(userlist.DataSourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyDataSource(unit.DataSourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyDataSource(database2.DataSourceOptions),
-		"aiven_pg_user":                             adapter.NewLazyDataSource(user2.DataSourceOptions),
+		"aiven_pg_user":                             adapter.NewLazyDataSource(user3.DataSourceOptions),
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(plan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(planlist.DataSourceOptions),

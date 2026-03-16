@@ -69,7 +69,7 @@
 |  63 | aiven_opensearch_acl_config                 |        |     2 |
 |  64 | aiven_opensearch_acl_rule                   |        |     2 |
 |  65 | aiven_opensearch_security_plugin_config     |        |     2 |
-|  66 | aiven_opensearch_user                       |        |     2 |
+|  66 | aiven_opensearch_user                       | yes    |     2 |
 |  67 | aiven_organization                          | yes    |     2 |
 |  68 | aiven_organization_address                  | yes    |     2 |
 |  69 | aiven_organization_application_user         | yes    |     2 |
@@ -108,6 +108,6 @@
 | 102 | aiven_valkey                                |        |     2 |
 | 103 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 27%                          | 47     |   177 |
+|     | TOTAL MIGRATED 28%                          | 49     |   177 |
 +-----+---------------------------------------------+--------+-------+
 ```
