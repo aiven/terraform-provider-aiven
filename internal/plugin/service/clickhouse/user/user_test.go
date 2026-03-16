@@ -50,7 +50,11 @@ func TestAccAivenClickHouseUser(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 						resource.TestCheckResourceAttr(resourceName, "username", userName),
 						resource.TestCheckResourceAttrSet(resourceName, "uuid"),
+						resource.TestCheckResourceAttrSet(resourceName, "required"),
 						testAccCheckClickHouseUserHasGeneratedPassword(resourceName),
+						resource.TestCheckResourceAttr("data.aiven_clickhouse_user.by_username", "project", projectName),
+						resource.TestCheckResourceAttr("data.aiven_clickhouse_user.by_username", "service_name", serviceName),
+						resource.TestCheckResourceAttr("data.aiven_clickhouse_user.by_username", "username", userName),
 					),
 				},
 			},
@@ -116,6 +120,8 @@ func TestAccAivenClickHouseUser(t *testing.T) {
 					// Switch to write-only mode and check that the password is no longer stored in state.
 					Config: testAccClickHouseUserWriteOnly(projectName, serviceName, userName, "WriteOnlyPass$1", 1),
 					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
+						resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
 						testAccCheckClickHouseUserHasWOPassword(resourceName),
 					),
 				},
@@ -123,6 +129,17 @@ func TestAccAivenClickHouseUser(t *testing.T) {
 					// Rotate the write-only password to confirm that changing only the version starts another update.
 					Config: testAccClickHouseUserWriteOnly(projectName, serviceName, userName, "WriteOnlyPass$2", 2),
 					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
+						resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
+						testAccCheckClickHouseUserHasWOPassword(resourceName),
+					),
+				},
+				{
+					// Refresh the state without changes to make sure write-only mode survives a plain refresh.
+					RefreshState: true,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
+						resource.TestCheckResourceAttr(resourceName, "password_wo_version", "2"),
 						testAccCheckClickHouseUserHasWOPassword(resourceName),
 					),
 				},
@@ -131,6 +148,15 @@ func TestAccAivenClickHouseUser(t *testing.T) {
 					Config: testAccClickHouseUserWithoutPassword(projectName, serviceName, userName),
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckClickHouseUserHasGeneratedPassword(resourceName),
+					),
+				},
+				{
+					// Enter write-only mode again to make sure it still works after leaving it once.
+					Config: testAccClickHouseUserWriteOnly(projectName, serviceName, userName, "WriteOnlyPass$3", 1),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
+						resource.TestCheckResourceAttr(resourceName, "password_wo_version", "1"),
+						testAccCheckClickHouseUserHasWOPassword(resourceName),
 					),
 				},
 			},

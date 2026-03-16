@@ -17,12 +17,8 @@ func init() {
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	project := d.Get("project").(string)
-	serviceName := d.Get("service_name").(string)
-	username := d.Get("username").(string)
-
-	user, err := client.ServiceClickHouseUserCreate(ctx, project, serviceName, &clickhouse.ServiceClickHouseUserCreateIn{
-		Name: username,
+	user, err := client.ServiceClickHouseUserCreate(ctx, d.Get("project").(string), d.Get("service_name").(string), &clickhouse.ServiceClickHouseUserCreateIn{
+		Name: d.Get("username").(string),
 	})
 	if err != nil {
 		return err
@@ -32,11 +28,7 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		return err
 	}
 
-	if err = d.Set("uuid", user.Uuid); err != nil {
-		return err
-	}
-
-	return d.SetID(project, serviceName, user.Uuid)
+	return d.Flatten(user, flattenModifier(ctx, client))
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

@@ -44,20 +44,20 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"required": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "Indicates if a ClickHouse user is required.",
+				MarkdownDescription: "Required user.",
 			},
 			"service_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the ClickHouse service.",
+				MarkdownDescription: "Service name.",
 				Required:            true,
 			},
 			"username": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The name of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.",
+				MarkdownDescription: "User name. Exactly one of the fields must be specified: `uuid` or `username`.",
 				Optional:            true,
 			},
 			"uuid": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "UUID of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.",
+				MarkdownDescription: "User identifier. Exactly one of the fields must be specified: `uuid` or `username`.",
 				Optional:            true,
 			},
 		},

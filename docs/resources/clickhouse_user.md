@@ -26,8 +26,8 @@ resource "aiven_clickhouse_user" "example_user" {
 ### Required
 
 - `project` (String) Project name. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the ClickHouse service. Changing this property forces recreation of the resource.
-- `username` (String) The name of the ClickHouse user. Maximum length: `64`. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
+- `username` (String) User name. Maximum length: `64`. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -41,8 +41,8 @@ resource "aiven_clickhouse_user" "example_user" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_name/uuid`.
-- `required` (Boolean) Indicates if a ClickHouse user is required.
-- `uuid` (String) UUID of the ClickHouse user.
+- `required` (Boolean) Required user.
+- `uuid` (String) User identifier.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

@@ -68,22 +68,22 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"required": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "Indicates if a ClickHouse user is required.",
+				MarkdownDescription: "Required user.",
 			},
 			"service_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the ClickHouse service. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Service name. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "The name of the ClickHouse user. Maximum length: `64`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "User name. Maximum length: `64`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
 			"uuid": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "UUID of the ClickHouse user.",
+				MarkdownDescription: "User identifier.",
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},

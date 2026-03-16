@@ -26,19 +26,19 @@ data "aiven_clickhouse_user" "example_user" {
 ### Required
 
 - `project` (String) Project name.
-- `service_name` (String) The name of the ClickHouse service.
+- `service_name` (String) Service name.
 
 ### Optional
 
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `username` (String) The name of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.
-- `uuid` (String) UUID of the ClickHouse user. Exactly one of the fields must be specified: `uuid` or `username`.
+- `username` (String) User name. Exactly one of the fields must be specified: `uuid` or `username`.
+- `uuid` (String) User identifier. Exactly one of the fields must be specified: `uuid` or `username`.
 
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_name/uuid`.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
-- `required` (Boolean) Indicates if a ClickHouse user is required.
+- `required` (Boolean) Required user.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

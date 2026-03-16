@@ -31,18 +31,6 @@ remove:
   - privileges
   - roles
 schema:
-  service_name:
-    description: The name of the ClickHouse service.
-  username:
-    description: The name of the ClickHouse user.
-    forceNew: true
-  uuid:
-    computed: true
-    description: UUID of the ClickHouse user.
-  required:
-    type: boolean
-    computed: true
-    description: Indicates if a ClickHouse user is required.
   password:
     type: string
     optional: true
