@@ -114,7 +114,6 @@ Optional:
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `follower_fetching` (Block List, Max: 1) Enable follower fetching (see [below for nested schema](#nestedblock--kafka_user_config--follower_fetching))
 - `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.
-- `inkless` (Block List, Max: 1) Inkless configuration values (see [below for nested schema](#nestedblock--kafka_user_config--inkless))
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
@@ -149,14 +148,6 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Whether to enable the follower fetching functionality.
-
-
-<a id="nestedblock--kafka_user_config--inkless"></a>
-### Nested Schema for `kafka_user_config.inkless`
-
-Required:
-
-- `enabled` (Boolean) Whether to enable the Inkless functionality.
 
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>

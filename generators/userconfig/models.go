@@ -100,6 +100,11 @@ func (o *object) init(name string) {
 
 	unwrapArrayMultipleTypes(o)
 
+	// Removes a beta feature
+	if len(o.Properties) > 0 {
+		delete(o.Properties, "inkless")
+	}
+
 	// Sorts properties, so they keep order on each generation
 	keys := make([]string, 0, len(o.Properties))
 	for k := range o.Properties {

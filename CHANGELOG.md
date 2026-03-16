@@ -33,7 +33,6 @@ nav_order: 1
 - Change `aiven_project_user` field `member_type` (enum): add `role:project:admin`
 - Change `aiven_service_integration_endpoint` field `datadog_user_config.site` (enum): add `ap2.datadoghq.com`
 - Change `aiven_cassandra` resource field `cassandra_user_config`: deprecate: This property is deprecated
-- Add `aiven_kafka` field `kafka_user_config.inkless`: Inkless configuration values
 - Add `aiven_mysql` field `mysql_user_config.mysql.lower_case_table_names` (enum): Sets how table and database names
   are stored and compared
 - Add `aiven_pg` field `pg_user_config.switchover_windows`
