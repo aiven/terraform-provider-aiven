@@ -283,7 +283,7 @@ func valkeyUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"valkey_version": {
-				Description: "Enum: `8.1`, and newer. Valkey major version.",
+				Description: "Enum: `8.1`, `9.0`, and newer. Valkey major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

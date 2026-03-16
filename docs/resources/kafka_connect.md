@@ -211,6 +211,7 @@ Required:
 Optional:
 
 - `aws` (Block List, Max: 1) AWS secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--aws))
+- `env` (Block List, Max: 1) ENV secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--env))
 - `vault` (Block List, Max: 1) Vault secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--vault))
 
 <a id="nestedblock--kafka_connect_user_config--secret_providers--aws"></a>
@@ -225,6 +226,14 @@ Optional:
 
 - `access_key` (String) Access key used to authenticate with aws.
 - `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
+
+
+<a id="nestedblock--kafka_connect_user_config--secret_providers--env"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.env`
+
+Required:
+
+- `secrets` (Map of String) Key/value map of secrets for ENV secret provider.
 
 
 <a id="nestedblock--kafka_connect_user_config--secret_providers--vault"></a>
