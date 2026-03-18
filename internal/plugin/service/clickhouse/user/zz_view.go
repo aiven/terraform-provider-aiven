@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/clickhouse"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -43,6 +44,19 @@ var DataSourceOptions = adapter.DataSourceOptions{
 	Schema:           datasourceSchema,
 	SchemaInternal:   datasourceSchemaInternal(),
 	TypeName:         typeName,
+}
+
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(clickhouse.ServiceClickHouseUserCreateIn)
+	err := d.Expand(req, expandModifier(ctx, client), adapter.RenameFields(map[string]string{"username": "name"}))
+	if err != nil {
+		return err
+	}
+	rsp, err := client.ServiceClickHouseUserCreate(ctx, d.Get("project").(string), d.Get("service_name").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp, adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

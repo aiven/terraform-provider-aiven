@@ -11,12 +11,12 @@ clientHandler: clickhouse
 idAttributeComposed: [project, service_name, uuid]
 legacyTimeouts: true
 flattenModifier: true
+expandModifier: true
 planModifier: true
 operations:
   - id: ServiceClickHouseUserCreate
     type: create
     resultKey: user
-    disableView: true
   - id: ServiceClickHouseUserDelete
     type: delete
   - id: ServiceClickHouseUserList
