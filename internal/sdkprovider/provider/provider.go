@@ -147,8 +147,7 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_mirrormaker":            kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse":      clickhouse.DatasourceClickhouse(),
-			"aiven_clickhouse_user": clickhouse.DatasourceClickhouseUser(),
+			"aiven_clickhouse": clickhouse.DatasourceClickhouse(),
 
 			// dragonfly
 			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
@@ -263,7 +262,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// clickhouse
 			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),
-			"aiven_clickhouse_user":  clickhouse.ResourceClickhouseUser(),
 			"aiven_clickhouse_role":  clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
 
