@@ -498,3 +498,15 @@ func MustParseDuration(s string) time.Duration {
 	}
 	return d
 }
+
+// FilterIndex returns elements from list where pred(index) is true.
+// Useful for code generation when T name is unknown.
+func FilterIndex[T any](list []T, pred func(int) bool) []T {
+	result := make([]T, 0, len(list))
+	for i := range list {
+		if pred(i) {
+			result = append(result, list[i])
+		}
+	}
+	return result
+}

@@ -66,11 +66,12 @@ func operationToHandler() map[OperationType]AppearsIn {
 type OperationID string
 
 type Operation struct {
-	ID                   OperationID       `yaml:"id"`
-	Type                 OperationType     `yaml:"type"`
-	DisableView          bool              `yaml:"disableView"`
-	ResultKey            string            `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
-	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
+	ID                     OperationID       `yaml:"id"`
+	Type                   OperationType     `yaml:"type"`
+	DisableView            bool              `yaml:"disableView"`
+	ResultKey              string            `yaml:"resultKey"`              // E.g.: {errors: [], result: {}} - extract "result"
+	ResultListLookupKeys   map[string]string `yaml:"resultListLookupKeys"`   // When the response is a list, these keys are used to locate the correct item
+	ResultListLookupKeysOr bool              `yaml:"resultListLookupKeysOr"` // Set to true to use the OR operator when matching the list items
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
 

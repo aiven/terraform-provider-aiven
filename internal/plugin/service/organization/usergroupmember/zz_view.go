@@ -37,14 +37,19 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	for _, v := range rsp {
-		if v.UserId == d.Get("user_id").(string) {
-			return d.Flatten(&v)
+	found := adapter.FilterIndex(rsp, func(i int) bool {
+		return rsp[i].UserId == d.Get("user_id").(string)
+	})
+	switch len(found) {
+	case 1:
+		return d.Flatten(&found[0])
+	case 0:
+		return avngen.Error{
+			Message:     "`aiven_organization_user_group_member` with given `user_id` not found",
+			OperationID: "UserGroupMemberList",
+			Status:      http.StatusNotFound,
 		}
-	}
-	return avngen.Error{
-		Message:     fmt.Sprintf("`aiven_organization_user_group_member` with given `user_id` not found"),
-		OperationID: "UserGroupMemberList",
-		Status:      http.StatusNotFound,
+	default:
+		return fmt.Errorf("found %d `aiven_organization_user_group_member` with given `user_id`", len(found))
 	}
 }

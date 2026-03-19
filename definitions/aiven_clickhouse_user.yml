@@ -12,18 +12,22 @@ idAttributeComposed: [project, service_name, uuid]
 legacyTimeouts: true
 flattenModifier: true
 expandModifier: true
-planModifier: true
 operations:
   - id: ServiceClickHouseUserCreate
     type: create
     resultKey: user
   - id: ServiceClickHouseUserDelete
     type: delete
+  - id: ServiceClickHousePasswordReset
+    type: update
+    resultToKey: password
   - id: ServiceClickHouseUserList
     type: read
     resultKey: users
+    resultListLookupKeysOr: true
     resultListLookupKeys:
       Uuid: uuid
+      Name: username
 rename:
   name: username
   user_uuid: uuid

@@ -35,6 +35,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),
 	TypeName:       typeName,
+	Update:         updateView,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
@@ -60,24 +61,38 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := planModifier(ctx, client, d)
-	if err != nil {
-		return err
-	}
 	rsp, err := client.ServiceClickHouseUserList(ctx, d.Get("project").(string), d.Get("service_name").(string))
 	if err != nil {
 		return err
 	}
-	for _, v := range rsp {
-		if v.Uuid == d.Get("uuid").(string) {
-			return d.Flatten(&v, adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
+	found := adapter.FilterIndex(rsp, func(i int) bool {
+		return rsp[i].Name == d.Get("username").(string) || rsp[i].Uuid == d.Get("uuid").(string)
+	})
+	switch len(found) {
+	case 1:
+		return d.Flatten(&found[0], adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
+	case 0:
+		return avngen.Error{
+			Message:     "`aiven_clickhouse_user` with given `username` or `uuid` not found",
+			OperationID: "ServiceClickHouseUserList",
+			Status:      http.StatusNotFound,
 		}
+	default:
+		return fmt.Errorf("found %d `aiven_clickhouse_user` with given `username` or `uuid`", len(found))
 	}
-	return avngen.Error{
-		Message:     fmt.Sprintf("`aiven_clickhouse_user` with given `uuid` not found"),
-		OperationID: "ServiceClickHouseUserList",
-		Status:      http.StatusNotFound,
+}
+
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(clickhouse.ServiceClickHousePasswordResetIn)
+	err := d.Expand(req, expandModifier(ctx, client))
+	if err != nil {
+		return err
 	}
+	rsp, err := client.ServiceClickHousePasswordReset(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("uuid").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(&map[string]any{"password": rsp}, flattenModifier(ctx, client))
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
