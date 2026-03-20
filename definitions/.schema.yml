@@ -160,6 +160,12 @@ definitions:
         $comment: |
           The key to extract the result object from the response (if the API nests result under a property)
           E.g.: resultKey: "result" retrieves response.result
+      resultListLookupKeysOr:
+        type: boolean
+        $comment: |
+          Set to true to use the OR operator when matching the list items.
+        dependencies:
+          - resultListLookupKeys
       resultListLookupKeys:
         type: object
         additionalProperties:

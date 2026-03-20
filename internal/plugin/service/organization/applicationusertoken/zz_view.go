@@ -51,15 +51,20 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	for _, v := range rsp {
-		if v.TokenPrefix == d.Get("token_prefix").(string) {
-			return d.Flatten(&v)
+	found := adapter.FilterIndex(rsp, func(i int) bool {
+		return rsp[i].TokenPrefix == d.Get("token_prefix").(string)
+	})
+	switch len(found) {
+	case 1:
+		return d.Flatten(&found[0])
+	case 0:
+		return avngen.Error{
+			Message:     "`aiven_organization_application_user_token` with given `token_prefix` not found",
+			OperationID: "ApplicationUserAccessTokensList",
+			Status:      http.StatusNotFound,
 		}
-	}
-	return avngen.Error{
-		Message:     fmt.Sprintf("`aiven_organization_application_user_token` with given `token_prefix` not found"),
-		OperationID: "ApplicationUserAccessTokensList",
-		Status:      http.StatusNotFound,
+	default:
+		return fmt.Errorf("found %d `aiven_organization_application_user_token` with given `token_prefix`", len(found))
 	}
 }
 

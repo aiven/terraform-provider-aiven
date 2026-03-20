@@ -57,15 +57,20 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	for _, v := range rsp {
-		if v.DatabaseName == d.Get("database_name").(string) {
-			return d.Flatten(&v)
+	found := adapter.FilterIndex(rsp, func(i int) bool {
+		return rsp[i].DatabaseName == d.Get("database_name").(string)
+	})
+	switch len(found) {
+	case 1:
+		return d.Flatten(&found[0])
+	case 0:
+		return avngen.Error{
+			Message:     "`aiven_mysql_database` with given `database_name` not found",
+			OperationID: "ServiceDatabaseList",
+			Status:      http.StatusNotFound,
 		}
-	}
-	return avngen.Error{
-		Message:     fmt.Sprintf("`aiven_mysql_database` with given `database_name` not found"),
-		OperationID: "ServiceDatabaseList",
-		Status:      http.StatusNotFound,
+	default:
+		return fmt.Errorf("found %d `aiven_mysql_database` with given `database_name`", len(found))
 	}
 }
 

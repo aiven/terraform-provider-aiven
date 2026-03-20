@@ -307,12 +307,16 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	}
 
 	// Finds a match in the list.
-	// E.g. if rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
-	fieldsMatch := make([]jen.Code, 0)
+	// E.g. rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
+	var fieldsMatch jen.Statement
 	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
 		fieldName := operation.ResultListLookupKeys[key]
 		if i > 0 {
-			fieldsMatch = append(fieldsMatch, jen.Op("&&"))
+			if operation.ResultListLookupKeysOr {
+				fieldsMatch.Op("||")
+			} else {
+				fieldsMatch.Op("&&")
+			}
 		}
 
 		field, ok := item.Properties[fieldName]
@@ -320,29 +324,48 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 			return fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
 		}
 
-		fieldsMatch = append(
-			fieldsMatch,
-			jen.Id("v").Dot(key).
-				Op("==").
-				Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType())),
-		)
+		fieldsMatch.Id("rsp").Index(jen.Id("i")).Dot(key).
+			Op("==").
+			Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType()))
 	}
 
-	// Flattens the item on the list if all key fields match.
-	g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(rspName)).
-		Block(jen.If(fieldsMatch...).Block(jen.Add(flatten(jen.Id("&v")))))
+	// Filters the response by the fields match
+	const foundName = "found"
+	g.Id(foundName).Op(":=").Qual(adapterPackage, "FilterIndex").CallFunc(func(g *jen.Group) {
+		g.Id(rspName)
+		g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(&fieldsMatch))
+	})
 
-	// If passed the "for" loop, then no item was found - adds error
+	// Makes a list of human readable values, e.g. foo, bar and baz
 	values := lo.Values(operation.ResultListLookupKeys)
 	slices.Sort(values)
-	g.Return().
-		Qual(avnGenPackage, "Error").Values(jen.Dict{
-		jen.Id("OperationID"): jen.Lit(string(operation.ID)),
-		jen.Id("Status"):      jen.Qual("net/http", "StatusNotFound"),
-		jen.Id("Message"): jen.Qual("fmt", "Sprintf").Call(
-			jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanizeCodeList(values))),
-		),
-	})
+	humanValues := humanizeCodeList(values, func() string {
+		if operation.ResultListLookupKeysOr {
+			return " or "
+		}
+		return " and "
+	}())
+
+	// Switches on the number of found items
+	// 0: returns not found error
+	// 1: flattens the item
+	// 2+: returns multiple found error
+	g.Switch(jen.Len(jen.Id(foundName))).Block(
+		jen.Case(jen.Lit(1)).Block(flatten(jen.Op("&").Id(foundName).Index(jen.Lit(0)))),
+		jen.Case(jen.Lit(0)).BlockFunc(func(g *jen.Group) {
+			// If passed the "for" loop, then no item was found - adds error
+			g.Return().
+				Qual(avnGenPackage, "Error").Values(jen.Dict{
+				jen.Id("OperationID"): jen.Lit(string(operation.ID)),
+				jen.Id("Status"):      jen.Qual("net/http", "StatusNotFound"),
+				jen.Id("Message"):     jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanValues)),
+			})
+		}),
+		jen.Default().Block(jen.Return().Qual("fmt", "Errorf").Call(
+			jen.Lit(fmt.Sprintf("found %%d `%s` with given %s", def.typeName, humanValues)),
+			jen.Len(jen.Id(foundName)),
+		)),
+	)
 
 	return nil
 }
@@ -380,14 +403,14 @@ func filterAppearsIn(items []*Item, appearsIn AppearsIn) []*Item {
 }
 
 // humanizeCodeList turns ["foo", "bar", "baz"] -> "`foo`, `bar` and `baz`"
-func humanizeCodeList(args []string) string {
+func humanizeCodeList(args []string, union string) string {
 	var list strings.Builder
 	last := len(args) - 1
 	for i, v := range args {
 		switch i {
 		case 0:
 		case last:
-			list.WriteString(" and ")
+			list.WriteString(union)
 		default:
 			list.WriteString(", ")
 		}
