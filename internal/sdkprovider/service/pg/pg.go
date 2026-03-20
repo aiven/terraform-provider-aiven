@@ -222,7 +222,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, client
 		newVersion := userConfig["pg_version"].(string)
 		if oldVersion != newVersion {
 			t, err := client.ServiceTaskCreate(ctx, projectName, serviceName, &service.ServiceTaskCreateIn{
-				TargetVersion: service.TargetVersionType(newVersion),
+				TargetVersion: &newVersion, // A null value is not possible here because the upgrade requires a target version
 				TaskType:      service.TaskTypeUpgradeCheck,
 			})
 			if err != nil {
