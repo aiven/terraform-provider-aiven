@@ -454,7 +454,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Sweep
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 15
           max_attempts: 15
