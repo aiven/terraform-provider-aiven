@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_account_team_project` field `team_type` (enum): add `service:metrics:read`
+- Change `aiven_project_user` field `member_type` (enum): add `service:metrics:read`
+
 ## [4.53.0] - 2026-03-16
 
 - Migrate `aiven_clickhouse_user` to the Plugin Framework
