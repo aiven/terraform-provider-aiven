@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
@@ -26,7 +27,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )

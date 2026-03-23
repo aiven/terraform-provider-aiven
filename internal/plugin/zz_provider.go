@@ -36,6 +36,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 )
 
 func Resources() map[string]func() resource.Resource {
@@ -59,6 +60,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organizational_unit":                 adapter.NewLazyResource(unit.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(database2.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(user2.ResourceOptions),
+		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 	}
 }
 

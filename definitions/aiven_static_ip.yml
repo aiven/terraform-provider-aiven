@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/staticip
+resource:
+  description: |
+    The aiven_static_ip resource allows the creation and deletion of static ips.
+    Please note that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled.
+    Plans that would delete static ips that are in the assigned state will be blocked.
+  refreshState: true
+  refreshStateWaiter: true
+clientHandler: staticip
+idAttributeComposed: [project, static_ip_address_id]
+legacyTimeouts: true
+operations:
+  - id: StaticIPCreate
+    type: create
+  - id: ProjectStaticIPPatch
+    type: update
+  - id: StaticIPDelete
+    type: delete
+  - id: StaticIPList
+    type: read
+    resultKey: static_ips
+    resultListLookupKeys:
+      StaticIPAddressId: static_ip_address_id
+schema:
+  termination_protection:
+    default: false
