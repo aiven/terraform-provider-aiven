@@ -36,7 +36,7 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: nick-invision/retry@v3
+      - uses: nick-invision/retry@v4
         if: always()
         with:
           timeout_minutes: 15
