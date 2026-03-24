@@ -28,6 +28,15 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
+
+	// Plugin framework sweepers
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
+
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -50,11 +59,7 @@ func knownMissingSweepers() []string {
 		"aiven_clickhouse_grant",
 		"aiven_clickhouse_role",
 		"aiven_clickhouse_user",
-		"aiven_flink_application",
-		"aiven_flink_application_deployment",
 		"aiven_flink_application_version",
-		"aiven_flink_jar_application",
-		"aiven_flink_jar_application_deployment",
 		"aiven_flink_jar_application_version",
 		"aiven_gcp_privatelink_connection_approval",
 		"aiven_influxdb_database",
@@ -68,18 +73,15 @@ func knownMissingSweepers() []string {
 		"aiven_kafka_topic",
 		"aiven_kafka_user",
 		"aiven_m3db_user",
-		"aiven_mirrormaker_replication_flow",
 		"aiven_mysql_database",
 		"aiven_mysql_user",
 		"aiven_opensearch_acl_config",
 		"aiven_opensearch_acl_rule",
 		"aiven_opensearch_security_plugin_config",
 		"aiven_opensearch_user",
-		"aiven_organization_application_user_token",
 		"aiven_organization_permission",
 		"aiven_pg_database",
 		"aiven_pg_user",
-		"aiven_project_user",
 		"aiven_redis_user",
 		"aiven_valkey_user",
 	}
