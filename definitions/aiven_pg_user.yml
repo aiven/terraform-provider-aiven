@@ -4,7 +4,7 @@ resource:
   refreshState: true
   refreshStateDelay: 15s
   removeMissing: true
-  description: Creates and manages an Aiven for PostgreSQL® service user.
+  description: Creates and manages an Aiven for PostgreSQL® service user. The built-in admin user belongs to the service itself. Write-only password management is not supported.
 datasource:
   description: Gets information about an Aiven for PostgreSQL® service user.
 clientHandler: service

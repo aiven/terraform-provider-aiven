@@ -3,12 +3,12 @@
 page_title: "aiven_pg_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for PostgreSQL® service user. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven for PostgreSQL® service user. The built-in admin user belongs to the service itself. Write-only password management is not supported. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_pg_user (Resource)
 
-Creates and manages an Aiven for PostgreSQL® service user. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages an Aiven for PostgreSQL® service user. The built-in admin user belongs to the service itself. Write-only password management is not supported. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 
@@ -18,16 +18,6 @@ resource "aiven_pg_user" "example_user" {
   project      = data.aiven_project.example_project.project
   username     = "example-service-user"
   password     = var.service_user_password
-}
-
-# Each service has a default admin user with the username avnadmin.
-resource "aiven_pg_user" "admin_user" {
-  service_name = aiven_pg.example_postgres.service_name
-  project      = data.aiven_project.example_project.project
-  username     = "avnadmin"
-  password     = var.service_user_password
-  # The pg_allow_replication attribute is required for this user and must be true.
-  pg_allow_replication = true
 }
 ```
 
