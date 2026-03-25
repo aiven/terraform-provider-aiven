@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -114,7 +115,20 @@ func resourceKafkaQuotaCreate(ctx context.Context, d *schema.ResourceData, clien
 		return err
 	}
 
-	if err := client.ServiceKafkaQuotaCreate(ctx, project, service, &req); err != nil {
+	// Retry on 503 errors that can occur when the Kafka service is not yet fully ready
+	err := retry.RetryContext(ctx, 1*time.Minute, func() *retry.RetryError {
+		err := client.ServiceKafkaQuotaCreate(ctx, project, service, &req)
+		if err == nil {
+			return nil
+		}
+
+		if e, ok := errors.AsType[avngen.Error](err); ok && e.Status == 503 {
+			return retry.RetryableError(err)
+		}
+
+		return retry.NonRetryableError(err)
+	})
+	if err != nil {
 		return err
 	}
 
