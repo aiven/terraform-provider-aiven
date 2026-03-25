@@ -37,7 +37,7 @@ func sweepConnectionPoll(ctx context.Context) func(string) error {
 
 		for _, s := range services {
 			switch s.Type {
-			case schemautil.ServiceTypeAlloyDBOmni, schemautil.ServiceTypePG:
+			case schemautil.ServiceTypePG:
 			default:
 				continue
 			}

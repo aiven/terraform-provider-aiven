@@ -59,7 +59,6 @@ func TestUpsertServicePassword(t *testing.T) {
 			{"clickhouse", ServiceTypeClickhouse},
 			{"cassandra", ServiceTypeCassandra},
 			{"thanos", ServiceTypeThanos},
-			{"alloydbomni", ServiceTypeAlloyDBOmni},
 		}
 
 		for _, tc := range testCases {

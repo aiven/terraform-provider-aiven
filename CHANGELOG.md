@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Remove deprecated `aiven_alloydbomni`, `aiven_alloydbomni_database`, and `aiven_alloydbomni_user` resources and data
+  sources: the AlloyDB Omni service is no longer supported by the API.
 - Change `aiven_account_team_project` field `team_type` (enum): add `service:metrics:read`
 - Change `aiven_project_user` field `member_type` (enum): add `service:metrics:read`
 
