@@ -2,9 +2,11 @@ package applicationusertoken
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -33,8 +35,17 @@ func init() {
 
 			for _, organization := range organizations {
 				users, err := client.ApplicationUsersList(ctx, organization.OrganizationId)
-				if common.IsCritical(err) {
-					return fmt.Errorf("error retrieving application users for organization %s: %w", organization.OrganizationId, err)
+				if err != nil {
+					// AccountList returns all orgs visible to the token, but the token
+					// may not have permission on every org.
+					// Skip those rather than failing the entire sweep.
+					if e, ok := errors.AsType[avngen.Error](err); ok && e.Status == 403 {
+						continue
+					}
+
+					if common.IsCritical(err) {
+						return fmt.Errorf("error retrieving application users for organization %s: %w", organization.OrganizationId, err)
+					}
 				}
 
 				for _, user := range users {

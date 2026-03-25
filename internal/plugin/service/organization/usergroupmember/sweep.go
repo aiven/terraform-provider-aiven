@@ -2,9 +2,11 @@ package usergroupmember
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/usergroup"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
@@ -34,8 +36,17 @@ func init() {
 
 			for _, organization := range organizations {
 				groups, err := client.UserGroupsList(ctx, organization.OrganizationId)
-				if common.IsCritical(err) {
-					return fmt.Errorf("error retrieving user groups for organization %s: %w", organization.OrganizationId, err)
+				if err != nil {
+					// AccountList returns all orgs visible to the token, but the token
+					// may not have permission on every org.
+					// Skip those rather than failing the entire sweep.
+					if e, ok := errors.AsType[avngen.Error](err); ok && e.Status == 403 {
+						continue
+					}
+
+					if common.IsCritical(err) {
+						return fmt.Errorf("error retrieving user groups for organization %s: %w", organization.OrganizationId, err)
+					}
 				}
 
 				for _, group := range groups {
