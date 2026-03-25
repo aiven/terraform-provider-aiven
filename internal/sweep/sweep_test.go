@@ -36,7 +36,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
-
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -51,8 +50,6 @@ func knownMissingSweepers() []string {
 	// all the associated resources will be deleted as well, like Kafka ACLs, topics, etc.
 	// Therefore, we don't need to have sweepers for them.
 	return []string{
-		"aiven_alloydbomni_database",
-		"aiven_alloydbomni_user",
 		"aiven_azure_privatelink_connection_approval",
 		"aiven_cassandra_user",
 		"aiven_clickhouse_database",

@@ -14,7 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/alloydbomni"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
@@ -73,11 +72,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// pg
 			"aiven_pg": pg.DatasourcePG(),
-
-			// alloydbomni
-			"aiven_alloydbomni":          alloydbomni.DatasourceAlloyDBOmni(),
-			"aiven_alloydbomni_user":     alloydbomni.DatasourceAlloyDBOmniUser(),
-			"aiven_alloydbomni_database": alloydbomni.DatasourceAlloyDBOmniDatabase(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.DatasourceCassandra(),
@@ -179,11 +173,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// pg
 			"aiven_pg": pg.ResourcePG(),
 
-			// alloydbomni
-			"aiven_alloydbomni":          alloydbomni.ResourceAlloyDBOmni(),
-			"aiven_alloydbomni_user":     alloydbomni.ResourceAlloyDBOmniUser(),
-			"aiven_alloydbomni_database": alloydbomni.ResourceAlloyDBOmniDatabase(),
-
 			// cassandra
 			"aiven_cassandra":      cassandra.ResourceCassandra(),
 			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
@@ -276,9 +265,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 	// Adds "beta" warning to the description
 	betaResources := []string{
-		"aiven_alloydbomni",
-		"aiven_alloydbomni_user",
-		"aiven_alloydbomni_database",
 		"aiven_flink_jar_application",
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
@@ -289,9 +275,6 @@ func Provider(version string) (*schema.Provider, error) {
 	}
 
 	betaDataSources := []string{
-		"aiven_alloydbomni",
-		"aiven_alloydbomni_user",
-		"aiven_alloydbomni_database",
 		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",

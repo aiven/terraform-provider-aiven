@@ -48,7 +48,6 @@ func GetDefaultTimeout() time.Duration {
 }
 
 const (
-	ServiceTypeAlloyDBOmni      = "alloydbomni"
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeOpenSearch       = "opensearch"
@@ -133,7 +132,7 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 	list := make([]service.IntegrationType, 0)
 
 	switch kind {
-	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeAlloyDBOmni, ServiceTypeRedis, ServiceTypeValkey:
+	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeRedis, ServiceTypeValkey:
 		list = append(list, service.IntegrationTypeReadReplica)
 	}
 
@@ -976,7 +975,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		setProp(props, "connect_uri", connectionInfo.KafkaConnectUri)
 		setProp(props, "rest_uri", connectionInfo.KafkaRestUri)
 		setProp(props, "schema_registry_uri", connectionInfo.SchemaRegistryUri)
-	case ServiceTypeAlloyDBOmni, ServiceTypePG:
+	case ServiceTypePG:
 		// For compatibility with the old schema, we only set the first URI.
 		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
 		if len(connectionInfo.Pg) > 0 {

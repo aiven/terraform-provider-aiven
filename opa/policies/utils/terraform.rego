@@ -35,7 +35,6 @@ aiven_service_types := {
 	"aiven_valkey",
 	"aiven_thanos",
 	"aiven_flink",
-	"aiven_alloydbomni",
 }
 
 # Helper function to extract service name from service resources

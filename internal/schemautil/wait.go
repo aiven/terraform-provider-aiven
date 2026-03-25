@@ -238,7 +238,7 @@ func grafanaReady(s *service.ServiceGetOut) bool {
 
 func backupsReady(s *service.ServiceGetOut) bool {
 	switch s.ServiceType {
-	case ServiceTypeAlloyDBOmni, ServiceTypePG, ServiceTypeInfluxDB, ServiceTypeRedis, ServiceTypeDragonfly:
+	case ServiceTypePG, ServiceTypeInfluxDB, ServiceTypeRedis, ServiceTypeDragonfly:
 		// See https://github.com/aiven/terraform-provider-aiven/issues/756
 		switch "off" {
 		case s.UserConfig["redis_persistence"], s.UserConfig["dragonfly_persistence"]:
