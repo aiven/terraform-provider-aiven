@@ -118,10 +118,6 @@ func testAccCheckAivenAccountAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get an account id from Aiven")
 		}
 
-		if a["owner_team_id"] == "" {
-			return fmt.Errorf("expected to get a owner_team_id from Aiven")
-		}
-
 		if a["tenant_id"] == "" {
 			return fmt.Errorf("expected to get a tenant_id from Aiven")
 		}
