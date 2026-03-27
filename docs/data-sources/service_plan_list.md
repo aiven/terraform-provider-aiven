@@ -79,6 +79,7 @@ Optional:
 
 Read-Only:
 
+- `is_cluster_plan` (Boolean) True when the plan is a cluster plan with dedicated node groups.
 - `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
 - `node_count` (Number) Number of nodes in this service plan.
 - `regions` (Attributes Map) Service plan hourly price per cloud region. (see [below for nested schema](#nestedatt--service_plans--regions))
