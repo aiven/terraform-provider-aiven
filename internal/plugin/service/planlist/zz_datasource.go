@@ -21,6 +21,7 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  service_plans {
+	    is_cluster_plan    = true
 	    max_memory_percent = 42
 	    node_count         = 42
 	    regions = {
@@ -61,6 +62,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"service_plans": schema.ListNestedBlock{
 				MarkdownDescription: "List of plans available for this type of service.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+					"is_cluster_plan": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "True when the plan is a cluster plan with dedicated node groups.",
+					},
 					"max_memory_percent": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: "Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.",
@@ -139,6 +144,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
+						"is_cluster_plan": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
 						"max_memory_percent": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeInt,

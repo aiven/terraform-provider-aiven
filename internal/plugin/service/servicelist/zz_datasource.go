@@ -24,6 +24,7 @@ datasourceSchema:
 	    cloud_name               = "test"
 	    create_time              = "foo"
 	    disk_space_mb            = 42
+	    is_cluster_plan          = true
 	    node_count               = 42
 	    node_cpu_count           = 42
 	    node_memory_mb           = 3.14
@@ -70,6 +71,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					"disk_space_mb": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: "Megabytes of disk space for data storage.",
+					},
+					"is_cluster_plan": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "True when the service uses a cluster plan with dedicated node groups.",
 					},
 					"node_count": schema.Int64Attribute{
 						Computed:            true,
@@ -155,6 +160,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 						"disk_space_mb": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeInt,
+						},
+						"is_cluster_plan": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
 						},
 						"node_count": &adapter.Schema{
 							Computed: true,
