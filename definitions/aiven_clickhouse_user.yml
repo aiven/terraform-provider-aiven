@@ -41,8 +41,8 @@ schema:
     computed: true
     forceNew: false
     sensitive: true
-    minimum: 8
-    maximum: 256
+    minLength: 8
+    maxLength: 256
     conflictsWith: [password_wo]
     description: The password of the service user (auto-generated if not provided).
   password_wo:
@@ -51,8 +51,8 @@ schema:
     writeOnly: true
     sensitive: true
     description: The password of the service user (write-only, not stored in state).
-    minimum: 8
-    maximum: 256
+    minLength: 8
+    maxLength: 256
     conflictsWith: [password]
     alsoRequires: [password_wo_version]
   password_wo_version:

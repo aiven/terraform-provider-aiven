@@ -64,7 +64,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"resource": schema.StringAttribute{
-				MarkdownDescription: "The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID. Maximum length: `512`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID. Length must be between `1` and `512`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 512)},

@@ -31,7 +31,7 @@ resource "aiven_cmk" "example_user" {
 
 - `cmk_provider` (String) The cloud provider hosting the key management service (KMS). The possible values are `aws`, `gcp` and `oci`. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
-- `resource` (String) The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID. Maximum length: `512`. Changing this property forces recreation of the resource.
+- `resource` (String) The unique identifier for the CMK in the cloud provider's KMS. In AWS, this is the Key ARN; in Google Cloud the Resource Name; and in Oracle Cloud the Key OCID. Length must be between `1` and `512`. Changing this property forces recreation of the resource.
 
 ### Optional
 

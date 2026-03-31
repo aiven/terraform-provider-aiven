@@ -74,13 +74,13 @@ resource "aiven_flink_application_deployment" "main" {
 - `application_id` (String) Application Id. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 - `service_name` (String) Service name. Changing this property forces recreation of the resource.
-- `version_id` (String) ApplicationVersion ID. Maximum length: `36`. Changing this property forces recreation of the resource.
+- `version_id` (String) ApplicationVersion ID. Length must be exactly `36`. Changing this property forces recreation of the resource.
 
 ### Optional
 
 - `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail. Value must be between `1` and `128`. The default value is `1`. Changing this property forces recreation of the resource.
 - `restart_enabled` (Boolean) Specifies whether a Flink Job is restarted in case it fails. The default value is `true`. Changing this property forces recreation of the resource.
-- `starting_savepoint` (String) Job savepoint. Maximum length: `2048`. Changing this property forces recreation of the resource.
+- `starting_savepoint` (String) Job savepoint. Length must be between `1` and `2048`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

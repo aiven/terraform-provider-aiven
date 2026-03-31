@@ -23,7 +23,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ### Required
 
 - `billing_address_id` (String) Billing address ID. Maximum length: `36`.
-- `billing_group_name` (String) Billing Group Name. Maximum length: `128`.
+- `billing_group_name` (String) Billing Group Name. Length must be between `1` and `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 - `shipping_address_id` (String) Shipping address ID. Maximum length: `36`.
 

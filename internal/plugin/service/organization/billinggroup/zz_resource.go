@@ -56,7 +56,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Billing group ID.",
 			},
 			"billing_group_name": schema.StringAttribute{
-				MarkdownDescription: "Billing Group Name. Maximum length: `128`.",
+				MarkdownDescription: "Billing Group Name. Length must be between `1` and `128`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
 			},

@@ -48,7 +48,7 @@ resource "aiven_organization_project" "example_project" {
 
 ### Required
 
-- `billing_group_id` (String) Billing group ID to assign to the project. It's required when moving projects between organizations.
+- `billing_group_id` (String) Billing group ID to assign to the project. It's required when moving projects between organizations. Minimum length: `1`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`.
 - `parent_id` (String) Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `project_id` (String) The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource. Changing this property forces recreation of the resource.

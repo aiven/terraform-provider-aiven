@@ -47,7 +47,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"lc_collate": schema.StringAttribute{
 				Computed:            true,
 				Default:             stringdefault.StaticString("en_US.UTF-8"),
-				MarkdownDescription: "Default string sort order (`LC_COLLATE`) of the database. Maximum length: `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Default string sort order (`LC_COLLATE`) of the database. Length must be between `1` and `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
@@ -55,7 +55,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"lc_ctype": schema.StringAttribute{
 				Computed:            true,
 				Default:             stringdefault.StaticString("en_US.UTF-8"),
-				MarkdownDescription: "Default character classification (`LC_CTYPE`) of the database. Maximum length: `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Default character classification (`LC_CTYPE`) of the database. Length must be between `1` and `128`. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
