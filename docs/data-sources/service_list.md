@@ -75,6 +75,7 @@ Read-Only:
 - `cloud_name` (String) Target cloud.
 - `create_time` (String) Service creation timestamp (ISO 8601).
 - `disk_space_mb` (Number) Megabytes of disk space for data storage.
+- `is_cluster_plan` (Boolean) True when the service uses a cluster plan with dedicated node groups.
 - `node_count` (Number) Number of service nodes in the active plan.
 - `node_cpu_count` (Number) Number of CPUs for each node.
 - `node_memory_mb` (Number) Megabytes of memory for each node.
