@@ -231,6 +231,7 @@ Read-Only:
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean)
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number)
 - `pg_stat_statements__dot__track` (String)
+- `synchronous_commit` (String)
 - `temp_file_limit` (Number)
 - `timezone` (String)
 - `track_activity_query_size` (Number)

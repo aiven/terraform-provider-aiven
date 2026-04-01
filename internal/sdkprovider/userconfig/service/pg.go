@@ -420,6 +420,12 @@ func pgUserConfig() *schema.Schema {
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "none", "top"}, false),
 					},
+					"synchronous_commit": {
+						Description:  "Enum: `local`, `off`, `on`, `remote_apply`, `remote_write`. Sets the current transaction's synchronization level. The default is `off`. This setting takes precedence over `synchronous_replication`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"local", "off", "on", "remote_apply", "remote_write"}, false),
+					},
 					"temp_file_limit": {
 						Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited.",
 						Optional:    true,
@@ -814,7 +820,7 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"synchronous_replication": {
-				Description:  "Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
+				Description:  "Enum: `off`, `quorum`. Use synchronous_commit instead. Any change to this setting will automatically update synchronous_commit. Setting the value to quorum changes synchronous_commit to remote_write, while setting it to off changes synchronous_commit to off.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"off", "quorum"}, false),
