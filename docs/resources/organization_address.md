@@ -25,7 +25,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `address_lines` (List of String) Address Lines.
 - `city` (String) City. Maximum length: `125`.
 - `country_code` (String) Country Code. Maximum length: `2`.
-- `name` (String) Name of a company. Maximum length: `128`.
+- `name` (String) Name of a company. Length must be between `1` and `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 
 ### Optional

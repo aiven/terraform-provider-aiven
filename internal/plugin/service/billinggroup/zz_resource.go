@@ -104,7 +104,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"copy_from_billing_group": schema.StringAttribute{
-				MarkdownDescription: "Billing group ID. Maximum length: `36`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},

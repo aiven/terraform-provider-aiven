@@ -41,8 +41,10 @@ type DescriptionBuilder struct {
 	availabilityType AvailabilityType
 	// withPossibleValues is a flag that indicates if the possible values should be included.
 	withPossibleValues []string
+	// withMinLen is a flag that indicates if the minimum length should be included.
+	withMinLen *int
 	// withMaxLen is a flag that indicates if the maximum length should be included.
-	withMaxLen int
+	withMaxLen *int
 	// withMinimum is a flag that indicates if the minimum value should be included.
 	withMinimum *int
 	// withMaximum is a flag that indicates if the maximum value should be included.
@@ -112,9 +114,13 @@ func (db *DescriptionBuilder) AtLeastOneOf(values ...string) *DescriptionBuilder
 	return db
 }
 
-// MaxLen is a function that sets the withMaxLen flag.
+func (db *DescriptionBuilder) MinLen(length int) *DescriptionBuilder {
+	db.withMinLen = &length
+	return db
+}
+
 func (db *DescriptionBuilder) MaxLen(length int) *DescriptionBuilder {
-	db.withMaxLen = length
+	db.withMaxLen = &length
 	return db
 }
 
@@ -230,9 +236,20 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 		}
 	}
 
-	if db.withMaxLen > 0 {
+	switch {
+	case db.withMinLen != nil && db.withMaxLen != nil:
 		builder.WriteRune(' ')
-		builder.WriteString(fmt.Sprintf("Maximum length: `%v`.", db.withMaxLen))
+		if *db.withMinLen == *db.withMaxLen {
+			builder.WriteString(fmt.Sprintf("Length must be exactly `%d`.", *db.withMinLen))
+		} else {
+			builder.WriteString(fmt.Sprintf("Length must be between `%d` and `%d`.", *db.withMinLen, *db.withMaxLen))
+		}
+	case db.withMinLen != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Minimum length: `%d`.", *db.withMinLen))
+	case db.withMaxLen != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Maximum length: `%d`.", *db.withMaxLen))
 	}
 
 	switch {

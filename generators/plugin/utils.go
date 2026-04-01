@@ -105,6 +105,10 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 			b.ForceNew()
 		}
 
+		if item.MinLength > 0 {
+			b.MinLen(item.MinLength)
+		}
+
 		if item.MaxLength > 0 {
 			b.MaxLen(item.MaxLength)
 		}

@@ -93,13 +93,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"starting_savepoint": schema.StringAttribute{
-				MarkdownDescription: "Job savepoint. Maximum length: `2048`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Job savepoint. Length must be between `1` and `2048`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 2048)},
 			},
 			"version_id": schema.StringAttribute{
-				MarkdownDescription: "ApplicationVersion ID. Maximum length: `36`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "ApplicationVersion ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},

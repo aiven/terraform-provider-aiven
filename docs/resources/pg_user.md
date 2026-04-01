@@ -34,8 +34,8 @@ resource "aiven_pg_user" "example_user" {
 
 > **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
 
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`. Value must be between `8` and `256`.
-- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Value must be between `8` and `256`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`. Length must be between `8` and `256`.
+- `password_wo` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Length must be between `8` and `256`.
 - `password_wo_version` (Number) Version number for `password_wo`. Increment this to rotate the password. The field is required with `password_wo`. Minimum value: `1`.
 - `pg_allow_replication` (Boolean) Allows replication. For the default avnadmin user this attribute is required and is always `true`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

@@ -43,16 +43,16 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"password": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`. Value must be between `8` and `256`.",
+				MarkdownDescription: "The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`. Length must be between `8` and `256`.",
 				Optional:            true,
 				Sensitive:           true,
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("password_wo"))},
+				Validators:          []validator.String{stringvalidator.LengthBetween(8, 256), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("password_wo"))},
 			},
 			"password_wo": schema.StringAttribute{
-				MarkdownDescription: "The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Value must be between `8` and `256`.",
+				MarkdownDescription: "The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Length must be between `8` and `256`.",
 				Optional:            true,
 				Sensitive:           true,
-				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo_version")), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("password"))},
+				Validators:          []validator.String{stringvalidator.LengthBetween(8, 256), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo_version")), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("password"))},
 				WriteOnly:           true,
 			},
 			"password_wo_version": schema.Int64Attribute{
