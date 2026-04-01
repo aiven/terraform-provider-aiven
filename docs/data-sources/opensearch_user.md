@@ -25,12 +25,23 @@ data "aiven_opensearch_user" "example_opensearch_user" {
 
 ### Required
 
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) Name of the OpenSearch service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) Project name.
+- `service_name` (String) Service name.
+- `username` (String) Account username.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). Must be 8-256 characters if specified.
-- `type` (String) User account type, such as primary or regular account.
+- `id` (String) Resource ID composed as: `project/service_name/username`.
+- `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
+- `type` (String) Account type.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -121,7 +121,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// opensearch
 			"aiven_opensearch":                        opensearch.DatasourceOpenSearch(),
-			"aiven_opensearch_user":                   opensearch.DatasourceOpenSearchUser(),
 			"aiven_opensearch_acl_config":             opensearch.DatasourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":               opensearch.DatasourceOpenSearchACLRule(),
 			"aiven_opensearch_security_plugin_config": opensearch.DatasourceOpenSearchSecurityPluginConfig(),
@@ -226,7 +225,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// opensearch
 			"aiven_opensearch":                        opensearch.ResourceOpenSearch(),
-			"aiven_opensearch_user":                   opensearch.ResourceOpenSearchUser(),
 			"aiven_opensearch_acl_config":             opensearch.ResourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":               opensearch.ResourceOpenSearchACLRule(),
 			"aiven_opensearch_security_plugin_config": opensearch.ResourceOpenSearchSecurityPluginConfig(),

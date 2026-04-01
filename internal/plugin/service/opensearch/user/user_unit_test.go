@@ -18,34 +18,21 @@ func TestResetPassword(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name               string
-		plan               map[string]any
-		state              map[string]any
-		config             map[string]any
-		wantModifyCall     bool
-		wantAuthentication string
-		wantSetPassword    *string
+		name            string
+		plan            map[string]any
+		state           map[string]any
+		config          map[string]any
+		wantModifyCall  bool
+		wantSetPassword *string
 	}{
 		{
-			name: "new resource without password and authentication does not call Modify",
+			name: "new resource without password does not call Modify",
 			plan: map[string]any{
 				"project": project, "service_name": serviceName, "username": username,
 			},
-			state:              nil,
-			wantModifyCall:     false,
-			wantAuthentication: "",
-			wantSetPassword:    nil,
-		},
-		{
-			name: "new resource with authentication but no password calls Modify with nil password",
-			plan: map[string]any{
-				"project": project, "service_name": serviceName, "username": username,
-				"authentication": "caching_sha2_password",
-			},
-			state:              nil,
-			wantModifyCall:     true,
-			wantAuthentication: "caching_sha2_password",
-			wantSetPassword:    nil,
+			state:           nil,
+			wantModifyCall:  false,
+			wantSetPassword: nil,
 		},
 		{
 			name: "new resource with password calls Modify",
@@ -53,21 +40,9 @@ func TestResetPassword(t *testing.T) {
 				"project": project, "service_name": serviceName, "username": username,
 				"password": "Custom$Pass1",
 			},
-			state:              nil,
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("Custom$Pass1"),
-		},
-		{
-			name: "new resource with password and authentication calls Modify",
-			plan: map[string]any{
-				"project": project, "service_name": serviceName, "username": username,
-				"password": "Custom$Pass1", "authentication": "mysql_native_password",
-			},
-			state:              nil,
-			wantModifyCall:     true,
-			wantAuthentication: "mysql_native_password",
-			wantSetPassword:    new("Custom$Pass1"),
+			state:           nil,
+			wantModifyCall:  true,
+			wantSetPassword: new("Custom$Pass1"),
 		},
 		{
 			name: "new resource with password_wo calls Modify",
@@ -75,16 +50,14 @@ func TestResetPassword(t *testing.T) {
 				"project": project, "service_name": serviceName, "username": username,
 				"password_wo_version": 1,
 			},
-			state: nil,
 			config: map[string]any{
 				"password_wo": "WriteOnlyPass$1",
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("WriteOnlyPass$1"),
+			wantModifyCall:  true,
+			wantSetPassword: new("WriteOnlyPass$1"),
 		},
 		{
-			name: "existing resource no password or authentication change does not call Modify",
+			name: "existing resource no password change does not call Modify",
 			plan: map[string]any{
 				"password": "SamePass",
 			},
@@ -92,9 +65,8 @@ func TestResetPassword(t *testing.T) {
 				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
 				"password": "SamePass",
 			},
-			wantModifyCall:     false,
-			wantAuthentication: "",
-			wantSetPassword:    nil,
+			wantModifyCall:  false,
+			wantSetPassword: nil,
 		},
 		{
 			name: "existing resource password changed calls Modify",
@@ -105,22 +77,8 @@ func TestResetPassword(t *testing.T) {
 				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
 				"password": "OldPass",
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("NewPass456"),
-		},
-		{
-			name: "existing resource authentication changed calls Modify",
-			plan: map[string]any{
-				"password": "SamePass", "authentication": "mysql_native_password",
-			},
-			state: map[string]any{
-				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
-				"password": "SamePass", "authentication": "caching_sha2_password",
-			},
-			wantModifyCall:     true,
-			wantAuthentication: "mysql_native_password",
-			wantSetPassword:    new("SamePass"),
+			wantModifyCall:  true,
+			wantSetPassword: new("NewPass456"),
 		},
 		{
 			name: "existing resource password_wo_version changed calls Modify",
@@ -134,9 +92,8 @@ func TestResetPassword(t *testing.T) {
 			config: map[string]any{
 				"password_wo": "Rotated$2",
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("Rotated$2"),
+			wantModifyCall:  true,
+			wantSetPassword: new("Rotated$2"),
 		},
 		{
 			name: "existing resource password removed calls Modify with nil so backend generates",
@@ -145,9 +102,8 @@ func TestResetPassword(t *testing.T) {
 				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
 				"password": "OldPass",
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    nil,
+			wantModifyCall:  true,
+			wantSetPassword: nil,
 		},
 		{
 			name: "existing resource switch from password to password_wo calls Modify",
@@ -161,9 +117,8 @@ func TestResetPassword(t *testing.T) {
 			config: map[string]any{
 				"password_wo": "WriteOnlyPass$1",
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("WriteOnlyPass$1"),
+			wantModifyCall:  true,
+			wantSetPassword: new("WriteOnlyPass$1"),
 		},
 		{
 			name: "existing resource switch from password_wo back to password calls Modify",
@@ -174,9 +129,8 @@ func TestResetPassword(t *testing.T) {
 				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
 				"password_wo_version": 1,
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    new("BackToCustom$99"),
+			wantModifyCall:  true,
+			wantSetPassword: new("BackToCustom$99"),
 		},
 		{
 			name: "existing resource password_wo removed calls Modify with nil so backend generates",
@@ -184,9 +138,8 @@ func TestResetPassword(t *testing.T) {
 				"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
 				"password_wo_version": 1,
 			},
-			wantModifyCall:     true,
-			wantAuthentication: "",
-			wantSetPassword:    nil,
+			wantModifyCall:  true,
+			wantSetPassword: nil,
 		},
 	}
 
@@ -199,9 +152,8 @@ func TestResetPassword(t *testing.T) {
 			if tt.wantModifyCall {
 				client.EXPECT().
 					ServiceUserCredentialsModify(ctx, project, serviceName, username, &service.ServiceUserCredentialsModifyIn{
-						Operation:      service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
-						Authentication: service.AuthenticationType(tt.wantAuthentication),
-						NewPassword:    tt.wantSetPassword,
+						Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+						NewPassword: tt.wantSetPassword,
 					}).
 					Return(&service.ServiceUserCredentialsModifyOut{}, nil)
 			}

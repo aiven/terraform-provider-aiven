@@ -402,6 +402,12 @@ func (a *resourceAdapter) ValidateConfig(
 		return
 	}
 
+	if a.client == nil {
+		// By some reason ValidateConfig is called several times.
+		// The first call goes before resourceAdapter.Configure, hence the client is nil.
+		return
+	}
+
 	diags := &rsp.Diagnostics
 
 	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, nil, &req.Config)
