@@ -171,6 +171,7 @@ Focus on migration-specific concerns:
 - Match all SDK schema fields exactly
 - Preserve ID structure
 - Copy descriptions from SDK resource
+- Keep every SDK `Sensitive` field as `sensitive: true` in YAML (no regressions)
 
 ### 7. Generate and Build
 
@@ -256,6 +257,7 @@ Before marking migration complete:
 - [ ] Computed fields work the same way
 - [ ] Default values match
 - [ ] Required/Optional flags match
+- [ ] All SDK-sensitive fields remain `sensitive: true` in YAML
 - [ ] ForceNew behavior matches
 - [ ] Import works with existing IDs
 - [ ] Existing state can be used without migration
@@ -267,6 +269,7 @@ Before marking migration complete:
 
 | Issue | Solution |
 |-------|----------|
+| Sensitive field no longer marked sensitive | Set `sensitive: true` on the attribute (and nested fields if applicable); match SDK `Sensitive: true` exactly |
 | ID format changed accidentally | Verify `idAttributeComposed` matches SDK's ID builder |
 | Set ordering causes diffs | Use `arrayOrdered` instead of `array` |
 | Computed field becomes required | Keep as `computed: true` if API provides it |
@@ -318,5 +321,6 @@ Once all tests pass and state compatibility is verified:
 
 1. **State compatibility first** - Users should not need to recreate resources
 2. **Preserve exact behavior** - Match SDK resource behavior precisely
-3. **Test thoroughly** - All SDK test scenarios must pass with Plugin version
-4. **Remove SDK version** - Once verified, delete SDK resource to avoid maintenance burden
+3. **Preserve sensitivity** - All fields that were `Sensitive` in SDK must stay sensitive in Plugin Framework (`sensitive: true`); never expose secrets in plan or state output by omission
+4. **Test thoroughly** - All SDK test scenarios must pass with Plugin version
+5. **Remove SDK version** - Once verified, delete SDK resource to avoid maintenance burden

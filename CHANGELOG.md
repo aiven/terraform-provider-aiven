@@ -17,6 +17,7 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): add `service:metrics:read`
 - Change `aiven_project_user` field `member_type` (enum): add `service:metrics:read`
 - Migrate `aiven_opensearch_user` to the Plugin Framework
+- Migrate `aiven_opensearch_security_plugin_config` to the Plugin Framework
 
 ## [4.53.0] - 2026-03-16
 

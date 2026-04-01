@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/opensearch/securitypluginconfig
+resource:
+  refreshState: true
+  removeMissing: true
+  description: |
+    Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security).
+
+    After enabling OpenSearch Security management,
+    **you can no longer use Aiven Terraform Provider to manage access controls for that service.**
+    To manage user authentication and access control with OpenSearch Security management enabled,
+    use the OpenSearch Security Dashboard or OpenSearch Security API.
+
+    **Once enabled, OpenSearch Security management cannot be disabled.** To disable it,
+    [contact Aiven support](https://aiven.io/support-services).
+datasource:
+  description: Gets information about OpenSearch Security configuration for an Aiven for OpenSearch® service.
+clientHandler: opensearch
+idAttributeComposed: [project, service_name]
+legacyTimeouts: true
+operations:
+  - id: ServiceOpenSearchSecuritySet
+    type: create
+  - id: ServiceOpenSearchSecurityGet
+    type: read
+  - id: ServiceOpenSearchSecurityReset
+    type: update
+    disableView: true
+remove:
+  - new_password # From ServiceOpenSearchSecurityReset
+rename:
+  security_plugin_admin_enabled: admin_enabled
+  security_plugin_available: available
+  security_plugin_enabled: enabled
+schema:
+  admin_password:
+    sensitive: true

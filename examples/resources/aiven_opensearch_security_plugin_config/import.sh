@@ -1,1 +1,1 @@
-terraform import aiven_opensearch_security_plugin_config.main PROJECT/SERVICE_NAME
+terraform import aiven_opensearch_security_plugin_config.example PROJECT/SERVICE_NAME
