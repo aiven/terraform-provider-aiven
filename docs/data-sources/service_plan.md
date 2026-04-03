@@ -74,6 +74,7 @@ output "estimated_monthly_cost" {
 - `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
 - `node_count` (Number) Number of nodes in this service plan.
 - `object_storage_gb_price_usd` (String) Hourly object storage price per GiB in this region in USD.
+- `primary_count` (Number) Number of primary nodes in this Valkey cluster service plan.
 - `shard_count` (Number) Number of shards in this service plan.
 
 <a id="nestedblock--timeouts"></a>

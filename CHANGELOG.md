@@ -17,6 +17,12 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): add `service:metrics:read`
 - Change `aiven_project_user` field `member_type` (enum): add `service:metrics:read`
 - Migrate `aiven_opensearch_user` to the Plugin Framework
+- Change `aiven_clickhouse` field `clickhouse_user_config.clickhouse_version` (enum): add `25.8`
+- Add `aiven_pg` field `pg_user_config.pg.synchronous_commit` (enum): Sets the current transaction's synchronization
+  level. The default is `off`
+- Change `aiven_service_integration` field `clickhouse_kafka_user_config.tables.handle_error_mode` (enum): add `dead_letter_queue`
+- Change `aiven_service_integration` field `integration_type` (enum): add `service_composition`, remove `m3aggregator`, `m3coordinator`
+- Add `aiven_service_plan` datasource field `primary_count`: Number of primary nodes in this Valkey cluster service plan.
 
 ## [4.53.0] - 2026-03-16
 
