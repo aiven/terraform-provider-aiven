@@ -58,10 +58,10 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"handle_error_mode": {
-					Description:  "Enum: `default`, `stream`. Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors. Default: `default`.",
+					Description:  "Enum: `dead_letter_queue`, `default`, `stream`. Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to system.dead_letter_queue (requires ClickHouse 25.8+). Default: `default`.",
 					Optional:     true,
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"default", "stream"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"dead_letter_queue", "default", "stream"}, false),
 				},
 				"max_block_size": {
 					Description: "Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Default: `0`.",
