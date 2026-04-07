@@ -24,6 +24,7 @@ datasourceSchema:
 	    is_cluster_plan    = true
 	    max_memory_percent = 42
 	    node_count         = 42
+	    primary_count      = 42
 	    regions = {
 	      foo = {
 	        disk_space_cap_mb           = 42
@@ -73,6 +74,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					"node_count": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: "Number of nodes in this service plan.",
+					},
+					"primary_count": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: "Number of primary nodes in this Valkey cluster service plan.",
 					},
 					"regions": schema.MapNestedAttribute{
 						Computed:            true,
@@ -153,6 +158,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Type:     adapter.SchemaTypeInt,
 						},
 						"node_count": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeInt,
+						},
+						"primary_count": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeInt,
 						},

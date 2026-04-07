@@ -40,6 +40,7 @@ datasourceSchema:
 	  max_memory_percent          = 42
 	  node_count                  = 42
 	  object_storage_gb_price_usd = "foo"
+	  primary_count               = 42
 	  shard_count                 = 42
 	}
 */
@@ -82,6 +83,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"object_storage_gb_price_usd": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Hourly object storage price per GiB in this region in USD.",
+			},
+			"primary_count": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Number of primary nodes in this Valkey cluster service plan.",
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",
@@ -214,6 +219,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 			"object_storage_gb_price_usd": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"primary_count": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
 			},
 			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_plan": &adapter.Schema{Type: adapter.SchemaTypeString},
