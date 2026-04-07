@@ -24,13 +24,24 @@ data "aiven_opensearch_security_plugin_config" "os-sec-config" {
 
 ### Required
 
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) Project name.
+- `service_name` (String) Service name.
+
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether OpenSearch Security management is enabled. This is always true when the os-sec-admin password was set at least once.
-- `admin_password` (String, Sensitive) The password for the os-sec-admin user.
-- `available` (Boolean) Whether the security plugin is available. This is always true for recently created services.
-- `enabled` (Boolean) Whether the security plugin is enabled. This is always true for recently created services.
-- `id` (String) The ID of this resource.
+- `admin_enabled` (Boolean) security plugin admin defined.
+- `admin_password` (String, Sensitive) Current os-sec-admin password.
+- `available` (Boolean) Opensearch security available for the service.
+- `enabled` (Boolean) Opensearch security enabled for the service.
+- `id` (String) Resource ID composed as: `project/service_name`.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

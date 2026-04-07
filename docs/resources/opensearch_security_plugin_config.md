@@ -3,20 +3,12 @@
 page_title: "aiven_opensearch_security_plugin_config Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Enables and manages OpenSearch Security for an Aiven for OpenSearch® service https://aiven.io/docs/products/opensearch/concepts/os-security.
-  After enabling OpenSearch Security management, you can no longer use Aiven Terraform Provider to manage access controls for that service. To manage user authentication and access control with OpenSearch Security management enabled,
-  use the OpenSearch Security Dashboard or OpenSearch Security API.
-  Once enabled, OpenSearch Security management cannot be disabled. To disable it, contact Aiven support https://aiven.io/support-services.
+  Enables and manages OpenSearch Security for an Aiven for OpenSearch® service https://aiven.io/docs/products/opensearch/concepts/os-security. After enabling OpenSearch Security management, you can no longer use Aiven Terraform Provider to manage access controls for that service. To manage user authentication and access control with OpenSearch Security management enabled, use the OpenSearch Security Dashboard or OpenSearch Security API. Once enabled, OpenSearch Security management cannot be disabled. To disable it, contact Aiven support https://aiven.io/support-services. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_opensearch_security_plugin_config (Resource)
 
-Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security).
-
-After enabling OpenSearch Security management, **you can no longer use Aiven Terraform Provider to manage access controls for that service.** To manage user authentication and access control with OpenSearch Security management enabled,
-use the OpenSearch Security Dashboard or OpenSearch Security API.
-
-**Once enabled, OpenSearch Security management cannot be disabled.** To disable it, [contact Aiven support](https://aiven.io/support-services).
+Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security). After enabling OpenSearch Security management, **you can no longer use Aiven Terraform Provider to manage access controls for that service.** To manage user authentication and access control with OpenSearch Security management enabled, use the OpenSearch Security Dashboard or OpenSearch Security API. **Once enabled, OpenSearch Security management cannot be disabled.** To disable it, [contact Aiven support](https://aiven.io/support-services). If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 
@@ -33,9 +25,9 @@ resource "aiven_opensearch_security_plugin_config" "main" {
 
 ### Required
 
-- `admin_password` (String, Sensitive) The password for the os-sec-admin user.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `admin_password` (String, Sensitive) Current os-sec-admin password. Length must be between `8` and `256`.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -43,26 +35,26 @@ resource "aiven_opensearch_security_plugin_config" "main" {
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) Whether the os-sec-admin user is enabled. This indicates whether OpenSearch Security management is enabled. This is always true when the os-sec-admin password was set at least once.
-- `available` (Boolean) Whether the security plugin is available. This is always true for recently created services.
-- `enabled` (Boolean) Whether the security plugin is enabled. This is always true for recently created services.
-- `id` (String) The ID of this resource.
+- `admin_enabled` (Boolean) security plugin admin defined.
+- `available` (Boolean) Opensearch security available for the service.
+- `enabled` (Boolean) Opensearch security enabled for the service.
+- `id` (String) Resource ID composed as: `project/service_name`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_opensearch_security_plugin_config.main PROJECT/SERVICE_NAME
+terraform import aiven_opensearch_security_plugin_config.example PROJECT/SERVICE_NAME
 ```

@@ -1,16 +1,19 @@
 package opensearch_test
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
 	"testing"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 // OpenSearch service tests
@@ -285,4 +288,35 @@ func TestAccAivenOpenSearchPasswordRotation(t *testing.T) {
 		ResourceType: "aiven_opensearch",
 		Username:     "avnadmin",
 	})
+}
+
+func testAccCheckAivenOpenSearchUserResourceDestroy(s *terraform.State) error {
+	c, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return fmt.Errorf("error instantiating client: %w", err)
+	}
+
+	ctx := context.Background()
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "aiven_opensearch_user" {
+			continue
+		}
+
+		projectName, serviceName, username, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = c.ServiceUserGet(ctx, projectName, serviceName, username)
+		if err != nil && !avngen.IsNotFound(err) {
+			return fmt.Errorf("error checking if user was destroyed: %w", err)
+		}
+
+		if err == nil {
+			return fmt.Errorf("opensearch user (%s) still exists", rs.Primary.ID)
+		}
+	}
+
+	return nil
 }
