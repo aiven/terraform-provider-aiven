@@ -14,6 +14,8 @@ nav_order: 1
 
 - Remove deprecated `aiven_m3aggregator`, `aiven_m3db`, and `aiven_m3db_user` resources and data sources: the M3 service
   is no longer supported by the API.
+- Remove deprecated `aiven_influxdb`, `aiven_influxdb_database`, and `aiven_influxdb_user` resources and data sources:
+  the InfluxDB service is no longer supported by the API.
 - Remove deprecated `aiven_alloydbomni`, `aiven_alloydbomni_database`, and `aiven_alloydbomni_user` resources and data
   sources: the AlloyDB Omni service is no longer supported by the API.
 - Change `aiven_account_team_project` field `team_type` (enum): add `service:metrics:read`

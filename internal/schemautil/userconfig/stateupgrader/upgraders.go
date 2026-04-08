@@ -6,7 +6,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/grafana"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/influxdb"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/opensearch"
@@ -40,16 +39,6 @@ func Grafana() []schema.StateUpgrader {
 		{
 			Type:    grafana.ResourceGrafana().CoreConfigSchema().ImpliedType(),
 			Upgrade: grafana.ResourceGrafanaStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func InfluxDB() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    influxdb.ResourceInfluxDB().CoreConfigSchema().ImpliedType(),
-			Upgrade: influxdb.ResourceInfluxDBStateUpgrade,
 			Version: 0,
 		},
 	}

@@ -145,7 +145,6 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 
 		r := func() []string {
 			return []string{
-				"aiven_influxdb",
 				"aiven_grafana",
 				"aiven_mysql",
 				"aiven_redis",

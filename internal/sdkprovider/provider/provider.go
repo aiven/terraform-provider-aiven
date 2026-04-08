@@ -20,7 +20,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
@@ -53,11 +52,6 @@ func Provider(version string) (*schema.Provider, error) {
 		DataSourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool":   connectionpool.DatasourceConnectionPool(),
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
-
-			// influxdb
-			"aiven_influxdb":          influxdb.DatasourceInfluxDB(),
-			"aiven_influxdb_user":     influxdb.DatasourceInfluxDBUser(),
-			"aiven_influxdb_database": influxdb.DatasourceInfluxDBDatabase(),
 
 			// grafana
 			"aiven_grafana": grafana.DatasourceGrafana(),
@@ -147,10 +141,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
-			// influxdb
-			"aiven_influxdb":          influxdb.ResourceInfluxDB(),
-			"aiven_influxdb_user":     influxdb.ResourceInfluxDBUser(),
-			"aiven_influxdb_database": influxdb.ResourceInfluxDBDatabase(),
 
 			// grafana
 			"aiven_grafana": grafana.ResourceGrafana(),
