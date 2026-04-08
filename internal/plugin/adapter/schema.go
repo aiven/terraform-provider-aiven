@@ -29,6 +29,12 @@ type Schema struct {
 	// The path syntax reflects this, using indices such as "foo.0.bar", where "bar" is a property of the single object, accessed via index 0.
 	// This flag distinguishes between a direct object and a list containing one object, which is important for marshaling.
 	IsObject bool
+
+	// If true, the field value cannot be zero (i.e., it has a minimum, minLength, or minItems > 0).
+	// In SDKv2, the state may contain empty values that should not be sent to the API.
+	// Because we can't distinguish between zero values and missing values in the SDKv2 state,
+	// this flag allows such cases to be ignored.
+	ZeroNotAllowed bool
 }
 
 func isScalar(kind SchemaType) bool {

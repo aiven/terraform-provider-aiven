@@ -216,7 +216,7 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 		// If the string/array/set field was removed, set it to empty value
 		// to override the backend value.
 		_, ok = norm[k]
-		if !ok {
+		if !ok && !sch.ZeroNotAllowed {
 			switch sch.Type {
 			case SchemaTypeString, SchemaTypeList, SchemaTypeSet:
 				norm[k] = zeroValue(sch.Type)

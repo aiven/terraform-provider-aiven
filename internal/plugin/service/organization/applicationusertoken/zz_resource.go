@@ -197,7 +197,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"max_age_seconds": &adapter.Schema{Type: adapter.SchemaTypeInt},
+			"max_age_seconds": &adapter.Schema{
+				Type:           adapter.SchemaTypeInt,
+				ZeroNotAllowed: true,
+			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"scopes": &adapter.Schema{
 				Items: &adapter.Schema{Type: adapter.SchemaTypeString},

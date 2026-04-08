@@ -106,8 +106,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"address_lines": &adapter.Schema{
-				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
-				Type:  adapter.SchemaTypeList,
+				Items:          &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:           adapter.SchemaTypeList,
+				ZeroNotAllowed: true,
 			},
 			"city":         &adapter.Schema{Type: adapter.SchemaTypeString},
 			"country_code": &adapter.Schema{Type: adapter.SchemaTypeString},
@@ -119,7 +120,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"name":            &adapter.Schema{Type: adapter.SchemaTypeString},
+			"name": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"state":           &adapter.Schema{Type: adapter.SchemaTypeString},
 			"timeouts": &adapter.Schema{
