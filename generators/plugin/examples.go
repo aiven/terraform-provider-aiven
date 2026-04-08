@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -214,14 +215,13 @@ func exampleScalarItem(item *Item) (cty.Value, error) {
 		if anyValue == nil {
 			anyValue = int64(42)
 		}
-		switch v := anyValue.(type) {
-		case int:
-			return cty.NumberIntVal(int64(v)), nil
-		case int64:
-			return cty.NumberIntVal(v), nil
-		default:
-			return cty.NilVal, fmt.Errorf("unexpected integer type %T for %q", anyValue, item.Path())
+
+		// ParseInt handles case when value is a float, e.g. "10.0".
+		i, err := strconv.ParseInt(fmt.Sprint(anyValue), 10, 64)
+		if err != nil {
+			return cty.NilVal, fmt.Errorf(`invalid integer "%v" for %q: %w`, anyValue, item.Path(), err)
 		}
+		return cty.NumberIntVal(i), nil
 	case SchemaTypeNumber:
 		if anyValue == nil {
 			anyValue = 3.14

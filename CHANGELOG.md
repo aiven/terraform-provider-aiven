@@ -30,6 +30,7 @@ nav_order: 1
 - Add `aiven_service_plan` datasource field `primary_count`: Number of primary nodes in this Valkey cluster service plan.
 - Change `aiven_service_integration` field `integration_type` (enum): add `thanos_object_storage`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `external_object_storage_config`
+- Migrate `aiven_connection_pool` to the Plugin Framework
 
 ## [4.53.0] - 2026-03-16
 

@@ -242,6 +242,7 @@ ls internal/sdkprovider/service/*resource_name*_test.go
 
 **Ensure Plugin Framework tests cover:**
 - All CRUD operations from SDK tests
+- Update step: If the resource implements `Update` (mutable fields that are not all `ForceNew`), acceptance tests MUST include a Terraform apply that changes at least one updatable attribute after create — i.e. an explicit `update` step in the test sequence, not only create + destroy. Skip this only when the resource is create/delete-only or every mutable change forces replacement.
 - Edge cases
 - Error handling
 - Import functionality
@@ -263,6 +264,7 @@ Before marking migration complete:
 - [ ] Existing state can be used without migration
 - [ ] Backward compatibility test added using `acc.BackwardCompatibilitySteps()`
 - [ ] All SDK test scenarios pass with Plugin version
+- [ ] When the resource supports Update, acceptance tests include an update step (apply with changed config after create)
 - [ ] Changelog entry added to `CHANGELOG.md`
 
 ## Common Migration Issues
@@ -322,5 +324,5 @@ Once all tests pass and state compatibility is verified:
 1. **State compatibility first** - Users should not need to recreate resources
 2. **Preserve exact behavior** - Match SDK resource behavior precisely
 3. **Preserve sensitivity** - All fields that were `Sensitive` in SDK must stay sensitive in Plugin Framework (`sensitive: true`); never expose secrets in plan or state output by omission
-4. **Test thoroughly** - All SDK test scenarios must pass with Plugin version
+4. **Test thoroughly** - All SDK test scenarios must pass with Plugin version; when Update exists, tests must exercise it via an update apply step
 5. **Remove SDK version** - Once verified, delete SDK resource to avoid maintenance burden

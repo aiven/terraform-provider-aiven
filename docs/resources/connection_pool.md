@@ -3,12 +3,12 @@
 page_title: "aiven_connection_pool Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a connection pool https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling in an Aiven for PostgreSQL® service.
+  Creates and manages a connection pool https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling in an Aiven for PostgreSQL® service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_connection_pool (Resource)
 
-Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service.
+Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 
@@ -29,38 +29,38 @@ resource "aiven_connection_pool" "main" {
 
 ### Required
 
-- `database_name` (String) The name of the database the pool connects to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `pool_name` (String) Name of the pool. Changing this property forces recreation of the resource.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `database_name` (String) Service database name. Maximum length: `63`. Changing this property forces recreation of the resource.
+- `pool_name` (String) PgBouncer connection pool name. Maximum length: `63`. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `pool_mode` (String) The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes). The possible values are `session`, `statement` and `transaction`. The default value is `transaction`.
-- `pool_size` (Number) The number of PostgreSQL server connections this pool can use at a time. This does not affect the number of incoming connections. Each pool can handle a minimum of 5000 client connections. The default value is `10`.
+- `pool_mode` (String) PGBouncer pool mode. The possible values are `session`, `statement` and `transaction`. The default value is `transaction`.
+- `pool_size` (Number) Size of PGBouncer's PostgreSQL side connection pool. Value must be between `1` and `10000`. The default value is `10`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `username` (String) The name of the service user used to connect to the database. To set up proper dependencies please refer to this variable as a reference.
+- `username` (String) Service username. Length must be between `1` and `64`.
 
 ### Read-Only
 
-- `connection_uri` (String, Sensitive) The URI for connecting to the pool.
-- `id` (String) The ID of this resource.
+- `connection_uri` (String, Sensitive) Connection URI for the DB pool.
+- `id` (String) Resource ID composed as: `project/service_name/pool_name`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_connection_pool.main PROJECT/SERVICE_NAME/POOL_NAME
+terraform import aiven_connection_pool.example PROJECT/SERVICE_NAME/POOL_NAME
 ```

@@ -160,6 +160,9 @@ definitions:
         $comment: |
           The key to extract the result object from the response (if the API nests result under a property)
           E.g.: resultKey: "result" retrieves response.result
+      resultListLookup:
+        type: string
+        $comment: The name of the list to lookup the item in the response
       resultListLookupKeysOr:
         type: boolean
         $comment: |

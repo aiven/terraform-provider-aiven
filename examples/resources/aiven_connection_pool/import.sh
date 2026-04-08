@@ -1,1 +1,1 @@
-terraform import aiven_connection_pool.main PROJECT/SERVICE_NAME/POOL_NAME
+terraform import aiven_connection_pool.example PROJECT/SERVICE_NAME/POOL_NAME

@@ -26,7 +26,7 @@
 | 20 | aiven_clickhouse_role                       |        |     1 |
 | 21 | aiven_clickhouse_user                       | yes    |     2 |
 | 22 | aiven_cmk                                   | yes    |     1 |
-| 23 | aiven_connection_pool                       |        |     2 |
+| 23 | aiven_connection_pool                       | yes    |     2 |
 | 24 | aiven_dragonfly                             |        |     2 |
 | 25 | aiven_external_identity                     | yes    |     1 |
 | 26 | aiven_flink                                 |        |     2 |
@@ -102,6 +102,6 @@
 | 96 | aiven_valkey                                |        |     2 |
 | 97 | aiven_valkey_user                           |        |     2 |
 +----+---------------------------------------------+--------+-------+
-|    | TOTAL MIGRATED 31%                          | 51     |   165 |
+|    | TOTAL MIGRATED 32%                          | 53     |   165 |
 +----+---------------------------------------------+--------+-------+
 ```
