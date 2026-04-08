@@ -85,7 +85,7 @@ func ResourcePGUserCreate(ctx context.Context, d schemautil.ResourceData, client
 		&service.ServiceUserCreateIn{
 			Username: username,
 			AccessControl: &service.AccessControlIn{
-				PgAllowReplication: &allowReplication,
+				PGAllowReplication: &allowReplication,
 			},
 		},
 	)
@@ -131,7 +131,7 @@ func ResourcePGUserUpdate(ctx context.Context, d schemautil.ResourceData, client
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
-				PgAllowReplication: new(d.Get("pg_allow_replication").(bool)),
+				PGAllowReplication: new(d.Get("pg_allow_replication").(bool)),
 			},
 		}
 		_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, req)
@@ -178,8 +178,8 @@ func ResourcePGUserRead(ctx context.Context, d schemautil.ResourceData, client a
 		return err
 	}
 
-	if user.AccessControl != nil && user.AccessControl.PgAllowReplication != nil {
-		err = d.Set("pg_allow_replication", *user.AccessControl.PgAllowReplication)
+	if user.AccessControl != nil && user.AccessControl.PGAllowReplication != nil {
+		err = d.Set("pg_allow_replication", *user.AccessControl.PGAllowReplication)
 		if err != nil {
 			return err
 		}

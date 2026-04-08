@@ -976,13 +976,13 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	case ServiceTypePG:
 		// For compatibility with the old schema, we only set the first URI.
 		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
-		if len(connectionInfo.Pg) > 0 {
-			props["uri"] = connectionInfo.Pg[0]
+		if len(connectionInfo.PG) > 0 {
+			props["uri"] = connectionInfo.PG[0]
 		}
 
-		props["uris"] = connectionInfo.Pg
-		params := make([]map[string]any, len(connectionInfo.PgParams))
-		for i, p := range connectionInfo.PgParams {
+		props["uris"] = connectionInfo.PG
+		params := make([]map[string]any, len(connectionInfo.PGParams))
+		for i, p := range connectionInfo.PGParams {
 			port, err := strconv.ParseInt(p.Port, 10, 32)
 			if err != nil {
 				return err
@@ -1010,9 +1010,9 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		}
 
 		props["params"] = params
-		props["standby_uris"] = connectionInfo.PgStandby
-		props["syncing_uris"] = connectionInfo.PgSyncing
-		setProp(props, "replica_uri", connectionInfo.PgReplicaUri)
+		props["standby_uris"] = connectionInfo.PGStandby
+		props["syncing_uris"] = connectionInfo.PGSyncing
+		setProp(props, "replica_uri", connectionInfo.PGReplicaUri)
 
 		// TODO: This isn't in the connection info, but it's in the metadata.
 		//  We should move this to the other part of the schema in the next major version.

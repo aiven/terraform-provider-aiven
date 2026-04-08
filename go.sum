@@ -80,6 +80,8 @@ github.com/aiven/go-api-schemas v1.179.0 h1:OZOEu0ruldYBRu2meypv4ngePU7X4KYia0xx
 github.com/aiven/go-api-schemas v1.179.0/go.mod h1:WTWdlammndlBvINEUP2F8JDmOef6rEWkpNVhJS33GcQ=
 github.com/aiven/go-client-codegen v0.170.0 h1:mLvdiDKKvcHK6LdhlzXcmOQQz9ssD+WLi+az3E3q+x0=
 github.com/aiven/go-client-codegen v0.170.0/go.mod h1:v+aIjg3XplzzDneRaBqnDkHp2ikzB4XPocywG4ySA2Y=
+github.com/aiven/go-client-codegen v0.171.0 h1:ad3Qc1YqC59dV+PAxrSXjax8lZbal8ikwuikDHnA3RQ=
+github.com/aiven/go-client-codegen v0.171.0/go.mod h1:v+aIjg3XplzzDneRaBqnDkHp2ikzB4XPocywG4ySA2Y=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
 github.com/aiven/go-utils/selproj v0.1.0/go.mod h1:Tc71RJ7tPJ5V0IsVxSrXbAJQICGLpe5iMXS+rq8aLqg=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
