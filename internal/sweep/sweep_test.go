@@ -19,7 +19,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
@@ -69,7 +68,6 @@ func knownMissingSweepers() []string {
 		"aiven_kafka_schema_registry_acl",
 		"aiven_kafka_topic",
 		"aiven_kafka_user",
-		"aiven_m3db_user",
 		"aiven_mysql_database",
 		"aiven_mysql_user",
 		"aiven_opensearch_acl_config",

@@ -24,7 +24,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
@@ -109,11 +108,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// service integrations
 			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
 			"aiven_service_integration_endpoint": serviceintegration.DatasourceServiceIntegrationEndpoint(),
-
-			// m3db
-			"aiven_m3db":         m3db.DatasourceM3DB(),
-			"aiven_m3db_user":    m3db.DatasourceM3DBUser(),
-			"aiven_m3aggregator": m3db.DatasourceM3Aggregator(),
 
 			// flink
 			"aiven_flink":                     flink.DatasourceFlink(),
@@ -209,11 +203,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// service integrations
 			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
 			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
-
-			// m3db
-			"aiven_m3db":         m3db.ResourceM3DB(),
-			"aiven_m3db_user":    m3db.ResourceM3DBUser(),
-			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
 			"aiven_flink":                            flink.ResourceFlink(),

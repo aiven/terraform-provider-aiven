@@ -8,7 +8,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/influxdb"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/kafka"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/m3"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/pg"
@@ -91,26 +90,6 @@ func KafkaTopic() []schema.StateUpgrader {
 		{
 			Type:    kafka.ResourceKafkaTopic().CoreConfigSchema().ImpliedType(),
 			Upgrade: kafka.ResourceKafkaTopicStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func M3Aggregator() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    m3.ResourceM3Aggregator().CoreConfigSchema().ImpliedType(),
-			Upgrade: m3.ResourceM3AggregatorStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func M3DB() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    m3.ResourceM3DBResource().CoreConfigSchema().ImpliedType(),
-			Upgrade: m3.ResourceM3DBStateUpgrade,
 			Version: 0,
 		},
 	}

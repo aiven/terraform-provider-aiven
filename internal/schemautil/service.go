@@ -58,8 +58,6 @@ const (
 	ServiceTypeKafka            = "kafka"
 	ServiceTypeKafkaConnect     = "kafka_connect"
 	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
-	ServiceTypeM3               = "m3db"
-	ServiceTypeM3Aggregator     = "m3aggregator"
 	ServiceTypeFlink            = "flink"
 	ServiceTypeClickhouse       = "clickhouse"
 	ServiceTypeDragonfly        = "dragonfly"
@@ -1075,16 +1073,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		setProp(props, "database_name", connectionInfo.InfluxdbDbname)
 	case ServiceTypeGrafana:
 		props["uris"] = connectionInfo.Grafana
-	case ServiceTypeM3:
-		props["uris"] = connectionInfo.M3Db
-		setProp(props, "http_cluster_uri", connectionInfo.HttpClusterUri)
-		setProp(props, "http_node_uri", connectionInfo.HttpNodeUri)
-		setProp(props, "influxdb_uri", connectionInfo.InfluxdbUri)
-		setProp(props, "prometheus_remote_read_uri", connectionInfo.PrometheusRemoteReadUri)
-		setProp(props, "prometheus_remote_write_uri", connectionInfo.PrometheusRemoteWriteUri)
-	case ServiceTypeM3Aggregator:
-		props["uris"] = connectionInfo.M3Aggregator
-		setProp(props, "aggregator_http_uri", connectionInfo.AggregatorHttpUri)
 	case ServiceTypeClickhouse:
 		props["uris"] = connectionInfo.Clickhouse
 	case ServiceTypeFlink:

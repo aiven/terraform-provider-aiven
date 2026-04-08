@@ -60,24 +60,6 @@ func TestRenameAliasesToDto(t *testing.T) {
 			expected:    `{"ip_filter": [{"name": "foo"}]}`,
 		},
 		{
-			serviceType: "m3db",
-			name:        "ignores namespaces_string on the root level",
-			src:         `{"namespaces_string": {"name": "foo"}}`,
-			expected:    `{"namespaces_string": {"name": "foo"}}`,
-		},
-		{
-			serviceType: "m3db",
-			name:        "renames namespaces_string where expected",
-			src:         `{"rules": {"mapping": [{"namespaces_string": ["string"]}]}}`,
-			expected:    `{"rules": {"mapping": [{"namespaces": ["string"]}]}}`,
-		},
-		{
-			serviceType: "m3db",
-			name:        "renames namespaces_object where expected",
-			src:         `{"rules": {"mapping": [{"namespaces_object": [{"name": "foo"}]}]}}`,
-			expected:    `{"rules": {"mapping": [{"namespaces": [{"name": "foo"}]}]}}`,
-		},
-		{
 			serviceType: "thanos",
 			name:        "with a prent field to rename",
 			src:         `{"query_frontend": {"query_range_align_range_with_step": 0}}`,
@@ -145,24 +127,6 @@ func TestRenameAliasesToTfo(t *testing.T) {
 						{"network": "::/0"},
 					},
 				),
-			),
-		},
-		{
-			serviceType: "m3db",
-			name:        "renames namespaces_string",
-			expected:    `{"rules": {"mapping": [{"namespaces_string": ["string"]}]}}`,
-			dto:         `{"rules": {"mapping": [{"namespaces": ["string"]}]}}`,
-			tfo: newResourceDataMock(
-				newResourceDataKV("m3db_user_config.0.rules.0.mapping.0.namespaces_string", "string"),
-			),
-		},
-		{
-			serviceType: "m3db",
-			name:        "renames namespaces_object",
-			expected:    `{"rules": {"mapping": [{"namespaces_object": [{"name": "foo"}]}]}}`,
-			dto:         `{"rules": {"mapping": [{"namespaces": [{"name": "foo"}]}]}}`,
-			tfo: newResourceDataMock(
-				newResourceDataKV("m3db_user_config.0.rules.0.mapping.0.namespaces_object", []map[string]string{{"name": "foo"}}),
 			),
 		},
 		{
