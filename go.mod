@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/agnivade/levenshtein v1.2.1
 	github.com/aiven/aiven-go-client/v2 v2.38.0
-	github.com/aiven/go-client-codegen v0.166.0
+	github.com/aiven/go-client-codegen v0.169.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stoewer/go-strcase v1.3.1
@@ -264,7 +264,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.178.0
+	github.com/aiven/go-api-schemas v1.179.0
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.18.0 // indirect

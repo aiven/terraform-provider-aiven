@@ -35,7 +35,7 @@ func clickhouseUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"clickhouse_version": {
-				Description: "Enum: `25.3`, and newer. ClickHouse major version.",
+				Description: "Enum: `25.3`, `25.8`, and newer. ClickHouse major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
