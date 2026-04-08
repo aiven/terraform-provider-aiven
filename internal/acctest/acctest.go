@@ -151,7 +151,6 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 				"aiven_redis",
 				"aiven_valkey",
 				"aiven_pg",
-				"aiven_m3db",
 				"aiven_flink",
 				"aiven_opensearch",
 				"aiven_kafka",
@@ -159,7 +158,6 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 				"aiven_kafka_connect",
 				"aiven_clickhouse",
 				"aiven_dragonfly",
-				"aiven_m3aggregator",
 				"aiven_thanos",
 				"aiven_valkey",
 			}

@@ -26,8 +26,6 @@ func init() {
 			"aiven_kafka",
 			"aiven_kafka_connect",
 			"aiven_kafka_mirrormaker",
-			"aiven_m3db",
-			"aiven_m3aggregator",
 			"aiven_mysql",
 			"aiven_opensearch",
 			"aiven_pg",

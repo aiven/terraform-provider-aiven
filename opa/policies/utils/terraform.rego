@@ -29,8 +29,6 @@ aiven_service_types := {
 	"aiven_redis",
 	"aiven_cassandra",
 	"aiven_grafana",
-	"aiven_m3db",
-	"aiven_m3aggregator",
 	"aiven_dragonfly",
 	"aiven_valkey",
 	"aiven_thanos",
