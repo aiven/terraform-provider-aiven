@@ -20,7 +20,6 @@ func init() {
 		"aiven_cassandra",
 		"aiven_opensearch",
 		"aiven_grafana",
-		"aiven_influxdb",
 		"aiven_redis",
 		"aiven_mysql",
 		"aiven_kafka",

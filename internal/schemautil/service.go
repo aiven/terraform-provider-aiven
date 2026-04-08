@@ -52,7 +52,6 @@ const (
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
-	ServiceTypeInfluxDB         = "influxdb"
 	ServiceTypeRedis            = "redis"
 	ServiceTypeMySQL            = "mysql"
 	ServiceTypeKafka            = "kafka"
@@ -1066,11 +1065,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["slave_uris"] = connectionInfo.ValkeySlave
 		setProp(props, "replica_uri", connectionInfo.ValkeyReplicaUri)
 		setProp(props, "password", connectionInfo.ValkeyPassword)
-	case ServiceTypeInfluxDB:
-		props["uris"] = connectionInfo.Influxdb
-		setProp(props, "username", connectionInfo.InfluxdbUsername)
-		setProp(props, "password", connectionInfo.InfluxdbPassword)
-		setProp(props, "database_name", connectionInfo.InfluxdbDbname)
 	case ServiceTypeGrafana:
 		props["uris"] = connectionInfo.Grafana
 	case ServiceTypeClickhouse:

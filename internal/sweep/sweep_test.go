@@ -17,7 +17,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
@@ -58,8 +57,6 @@ func knownMissingSweepers() []string {
 		"aiven_flink_application_version",
 		"aiven_flink_jar_application_version",
 		"aiven_gcp_privatelink_connection_approval",
-		"aiven_influxdb_database",
-		"aiven_influxdb_user",
 		"aiven_kafka_acl",
 		"aiven_kafka_native_acl",
 		"aiven_kafka_quota",

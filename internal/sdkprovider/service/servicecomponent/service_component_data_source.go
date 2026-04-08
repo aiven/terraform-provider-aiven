@@ -38,7 +38,6 @@ func DatasourceServiceComponent() *schema.Resource {
 					"cassandra",
 					"elasticsearch",
 					"grafana",
-					"influxdb",
 					"kafka",
 					"kafka_connect",
 					"mysql",

@@ -25,7 +25,6 @@ func init() {
 			"aiven_clickhouse",
 			"aiven_flink",
 			"aiven_grafana",
-			"aiven_influxdb",
 			"aiven_kafka",
 			"aiven_kafka_connect",
 			"aiven_kafka_mirrormaker",
