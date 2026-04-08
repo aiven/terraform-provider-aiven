@@ -45,7 +45,7 @@ func TestCreateUpdateRetriesErrors(t *testing.T) {
 	createIn := &service.ServiceUserCreateIn{
 		Username: username,
 		AccessControl: &service.AccessControlIn{
-			PgAllowReplication: new(true),
+			PGAllowReplication: new(true),
 		},
 	}
 	client.EXPECT().
