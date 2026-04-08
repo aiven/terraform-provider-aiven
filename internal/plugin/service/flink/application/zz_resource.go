@@ -84,8 +84,9 @@ func resourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
 			"application_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"created_at": &adapter.Schema{
 				Computed: true,

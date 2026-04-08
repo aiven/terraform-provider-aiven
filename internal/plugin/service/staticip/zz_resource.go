@@ -92,8 +92,9 @@ func resourceSchemaInternal() *adapter.Schema {
 			},
 			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_name": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"state": &adapter.Schema{
 				Computed: true,

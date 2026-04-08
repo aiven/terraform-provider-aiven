@@ -86,8 +86,9 @@ func resourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
 			"cmk_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"cmk_provider": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"created_at": &adapter.Schema{
@@ -99,8 +100,11 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"project":  &adapter.Schema{Type: adapter.SchemaTypeString},
-			"resource": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"resource": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"status": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,

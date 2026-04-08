@@ -91,12 +91,14 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"lc_collate": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"lc_ctype": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},

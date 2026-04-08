@@ -122,24 +122,29 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"deployment_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
 			"parallelism": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeInt,
+				Computed:       true,
+				Type:           adapter.SchemaTypeInt,
+				ZeroNotAllowed: true,
 			},
 			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"restart_enabled": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,
 			},
-			"service_name":       &adapter.Schema{Type: adapter.SchemaTypeString},
-			"starting_savepoint": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"starting_savepoint": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{
 					"create":  &adapter.Schema{Type: adapter.SchemaTypeString},
@@ -150,7 +155,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				},
 				Type: adapter.SchemaTypeObject,
 			},
-			"version_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"version_id": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

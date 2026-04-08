@@ -98,12 +98,19 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"password": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
-			"password_wo":         &adapter.Schema{Type: adapter.SchemaTypeString},
-			"password_wo_version": &adapter.Schema{Type: adapter.SchemaTypeInt},
-			"project":             &adapter.Schema{Type: adapter.SchemaTypeString},
+			"password_wo": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
+			"password_wo_version": &adapter.Schema{
+				Type:           adapter.SchemaTypeInt,
+				ZeroNotAllowed: true,
+			},
+			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"required": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,

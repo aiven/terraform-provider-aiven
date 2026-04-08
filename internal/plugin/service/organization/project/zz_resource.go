@@ -103,10 +103,14 @@ func resourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
 			"base_port": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeInt,
+				Computed:       true,
+				Type:           adapter.SchemaTypeInt,
+				ZeroNotAllowed: true,
 			},
-			"billing_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_id": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"ca_cert": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,

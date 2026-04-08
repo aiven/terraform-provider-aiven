@@ -181,8 +181,9 @@ func resourceSchemaInternal() *adapter.Schema {
 			},
 			"billing_extra_text": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"billing_group_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"card_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"city": &adapter.Schema{
@@ -193,7 +194,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"copy_from_billing_group": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"copy_from_billing_group": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"country_code": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,

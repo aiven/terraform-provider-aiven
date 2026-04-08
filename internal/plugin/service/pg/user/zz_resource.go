@@ -121,11 +121,18 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"password": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
-			"password_wo":         &adapter.Schema{Type: adapter.SchemaTypeString},
-			"password_wo_version": &adapter.Schema{Type: adapter.SchemaTypeInt},
+			"password_wo": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
+			"password_wo_version": &adapter.Schema{
+				Type:           adapter.SchemaTypeInt,
+				ZeroNotAllowed: true,
+			},
 			"pg_allow_replication": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,

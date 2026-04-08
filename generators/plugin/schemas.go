@@ -293,6 +293,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		params[jen.Id("Items")] = items
 	}
 
+	if entity.isResource() && max(item.Minimum, item.MinItems, item.MinLength) > 0 {
+		params[jen.Id("ZeroNotAllowed")] = jen.True()
+	}
+
 	properties := make(jen.Dict)
 	for k, v := range item.Properties {
 		if !entity.isResource() && isWriteOnly(v) {

@@ -148,7 +148,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"billing_group_name":  &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_name": &adapter.Schema{
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
+			},
 			"custom_invoice_text": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"id": &adapter.Schema{
 				Computed: true,

@@ -236,8 +236,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"aiven_aws_assume_role_external_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"aiven_aws_object_storage_credentials_creator_arn": &adapter.Schema{
 				Computed: true,
@@ -307,11 +308,13 @@ func resourceSchemaInternal() *adapter.Schema {
 					},
 					Type: adapter.SchemaTypeObject,
 				},
-				Type: adapter.SchemaTypeSet,
+				Type:           adapter.SchemaTypeSet,
+				ZeroNotAllowed: true,
 			},
 			"custom_cloud_environment_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
+				Computed:       true,
+				Type:           adapter.SchemaTypeString,
+				ZeroNotAllowed: true,
 			},
 			"custom_cloud_names": &adapter.Schema{
 				Computed: true,
