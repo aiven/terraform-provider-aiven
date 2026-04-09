@@ -33,6 +33,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmemberlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/connectionpool"
 	database2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/database"
 	user3 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
@@ -48,6 +49,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(database.ResourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyResource(user.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
+		"aiven_connection_pool":                     adapter.NewLazyResource(connectionpool.ResourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
@@ -73,6 +75,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(user.DataSourceOptions),
+		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(topiclist.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),

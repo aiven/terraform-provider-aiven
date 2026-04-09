@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/pg/connectionpool
+resource:
+  refreshState: true
+  removeMissing: true
+  description: Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service.
+datasource:
+  description: Gets information about a connection pool in an Aiven for PostgreSQL® service.
+clientHandler: postgresql
+idAttributeComposed: [project, service_name, pool_name]
+legacyTimeouts: true
+rename:
+  database: database_name
+operations:
+  - id: ServicePGBouncerCreate
+    type: create
+  - id: ServicePGBouncerUpdate
+    type: update
+  - id: ServicePGBouncerDelete
+    type: delete
+  - id: ServiceGet
+    type: read
+    resultKey: service/connection_pools
+    resultListLookup: ConnectionPools
+    resultListLookupKeys:
+      PoolName: pool_name
+schema:
+  username:
+    minLength: 1
+  connection_uri:
+    sensitive: true
+  database_name:
+    forceNew: true

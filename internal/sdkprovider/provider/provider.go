@@ -16,7 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
@@ -50,7 +49,6 @@ func Provider(version string) (*schema.Provider, error) {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool":   connectionpool.DatasourceConnectionPool(),
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// grafana
@@ -140,8 +138,6 @@ func Provider(version string) (*schema.Provider, error) {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
-
 			// grafana
 			"aiven_grafana": grafana.ResourceGrafana(),
 

@@ -432,14 +432,15 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 		delete(response.Properties, "errors")
 
 		if operation.ResultKey != "" {
-			rsp, ok := response.Properties[operation.ResultKey]
-			if !ok {
-				return fmt.Errorf("resultKey %q not found", operation.ResultKey)
-			}
-
-			response = rsp
-			if response.Type == SchemaTypeArray {
-				response = response.Items
+			for _, key := range strings.Split(operation.ResultKey, "/") {
+				rsp, ok := response.Properties[key]
+				if !ok {
+					return fmt.Errorf("resultKey %q not found", operation.ResultKey)
+				}
+				if rsp.Type == SchemaTypeArray {
+					rsp = rsp.Items
+				}
+				response = rsp
 			}
 		}
 

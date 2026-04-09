@@ -308,6 +308,11 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 
 	// Finds a match in the list.
 	// E.g. rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
+	rspCode := jen.Id(rspName)
+	if operation.ResultListLookup != "" {
+		rspCode.Dot(operation.ResultListLookup)
+	}
+
 	var fieldsMatch jen.Statement
 	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
 		fieldName := operation.ResultListLookupKeys[key]
@@ -324,7 +329,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 			return fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
 		}
 
-		fieldsMatch.Id("rsp").Index(jen.Id("i")).Dot(key).
+		fieldsMatch.Add(rspCode).Index(jen.Id("i")).Dot(key).
 			Op("==").
 			Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType()))
 	}
@@ -332,7 +337,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	// Filters the response by the fields match
 	const foundName = "found"
 	g.Id(foundName).Op(":=").Qual(adapterPackage, "FilterIndex").CallFunc(func(g *jen.Group) {
-		g.Id(rspName)
+		g.Add(rspCode)
 		g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(&fieldsMatch))
 	})
 
