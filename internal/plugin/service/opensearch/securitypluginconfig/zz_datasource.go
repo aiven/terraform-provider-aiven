@@ -21,7 +21,7 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  admin_enabled  = true
-	  admin_password = "password"
+	  admin_password = "h3.2aD!z2"
 	  available      = true
 	  enabled        = true
 	}

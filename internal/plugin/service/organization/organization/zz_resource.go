@@ -20,12 +20,12 @@ import (
 resourceSchema:
 
 	resource "aiven_organization" "example" {
-	  name = "test"
+	  name = "Aiven Ltd"
 
 	  // COMPUTED FIELDS
 	  create_time = "foo"
 	  id          = "foo"
-	  tenant_id   = "foo"
+	  tenant_id   = "foo" // Deprecated
 	  update_time = "foo"
 	}
 */

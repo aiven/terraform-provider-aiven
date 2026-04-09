@@ -22,21 +22,21 @@ datasourceSchema:
 	  billing_group_id = "foo"
 
 	  // COMPUTED FIELDS
-	  billing_address_id = "foo"
+	  billing_address_id = "addr4b1ff1ceeaa"
 	  billing_contact_emails {
-	    email = "test@example.com"
+	    email = "jane@example.com"
 	  }
 	  billing_emails {
-	    email = "test@example.com"
+	    email = "jane@example.com"
 	  }
-	  billing_group_name  = "test"
-	  custom_invoice_text = "foo"
+	  billing_group_name  = "Default billing group for the organization"
+	  custom_invoice_text = "Extra billing text"
 	  payment_method {
-	    payment_method_id   = "foo"
-	    payment_method_type = "aws_subscription"
+	    payment_method_id   = "pm4b1ff1ceeaa"
+	    payment_method_type = "credit_card"
 	  }
-	  shipping_address_id = "foo"
-	  vat_id              = "foo"
+	  shipping_address_id = "addr4b1ff1ceeaa"
+	  vat_id              = "FI12345678"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

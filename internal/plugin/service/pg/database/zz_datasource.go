@@ -20,12 +20,12 @@ datasourceSchema:
 	data "aiven_pg_database" "example" {
 	  project       = "foo"
 	  service_name  = "test"
-	  database_name = "test"
+	  database_name = "testdb"
 
 	  // COMPUTED FIELDS
 	  lc_collate             = "en_US.UTF-8"
 	  lc_ctype               = "en_US.UTF-8"
-	  termination_protection = false
+	  termination_protection = false // Deprecated
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

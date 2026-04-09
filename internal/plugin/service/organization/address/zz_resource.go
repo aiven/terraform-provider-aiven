@@ -23,12 +23,12 @@ resourceSchema:
 
 	resource "aiven_organization_address" "example" {
 	  organization_id = "org1a23f456789" // Force new
-	  address_lines   = ["foo"]
-	  city            = "foo"
-	  country_code    = "foo"
-	  name            = "test"
+	  address_lines   = ["Main Street 1"]
+	  city            = "Helsinki"
+	  country_code    = "FI"
+	  name            = "Aiven Oy"
 	  state           = "foo"
-	  zip_code        = "foo"
+	  zip_code        = "01234"
 
 	  // COMPUTED FIELDS
 	  create_time = "foo"

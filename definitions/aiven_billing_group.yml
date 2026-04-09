@@ -52,9 +52,11 @@ schema:
   billing_contact_emails:
     items:
       type: string
+      example: jane@example.com
   billing_emails:
     items:
       type: string
+      example: test@example.com
   billing_currency:
     computed: true
   country_code:

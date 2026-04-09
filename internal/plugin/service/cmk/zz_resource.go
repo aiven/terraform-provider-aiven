@@ -22,8 +22,8 @@ resourceSchema:
 	resource "aiven_cmk" "example" {
 	  cmk_provider = "aws" // Force new
 	  project      = "foo" // Force new
-	  resource     = "foo" // Force new
-	  default_cmk  = true
+	  resource     = "my-resource" // Force new
+	  default_cmk  = false
 
 	  // COMPUTED FIELDS
 	  created_at = "foo"

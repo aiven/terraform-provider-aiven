@@ -20,10 +20,10 @@ datasourceSchema:
 	data "aiven_mysql_database" "example" {
 	  project       = "foo"
 	  service_name  = "test"
-	  database_name = "test"
+	  database_name = "testdb"
 
 	  // COMPUTED FIELDS
-	  termination_protection = false
+	  termination_protection = false // Deprecated
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

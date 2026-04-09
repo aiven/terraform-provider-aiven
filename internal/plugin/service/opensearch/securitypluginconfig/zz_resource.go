@@ -22,7 +22,7 @@ resourceSchema:
 	resource "aiven_opensearch_security_plugin_config" "example" {
 	  project        = "foo" // Force new
 	  service_name   = "test" // Force new
-	  admin_password = "password"
+	  admin_password = "h3.2aD!z2"
 
 	  // COMPUTED FIELDS
 	  admin_enabled = true

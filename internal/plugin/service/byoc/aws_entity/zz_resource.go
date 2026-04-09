@@ -23,17 +23,17 @@ resourceSchema:
 
 	resource "aiven_byoc_aws_entity" "example" {
 	  organization_id  = "org1a23f456789" // Force new
-	  aws_iam_role_arn = "admin"
+	  aws_iam_role_arn = "arn:aws:iam::012345678901:root"
 	  cloud_provider   = "aws"
-	  cloud_region     = "foo"
+	  cloud_region     = "eu-west-1"
 	  contact_emails {
-	    email     = "test@example.com"
-	    real_name = "test"
+	    email     = "jane@example.com"
+	    real_name = "Jane Smith"
 	    role      = "admin"
 	  }
-	  deployment_model = "direct_ipsec_ingress"
-	  display_name     = "test"
-	  reserved_cidr    = "10.0.0.0/24"
+	  deployment_model = "standard"
+	  display_name     = "byoc-cloud-prod-eu-west-1"
+	  reserved_cidr    = "192.168.6.0/24"
 	  tags = {
 	    foo = "foo"
 	  }

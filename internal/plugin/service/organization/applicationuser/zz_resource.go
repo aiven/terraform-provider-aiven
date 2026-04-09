@@ -20,8 +20,8 @@ resourceSchema:
 
 	resource "aiven_organization_application_user" "example" {
 	  organization_id = "org1a23f456789" // Force new
-	  is_super_admin  = false
-	  name            = "test"
+	  is_super_admin  = false // Deprecated
+	  name            = "devops app user"
 
 	  // COMPUTED FIELDS
 	  create_time = "foo"

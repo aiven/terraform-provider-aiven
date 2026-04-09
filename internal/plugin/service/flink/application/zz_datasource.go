@@ -25,7 +25,7 @@ datasourceSchema:
 	  // COMPUTED FIELDS
 	  created_at = "foo"
 	  created_by = "foo"
-	  name       = "test"
+	  name       = "TestJob"
 	  updated_at = "foo"
 	  updated_by = "foo"
 	}
