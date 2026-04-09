@@ -23,14 +23,14 @@ datasourceSchema:
 	  address_id      = "foo"
 
 	  // COMPUTED FIELDS
-	  address_lines = ["foo"]
-	  city          = "foo"
-	  country_code  = "foo"
+	  address_lines = ["Main Street 1"]
+	  city          = "Helsinki"
+	  country_code  = "FI"
 	  create_time   = "foo"
-	  name          = "test"
+	  name          = "Aiven Oy"
 	  state         = "foo"
 	  update_time   = "foo"
-	  zip_code      = "foo"
+	  zip_code      = "01234"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

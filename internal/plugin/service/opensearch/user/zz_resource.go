@@ -24,7 +24,7 @@ resourceSchema:
 	resource "aiven_opensearch_user" "example" {
 	  project             = "foo" // Force new
 	  service_name        = "test" // Force new
-	  username            = "test" // Force new
+	  username            = "testuser" // Force new
 	  password            = "password"
 	  password_wo         = "password"
 	  password_wo_version = 42

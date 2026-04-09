@@ -19,14 +19,14 @@ import (
 datasourceSchema:
 
 	data "aiven_organization_project" "example" {
-	  organization_id = "org1a23f456789"
-	  project_id      = "foo"
+	  organization_id = "org1234abcd"
+	  project_id      = "project-1"
 
 	  // COMPUTED FIELDS
 	  base_port        = 42
-	  billing_group_id = "foo"
+	  billing_group_id = "721bf796-1d89-402d-9195-425a23c4efdc"
 	  ca_cert          = "foo"
-	  parent_id        = "foo"
+	  parent_id        = "a3fd7a594e01"
 	  tag {
 	    key   = "foo"
 	    value = "foo"

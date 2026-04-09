@@ -24,7 +24,7 @@ resourceSchema:
 	resource "aiven_mysql_user" "example" {
 	  project             = "foo" // Force new
 	  service_name        = "test" // Force new
-	  username            = "test" // Force new
+	  username            = "testuser" // Force new
 	  authentication      = "caching_sha2_password"
 	  password            = "password"
 	  password_wo         = "password"

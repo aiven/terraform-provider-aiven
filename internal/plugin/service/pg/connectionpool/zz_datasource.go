@@ -20,14 +20,14 @@ datasourceSchema:
 	data "aiven_connection_pool" "example" {
 	  project      = "foo"
 	  service_name = "test"
-	  pool_name    = "test"
+	  pool_name    = "mypool-x-y-z"
 
 	  // COMPUTED FIELDS
 	  connection_uri = "foo"
-	  database_name  = "test"
+	  database_name  = "testdb"
 	  pool_mode      = "transaction"
 	  pool_size      = 10
-	  username       = "test"
+	  username       = "testuser"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

@@ -23,8 +23,8 @@ resourceSchema:
 	resource "aiven_clickhouse_database" "example" {
 	  project                = "foo" // Force new
 	  service_name           = "test" // Force new
-	  name                   = "test" // Force new
-	  termination_protection = false
+	  name                   = "testdb" // Force new
+	  termination_protection = false // Deprecated
 	}
 */
 func resourceSchema(ctx context.Context) schema.Schema {

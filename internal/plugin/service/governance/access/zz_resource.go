@@ -24,23 +24,23 @@ resourceSchema:
 	resource "aiven_governance_access" "example" {
 	  access_data {
 	    acls {
-	      host            = "foo" // Force new
-	      operation       = "Read" // Force new
+	      host            = "*" // Force new
+	      operation       = "Write" // Force new
 	      permission_type = "ALLOW" // Force new
-	      resource_name   = "test" // Force new
+	      resource_name   = "events" // Force new
 	      resource_type   = "Topic" // Force new
 	      id              = "foo"
 	      pattern_type    = "LITERAL"
 	      principal       = "foo"
 	    }
-	    project_name = "test" // Force new
-	    service_name = "test" // Force new
-	    username     = "test" // Force new
+	    project_name = "project-1" // Force new
+	    service_name = "service-1" // Force new
+	    username     = "api3" // Force new
 	  }
-	  access_name         = "test" // Force new
+	  access_name         = "My Access" // Force new
 	  access_type         = "KAFKA" // Force new
 	  organization_id     = "org1a23f456789" // Force new
-	  owner_user_group_id = "foo" // Force new
+	  owner_user_group_id = "ug22ba494e096" // Force new
 
 	  // COMPUTED FIELDS
 	  access_id = "foo"

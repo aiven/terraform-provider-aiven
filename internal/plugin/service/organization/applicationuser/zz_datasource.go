@@ -22,8 +22,8 @@ datasourceSchema:
 	  // COMPUTED FIELDS
 	  create_time    = "foo"
 	  email          = "test@example.com"
-	  is_super_admin = false
-	  name           = "test"
+	  is_super_admin = false // Deprecated
+	  name           = "devops app user"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

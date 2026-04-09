@@ -212,6 +212,7 @@ type Item struct {
 	MaxItems           int        `yaml:"maxItems"`
 	Minimum            int        `yaml:"minimum"`
 	Maximum            int        `yaml:"maximum"`
+	Example            any        `yaml:"example"`
 }
 
 // UniqueName generates unique name by composing all ancestor names

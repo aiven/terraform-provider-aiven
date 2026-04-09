@@ -23,8 +23,8 @@ resourceSchema:
 	resource "aiven_mysql_database" "example" {
 	  project                = "foo" // Force new
 	  service_name           = "test" // Force new
-	  database_name          = "test" // Force new
-	  termination_protection = false
+	  database_name          = "testdb" // Force new
+	  termination_protection = false // Deprecated
 	}
 */
 func resourceSchema(ctx context.Context) schema.Schema {

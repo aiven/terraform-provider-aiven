@@ -27,12 +27,12 @@ import (
 resourceSchema:
 
 	resource "aiven_organization_application_user_token" "example" {
-	  description      = "test" // Force new
+	  description      = "Integration client Alpha" // Force new
 	  extend_when_used = false // Force new
-	  ip_allowlist     = ["foo"] // Force new
+	  ip_allowlist     = ["192.168.0.0/24"] // Force new
 	  max_age_seconds  = 42 // Force new
 	  organization_id  = "org1a23f456789" // Force new
-	  scopes           = ["foo"] // Force new
+	  scopes           = ["user:read"] // Force new
 	  user_id          = "foo" // Force new
 
 	  // COMPUTED FIELDS

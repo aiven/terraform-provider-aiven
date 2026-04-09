@@ -22,7 +22,7 @@ resourceSchema:
 	resource "aiven_flink_application" "example" {
 	  project      = "foo" // Force new
 	  service_name = "test" // Force new
-	  name         = "test"
+	  name         = "TestJob"
 
 	  // COMPUTED FIELDS
 	  created_at     = "foo"

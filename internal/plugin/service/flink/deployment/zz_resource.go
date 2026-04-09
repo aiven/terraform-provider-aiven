@@ -28,8 +28,8 @@ resourceSchema:
 	  parallelism        = 1 // Force new
 	  project            = "foo" // Force new
 	  restart_enabled    = true // Force new
-	  starting_savepoint = "foo" // Force new
-	  version_id         = "foo" // Force new
+	  starting_savepoint = "path/to/savepoint" // Force new
+	  version_id         = "543e420d-aa63-43e8-b8e8-294a78c600e7" // Force new
 	  service_name       = "test" // Force new
 	  application_id     = "foo" // Force new
 

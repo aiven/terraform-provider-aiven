@@ -21,7 +21,7 @@ import (
 resourceSchema:
 
 	resource "aiven_static_ip" "example" {
-	  cloud_name             = "test" // Force new
+	  cloud_name             = "aws-eu-central-1" // Force new
 	  project                = "foo" // Force new
 	  termination_protection = false
 

@@ -418,6 +418,11 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 			return err
 		}
 
+		err = loadExamples(root, path.Request.Content.ApplicationJSON.Example)
+		if err != nil {
+			return err
+		}
+
 		operation.Request = request
 	}
 
@@ -446,6 +451,11 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 
 		ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
 		err = fromSchema(scope, operation, root, response, ap)
+		if err != nil {
+			return err
+		}
+
+		err = loadExamples(root, path.Response.OK.Content.ApplicationJSON.Example)
 		if err != nil {
 			return err
 		}
@@ -719,8 +729,12 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.MinLength = max(a.MinLength, b.MinLength)
 	a.MaxLength = max(a.MaxLength, b.MaxLength)
 
-	if b.Default != nil {
+	if !isEmpty(b.Default) {
 		a.Default = b.Default
+	}
+
+	if !isEmpty(b.Example) {
+		a.Example = b.Example
 	}
 
 	// Validators
@@ -844,4 +858,55 @@ func fillOptionalFields(parent *Item, item *Item, name string) error {
 		}
 	}
 	return nil
+}
+
+// loadExamples parses examples from the OpenAPI spec and assigns them to the item.
+func loadExamples(item *Item, exampleSrc any) error {
+	example, ok := castSafely(item.Type, exampleSrc)
+	if !ok || isEmpty(example) {
+		return nil
+	}
+
+	item.Example = example
+
+	switch {
+	case len(item.Properties) > 0:
+		exampleObject := example.(map[string]any)
+		for _, child := range item.Properties {
+			err := loadExamples(child, exampleObject[child.JSONName])
+			if err != nil {
+				return err
+			}
+		}
+	case item.Items != nil:
+		exampleList := example.([]any)
+		if len(exampleList) > 0 {
+			err := loadExamples(item.Items, exampleList[0])
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func castSafely(kind SchemaType, value any) (any, bool) {
+	var v any
+	var ok bool
+	switch kind {
+	case SchemaTypeString:
+		v, ok = value.(string)
+	case SchemaTypeInteger:
+		v, ok = value.(int)
+	case SchemaTypeNumber:
+		v, ok = value.(float64)
+	case SchemaTypeBoolean:
+		v, ok = value.(bool)
+	case SchemaTypeArray, SchemaTypeArrayOrdered:
+		v, ok = value.([]any)
+	case SchemaTypeObject:
+		v, ok = value.(map[string]any)
+	}
+	return v, ok
 }

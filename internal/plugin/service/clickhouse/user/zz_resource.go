@@ -23,9 +23,9 @@ resourceSchema:
 
 	resource "aiven_clickhouse_user" "example" {
 	  project             = "foo" // Force new
-	  username            = "test" // Force new
+	  username            = "alice" // Force new
 	  service_name        = "test" // Force new
-	  password            = "password"
+	  password            = "!@$password12345"
 	  password_wo         = "password"
 	  password_wo_version = 42
 

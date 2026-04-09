@@ -21,9 +21,9 @@ datasourceSchema:
 	  uuid         = "foo"
 
 	  // COMPUTED FIELDS
-	  password = "password"
+	  password = "!@$password12345"
 	  required = true
-	  username = "test"
+	  username = "alice"
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {

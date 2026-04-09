@@ -20,10 +20,10 @@ datasourceSchema:
 	data "aiven_clickhouse_database" "example" {
 	  project      = "foo"
 	  service_name = "test"
-	  name         = "test"
+	  name         = "testdb"
 
 	  // COMPUTED FIELDS
-	  termination_protection = false
+	  termination_protection = false // Deprecated
 	}
 */
 func datasourceSchema(ctx context.Context) schema.Schema {
