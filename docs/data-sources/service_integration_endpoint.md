@@ -43,6 +43,7 @@ data "aiven_service_integration_endpoint" "example_datadog_endpoint" {
 - `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_kafka_user_config))
 - `external_mysql_user_config` (List of Object) ExternalMysql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_mysql_user_config))
+- `external_object_storage_config_user_config` (List of Object) ExternalObjectStorageConfig user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_object_storage_config_user_config))
 - `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
 - `external_postgresql` (List of Object) ExternalPostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_postgresql))
 - `external_prometheus_user_config` (List of Object) ExternalPrometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_prometheus_user_config))
@@ -204,6 +205,25 @@ Read-Only:
 - `ssl_mode` (String)
 - `ssl_root_cert` (String)
 - `username` (String)
+
+
+<a id="nestedatt--external_object_storage_config_user_config"></a>
+### Nested Schema for `external_object_storage_config_user_config`
+
+Read-Only:
+
+- `account_key` (String)
+- `account_name` (String)
+- `aws_access_key_id` (String)
+- `aws_secret_access_key` (String)
+- `bucket_name` (String)
+- `credentials` (String)
+- `host` (String)
+- `port` (Number)
+- `prefix` (String)
+- `project_id` (String)
+- `region` (String)
+- `storage_type` (String)
 
 
 <a id="nestedatt--external_opensearch_logs_user_config"></a>
