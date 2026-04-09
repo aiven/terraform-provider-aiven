@@ -43,9 +43,10 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"backup_interval_hours": {
-				Description: "Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.",
-				Optional:    true,
-				Type:        schema.TypeInt,
+				Description:  "Enum: `12`, `24`, `3`, `4`, `6`, `8`. Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only).",
+				Optional:     true,
+				Type:         schema.TypeInt,
+				ValidateFunc: validation.IntInSlice([]int{12, 24, 3, 4, 6, 8}),
 			},
 			"backup_minute": {
 				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.",

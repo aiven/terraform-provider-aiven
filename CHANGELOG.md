@@ -31,6 +31,12 @@ nav_order: 1
 - Change `aiven_service_integration` field `integration_type` (enum): add `thanos_object_storage`
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `external_object_storage_config`
 - Migrate `aiven_connection_pool` to the Plugin Framework
+- Change `aiven_kafka` field `kafka_user_config.backup_interval_hours` (enum): add `12`, `24`, `3`, `4`, `6`, `8`
+- Change `aiven_pg` field `pg_user_config.backup_interval_hours` (enum): add `12`, `24`, `3`, `4`, `6`, `8`
+- Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.materialized_view`: Optional materialized
+  view that persists data from the Kafka engine table into a MergeTree-family table
+- Add `aiven_service_integration_endpoint` field `external_object_storage_config_user_config`: ExternalObjectStorageConfig
+  user configurable settings
 
 ## [4.53.0] - 2026-03-16
 

@@ -89,6 +89,7 @@ Read-Only:
 - `date_time_input_format` (String)
 - `group_name` (String)
 - `handle_error_mode` (String)
+- `materialized_view` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--materialized_view))
 - `max_block_size` (Number)
 - `max_rows_per_message` (Number)
 - `name` (String)
@@ -114,6 +115,21 @@ Read-Only:
 
 - `name` (String)
 - `type` (String)
+
+
+<a id="nestedobjatt--clickhouse_kafka_user_config--tables--materialized_view"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.materialized_view`
+
+Read-Only:
+
+- `database_name` (String)
+- `engine` (String)
+- `engine_params` (List of String)
+- `local_disk_ttl_days` (Number)
+- `order_by` (List of String)
+- `ttl_column` (String)
+- `ttl_days` (Number)
+- `view_name` (String)
 
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables--topics"></a>

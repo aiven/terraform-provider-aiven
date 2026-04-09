@@ -30,6 +30,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return externalKafkaUserConfig()
 	case "external_mysql":
 		return externalMysqlUserConfig()
+	case "external_object_storage_config":
+		return externalObjectStorageConfigUserConfig()
 	case "external_opensearch_logs":
 		return externalOpensearchLogsUserConfig()
 	case "external_postgresql":
@@ -54,5 +56,5 @@ func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"autoscaler", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_aws_s3", "external_azure_blob_storage", "external_clickhouse", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_mysql", "external_opensearch_logs", "external_postgresql", "external_prometheus", "external_schema_registry", "jolokia", "prometheus", "rsyslog"}
+	return []string{"autoscaler", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_aws_s3", "external_azure_blob_storage", "external_clickhouse", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_mysql", "external_object_storage_config", "external_opensearch_logs", "external_postgresql", "external_prometheus", "external_schema_registry", "jolokia", "prometheus", "rsyslog"}
 }

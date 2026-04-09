@@ -31,9 +31,10 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"backup_interval_hours": {
-				Description: "Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.",
-				Optional:    true,
-				Type:        schema.TypeInt,
+				Description:  "Enum: `12`, `24`, `3`, `4`, `6`, `8`. Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only).",
+				Optional:     true,
+				Type:         schema.TypeInt,
+				ValidateFunc: validation.IntInSlice([]int{12, 24, 3, 4, 6, 8}),
 			},
 			"backup_retention_days": {
 				Description: "Number of days to retain automatic backups. Backups older than this value will be automatically deleted. (Applicable to ACU plans only). Example: `7`.",

@@ -63,6 +63,59 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"dead_letter_queue", "default", "stream"}, false),
 				},
+				"materialized_view": {
+					Description: "Optional materialized view that persists data from the Kafka engine table into a MergeTree-family table. When specified, a ClickHouse materialized view is created that automatically reads from the Kafka table and inserts into a durable target table",
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+						"database_name": {
+							Description: "The database to create the materialized view in. Must not be the Kafka integration database as it is not replicated and may be dropped. Default: `default`.",
+							Optional:    true,
+							Type:        schema.TypeString,
+						},
+						"engine": {
+							Description:  "Enum: `AggregatingMergeTree`, `CollapsingMergeTree`, `MergeTree`, `ReplacingMergeTree`, `SummingMergeTree`, `VersionedCollapsingMergeTree`. The MergeTree-family engine for the materialized view's target table. Default: `MergeTree`.",
+							Optional:     true,
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{"AggregatingMergeTree", "CollapsingMergeTree", "MergeTree", "ReplacingMergeTree", "SummingMergeTree", "VersionedCollapsingMergeTree"}, false),
+						},
+						"engine_params": {
+							Description: "Column names passed as engine arguments, e.g. the sign column for CollapsingMergeTree or the sign and version columns for VersionedCollapsingMergeTree.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							MaxItems:    10,
+							Optional:    true,
+							Type:        schema.TypeList,
+						},
+						"local_disk_ttl_days": {
+							Description: "Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with ttl_column. Example: `7`.",
+							Optional:    true,
+							Type:        schema.TypeInt,
+						},
+						"order_by": {
+							Description: "Columns for the ORDER BY clause of the target table. Determines the sort order and primary index.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							MaxItems:    100,
+							Required:    true,
+							Type:        schema.TypeList,
+						},
+						"ttl_column": {
+							Description: "Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when ttl_days or local_disk_ttl_days is set. Example: `created_at`.",
+							Optional:    true,
+							Type:        schema.TypeString,
+						},
+						"ttl_days": {
+							Description: "Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with ttl_column. Example: `30`.",
+							Optional:    true,
+							Type:        schema.TypeInt,
+						},
+						"view_name": {
+							Description: "The name of the materialized view to create. Example: `events_mv`.",
+							Required:    true,
+							Type:        schema.TypeString,
+						},
+					}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
 				"max_block_size": {
 					Description: "Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Default: `0`.",
 					Optional:    true,

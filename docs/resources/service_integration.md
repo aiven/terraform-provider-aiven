@@ -128,6 +128,7 @@ Optional:
 - `auto_offset_reset` (String) Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Determines where to start reading from Kafka when no offset is stored or the stored offset is out of range. `earliest` starts from the beginning, `latest` starts from the end. Default: `earliest`.
 - `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Specifies how ClickHouse should parse DateTime values from text-based input formats. `basic` uses simple parsing, `best_effort` attempts more flexible parsing. Default: `basic`.
 - `handle_error_mode` (String) Enum: `dead_letter_queue`, `default`, `stream`. Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to system.dead_letter_queue (requires ClickHouse 25.8+). Default: `default`.
+- `materialized_view` (Block List, Max: 1) Optional materialized view that persists data from the Kafka engine table into a MergeTree-family table. When specified, a ClickHouse materialized view is created that automatically reads from the Kafka table and inserts into a durable target table (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--materialized_view))
 - `max_block_size` (Number) Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Default: `0`.
 - `max_rows_per_message` (Number) Maximum number of rows that can be processed from a single Kafka message for row-based formats. Useful for controlling memory usage. Default: `1`.
 - `num_consumers` (Number) Number of Kafka consumers to run per table per replica. Increasing this can improve throughput but may increase resource usage. Default: `1`.
@@ -159,6 +160,24 @@ Required:
 Required:
 
 - `name` (String) The name of the Kafka topic to read messages from or write messages to. The topic must exist in the Kafka cluster. Example: `topic_name`.
+
+
+<a id="nestedblock--clickhouse_kafka_user_config--tables--materialized_view"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.materialized_view`
+
+Required:
+
+- `order_by` (List of String) Columns for the ORDER BY clause of the target table. Determines the sort order and primary index.
+- `view_name` (String) The name of the materialized view to create. Example: `events_mv`.
+
+Optional:
+
+- `database_name` (String) The database to create the materialized view in. Must not be the Kafka integration database as it is not replicated and may be dropped. Default: `default`.
+- `engine` (String) Enum: `AggregatingMergeTree`, `CollapsingMergeTree`, `MergeTree`, `ReplacingMergeTree`, `SummingMergeTree`, `VersionedCollapsingMergeTree`. The MergeTree-family engine for the materialized view's target table. Default: `MergeTree`.
+- `engine_params` (List of String) Column names passed as engine arguments, e.g. the sign column for CollapsingMergeTree or the sign and version columns for VersionedCollapsingMergeTree.
+- `local_disk_ttl_days` (Number) Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with ttl_column. Example: `7`.
+- `ttl_column` (String) Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when ttl_days or local_disk_ttl_days is set. Example: `created_at`.
+- `ttl_days` (Number) Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with ttl_column. Example: `30`.
 
 
 
