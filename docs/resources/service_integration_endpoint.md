@@ -64,6 +64,7 @@ resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
 - `external_google_cloud_logging_user_config` (Block List, Max: 1) ExternalGoogleCloudLogging user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (Block List, Max: 1) ExternalKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_kafka_user_config))
 - `external_mysql_user_config` (Block List, Max: 1) ExternalMysql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_mysql_user_config))
+- `external_object_storage_config_user_config` (Block List, Max: 1) ExternalObjectStorageConfig user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_object_storage_config_user_config))
 - `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
 - `external_postgresql` (Block List, Max: 1) ExternalPostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_postgresql))
 - `external_prometheus_user_config` (Block List, Max: 1) ExternalPrometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_prometheus_user_config))
@@ -266,6 +267,28 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
+
+
+<a id="nestedblock--external_object_storage_config_user_config"></a>
+### Nested Schema for `external_object_storage_config_user_config`
+
+Required:
+
+- `storage_type` (String) Enum: `azure`, `google`, `s3`. Object storage type.
+
+Optional:
+
+- `account_key` (String, Sensitive) Azure account secret key (Azure only). Example: `YWNjb3VudCBrZXkgZXhhbXBsZQ==`.
+- `account_name` (String) Azure account name (Azure only). Example: `myazureaccount`.
+- `aws_access_key_id` (String) AWS access key ID (S3 only). Example: `AKIAIOSFODNN7EXAMPLE`.
+- `aws_secret_access_key` (String, Sensitive) AWS secret access key (S3 only). Example: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`.
+- `bucket_name` (String) Bucket name. Example: `my-thanos-bucket`.
+- `credentials` (String, Sensitive) Google service account credentials JSON (Google Cloud Storage only). Example: `{"type": "service_account", ...`.
+- `host` (String) S3-compatible endpoint host (S3 only). Example: `s3.eu-west-1.amazonaws.com`.
+- `port` (Number) S3-compatible endpoint port (S3 only). Example: `443`.
+- `prefix` (String) Object storage prefix / path. Example: `thanos-data/`.
+- `project_id` (String) GCP project ID (Google Cloud Storage only). Example: `my-gcp-project`.
+- `region` (String) AWS S3 region (S3 only). Example: `eu-west-1`.
 
 
 <a id="nestedblock--external_opensearch_logs_user_config"></a>
