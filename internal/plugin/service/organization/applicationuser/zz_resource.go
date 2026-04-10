@@ -24,13 +24,18 @@ resourceSchema:
 	  name            = "test"
 
 	  // COMPUTED FIELDS
-	  email   = "test@example.com"
-	  user_id = "foo"
+	  create_time = "foo"
+	  email       = "test@example.com"
+	  user_id     = "foo"
 	}
 */
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"create_time": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Time this application user was created.",
+			},
 			"email": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "User Email.",
@@ -68,6 +73,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 func resourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
+			"create_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"email": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
