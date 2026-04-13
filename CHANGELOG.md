@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_organization_application_user` field `create_time`: Time this application user was created.
+
 ## [4.54.0] - 2026-04-09
 
 - Remove deprecated `aiven_m3aggregator`, `aiven_m3db`, and `aiven_m3db_user` resources and data sources: the M3 service

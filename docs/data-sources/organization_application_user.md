@@ -44,6 +44,7 @@ data "aiven_organization_application_user" "app_user" {
 
 ### Read-Only
 
+- `create_time` (String) Time this application user was created.
 - `email` (String) User Email.
 - `id` (String) Resource ID composed as: `organization_id/user_id`.
 - `is_super_admin` (Boolean, Deprecated) Alters super admin state of the organization application user. The default value is `false`. **Deprecated**: This field is no longer accepted by the API. For administrative tasks, assign application users the organization admin role instead using the `aiven_organization_permission` resource.
