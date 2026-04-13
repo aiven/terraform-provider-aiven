@@ -94,7 +94,7 @@ jobs:
       statuses: write
     steps:
       - name: Report status of all required checks
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const head_sha = '${{ needs.create_update_pr.outputs.pr_head_sha }}';
