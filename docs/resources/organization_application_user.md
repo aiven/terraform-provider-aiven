@@ -34,6 +34,7 @@ resource "aiven_organization_application_user" "tf_user" {
 
 ### Read-Only
 
+- `create_time` (String) Time this application user was created.
 - `email` (String) User Email.
 - `id` (String) Resource ID composed as: `organization_id/user_id`.
 - `user_id` (String) User ID.
