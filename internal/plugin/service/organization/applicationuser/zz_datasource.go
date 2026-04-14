@@ -20,6 +20,7 @@ datasourceSchema:
 	  user_id         = "foo"
 
 	  // COMPUTED FIELDS
+	  create_time    = "foo"
 	  email          = "test@example.com"
 	  is_super_admin = false
 	  name           = "test"
@@ -28,6 +29,10 @@ datasourceSchema:
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"create_time": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Time this application user was created.",
+			},
 			"email": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "User Email.",
@@ -61,6 +66,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 func datasourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
+			"create_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"email": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
