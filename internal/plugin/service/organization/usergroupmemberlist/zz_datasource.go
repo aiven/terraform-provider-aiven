@@ -12,33 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization_user_group_member_list" "example" {
-	  organization_id = "org1a23f456789"
-	  user_group_id   = "foo"
-
-	  // COMPUTED FIELDS
-	  members {
-	    last_activity_time = "foo"
-	    user_id            = "foo"
-	    user_info {
-	      city                     = "foo"
-	      country                  = "foo"
-	      create_time              = "foo"
-	      department               = "foo"
-	      is_application_user      = true
-	      job_title                = "foo"
-	      managed_by_scim          = true
-	      managing_organization_id = "org1a23f456789"
-	      real_name                = "test"
-	      state                    = "foo"
-	      user_email               = "test@example.com"
-	    }
-	  }
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

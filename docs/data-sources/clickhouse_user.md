@@ -13,10 +13,18 @@ Gets information about an Aiven for ClickHouse user.
 ## Example Usage
 
 ```terraform
-data "aiven_clickhouse_user" "example_user" {
-  project      = data.aiven_project.example_project.project
-  service_name = aiven_clickhouse.example_clickhouse.service_name
-  username     = "analyst"
+data "aiven_clickhouse_user" "example" {
+  project      = "my-project"
+  service_name = "my-clickhouse"
+
+  // REQUIRED EXACTLY ONE
+  uuid     = "foo"
+  username = "alice"
+
+  /* COMPUTED FIELDS
+  password = "!@$password12345"
+  required = true
+  */
 }
 ```
 

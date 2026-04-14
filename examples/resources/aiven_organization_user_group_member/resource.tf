@@ -1,17 +1,9 @@
-resource "aiven_organization_user_group" "example" {
-  description     = "Example group of users."
-  organization_id = aiven_organization.main.id
-  name            = "Example group"
-}
+resource "aiven_organization_user_group_member" "example" {
+  organization_id = "org1a23f456789" // Force new
+  group_id        = "foo" // Force new
+  user_id         = "foo" // Force new
 
-# Use the aiven_organization_user_list data source
-# to get the user_id of a user by their email address
-data "aiven_organization_user_list" "users" {
-  name = "Example organization"
-}
-
-resource "aiven_organization_user_group_member" "project_admin" {
-  group_id        = aiven_organization_user_group.example.group_id
-  organization_id = aiven_organization.main.id
-  user_id         = one([for user in data.aiven_organization_user_list.users.users : user.user_id if user.user_info[0].user_email == "izumi@example.com"])
+  /* COMPUTED FIELDS
+  last_activity_time = "2021-01-01T00:00:00Z"
+  */
 }

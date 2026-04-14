@@ -12,20 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization_application_user" "example" {
-	  organization_id = "org1a23f456789"
-	  user_id         = "foo"
-
-	  // COMPUTED FIELDS
-	  create_time    = "foo"
-	  email          = "test@example.com"
-	  is_super_admin = false // Deprecated
-	  name           = "devops app user"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

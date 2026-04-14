@@ -14,19 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_opensearch_user" "example" {
-	  project      = "foo"
-	  service_name = "test"
-	  username     = "testuser"
-
-	  // COMPUTED FIELDS
-	  password = "password"
-	  type     = "foo"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

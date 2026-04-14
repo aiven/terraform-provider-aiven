@@ -7,25 +7,13 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_clickhouse_user" "example" {
-	  project      = "foo"
-	  service_name = "test"
-	  uuid         = "foo"
-
-	  // COMPUTED FIELDS
-	  password = "!@$password12345"
-	  required = true
-	  username = "alice"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -54,6 +42,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "User name. Exactly one of the fields must be specified: `uuid` or `username`.",
 				Optional:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
 			"uuid": schema.StringAttribute{
 				Computed:            true,
