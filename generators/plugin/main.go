@@ -218,9 +218,32 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				def.typeName,
 				strings.ToUpper(filepath.Join(idPath...)),
 			)
+
 			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
 			if err != nil {
 				return fmt.Errorf("could not write file %s: %w", filepath.Join(importDir, importFileName), err)
+			}
+
+		}
+
+		if !resDat.DisableExample {
+			// Datasource examples are located in "data-source"
+			entityString := strings.ReplaceAll(entity.String(), "data", "data-")
+
+			exampleDir := filepath.Join(examplesDir, entityString+"s", def.typeName)
+			err := os.MkdirAll(exampleDir, os.ModePerm)
+			if err != nil {
+				return fmt.Errorf("could not create directory %s: %w", exampleDir, err)
+			}
+			exampleBytes, err := exampleRoot(def, entity, root)
+			if err != nil {
+				return fmt.Errorf("could not generate example: %w", err)
+			}
+
+			filePath := filepath.Join(exampleDir, entityString+".tf")
+			err = os.WriteFile(filePath, exampleBytes, 0o644)
+			if err != nil {
+				return fmt.Errorf("could not write file %s: %w", filePath, err)
 			}
 		}
 	}
@@ -397,7 +420,7 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 
 	// If the operation is experimental and user has not overridden the beta flag.
 	if path.Experimental && scope.Definition.Beta == nil {
-		scope.Definition.Beta = new(true)
+		scope.Definition.Beta = lo.ToPtr(true)
 	}
 
 	root.Description = path.Summary

@@ -23,31 +23,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_organization_application_user_token" "example" {
-	  description      = "Integration client Alpha" // Force new
-	  extend_when_used = false // Force new
-	  ip_allowlist     = ["192.168.0.0/24"] // Force new
-	  max_age_seconds  = 42 // Force new
-	  organization_id  = "org1a23f456789" // Force new
-	  scopes           = ["user:read"] // Force new
-	  user_id          = "foo" // Force new
-
-	  // COMPUTED FIELDS
-	  create_time                    = "foo"
-	  created_manually               = true
-	  currently_active               = true
-	  expiry_time                    = "foo"
-	  full_token                     = "foo"
-	  last_ip                        = "foo"
-	  last_used_time                 = "foo"
-	  last_user_agent                = "foo"
-	  last_user_agent_human_readable = "foo"
-	  token_prefix                   = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

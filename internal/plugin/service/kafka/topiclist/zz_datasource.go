@@ -12,34 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_kafka_topic_list" "example" {
-	  project      = "foo"
-	  service_name = "test"
-
-	  // COMPUTED FIELDS
-	  topics {
-	    cleanup_policy        = "foo"
-	    diskless_enable       = true
-	    min_insync_replicas   = 42
-	    owner_user_group_id   = "foo"
-	    partitions            = 42
-	    remote_storage_enable = true
-	    replication           = 42
-	    retention_bytes       = 42
-	    retention_hours       = 42
-	    state                 = "ACTIVE"
-	    tags {
-	      key   = "foo"
-	      value = "foo"
-	    }
-	    topic_description = "test"
-	    topic_name        = "test"
-	  }
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

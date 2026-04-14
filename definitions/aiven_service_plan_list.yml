@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/planlist
 datasource:
+  disableExample: true
   description: >
     A list of service plans for a given project and service type.
 idAttributeComposed: [project, service_type]

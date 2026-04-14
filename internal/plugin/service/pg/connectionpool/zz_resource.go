@@ -19,22 +19,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_connection_pool" "example" {
-	  database_name = "testdb" // Force new
-	  project       = "foo" // Force new
-	  service_name  = "test" // Force new
-	  pool_name     = "mypool-x-y-z" // Force new
-	  pool_mode     = "transaction"
-	  pool_size     = 10
-	  username      = "testuser"
-
-	  // COMPUTED FIELDS
-	  connection_uri = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

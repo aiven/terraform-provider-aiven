@@ -14,22 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_connection_pool" "example" {
-	  project      = "foo"
-	  service_name = "test"
-	  pool_name    = "mypool-x-y-z"
-
-	  // COMPUTED FIELDS
-	  connection_uri = "foo"
-	  database_name  = "testdb"
-	  pool_mode      = "transaction"
-	  pool_size      = 10
-	  username       = "testuser"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

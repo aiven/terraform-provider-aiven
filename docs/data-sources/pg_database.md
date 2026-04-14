@@ -13,10 +13,15 @@ Gets information about an Aiven for PostgreSQL® database.
 ## Example Usage
 
 ```terraform
-data "aiven_pg_database" "main" {
-  project       = data.aiven_project.example_project.project
-  service_name  = aiven_pg.example_postgres.service_name
-  database_name = "example-database"
+data "aiven_pg_database" "example" {
+  project       = "my-project"
+  service_name  = "my-pg"
+  database_name = "testdb"
+
+  /* COMPUTED FIELDS
+  lc_collate = "en_US.UTF-8"
+  lc_ctype   = "en_US.UTF-8"
+  */
 }
 ```
 

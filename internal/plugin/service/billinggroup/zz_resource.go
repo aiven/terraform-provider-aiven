@@ -18,31 +18,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_billing_group" "example" {
-	  copy_from_billing_group = "ffb3f0cd-5532-4eb9-8867-f2cac5823492" // Force new
-	  account_id              = "a22ba494e096" // Deprecated
-	  address_lines           = ["Main Street 1"]
-	  billing_contact_emails  = ["jane@example.com"]
-	  billing_currency        = "USD"
-	  billing_emails          = ["test@example.com"]
-	  billing_extra_text      = "Purchase order: PO100018"
-	  card_id                 = "9330c086-8781-11e5-89ff-5404a64abfef"
-	  city                    = "Helsinki"
-	  company                 = "My Company"
-	  country_code            = "FI"
-	  name                    = "my billing group"
-	  parent_id               = "foo"
-	  state                   = "foo"
-	  vat_id                  = "FI27957435"
-	  zip_code                = "01234"
-
-	  // COMPUTED FIELDS
-	  billing_group_id = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

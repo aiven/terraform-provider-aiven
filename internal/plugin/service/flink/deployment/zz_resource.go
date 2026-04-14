@@ -21,24 +21,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_flink_application_deployment" "example" {
-	  parallelism        = 1 // Force new
-	  project            = "foo" // Force new
-	  restart_enabled    = true // Force new
-	  starting_savepoint = "path/to/savepoint" // Force new
-	  version_id         = "543e420d-aa63-43e8-b8e8-294a78c600e7" // Force new
-	  service_name       = "test" // Force new
-	  application_id     = "foo" // Force new
-
-	  // COMPUTED FIELDS
-	  created_at    = "foo"
-	  created_by    = "foo"
-	  deployment_id = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

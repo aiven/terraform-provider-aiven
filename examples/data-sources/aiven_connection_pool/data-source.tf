@@ -1,5 +1,13 @@
-data "aiven_connection_pool" "main" {
-  project      = data.aiven_project.example_project.project
-  service_name = aiven_pg.example_postgres.service_name
-  pool_name    = "example-pool"
+data "aiven_connection_pool" "example" {
+  project      = "my-project"
+  service_name = "foo"
+  pool_name    = "mypool-x-y-z"
+
+  /* COMPUTED FIELDS
+  connection_uri = "foo"
+  database_name  = "testdb"
+  pool_mode      = "transaction"
+  pool_size      = 10
+  username       = "testuser"
+  */
 }

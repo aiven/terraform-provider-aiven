@@ -1,5 +1,13 @@
-data "aiven_pg_user" "example_user" {
-  service_name = aiven_pg.example_postgres.service_name
-  project      = data.aiven_project.example_project.project
-  username     = "example-service-user"
+data "aiven_pg_user" "example" {
+  project      = "my-project"
+  service_name = "my-pg"
+  username     = "testuser"
+
+  /* COMPUTED FIELDS
+  access_cert          = "foo"
+  access_key           = "foo"
+  password             = "password123"
+  pg_allow_replication = true
+  type                 = "foo"
+  */
 }

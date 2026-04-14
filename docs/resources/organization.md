@@ -13,8 +13,14 @@ Creates and manages an [organization](https://aiven.io/docs/platform/concepts/or
 ## Example Usage
 
 ```terraform
-resource "aiven_organization" "main" {
-  name = "Example organization"
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
+
+  /* COMPUTED FIELDS
+  id          = "org1a23f456789"
+  create_time = "2021-01-01T00:00:00Z"
+  update_time = "2021-01-01T00:00:00Z"
+  */
 }
 ```
 

@@ -16,22 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_cmk" "example" {
-	  cmk_provider = "aws" // Force new
-	  project      = "foo" // Force new
-	  resource     = "my-resource" // Force new
-	  default_cmk  = false
-
-	  // COMPUTED FIELDS
-	  created_at = "foo"
-	  status     = "current"
-	  updated_at = "foo"
-	  cmk_id     = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
