@@ -16,11 +16,11 @@ require (
 	github.com/gruntwork-io/terratest v0.56.0
 	github.com/hamba/avro/v2 v2.31.0
 	github.com/hashicorp/go-cty v1.5.0
-	github.com/hashicorp/terraform-plugin-framework v1.18.0
-	github.com/hashicorp/terraform-plugin-go v0.30.0
-	github.com/hashicorp/terraform-plugin-mux v0.22.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
-	github.com/jedib0t/go-pretty/v6 v6.7.8
+	github.com/hashicorp/terraform-plugin-framework v1.19.0
+	github.com/hashicorp/terraform-plugin-go v0.31.0
+	github.com/hashicorp/terraform-plugin-mux v0.23.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0
+	github.com/jedib0t/go-pretty/v6 v6.7.9
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.35.0
 	github.com/samber/lo v1.53.0
@@ -28,7 +28,7 @@ require (
 	github.com/stoewer/go-strcase v1.3.1
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/sync v0.20.0
-	golang.org/x/tools v0.41.0
+	golang.org/x/tools v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -251,10 +251,10 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/exp/typeparams v0.0.0-20250210185358-939b2ce775ac // indirect
-	golang.org/x/term v0.40.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/tools/go/expect v0.1.1-deprecated // indirect
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gotest.tools/gotestsum v1.12.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
@@ -286,7 +286,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.7.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
-	github.com/hashicorp/terraform-plugin-testing v1.14.0
+	github.com/hashicorp/terraform-plugin-testing v1.15.0
 	github.com/hashicorp/terraform-registry-address v0.4.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
@@ -307,13 +307,13 @@ require (
 	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.18.0
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/mod v0.33.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/mod v0.34.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/grpc v1.79.1 // indirect
+	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
