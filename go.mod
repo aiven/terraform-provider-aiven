@@ -47,7 +47,7 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
-	github.com/ProtonMail/go-crypto v1.3.0 // indirect
+	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/aiven/go-utils/selproj v0.1.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.16.0 // indirect
 	github.com/alecthomas/go-check-sumtype v0.3.1 // indirect
@@ -277,8 +277,8 @@ require (
 	github.com/hashicorp/go-plugin v1.7.0 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/hashicorp/go-version v1.8.0 // indirect
-	github.com/hashicorp/hc-install v0.9.3 // indirect
+	github.com/hashicorp/go-version v1.9.0 // indirect
+	github.com/hashicorp/hc-install v0.9.4 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.25.0 // indirect
@@ -308,7 +308,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.18.0
 	golang.org/x/crypto v0.50.0 // indirect
-	golang.org/x/mod v0.34.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
