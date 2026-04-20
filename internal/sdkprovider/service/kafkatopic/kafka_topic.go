@@ -9,7 +9,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -263,10 +263,10 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 func ResourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).",
-		CreateContext: resourceKafkaTopicCreate,
-		ReadContext:   resourceKafkaTopicReadResource,
-		UpdateContext: resourceKafkaTopicUpdate,
-		DeleteContext: resourceKafkaTopicDelete,
+		CreateContext: common.WithGenClientDiag(resourceKafkaTopicCreate),
+		ReadContext:   common.WithGenClientDiag(resourceKafkaTopicReadResource),
+		UpdateContext: common.WithGenClientDiag(resourceKafkaTopicUpdate),
+		DeleteContext: common.WithGenClientDiag(resourceKafkaTopicDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -274,7 +274,7 @@ func ResourceKafkaTopic() *schema.Resource {
 		Schema:         aivenKafkaTopicSchema,
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.KafkaTopic(),
-		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m any) error {
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, _ any) error {
 			oldPartitions, newPartitions := d.GetChange("partitions")
 
 			assertedOldPartitions, ok := oldPartitions.(int)
@@ -319,12 +319,15 @@ func ResourceKafkaTopic() *schema.Resource {
 				return nil
 			}
 
-			// A new topic
-			client := m.(*aiven.Client)
+			client, err := common.GenClient()
+			if err != nil {
+				return err
+			}
+
 			project := d.Get("project").(string)
 			serviceName := d.Get("service_name").(string)
 			topicName := d.Get("topic_name").(string)
-			exists, err := kafkatopicrepository.New(client.KafkaTopics).Exists(ctx, project, serviceName, topicName)
+			exists, err := kafkatopicrepository.New(client).Exists(ctx, project, serviceName, topicName)
 			if err != nil {
 				return err
 			}
@@ -338,7 +341,7 @@ func ResourceKafkaTopic() *schema.Resource {
 	}
 }
 
-func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
@@ -352,7 +355,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m any
 		return diag.Errorf("config to json error: %s", err)
 	}
 
-	createRequest := aiven.CreateKafkaTopicRequest{
+	createRequest := &kafkatopic.ServiceKafkaTopicCreateIn{
 		Partitions:  &partitions,
 		Replication: &replication,
 		TopicName:   topicName,
@@ -368,8 +371,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m any
 		createRequest.OwnerUserGroupId = &ownerUserGroupID
 	}
 
-	client := m.(*aiven.Client)
-	err = kafkatopicrepository.New(client.KafkaTopics).Create(ctx, project, serviceName, createRequest)
+	err = kafkatopicrepository.New(client).Create(ctx, project, serviceName, createRequest)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -382,29 +384,28 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m any
 	return nil
 }
 
-func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
+func getTags(d *schema.ResourceData) *[]kafkatopic.TagIn {
 	tagSet := d.Get("tag").(*schema.Set)
-	tags := make([]aiven.KafkaTopicTag, tagSet.Len())
+	if tagSet.Len() == 0 {
+		return nil
+	}
+	tags := make([]kafkatopic.TagIn, tagSet.Len())
 	for i, tagD := range tagSet.List() {
 		tagM := tagD.(map[string]any)
-		tag := aiven.KafkaTopicTag{
+		tags[i] = kafkatopic.TagIn{
 			Key:   tagM["key"].(string),
 			Value: tagM["value"].(string),
 		}
-
-		tags[i] = tag
 	}
-
-	return tags
+	return &tags
 }
 
-// getKafkaTopicConfig converts schema.ResourceData into aiven.KafkaTopicConfig
+// getKafkaTopicConfig converts schema.ResourceData into kafkatopic.ConfigIn
 // Takes manifest values only
-func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error) {
-	empty := aiven.KafkaTopicConfig{}
+func getKafkaTopicConfig(d *schema.ResourceData) (*kafkatopic.ConfigIn, error) {
 	configs := d.GetRawConfig().AsValueMap()[configField]
 	if configs.IsNull() || len(configs.AsValueSlice()) == 0 {
-		return empty, nil
+		return nil, nil
 	}
 
 	config := make(map[string]any)
@@ -416,7 +417,7 @@ func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error)
 		key := fmt.Sprintf("%s.0.%s", configField, k)
 		value, err := typedConfigValue(k, d.Get(key))
 		if err != nil {
-			return empty, fmt.Errorf("error converting config field %q: %w", k, err)
+			return nil, fmt.Errorf("error converting config field %q: %w", k, err)
 		}
 		config[k] = value
 	}
@@ -424,24 +425,26 @@ func getKafkaTopicConfig(d *schema.ResourceData) (aiven.KafkaTopicConfig, error)
 	// Converts to json and loads values to the struct
 	b, err := json.Marshal(config)
 	if err != nil {
-		return empty, err
+		return nil, err
 	}
 
-	var result aiven.KafkaTopicConfig
+	var result kafkatopic.ConfigIn
 	dec := json.NewDecoder(bytes.NewReader(b))
 	dec.UseNumber()
 	err = dec.Decode(&result)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m any, isResource bool) diag.Diagnostics {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, client avngen.Client, isResource bool) diag.Diagnostics {
 	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	client := m.(*aiven.Client)
-	topic, err := kafkatopicrepository.New(client.KafkaTopics).Read(ctx, project, serviceName, topicName)
+	topic, err := kafkatopicrepository.New(client).Read(ctx, project, serviceName, topicName)
 	// Topics are destroyed when kafka is off
 	// https://aiven.io/docs/platform/concepts/service-power-cycle
 	// So it's better to recreate them, than make user to clear the state manually
@@ -504,15 +507,15 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m any, 
 	return nil
 }
 
-func resourceKafkaTopicReadResource(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	return resourceKafkaTopicRead(ctx, d, m, true)
+func resourceKafkaTopicReadResource(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	return resourceKafkaTopicRead(ctx, d, client, true)
 }
 
-func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
-	return resourceKafkaTopicRead(ctx, d, m, false)
+func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	return resourceKafkaTopicRead(ctx, d, client, false)
 }
 
-func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]any {
+func flattenKafkaTopicTags(list []kafkatopic.TagOut) []map[string]any {
 	tags := make([]map[string]any, 0, len(list))
 	for _, tagS := range list {
 		tags = append(tags, map[string]any{
@@ -524,7 +527,7 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]any {
 	return tags
 }
 
-func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	partitions := d.Get("partitions").(int)
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
@@ -539,7 +542,7 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m any
 	topicDescription := d.Get("topic_description").(string)
 	ownerUserGroupID := d.Get("owner_user_group_id").(string)
 
-	updateRequest := aiven.UpdateKafkaTopicRequest{
+	updateRequest := &kafkatopic.ServiceKafkaTopicUpdateIn{
 		Partitions:  &partitions,
 		Replication: schemautil.OptionalIntPointer(d, "replication"),
 		Config:      config,
@@ -554,8 +557,7 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m any
 		updateRequest.OwnerUserGroupId = &ownerUserGroupID
 	}
 
-	client := m.(*aiven.Client)
-	err = kafkatopicrepository.New(client.KafkaTopics).Update(
+	err = kafkatopicrepository.New(client).Update(
 		ctx,
 		projectName,
 		serviceName,
@@ -569,7 +571,7 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m any
 	return nil
 }
 
-func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -579,7 +581,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m any
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	err = kafkatopicrepository.New(m.(*aiven.Client).KafkaTopics).Delete(ctx, projectName, serviceName, topicName)
+	err = kafkatopicrepository.New(client).Delete(ctx, projectName, serviceName, topicName)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Kafka Topic to be DELETED: %s", err)
 	}
@@ -587,7 +589,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m any
 	return nil
 }
 
-func FlattenKafkaTopicConfig(t *aiven.KafkaTopic, isResource bool) ([]map[string]any, error) {
+func FlattenKafkaTopicConfig(t *kafkatopic.ServiceKafkaTopicGetOut, isResource bool) ([]map[string]any, error) {
 	source := make(map[string]struct {
 		Source kafkatopic.SourceType `json:"source"`
 		Value  any                   `json:"value"`

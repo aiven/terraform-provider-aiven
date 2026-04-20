@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/avast/retry-go"
 	"github.com/samber/lo"
 )
 
-func (rep *repository) Read(ctx context.Context, project, service, topic string) (*aiven.KafkaTopic, error) {
+func (rep *repository) Read(ctx context.Context, project, service, topic string) (*kafkatopic.ServiceKafkaTopicGetOut, error) {
 	// We have quick methods to determine that topic does not exist
 	err := rep.exists(ctx, project, service, topic, false)
 	if err != nil {
@@ -42,7 +43,7 @@ func (rep *repository) Read(ctx context.Context, project, service, topic string)
 // Exists omits service not found
 func (rep *repository) Exists(ctx context.Context, project, service, topic string) (bool, error) {
 	err := rep.exists(ctx, project, service, topic, false)
-	if aiven.IsNotFound(err) {
+	if avngen.IsNotFound(err) {
 		// Either topic or service or project does not exist
 		return false, nil
 	}
@@ -54,7 +55,6 @@ func (rep *repository) Exists(ctx context.Context, project, service, topic strin
 // 2. calls v1List for the remote state for the given service and marks it in repository.seenServices
 // 3. saves topic names to repository.seenTopics, so its result can be reused
 // 4. when acquire true, then saves topic to repository.seenTopics (for creating)
-// todo: use context with the new client
 func (rep *repository) exists(ctx context.Context, project, service, topic string, acquire bool) error {
 	rep.Lock()
 	defer rep.Unlock()
@@ -69,7 +69,7 @@ func (rep *repository) exists(ctx context.Context, project, service, topic strin
 
 	// Goes for v1List
 	if !rep.seenServices[serviceKey] {
-		list, err := rep.client.List(ctx, project, service)
+		list, err := rep.client.ServiceKafkaTopicList(ctx, project, service)
 		if err != nil {
 			return err
 		}
@@ -129,15 +129,15 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 		for _, chunk := range lo.Chunk(topicNames, rep.v2ListBatchSize) {
 			// V2List() and Get() do not get info immediately
 			// Some retries should be applied if result is not equal to requested values
-			var list []*aiven.KafkaTopic
+			var list []kafkatopic.ServiceKafkaTopicGetOut
 			err := retry.Do(func() error {
-				rspList, err := rep.client.V2List(ctx, project, service, chunk)
+				rspList, err := rep.client.ServiceKafkaTopicListV2(ctx, project, service, &kafkatopic.ServiceKafkaTopicListV2In{TopicNames: chunk})
 
 				// A 404 means that the "chunk" contains a topic not found on the backend,
 				// even though repository.exists confirmed the topic exists.
 				// The backend uses a cache, and the two endpoints might be inconsistent.
 				// Keeps retrying.
-				if aiven.IsNotFound(err) {
+				if avngen.IsNotFound(err) {
 					return fmt.Errorf("topic list is inconsistent: %w", err)
 				}
 
@@ -167,7 +167,7 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 
 			// Sends topics
 			for _, t := range list {
-				queue[newKey(project, service, t.TopicName)].send(t, nil)
+				queue[newKey(project, service, t.TopicName)].send(&t, nil)
 			}
 		}
 	}

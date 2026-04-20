@@ -9,7 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +25,7 @@ func TestCreateConflict(t *testing.T) {
 	var wg sync.WaitGroup
 	for range 100 {
 		wg.Go(func() {
-			err := rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
+			err := rep.Create(ctx, "a", "b", &kafkatopic.ServiceKafkaTopicCreateIn{TopicName: "c"})
 			if errors.Is(err, errAlreadyExists) {
 				atomic.AddInt32(&conflictErr, 1)
 			}
@@ -47,7 +48,7 @@ func TestCreateRecreateMissing(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates topic
-	err := rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
+	err := rep.Create(ctx, "a", "b", &kafkatopic.ServiceKafkaTopicCreateIn{TopicName: "c"})
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, client.createCalled)
 	assert.EqualValues(t, 1, client.v1ListCalled)
@@ -62,7 +63,7 @@ func TestCreateRecreateMissing(t *testing.T) {
 	assert.False(t, rep.seenTopics["a/b/c"]) // not cached, missing
 
 	// Recreates topic
-	err = rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
+	err = rep.Create(ctx, "a", "b", &kafkatopic.ServiceKafkaTopicCreateIn{TopicName: "c"})
 	require.NoError(t, err)
 	assert.EqualValues(t, 2, client.createCalled) // Updated
 	assert.EqualValues(t, 1, client.v1ListCalled)
@@ -87,7 +88,7 @@ func TestCreateRetries(t *testing.T) {
 		{
 			name: "emulates case when 501 retried in client and then 409 received (ignores 409)",
 			createErr: []error{
-				aiven.Error{Status: 409, Message: "already exists"},
+				avngen.Error{Status: 409, Message: "already exists"},
 			},
 			expectCalled: 1, // exists on the first call as it means the topic is created
 		},
@@ -103,7 +104,7 @@ func TestCreateRetries(t *testing.T) {
 			rep := newRepository(client)
 			rep.workerCallInterval = time.Millisecond
 
-			req := aiven.CreateKafkaTopicRequest{
+			req := &kafkatopic.ServiceKafkaTopicCreateIn{
 				TopicName: "my-topic",
 			}
 			err := rep.Create(ctx, "foo", "bar", req)

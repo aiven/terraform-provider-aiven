@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
-	kafkatopic2 "github.com/aiven/go-client-codegen/handler/kafkatopic"
+	kafkatopichandler "github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/avast/retry-go"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -163,7 +162,7 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 							func() error {
 								topic, err := client.ServiceKafkaTopicGet(ctx, projectName, kafkaName, topicName)
 								if topic != nil {
-									assert.Equal(t, kafkatopic2.TopicStateTypeActive, topic.State)
+									assert.Equal(t, kafkatopichandler.TopicStateTypeActive, topic.State)
 								}
 								return err
 							},
@@ -195,7 +194,7 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 								func() error {
 									topic, err := client.ServiceKafkaTopicGet(ctx, projectName, kafkaName, topicName)
 									if topic != nil {
-										assert.Equal(t, kafkatopic2.TopicStateTypeActive, topic.State)
+										assert.Equal(t, kafkatopichandler.TopicStateTypeActive, topic.State)
 									}
 									return err
 								},
@@ -566,7 +565,7 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 	cases := []struct {
 		name   string
 		expect map[string]any
-		config aiven.KafkaTopicConfigResponse
+		config kafkatopichandler.ConfigOut
 	}{
 		{
 			name: "all fields",
@@ -584,6 +583,8 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				"max_message_bytes":                   "8",
 				"message_downconversion_enable":       false,
 				"message_format_version":              "",
+				"message_timestamp_after_max_ms":      "1000",
+				"message_timestamp_before_max_ms":     "1000",
 				"message_timestamp_difference_max_ms": "0",
 				"message_timestamp_type":              "",
 				"min_cleanable_dirty_ratio":           0.2,
@@ -599,34 +600,36 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				"segment_ms":                          "0",
 				"unclean_leader_election_enable":      true,
 			},
-			config: aiven.KafkaTopicConfigResponse{
-				CleanupPolicy:                   &aiven.KafkaTopicConfigResponseString{Value: "foo"},
-				CompressionType:                 &aiven.KafkaTopicConfigResponseString{Value: "bar"},
-				DeleteRetentionMs:               &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				FileDeleteDelayMs:               &aiven.KafkaTopicConfigResponseInt{Value: 1},
-				FlushMessages:                   &aiven.KafkaTopicConfigResponseInt{Value: 2},
-				FlushMs:                         &aiven.KafkaTopicConfigResponseInt{Value: 3},
-				IndexIntervalBytes:              &aiven.KafkaTopicConfigResponseInt{Value: 4},
-				LocalRetentionBytes:             &aiven.KafkaTopicConfigResponseInt{Value: 5},
-				LocalRetentionMs:                &aiven.KafkaTopicConfigResponseInt{Value: 6},
-				MaxCompactionLagMs:              &aiven.KafkaTopicConfigResponseInt{Value: 7},
-				MaxMessageBytes:                 &aiven.KafkaTopicConfigResponseInt{Value: 8},
-				MessageDownconversionEnable:     &aiven.KafkaTopicConfigResponseBool{Value: false},
-				MessageFormatVersion:            &aiven.KafkaTopicConfigResponseString{Value: ""},
-				MessageTimestampDifferenceMaxMs: &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				MessageTimestampType:            &aiven.KafkaTopicConfigResponseString{Value: ""},
-				MinCleanableDirtyRatio:          &aiven.KafkaTopicConfigResponseFloat{Value: 0.2},
-				MinCompactionLagMs:              &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				MinInsyncReplicas:               &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				Preallocate:                     &aiven.KafkaTopicConfigResponseBool{Value: true},
-				RemoteStorageEnable:             &aiven.KafkaTopicConfigResponseBool{Value: false},
-				RetentionBytes:                  &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				RetentionMs:                     &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				SegmentBytes:                    &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				SegmentIndexBytes:               &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				SegmentJitterMs:                 &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				SegmentMs:                       &aiven.KafkaTopicConfigResponseInt{Value: 0},
-				UncleanLeaderElectionEnable:     &aiven.KafkaTopicConfigResponseBool{Value: true},
+			config: kafkatopichandler.ConfigOut{
+				CleanupPolicy:                   &kafkatopichandler.CleanupPolicyOut{Value: "foo"},
+				CompressionType:                 &kafkatopichandler.CompressionTypeOut{Value: "bar"},
+				DeleteRetentionMs:               &kafkatopichandler.DeleteRetentionMsOut{Value: 0},
+				FileDeleteDelayMs:               &kafkatopichandler.FileDeleteDelayMsOut{Value: 1},
+				FlushMessages:                   &kafkatopichandler.FlushMessagesOut{Value: 2},
+				FlushMs:                         &kafkatopichandler.FlushMsOut{Value: 3},
+				IndexIntervalBytes:              &kafkatopichandler.IndexIntervalBytesOut{Value: 4},
+				LocalRetentionBytes:             &kafkatopichandler.LocalRetentionBytesOut{Value: 5},
+				LocalRetentionMs:                &kafkatopichandler.LocalRetentionMsOut{Value: 6},
+				MaxCompactionLagMs:              &kafkatopichandler.MaxCompactionLagMsOut{Value: 7},
+				MaxMessageBytes:                 &kafkatopichandler.MaxMessageBytesOut{Value: 8},
+				MessageDownconversionEnable:     &kafkatopichandler.MessageDownconversionEnableOut{Value: false},
+				MessageFormatVersion:            &kafkatopichandler.MessageFormatVersionOut{Value: ""},
+				MessageTimestampAfterMaxMs:      &kafkatopichandler.MessageTimestampAfterMaxMsOut{Value: 1000},
+				MessageTimestampBeforeMaxMs:     &kafkatopichandler.MessageTimestampBeforeMaxMsOut{Value: 1000},
+				MessageTimestampDifferenceMaxMs: &kafkatopichandler.MessageTimestampDifferenceMaxMsOut{Value: 0},
+				MessageTimestampType:            &kafkatopichandler.MessageTimestampTypeOut{Value: ""},
+				MinCleanableDirtyRatio:          &kafkatopichandler.MinCleanableDirtyRatioOut{Value: 0.2},
+				MinCompactionLagMs:              &kafkatopichandler.MinCompactionLagMsOut{Value: 0},
+				MinInsyncReplicas:               &kafkatopichandler.MinInsyncReplicasOut{Value: 0},
+				Preallocate:                     &kafkatopichandler.PreallocateOut{Value: true},
+				RemoteStorageEnable:             &kafkatopichandler.RemoteStorageEnableOut{Value: false},
+				RetentionBytes:                  &kafkatopichandler.RetentionBytesOut{Value: 0},
+				RetentionMs:                     &kafkatopichandler.RetentionMsOut{Value: 0},
+				SegmentBytes:                    &kafkatopichandler.SegmentBytesOut{Value: 0},
+				SegmentIndexBytes:               &kafkatopichandler.SegmentIndexBytesOut{Value: 0},
+				SegmentJitterMs:                 &kafkatopichandler.SegmentJitterMsOut{Value: 0},
+				SegmentMs:                       &kafkatopichandler.SegmentMsOut{Value: 0},
+				UncleanLeaderElectionEnable:     &kafkatopichandler.UncleanLeaderElectionEnableOut{Value: true},
 			},
 		},
 		{
@@ -636,17 +639,17 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				"retention_bytes":       "2",
 				"segment_bytes":         "10",
 			},
-			config: aiven.KafkaTopicConfigResponse{
-				LocalRetentionBytes: &aiven.KafkaTopicConfigResponseInt{Value: 1},
-				RetentionBytes:      &aiven.KafkaTopicConfigResponseInt{Value: 2},
-				SegmentBytes:        &aiven.KafkaTopicConfigResponseInt{Value: 10},
+			config: kafkatopichandler.ConfigOut{
+				LocalRetentionBytes: &kafkatopichandler.LocalRetentionBytesOut{Value: 1},
+				RetentionBytes:      &kafkatopichandler.RetentionBytesOut{Value: 2},
+				SegmentBytes:        &kafkatopichandler.SegmentBytesOut{Value: 10},
 			},
 		},
 	}
 
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
-			result, err := kafkatopic.FlattenKafkaTopicConfig(&aiven.KafkaTopic{Config: opt.config}, false)
+			result, err := kafkatopic.FlattenKafkaTopicConfig(&kafkatopichandler.ServiceKafkaTopicGetOut{Config: opt.config}, false)
 			require.NoError(t, err)
 			assert.Empty(t, cmp.Diff([]map[string]any{opt.expect}, result))
 		})
