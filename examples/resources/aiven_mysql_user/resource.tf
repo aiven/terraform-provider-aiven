@@ -5,7 +5,7 @@ resource "aiven_mysql_user" "example" {
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
-  password_wo_version = 42
+  password_wo_version = 1
   authentication      = "caching_sha2_password"
 
   /* COMPUTED FIELDS

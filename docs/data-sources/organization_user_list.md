@@ -15,8 +15,8 @@ Returns a list of [users in the organization](https://aiven.io/docs/platform/con
 ```terraform
 data "aiven_organization_user_list" "example" {
   // REQUIRED EXACTLY ONE
-  id   = "org1a23f456789"
-  name = "foo"
+  id      = "org1a23f456789"
+  // name = "foo"
 
   /* COMPUTED FIELDS
   users {

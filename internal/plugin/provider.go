@@ -103,46 +103,43 @@ func (p *AivenProvider) Configure(
 	resp *provider.ConfigureResponse,
 ) {
 	var data AivenProviderModel
-
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if data.APIToken.IsNull() {
-		token, ok := os.LookupEnv("AIVEN_TOKEN")
-		if !ok {
+	// If the client is not defined in tests
+	if p.GenClient == nil {
+		token := lo.CoalesceOrEmpty(data.APIToken.ValueString(), os.Getenv("AIVEN_TOKEN"))
+		if token == "" {
 			resp.Diagnostics.AddError(errmsg.SummaryTokenMissing, errmsg.DetailTokenMissing)
-
 			return
 		}
 
-		data.APIToken = types.StringValue(token)
-	}
+		// Initialize the generated client
+		genClient, err := common.NewAivenGenClient(
+			common.TokenOpt(token),
+			common.TFVersionOpt(req.TerraformVersion),
+			common.BuildVersionOpt(p.version),
+		)
+		if err != nil {
+			resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
+			return
+		}
+		p.GenClient = genClient
 
-	// Initialize the handwritten client
-	client, err := common.NewAivenClient(
-		common.TokenOpt(data.APIToken.ValueString()),
-		common.TFVersionOpt(req.TerraformVersion),
-		common.BuildVersionOpt(p.version),
-	)
-	if err != nil {
-		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
-		return
+		// Initialize the handwritten client
+		client, err := common.NewAivenClient(
+			common.TokenOpt(token),
+			common.TFVersionOpt(req.TerraformVersion),
+			common.BuildVersionOpt(p.version),
+		)
+		if err != nil {
+			resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
+			return
+		}
+		p.Client = client
 	}
-	p.Client = client
-
-	// Initialize the generated client
-	genClient, err := common.NewAivenGenClient(
-		common.TokenOpt(data.APIToken.ValueString()),
-		common.TFVersionOpt(req.TerraformVersion),
-		common.BuildVersionOpt(p.version),
-	)
-	if err != nil {
-		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
-		return
-	}
-	p.GenClient = genClient
 
 	// Pass the provider itself as the provider data
 	resp.DataSourceData = p

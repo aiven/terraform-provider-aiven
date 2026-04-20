@@ -232,7 +232,15 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 				Bytes: []byte("// Force new"),
 			})
 		}
-		body.SetAttributeRaw(k, tokens)
+
+		fieldName := k
+		if exactlyOneOf && slices.Index(def.Datasource.ExactlyOneOf, k) > 0 {
+			// Comments other options for exactlyOneOf
+			// so the validation won't complain about conflicting fields
+			fieldName = "// " + k
+		}
+
+		body.SetAttributeRaw(fieldName, tokens)
 	}
 
 	if !inComputedBlock && seenComputed {
@@ -250,6 +258,8 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 	return nil
 }
 
+const uuidExample = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+
 func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 	var anyValue any
 	switch {
@@ -259,6 +269,10 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 		anyValue = item.Default
 	case !isEmpty(item.Example):
 		anyValue = item.Example
+	case item.Minimum > 0:
+		anyValue = item.Minimum
+	case item.Maximum > 0:
+		anyValue = item.Maximum
 	case item.IsEnum():
 		anyValue = item.Enum[0]
 	}
@@ -266,9 +280,9 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 	switch item.Type {
 	case SchemaTypeString:
 		if anyValue == nil {
-			anyValue = "foo" // Default value
-			switch item.Name {
-			case "service_name":
+			anyValue = "foo"
+			switch {
+			case item.Name == "service_name":
 				for _, k := range billinggroup.ServiceTypeChoices() {
 					// "kafka_connect" is better than "kafka", so it should be preferred
 					if strings.Contains(def.typeName, k) {
@@ -276,6 +290,8 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 						break
 					}
 				}
+			case item.Name == "uuid", item.MinLength == len(uuidExample):
+				anyValue = uuidExample
 			default:
 				// Some placeholders that can improve the example
 				placeholders := map[string]string{
@@ -292,7 +308,7 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 					"updated_at":       "2021-01-01T00:00:00Z",
 					"project":          "my-project",
 					"service_name":     "my-service",
-					"billing_group_id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+					"billing_group_id": uuidExample,
 				}
 
 				for pattern, example := range placeholders {

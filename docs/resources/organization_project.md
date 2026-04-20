@@ -20,7 +20,7 @@ resource "aiven_organization_project" "example" {
   parent_id        = "a3fd7a594e01"
 
   // OPTIONAL FIELDS
-  base_port = 42
+  base_port = 10000
   tag {
     key   = "foo"
     value = "foo"

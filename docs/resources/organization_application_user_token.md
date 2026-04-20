@@ -21,7 +21,7 @@ resource "aiven_organization_application_user_token" "example" {
   description      = "Integration client Alpha" // Force new
   extend_when_used = false // Force new
   ip_allowlist     = ["192.168.0.0/24"] // Force new
-  max_age_seconds  = 42 // Force new
+  max_age_seconds  = 600 // Force new
   scopes           = ["user:read"] // Force new
 
   /* COMPUTED FIELDS

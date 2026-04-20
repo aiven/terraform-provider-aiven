@@ -5,7 +5,7 @@ resource "aiven_opensearch_user" "example" {
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
-  password_wo_version = 42
+  password_wo_version = 1
 
   /* COMPUTED FIELDS
   type = "foo"

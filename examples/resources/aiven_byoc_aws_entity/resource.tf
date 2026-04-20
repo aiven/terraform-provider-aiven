@@ -21,7 +21,7 @@ resource "aiven_byoc_aws_entity" "example" {
 
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id                = "admin"
-  custom_cloud_environment_id                      = "foo"
+  custom_cloud_environment_id                      = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
   aiven_aws_account_principal                      = "foo"
   aiven_aws_object_storage_credentials_creator_arn = "foo"
   aiven_aws_object_storage_user_arn                = "foo"

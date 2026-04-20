@@ -5,7 +5,7 @@ data "aiven_organization_project" "example" {
   /* COMPUTED FIELDS
   billing_group_id = "721bf796-1d89-402d-9195-425a23c4efdc"
   parent_id        = "a3fd7a594e01"
-  base_port        = 42
+  base_port        = 10000
   ca_cert          = "foo"
   tag {
     key   = "foo"

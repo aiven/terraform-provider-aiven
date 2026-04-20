@@ -15,8 +15,8 @@ Gets information about an organizational unit.
 ```terraform
 data "aiven_organizational_unit" "example" {
   // REQUIRED EXACTLY ONE
-  id   = "foo"
-  name = "Aiven Ltd"
+  id      = "foo"
+  // name = "Aiven Ltd"
 
   /* COMPUTED FIELDS
   parent_id   = "a22ba494e096"
