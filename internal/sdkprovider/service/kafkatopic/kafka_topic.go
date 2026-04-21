@@ -92,6 +92,16 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.StringInSlice(kafkatopic.ConfigMessageFormatVersionTypeChoices(), false),
 			Description:  userconfig.Desc("Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'.").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
 		},
+		"message_timestamp_after_max_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
+			Optional:    true,
+		},
+		"message_timestamp_before_max_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
+			Optional:    true,
+		},
 		"message_timestamp_difference_max_ms": {
 			Type:        schema.TypeString,
 			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if message.timestamp.type=LogAppendTime.",
@@ -583,14 +593,9 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic, isResource bool) ([]map[string
 		Value  any                   `json:"value"`
 	})
 
-	data, err := json.Marshal(t.Config)
+	err := schemautil.Remarshal(t.Config, &source)
 	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(data, &source)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error remarshaling config: %w", err)
 	}
 
 	// Set resource "config" block to nil if no user configuration exists.
@@ -605,11 +610,24 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic, isResource bool) ([]map[string
 	config := make(map[string]any)
 	configSchema := aivenKafkaTopicConfigSchema()
 	for k, v := range source {
-		if configSchema[k].Type == schema.TypeString {
-			config[k] = schemautil.ToOptionalString(v.Value)
-		} else {
-			config[k] = v.Value
+		s, ok := configSchema[k]
+		if !ok {
+			continue
 		}
+
+		// Normalizes data, converts json.Number to int64, float64
+		val, err := typedConfigValue(k, v.Value)
+		if err != nil {
+			return nil, fmt.Errorf("error normalizing config field %q: %w", k, err)
+		}
+
+		// Some values are strings in the schema.
+		// Turns them back to a string.
+		if s.Type == schema.TypeString {
+			val = fmt.Sprint(val)
+		}
+
+		config[k] = val
 
 		if v.Source == kafkatopic.SourceTypeTopicConfig {
 			// There is at least one user defined value.

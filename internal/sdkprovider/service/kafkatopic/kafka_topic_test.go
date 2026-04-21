@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"regexp"
 	"testing"
 	"time"
@@ -71,6 +72,8 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "config.#", "1"),
 						resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
 						resource.TestCheckResourceAttr(resourceName, "config.0.segment_bytes", "1610612736"),
+						resource.TestCheckResourceAttr(resourceName, "config.0.message_timestamp_after_max_ms", "9223372036854775807"),
+						resource.TestCheckResourceAttr(resourceName, "config.0.message_timestamp_before_max_ms", "9223372036854775807"),
 						resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
 						resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
 
@@ -286,12 +289,14 @@ resource "aiven_kafka_topic" "foo" {
   replication  = 2
 
   config {
-    flush_ms                  = 10
-    cleanup_policy            = "compact"
-    min_cleanable_dirty_ratio = 0.01
-    delete_retention_ms       = 50000
-    retention_bytes           = 1234
-    segment_bytes             = 1610612736
+    flush_ms                        = 10
+    cleanup_policy                  = "compact"
+    min_cleanable_dirty_ratio       = 0.01
+    delete_retention_ms             = 50000
+    retention_bytes                 = 1234
+    segment_bytes                   = 1610612736
+    message_timestamp_after_max_ms  = 9223372036854775807
+    message_timestamp_before_max_ms = 9223372036854775807
   }
 }
 
@@ -584,6 +589,8 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				"max_message_bytes":                   "8",
 				"message_downconversion_enable":       false,
 				"message_format_version":              "",
+				"message_timestamp_after_max_ms":      "9223372036854775807",
+				"message_timestamp_before_max_ms":     "9223372036854775807",
 				"message_timestamp_difference_max_ms": "0",
 				"message_timestamp_type":              "",
 				"min_cleanable_dirty_ratio":           0.2,
@@ -613,6 +620,8 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				MaxMessageBytes:                 &aiven.KafkaTopicConfigResponseInt{Value: 8},
 				MessageDownconversionEnable:     &aiven.KafkaTopicConfigResponseBool{Value: false},
 				MessageFormatVersion:            &aiven.KafkaTopicConfigResponseString{Value: ""},
+				MessageTimestampAfterMaxMs:      &aiven.KafkaTopicConfigResponseInt{Value: math.MaxInt64},
+				MessageTimestampBeforeMaxMs:     &aiven.KafkaTopicConfigResponseInt{Value: math.MaxInt64},
 				MessageTimestampDifferenceMaxMs: &aiven.KafkaTopicConfigResponseInt{Value: 0},
 				MessageTimestampType:            &aiven.KafkaTopicConfigResponseString{Value: ""},
 				MinCleanableDirtyRatio:          &aiven.KafkaTopicConfigResponseFloat{Value: 0.2},

@@ -12,6 +12,13 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka_topic` field `config.message_timestamp_after_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps later than the broker's timestamp.
+- Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps earlier than the broker's timestamp.
+
 ## [4.51.0] - 2026-02-17
 
 - Remove docs for `aiven_cassandra` and `aiven_cassandra_user` resources: The Cassandra service has reached end of life.
