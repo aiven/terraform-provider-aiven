@@ -18,7 +18,7 @@
 | 12 | aiven_azure_vpc_peering_connection          |        |     2 |
 | 13 | aiven_billing_group                         | yes    |     2 |
 | 14 | aiven_byoc_aws_entity                       | yes    |     1 |
-| 15 | aiven_byoc_permissions                      | yes    |     1 |
+| 15 | aiven_byoc_aws_provision                    | yes    |     1 |
 | 16 | aiven_cassandra                             |        |     2 |
 | 17 | aiven_cassandra_user                        |        |     2 |
 | 18 | aiven_clickhouse                            |        |     2 |

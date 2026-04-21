@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/aws_provision
+resource:
+  refreshState: true
+  description: |
+    Provisions a BYOC custom cloud environment by handing Aiven the IAM role
+    ARN created in the customer AWS account. Transitions the environment from
+    `draft` to `active` so services can be deployed into it.
+
+    Create this resource after the customer-side AWS infrastructure
+    (IAM role, VPC, subnets, security groups, buckets) has been applied, and
+    before `aiven_byoc_permissions`.
+
+    `terraform destroy` on this resource is a state-only operation -- it does
+    not reverse provisioning. To tear down, destroy the underlying
+    `aiven_byoc_aws_entity`.
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentProvision
+    type: create
+    resultKey: custom_cloud_environment
+    disableView: true
+  - id: CustomCloudEnvironmentGet
+    type: read
+    resultKey: custom_cloud_environment
+remove:
+  - aiven_aws_object_storage_credentials_creator_arn
+  - aiven_aws_object_storage_user_arn
+  - aiven_google_account_principal
+  - aiven_management_cidr_blocks
+  - aiven_object_storage_credentials_creator_user
+  - aws_subnets_bastion
+  - aws_subnets_workload
+  - bucket_names
+  - byoc_resource_tags
+  - byoc_unique_name
+  - cloud_provider
+  - cloud_region
+  - contact_emails
+  - custom_cloud_names
+  - deployment_model
+  - display_name
+  - errors
+  - google_bastion_cidr
+  - google_privilege_bearing_service_account_id
+  - google_workload_cidr
+  - oracle_compartment_id
+  - oracle_subnet_bastion
+  - oracle_subnet_workload
+  - reserved_cidr
+  - state
+  - tags
+  - update_time
+  - use_customer_owned_storage
+schema:
+  organization_id:
+    forceNew: true
+  custom_cloud_environment_id:
+    forceNew: true
