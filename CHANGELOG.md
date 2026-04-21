@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.55.0] - 2026-04-21
+
 - Migrate `aiven_kafka_topic` resource and data source to the generated Go client
 - Add `aiven_organization_application_user` field `create_time`: Time this application user was created.
 - Add `aiven_kafka_topic` field `config.message_timestamp_after_max_ms`: The maximum difference allowed between
