@@ -3,7 +3,7 @@ resource "aiven_kafka" "kafka_service" {
   project                 = var.avn_project
   service_name            = var.kafka_name
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 }

@@ -44,6 +44,8 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
+					resource.TestCheckResourceAttr(resourceName, "config.0.message_timestamp_after_max_ms", "9223372036854775807"),
+					resource.TestCheckResourceAttr(resourceName, "config.0.message_timestamp_before_max_ms", "9223372036854775807"),
 					resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
 					resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
 				),
@@ -158,7 +160,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -172,11 +174,13 @@ resource "aiven_kafka_topic" "foo" {
   replication  = 2
 
   config {
-    flush_ms                  = 10
-    cleanup_policy            = "compact"
-    min_cleanable_dirty_ratio = 0.01
-    delete_retention_ms       = 50000
-    retention_bytes           = 1234
+    flush_ms                        = 10
+    cleanup_policy                  = "compact"
+    min_cleanable_dirty_ratio       = 0.01
+    delete_retention_ms             = 50000
+    retention_bytes                 = 1234
+    message_timestamp_after_max_ms  = 9223372036854775807
+    message_timestamp_before_max_ms = 9223372036854775807
   }
 }
 
@@ -208,7 +212,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -250,7 +254,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -485,7 +489,7 @@ data "aiven_project" "project" {
 resource "aiven_kafka" "kafka" {
   project                 = data.aiven_project.project.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -537,7 +541,7 @@ func testAccAivenKafkaTopicResourceImportMissing(prefix, project string) string 
 resource "aiven_kafka" "kafka" {
   project                 = %[2]q
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -551,7 +555,7 @@ func testAccAivenKafkaTopicResourceImportMissingStep2(prefix, project string) st
 resource "aiven_kafka" "kafka" {
   project                 = %[2]q
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -592,7 +596,7 @@ func testAccAivenKafkaTopicConflictsIfExists(prefix, project string) string {
 resource "aiven_kafka" "kafka" {
   project                 = data.aiven_project.project.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%[1]s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -705,6 +709,8 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				"max_message_bytes":                   "8",
 				"message_downconversion_enable":       false,
 				"message_format_version":              "",
+				"message_timestamp_after_max_ms":      "1000",
+				"message_timestamp_before_max_ms":     "1000",
 				"message_timestamp_difference_max_ms": "0",
 				"message_timestamp_type":              "",
 				"min_cleanable_dirty_ratio":           0.2,
@@ -734,6 +740,8 @@ func TestFlattenKafkaTopicConfig(t *testing.T) {
 				MaxMessageBytes:                 &aiven.KafkaTopicConfigResponseInt{Value: 8},
 				MessageDownconversionEnable:     &aiven.KafkaTopicConfigResponseBool{Value: false},
 				MessageFormatVersion:            &aiven.KafkaTopicConfigResponseString{Value: ""},
+				MessageTimestampAfterMaxMs:      &aiven.KafkaTopicConfigResponseInt{Value: 1000},
+				MessageTimestampBeforeMaxMs:     &aiven.KafkaTopicConfigResponseInt{Value: 1000},
 				MessageTimestampDifferenceMaxMs: &aiven.KafkaTopicConfigResponseInt{Value: 0},
 				MessageTimestampType:            &aiven.KafkaTopicConfigResponseString{Value: ""},
 				MinCleanableDirtyRatio:          &aiven.KafkaTopicConfigResponseFloat{Value: 0.2},

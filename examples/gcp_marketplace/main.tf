@@ -21,7 +21,7 @@ data "aiven_project" "existing_project" {
 resource "aiven_kafka" "kafka" {
   project      = data.aiven_project.existing_project.id
   cloud_name   = "google-europe-north1"
-  plan         = "gcp-marketplace-startup-2"
+  plan         = "gcp-marketplace-startup-4"
   service_name = "kafka"
 }
 

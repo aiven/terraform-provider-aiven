@@ -1,6 +1,7 @@
 package kafkatopic
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -86,6 +87,16 @@ var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
 		Description:  userconfig.Desc("message.format.version value").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
+	},
+	"message_timestamp_after_max_ms": {
+		Type:        schema.TypeString,
+		Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
+		Optional:    true,
+	},
+	"message_timestamp_before_max_ms": {
+		Type:        schema.TypeString,
+		Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
+		Optional:    true,
 	},
 	"message_timestamp_difference_max_ms": {
 		Type:        schema.TypeString,
@@ -593,16 +604,35 @@ func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, err
 		return nil, err
 	}
 
-	err = json.Unmarshal(data, &source)
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	err = decoder.Decode(&source)
 	if err != nil {
 		return nil, err
 	}
 
 	config := make(map[string]any)
 	for k, v := range source {
-		if aivenKafkaTopicConfigSchema[k].Type == schema.TypeString {
+		s, ok := aivenKafkaTopicConfigSchema[k]
+		if !ok {
+			// Unknown fields are ignored
+			continue
+		}
+
+		switch s.Type {
+		case schema.TypeString:
 			config[k] = schemautil.ToOptionalString(v.Value)
-		} else {
+		case schema.TypeInt:
+			config[k], err = strconv.ParseInt(fmt.Sprint(v.Value), 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing %q as int: %w", k, err)
+			}
+		case schema.TypeFloat:
+			config[k], err = strconv.ParseFloat(fmt.Sprint(v.Value), 64)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing %q as float: %w", k, err)
+			}
+		default:
 			config[k] = v.Value
 		}
 	}

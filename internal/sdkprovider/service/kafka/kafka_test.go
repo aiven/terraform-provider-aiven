@@ -116,7 +116,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -152,7 +152,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -192,7 +192,7 @@ data "aiven_project" "foo" {
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -356,7 +356,7 @@ func testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix string) 
 resource "aiven_kafka" "kafka" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-2"
+  plan                    = "startup-4"
   service_name            = "%s-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -406,7 +406,7 @@ resource "aiven_kafka" "kafka" {
   project      = "%s"
   service_name = "%s-kafka"
   cloud_name   = "google-europe-west1"
-  plan         = "startup-2"
+  plan         = "startup-4"
 
   %s
 }

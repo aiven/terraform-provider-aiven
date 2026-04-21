@@ -70,6 +70,8 @@ func ToOptionalString(val interface{}) string {
 		return strconv.FormatBool(v)
 	case string:
 		return v
+	case json.Number:
+		return v.String()
 	default:
 		return ""
 	}

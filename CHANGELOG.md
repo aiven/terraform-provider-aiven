@@ -17,6 +17,12 @@ nav_order: 1
 - Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
 - Migrate `aiven_service_component` data source to use generated client
 - Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`, `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
+- Add `aiven_kafka_topic` field `config.message_timestamp_after_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps later than the broker's timestamp.
+- Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps earlier than the broker's timestamp.
 
 ## [4.37.1] - 2026-01-14
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state

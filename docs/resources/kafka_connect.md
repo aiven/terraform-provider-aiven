@@ -29,7 +29,7 @@ resource "aiven_kafka" "example_kafka" {
   project      = data.aiven_project.example_project.project
   service_name = "example-kafka-service"
   cloud_name   = "google-europe-west1"
-  plan         = "startup-2"
+  plan         = "startup-4"
 }
 
 # Create a Kafka Connect service.
