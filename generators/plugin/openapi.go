@@ -61,6 +61,7 @@ type Content struct {
 		Schema struct {
 			Ref string `json:"$ref"`
 		} `json:"schema"`
+		Example map[string]any `json:"example"` // Contains a json object with example values for the schema
 	} `json:"application/json"`
 }
 

@@ -26,8 +26,8 @@ resourceSchema:
 	  resource_type   = "organization" // Force new
 	  resource_id     = "foo" // Force new
 	  permissions {
-	    permissions    = ["foo"]
-	    principal_id   = "foo"
+	    permissions    = ["read_only"]
+	    principal_id   = "u12345"
 	    principal_type = "user"
 	    create_time    = "foo"
 	    update_time    = "foo"

@@ -20,7 +20,7 @@ datasourceSchema:
 	data "aiven_opensearch_user" "example" {
 	  project      = "foo"
 	  service_name = "test"
-	  username     = "test"
+	  username     = "testuser"
 
 	  // COMPUTED FIELDS
 	  password = "password"

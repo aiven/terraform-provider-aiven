@@ -170,6 +170,12 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 				Bytes: []byte("// Force new"),
 			})
 		}
+		if v.DeprecationMessage != "" {
+			tokens = append(tokens, &hclwrite.Token{
+				Type:  hclsyntax.TokenComment,
+				Bytes: []byte("// Deprecated"),
+			})
+		}
 		body.SetAttributeRaw(k, tokens)
 	}
 
@@ -178,9 +184,14 @@ func exampleObjectItem(isResource bool, item *Item, body *hclwrite.Body) error {
 
 func exampleScalarItem(item *Item) (cty.Value, error) {
 	var anyValue any
-	if item.Default != nil {
+	switch {
+	case !isEmpty(item.Default):
+		// Default values are preferred for examples,
+		// because "default" usually means "best", while "example" is just a random value.
 		anyValue = item.Default
-	} else if item.IsEnum() {
+	case !isEmpty(item.Example):
+		anyValue = item.Example
+	case item.IsEnum():
 		anyValue = item.Enum[0]
 	}
 

@@ -20,7 +20,7 @@ datasourceSchema:
 	data "aiven_mysql_user" "example" {
 	  project      = "foo"
 	  service_name = "test"
-	  username     = "test"
+	  username     = "testuser"
 
 	  // COMPUTED FIELDS
 	  access_cert    = "foo"

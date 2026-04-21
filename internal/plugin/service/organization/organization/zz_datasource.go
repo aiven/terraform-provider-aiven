@@ -22,8 +22,8 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  create_time = "foo"
-	  name        = "test"
-	  tenant_id   = "foo"
+	  name        = "Aiven Ltd"
+	  tenant_id   = "foo" // Deprecated
 	  update_time = "foo"
 	}
 */

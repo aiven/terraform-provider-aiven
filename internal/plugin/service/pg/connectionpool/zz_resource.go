@@ -23,13 +23,13 @@ import (
 resourceSchema:
 
 	resource "aiven_connection_pool" "example" {
-	  database_name = "test" // Force new
+	  database_name = "testdb" // Force new
 	  project       = "foo" // Force new
 	  service_name  = "test" // Force new
-	  pool_name     = "test" // Force new
+	  pool_name     = "mypool-x-y-z" // Force new
 	  pool_mode     = "transaction"
 	  pool_size     = 10
-	  username      = "test"
+	  username      = "testuser"
 
 	  // COMPUTED FIELDS
 	  connection_uri = "foo"

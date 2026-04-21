@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"maps"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
@@ -187,4 +188,19 @@ func multilineValues() jen.Options {
 		Open:      "{",
 		Separator: ",",
 	}
+}
+
+// isEmpty checks if the value is empty — has length zero.
+func isEmpty(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.String, reflect.Array, reflect.Slice, reflect.Map:
+		return rv.Len() == 0
+	}
+
+	return false
 }

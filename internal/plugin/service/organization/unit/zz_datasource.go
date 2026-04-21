@@ -22,8 +22,8 @@ datasourceSchema:
 
 	  // COMPUTED FIELDS
 	  create_time = "foo"
-	  name        = "test"
-	  parent_id   = "foo"
+	  name        = "Aiven Ltd"
+	  parent_id   = "a22ba494e096"
 	  tenant_id   = "foo"
 	  update_time = "foo"
 	}
