@@ -92,6 +92,16 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.StringInSlice(kafkatopic.ConfigMessageFormatVersionTypeChoices(), false),
 			Description:  userconfig.Desc("Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'.").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
 		},
+		"message_timestamp_after_max_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
+			Optional:    true,
+		},
+		"message_timestamp_before_max_ms": {
+			Type:        schema.TypeString,
+			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
+			Optional:    true,
+		},
 		"message_timestamp_difference_max_ms": {
 			Type:        schema.TypeString,
 			Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if message.timestamp.type=LogAppendTime.",
@@ -135,7 +145,7 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 		},
 		"segment_bytes": {
 			Type:        schema.TypeString,
-			Description: "This configuration controls the size of the index that maps offsets to file positions. We preallocate this index file and shrink it only after log rolls. You generally should not need to change this setting.",
+			Description: "This configuration controls the segment file size for the log. Retention and cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over retention. Setting this to a very low value has consequences, and the Aiven management plane ignores values less than 10 megabytes.",
 			Optional:    true,
 		},
 		"segment_index_bytes": {
@@ -160,7 +170,7 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 		},
 		"remote_storage_enable": {
 			Type:        schema.TypeBool,
-			Description: "Indicates whether tiered storage should be enabled.",
+			Description: "Indicates whether tiered storage should be enabled. This is only available for services with Tiered Storage feature enabled.",
 			Optional:    true,
 		},
 		"local_retention_bytes": {

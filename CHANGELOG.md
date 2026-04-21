@@ -13,6 +13,12 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `aiven_organization_application_user` field `create_time`: Time this application user was created.
+- Add `aiven_kafka_topic` field `config.message_timestamp_after_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps later than the broker's timestamp.
+- Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
+  the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
+  with timestamps earlier than the broker's timestamp.
 
 ## [4.54.0] - 2026-04-09
 

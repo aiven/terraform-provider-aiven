@@ -48,6 +48,8 @@ func apiConfigTypes() map[string]schema.ValueType {
 		"max_message_bytes":                   schema.TypeInt,
 		"message_downconversion_enable":       schema.TypeBool,
 		"message_format_version":              schema.TypeString,
+		"message_timestamp_after_max_ms":      schema.TypeInt,
+		"message_timestamp_before_max_ms":     schema.TypeInt,
 		"message_timestamp_difference_max_ms": schema.TypeInt,
 		"message_timestamp_type":              schema.TypeString,
 		"min_cleanable_dirty_ratio":           schema.TypeFloat,
