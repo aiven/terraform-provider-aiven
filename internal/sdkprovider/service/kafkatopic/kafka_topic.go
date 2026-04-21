@@ -87,6 +87,16 @@ var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
 		Description:  userconfig.Desc("message.format.version value").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
 	},
+	"message_timestamp_after_max_ms": {
+		Type:        schema.TypeInt,
+		Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
+		Optional:    true,
+	},
+	"message_timestamp_before_max_ms": {
+		Type:        schema.TypeInt,
+		Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
+		Optional:    true,
+	},
 	"message_timestamp_difference_max_ms": {
 		Type:        schema.TypeString,
 		Description: "message.timestamp.difference.max.ms value",
