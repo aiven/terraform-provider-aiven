@@ -21,9 +21,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 resource "aiven_byoc_aws_provision" "example" {
   organization_id             = "org1a23f456789" // Force new
   custom_cloud_environment_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" // Force new
-
-  // OPTIONAL FIELDS
-  aws_iam_role_arn = "arn:aws:iam::012345678901:root" // Force new
+  aws_iam_role_arn            = "arn:aws:iam::012345678901:root" // Force new
 
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id = "admin"
@@ -37,12 +35,12 @@ resource "aiven_byoc_aws_provision" "example" {
 
 ### Required
 
+- `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.
 - `custom_cloud_environment_id` (String) ID of a custom cloud environment. Length must be exactly `36`. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

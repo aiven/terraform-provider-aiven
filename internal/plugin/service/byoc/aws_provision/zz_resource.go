@@ -16,19 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_byoc_aws_provision" "example" {
-	  aws_iam_role_arn            = "arn:aws:iam::012345678901:root" // Force new
-	  organization_id             = "org1a23f456789" // Force new
-	  custom_cloud_environment_id = "foo" // Force new
-
-	  // COMPUTED FIELDS
-	  aiven_aws_account_principal       = "foo"
-	  aiven_aws_assume_role_external_id = "admin"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -42,8 +29,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"aws_iam_role_arn": schema.StringAttribute{
 				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.",
-				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
 			},
 			"custom_cloud_environment_id": schema.StringAttribute{

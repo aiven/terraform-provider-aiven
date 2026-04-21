@@ -59,3 +59,5 @@ schema:
     forceNew: true
   custom_cloud_environment_id:
     forceNew: true
+  aws_iam_role_arn:
+    required: true
