@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.55.2] - 2026-04-22
+
+- Revert `v4.55.1` due to JSON int64 overflow problems in SDKv2
+
 ## [4.55.1] - 2026-04-21
 
 - Change `aiven_kafka_topic` field `config.message_timestamp_after_max_ms` type to integer
