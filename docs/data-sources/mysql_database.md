@@ -13,10 +13,10 @@ Gets information about an Aiven for MySQL® database.
 ## Example Usage
 
 ```terraform
-data "aiven_mysql_database" "example_database" {
-  project       = aiven_project.example_project.project
-  service_name  = aiven_mysql.example_mysql.service_name
-  database_name = "example-database"
+data "aiven_mysql_database" "example" {
+  project       = "my-project"
+  service_name  = "my-mysql"
+  database_name = "testdb"
 }
 ```
 

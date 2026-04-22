@@ -14,19 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization" "example" {
-	  id = "foo"
-
-	  // COMPUTED FIELDS
-	  create_time = "foo"
-	  name        = "Aiven Ltd"
-	  tenant_id   = "foo" // Deprecated
-	  update_time = "foo"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -44,6 +31,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Name of the organization. Exactly one of the fields must be specified: `id` or `name`.",
 				Optional:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(83)},
 			},
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,

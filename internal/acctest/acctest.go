@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,6 +18,7 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	retryGo "github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -23,6 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/server"
@@ -321,4 +325,35 @@ func CreateTestService(t *testing.T, projectName, serviceName string, opts ...Cr
 	}()
 
 	return readiness
+}
+
+var (
+	_                 avngen.Doer = (*noopDoer)(nil)
+	ErrNoopError                  = fmt.Errorf("noop error")
+	ErrNoopErrorRegex             = regexp.MustCompile(ErrNoopError.Error())
+)
+
+type noopDoer struct{}
+
+func (n *noopDoer) Do(_ *http.Request) (*http.Response, error) {
+	return nil, ErrNoopError
+}
+
+// NoopProviderServer returns a provider that does not make any API calls.
+// Used for testing data-sources as they are invoked during the plan.
+// This is Plugin Framework only server.
+func NoopProviderServer() map[string]func() (tfprotov6.ProviderServer, error) {
+	client, err := avngen.NewClient(
+		avngen.TokenOpt("noop-token"),
+		avngen.DoerOpt(new(noopDoer)),
+	)
+	if err != nil {
+		panic(fmt.Errorf("creating noop client failed: %w", err))
+	}
+
+	return map[string]func() (tfprotov6.ProviderServer, error){
+		"aiven": providerserver.NewProtocol6WithError(&plugin.AivenProvider{
+			GenClient: client,
+		}),
+	}
 }

@@ -13,10 +13,15 @@ Gets information about an Aiven for OpenSearch® service user.
 ## Example Usage
 
 ```terraform
-data "aiven_opensearch_user" "example_opensearch_user" {
-  service_name = "example-opensearch-service"
-  project      = data.aiven_project.example_project.project
-  username     = "example-opensearch-user"
+data "aiven_opensearch_user" "example" {
+  project      = "my-project"
+  service_name = "my-opensearch"
+  username     = "testuser"
+
+  /* COMPUTED FIELDS
+  password = "password123"
+  type     = "foo"
+  */
 }
 ```
 

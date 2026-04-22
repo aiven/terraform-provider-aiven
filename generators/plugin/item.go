@@ -140,6 +140,7 @@ type SchemaMeta struct {
 	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
 	RefreshStateWaiter    bool          `yaml:"refreshStateWaiter,omitempty"`
 	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
+	DisableExample        bool          `yaml:"disableExample,omitempty"`
 }
 
 type Definition struct {
@@ -282,13 +283,30 @@ func (item *Item) Path() string {
 	return strings.Join(chunks, "/")
 }
 
-func (item *Item) IsReadOnly(isResource bool) bool {
-	if isResource {
+func (item *Item) IsRequired(def *Definition, entity entityType) bool {
+	if entity.isResource() {
+		return item.Required
+	}
+
+	// ID attributes are required in data sources, except when there is no exactlyOneOf constraint.
+	return item.IDAttribute && !slices.Contains(def.Datasource.ExactlyOneOf, item.Name)
+}
+
+func (item *Item) IsOptional(def *Definition, entity entityType) bool {
+	if entity.isResource() {
+		return item.Optional
+	}
+
+	return slices.Contains(def.Datasource.ExactlyOneOf, item.Name)
+}
+
+func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
+	if entity.isResource() {
 		return !item.Required && !item.Optional
 	}
 
 	// ID attributes are not read-only in data sources
-	return !item.IDAttribute
+	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
 }
 
 func (item *Item) PropertiesWithoutWO() map[string]*Item {

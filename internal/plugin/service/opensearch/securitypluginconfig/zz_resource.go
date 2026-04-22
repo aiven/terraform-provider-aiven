@@ -16,20 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_opensearch_security_plugin_config" "example" {
-	  project        = "foo" // Force new
-	  service_name   = "test" // Force new
-	  admin_password = "h3.2aD!z2"
-
-	  // COMPUTED FIELDS
-	  admin_enabled = true
-	  available     = true
-	  enabled       = true
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

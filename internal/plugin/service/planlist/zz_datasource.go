@@ -12,37 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_service_plan_list" "example" {
-	  project      = "foo"
-	  service_type = "foo"
-
-	  // COMPUTED FIELDS
-	  service_plans {
-	    is_cluster_plan    = true
-	    max_memory_percent = 42
-	    node_count         = 42
-	    primary_count      = 42
-	    regions = {
-	      foo = {
-	        disk_space_cap_mb           = 42
-	        disk_space_gb_price_usd     = "foo"
-	        disk_space_mb               = 42
-	        disk_space_step_mb          = 42
-	        node_cpu_count              = 42
-	        node_memory_mb              = 42
-	        object_storage_gb_price_usd = "foo"
-	        price_usd                   = "foo"
-	      }
-	    }
-	    service_plan = "foo"
-	    service_type = "foo"
-	    shard_count  = 42
-	  }
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -16,19 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_organization" "example" {
-	  name = "Aiven Ltd"
-
-	  // COMPUTED FIELDS
-	  create_time = "foo"
-	  id          = "foo"
-	  tenant_id   = "foo" // Deprecated
-	  update_time = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

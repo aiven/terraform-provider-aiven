@@ -60,6 +60,10 @@ properties:
         $comment: |
           Set to true to remove the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
           Useful for resources that Aiven may automatically delete, such as users or databases when a service has been turned off and then on again.
+      disableExample:
+        type: boolean
+        $comment: |
+          Set to true to disable Terraform example file generation for this resource.
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
@@ -77,6 +81,10 @@ properties:
         items:
           type: string
         description: List of fields where exactly one must be configured. Applies to data sources only.
+      disableExample:
+        type: boolean
+        $comment: |
+          Set to true to disable Terraform example file generation for this datasource.
     $comment: |
       Documentation and configuration specific to this datasource.
       Use this to provide clear descriptions for your datasource in the Terraform registry.

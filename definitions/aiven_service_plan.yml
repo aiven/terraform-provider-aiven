@@ -2,6 +2,7 @@
 location: internal/plugin/service/plan
 beta: true
 datasource:
+  disableExample: true
   description: >
     Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
 idAttributeComposed: [project, service_type, service_plan, cloud_name]
