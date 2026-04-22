@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+location: internal/plugin/service/byoc/permissions
+resource:
+  description: |
+    Manages permissions for a BYOC custom cloud environment,
+    which accounts and projects can use the cloud to deploy services.
+
+    Note! The \`accounts\` and \`projects\` lists are authoritative. This differs from the \`avn byoc cloud permissions add\`,
+    which merges into the existing set.
+
+    Create this resource after \`aiven_byoc_aws_entity\` and \`aiven_byoc_aws_provision\` so the custom cloud environment
+    is active before permissions are granted.
+  refreshState: true
+  removeMissing: true
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentPermissionsSet
+    type: create
+  - id: CustomCloudEnvironmentPermissionsGet
+    type: read
+  - id: CustomCloudEnvironmentPermissionsSet
+    type: update
+schema:
+  organization_id:
+    forceNew: true
+  custom_cloud_environment_id:
+    forceNew: true
