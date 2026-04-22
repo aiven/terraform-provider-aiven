@@ -300,7 +300,7 @@ Optional:
 
 Required:
 
-- `secrets` (Map of String) Key/value map of secrets for ENV secret provider.
+- `secrets` (Map of String, Sensitive) Key/value map of secrets for ENV secret provider.
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--vault"></a>

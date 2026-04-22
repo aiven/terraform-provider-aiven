@@ -234,7 +234,7 @@ Optional:
 
 Required:
 
-- `secrets` (Map of String) Key/value map of secrets for ENV secret provider.
+- `secrets` (Map of String, Sensitive) Key/value map of secrets for ENV secret provider.
 
 
 <a id="nestedblock--kafka_connect_user_config--secret_providers--vault"></a>
