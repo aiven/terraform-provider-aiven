@@ -10,7 +10,7 @@ description: |-
 
 # aiven_byoc_aws_provision (Resource)
 
-Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been applied, and before `aiven_byoc_permissions`. `terraform destroy` on this resource is a state-only operation -- it does not reverse provisioning. To tear down, destroy the underlying `aiven_byoc_aws_entity`. 
+Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been applied, and before `aiven_byoc_permissions`. `terraform destroy` on this resource is a state-only operation -- it does not reverse provisioning. To tear down, destroy the underlying `aiven_byoc_aws_entity`.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -19,13 +19,16 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ```terraform
 resource "aiven_byoc_aws_provision" "example" {
-  organization_id             = data.aiven_organization.main.id
-  custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id
-  aws_iam_role_arn            = aws_iam_role.aiven_byoc.arn
+  organization_id             = "org1a23f456789" // Force new
+  custom_cloud_environment_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" // Force new
 
-  depends_on = [
-    aws_iam_role_policy_attachment.aiven_byoc,
-  ]
+  // OPTIONAL FIELDS
+  aws_iam_role_arn = "arn:aws:iam::012345678901:root" // Force new
+
+  /* COMPUTED FIELDS
+  aiven_aws_assume_role_external_id = "admin"
+  aiven_aws_account_principal       = "foo"
+  */
 }
 ```
 
