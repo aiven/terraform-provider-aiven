@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/billinggroup"
 	awsentity "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_entity"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/permissions"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
@@ -46,6 +47,7 @@ func Resources() map[string]func() resource.Resource {
 	return map[string]func() resource.Resource{
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
 		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(awsentity.ResourceOptions),
+		"aiven_byoc_permissions":                    adapter.NewLazyResource(permissions.ResourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(database.ResourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyResource(user.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
