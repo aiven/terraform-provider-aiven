@@ -53,6 +53,15 @@ type ResourceOptions struct {
 	// Instead of forcing users to manually clean up the state, Terraform will plan to "create" the resource again.
 	RemoveMissing bool
 
+	// IgnoreAlreadyExists treats a 409 Conflict ("already exists") response from Create as success.
+	// This is useful when the resource being managed is a one-shot provisioning action whose effect is
+	// idempotent from Terraform's perspective — re-running it should adopt the existing entity rather
+	// than fail. Requires RefreshState=true so that the full state is populated by the subsequent Read.
+	// NOTE: This does NOT work for resources whose ID is returned only in the Create response
+	// (e.g. server-assigned IDs), because on conflict there is no response to read the ID from and
+	// the subsequent Read has nothing to look up.
+	IgnoreAlreadyExists bool
+
 	// Returns an error on "plan" if the resource is marked for deletion and the `termination_protection` field is set to true.
 	// There are two types of resources with a `termination_protection` field in our provider:
 	// 1. API-level termination protection: defined in the API schema and prevents deletion through the API.
@@ -174,7 +183,7 @@ func (a *resourceAdapter) Create(
 	defer drainWarnings()
 
 	err = a.resource.Create(ctx, a.client, d)
-	if err != nil {
+	if err != nil && !(a.resource.IgnoreAlreadyExists && avngen.IsAlreadyExists(err)) {
 		diags.AddError("failed to create resource", err.Error())
 		return
 	}
@@ -331,6 +340,11 @@ func (a *resourceAdapter) Delete(
 	req resource.DeleteRequest,
 	rsp *resource.DeleteResponse,
 ) {
+	if a.resource.Delete == nil {
+		// Some resources might not have a Delete operation
+		return
+	}
+
 	diags := &rsp.Diagnostics
 
 	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil)

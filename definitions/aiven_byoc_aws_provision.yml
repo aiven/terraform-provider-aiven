@@ -2,6 +2,7 @@
 beta: true
 location: internal/plugin/service/byoc/aws_provision
 resource:
+  ignoreAlreadyExists: true
   refreshState: true
   description: |
     Provisions a BYOC custom cloud environment by handing Aiven the IAM role
@@ -21,7 +22,6 @@ operations:
   - id: CustomCloudEnvironmentProvision
     type: create
     resultKey: custom_cloud_environment
-    disableView: true
   - id: CustomCloudEnvironmentGet
     type: read
     resultKey: custom_cloud_environment

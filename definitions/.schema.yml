@@ -60,6 +60,16 @@ properties:
         $comment: |
           Set to true to remove the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
           Useful for resources that Aiven may automatically delete, such as users or databases when a service has been turned off and then on again.
+      ignoreAlreadyExists:
+        type: boolean
+        $comment: |
+          Set to true to treat a 409 Conflict ("already exists") response from Create as success.
+          Useful for one-shot provisioning actions that should adopt an existing entity rather than fail on re-run.
+          Requires `refreshState: true` so the state is populated by the subsequent Read.
+          Does NOT work for resources whose ID is returned only in the Create response (e.g. server-assigned IDs):
+          on conflict there is no response to read the ID from and the subsequent Read has nothing to look up.
+        dependencies:
+          - refreshState
       disableExample:
         type: boolean
         $comment: |

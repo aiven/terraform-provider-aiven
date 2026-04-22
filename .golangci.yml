@@ -45,6 +45,10 @@ linters:
       - linters:
          - staticcheck
         text: 'QF1012: (.*)'
+      # De Morgan's law
+      - linters:
+         - staticcheck
+        text: 'QF1001: (.*)'
       - path: (.+)\.go$
         text: 'var-naming: .*'
       - path: (.+)\.go$

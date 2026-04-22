@@ -94,6 +94,10 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 			values["RemoveMissing"] = jen.True()
 		}
 
+		if def.Resource.IgnoreAlreadyExists {
+			values["IgnoreAlreadyExists"] = jen.True()
+		}
+
 		if def.Resource.TerminationProtection {
 			values["TerminationProtection"] = jen.True()
 		}
