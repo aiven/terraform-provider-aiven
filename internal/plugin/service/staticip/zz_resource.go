@@ -17,21 +17,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_static_ip" "example" {
-	  cloud_name             = "aws-eu-central-1" // Force new
-	  project                = "foo" // Force new
-	  termination_protection = false
-
-	  // COMPUTED FIELDS
-	  ip_address           = "foo"
-	  service_name         = "test"
-	  state                = "assigned"
-	  static_ip_address_id = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

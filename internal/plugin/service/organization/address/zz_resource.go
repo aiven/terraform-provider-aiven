@@ -18,24 +18,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_organization_address" "example" {
-	  organization_id = "org1a23f456789" // Force new
-	  address_lines   = ["Main Street 1"]
-	  city            = "Helsinki"
-	  country_code    = "FI"
-	  name            = "Aiven Oy"
-	  state           = "foo"
-	  zip_code        = "01234"
-
-	  // COMPUTED FIELDS
-	  create_time = "foo"
-	  update_time = "foo"
-	  address_id  = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

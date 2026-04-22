@@ -18,25 +18,39 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ## Example Usage
 
 ```terraform
-resource "aiven_governance_access" "example_access" {
-  organization_id = data.aiven_organization.main.id
-  access_name     = "example-topic-access"
-  access_type     = "KAFKA"
-
+resource "aiven_governance_access" "example" {
+  organization_id = "org1a23f456789" // Force new
   access_data {
-    project      = data.aiven_project.example_project.project
-    service_name = aiven_kafka.example_kafka.service_name
-
     acls {
-      resource_name   = "example-topic"
-      resource_type   = "Topic"
-      operation       = "Read"
+      operation       = "Write"
       permission_type = "ALLOW"
-      host            = "*"
-    }
-  }
+      resource_name   = "events"
+      resource_type   = "Topic"
 
-  owner_user_group_id = aiven_organization_user_group.example.group_id
+      // OPTIONAL FIELDS
+      host = "*"
+
+      /* COMPUTED FIELDS
+      id           = "foo"
+      pattern_type = "LITERAL"
+      principal    = "foo"
+      */
+    }
+    project_name = "project-1"
+    service_name = "service-1"
+
+    // OPTIONAL FIELDS
+    username = "api3"
+  }
+  access_name = "My Access" // Force new
+  access_type = "KAFKA" // Force new
+
+  // OPTIONAL FIELDS
+  owner_user_group_id = "ug22ba494e096" // Force new
+
+  /* COMPUTED FIELDS
+  access_id = "foo"
+  */
 }
 ```
 

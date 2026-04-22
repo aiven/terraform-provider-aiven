@@ -1,28 +1,18 @@
-# Define a random_string resource to generate a suffix
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-  upper   = false
-  numeric = true
-}
+resource "aiven_organization_project" "example" {
+  organization_id  = "org1234abcd"
+  project_id       = "project-1" // Force new
+  billing_group_id = "721bf796-1d89-402d-9195-425a23c4efdc"
+  parent_id        = "a3fd7a594e01"
 
-# Create a project within an organization
-resource "aiven_organization_project" "example_project" {
-  project_id       = "example-project-${random_string.suffix.result}"
-  organization_id  = aiven_organization.main.id
-  parent_id        = aiven_organization.main.id
-  billing_group_id = aiven_billing_group.main.id
-
+  // OPTIONAL FIELDS
+  base_port = 10000
   tag {
-    key   = "env"
-    value = "prod"
+    key   = "foo"
+    value = "foo"
   }
-}
+  technical_emails = ["foo@example.com"]
 
-# Create a project within an organizational unit
-resource "aiven_organization_project" "example_project" {
-  project_id       = "example-project-in-unit-${random_string.suffix.result}"
-  organization_id  = aiven_organization.main.id
-  parent_id        = data.aiven_organizational_unit.example_unit.id
-  billing_group_id = aiven_billing_group.main.id
+  /* COMPUTED FIELDS
+  ca_cert = "foo"
+  */
 }

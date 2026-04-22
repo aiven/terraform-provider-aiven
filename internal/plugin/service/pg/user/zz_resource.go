@@ -19,24 +19,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_pg_user" "example" {
-	  project              = "foo" // Force new
-	  service_name         = "test" // Force new
-	  username             = "testuser" // Force new
-	  password             = "password"
-	  password_wo          = "password"
-	  password_wo_version  = 42
-	  pg_allow_replication = true
-
-	  // COMPUTED FIELDS
-	  access_cert = "foo"
-	  access_key  = "foo"
-	  type        = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

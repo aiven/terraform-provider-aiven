@@ -126,7 +126,7 @@ func getAccountID(ctx context.Context, client avngen.Client, d adapter.ResourceD
 		// This is an organization ID (org123456) format
 		org, err := client.OrganizationGet(ctx, id)
 		if err != nil {
-			return "", fmt.Errorf("faild to resolve organization id %q", id)
+			return "", fmt.Errorf("faild to resolve organization id %q: %w", id, err)
 		}
 		return org.AccountId, nil
 	case id != "":

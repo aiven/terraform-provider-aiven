@@ -18,22 +18,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_organization_permission" "example" {
-	  organization_id = "org1a23f456789" // Force new
-	  resource_type   = "organization" // Force new
-	  resource_id     = "foo" // Force new
-	  permissions {
-	    permissions    = ["read_only"]
-	    principal_id   = "u12345"
-	    principal_type = "user"
-	    create_time    = "foo"
-	    update_time    = "foo"
-	  }
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

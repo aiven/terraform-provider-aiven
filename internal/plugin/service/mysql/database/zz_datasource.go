@@ -14,18 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_mysql_database" "example" {
-	  project       = "foo"
-	  service_name  = "test"
-	  database_name = "testdb"
-
-	  // COMPUTED FIELDS
-	  termination_protection = false // Deprecated
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
