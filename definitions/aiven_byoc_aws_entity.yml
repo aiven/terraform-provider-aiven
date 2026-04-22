@@ -27,3 +27,12 @@ remove:
   - oracle_compartment_id
   - oracle_subnet_bastion
   - oracle_subnet_workload
+schema:
+  cloud_provider:
+    forceNew: true
+  cloud_region:
+    forceNew: true
+  deployment_model:
+    forceNew: true
+  reserved_cidr:
+    forceNew: true

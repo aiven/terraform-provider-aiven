@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -62,6 +63,28 @@ resource "aiven_byoc_aws_entity" "example" {
   }
 }`, iamRoleARN)
 
+	regionChangeConfig := baseConfig + fmt.Sprintf(`
+resource "aiven_byoc_aws_entity" "example" {
+  organization_id  = data.aiven_organization.org.id
+  display_name     = "test-byoc-acc-updated"
+  cloud_provider   = "aws"
+  cloud_region     = "aws-us-east-1"
+  deployment_model = "standard"
+  reserved_cidr    = "10.0.0.0/16"
+  aws_iam_role_arn = %q
+
+  contact_emails {
+    email     = "ops@example.com"
+    real_name = "Ops Team"
+    role      = "admin"
+  }
+
+  contact_emails {
+    email = "devops@example.com"
+    role  = "ops"
+  }
+}`, iamRoleARN)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -100,6 +123,16 @@ resource "aiven_byoc_aws_entity" "example" {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config:             regionChangeConfig,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
 			},
 		},
 	})
