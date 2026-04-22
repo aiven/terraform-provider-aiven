@@ -22,18 +22,18 @@ import (
 resourceSchema:
 
 	resource "aiven_byoc_aws_entity" "example" {
+	  cloud_provider   = "aws" // Force new
+	  cloud_region     = "eu-west-1" // Force new
+	  deployment_model = "standard" // Force new
 	  organization_id  = "org1a23f456789" // Force new
+	  reserved_cidr    = "192.168.6.0/24" // Force new
 	  aws_iam_role_arn = "arn:aws:iam::012345678901:root"
-	  cloud_provider   = "aws"
-	  cloud_region     = "eu-west-1"
 	  contact_emails {
 	    email     = "jane@example.com"
 	    real_name = "Jane Smith"
 	    role      = "admin"
 	  }
-	  deployment_model = "standard"
-	  display_name     = "byoc-cloud-prod-eu-west-1"
-	  reserved_cidr    = "192.168.6.0/24"
+	  display_name = "byoc-cloud-prod-eu-west-1"
 	  tags = {
 	    foo = "foo"
 	  }
@@ -127,12 +127,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Name for all the resources created for the custom cloud environment.",
 			},
 			"cloud_provider": schema.StringAttribute{
-				MarkdownDescription: "Cloud provider for the BYOC cloud. The possible values are `aws`, `azure`, `google` and `oracle`.",
+				MarkdownDescription: "Cloud provider for the BYOC cloud. The possible values are `aws`, `azure`, `google` and `oracle`. Changing this property forces recreation of the resource.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("aws", "azure", "google", "oracle")},
 			},
 			"cloud_region": schema.StringAttribute{
-				MarkdownDescription: "Cloud region for the BYOC cloud. Maximum length: `32`.",
+				MarkdownDescription: "Cloud region for the BYOC cloud. Maximum length: `32`. Changing this property forces recreation of the resource.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(32)},
 			},
@@ -146,7 +148,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Cloud names that can be used to provision a service on this BYOC.",
 			},
 			"deployment_model": schema.StringAttribute{
-				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `ipsec_ingress`, `standard` and `standard_public`.",
+				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `ipsec_ingress`, `standard` and `standard_public`. Changing this property forces recreation of the resource.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("direct_ipsec_ingress", "ipsec_ingress", "standard", "standard_public")},
 			},
@@ -166,7 +169,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"reserved_cidr": schema.StringAttribute{
-				MarkdownDescription: "CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`.",
+				MarkdownDescription: "CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`. Changing this property forces recreation of the resource.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
 			},
