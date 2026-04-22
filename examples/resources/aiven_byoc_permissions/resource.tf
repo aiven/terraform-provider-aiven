@@ -1,7 +1,7 @@
 resource "aiven_byoc_permissions" "example" {
-  organization_id             = data.aiven_organization.main.id
-  custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id
+  organization_id             = "org1a23f456789"
+  custom_cloud_environment_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 
-  accounts = [data.aiven_organization.main.id]
+  accounts = ["a22ba494e096"]
   projects = ["my-project"]
 }

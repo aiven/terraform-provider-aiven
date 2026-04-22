@@ -15,24 +15,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization_address" "example" {
-	  organization_id = "org1a23f456789"
-	  address_id      = "foo"
-
-	  // COMPUTED FIELDS
-	  address_lines = ["Main Street 1"]
-	  city          = "Helsinki"
-	  country_code  = "FI"
-	  create_time   = "foo"
-	  name          = "Aiven Oy"
-	  state         = "foo"
-	  update_time   = "foo"
-	  zip_code      = "01234"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

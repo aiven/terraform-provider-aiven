@@ -38,16 +38,10 @@ func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error)
 		attrs[jen.Id("Version")] = jen.Lit(*def.Version)
 	}
 
-	example, err := exampleRoot(entity.isResource(), def, item)
-	if err != nil {
-		return nil, fmt.Errorf("example error: %w", err)
-	}
-
 	// Schema package depends on the entity type.
 	pkg := entityImport(entity.isResource(), schemaPackageFmt)
 	funcName := string(entity) + schemaSuffix
 	return jen.
-		Comment(funcName+":\n"+example).
 		Line().
 		Func().
 		Id(funcName).
@@ -239,7 +233,7 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 	}
 
 	// So far no validations for datasources
-	if !item.IsReadOnly(entity.isResource()) {
+	if !item.IsReadOnly(def, entity) {
 		validators, err := genValidators(item)
 		if err != nil {
 			return nil, err

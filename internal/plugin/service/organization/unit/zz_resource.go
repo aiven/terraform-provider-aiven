@@ -16,20 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_organizational_unit" "example" {
-	  name      = "Aiven Ltd"
-	  parent_id = "a22ba494e096"
-
-	  // COMPUTED FIELDS
-	  create_time = "foo"
-	  id          = "foo"
-	  tenant_id   = "foo"
-	  update_time = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

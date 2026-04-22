@@ -13,9 +13,16 @@ Gets information about OpenSearch Security configuration for an Aiven for OpenSe
 ## Example Usage
 
 ```terraform
-data "aiven_opensearch_security_plugin_config" "os-sec-config" {
-  project      = data.aiven_project.example_project.project
-  service_name = aiven_opensearch.example_opensearch.service_name
+data "aiven_opensearch_security_plugin_config" "example" {
+  project      = "my-project"
+  service_name = "my-opensearch"
+
+  /* COMPUTED FIELDS
+  admin_enabled  = true
+  admin_password = "h3.2aD!z2"
+  available      = true
+  enabled        = true
+  */
 }
 ```
 

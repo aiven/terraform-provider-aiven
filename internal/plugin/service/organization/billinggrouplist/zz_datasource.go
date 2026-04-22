@@ -12,34 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization_billing_group_list" "example" {
-	  organization_id = "org1a23f456789"
-
-	  // COMPUTED FIELDS
-	  billing_groups {
-	    billing_address_id = "foo"
-	    billing_contact_emails {
-	      email = "test@example.com"
-	    }
-	    billing_emails {
-	      email = "test@example.com"
-	    }
-	    billing_group_id    = "foo"
-	    billing_group_name  = "test"
-	    custom_invoice_text = "foo"
-	    organization_id     = "org1a23f456789"
-	    payment_method {
-	      payment_method_id   = "foo"
-	      payment_method_type = "aws_subscription"
-	    }
-	    shipping_address_id = "foo"
-	    vat_id              = "foo"
-	  }
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

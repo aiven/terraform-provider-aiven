@@ -18,22 +18,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 )
 
-/*
-resourceSchema:
-
-	resource "aiven_clickhouse_user" "example" {
-	  project             = "foo" // Force new
-	  username            = "alice" // Force new
-	  service_name        = "test" // Force new
-	  password            = "!@$password12345"
-	  password_wo         = "password"
-	  password_wo_version = 42
-
-	  // COMPUTED FIELDS
-	  required = true
-	  uuid     = "foo"
-	}
-*/
 func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

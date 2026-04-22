@@ -14,22 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_flink_application" "example" {
-	  project        = "foo"
-	  service_name   = "test"
-	  application_id = "foo"
-
-	  // COMPUTED FIELDS
-	  created_at = "foo"
-	  created_by = "foo"
-	  name       = "TestJob"
-	  updated_at = "foo"
-	  updated_by = "foo"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -55,6 +39,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Application name. Exactly one of the fields must be specified: `application_id` or `name`.",
 				Optional:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",

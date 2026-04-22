@@ -12,24 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_organization_user_group_list" "example" {
-	  organization_id = "org1a23f456789"
-
-	  // COMPUTED FIELDS
-	  user_groups {
-	    create_time     = "foo"
-	    description     = "test"
-	    managed_by_scim = true
-	    member_count    = 42
-	    update_time     = "foo"
-	    user_group_id   = "foo"
-	    user_group_name = "test"
-	  }
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

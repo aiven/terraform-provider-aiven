@@ -14,22 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-/*
-datasourceSchema:
-
-	data "aiven_pg_user" "example" {
-	  project      = "foo"
-	  service_name = "test"
-	  username     = "testuser"
-
-	  // COMPUTED FIELDS
-	  access_cert          = "foo"
-	  access_key           = "foo"
-	  password             = "password"
-	  pg_allow_replication = true
-	  type                 = "foo"
-	}
-*/
 func datasourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -3,6 +3,7 @@ location: internal/plugin/service/flink/deployment
 resource:
   refreshState: true
   removeMissing: true
+  disableExample: true
   description: Creates and manages the deployment of an Aiven for Apache Flink® application.
 clientHandler: flinkapplicationdeployment
 idAttributeComposed: [project, service_name, application_id, deployment_id]

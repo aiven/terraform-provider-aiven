@@ -101,7 +101,7 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 		if item.IsRootProperty() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
 			b.ExactlyOneOf(def.Datasource.ExactlyOneOf...)
 		}
-	} else if !item.IsReadOnly(isResource) {
+	} else if !item.IsReadOnly(def, entity) {
 		if item.ForceNew {
 			b.ForceNew()
 		}
