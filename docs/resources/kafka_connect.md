@@ -155,6 +155,7 @@ Optional:
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).
 - `offset_flush_timeout_ms` (Number) Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).
+- `prefer_ipv6_address_enable` (Boolean) When enabled, connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack. Default: `false`.
 - `producer_batch_size` (Number) This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).
 - `producer_buffer_memory` (Number) The total bytes of memory the producer can use to buffer records waiting to be sent to the broker (defaults to 33554432).
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
@@ -248,6 +249,7 @@ Optional:
 
 - `engine_version` (Number) Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.
 - `prefix_path_depth` (Number) Prefix path depth of the secrets Engine. Default is 1. If the secrets engine path has more than one segment it has to be increased to the number of segments.
+- `server_pem` (String) PEM encoded certificate of the Vault server. Required if the vault server uses a self-signed certificate.
 - `token` (String, Sensitive) Token used to authenticate with vault and auth method `token`.
 
 

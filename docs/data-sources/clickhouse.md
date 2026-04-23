@@ -84,6 +84,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--public_access))
 - `recovery_basebackup_name` (String)
+- `server_settings` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--server_settings))
 - `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
@@ -129,6 +130,14 @@ Read-Only:
 - `clickhouse_https` (Boolean)
 - `clickhouse_mysql` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--clickhouse_user_config--server_settings"></a>
+### Nested Schema for `clickhouse_user_config.server_settings`
+
+Read-Only:
+
+- `vector_similarity_index_cache_size` (Number)
 
 
 

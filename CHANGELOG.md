@@ -15,6 +15,17 @@ nav_order: 1
 - Change `aiven_byoc_aws_entity` fields `cloud_provider`, `cloud_region`, `deployment_model`, and `reserved_cidr` to force
   resource replacement when changed. The Aiven API cannot change these fields in place because each is coupled
   to customer-side AWS infrastructure.
+- Add `aiven_clickhouse` field `clickhouse_user_config.server_settings`: ClickHouse server settings, which can be found
+  in the `system.server_settings` table
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_config.prefer_ipv6_address_enable`: When enabled, connectors
+  will automatically resolve IPv6 addresses from external server names configured with dual-stack
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.vault.server_pem`: PEM encoded certificate
+  of the Vault server
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.kafka_connect.prefer_ipv6_address_enable`: When enabled,
+  connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.secret_providers.vault.server_pem`: PEM encoded certificate
+  of the Vault server
+- Change `aiven_service_integration` field `integration_type` (enum): remove `cassandra_cross_service_cluster`
 
 ## [4.55.2] - 2026-04-22
 

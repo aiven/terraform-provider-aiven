@@ -444,6 +444,11 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"prefer_ipv6_address_enable": {
+						Description: "When enabled, connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"producer_batch_size": {
 						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
@@ -574,6 +579,11 @@ func kafkaUserConfig() *schema.Schema {
 								Description: "Prefix path depth of the secrets Engine. Default is 1. If the secrets engine path has more than one segment it has to be increased to the number of segments.",
 								Optional:    true,
 								Type:        schema.TypeInt,
+							},
+							"server_pem": {
+								Description: "PEM encoded certificate of the Vault server. Required if the vault server uses a self-signed certificate.",
+								Optional:    true,
+								Type:        schema.TypeString,
 							},
 							"token": {
 								Description: "Token used to authenticate with vault and auth method `token`.",
