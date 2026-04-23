@@ -117,6 +117,7 @@ Read-Only:
 - `consumer_max_poll_records` (Number)
 - `offset_flush_interval_ms` (Number)
 - `offset_flush_timeout_ms` (Number)
+- `prefer_ipv6_address_enable` (Boolean)
 - `producer_batch_size` (Number)
 - `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)
@@ -201,6 +202,7 @@ Read-Only:
 - `auth_method` (String)
 - `engine_version` (Number)
 - `prefix_path_depth` (Number)
+- `server_pem` (String)
 - `token` (String)
 
 

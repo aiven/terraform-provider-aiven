@@ -92,6 +92,7 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--clickhouse_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
+- `server_settings` (Block List, Max: 1) ClickHouse server settings, which can be found in the `system.server_settings` table (see [below for nested schema](#nestedblock--clickhouse_user_config--server_settings))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
@@ -140,6 +141,14 @@ Optional:
 - `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.
 - `clickhouse_mysql` (Boolean) Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+
+
+<a id="nestedblock--clickhouse_user_config--server_settings"></a>
+### Nested Schema for `clickhouse_user_config.server_settings`
+
+Optional:
+
+- `vector_similarity_index_cache_size` (Number) Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is 0.07 (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.
 
 
 

@@ -178,6 +178,17 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"server_settings": {
+				Description: "ClickHouse server settings, which can be found in the `system.server_settings` table",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"vector_similarity_index_cache_size": {
+					Description: "Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is 0.07 (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.",
+					Optional:    true,
+					Type:        schema.TypeFloat,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,

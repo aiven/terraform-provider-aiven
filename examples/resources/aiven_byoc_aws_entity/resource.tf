@@ -1,10 +1,10 @@
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = "org1a23f456789" // Force new
-  cloud_provider   = "aws"
-  cloud_region     = "eu-west-1"
-  deployment_model = "standard"
+  cloud_provider   = "aws" // Force new
+  cloud_region     = "eu-west-1" // Force new
+  deployment_model = "standard" // Force new
   display_name     = "byoc-cloud-prod-eu-west-1"
-  reserved_cidr    = "192.168.6.0/24"
+  reserved_cidr    = "192.168.6.0/24" // Force new
 
   // OPTIONAL FIELDS
   aws_iam_role_arn = "arn:aws:iam::012345678901:root"
