@@ -14,7 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
@@ -63,10 +62,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// pg
 			"aiven_pg": pg.DatasourcePG(),
-
-			// cassandra
-			"aiven_cassandra":      cassandra.DatasourceCassandra(),
-			"aiven_cassandra_user": cassandra.DatasourceCassandraUser(),
 
 			// account
 			"aiven_account":                account.DatasourceAccount(),
@@ -150,10 +145,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// pg
 			"aiven_pg": pg.ResourcePG(),
-
-			// cassandra
-			"aiven_cassandra":      cassandra.ResourceCassandra(),
-			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
 
 			// account
 			"aiven_account":                account.ResourceAccount(),
