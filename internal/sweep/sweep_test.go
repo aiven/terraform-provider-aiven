@@ -13,7 +13,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"

@@ -45,7 +45,7 @@ resource "aiven_organization_address" "example" {
 - `address_lines` (List of String) Address Lines.
 - `city` (String) City. Maximum length: `125`.
 - `country_code` (String) Country Code. Maximum length: `2`.
-- `name` (String) Name of a company. Length must be between `1` and `128`.
+- `name` (String) Name of a company. Length must be between `1` and `83`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 
 ### Optional

@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Remove user configuration options for Cassandra, InfluxDB, AlloyDB Omni, M3DB, and M3Aggregator, as these services have
+  reached EOL.
+- Remove `aiven_cassandra` and `aiven_cassandra_user` resources: Cassandra service reached end-of-life on [January 7,
+  2024](https://aiven.io/cassandra), and is no longer supported.
 - Change `aiven_byoc_aws_entity` fields `cloud_provider`, `cloud_region`, `deployment_model`, and `reserved_cidr` to force
   resource replacement when changed. The Aiven API cannot change these fields in place because each is coupled
   to customer-side AWS infrastructure.

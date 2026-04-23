@@ -6,10 +6,6 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 func GetUserConfig(kind string) *schema.Schema {
 	switch kind {
-	case "alloydbomni":
-		return alloydbomniUserConfig()
-	case "cassandra":
-		return cassandraUserConfig()
 	case "clickhouse":
 		return clickhouseUserConfig()
 	case "dragonfly":
@@ -18,18 +14,12 @@ func GetUserConfig(kind string) *schema.Schema {
 		return flinkUserConfig()
 	case "grafana":
 		return grafanaUserConfig()
-	case "influxdb":
-		return influxdbUserConfig()
 	case "kafka":
 		return kafkaUserConfig()
 	case "kafka_connect":
 		return kafkaConnectUserConfig()
 	case "kafka_mirrormaker":
 		return kafkaMirrormakerUserConfig()
-	case "m3aggregator":
-		return m3aggregatorUserConfig()
-	case "m3db":
-		return m3dbUserConfig()
 	case "mysql":
 		return mysqlUserConfig()
 	case "opensearch":
@@ -50,17 +40,6 @@ func GetUserConfig(kind string) *schema.Schema {
 // GetFieldMapping returns TF fields to Json fields mapping (in unix-path way)
 func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{
-		"alloydbomni": {
-			"ip_filter_object":                  "ip_filter",
-			"ip_filter_string":                  "ip_filter",
-			"pg/pg_partman_bgw__dot__interval":  "pg/pg_partman_bgw.interval",
-			"pg/pg_partman_bgw__dot__role":      "pg/pg_partman_bgw.role",
-			"pg/pg_stat_statements__dot__track": "pg/pg_stat_statements.track",
-		},
-		"cassandra": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
-		},
 		"clickhouse": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
@@ -77,10 +56,6 @@ func GetFieldMapping(kind string) map[string]string {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
 		},
-		"influxdb": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
-		},
 		"kafka": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
@@ -92,16 +67,6 @@ func GetFieldMapping(kind string) map[string]string {
 		"kafka_mirrormaker": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
-		},
-		"m3aggregator": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
-		},
-		"m3db": {
-			"ip_filter_object":                "ip_filter",
-			"ip_filter_string":                "ip_filter",
-			"rules/mapping/namespaces_object": "rules/mapping/namespaces",
-			"rules/mapping/namespaces_string": "rules/mapping/namespaces",
 		},
 		"mysql": {
 			"ip_filter_object": "ip_filter",
@@ -164,5 +129,5 @@ func GetFieldMapping(kind string) map[string]string {
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"alloydbomni", "cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
+	return []string{"clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
 }

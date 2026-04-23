@@ -51,9 +51,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of a company. Length must be between `1` and `128`.",
+				MarkdownDescription: "Name of a company. Length must be between `1` and `83`.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
+				Validators:          []validator.String{stringvalidator.LengthBetween(1, 83)},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.",
