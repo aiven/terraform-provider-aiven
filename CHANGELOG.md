@@ -31,6 +31,7 @@ nav_order: 1
 ## [4.55.2] - 2026-04-22
 
 - Revert `v4.55.1` due to JSON int64 overflow problems in SDKv2
+- Add `aiven_byoc_aws_provision` resource for provisioning BYOC custom cloud environments on AWS
 
 ## [4.55.1] - 2026-04-21
 
