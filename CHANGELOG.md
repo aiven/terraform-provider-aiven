@@ -23,6 +23,8 @@ nav_order: 1
 - Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
   the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
   with timestamps earlier than the broker's timestamp.
+- Add `aiven_kafka` field `config.kafka.log_message_timestamp_after_max_ms`
+- Add `aiven_kafka` field `config.kafka.log_message_timestamp_before_max_ms`
 
 ## [4.37.1] - 2026-01-14
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state

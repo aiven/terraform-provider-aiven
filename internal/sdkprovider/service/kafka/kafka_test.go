@@ -283,8 +283,9 @@ resource "aiven_kafka" "bar" {
     schema_registry = true
 
     kafka {
-      group_max_session_timeout_ms = 70000
-      log_retention_bytes          = 1000000000
+		group_max_session_timeout_ms = 70000
+		log_retention_bytes          = 1000000000
+		log_message_timestamp_after_max_ms = 1000000000
     }
 
     public_access {

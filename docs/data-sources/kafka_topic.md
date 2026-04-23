@@ -58,6 +58,8 @@ Read-Only:
 - `max_message_bytes` (String)
 - `message_downconversion_enable` (Boolean)
 - `message_format_version` (String)
+- `message_timestamp_after_max_ms` (String)
+- `message_timestamp_before_max_ms` (String)
 - `message_timestamp_difference_max_ms` (String)
 - `message_timestamp_type` (String)
 - `min_cleanable_dirty_ratio` (Number)
