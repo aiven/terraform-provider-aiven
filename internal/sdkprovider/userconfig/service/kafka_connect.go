@@ -287,6 +287,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"secrets": {
 							Description: "Key/value map of secrets for ENV secret provider.",
 							Required:    true,
+							Sensitive:   true,
 							Type:        schema.TypeMap,
 						}}},
 						MaxItems: 1,

@@ -26,6 +26,7 @@ nav_order: 1
 - Add `aiven_kafka_connect` field `kafka_connect_user_config.secret_providers.vault.server_pem`: PEM encoded certificate
   of the Vault server
 - Change `aiven_service_integration` field `integration_type` (enum): remove `cassandra_cross_service_cluster`
+- Mark `env.secrets` field as sensitive in user config schemas for `kafka` and `kafka_connect` resources
 
 ## [4.55.2] - 2026-04-22
 

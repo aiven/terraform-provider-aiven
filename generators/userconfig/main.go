@@ -254,11 +254,11 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 		}
 	}
 
-	if o.isScalar() {
-		if o.IsSensitive {
-			values[jen.Id("Sensitive")] = jen.True()
-		}
+	if o.IsSensitive {
+		values[jen.Id("Sensitive")] = jen.True()
+	}
 
+	if o.isScalar() {
 		if o.Enum != nil {
 			args := make([]jen.Code, 0)
 			for _, v := range o.Enum {
