@@ -140,6 +140,7 @@ type SchemaMeta struct {
 	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
 	RefreshStateWaiter    bool          `yaml:"refreshStateWaiter,omitempty"`
 	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
+	IgnoreAlreadyExists   bool          `yaml:"ignoreAlreadyExists,omitempty"`
 	DisableExample        bool          `yaml:"disableExample,omitempty"`
 }
 

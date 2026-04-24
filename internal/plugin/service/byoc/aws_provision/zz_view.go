@@ -7,6 +7,7 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/byoc"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -20,14 +21,28 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:           true,
-	Create:         createView,
-	IDFields:       idFields(),
-	Read:           readView,
-	RefreshState:   true,
-	Schema:         resourceSchema,
-	SchemaInternal: resourceSchemaInternal(),
-	TypeName:       typeName,
+	Beta:                true,
+	Create:              createView,
+	IDFields:            idFields(),
+	IgnoreAlreadyExists: true,
+	Read:                readView,
+	RefreshState:        true,
+	Schema:              resourceSchema,
+	SchemaInternal:      resourceSchemaInternal(),
+	TypeName:            typeName,
+}
+
+func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(byoc.CustomCloudEnvironmentProvisionIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.CustomCloudEnvironmentProvision(ctx, d.Get("organization_id").(string), d.Get("custom_cloud_environment_id").(string), req)
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp)
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
