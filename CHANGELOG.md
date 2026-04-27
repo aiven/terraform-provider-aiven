@@ -36,6 +36,7 @@ nav_order: 1
   in the `system.settings` table
 - Change `aiven_mysql` field `mysql_user_config.mysql_version` (enum): add `8.4`
 - Fix plugin-framework adapter decoding map attributes as objects
+- Migrate `aiven_project_vpc` resource and data source to the Plugin Framework.
 
 ## [4.55.2] - 2026-04-22
 

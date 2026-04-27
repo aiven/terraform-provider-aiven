@@ -26,10 +26,18 @@ data "aiven_project_vpc" "example_vpc" {
 
 - `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
 - `project` (String) Identifies the project this resource belongs to.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vpc_id` (String) The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID composed as: `project/project_vpc_id`.
 - `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
 - `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
