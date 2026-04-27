@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 func TestItemPath(t *testing.T) {
@@ -31,6 +32,65 @@ func TestItemPath(t *testing.T) {
 	items.Parent = array
 	assert.Equal(t, "array", array.Path())
 	assert.Equal(t, "array", items.Path())
+}
+
+func TestIDAttributeComposedUnmarshal(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		cases := []struct {
+			name string
+			yml  string
+			want IDAttribute
+		}{
+			{
+				name: "list form",
+				yml:  "idAttributeComposed: [project, project_vpc_id]",
+				want: IDAttribute{
+					Fields: []string{"project", "project_vpc_id"},
+				},
+			},
+			{
+				name: "object form",
+				yml: `
+idAttributeComposed:
+  fields: [project, project_vpc_id]
+  populateFieldsFromID: true
+`,
+				want: IDAttribute{
+					Fields:               []string{"project", "project_vpc_id"},
+					PopulateFieldsFromID: true,
+				},
+			},
+		}
+
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				var def Definition
+				err := yaml.Unmarshal([]byte(tc.yml), &def)
+				require.NoError(t, err)
+				assert.Equal(t, tc.want, def.IDAttributeComposed)
+			})
+		}
+	})
+
+	t.Run("errors", func(t *testing.T) {
+		cases := []struct {
+			name string
+			yml  string
+		}{
+			{
+				name: "scalar form",
+				yml:  `idAttributeComposed: project_vpc_id`,
+			},
+		}
+
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				var def Definition
+				err := yaml.Unmarshal([]byte(tc.yml), &def)
+				require.ErrorContains(t, err, "idAttributeComposed must be a list of fields or an object")
+			})
+		}
+	})
 }
 
 // TestItemRemoveElements verifies that elements are correctly removed from nested structures.

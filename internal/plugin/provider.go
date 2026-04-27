@@ -21,6 +21,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -178,6 +179,7 @@ func ResourcesMap() map[string]func() resource.Resource {
 func DataSourcesMap() map[string]func() datasource.DataSource {
 	result := map[string]func() datasource.DataSource{
 		"aiven_organization": organization.NewDataSource,
+		"aiven_project_vpc":  projectvpc.NewDataSource,
 	}
 
 	if util.IsBeta() {

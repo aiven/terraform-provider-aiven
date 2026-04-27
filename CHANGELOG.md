@@ -35,6 +35,7 @@ nav_order: 1
 - Add `aiven_clickhouse` field `clickhouse_user_config.session_settings`: ClickHouse session settings, which can be found
   in the `system.settings` table
 - Change `aiven_mysql` field `mysql_user_config.mysql_version` (enum): add `8.4`
+- Migrate `aiven_project_vpc` resource and data source to the Plugin Framework.
 
 ## [4.55.2] - 2026-04-22
 

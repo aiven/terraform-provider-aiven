@@ -1,9 +1,10 @@
-resource "aiven_project_vpc" "example_vpc" {
-  project      = data.aiven_project.example_project.project
-  cloud_name   = "google-europe-west1"
-  network_cidr = "192.168.1.0/24"
+resource "aiven_project_vpc" "example" {
+  project      = "my-project" // Force new
+  cloud_name   = "aws-eu-central-1" // Force new
+  network_cidr = "192.168.6.0/24" // Force new
 
-  timeouts {
-    create = "5m"
-  }
+  /* COMPUTED FIELDS
+  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  state          = "ACTIVE"
+  */
 }

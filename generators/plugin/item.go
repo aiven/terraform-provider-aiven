@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ettle/strcase"
+	"gopkg.in/yaml.v3"
 )
 
 // AppearsIn is a bitmask for the field appearance (request, response, etc.)
@@ -69,6 +70,7 @@ type Operation struct {
 	ID                     OperationID       `yaml:"id"`
 	Type                   OperationType     `yaml:"type"`
 	DisableView            bool              `yaml:"disableView"`
+	OnSuccess              string            `yaml:"onSuccess"`
 	ResultKey              string            `yaml:"resultKey"`              // E.g.: {errors: [], result: {}} - extract "result"
 	ResultListLookup       string            `yaml:"resultListLookup"`       // The list name to lookup the item in the response
 	ResultListLookupKeys   map[string]string `yaml:"resultListLookupKeys"`   // When the response is a list, these keys are used to locate the correct item
@@ -154,7 +156,7 @@ type Definition struct {
 	Rename              map[string]string `yaml:"rename,omitempty"`
 	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
 	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
+	IDAttributeComposed IDAttribute       `yaml:"idAttributeComposed,omitempty"`
 	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
 	Operations          Operations        `yaml:"operations"`
 	Version             *int              `yaml:"version"`
@@ -162,6 +164,28 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+}
+
+type IDAttribute struct {
+	Fields               []string `yaml:"fields"`
+	PopulateFieldsFromID bool     `yaml:"populateFieldsFromID,omitempty"`
+}
+
+func (id *IDAttribute) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.SequenceNode:
+		return value.Decode(&id.Fields)
+	case yaml.MappingNode:
+		type rawIDAttribute IDAttribute
+		var raw rawIDAttribute
+		if err := value.Decode(&raw); err != nil {
+			return err
+		}
+		*id = IDAttribute(raw)
+		return nil
+	default:
+		return fmt.Errorf("idAttributeComposed must be a list of fields or an object")
+	}
 }
 
 type Item struct {

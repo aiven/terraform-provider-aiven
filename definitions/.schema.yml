@@ -104,11 +104,27 @@ properties:
       List of attributes to remove from the resource/datasource.
       Example: remove: ["openapi_name1", "openapi_name2"]
   idAttributeComposed:
-    type: array
-    minItems: 1
-    items:
-      type: string
-      $comment: A list of fields to compose the ID attribute from
+    oneOf:
+      - type: array
+        minItems: 1
+        items:
+          type: string
+          $comment: A list of fields to compose the ID attribute from
+      - type: object
+        required:
+          - fields
+        additionalProperties: false
+        properties:
+          fields:
+            type: array
+            minItems: 1
+            items:
+              type: string
+            $comment: A list of fields to compose the ID attribute from
+          populateFieldsFromID:
+            type: boolean
+            $comment: |
+              Populate missing ID attribute fields by splitting the composed ID before generated resource read/delete operations.
   location:
     type: string
     $comment: |
@@ -173,6 +189,11 @@ definitions:
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
+      onSuccess:
+        type: string
+        $comment: |
+          Function to call after this operation succeeds.
+          Signature: func(ctx context.Context, client avngen.Client, d adapter.ResourceData) error
       resultKey:
         type: string
         $comment: |
