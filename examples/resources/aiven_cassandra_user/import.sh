@@ -1,1 +1,0 @@
-terraform import aiven_cassandra_user.example_service_user PROJECT/SERVICE_NAME/USERNAME

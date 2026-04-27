@@ -35,7 +35,6 @@ func DatasourceServiceComponent() *schema.Resource {
 				Required:    true,
 				Description: "Service component name",
 				ValidateFunc: validation.StringInSlice([]string{ // fixme: choices are missing from the schema
-					"cassandra",
 					"elasticsearch",
 					"grafana",
 					"kafka",

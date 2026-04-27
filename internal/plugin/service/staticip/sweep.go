@@ -18,7 +18,6 @@ func init() {
 		Name: "aiven_static_ip",
 		F:    sweepStaticIPs(ctx),
 		Dependencies: []string{
-			"aiven_cassandra",
 			"aiven_clickhouse",
 			"aiven_flink",
 			"aiven_grafana",

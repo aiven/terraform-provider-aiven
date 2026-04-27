@@ -151,25 +151,6 @@ rules:
     Grafana should use the smallest plan (startup-1) to save costs
   severity: ERROR
 
-# Rule for M3 Aggregator
-- id: large-plan-in-test-m3aggregator
-  languages: [generic]
-  paths:
-    include:
-    - "*_test.go"
-  patterns:
-  - pattern-inside:
-      plan = "..."
-  - pattern-inside: |
-      resource "aiven_m3aggregator" ... {
-        ...
-      }
-  - pattern-not-regex: business-8|%s
-  fix: plan = "business-8"
-  message: |
-    M3Aggregator requires at least business-8 plan
-  severity: ERROR
-
 # Rule for all other services
 - id: large-plan-in-test-other
   languages: [generic]
@@ -189,14 +170,6 @@ rules:
       }
   - pattern-not-inside: |
       resource "aiven_flink" ... {
-        ...
-      }
-  - pattern-not-inside: |
-      resource "aiven_m3aggregator" ... {
-        ...
-      }
-  - pattern-not-inside: |
-      resource "aiven_m3db" ... {
         ...
       }
   - pattern-not-inside: |

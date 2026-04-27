@@ -21,7 +21,6 @@ func init() {
 		Name: "aiven_project",
 		F:    sweepProjects(ctx),
 		Dependencies: []string{
-			"aiven_cassandra",
 			"aiven_clickhouse",
 			"aiven_flink",
 			"aiven_grafana",

@@ -17,7 +17,6 @@ func init() {
 
 	allServices := []string{
 		"aiven_pg",
-		"aiven_cassandra",
 		"aiven_opensearch",
 		"aiven_grafana",
 		"aiven_redis",

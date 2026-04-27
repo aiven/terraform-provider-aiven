@@ -1,1 +1,0 @@
-terraform import aiven_cassandra.example_cassandra PROJECT/SERVICE_NAME
