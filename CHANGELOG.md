@@ -31,6 +31,8 @@ nav_order: 1
   of the Vault server
 - Change `aiven_service_integration` field `integration_type` (enum): remove `cassandra_cross_service_cluster`
 - Mark `env.secrets` field as sensitive in user config schemas for `kafka` and `kafka_connect` resources
+- Add `aiven_clickhouse` field `clickhouse_user_config.session_settings`: ClickHouse session settings, which can be found
+  in the `system.settings` table
 
 ## [4.55.2] - 2026-04-22
 

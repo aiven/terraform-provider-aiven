@@ -200,6 +200,17 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"session_settings": {
+				Description: "ClickHouse session settings, which can be found in the `system.settings` table",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"compatibility": {
+					Description: "When set, ClickHouse applies backward-compatible behavior from the specified version. Automatically set to the previous version on major version upgrade. Set to null to disable compatibility mode once all incompatibilities have been resolved. Takes effect after the next service restart/upgrade.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"static_ips": {
 				Description: "Use static public IP addresses.",
 				Optional:    true,
