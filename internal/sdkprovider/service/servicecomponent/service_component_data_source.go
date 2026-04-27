@@ -41,7 +41,6 @@ func DatasourceServiceComponent() *schema.Resource {
 					"kafka_connect",
 					"mysql",
 					"pg",
-					"redis",
 					"kibana",
 					"kafka_connect",
 					"kafka_rest",

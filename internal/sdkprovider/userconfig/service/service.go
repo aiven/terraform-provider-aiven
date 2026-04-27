@@ -26,8 +26,6 @@ func GetUserConfig(kind string) *schema.Schema {
 		return opensearchUserConfig()
 	case "pg":
 		return pgUserConfig()
-	case "redis":
-		return redisUserConfig()
 	case "thanos":
 		return thanosUserConfig()
 	case "valkey":
@@ -103,10 +101,6 @@ func GetFieldMapping(kind string) map[string]string {
 			"pg/pg_stat_monitor__dot__pgsm_max_buckets":       "pg/pg_stat_monitor.pgsm_max_buckets",
 			"pg/pg_stat_statements__dot__track":               "pg/pg_stat_statements.track",
 		},
-		"redis": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
-		},
 		"thanos": {
 			"compactor/retention_days":                         "compactor/retention.days",
 			"ip_filter_object":                                 "ip_filter",
@@ -129,5 +123,5 @@ func GetFieldMapping(kind string) map[string]string {
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
+	return []string{"clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "opensearch", "pg", "thanos", "valkey"}
 }

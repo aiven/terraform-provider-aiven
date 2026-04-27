@@ -52,7 +52,6 @@ const (
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
-	ServiceTypeRedis            = "redis"
 	ServiceTypeMySQL            = "mysql"
 	ServiceTypeKafka            = "kafka"
 	ServiceTypeKafkaConnect     = "kafka_connect"
@@ -129,7 +128,7 @@ func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
 	list := make([]service.IntegrationType, 0)
 
 	switch kind {
-	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeRedis, ServiceTypeValkey:
+	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeValkey:
 		list = append(list, service.IntegrationTypeReadReplica)
 	}
 
@@ -1055,7 +1054,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		// CassandraHosts will be renamed to CassandraURIs in the next major version of the Go client.
 		// That's why we name the props key `uris` here.
 		props["uris"] = connectionInfo.Cassandra
-	case ServiceTypeRedis, ServiceTypeDragonfly:
+	case ServiceTypeDragonfly:
 		props["uris"] = connectionInfo.Redis
 		props["slave_uris"] = connectionInfo.RedisSlave
 		setProp(props, "replica_uri", connectionInfo.RedisReplicaUri)
@@ -1100,7 +1099,7 @@ func setServicePassword(d ResourceData, password any) error {
 // Different services use different default usernames (e.g., avnadmin, default, etc.).
 func DefaultServiceUsername(serviceType string) string {
 	switch serviceType {
-	case ServiceTypeRedis, ServiceTypeDragonfly, ServiceTypeValkey:
+	case ServiceTypeDragonfly, ServiceTypeValkey:
 		return "default"
 	default:
 		return "avnadmin" // most services use avnadmin

@@ -16,6 +16,7 @@ nav_order: 1
   reached EOL.
 - Remove `aiven_cassandra` and `aiven_cassandra_user` resources: Cassandra service reached end-of-life on [January 7,
   2024](https://aiven.io/cassandra), and is no longer supported.
+- Remove `aiven_redis` and `aiven_redis_user` resources and data sources: reached end-of-life.
 - Change `aiven_byoc_aws_entity` fields `cloud_provider`, `cloud_region`, `deployment_model`, and `reserved_cidr` to force
   resource replacement when changed. The Aiven API cannot change these fields in place because each is coupled
   to customer-side AWS infrastructure.

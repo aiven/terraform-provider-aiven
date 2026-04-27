@@ -30,7 +30,6 @@ func init() {
 			"aiven_mysql",
 			"aiven_opensearch",
 			"aiven_pg",
-			"aiven_redis",
 		},
 	})
 

@@ -55,7 +55,6 @@ func TestUpsertServicePassword(t *testing.T) {
 			name        string
 			serviceType string
 		}{
-			{"redis", ServiceTypeRedis},
 			{"clickhouse", ServiceTypeClickhouse},
 			{"cassandra", ServiceTypeCassandra},
 			{"thanos", ServiceTypeThanos},

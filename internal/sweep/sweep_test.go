@@ -22,7 +22,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 
@@ -73,7 +72,6 @@ func knownMissingSweepers() []string {
 		"aiven_organization_permission",
 		"aiven_pg_database",
 		"aiven_pg_user",
-		"aiven_redis_user",
 		"aiven_valkey_user",
 	}
 }
