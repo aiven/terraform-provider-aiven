@@ -26,7 +26,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
@@ -55,10 +54,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// mysql
 			"aiven_mysql": mysql.DatasourceMySQL(),
-
-			// redis
-			"aiven_redis":      redis.DatasourceRedis(),
-			"aiven_redis_user": redis.DatasourceRedisUser(),
 
 			// pg
 			"aiven_pg": pg.DatasourcePG(),
@@ -138,10 +133,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// mysql
 			"aiven_mysql": mysql.ResourceMySQL(),
-
-			// redis
-			"aiven_redis":      redis.ResourceRedis(),
-			"aiven_redis_user": redis.ResourceRedisUser(),
 
 			// pg
 			"aiven_pg": pg.ResourcePG(),

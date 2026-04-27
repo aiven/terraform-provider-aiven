@@ -10,7 +10,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/pg"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/redis"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/serviceintegration"
 )
 
@@ -109,16 +108,6 @@ func PG() []schema.StateUpgrader {
 		{
 			Type:    pg.ResourcePG().CoreConfigSchema().ImpliedType(),
 			Upgrade: pg.ResourcePGStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func Redis() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    redis.ResourceRedis().CoreConfigSchema().ImpliedType(),
-			Upgrade: redis.ResourceRedisStateUpgrade,
 			Version: 0,
 		},
 	}

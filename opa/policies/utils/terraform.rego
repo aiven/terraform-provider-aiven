@@ -26,8 +26,6 @@ aiven_service_types := {
 	"aiven_kafka",
 	"aiven_opensearch",
 	"aiven_clickhouse",
-	"aiven_redis",
-	"aiven_cassandra",
 	"aiven_grafana",
 	"aiven_dragonfly",
 	"aiven_valkey",

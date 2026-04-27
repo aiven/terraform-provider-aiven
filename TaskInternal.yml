@@ -41,9 +41,6 @@ vars:
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
   CHANGELOG_FILE: CHANGELOG.md
 
-  # --- Docs ---
-  DEPRECATED_RESOURCES: "cassandra influxdb m3 redis"   # List of deprecated resources and data sources to exclude from docs
-
 env:
   CGO_ENABLED: 0 # Disable CGO for all Go commands by default for static builds
 
@@ -64,20 +61,7 @@ tasks:
   lint-docs:
     desc: "Validate provider documentation consistency"
     cmds:
-      - "{{.TFPLUGINDOCS}} generate --rendered-website-dir tmp"
-      - mkdir -p docs/data-sources docs/resources
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          mv tmp/data-sources/${resource}*.md docs/data-sources/ || true
-          mv -f tmp/resources/${resource}*.md docs/resources/ || true
-        done
-      - rm -rf tmp
       - "{{.TFPLUGINDOCS}} validate --provider-name aiven"
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          rm -f docs/data-sources/${resource}*.md
-          rm -f docs/resources/${resource}*.md
-        done
 
   semgrep:
     desc: "Run Semgrep static analysis security scan"
@@ -176,11 +160,6 @@ tasks:
     cmds:
       - rm -f docs/.DS_Store
       - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
-      - |
-        for resource in {{.DEPRECATED_RESOURCES}}; do
-          rm -f docs/data-sources/${resource}*.md
-          rm -f docs/resources/${resource}*.md
-        done
       - find docs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
 
   generate:

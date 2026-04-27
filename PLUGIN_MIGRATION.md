@@ -88,20 +88,18 @@
 | 82 | aiven_project                               |        |     2 |
 | 83 | aiven_project_user                          |        |     2 |
 | 84 | aiven_project_vpc                           |        |     2 |
-| 85 | aiven_redis                                 |        |     2 |
-| 86 | aiven_redis_user                            |        |     2 |
-| 87 | aiven_service_component                     |        |     1 |
-| 88 | aiven_service_integration                   |        |     2 |
-| 89 | aiven_service_integration_endpoint          |        |     2 |
-| 90 | aiven_service_list                          | yes    |     1 |
-| 91 | aiven_service_plan                          | yes    |     1 |
-| 92 | aiven_service_plan_list                     | yes    |     1 |
-| 93 | aiven_static_ip                             | yes    |     1 |
-| 94 | aiven_thanos                                |        |     2 |
-| 95 | aiven_transit_gateway_vpc_attachment        |        |     2 |
-| 96 | aiven_valkey                                |        |     2 |
-| 97 | aiven_valkey_user                           |        |     2 |
+| 85 | aiven_service_component                     |        |     1 |
+| 86 | aiven_service_integration                   |        |     2 |
+| 87 | aiven_service_integration_endpoint          |        |     2 |
+| 88 | aiven_service_list                          | yes    |     1 |
+| 89 | aiven_service_plan                          | yes    |     1 |
+| 90 | aiven_service_plan_list                     | yes    |     1 |
+| 91 | aiven_static_ip                             | yes    |     1 |
+| 92 | aiven_thanos                                |        |     2 |
+| 93 | aiven_transit_gateway_vpc_attachment        |        |     2 |
+| 94 | aiven_valkey                                |        |     2 |
+| 95 | aiven_valkey_user                           |        |     2 |
 +----+---------------------------------------------+--------+-------+
-|    | TOTAL MIGRATED 34%                          | 55     |   163 |
+|    | TOTAL MIGRATED 35%                          | 55     |   159 |
 +----+---------------------------------------------+--------+-------+
 ```

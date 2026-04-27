@@ -132,18 +132,19 @@ func TestCompare(t *testing.T) {
 func TestSerializeDiff(t *testing.T) {
 	list := []*Diff{
 		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.azure_migration.include_aliases"}},
-		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_cassandra", Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
-		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: ResourceRootKind, Root: "aiven_cassandra", Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
+		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_pg", Path: "aiven_pg.pg_user_config.additional_backup_regions"}},
+		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_pg", Path: "aiven_pg.pg_user_config.additional_backup_regions"}},
+		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: ResourceRootKind, Root: "aiven_pg", Path: "aiven_pg.pg_user_config.additional_backup_regions"}},
 		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
 		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
 		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.gcs_migration.include_aliases"}},
 	}
 
 	expect := []string{
-		"Change `aiven_cassandra` field `cassandra_user_config.additional_backup_regions`: remove deprecation",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: foo",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: foo",
 		"Add `aiven_opensearch` field `opensearch_user_config.s3_migration.include_aliases`: foo",
+		"Change `aiven_pg` field `pg_user_config.additional_backup_regions`: remove deprecation",
 	}
 
 	actual := serializeDiff(list)
