@@ -87,6 +87,7 @@ Read-Only:
 - `server_settings` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--server_settings))
 - `service_log` (Boolean)
 - `service_to_fork_from` (String)
+- `session_settings` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--session_settings))
 - `static_ips` (Boolean)
 - `tiered_storage_move_factor` (Number)
 
@@ -138,6 +139,14 @@ Read-Only:
 Read-Only:
 
 - `vector_similarity_index_cache_size` (Number)
+
+
+<a id="nestedobjatt--clickhouse_user_config--session_settings"></a>
+### Nested Schema for `clickhouse_user_config.session_settings`
+
+Read-Only:
+
+- `compatibility` (String)
 
 
 

@@ -95,6 +95,7 @@ Optional:
 - `server_settings` (Block List, Max: 1) ClickHouse server settings, which can be found in the `system.server_settings` table (see [below for nested schema](#nestedblock--clickhouse_user_config--server_settings))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
+- `session_settings` (Block List, Max: 1) ClickHouse session settings, which can be found in the `system.settings` table (see [below for nested schema](#nestedblock--clickhouse_user_config--session_settings))
 - `static_ips` (Boolean) Use static public IP addresses.
 - `tiered_storage_move_factor` (Number) The percentage of free disk space required on local storage before data is moved to object storage. A value of 0.2 means data is moved when local storage has less than 20% free space. Default: `0.2`.
 
@@ -149,6 +150,14 @@ Optional:
 Optional:
 
 - `vector_similarity_index_cache_size` (Number) Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is 0.07 (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.
+
+
+<a id="nestedblock--clickhouse_user_config--session_settings"></a>
+### Nested Schema for `clickhouse_user_config.session_settings`
+
+Optional:
+
+- `compatibility` (String) When set, ClickHouse applies backward-compatible behavior from the specified version. Automatically set to the previous version on major version upgrade. Set to null to disable compatibility mode once all incompatibilities have been resolved. Takes effect after the next service restart/upgrade.
 
 
 
