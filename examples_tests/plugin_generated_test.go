@@ -63,7 +63,7 @@ func TestAccGeneratedExamples(t *testing.T) {
 			config, err := os.ReadFile(f)
 			require.NoError(t, err)
 
-			resource.ParallelTest(t, resource.TestCase{
+			resource.Test(t, resource.TestCase{
 				ProtoV6ProviderFactories: acctest.NoopProviderServer(),
 				IsUnitTest:               true,
 				Steps: []resource.TestStep{
@@ -84,7 +84,7 @@ func TestAccGeneratedExamples(t *testing.T) {
 			config, err := os.ReadFile(f)
 			require.NoError(t, err)
 
-			resource.ParallelTest(t, resource.TestCase{
+			resource.Test(t, resource.TestCase{
 				ProtoV6ProviderFactories: acctest.NoopProviderServer(),
 				IsUnitTest:               true,
 				Steps: []resource.TestStep{
