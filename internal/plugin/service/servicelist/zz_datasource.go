@@ -36,6 +36,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Target cloud.",
 					},
+					"cmk_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Active Customer Managed Key identifier (CMK ID).",
+					},
 					"create_time": schema.StringAttribute{
 						Computed:            true,
 						MarkdownDescription: "Service creation timestamp (ISO 8601).",
@@ -122,6 +126,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Type:     adapter.SchemaTypeString,
 						},
 						"cloud_name": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"cmk_id": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
 						},

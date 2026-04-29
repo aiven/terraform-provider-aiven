@@ -348,7 +348,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"mysql_version": {
-				Description: "Enum: `8`, and newer. MySQL major version.",
+				Description: "Enum: `8`, `8.4`, and newer. MySQL major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

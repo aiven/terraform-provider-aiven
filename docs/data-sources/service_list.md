@@ -73,6 +73,7 @@ Read-Only:
 
 - `cloud_description` (String) Cloud provider and location.
 - `cloud_name` (String) Target cloud.
+- `cmk_id` (String) Active Customer Managed Key identifier (CMK ID).
 - `create_time` (String) Service creation timestamp (ISO 8601).
 - `disk_space_mb` (Number) Megabytes of disk space for data storage.
 - `is_cluster_plan` (Boolean) True when the service uses a cluster plan with dedicated node groups.
