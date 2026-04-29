@@ -29,6 +29,8 @@ jobs:
     needs: gatekeeper
     if: needs.gatekeeper.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    env:
+      TF_ACC_TERRAFORM_VERSION: 1.14.9
     steps:
       - uses: actions/checkout@v6
         with:
