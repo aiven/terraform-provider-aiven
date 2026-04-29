@@ -20,15 +20,16 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:         createView,
-	Delete:         deleteView,
-	IDFields:       idFields(),
-	Read:           readView,
-	RefreshState:   true,
-	RemoveMissing:  true,
-	Schema:         resourceSchema,
-	SchemaInternal: resourceSchemaInternal(),
-	TypeName:       typeName,
+	Create:            createView,
+	Delete:            deleteView,
+	IDFields:          idFields(),
+	Read:              readView,
+	RefreshState:      true,
+	RefreshStateDelay: adapter.MustParseDuration("10s"),
+	RemoveMissing:     true,
+	Schema:            resourceSchema,
+	SchemaInternal:    resourceSchemaInternal(),
+	TypeName:          typeName,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
