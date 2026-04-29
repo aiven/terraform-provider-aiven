@@ -72,7 +72,31 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 		}
 
 		return result, nil
-	case SchemaTypeMap, SchemaTypeObject:
+	case SchemaTypeMap:
+		var mapVal map[string]tftypes.Value
+		if err := value.As(&mapVal); err != nil {
+			return nil, err
+		}
+		if sch.Items == nil {
+			return nil, fmt.Errorf("map items is nil")
+		}
+		result := make(map[string]any, len(mapVal))
+		for key, elem := range mapVal {
+			if !elem.IsKnown() || elem.IsNull() {
+				continue
+			}
+			item, err := fromTFValueAny(sch.Items, elem)
+			if err != nil {
+				return nil, err
+			}
+			result[key] = item
+		}
+
+		if len(result) == 0 {
+			return map[string]any{}, nil
+		}
+		return result, nil
+	case SchemaTypeObject:
 		var mapVal map[string]tftypes.Value
 		if err := value.As(&mapVal); err != nil {
 			return nil, err
