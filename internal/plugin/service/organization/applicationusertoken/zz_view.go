@@ -52,7 +52,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		return err
 	}
 	found := adapter.FilterIndex(rsp, func(i int) bool {
-		return rsp[i].TokenPrefix == d.Get("token_prefix").(string)
+		return adapter.Equal(rsp[i].TokenPrefix, d.Get("token_prefix"))
 	})
 	switch len(found) {
 	case 1:

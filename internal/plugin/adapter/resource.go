@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -529,4 +530,21 @@ func FilterIndex[T any](list []T, pred func(int) bool) []T {
 		}
 	}
 	return result
+}
+
+// Equal compares two values for equality, dereferencing pointers as needed.
+// Can compare an enum value with its string representation.
+func Equal(a, b any) bool {
+	return fmt.Sprint(deref(a)) == fmt.Sprint(deref(b))
+}
+
+func deref(a any) any {
+	if a == nil {
+		return nil
+	}
+	v := reflect.ValueOf(a)
+	if v.Kind() == reflect.Ptr && !v.IsNil() {
+		return v.Elem().Interface()
+	}
+	return a
 }

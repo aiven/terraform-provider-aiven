@@ -38,7 +38,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		return err
 	}
 	found := adapter.FilterIndex(rsp, func(i int) bool {
-		return rsp[i].UserId == d.Get("user_id").(string)
+		return adapter.Equal(rsp[i].UserId, d.Get("user_id"))
 	})
 	switch len(found) {
 	case 1:

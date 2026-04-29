@@ -58,7 +58,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		return err
 	}
 	found := adapter.FilterIndex(rsp, func(i int) bool {
-		return rsp[i].DatabaseName == d.Get("database_name").(string)
+		return adapter.Equal(rsp[i].DatabaseName, d.Get("database_name"))
 	})
 	switch len(found) {
 	case 1:

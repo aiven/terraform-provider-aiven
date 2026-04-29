@@ -58,7 +58,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		return err
 	}
 	found := adapter.FilterIndex(rsp.ConnectionPools, func(i int) bool {
-		return rsp.ConnectionPools[i].PoolName == d.Get("pool_name").(string)
+		return adapter.Equal(rsp.ConnectionPools[i].PoolName, d.Get("pool_name"))
 	})
 	switch len(found) {
 	case 1:
