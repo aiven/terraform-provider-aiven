@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafkaschema/registryacl
+resource:
+  refreshState: true
+  removeMissing: true
+  description: Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry.
+datasource:
+  description: Gets information about an Aiven for Apache Kafka® Schema Registry ACL entry.
+clientHandler: kafkaschemaregistry
+idAttributeComposed: [project, service_name, acl_id]
+legacyTimeouts: true
+rename:
+  id: acl_id
+  schema_registry_acl_id: acl_id
+operations:
+  - id: ServiceSchemaRegistryAclAdd
+    type: create
+    resultKey: acl
+    resultListLookupKeys:
+      Permission: permission
+      Resource: resource
+      Username: username
+  - id: ServiceSchemaRegistryAclList
+    type: read
+    resultKey: acl
+    resultListLookupKeys:
+      Id: acl_id
+  - id: ServiceSchemaRegistryAclList
+    type: read
+    datasourceLookup: true
+    resultKey: acl
+    resultListLookupKeys:
+      Permission: permission
+      Resource: resource
+      Username: username
+  - id: ServiceSchemaRegistryAclDelete
+    type: delete
+    resultKey: acl
