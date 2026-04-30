@@ -179,7 +179,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		}
 
 		if len(list) == 0 {
-			return tftypes.NewValue(listType, nil), nil
+			return tftypes.NewValue(listType, []tftypes.Value{}), nil
 		}
 
 		result := make([]tftypes.Value, len(list))
@@ -209,7 +209,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		}
 
 		if len(set) == 0 {
-			return tftypes.NewValue(setType, nil), nil
+			return tftypes.NewValue(setType, []tftypes.Value{}), nil
 		}
 
 		result := make([]tftypes.Value, len(set))

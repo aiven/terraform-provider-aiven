@@ -9,6 +9,82 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestToTFValue_EmptyCollectionsAreKnown covers the encode path for empty
+// List/Set values. Regression for a bug where
+// `tftypes.NewValue(<type>, nil)` was returned, which produces a null value.
+// When a resource's schema declares the attribute as Required (e.g.
+// `accounts` on aiven_byoc_permissions) and the user supplies an empty
+// collection, TF rejects the apply with
+// `Provider produced inconsistent result after apply ... was
+// cty.SetValEmpty(<type>), but now null`.
+func TestToTFValue_EmptyCollectionsAreKnown(t *testing.T) {
+	t.Parallel()
+
+	strSch := &Schema{Type: SchemaTypeString}
+
+	t.Run("empty list encodes as empty known value, not null", func(t *testing.T) {
+		sch := &Schema{Type: SchemaTypeList, Items: strSch}
+
+		got, err := toTFValue(sch, []any{})
+		require.NoError(t, err)
+		require.False(t, got.IsNull(), "empty list must not be null")
+		require.True(t, got.IsKnown(), "empty list must be known")
+
+		// Round-trip: decoding the encoded value must give back []any{}.
+		decoded, err := fromTFValueAny(sch, got)
+		require.NoError(t, err)
+		require.Equal(t, []any{}, decoded)
+	})
+
+	t.Run("empty set encodes as empty known value, not null", func(t *testing.T) {
+		sch := &Schema{Type: SchemaTypeSet, Items: strSch}
+
+		got, err := toTFValue(sch, []any{})
+		require.NoError(t, err)
+		require.False(t, got.IsNull(), "empty set must not be null")
+		require.True(t, got.IsKnown(), "empty set must be known")
+
+		decoded, err := fromTFValueAny(sch, got)
+		require.NoError(t, err)
+		require.Equal(t, []any{}, decoded)
+	})
+
+	t.Run("non-empty list preserves elements", func(t *testing.T) {
+		sch := &Schema{Type: SchemaTypeList, Items: strSch}
+
+		got, err := toTFValue(sch, []any{"a", "b"})
+		require.NoError(t, err)
+		require.False(t, got.IsNull())
+
+		decoded, err := fromTFValueAny(sch, got)
+		require.NoError(t, err)
+		require.Equal(t, []any{"a", "b"}, decoded)
+	})
+
+	t.Run("non-empty set preserves elements", func(t *testing.T) {
+		sch := &Schema{Type: SchemaTypeSet, Items: strSch}
+
+		got, err := toTFValue(sch, []any{"a", "b"})
+		require.NoError(t, err)
+		require.False(t, got.IsNull())
+
+		decoded, err := fromTFValueAny(sch, got)
+		require.NoError(t, err)
+		require.Equal(t, []any{"a", "b"}, decoded)
+	})
+
+	t.Run("nil value stays null", func(t *testing.T) {
+		// Distinct from an empty collection: when the Go-side value is nil,
+		// the attribute is unset and we want a null tftypes value. Empty
+		// collections (above) and unset (here) are semantically different.
+		sch := &Schema{Type: SchemaTypeList, Items: strSch}
+
+		got, err := toTFValue(sch, nil)
+		require.NoError(t, err)
+		require.True(t, got.IsNull(), "nil input must encode as null")
+	})
+}
+
 // TestFromTFValueAny_Map covers the decode path for SchemaTypeMap.
 // Regression for a bug where SchemaTypeMap and SchemaTypeObject shared
 // one case, causing user-supplied map keys to be looked up in sch.Properties
