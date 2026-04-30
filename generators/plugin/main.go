@@ -208,7 +208,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			idPath := def.IDAttributeComposed
+			idPath := def.IDAttributeComposed.Fields
 			if len(idPath) == 0 {
 				idPath = append(idPath, root.Name+"_id")
 			}
@@ -358,7 +358,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Adds the 'id' field if missing
 	idField, idExists := root.Properties["id"]
 	if !idExists {
-		if len(pkg.IDAttributeComposed) == 0 {
+		if len(pkg.IDAttributeComposed.Fields) == 0 {
 			return nil, fmt.Errorf("no 'id' field found and no IDAttributeComposed defined")
 		}
 
@@ -375,11 +375,11 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	idField.IDAttribute = true
-	if idField.Description == "" && len(pkg.IDAttributeComposed) != 0 {
-		if len(pkg.IDAttributeComposed) > 1 {
-			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed...))
+	if idField.Description == "" && len(pkg.IDAttributeComposed.Fields) != 0 {
+		if len(pkg.IDAttributeComposed.Fields) > 1 {
+			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed.Fields...))
 		} else {
-			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed[0])
+			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed.Fields[0])
 		}
 	}
 
@@ -391,7 +391,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Marks ID fields
 	isMutable := scope.Definition.Operations.AppearsInHandler(OperationUpdate, RequestBody)
 	idField.UseStateForUnknown = true
-	for i, v := range pkg.IDAttributeComposed {
+	for i, v := range pkg.IDAttributeComposed.Fields {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
 			return nil, fmt.Errorf("ID field %q not found in: %s", v, strings.Join(keys, ", "))

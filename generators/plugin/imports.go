@@ -57,6 +57,7 @@ const (
 	utilPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	adapterPackage        = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	legacyTimeoutsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	schemautilPackage     = "github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	avnGenPackage         = "github.com/aiven/go-client-codegen"
 	errMsgPackage         = "github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	datasourcePkg         = "github.com/hashicorp/terraform-plugin-framework/datasource"

@@ -3,24 +3,25 @@
 page_title: "aiven_project_vpc Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a VPC for an Aiven project.
+  Creates and manages a VPC for an Aiven project. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_project_vpc (Resource)
 
-Creates and manages a VPC for an Aiven project.
+Creates and manages a VPC for an Aiven project. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_project_vpc" "example_vpc" {
-  project      = data.aiven_project.example_project.project
-  cloud_name   = "google-europe-west1"
-  network_cidr = "192.168.1.0/24"
+resource "aiven_project_vpc" "example" {
+  project      = "my-project" // Force new
+  cloud_name   = "aws-eu-central-1" // Force new
+  network_cidr = "192.168.6.0/24" // Force new
 
-  timeouts {
-    create = "5m"
-  }
+  /* COMPUTED FIELDS
+  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  state          = "ACTIVE"
+  */
 }
 ```
 
@@ -29,9 +30,9 @@ resource "aiven_project_vpc" "example_vpc" {
 
 ### Required
 
-- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Changing this property forces recreation of the resource.
-- `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
-- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Maximum length: `256`. Changing this property forces recreation of the resource.
+- `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`. Maximum length: `18`. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -39,7 +40,8 @@ resource "aiven_project_vpc" "example_vpc" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID composed as: `project/project_vpc_id`.
+- `project_vpc_id` (String) Project VPC ID.
 - `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
 
 <a id="nestedblock--timeouts"></a>
@@ -47,16 +49,16 @@ resource "aiven_project_vpc" "example_vpc" {
 
 Optional:
 
-- `create` (String)
-- `default` (String, Deprecated) Use specific CRUD timeouts instead.
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `default` (String, Deprecated) Timeout for all operations. Deprecated, use operation-specific timeouts instead.
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_project_vpc.example_vpc PROJECT/ID
+terraform import aiven_project_vpc.example PROJECT/PROJECT_VPC_ID
 ```
