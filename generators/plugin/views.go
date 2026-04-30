@@ -333,9 +333,10 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 			return fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
 		}
 
-		fieldsMatch.Add(rspCode).Index(jen.Id("i")).Dot(key).
-			Op("==").
-			Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType()))
+		fieldsMatch.Qual(adapterPackage, "Equal").Call(
+			rspCode.Clone().Index(jen.Id("i")).Dot(key),
+			jen.Id("d").Dot("Get").Call(jen.Lit(field.Name)),
+		)
 	}
 
 	// Filters the response by the fields match

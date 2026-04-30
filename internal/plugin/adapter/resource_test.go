@@ -60,3 +60,12 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.False(t, target.Contains(warning("try-1-b")))
 	})
 }
+
+func TestEqual(t *testing.T) {
+	t.Parallel()
+
+	type fooType string
+	var fooVar fooType = "foo"
+	require.True(t, Equal(fooVar, "foo"))
+	require.True(t, Equal(new(fooVar), "foo"))
+}
