@@ -22,6 +22,7 @@ const (
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
 	refreshStateWaiter         = "refreshStateWaiter"
+	populateIDFieldsFromID     = "populateIDFieldsFromID"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -36,6 +37,10 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 		if v != nil {
 			codes = append(codes, v)
 		}
+	}
+
+	if def.Resource != nil && def.IDAttributeComposed.PopulateFieldsFromID {
+		codes = append(codes, genPopulateIDFieldsFromID(def))
 	}
 
 	builders := make([]jen.Code, 0)
@@ -137,6 +142,13 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	// The function block
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
+		if shouldPopulateIDFieldsFromID(def, operation) {
+			g.If(
+				jen.Err().Op(":=").Id(populateIDFieldsFromID).Call(jen.Id("d")),
+				jen.Err().Op("!=").Nil(),
+			).Block(jen.Return().Err())
+		}
+
 		if def.PlanModifier && operation == OperationRead {
 			g.Err().Op(":=").Id(planModifier).Call(
 				jen.Id("ctx"),
@@ -155,6 +167,55 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	})
 
 	return view, errM.ErrorOrNil()
+}
+
+func genOnSuccessCall(operation *Operation) *jen.Statement {
+	return jen.Id(operation.OnSuccess).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
+}
+
+func genReturnErrOrOnSuccess(g *jen.Group, operation *Operation) {
+	if operation.OnSuccess == "" {
+		g.Return().Err()
+		return
+	}
+
+	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+	g.Return().Add(genOnSuccessCall(operation))
+}
+
+func shouldPopulateIDFieldsFromID(def *Definition, operation OperationType) bool {
+	return def.Resource != nil &&
+		def.IDAttributeComposed.PopulateFieldsFromID &&
+		(operation == OperationRead || operation == OperationDelete)
+}
+
+func genPopulateIDFieldsFromID(def *Definition) jen.Code {
+	return jen.Func().Id(populateIDFieldsFromID).
+		Params(jen.Id("d").Qual(adapterPackage, resourceData)).
+		Error().
+		Block(
+			jen.If(jen.Id("d").Dot("ID").Call().Op("==").Lit("")).Block(jen.Return().Nil()),
+			jen.Id("fields").Op(":=").Id(funcIDFields).Call(),
+			jen.List(jen.Id("chunks"), jen.Err()).Op(":=").Qual(schemautilPackage, "SplitResourceID").Call(
+				jen.Id("d").Dot("ID").Call(),
+				jen.Len(jen.Id("fields")),
+			),
+			jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return().Qual("fmt", "Errorf").Call(
+					jen.Lit("invalid "+def.typeName+" id %q: %w"),
+					jen.Id("d").Dot("ID").Call(),
+					jen.Err(),
+				),
+			),
+			jen.For(jen.List(jen.Id("i"), jen.Id("field")).Op(":=").Range().Id("fields")).Block(
+				jen.If(jen.Id("d").Dot("Get").Call(jen.Id("field")).Op(".").Parens(jen.String()).Op("!=").Lit("")).Block(jen.Continue()),
+				jen.If(
+					jen.Err().Op(":=").Id("d").Dot("Set").Call(jen.Id("field"), jen.Id("chunks").Index(jen.Id("i"))),
+					jen.Err().Op("!=").Nil(),
+				).Block(jen.Return().Err()),
+			),
+			jen.Return().Nil(),
+		)
 }
 
 func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item, def *Definition, operation *Operation) error {
@@ -206,7 +267,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	// otherwise "rsp, err :="
 	var clientCall *jen.Statement
 	switch {
-	case mustReturnResult:
+	case mustReturnResult && operation.OnSuccess == "":
 		clientCall = jen.Return()
 	case funcIndex == 0:
 		clientCall = jen.Err().Op(":=")
@@ -254,11 +315,15 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	)
 
 	if mustReturnResult {
+		if operation.OnSuccess != "" {
+			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+			g.Return().Add(genOnSuccessCall(operation))
+		}
 		return nil
 	}
 
 	if !hasResponse || operation.Type == OperationDelete {
-		g.Return().Err()
+		genReturnErrOrOnSuccess(g, operation)
 		return nil
 	}
 
@@ -287,10 +352,26 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 			}
 		})
 
-		if funcCount == 1 || funcIndex == funcCount-1 {
-			v = jen.Return(v)
+		isLast := funcCount == 1 || funcIndex == funcCount-1
+		if operation.OnSuccess == "" {
+			if isLast {
+				v = jen.Return(v)
+			} else {
+				v = jen.Err().Op("=").Add(v).
+					Line().
+					If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+			}
+			return v
+		}
+
+		v = jen.Err().Op("=").Add(v).
+			Line().
+			If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err()).
+			Line()
+		if isLast {
+			v.Return().Add(genOnSuccessCall(operation))
 		} else {
-			v = jen.Err().Op("=").Add(v).
+			v.Err().Op("=").Add(genOnSuccessCall(operation)).
 				Line().
 				If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 		}

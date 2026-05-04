@@ -1,30 +1,30 @@
-package vpc
+package projectvpc
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/vpc"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetVPC(t *testing.T) {
-	differentCloudName := []*aiven.VPC{
-		{ProjectVPCID: "foo", CloudName: "aws"},
-		{ProjectVPCID: "bar", CloudName: "azure"},
+func TestDataSourceGetVPC(t *testing.T) {
+	differentCloudName := []vpc.VpcOut{
+		{ProjectVpcId: "foo", CloudName: "aws"},
+		{ProjectVpcId: "bar", CloudName: "azure"},
 	}
 
-	duplicateCloudName := []*aiven.VPC{
-		{ProjectVPCID: "foo", CloudName: "azure"},
-		{ProjectVPCID: "bar", CloudName: "azure"},
+	duplicateCloudName := []vpc.VpcOut{
+		{ProjectVpcId: "foo", CloudName: "azure"},
+		{ProjectVpcId: "bar", CloudName: "azure"},
 	}
 
 	cases := []struct {
 		name           string
-		inputVPCList   []*aiven.VPC
+		inputVPCList   []vpc.VpcOut
 		inputVPCID     string
 		inputCloudName string
-		expectVPC      *aiven.VPC
+		expectVPC      *vpc.VpcOut
 		expectErr      error
 	}{
 		{
@@ -32,7 +32,7 @@ func TestGetVPC(t *testing.T) {
 			inputVPCList:   duplicateCloudName,
 			inputVPCID:     "foo",
 			inputCloudName: "",
-			expectVPC:      &aiven.VPC{ProjectVPCID: "foo", CloudName: "azure"},
+			expectVPC:      &vpc.VpcOut{ProjectVpcId: "foo", CloudName: "azure"},
 			expectErr:      nil,
 		},
 		{
@@ -40,7 +40,7 @@ func TestGetVPC(t *testing.T) {
 			inputVPCList:   duplicateCloudName,
 			inputVPCID:     "bar",
 			inputCloudName: "",
-			expectVPC:      &aiven.VPC{ProjectVPCID: "bar", CloudName: "azure"},
+			expectVPC:      &vpc.VpcOut{ProjectVpcId: "bar", CloudName: "azure"},
 			expectErr:      nil,
 		},
 		{
@@ -48,7 +48,7 @@ func TestGetVPC(t *testing.T) {
 			inputVPCList:   differentCloudName,
 			inputVPCID:     "",
 			inputCloudName: "azure",
-			expectVPC:      &aiven.VPC{ProjectVPCID: "bar", CloudName: "azure"},
+			expectVPC:      &vpc.VpcOut{ProjectVpcId: "bar", CloudName: "azure"},
 			expectErr:      nil,
 		},
 		{
@@ -95,12 +95,10 @@ func TestGetVPC(t *testing.T) {
 
 	for _, o := range cases {
 		t.Run(o.name, func(t *testing.T) {
-			vpc, err := getVPC(o.inputVPCList, o.inputVPCID, o.inputCloudName)
-			require.Equal(t, err, o.expectErr)
-			require.Equal(t, vpc, o.expectVPC)
-
-			// Never returns both nil, also xnor
-			require.NotEqual(t, err == nil, vpc == nil)
+			projectVPC, err := getVPC(o.inputVPCList, o.inputVPCID, o.inputCloudName)
+			require.Equal(t, o.expectErr, err)
+			require.Equal(t, o.expectVPC, projectVPC)
+			require.NotEqual(t, err == nil, projectVPC == nil)
 		})
 	}
 }

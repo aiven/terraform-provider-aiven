@@ -83,7 +83,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_privatelink":                  vpc.DatasourceGCPPrivatelink(),
 			"aiven_gcp_vpc_peering_connection":       vpc.DatasourceGCPVPCPeeringConnection(),
 			"aiven_gcp_org_vpc_peering_connection":   vpc.DatasourceGCPOrgVPCPeeringConnection(),
-			"aiven_project_vpc":                      vpc.DatasourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment":   vpc.DatasourceTransitGatewayVPCAttachment(),
 			"aiven_organization_vpc":                 vpc.DataSourceOrganizationVPC(),
 
@@ -164,7 +163,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_gcp_org_vpc_peering_connection":        vpc.ResourceGCPOrgVPCPeeringConnection(),
-			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
 			"aiven_organization_vpc":                      vpc.ResourceOrganizationVPC(),
 

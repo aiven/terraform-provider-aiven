@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/projectvpc
+resource:
+  description: Creates and manages a VPC for an Aiven project.
+  removeMissing: true
+  refreshState: true
+  refreshStateWaiter: true
+clientHandler: vpc
+idAttributeComposed:
+  fields: [project, project_vpc_id]
+  populateFieldsFromID: true
+legacyTimeouts: true
+expandModifier: true
+schema:
+  cloud_name:
+    description: The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
+  network_cidr:
+    description: Network address range used by the VPC. For example, `192.168.0.0/24`.
+  state:
+    description: State of the VPC.
+operations:
+  - id: VpcCreate
+    type: create
+  - id: VpcGet
+    type: read
+  - id: VpcDelete
+    type: delete
+    onSuccess: waitForDeletion
+remove:
+  - create_time
+  - peering_connections
+  - pending_build_only_peering_connections
+  - update_time
