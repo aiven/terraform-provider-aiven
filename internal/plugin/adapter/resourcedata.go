@@ -270,15 +270,18 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 // tfValue converts the current state to tftypes.Value to write it to the user's state.
 func (d *resourceData) tfValue() tftypes.Value {
 	state := d.currentState()
-	keepEmpty := d.plan != nil && d.config != nil
-	if keepEmpty {
+	if d.config != nil {
 		// Plan and config must agree on which empty containers (`[]`, `{}`)
 		// exist; otherwise toTFValue produces a state that Terraform rejects
 		// as inconsistent with config.
 		normalizeEmpties(d.schema, state, d.config)
 	}
 
-	v, err := toTFValue(d.schema, state, keepEmpty)
+	if _, ok := state["technical_emails"]; ok {
+		println(";ad")
+	}
+
+	v, err := toTFValue(d.schema, state, d.config == nil)
 	if err != nil {
 		panic(fmt.Errorf("failed to convert state to tftypes.Value: %w", err))
 	}
