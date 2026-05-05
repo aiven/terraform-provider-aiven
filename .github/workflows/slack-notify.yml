@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Notify Slack on success
         if: inputs.status == 'success'
-        uses: slackapi/slack-github-action@v3.0.2
+        uses: slackapi/slack-github-action@v3.0.3
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: webhook-trigger
@@ -77,7 +77,7 @@ jobs:
 
       - name: Notify Slack on failure
         if: inputs.status == 'failure'
-        uses: slackapi/slack-github-action@v3.0.2
+        uses: slackapi/slack-github-action@v3.0.3
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: webhook-trigger
