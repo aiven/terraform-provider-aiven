@@ -127,7 +127,7 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 	}
 }
 
-func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
+func toTFValue(sch *Schema, value any, keepEmpty bool) (tftypes.Value, error) {
 	if sch == nil {
 		return tftypes.Value{}, fmt.Errorf("schema is nil")
 	}
@@ -165,7 +165,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		if sch.Items == nil {
 			return tftypes.Value{}, fmt.Errorf("list items is nil")
 		}
-		nullItem, err := toTFValue(sch.Items, nil)
+		nullItem, err := toTFValue(sch.Items, nil, keepEmpty)
 		if err != nil {
 			return tftypes.Value{}, fmt.Errorf("failed to build list item type: %w", err)
 		}
@@ -178,13 +178,13 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
 		}
 
-		if len(list) == 0 {
+		if len(list) == 0 && !keepEmpty {
 			return tftypes.NewValue(listType, nil), nil
 		}
 
 		result := make([]tftypes.Value, len(list))
 		for i, item := range list {
-			converted, err := toTFValue(sch.Items, item)
+			converted, err := toTFValue(sch.Items, item, keepEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
 			}
@@ -195,7 +195,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		if sch.Items == nil {
 			return tftypes.Value{}, fmt.Errorf("set items is nil")
 		}
-		nullItem, err := toTFValue(sch.Items, nil)
+		nullItem, err := toTFValue(sch.Items, nil, keepEmpty)
 		if err != nil {
 			return tftypes.Value{}, fmt.Errorf("failed to build set item type: %w", err)
 		}
@@ -208,13 +208,13 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
 		}
 
-		if len(set) == 0 {
+		if len(set) == 0 && !keepEmpty {
 			return tftypes.NewValue(setType, nil), nil
 		}
 
 		result := make([]tftypes.Value, len(set))
 		for i, item := range set {
-			converted, err := toTFValue(sch.Items, item)
+			converted, err := toTFValue(sch.Items, item, keepEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
 			}
@@ -225,7 +225,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		if sch.Items == nil {
 			return tftypes.Value{}, fmt.Errorf("map items is nil")
 		}
-		nullItem, err := toTFValue(sch.Items, nil)
+		nullItem, err := toTFValue(sch.Items, nil, keepEmpty)
 		if err != nil {
 			return tftypes.Value{}, fmt.Errorf("failed to build map item type: %w", err)
 		}
@@ -240,7 +240,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 
 		result := make(map[string]tftypes.Value, len(m))
 		for k, item := range m {
-			converted, err := toTFValue(sch.Items, item)
+			converted, err := toTFValue(sch.Items, item, keepEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid map value for key %q: %w", k, err)
 			}
@@ -250,7 +250,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 	case SchemaTypeObject:
 		attrs := make(map[string]tftypes.Type, len(sch.Properties))
 		for key, prop := range sch.Properties {
-			nullProp, err := toTFValue(prop, nil)
+			nullProp, err := toTFValue(prop, nil, keepEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("failed to build object property %q type: %w", key, err)
 			}
@@ -271,7 +271,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		for key, prop := range sch.Properties {
 			item, exists := m[key]
 			if !exists {
-				nullValue, err := toTFValue(prop, nil)
+				nullValue, err := toTFValue(prop, nil, keepEmpty)
 				if err != nil {
 					return tftypes.Value{}, fmt.Errorf("invalid object property %q: %w", key, err)
 				}
@@ -279,7 +279,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 				continue
 			}
 
-			converted, err := toTFValue(prop, item)
+			converted, err := toTFValue(prop, item, keepEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid object property %q: %w", key, err)
 			}
