@@ -13,6 +13,14 @@ const (
 	SchemaTypeObject SchemaType = "object"
 )
 
+func (s SchemaType) IsPrimitive() bool {
+	switch s {
+	case SchemaTypeBool, SchemaTypeString, SchemaTypeInt, SchemaTypeFloat:
+		return true
+	}
+	return false
+}
+
 // Schema simplified schema similar to OpenAPI spec.
 // Used internally to perform data normalization and validation,
 // because TF schemas have different types for resource and datasource,

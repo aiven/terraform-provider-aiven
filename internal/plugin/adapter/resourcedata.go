@@ -269,11 +269,76 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 
 // tfValue converts the current state to tftypes.Value to write it to the user's state.
 func (d *resourceData) tfValue() tftypes.Value {
-	v, err := toTFValue(d.schema, d.currentState())
+	state := d.currentState()
+	if d.config != nil {
+		// Plan and config must agree on which empty containers (`[]`, `{}`)
+		// exist; otherwise toTFValue produces a state that Terraform rejects
+		// as inconsistent with config.
+		normalizeEmpties(d.schema, state, d.config)
+	}
+
+	if _, ok := state["technical_emails"]; ok {
+		println(";ad")
+	}
+
+	v, err := toTFValue(d.schema, state, d.config == nil)
 	if err != nil {
 		panic(fmt.Errorf("failed to convert state to tftypes.Value: %w", err))
 	}
 	return v
+}
+
+func normalizeEmpties(sch *Schema, state, config map[string]any) {
+	if state == nil || config == nil {
+		return
+	}
+
+	for k, childSch := range sch.Properties {
+		if childSch.Type.IsPrimitive() {
+			// We process containers only.
+			continue
+		}
+
+		cv, cOk := config[k]
+		sv, sOk := state[k]
+
+		// Treat an explicit nil value the same as a missing key — both mean
+		// "user did not set this".
+		sOk = sOk && sv != nil
+		cOk = cOk && cv != nil
+
+		switch {
+		case sOk == cOk:
+		case sOk:
+			if isEmpty(sv) {
+				// State has an empty [] or {}, but user hasn't defined it in the config.
+				// Need to delete it, so terraform won't complain.
+				delete(state, k)
+			}
+		case cOk:
+			if isEmpty(cv) {
+				// Config has an empty [] or {}, but state doesn't, e.g.:
+				// resource "foo" "foo" {
+				//   foo = []
+				// }
+				// The state value probably has been omitted by the backend or the go-client struct.
+				state[k] = zeroValue(childSch.Type)
+			}
+		}
+	}
+}
+
+func isEmpty(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	val := reflect.ValueOf(v)
+	switch val.Kind() {
+	case reflect.String, reflect.Slice, reflect.Map, reflect.Array:
+		return val.Len() == 0
+	}
+	return false
 }
 
 // getOk returns a value by a path:

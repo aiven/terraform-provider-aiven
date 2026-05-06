@@ -269,6 +269,26 @@ resource "aiven_organization_project" "foo" {
 				),
 			},
 			{
+				// set technical_emails = []
+				Config: baseConfig + fmt.Sprintf(`
+resource "aiven_organization_project" "foo" {
+  project_id       = "%s"
+  organization_id  = aiven_organization.foo.id
+  billing_group_id = aiven_billing_group.foo.id
+  parent_id        = aiven_organizational_unit.foo.id
+  technical_emails = []
+}
+`, projectID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
+					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "aiven_organization.foo", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "billing_group_id", "aiven_billing_group.foo", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
+					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "technical_emails.#", "0"),
+				),
+			},
+			{
 				// change parent_id which belongs to the same organization, should succeed. Also, remove technical_emails
 				Config: baseConfig + fmt.Sprintf(`
 resource "aiven_organization_project" "foo" {
