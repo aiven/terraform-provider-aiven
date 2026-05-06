@@ -28,6 +28,8 @@ import (
 // compile time with -ldflags "-X github.com/aiven/terraform-provider-aiven/internal/schemautil.defaultTimeout=30".
 var defaultTimeout time.Duration = 20
 
+const cmkIDReset = "00000000-0000-0000-0000-000000000000"
+
 func DefaultResourceTimeouts() *schema.ResourceTimeout {
 	return &schema.ResourceTimeout{
 		Create: schema.DefaultTimeout(defaultTimeout * time.Minute),
@@ -207,6 +209,19 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 				"and the VPC must be in the same cloud and region as the service itself. " +
 				"The service can be freely moved to and from VPC after creation, but doing so triggers migration to new servers, " +
 				"so the operation can take a significant amount of time to complete if the service has a lot of data.",
+		},
+		"cmk_id": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Computed:     true,
+			ValidateFunc: validation.StringLenBetween(36, 36),
+			Description:  fmt.Sprintf("Customer Managed Key identifier (CMK ID). To reset the CMK association, set this to the all-zero UUID `%s`; simply removing the attribute from configuration will not detach the key.", cmkIDReset),
+			DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+				// After applying cmkIDReset the API starts returning nil, which is
+				// stored as "" in state. Suppress the resulting "" -> cmkIDReset
+				// diff so plans don't oscillate after the reset.
+				return oldValue == "" && newValue == cmkIDReset
+			},
 		},
 		"maintenance_window_dow": {
 			Type:        schema.TypeString,
@@ -560,6 +575,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		UserConfig:            &cuc,
 		StaticIps:             &staticIps,
 		TechEmails:            technicalEmails,
+		CMKId:                 NilIfZero(d.Get("cmk_id").(string)),
 	}
 
 	if _, err = client.ServiceCreate(ctx, project, serviceCreate); err != nil {
@@ -666,6 +682,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 		Karapace:              karapace,
 		UserConfig:            &cuc,
 		TechEmails:            technicalEmails,
+		CMKId:                 NilIfZero(d.Get("cmk_id").(string)),
 	}
 
 	if _, err := client.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
@@ -818,6 +835,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("maintenance_window_enabled", s.Maintenance.Enabled); err != nil {
+		return err
+	}
+	if err := d.Set("cmk_id", lo.FromPtr(s.CMKId)); err != nil {
 		return err
 	}
 
