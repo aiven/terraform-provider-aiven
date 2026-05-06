@@ -97,10 +97,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Cloud names that can be used to provision a service on this BYOC.",
 			},
 			"deployment_model": schema.StringAttribute{
-				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `ipsec_ingress`, `standard` and `standard_public`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("direct_ipsec_ingress", "ipsec_ingress", "standard", "standard_public")},
+				Validators:          []validator.String{stringvalidator.OneOf("direct_ipsec_ingress", "hipaa", "ipsec_ingress", "pci_dss", "standard", "standard_public")},
 			},
 			"display_name": schema.StringAttribute{
 				MarkdownDescription: "Short name for this BYOC cloud. Maximum length: `64`.",

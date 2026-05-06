@@ -36,6 +36,8 @@ nav_order: 1
   in the `system.settings` table
 - Change `aiven_mysql` field `mysql_user_config.mysql_version` (enum): add `8.4`
 - Fix plugin-framework adapter decoding map attributes as objects
+- Change `aiven_byoc_aws_entity` resource field `deployment_model` (enum): add `hipaa`, `pci_dss`
+- Change `aiven_service_integration` field `integration_type` (enum): add `datahub_metadata_ingestion`
 
 ## [4.55.2] - 2026-04-22
 

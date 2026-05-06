@@ -79,7 +79,7 @@ resource "aiven_byoc_aws_entity" "example" {
 
 - `cloud_provider` (String) Cloud provider for the BYOC cloud. The possible values are `aws`, `azure`, `google` and `oracle`. Changing this property forces recreation of the resource.
 - `cloud_region` (String) Cloud region for the BYOC cloud. Maximum length: `32`. Changing this property forces recreation of the resource.
-- `deployment_model` (String) Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `ipsec_ingress`, `standard` and `standard_public`. Changing this property forces recreation of the resource.
+- `deployment_model` (String) Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.
 - `display_name` (String) Short name for this BYOC cloud. Maximum length: `64`.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 - `reserved_cidr` (String) CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`. Changing this property forces recreation of the resource.
