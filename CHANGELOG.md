@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [v4.56.0] - 2026-05-07
+
 - Add `cmk_id` field to all service resources: associates a [Customer Managed
   Key](https://aiven.io/docs/platform/howto/bring-your-own-key) with the service. Set the field to the all-zero UUID
   `00000000-0000-0000-0000-000000000000` to detach an existing key; removing the attribute from configuration
