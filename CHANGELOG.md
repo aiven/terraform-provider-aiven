@@ -38,6 +38,12 @@ nav_order: 1
 - Fix plugin-framework adapter decoding map attributes as objects
 - Change `aiven_byoc_aws_entity` resource field `deployment_model` (enum): add `hipaa`, `pci_dss`
 - Change `aiven_service_integration` field `integration_type` (enum): add `datahub_metadata_ingestion`
+- Add `aiven_clickhouse` field `clickhouse_user_config.private_access.clickhouse_arrowflight`: Allow clients to connect
+  to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_clickhouse` field `clickhouse_user_config.privatelink_access.clickhouse_arrowflight`: Enable clickhouse_arrowflight.
+- Add `aiven_clickhouse` field `clickhouse_user_config.public_access.clickhouse_arrowflight`: Allow clients to connect
+  to clickhouse_arrowflight from the public internet for service nodes that are in a project VPC or another type
+  of private network.
 
 ## [4.55.2] - 2026-04-22
 

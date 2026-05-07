@@ -106,6 +106,7 @@ Read-Only:
 Read-Only:
 
 - `clickhouse` (Boolean)
+- `clickhouse_arrowflight` (Boolean)
 - `clickhouse_https` (Boolean)
 - `clickhouse_mysql` (Boolean)
 - `prometheus` (Boolean)
@@ -117,6 +118,7 @@ Read-Only:
 Read-Only:
 
 - `clickhouse` (Boolean)
+- `clickhouse_arrowflight` (Boolean)
 - `clickhouse_https` (Boolean)
 - `clickhouse_mysql` (Boolean)
 - `prometheus` (Boolean)
@@ -128,6 +130,7 @@ Read-Only:
 Read-Only:
 
 - `clickhouse` (Boolean)
+- `clickhouse_arrowflight` (Boolean)
 - `clickhouse_https` (Boolean)
 - `clickhouse_mysql` (Boolean)
 - `prometheus` (Boolean)
