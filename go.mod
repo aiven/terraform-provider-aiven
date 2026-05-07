@@ -5,7 +5,7 @@ go 1.26
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/agnivade/levenshtein v1.2.1
-	github.com/aiven/aiven-go-client/v2 v2.42.0
+	github.com/aiven/aiven-go-client/v2 v2.43.0
 	github.com/aiven/go-client-codegen v0.179.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1

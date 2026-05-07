@@ -21,7 +21,6 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:           true,
 	Create:         createView,
 	Delete:         deleteView,
 	IDFields:       idFields(),

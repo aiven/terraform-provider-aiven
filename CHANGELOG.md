@@ -12,6 +12,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `cmk_id` field to all service resources: associates a [Customer Managed
+  Key](https://aiven.io/docs/platform/howto/bring-your-own-key) with the service. Set the field to the all-zero UUID
+  `00000000-0000-0000-0000-000000000000` to detach an existing key; removing the attribute from configuration
+  is intentionally not enough to trigger a reset.
 - Remove user configuration options for Cassandra, InfluxDB, AlloyDB Omni, M3DB, and M3Aggregator, as these services have
   reached EOL.
 - Remove `aiven_cassandra` and `aiven_cassandra_user` resources: Cassandra service reached end-of-life on [January 7,
