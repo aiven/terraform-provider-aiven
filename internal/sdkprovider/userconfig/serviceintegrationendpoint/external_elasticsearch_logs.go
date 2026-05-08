@@ -36,6 +36,7 @@ func externalElasticsearchLogsUserConfig() *schema.Schema {
 			"url": {
 				Description: "Elasticsearch connection URL. Example: `https://user:passwd@logs.example.com/`.",
 				Required:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 		}},
