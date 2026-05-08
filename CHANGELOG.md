@@ -44,6 +44,7 @@ nav_order: 1
 - Fix plugin-framework adapter decoding map attributes as objects
 - Change `aiven_byoc_aws_entity` resource field `deployment_model` (enum): add `hipaa`, `pci_dss`
 - Change `aiven_service_integration` field `integration_type` (enum): add `datahub_metadata_ingestion`
+- Fix plugin-framework adapter encoding empty lists and sets as null
 
 ## [4.55.2] - 2026-04-22
 
