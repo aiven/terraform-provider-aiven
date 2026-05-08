@@ -12,6 +12,16 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_clickhouse` field `clickhouse_user_config.private_access.clickhouse_arrowflight`: Allow clients to connect
+  to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_clickhouse` field `clickhouse_user_config.privatelink_access.clickhouse_arrowflight`: Enable clickhouse_arrowflight.
+- Add `aiven_clickhouse` field `clickhouse_user_config.public_access.clickhouse_arrowflight`: Allow clients to connect
+  to clickhouse_arrowflight from the public internet for service nodes that are in a project VPC or another type
+  of private network.
+- Change `aiven_service_integration_endpoint` field `external_elasticsearch_logs_user_config.url`: sensitive ~~`false`~~
+  → `true`
+- Change `aiven_service_integration_endpoint` field `external_opensearch_logs_user_config.url`: sensitive ~~`false`~~ → `true`
+
 ## [4.56.0] - 2026-05-07
 
 - Add `cmk_id` field to all service resources: associates a [Customer Managed

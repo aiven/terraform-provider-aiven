@@ -36,6 +36,7 @@ func externalOpensearchLogsUserConfig() *schema.Schema {
 			"url": {
 				Description: "OpenSearch connection URL. Example: `https://user:passwd@logs.example.com/`.",
 				Required:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 		}},
