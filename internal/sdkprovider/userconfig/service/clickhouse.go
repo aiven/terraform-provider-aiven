@@ -91,6 +91,11 @@ func clickhouseUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"clickhouse_arrowflight": {
+						Description: "Allow clients to connect to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"clickhouse_https": {
 						Description: "Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
@@ -116,6 +121,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"clickhouse": {
 						Description: "Enable clickhouse.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"clickhouse_arrowflight": {
+						Description: "Enable clickhouse_arrowflight.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -150,6 +160,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"clickhouse": {
 						Description: "Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"clickhouse_arrowflight": {
+						Description: "Allow clients to connect to clickhouse_arrowflight from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

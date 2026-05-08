@@ -191,7 +191,7 @@ Required:
 Required:
 
 - `index_prefix` (String) Elasticsearch index prefix. Default: `logs`.
-- `url` (String) Elasticsearch connection URL. Example: `https://user:passwd@logs.example.com/`.
+- `url` (String, Sensitive) Elasticsearch connection URL. Example: `https://user:passwd@logs.example.com/`.
 
 Optional:
 
@@ -297,7 +297,7 @@ Optional:
 Required:
 
 - `index_prefix` (String) OpenSearch index prefix. Default: `logs`.
-- `url` (String) OpenSearch connection URL. Example: `https://user:passwd@logs.example.com/`.
+- `url` (String, Sensitive) OpenSearch connection URL. Example: `https://user:passwd@logs.example.com/`.
 
 Optional:
 
