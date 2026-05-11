@@ -34,6 +34,13 @@ func genValidators(item *Item) ([]jen.Code, error) {
 		codes = append(codes, jen.Qual(pkg, "LengthAtMost").Call(jen.Lit(item.MaxLength)))
 	}
 
+	if item.Type == SchemaTypeString && isValidRegex(item.Pattern) {
+		codes = append(codes, jen.Qual(pkg, "RegexMatches").Call(
+			jen.Qual("regexp", "MustCompile").Call(jen.Lit(item.Pattern)),
+			jen.Lit(fmt.Sprintf("must match pattern %q", item.Pattern)),
+		))
+	}
+
 	// Slices
 	switch {
 	case item.MinItems > 0 && item.MaxItems > 0:

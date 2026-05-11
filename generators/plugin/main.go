@@ -511,6 +511,7 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		MaxLength:   s.MaxLength,
 		Minimum:     s.Minimum,
 		Maximum:     s.Maximum,
+		Pattern:     s.Pattern,
 		ForceNew:    s.CreateOnly,
 		Sensitive:   s.Sensitive,
 		Nullable:    s.Nullable,
@@ -751,6 +752,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)
 	a.MaxLength = max(a.MaxLength, b.MaxLength)
+	a.Pattern = or(b.Pattern, a.Pattern)
 
 	if !isEmpty(b.Default) {
 		a.Default = b.Default
