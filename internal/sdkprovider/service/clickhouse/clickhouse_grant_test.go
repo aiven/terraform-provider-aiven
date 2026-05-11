@@ -28,6 +28,10 @@ resource "aiven_clickhouse" "bar" {
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
+
+  clickhouse_user_config {
+    clickhouse_version = "25.3"
+  }
 }
 
 resource "aiven_clickhouse_database" "testdb" {
