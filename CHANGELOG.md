@@ -18,6 +18,7 @@ nav_order: 1
 - Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
   the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
   with timestamps earlier than the broker's timestamp.
+- Backport `aiven_valkey` field `valkey_user_config.valkey_version` (enum): `8.1`, `9.0`, and newer. Valkey major version.
 
 ## [4.51.0] - 2026-02-17
 

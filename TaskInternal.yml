@@ -189,9 +189,10 @@ tasks:
       no_spec: '{{.no_spec | default "false"}}'
     cmds:
       - task: gen-go
-      - task: gen-plugin
-        vars:
-          no_spec: '{{.no_spec}}'
+      # This backport branch should not refresh Plugin Framework resources from the latest OpenAPI spec.
+      # - task: gen-plugin
+      #   vars:
+      #     no_spec: '{{.no_spec}}'
       - task: gen-plugin-report
       - task: gen-docs
       - task: mockery
@@ -216,14 +217,16 @@ tasks:
   load-codegen:
     desc: "Update go-client-codegen module dependency"
     cmds:
-      - "{{.GO_CMD}} get github.com/aiven/go-client-codegen@latest"
+      # Keep this backport branch aligned with go.mod.
+      - "{{.GO_CMD}} get github.com/aiven/go-client-codegen@v0.151.0"
       - "{{.GO_CMD}} mod tidy"
 
   load-schemas:
     desc: "Update Go client codegen and API schema module dependencies"
     cmds:
       - task: load-codegen
-      - "{{.GO_CMD}} get github.com/aiven/go-api-schemas@latest"
+      # Keep this backport branch aligned with go.mod.
+      - "{{.GO_CMD}} get github.com/aiven/go-api-schemas@v1.167.1"
       - "{{.GO_CMD}} mod tidy"
 
   dump-mockery:
