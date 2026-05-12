@@ -43,7 +43,7 @@ jobs:
           ref: ${{ inputs.head_ref || github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           base-ref: ${{ inputs.base_ref || github.event.pull_request.base.ref }}
           head-ref: ${{ inputs.head_ref || github.event.pull_request.head.ref }}
