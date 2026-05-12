@@ -104,6 +104,7 @@ resource "aiven_valkey" "bar" {
 
   valkey_user_config {
     valkey_maxmemory_policy = "allkeys-random"
+    valkey_version          = "8.1"
 
     public_access {
       valkey = true
@@ -140,6 +141,7 @@ resource "aiven_valkey" "bar" {
 
   valkey_user_config {
     valkey_maxmemory_policy = "allkeys-random"
+    valkey_version          = "8.1"
 
     public_access {
       valkey = true
@@ -172,6 +174,7 @@ resource "aiven_valkey" "bar" {
   valkey_user_config {
     valkey_persistence      = "off"
     valkey_maxmemory_policy = "allkeys-random"
+    valkey_version          = "8.1"
 
     public_access {
       valkey = true
@@ -212,6 +215,7 @@ resource "aiven_valkey" "bar" {
 
   valkey_user_config {
     valkey_maxmemory_policy = "allkeys-random"
+    valkey_version          = "8.1"
 
     public_access {
       valkey = true
@@ -238,6 +242,10 @@ func testAccCheckAivenServiceValkeyAttributes(n string) resource.TestCheckFunc {
 
 		if a["valkey_user_config.0.valkey_maxmemory_policy"] != "allkeys-random" {
 			return fmt.Errorf("expected to get a correct valkey_maxmemory_policy from Aiven")
+		}
+
+		if a["valkey_user_config.0.valkey_version"] != "8.1" {
+			return fmt.Errorf("expected to get a correct valkey_version from Aiven")
 		}
 
 		if a["valkey_user_config.0.public_access.0.valkey"] != "true" {
