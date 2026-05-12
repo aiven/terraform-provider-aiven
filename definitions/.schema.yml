@@ -289,6 +289,10 @@ definitions:
         type: boolean
         $comment: |
           Set to true if this attribute is write-only. See https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
+      datasourceOnly:
+        type: boolean
+        $comment: |
+          Set to true if this attribute should appear only in the datasource schema and be omitted from the resource schema.
       properties:
         type: object
         additionalProperties:

@@ -187,6 +187,7 @@ type Item struct {
 	OverrideForceNew   *bool `yaml:"forceNew"`
 	UseStateForUnknown bool  `yaml:"useStateForUnknown"`
 	WriteOnly          bool  `yaml:"writeOnly"`
+	DatasourceOnly     bool  `yaml:"datasourceOnly"`
 
 	// TF Validators
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
@@ -311,10 +312,10 @@ func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
 	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
 }
 
-func (item *Item) PropertiesWithoutWO() map[string]*Item {
+func (item *Item) PropertiesByEntity(entity entityType) map[string]*Item {
 	props := maps.Clone(item.Properties)
 	for k, v := range item.Properties {
-		if v.WriteOnly {
+		if entity == resourceType && v.DatasourceOnly || entity == datasourceType && v.WriteOnly {
 			delete(props, k)
 			for _, a := range v.AlsoRequires {
 				delete(props, a)

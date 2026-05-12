@@ -31,11 +31,7 @@ func exampleRoot(def *Definition, entity entityType, item *Item) ([]byte, error)
 }
 
 func sortedKeysPriority(def *Definition, entity entityType, item *Item) []string {
-	props := item.Properties
-	if !entity.isResource() {
-		props = item.PropertiesWithoutWO()
-	}
-
+	props := item.PropertiesByEntity(entity)
 	keys := lo.Keys(props)
 	slices.SortFunc(keys, func(i, j string) int {
 		itemI := props[i]

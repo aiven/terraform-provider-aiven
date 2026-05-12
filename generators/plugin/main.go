@@ -776,6 +776,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.OverrideForceNew = or(b.OverrideForceNew, a.OverrideForceNew)
 	a.UseStateForUnknown = a.UseStateForUnknown || b.UseStateForUnknown
 	a.WriteOnly = a.WriteOnly || b.WriteOnly
+	a.DatasourceOnly = a.DatasourceOnly || b.DatasourceOnly
 
 	if a.Name == "" {
 		return nil, fmt.Errorf("node doesn't have name set, parent: %q", parent.Name)
