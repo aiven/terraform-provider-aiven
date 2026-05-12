@@ -81,6 +81,18 @@ func sortedKeys[K ~string, V any](m map[K]V) []K {
 
 var reNewline = regexp.MustCompile(`\s*\n+\s*`)
 
+// isValidRegex reports whether pattern is a non-empty regular expression
+// compilable by Go's RE2-based `regexp` package.
+// OpenAPI specs may use extended Perl features (lookarounds, backreferences,
+// possessive quantifiers, etc.) that RE2 doesn't support; those return false.
+func isValidRegex(pattern string) bool {
+	if pattern == "" {
+		return false
+	}
+	_, err := regexp.Compile(pattern)
+	return err == nil
+}
+
 func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	description := strings.TrimSpace(reNewline.ReplaceAllString(item.Description, " "))
 	if entity.isResource() && !item.IsRoot() && item.Required && item.IsNested() {
@@ -120,6 +132,10 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 
 		if item.Maximum > 0 {
 			b.Maximum(item.Maximum)
+		}
+
+		if isValidRegex(item.Pattern) {
+			b.Pattern(item.Pattern)
 		}
 	}
 

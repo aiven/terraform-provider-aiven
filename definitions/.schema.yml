@@ -272,6 +272,13 @@ definitions:
       minLength:
         type: integer
         $comment: Minimum length required for string attributes
+      pattern:
+        type: string
+        $comment: |
+          Regular expression that string values must match.
+          Compiled with Go's `regexp` package (RE2 syntax) and enforced via `stringvalidator.RegexMatches`.
+          Patterns that use extended Perl features (e.g. lookarounds, backreferences) are not supported by RE2
+          and are silently ignored by the generator; no validator is emitted for them.
       nullable:
         type: boolean
         $comment: Set to true if this attribute can be null. It can't be both nullable and optional.

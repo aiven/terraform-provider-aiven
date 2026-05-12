@@ -199,6 +199,7 @@ type Item struct {
 	Type               SchemaType `yaml:"type"`
 	Description        string     `yaml:"description"`
 	DeprecationMessage string     `yaml:"deprecationMessage"`
+	Pattern            string     `yaml:"pattern"`
 	Required           bool       `yaml:"-"`
 	Computed           bool       `yaml:"-"`
 	Virtual            bool       `yaml:"-"` // The field doesn't appear in API request/response. Only "id" for now.

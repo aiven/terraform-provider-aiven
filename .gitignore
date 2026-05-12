@@ -2,7 +2,9 @@
 **/.terraform/*
 .env
 
+# Compiled packages
 terraform-provider-aiven
+plugin
 
 # .tfstate files
 *.tfstate

@@ -49,6 +49,8 @@ type DescriptionBuilder struct {
 	withMinimum *int
 	// withMaximum is a flag that indicates if the maximum value should be included.
 	withMaximum *int
+	// withPattern is the regular expression that string values must match.
+	withPattern string
 	// withDefaultValue is a flag that indicates if the default value should be included.
 	withDefaultValue any
 	// withUseReference is a flag that indicates if the reference should be used.
@@ -131,6 +133,12 @@ func (db *DescriptionBuilder) Minimum(value int) *DescriptionBuilder {
 
 func (db *DescriptionBuilder) Maximum(value int) *DescriptionBuilder {
 	db.withMaximum = &value
+	return db
+}
+
+// Pattern sets the regular expression that string values must match.
+func (db *DescriptionBuilder) Pattern(pattern string) *DescriptionBuilder {
+	db.withPattern = pattern
 	return db
 }
 
@@ -262,6 +270,11 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 	case db.withMaximum != nil:
 		builder.WriteRune(' ')
 		builder.WriteString(fmt.Sprintf("Maximum value: `%d`.", *db.withMaximum))
+	}
+
+	if db.withPattern != "" {
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Must match pattern: `%s`.", db.withPattern))
 	}
 
 	if db.withDefaultValue != nil {
