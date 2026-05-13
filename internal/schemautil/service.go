@@ -215,7 +215,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Optional:     true,
 			Computed:     true,
 			ValidateFunc: validation.StringLenBetween(36, 36),
-			Description:  fmt.Sprintf("Customer Managed Key identifier (CMK ID). To reset the CMK association, set this to the all-zero UUID `%s`; simply removing the attribute from configuration will not detach the key.", cmkIDReset),
+			Description:  fmt.Sprintf("UUID of the Customer Managed Key (CMK) used to apply [bring your own key (BYOK) encryption](https://aiven.io/docs/platform/howto/bring-your-own-key) to this service's data at rest. You can register a CMK for an Aiven project using the `aiven_cmk` resource. Removing this attribute doesn't remove the CMK association. To remove it from this service, set this attribute to the all-zero UUID `%s`.", cmkIDReset),
 			DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 				// After applying cmkIDReset the API starts returning nil, which is
 				// stored as "" in state. Suppress the resulting "" -> cmkIDReset
