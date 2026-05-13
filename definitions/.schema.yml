@@ -86,11 +86,6 @@ properties:
       deprecationMessage:
         type: string
         description: Deprecation message for this datasource, if applicable.
-      exactlyOneOf:
-        type: array
-        items:
-          type: string
-        description: List of fields where exactly one must be configured. Applies to data sources only.
       disableExample:
         type: boolean
         $comment: |
@@ -173,6 +168,27 @@ definitions:
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
+      datasourceLookup:
+        type: boolean
+        $comment: |
+          Set to true to inline this read op as the data source's lookup branch (not
+          wired into the resource view). The values of `resultListLookupKeys` become the
+          composedOf lookup attributes, driving the data source's validators, schema
+          flags, example hint and the id-empty branch inlined into the data source's
+          readView.
+        dependencies:
+          - resultListLookupKeys
+      resultIDField:
+        type: string
+        $comment: |
+          Go field name on the lookup result item that holds the primary id. When set on
+          a datasourceLookup op the lookup is used only to resolve the primary id: the
+          generator emits `d.Set(id, match.<resultIDField>)` and lets control fall through
+          to the canonical read body in the same readView. Use this when the lookup
+          endpoint returns a different shape than the canonical read endpoint.
+        dependencies:
+          - datasourceLookup
+          - resultListLookupKeys
       resultKey:
         type: string
         $comment: |
@@ -181,12 +197,6 @@ definitions:
       resultListLookup:
         type: string
         $comment: The name of the list to lookup the item in the response
-      resultListLookupKeysOr:
-        type: boolean
-        $comment: |
-          Set to true to use the OR operator when matching the list items.
-        dependencies:
-          - resultListLookupKeys
       resultListLookupKeys:
         type: object
         additionalProperties:

@@ -1,5 +1,5 @@
 data "aiven_organizational_unit" "example" {
-  // REQUIRED EXACTLY ONE
+  // LOOKUP — provide `id` or `name`
   id      = "foo"
   // name = "Aiven Ltd"
 

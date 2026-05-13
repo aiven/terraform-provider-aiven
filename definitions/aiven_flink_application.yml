@@ -7,8 +7,6 @@ resource:
     Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).
 datasource:
   description: Gets information about an Aiven for Apache Flink® application.
-  exactlyOneOf: [application_id, name]
-planModifier: true
 clientHandler: flinkapplication
 idAttributeComposed: [project, service_name, application_id]
 legacyTimeouts: true
@@ -27,5 +25,11 @@ operations:
     type: delete
   - id: ServiceFlinkGetApplication
     type: read
+  - id: ServiceFlinkListApplications
+    type: read
+    datasourceLookup: true
+    resultKey: applications
+    resultListLookupKeys:
+      Name: name
   - id: ServiceFlinkUpdateApplication
     type: update

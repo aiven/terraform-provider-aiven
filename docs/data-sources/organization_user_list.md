@@ -14,7 +14,7 @@ Returns a list of [users in the organization](https://aiven.io/docs/platform/con
 
 ```terraform
 data "aiven_organization_user_list" "example" {
-  // REQUIRED EXACTLY ONE
+  // LOOKUP — provide `id` or `name`
   id      = "org1a23f456789"
   // name = "foo"
 

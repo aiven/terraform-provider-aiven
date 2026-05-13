@@ -173,8 +173,9 @@ resource:
 datasource:
   description: "..."
   deprecationMessage: "..."
-  exactlyOneOf: [field1, field2]    # Generates ConfigValidators
 ```
+
+For alternative lookup keys (e.g. look up by `name` instead of `id`), see [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key) below.
 
 ### Operations Configuration
 
@@ -185,6 +186,14 @@ operations:
   - id: OperationIDFromOpenAPI
     type: create|read|update|delete
     disableView: true               # Don't generate view function (for custom override)
+    datasourceLookup: true          # Inline this read op as readView's id-empty branch on
+                                    # the data source (requires resultListLookupKeys).
+                                    # See "Data Source with Alternative Lookup Key" below.
+    resultIDField: OrganizationId   # Go field on the lookup result that holds the
+                                    # primary id. When set, the lookup only resolves
+                                    # the id, then control falls through to the canonical
+                                    # read body in the same readView. Requires
+                                    # datasourceLookup + resultListLookupKeys.
     resultKey: nested_field          # Extract from response.nested_field
     resultToKey: wrapper_key         # Wrap response as {wrapper_key: ...}
     resultListLookupKeys:            # For list responses
@@ -398,8 +407,8 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 **Reference implementations:**
 - `internal/plugin/service/billinggroup/billinggroup.go` — extracts `billing_group_id` from composite `id` for SDK backward compat
 - `internal/plugin/service/flink/deployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
-- `internal/plugin/service/flink/application/application.go` — resolves application name to ID via API call (for datasource lookup by name)
-- `internal/plugin/service/organization/unit/unit.go` — resolves organization name to ID via API call
+
+For name -> ID resolution in data sources, use the generated `datasourceLookup` pattern instead of a hand-written `planModifier`. See [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key).
 
 ## Custom View Overrides
 
@@ -530,29 +539,92 @@ schema:
 
 ## Data Source with Alternative Lookup Key
 
-When a data source should look up by a field that's NOT in `idAttributeComposed` (e.g., lookup by `name` but resource ID uses `application_id`), use `datasource.exactlyOneOf` + `planModifier`:
+When a data source should look up by a field that's NOT in `idAttributeComposed` (e.g., lookup by `name` but resource ID uses `application_id`), add a second `read` operation marked `datasourceLookup: true` with `resultListLookupKeys`. The generator inlines the lookup body into `readView` as an id-empty branch:
 
-**YAML:**
-```yaml
-datasource:
-  exactlyOneOf: [application_id, name]
-planModifier: true
-idAttributeComposed: [project, service_name, application_id]
-```
-
-The `planModifier` resolves the alternative key to the ID field before the read:
 ```go
-func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-    if d.Get("application_id").(string) != "" {
-        return nil
+func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+    // planModifier (if enabled) runs first
+    if d.Get("<id-attr>").(string) == "" {
+        // ... datasourceLookup list call + FindOne by resultListLookupKeys ...
+        return d.Flatten(&match, ...)         // default: flatten match into state and return
+        // OR (when resultIDField is set):
+        // d.Set("<id-attr>", match.<resultIDField>)  // resolve id, fall through to canonical read
     }
-    // List and find by name, then set application_id and ID
-    apps, err := client.ServiceFlinkListApplications(ctx, d.Get("project").(string), d.Get("service_name").(string))
-    // ... find matching app, d.Set("application_id", app.Id), d.SetID(...)
+    // ... canonical read API call by id ...
 }
 ```
 
-**Reference**: See `internal/plugin/service/flink/application/application.go`.
+The data source uses the same `readView` directly — no separate `dataReadView` is generated. The generator also wires `ExactlyOneOf(id, alt_field...)` (and `RequiredTogether` when `composedOf` has more than one field) on the data source config validators, and marks the alternative fields as optional in the data source schema.
+
+**YAML:**
+```yaml
+clientHandler: flinkapplication
+idAttributeComposed: [project, service_name, application_id]
+rename:
+  id: application_id
+operations:
+  - id: ServiceFlinkCreateApplication
+    type: create
+  - id: ServiceFlinkGetApplication
+    type: read
+  - id: ServiceFlinkListApplications
+    type: read
+    datasourceLookup: true
+    resultKey: applications        # Unwrap the response: rsp.applications -> []Application
+    resultListLookupKeys:
+      Name: name                   # API field "Name" matches TF attribute "name"
+  - id: ServiceFlinkDeleteApplication
+    type: delete
+  - id: ServiceFlinkUpdateApplication
+    type: update
+```
+
+The `rename` map (e.g. `id: application_id`) is forwarded to the lookup branch's `Flatten` call when the API field exists in the lookup response, so the resource id attribute is populated correctly from the list item.
+
+**Multi-field composite lookup**: if `resultListLookupKeys` declares more than one mapping, the data source requires either the id attribute OR all alternative fields together. Example (`aiven_kafka_schema_registry_acl`):
+```yaml
+resultListLookupKeys:
+  Permission: permission
+  Resource: resource
+  Username: username
+```
+
+### `resultIDField` — id resolution only
+
+Set `resultIDField` to the Go field name on the lookup result item that holds the primary id when the lookup endpoint and the canonical read endpoint return _different_ shapes (the list response is just a directory of ids; the actual payload comes from the canonical read). With `resultIDField` set, `readView`'s id-empty branch:
+
+1. Calls the `datasourceLookup` list op.
+2. Finds the matching item by `resultListLookupKeys`.
+3. Sets the resolved id on state via `d.Set(<id-attr>, match.<resultIDField>)`.
+4. Falls through to the canonical read body in the same `readView` (no recursive call).
+
+The lookup response is _not_ merged into the data source schema, so leaked fields from the directory endpoint cannot pollute it.
+
+`resultIDField` requires `datasourceLookup: true` and `resultListLookupKeys` (enforced by `.schema.yml` `dependencies`).
+
+```yaml
+operations:
+  - id: OrganizationUserList         # canonical read, fetches the actual payload
+    type: read
+    resultToKey: users
+  - id: UserOrganizationsList        # directory used only to resolve the id
+    type: read
+    datasourceLookup: true
+    resultIDField: OrganizationId    # Go field on the list item holding the id
+    resultKey: organizations
+    resultListLookupKeys:
+      OrganizationName: name
+rename:
+  organization_id: id
+```
+
+**No `planModifier` needed**: both patterns fully replace the previous `datasource.exactlyOneOf` + custom `planModifier` approach.
+
+**Reference implementations**:
+- `definitions/aiven_flink_application.yml` — single-field name lookup (flatten match into state)
+- `definitions/aiven_kafka_schema_registry_acl.yml` — three-field composite lookup
+- `definitions/aiven_organizational_unit.yml` — name lookup with field renames
+- `definitions/aiven_organization_user_list.yml` — `resultIDField`, lookup resolves id then falls through to the canonical read body
 
 ## Computed + Optional Pattern
 
@@ -584,7 +656,7 @@ Search the codebase for similar patterns:
 | Composite ID | `grep -l "idAttributeComposed:" definitions/aiven_*.yml \| head -3` |
 | Custom modifiers | `grep -l "expandModifier: true" definitions/aiven_*.yml` |
 | Field renaming | `grep -l "rename:" definitions/aiven_*.yml` |
-| Alt lookup key | `grep -l "exactlyOneOf:" definitions/aiven_*.yml` |
+| Alt data source lookup key | `grep -l "datasourceLookup: true" definitions/aiven_*.yml` |
 
 **Best approach**: Find a similar resource, read its YAML definition, understand the pattern, adapt to your needs.
 
@@ -606,9 +678,10 @@ Search the codebase for similar patterns:
 | `pg_user` | Nested API fields, computed+optional, custom create/update, write-only fields, expand/flatten modifiers |
 | `mysql_database` | Simple CRUD, list-based read with lookup, termination protection |
 | `billing_group` | planModifier, `ComposeMapModifiers`, card ID resolution, organization ID conversion |
-| `flink_application` | Alt data source lookup key (`exactlyOneOf` + `planModifier`), `ConfigValidators`, field rename |
+| `flink_application` | Alt data source lookup key via `datasourceLookup` read op, field rename |
 | `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
-| `organization/unit` | planModifier for name -> ID resolution via API, expand/flatten for parent ID |
+| `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
+| `organization/unit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
 
 ## Testing Requirements
 

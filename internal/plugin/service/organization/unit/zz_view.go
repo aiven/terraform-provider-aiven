@@ -5,6 +5,7 @@ package unit
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/account"
@@ -64,9 +65,22 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := planModifier(ctx, client, d)
-	if err != nil {
-		return err
+	if d.Get("id").(string) == "" {
+		rsp, err := client.AccountList(ctx)
+		if err != nil {
+			return err
+		}
+		match, err := adapter.FindOne(rsp, func(i int) bool {
+			return adapter.Equal(rsp[i].AccountName, d.Get("name"))
+		})
+		if err != nil {
+			return fmt.Errorf("lookup `aiven_organizational_unit` by `name`: %w", err)
+		}
+		return d.Flatten(&match, adapter.RenameFields(map[string]string{
+			"account_id":        "id",
+			"account_name":      "name",
+			"parent_account_id": "parent_id",
+		}), flattenModifier(ctx, client))
 	}
 	rsp, err := client.AccountGet(ctx, d.Get("id").(string))
 	if err != nil {

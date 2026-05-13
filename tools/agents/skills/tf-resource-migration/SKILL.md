@@ -156,7 +156,7 @@ idAttributeComposed: [project, service_name, database_name]
 | `DiffSuppressFunc` | `planModifier: true` |
 | Multiple API calls in Update | Custom `updateView` via `init()` override |
 | Complex delete (cancel + delete) | Custom `deleteView` via `init()` override |
-| Data source looks up by name, not ID | `datasource.exactlyOneOf` + `planModifier` |
+| Data source looks up by alt key (e.g. name) | A second `read` op with `datasourceLookup: true` + `resultListLookupKeys`; add `resultIDField: <GoField>` when the lookup endpoint differs in shape from the canonical read and should only resolve the id |
 | Sensitive field not stored in state | `writeOnly: true` |
 
 For implementation details of each, see **tf-resource-generator** skill.
@@ -283,7 +283,7 @@ Before marking migration complete:
 | "was null, but now cty.X" error | Add `computed: true` + `useStateForUnknown: true` (see generator skill) |
 | Field nested differently in API | Use `expandModifier` and `flattenModifier` (see generator skill) |
 | Multiple update operations needed | Override `updateView` via `init()` (see generator skill) |
-| Data source lookup key differs | Use `datasource.exactlyOneOf` + `planModifier` (see generator skill) |
+| Data source lookup key differs | Add a second `read` operation with `datasourceLookup: true` + `resultListLookupKeys`. If the lookup endpoint returns a different shape than the canonical read (e.g. a directory of ids), also set `resultIDField: <GoField>` (see generator skill) |
 
 ## Migration-Specific Commands
 

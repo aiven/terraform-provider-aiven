@@ -6,7 +6,6 @@ package applicationusertoken
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
@@ -51,21 +50,13 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
+	match, err := adapter.FindOne(rsp, func(i int) bool {
 		return adapter.Equal(rsp[i].TokenPrefix, d.Get("token_prefix"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0])
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_organization_application_user_token` with given `token_prefix` not found",
-			OperationID: "ApplicationUserAccessTokensList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_organization_application_user_token` with given `token_prefix`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_organization_application_user_token` by `token_prefix`: %w", err)
 	}
+	return d.Flatten(&match)
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

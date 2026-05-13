@@ -2,13 +2,18 @@
 location: internal/plugin/service/organization/userlist
 datasource:
   description: Returns a list of [users in the organization](https://aiven.io/docs/platform/concepts/user-access-management), their profile details, and other data . This includes users you add to your organization and application users.
-  exactlyOneOf: [id, name]
 operations:
   - id: OrganizationUserList
     type: read
     resultToKey: users
+  - id: UserOrganizationsList
+    type: read
+    datasourceLookup: true
+    resultIDField: OrganizationId
+    resultKey: organizations
+    resultListLookupKeys:
+      OrganizationName: name
 clientHandler: organizationuser
-planModifier: true
 rename:
   organization_id: id
 schema:

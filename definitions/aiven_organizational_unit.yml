@@ -4,8 +4,6 @@ resource:
   description: Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) in an Aiven organization.
 datasource:
   description: Gets information about an organizational unit.
-  exactlyOneOf: [id, name]
-planModifier: true
 clientHandler: account
 flattenModifier: true
 expandModifier: true
@@ -32,6 +30,12 @@ operations:
   - id: AccountGet
     type: read
     resultKey: account
+  - id: AccountList
+    type: read
+    datasourceLookup: true
+    resultKey: accounts
+    resultListLookupKeys:
+      AccountName: name
   - id: AccountUpdate
     type: update
     resultKey: account

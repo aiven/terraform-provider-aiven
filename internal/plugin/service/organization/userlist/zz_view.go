@@ -5,6 +5,7 @@ package userlist
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
@@ -32,9 +33,20 @@ var DataSourceOptions = adapter.DataSourceOptions{
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := planModifier(ctx, client, d)
-	if err != nil {
-		return err
+	if d.Get("id").(string) == "" {
+		rsp, err := client.UserOrganizationsList(ctx)
+		if err != nil {
+			return err
+		}
+		match, err := adapter.FindOne(rsp, func(i int) bool {
+			return adapter.Equal(rsp[i].OrganizationName, d.Get("name"))
+		})
+		if err != nil {
+			return fmt.Errorf("lookup `aiven_organization_user_list` by `name`: %w", err)
+		}
+		if err := d.Set("id", match.OrganizationId); err != nil {
+			return err
+		}
 	}
 	rsp, err := client.OrganizationUserList(ctx, d.Get("id").(string))
 	if err != nil {

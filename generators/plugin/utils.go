@@ -110,8 +110,8 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	isResource := entity.isResource()
 	if !isResource {
 		b.MarkAsDataSource()
-		if item.IsRootProperty() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
-			b.ExactlyOneOf(def.Datasource.ExactlyOneOf...)
+		if item.IsRootProperty() && def.DatasourceLookupHas(item.Name) {
+			b.Lookup(def.DatasourceLookupID(), def.DatasourceLookupComposedOf()...)
 		}
 	} else if !item.IsReadOnly(def, entity) {
 		if item.ForceNew {

@@ -6,7 +6,6 @@ package connectionpool
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/postgresql"
@@ -57,21 +56,13 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp.ConnectionPools, func(i int) bool {
+	match, err := adapter.FindOne(rsp.ConnectionPools, func(i int) bool {
 		return adapter.Equal(rsp.ConnectionPools[i].PoolName, d.Get("pool_name"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0], adapter.RenameFields(map[string]string{"database": "database_name"}))
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_connection_pool` with given `pool_name` not found",
-			OperationID: "ServiceGet",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_connection_pool` with given `pool_name`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_connection_pool` by `pool_name`: %w", err)
 	}
+	return d.Flatten(&match, adapter.RenameFields(map[string]string{"database": "database_name"}))
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

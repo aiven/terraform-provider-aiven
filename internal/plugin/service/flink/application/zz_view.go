@@ -5,6 +5,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/flinkapplication"
@@ -59,9 +60,18 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := planModifier(ctx, client, d)
-	if err != nil {
-		return err
+	if d.Get("application_id").(string) == "" {
+		rsp, err := client.ServiceFlinkListApplications(ctx, d.Get("project").(string), d.Get("service_name").(string))
+		if err != nil {
+			return err
+		}
+		match, err := adapter.FindOne(rsp, func(i int) bool {
+			return adapter.Equal(rsp[i].Name, d.Get("name"))
+		})
+		if err != nil {
+			return fmt.Errorf("lookup `aiven_flink_application` by `name`: %w", err)
+		}
+		return d.Flatten(&match, adapter.RenameFields(map[string]string{"id": "application_id"}))
 	}
 	rsp, err := client.ServiceFlinkGetApplication(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("application_id").(string))
 	if err != nil {
