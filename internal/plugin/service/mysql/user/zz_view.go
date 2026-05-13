@@ -25,7 +25,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	IDFields:          idFields(),
 	Read:              readView,
 	RefreshState:      true,
-	RefreshStateDelay: adapter.MustParseDuration("10s"),
+	RefreshStateDelay: adapter.MustParseDuration("15s"),
 	RemoveMissing:     true,
 	Schema:            resourceSchema,
 	SchemaInternal:    resourceSchemaInternal(),
