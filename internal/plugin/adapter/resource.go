@@ -48,7 +48,7 @@ type ResourceOptions struct {
 	// It is called after the resource is created/updated and before the state is refreshed.
 	RefreshStateWaiter func(ctx context.Context, client avngen.Client, d ResourceData) error
 
-	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
+	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an IsNotFound error).
 	// This is useful for resources that Aiven may automatically delete,
 	// such as users or databases when a service has been turned off and then on again.
 	// Instead of forcing users to manually clean up the state, Terraform will plan to "create" the resource again.
@@ -226,7 +226,7 @@ func (a *resourceAdapter) Read(
 	// When RemoveResource is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
 	err = a.resource.Read(ctx, a.client, d)
-	if a.resource.RemoveMissing && avngen.IsNotFound(err) {
+	if a.resource.RemoveMissing && IsNotFound(err) {
 		// Ignores all the other diagnostics and removes the resource from the state.
 		rsp.State.RemoveResource(ctx)
 		return
@@ -367,7 +367,7 @@ func (a *resourceAdapter) Delete(
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
 	err = a.resource.Delete(ctx, a.client, d)
-	if err != nil && !avngen.IsNotFound(err) {
+	if err != nil && !IsNotFound(err) {
 		diags.AddError("failed to delete resource", err.Error())
 	}
 }
@@ -547,4 +547,43 @@ func deref(a any) any {
 		return v.Elem().Interface()
 	}
 	return a
+}
+
+var (
+	ErrNotFound = errors.New("not found")
+	ErrMultiple = errors.New("multiple found")
+)
+
+// FindOne returns the single element of list for which pred(index) is true. Returns
+// ErrNotFound when no element matches; on multiple matches it returns a zero T and an
+// error wrapping ErrMultiple with the total count.
+func FindOne[T any](list []T, pred func(int) bool) (T, error) {
+	var (
+		zero  T
+		index int
+		count int
+	)
+	for i := range list {
+		if !pred(i) {
+			continue
+		}
+		if count == 0 {
+			index = i
+		}
+		count++
+	}
+	switch count {
+	case 0:
+		return zero, ErrNotFound
+	case 1:
+		return list[index], nil
+	default:
+		return zero, fmt.Errorf("%w: %d", ErrMultiple, count)
+	}
+}
+
+// IsNotFound reports whether err is a "not found" error: either the local
+// ErrNotFound sentinel or an upstream avngen 404.
+func IsNotFound(err error) bool {
+	return errors.Is(err, ErrNotFound) || avngen.IsNotFound(err)
 }
