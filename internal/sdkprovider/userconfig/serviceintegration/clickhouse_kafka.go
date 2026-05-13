@@ -22,6 +22,11 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"beginning", "earliest", "end", "largest", "latest", "smallest"}, false),
 				},
+				"auto_offset_reset_by_duration_ms": {
+					Description: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - auto_offset_reset_by_duration_ms). This overrides auto_offset_reset when set. Requires ClickHouse >= 25.8. Default: `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"columns": {
 					Description: "Array of column definitions that specify the structure of the ClickHouse table. Each column maps to a field in the Kafka messages",
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{

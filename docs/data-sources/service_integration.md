@@ -84,6 +84,7 @@ Read-Only:
 Read-Only:
 
 - `auto_offset_reset` (String)
+- `auto_offset_reset_by_duration_ms` (Number)
 - `columns` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--columns))
 - `data_format` (String)
 - `date_time_input_format` (String)
