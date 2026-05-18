@@ -2,9 +2,9 @@
 **/.terraform/*
 .env
 
-# Compiled packages
-terraform-provider-aiven
-plugin
+# Compiled packages (root binaries only; do not match internal/plugin/)
+/terraform-provider-aiven
+/plugin
 
 # .tfstate files
 *.tfstate
