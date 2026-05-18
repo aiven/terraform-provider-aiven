@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/upgradepipeline/step
+limitedAvailability: true
+resource:
+  description: Creates and manages an Aiven Upgrade Pipeline step between source and destination services.
+clientHandler: upgradepipeline
+idAttributeComposed: [organization_id, step_id]
+operations:
+  - id: UpgradePipelineStepCreate
+    type: create
+  - id: UpgradePipelineStepDelete
+    type: delete
+  - id: UpgradePipelineStepGet
+    type: read
+  - id: UpgradePipelineStepUpdate
+    type: update
+remove:
+  - last_validation
+schema:
+  auto_validation_delay_days:
+    computed: true

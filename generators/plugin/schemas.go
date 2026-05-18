@@ -25,7 +25,10 @@ func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error)
 
 	desc := userconfig.Desc(fmtDescription(def, entity, item))
 	if lo.FromPtr(def.Beta) {
-		desc = desc.AvailabilityType(userconfig.Beta)
+		desc = desc.Beta()
+	}
+	if lo.FromPtr(def.LimitedAvailability) {
+		desc = desc.LimitedAvailability()
 	}
 	if entity.isResource() && def.Resource.RemoveMissing {
 		desc = desc.RemoveMissing()

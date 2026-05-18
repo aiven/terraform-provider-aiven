@@ -32,6 +32,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 

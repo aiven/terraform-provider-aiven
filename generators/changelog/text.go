@@ -16,6 +16,10 @@ func hasBeta(description string) bool {
 	return strings.Contains(description, util.AivenEnableBeta)
 }
 
+func hasLimited(description string) bool {
+	return strings.Contains(strings.ToLower(description), strings.ToLower(userconfig.LimitedAvailabilityMessage))
+}
+
 // reEnum finds enum values from the description: "Enum: `foo`, `bar`"
 var reEnum = regexp.MustCompile("(?i)enum: `[^`]+`(?:, `[^`]+`)*\\.?\\s*")
 

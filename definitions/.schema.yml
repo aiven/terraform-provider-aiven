@@ -15,6 +15,11 @@ properties:
     $comment: |
       Indicates whether this resource or datasource is in beta status.
       If not specified, the beta status may be inferred from OperationID schemas.
+  limitedAvailability:
+    type: boolean
+    $comment: |
+      Indicates whether this resource or datasource is in limited availability.
+      Limited availability resources render limited availability documentation.
   legacyTimeouts:
     type: boolean
     $comment: |
