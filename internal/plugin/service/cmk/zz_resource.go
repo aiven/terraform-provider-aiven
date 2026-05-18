@@ -24,10 +24,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Customer Managed Key identifier (CMK ID).",
 			},
 			"cmk_provider": schema.StringAttribute{
-				MarkdownDescription: "The cloud provider hosting the key management service (KMS). The possible values are `aws`, `gcp` and `oci`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The cloud provider hosting the key management service (KMS). The possible values are `aws`, `azure`, `gcp` and `oci`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("aws", "gcp", "oci")},
+				Validators:          []validator.String{stringvalidator.OneOf("aws", "azure", "gcp", "oci")},
 			},
 			"created_at": schema.StringAttribute{
 				Computed:            true,
