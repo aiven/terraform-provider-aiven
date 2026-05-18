@@ -6,7 +6,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/clickhouse"
@@ -57,21 +56,13 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
+	match, err := adapter.FindOne(rsp, func(i int) bool {
 		return adapter.Equal(rsp[i].Name, d.Get("name"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0])
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_clickhouse_database` with given `name` not found",
-			OperationID: "ServiceClickHouseDatabaseList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_clickhouse_database` with given `name`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_clickhouse_database` by `name`: %w", err)
 	}
+	return d.Flatten(&match)
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

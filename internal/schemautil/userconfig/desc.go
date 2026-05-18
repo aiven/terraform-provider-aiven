@@ -61,6 +61,11 @@ type DescriptionBuilder struct {
 	// TF validators https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
 	withRequiredWith, withConflictsWith, withExactlyOneOf, withAtLeastOneOf []string
 
+	// withLookupID and withLookupComposedOf describe a data source lookup contract:
+	// users must supply either `withLookupID` or all of `withLookupComposedOf`.
+	withLookupID         string
+	withLookupComposedOf []string
+
 	// withRemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
 	withRemoveMissing bool
 
@@ -113,6 +118,14 @@ func (db *DescriptionBuilder) ExactlyOneOf(values ...string) *DescriptionBuilder
 
 func (db *DescriptionBuilder) AtLeastOneOf(values ...string) *DescriptionBuilder {
 	db.withAtLeastOneOf = values
+	return db
+}
+
+// Lookup describes the data source lookup contract: callers must supply either `id`
+// or all of `composedOf` together.
+func (db *DescriptionBuilder) Lookup(id string, composedOf ...string) *DescriptionBuilder {
+	db.withLookupID = id
+	db.withLookupComposedOf = composedOf
 	return db
 }
 
@@ -241,6 +254,22 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 			builder.WriteString(validatorTitles[i])
 			builder.WriteString(listOfCodes(validatorConjunctions[i], v...))
 			builder.WriteRune('.')
+		}
+	}
+
+	if db.withLookupID != "" && len(db.withLookupComposedOf) > 0 {
+		builder.WriteRune(' ')
+		switch len(db.withLookupComposedOf) {
+		case 1:
+			builder.WriteString("Exactly one of the fields must be specified: ")
+			builder.WriteString(listOfCodes("or", db.withLookupID, db.withLookupComposedOf[0]))
+			builder.WriteRune('.')
+		default:
+			builder.WriteString("Provide either ")
+			builder.WriteString(fmt.Sprintf("`%s`", db.withLookupID))
+			builder.WriteString(", or all of ")
+			builder.WriteString(listOfCodes("and", db.withLookupComposedOf...))
+			builder.WriteString(" together.")
 		}
 	}
 

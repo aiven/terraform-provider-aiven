@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
 )
 
 func testAccAivenOrganizationUserListByName(name string) string {
@@ -56,7 +57,7 @@ func TestAccAivenOrganizationUserListByID(t *testing.T) {
 	client, err := acc.GetTestGenAivenClient()
 	require.NoError(t, err)
 
-	id, err := userlist.GetOrganizationByName(
+	id, err := getOrganizationByName(
 		context.Background(),
 		client,
 		acc.OrganizationName(),
@@ -114,4 +115,29 @@ data "aiven_organization_user_list" "invalid" {
 			},
 		})
 	})
+}
+
+// GetOrganizationByName resolves an organization name to its ID. It is kept as an exported
+// helper for tests; the runtime lookup is handled by the generated readView's id-empty branch.
+func getOrganizationByName(ctx context.Context, client avngen.Client, name string) (string, error) {
+	ids := make([]string, 0)
+	list, err := client.UserOrganizationsList(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, o := range list {
+		// Organization name is not unique
+		if o.OrganizationName == name {
+			ids = append(ids, o.OrganizationId)
+		}
+	}
+
+	switch len(ids) {
+	case 0:
+		return "", fmt.Errorf("organization %q not found", name)
+	case 1:
+		return ids[0], nil
+	}
+	return "", fmt.Errorf("multiple organizations %q found, ids: %s", name, strings.Join(ids, ", "))
 }

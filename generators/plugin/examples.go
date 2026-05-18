@@ -120,17 +120,17 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 		}
 
 		// Starts new block: optional or computed.
-		// Doesn't add title if it's the first item, except for exactlyOneOf.
+		// Doesn't add title if it's the first item, except for lookup.
 		// Doesn't add title if the block is in a computed block.
 		var comment string
-		exactlyOneOf := !entity.isResource() && def.Datasource != nil && def.Datasource.ExactlyOneOf != nil
-		if !inComputedBlock && (i > 0 || exactlyOneOf) {
+		hasLookup := !entity.isResource() && def.DatasourceLookupOp() != nil
+		if !inComputedBlock && (i > 0 || hasLookup) {
 			if !seenOptional && v.IsOptional(def, entity) {
 				seenOptional = true
 				comment = "// OPTIONAL FIELDS"
 
-				if exactlyOneOf {
-					comment = "// REQUIRED EXACTLY ONE"
+				if hasLookup {
+					comment = lookupExampleHint(def)
 				}
 
 			} else if !seenComputed && v.IsReadOnly(def, entity) {
@@ -230,9 +230,9 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 		}
 
 		fieldName := k
-		if exactlyOneOf && slices.Index(def.Datasource.ExactlyOneOf, k) > 0 {
-			// Comments other options for exactlyOneOf
-			// so the validation won't complain about conflicting fields
+		if hasLookup && slices.Contains(def.DatasourceLookupComposedOf(), k) {
+			// Comments out composedOf alternatives so the example uses the primary id field
+			// and the validator does not complain about conflicting fields.
 			fieldName = "// " + k
 		}
 
@@ -340,4 +340,15 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 		return cty.NumberFloatVal(anyValue.(float64)), nil
 	}
 	return cty.NilVal, fmt.Errorf("unknown scalar type %q for %q", item.Type, item.Path())
+}
+
+// lookupExampleHint renders the inline HCL comment above the lookup block, mirroring
+// the validator contract. Assumes a datasourceLookup op is present.
+func lookupExampleHint(def *Definition) string {
+	id := def.DatasourceLookupID()
+	composedOf := def.DatasourceLookupComposedOf()
+	if len(composedOf) == 1 {
+		return fmt.Sprintf("// LOOKUP — provide `%s` or %s", id, humanizeCodeList(composedOf, " and "))
+	}
+	return fmt.Sprintf("// LOOKUP — provide `%s`, or all of: %s", id, humanizeCodeList(composedOf, " and "))
 }

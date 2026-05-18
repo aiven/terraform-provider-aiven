@@ -279,10 +279,9 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		retry.LastErrorOnly(true),
 		retry.Context(ctx),
 		retry.RetryIf(func(err error) bool {
-			var e avngen.Error
 			// 404: The API is inconsistent, returns 404 after Create/Update
 			// 403: Eventual consistency might cause permission errors, for instance for "organization_project"
-			return errors.As(err, &e) && (e.Status == http.StatusNotFound || e.Status == http.StatusForbidden)
+			return IsNotFound(err) || isAivenError(err, http.StatusForbidden)
 		}),
 	)
 
@@ -520,18 +519,6 @@ func MustParseDuration(s string) time.Duration {
 	return d
 }
 
-// FilterIndex returns elements from list where pred(index) is true.
-// Useful for code generation when T name is unknown.
-func FilterIndex[T any](list []T, pred func(int) bool) []T {
-	result := make([]T, 0, len(list))
-	for i := range list {
-		if pred(i) {
-			result = append(result, list[i])
-		}
-	}
-	return result
-}
-
 // Equal compares two values for equality, dereferencing pointers as needed.
 // Can compare an enum value with its string representation.
 func Equal(a, b any) bool {
@@ -586,4 +573,9 @@ func FindOne[T any](list []T, pred func(int) bool) (T, error) {
 // ErrNotFound sentinel or an upstream avngen 404.
 func IsNotFound(err error) bool {
 	return errors.Is(err, ErrNotFound) || avngen.IsNotFound(err)
+}
+
+func isAivenError(err error, status int) bool {
+	var e avngen.Error
+	return errors.As(err, &e) && e.Status == status
 }

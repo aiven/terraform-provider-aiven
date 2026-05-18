@@ -161,7 +161,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 
 			// Generates views
 			if def.ClientHandler != "" {
-				views, err := genViews(root, def)
+				views, err := genViews(def, root)
 				if err != nil {
 					return fmt.Errorf("could not generate views: %w", err)
 				}
@@ -472,15 +472,19 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 			}
 		}
 
-		ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
-		err = fromSchema(scope, operation, root, response, ap)
-		if err != nil {
-			return err
-		}
+		// Ops with resultIDField only resolve the primary id, so their response shape must
+		// not pollute the root schema; we still record operation.Response for the view.
+		if operation.ResultIDField == "" {
+			ap := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
+			err = fromSchema(scope, operation, root, response, ap)
+			if err != nil {
+				return err
+			}
 
-		err = loadExamples(root, path.Response.OK.Content.ApplicationJSON.Example)
-		if err != nil {
-			return err
+			err = loadExamples(root, path.Response.OK.Content.ApplicationJSON.Example)
+			if err != nil {
+				return err
+			}
 		}
 
 		operation.Response = response
@@ -680,6 +684,22 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 		}
 		def.fileName = name
 		def.typeName = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+
+		// At most one datasourceLookup read op so DatasourceLookupOp stays a single-op getter.
+		var lookupOp *Operation
+		for _, op := range def.Operations {
+			if op.Type != OperationRead || op.DisableView || !op.DatasourceLookup {
+				continue
+			}
+			if lookupOp != nil {
+				return nil, fmt.Errorf(
+					"definition %q: multiple datasourceLookup read operations are not supported (found %q and %q)",
+					name, lookupOp.ID, op.ID,
+				)
+			}
+			lookupOp = op
+		}
+
 		defs = append(defs, def)
 	}
 

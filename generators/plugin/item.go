@@ -66,13 +66,14 @@ func operationToHandler() map[OperationType]AppearsIn {
 type OperationID string
 
 type Operation struct {
-	ID                     OperationID       `yaml:"id"`
-	Type                   OperationType     `yaml:"type"`
-	DisableView            bool              `yaml:"disableView"`
-	ResultKey              string            `yaml:"resultKey"`              // E.g.: {errors: [], result: {}} - extract "result"
-	ResultListLookup       string            `yaml:"resultListLookup"`       // The list name to lookup the item in the response
-	ResultListLookupKeys   map[string]string `yaml:"resultListLookupKeys"`   // When the response is a list, these keys are used to locate the correct item
-	ResultListLookupKeysOr bool              `yaml:"resultListLookupKeysOr"` // Set to true to use the OR operator when matching the list items
+	ID                   OperationID       `yaml:"id"`
+	Type                 OperationType     `yaml:"type"`
+	DisableView          bool              `yaml:"disableView"`
+	DatasourceLookup     bool              `yaml:"datasourceLookup"`     // Inline this read op as the data source readView's id-empty branch (lookup by alternative key). Not wired into resource views.
+	ResultIDField        string            `yaml:"resultIDField"`        // Go field name on the lookup result item that holds the primary id. When set on a datasourceLookup op, the lookup resolves the id and control falls through to the canonical read body in the same readView.
+	ResultKey            string            `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
+	ResultListLookup     string            `yaml:"resultListLookup"`     // The list name to lookup the item in the response
+	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
 
@@ -134,7 +135,6 @@ type Scope struct {
 type SchemaMeta struct {
 	Description           string        `yaml:"description"`
 	DeprecationMessage    string        `yaml:"deprecationMessage,omitempty"`
-	ExactlyOneOf          []string      `yaml:"exactlyOneOf,omitempty"` // Applies to data sources only
 	TerminationProtection bool          `yaml:"terminationProtection,omitempty"`
 	RefreshState          bool          `yaml:"refreshState,omitempty"`
 	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
@@ -162,6 +162,55 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+}
+
+// DatasourceLookupOp returns the single read op marked `datasourceLookup`, or nil. It
+// is the authoritative source for the data source's lookup contract (validators,
+// schema flags, example hint, readView's id-empty branch). Multiplicity is checked at load time.
+func (d *Definition) DatasourceLookupOp() *Operation {
+	if d == nil || d.Datasource == nil {
+		return nil
+	}
+	for _, op := range d.Operations {
+		if op.Type == OperationRead && !op.DisableView && op.DatasourceLookup {
+			return op
+		}
+	}
+	return nil
+}
+
+// DatasourceLookupID returns the name of the primary lookup attribute used to
+// identify a single resource via the data source. For composite IDs, this is the
+// most specific (leaf) segment; otherwise it falls back to Terraform's standard "id".
+func (d *Definition) DatasourceLookupID() string {
+	if n := len(d.IDAttributeComposed); n > 0 {
+		return d.IDAttributeComposed[n-1]
+	}
+	return "id"
+}
+
+// DatasourceLookupComposedOf returns the alternative lookup attributes — sorted values
+// of the datasourceLookup op's resultListLookupKeys. Nil when no datasourceLookup op exists.
+func (d *Definition) DatasourceLookupComposedOf() []string {
+	op := d.DatasourceLookupOp()
+	if op == nil {
+		return nil
+	}
+	out := slices.Collect(maps.Values(op.ResultListLookupKeys))
+	sort.Strings(out)
+	return out
+}
+
+// DatasourceLookupHas reports whether name is part of the lookup set (id or composedOf).
+// Returns false on a nil Definition or when no datasourceLookup op exists.
+func (d *Definition) DatasourceLookupHas(name string) bool {
+	if d == nil || d.DatasourceLookupOp() == nil {
+		return false
+	}
+	if name == d.DatasourceLookupID() {
+		return true
+	}
+	return slices.Contains(d.DatasourceLookupComposedOf(), name)
 }
 
 type Item struct {
@@ -291,8 +340,8 @@ func (item *Item) IsRequired(def *Definition, entity entityType) bool {
 		return item.Required
 	}
 
-	// ID attributes are required in data sources, except when there is no exactlyOneOf constraint.
-	return item.IDAttribute && !slices.Contains(def.Datasource.ExactlyOneOf, item.Name)
+	// ID attributes are required in data sources, except when they participate in the lookup set.
+	return item.IDAttribute && !def.DatasourceLookupHas(item.Name)
 }
 
 func (item *Item) IsOptional(def *Definition, entity entityType) bool {
@@ -300,7 +349,7 @@ func (item *Item) IsOptional(def *Definition, entity entityType) bool {
 		return item.Optional
 	}
 
-	return slices.Contains(def.Datasource.ExactlyOneOf, item.Name)
+	return def.DatasourceLookupHas(item.Name)
 }
 
 func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {

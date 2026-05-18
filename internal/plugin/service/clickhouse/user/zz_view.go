@@ -6,7 +6,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/clickhouse"
@@ -61,25 +60,30 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	if d.Get("uuid").(string) == "" {
+		rsp, err := client.ServiceClickHouseUserList(ctx, d.Get("project").(string), d.Get("service_name").(string))
+		if err != nil {
+			return err
+		}
+		match, err := adapter.FindOne(rsp, func(i int) bool {
+			return adapter.Equal(rsp[i].Name, d.Get("username"))
+		})
+		if err != nil {
+			return fmt.Errorf("lookup `aiven_clickhouse_user` by `username`: %w", err)
+		}
+		return d.Flatten(&match, adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
+	}
 	rsp, err := client.ServiceClickHouseUserList(ctx, d.Get("project").(string), d.Get("service_name").(string))
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
-		return adapter.Equal(rsp[i].Name, d.Get("username")) || adapter.Equal(rsp[i].Uuid, d.Get("uuid"))
+	match, err := adapter.FindOne(rsp, func(i int) bool {
+		return adapter.Equal(rsp[i].Uuid, d.Get("uuid"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0], adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_clickhouse_user` with given `username` or `uuid` not found",
-			OperationID: "ServiceClickHouseUserList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_clickhouse_user` with given `username` or `uuid`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_clickhouse_user` by `uuid`: %w", err)
 	}
+	return d.Flatten(&match, adapter.RenameFields(map[string]string{"name": "username"}), flattenModifier(ctx, client))
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

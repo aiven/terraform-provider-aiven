@@ -6,7 +6,6 @@ resource:
   description: Creates and manages an Aiven for ClickHouse user.
 datasource:
   description: Gets information about an Aiven for ClickHouse user.
-  exactlyOneOf: [uuid, username]
 clientHandler: clickhouse
 idAttributeComposed: [project, service_name, uuid]
 legacyTimeouts: true
@@ -24,9 +23,13 @@ operations:
   - id: ServiceClickHouseUserList
     type: read
     resultKey: users
-    resultListLookupKeysOr: true
     resultListLookupKeys:
       Uuid: uuid
+  - id: ServiceClickHouseUserList
+    type: read
+    datasourceLookup: true
+    resultKey: users
+    resultListLookupKeys:
       Name: username
 rename:
   name: username

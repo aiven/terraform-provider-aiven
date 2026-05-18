@@ -25,14 +25,13 @@ const (
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
-func genViews(item *Item, def *Definition) ([]jen.Code, error) {
+func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 	codes := make([]jen.Code, 0)
 	for _, op := range listOperationTypes() {
-		v, err := genGenericView(item, def, op)
+		v, err := genGenericView(def, item, op)
 		if err != nil {
 			return nil, fmt.Errorf("%s view error: %w", op, err)
 		}
-
 		if v != nil {
 			codes = append(codes, v)
 		}
@@ -44,11 +43,12 @@ func genViews(item *Item, def *Definition) ([]jen.Code, error) {
 	}
 
 	if def.Datasource != nil {
-		hasValidators := len(def.Datasource.ExactlyOneOf) > 0
-		if hasValidators {
-			codes = append(codes, datasourceExactlyOneOf(def))
+		hasLookup := def.DatasourceLookupOp() != nil
+		if hasLookup {
+			codes = append(codes, datasourceLookupValidators(def))
 		}
-		builders = append(builders, genNewResource(datasourceType, def, hasValidators))
+
+		builders = append(builders, genNewResource(datasourceType, def, hasLookup))
 	}
 
 	return append(builders, codes...), nil
@@ -70,10 +70,19 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	for _, v := range def.Operations {
-		if entity == datasourceType && v.Type != OperationRead {
-			// Datasource only supports Read operation
-			continue
+		if entity == datasourceType {
+			if v.Type != OperationRead {
+				// Datasource only supports Read operation
+				continue
+			}
+
+			if v.DatasourceLookup {
+				// Lookup ops are inlined into readView's id-empty branch; no separate
+				// wiring is needed (and they're invalid on resources).
+				continue
+			}
 		}
+
 		values[firstUpper(v.Type)] = jen.Id(fmt.Sprintf("%s%s", v.Type, viewSuffix))
 	}
 
@@ -112,16 +121,24 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	return jen.Var().Id(title).Op("=").Add(returnValue)
 }
 
-func genGenericView(item *Item, def *Definition, operation OperationType) (jen.Code, error) {
+func genGenericView(def *Definition, item *Item, operation OperationType) (jen.Code, error) {
 	operations := make([]*Operation, 0)
 	for _, op := range def.Operations {
-		if op.Type == operation && !op.DisableView {
+		if op.Type == operation && !op.DisableView && !op.DatasourceLookup {
 			operations = append(operations, op)
 		}
 	}
 
 	if len(operations) == 0 {
 		return nil, nil
+	}
+
+	// readView absorbs the datasourceLookup op as its id-empty branch:
+	// when the canonical id is missing, run the lookup (which either returns
+	// the flattened match or sets id and falls through to the canonical read).
+	var lookupOp *Operation
+	if operation == OperationRead {
+		lookupOp = def.DatasourceLookupOp()
 	}
 
 	view := jen.Func().Id(fmt.Sprintf("%s%s", operation, viewSuffix))
@@ -137,17 +154,24 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	// The function block
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
-		if def.PlanModifier && operation == OperationRead {
-			g.Err().Op(":=").Id(planModifier).Call(
-				jen.Id("ctx"),
-				jen.Id("client"),
-				jen.Id("d"),
-			)
-			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+		if operation == OperationRead {
+			emitPlanModifier(g, def)
+		}
+
+		if lookupOp != nil {
+			var lookupErr error
+			g.If(
+				jen.Id("d").Dot("Get").Call(jen.Lit(def.DatasourceLookupID())).Op(".").Parens(jen.String()).Op("==").Lit(""),
+			).BlockFunc(func(g *jen.Group) {
+				lookupErr = genGenericViewOperation(g, 0, 1, def, item, lookupOp)
+			})
+			if lookupErr != nil {
+				errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", lookupOp.ID, lookupErr))
+			}
 		}
 
 		for i, op := range operations {
-			err := genGenericViewOperation(g, i, len(operations), item, def, op)
+			err := genGenericViewOperation(g, i, len(operations), def, item, op)
 			if err != nil {
 				errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", op.ID, err))
 			}
@@ -157,7 +181,25 @@ func genGenericView(item *Item, def *Definition, operation OperationType) (jen.C
 	return view, errM.ErrorOrNil()
 }
 
-func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item, def *Definition, operation *Operation) error {
+// emitPlanModifier prepends the planModifier call to a Read-style view body.
+// No-op when the definition does not opt in via planModifier: true.
+func emitPlanModifier(g *jen.Group, def *Definition) {
+	if !def.PlanModifier {
+		return
+	}
+	g.Err().Op(":=").Id(planModifier).Call(
+		jen.Id("ctx"),
+		jen.Id("client"),
+		jen.Id("d"),
+	)
+	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+}
+
+func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Definition, item *Item, operation *Operation) error {
+	if operation.DatasourceLookup && len(operation.ResultListLookupKeys) == 0 {
+		return fmt.Errorf("datasourceLookup operation %q must declare resultListLookupKeys for filtering", operation.ID)
+	}
+
 	inPath := def.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
 	inRequest := def.Operations.AppearsInID(operation.ID, operation.Type, RequestBody)
 	inResponse := def.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
@@ -169,7 +211,9 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	})
 
 	hasRequest := len(filterAppearsIn(properties, inRequest)) > 0
-	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0
+	// Ops with resultIDField never merge their response into root.Properties, but the
+	// emitted view still consumes the response (FindOne, then d.Set id + readView).
+	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0 || (operation.ResultIDField != "" && operation.Response != nil)
 
 	// Generates the code that converts the TF model into the Client request struct
 	if hasRequest {
@@ -181,18 +225,8 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 			if def.ExpandModifier {
 				g.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client"))
 			}
-			if len(def.Rename) > 0 && operation.Request != nil {
-				renameFields := make(jen.Dict)
-				for jsonName, tfName := range def.Rename {
-					_, ok := operation.Request.Properties[jsonName]
-					if ok {
-						renameFields[jen.Lit(tfName)] = jen.Lit(jsonName)
-					}
-				}
-
-				if len(renameFields) > 0 {
-					g.Qual(adapterPackage, renameFieldsModifier).Call(jen.Map(jen.String()).String().Values(renameFields))
-				}
+			if code := renameFieldsArg(def.Rename, operation.Request, true); code != nil {
+				g.Add(code)
 			}
 		})
 		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
@@ -268,18 +302,8 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 		v := jen.Id("d").Dot("Flatten").CallFunc(func(g *jen.Group) {
 			g.Add(rsp)
 
-			if len(def.Rename) > 0 && operation.Response != nil {
-				renameFields := make(jen.Dict)
-				for jsonName, tfName := range def.Rename {
-					_, ok := operation.Response.Properties[jsonName]
-					if ok {
-						renameFields[jen.Lit(jsonName)] = jen.Lit(tfName)
-					}
-				}
-
-				if len(renameFields) > 0 {
-					g.Qual(adapterPackage, renameFieldsModifier).Call(jen.Map(jen.String()).String().Values(renameFields))
-				}
+			if code := renameFieldsArg(def.Rename, operation.Response, false); code != nil {
+				g.Add(code)
 			}
 
 			if def.FlattenModifier {
@@ -321,11 +345,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
 		fieldName := operation.ResultListLookupKeys[key]
 		if i > 0 {
-			if operation.ResultListLookupKeysOr {
-				fieldsMatch.Op("||")
-			} else {
-				fieldsMatch.Op("&&")
-			}
+			fieldsMatch.Op("&&")
 		}
 
 		field, ok := item.Properties[fieldName]
@@ -339,57 +359,75 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, item *Item,
 		)
 	}
 
-	// Filters the response by the fields match
-	const foundName = "found"
-	g.Id(foundName).Op(":=").Qual(adapterPackage, "FilterIndex").CallFunc(func(g *jen.Group) {
-		g.Add(rspCode)
-		g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(&fieldsMatch))
-	})
-
-	// Makes a list of human readable values, e.g. foo, bar and baz
-	values := lo.Values(operation.ResultListLookupKeys)
-	slices.Sort(values)
-	humanValues := humanizeCodeList(values, func() string {
-		if operation.ResultListLookupKeysOr {
-			return " or "
-		}
-		return " and "
-	}())
-
-	// Switches on the number of found items
-	// 0: returns not found error
-	// 1: flattens the item
-	// 2+: returns multiple found error
-	g.Switch(jen.Len(jen.Id(foundName))).Block(
-		jen.Case(jen.Lit(1)).Block(flatten(jen.Op("&").Id(foundName).Index(jen.Lit(0)))),
-		jen.Case(jen.Lit(0)).BlockFunc(func(g *jen.Group) {
-			// If passed the "for" loop, then no item was found - adds error
-			g.Return().
-				Qual(avnGenPackage, "Error").Values(jen.Dict{
-				jen.Id("OperationID"): jen.Lit(string(operation.ID)),
-				jen.Id("Status"):      jen.Qual("net/http", "StatusNotFound"),
-				jen.Id("Message"):     jen.Lit(fmt.Sprintf("`%s` with given %s not found", def.typeName, humanValues)),
-			})
-		}),
-		jen.Default().Block(jen.Return().Qual("fmt", "Errorf").Call(
-			jen.Lit(fmt.Sprintf("found %%d `%s` with given %s", def.typeName, humanValues)),
-			jen.Len(jen.Id(foundName)),
-		)),
+	const matchName = "match"
+	g.List(jen.Id(matchName), jen.Err()).Op(":=").
+		Qual(adapterPackage, "FindOne").
+		CallFunc(func(g *jen.Group) {
+			g.Add(rspCode)
+			g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(&fieldsMatch))
+		})
+	g.If(jen.Err().Op("!=").Nil()).Block(
+		jen.Return().Qual("fmt", "Errorf").Call(
+			jen.Lit(fmt.Sprintf("lookup `%s` by %s: %%w", def.typeName, lookupFieldsList(operation))),
+			jen.Err(),
+		),
 	)
+
+	// resultIDField: the lookup endpoint only resolves the primary id; control then
+	// falls through to the canonical read body (emitted right after the lookup block
+	// in readView). Used when the lookup response shape differs from the read response.
+	if operation.DatasourceLookup && operation.ResultIDField != "" {
+		g.If(
+			jen.Err().Op(":=").Id("d").Dot("Set").Call(
+				jen.Lit(def.DatasourceLookupID()),
+				jen.Id(matchName).Dot(operation.ResultIDField),
+			),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return().Err())
+		return nil
+	}
+
+	g.Add(flatten(jen.Op("&").Id(matchName)))
 
 	return nil
 }
 
-func datasourceExactlyOneOf(def *Definition) jen.Code {
-	fields := make([]jen.Code, len(def.Datasource.ExactlyOneOf))
-	for i, v := range def.Datasource.ExactlyOneOf {
-		fields[i] = jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(v))
+// lookupFieldsList renders an op's ResultListLookupKeys tf-attribute values as a
+// backticked human-readable list joined by " and " (or " or " when OR mode is set).
+func lookupFieldsList(op *Operation) string {
+	values := lo.Values(op.ResultListLookupKeys)
+	slices.Sort(values)
+	return humanizeCodeList(values, " and ")
+}
+
+// datasourceLookupValidators emits ExactlyOneOf(id, composedOf[0]) and, when composedOf
+// has more than one field, RequiredTogether(composedOf...). Assumes a datasourceLookup op
+// is present; the caller gates on that.
+func datasourceLookupValidators(def *Definition) jen.Code {
+	id := def.DatasourceLookupID()
+	composedOf := def.DatasourceLookupComposedOf()
+	pkg := datasourceType.Import(entityValidatorPkgFmt)
+
+	matchRoot := func(name string) jen.Code {
+		return jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(name))
 	}
 
-	pkg := datasourceType.Import(entityValidatorPkgFmt)
-	validators := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(
-		multilineValues(), jen.Qual(pkg, "ExactlyOneOf").Custom(multilineCall(), fields...),
-	)
+	validators := make([]jen.Code, 0, 2)
+	validators = append(validators, jen.Qual(pkg, "ExactlyOneOf").Custom(
+		multilineCall(),
+		matchRoot(id),
+		matchRoot(composedOf[0]),
+	))
+
+	if len(composedOf) > 1 {
+		together := make([]jen.Code, len(composedOf))
+		for i, v := range composedOf {
+			together[i] = matchRoot(v)
+		}
+		validators = append(validators, jen.Qual(pkg, "RequiredTogether").Custom(multilineCall(), together...))
+	}
+
+	list := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(multilineValues(), validators...)
 	return jen.Func().Id(datasourceType.String()+configValidatorsFuncSuffix).
 		Params(
 			jen.Id("ctx").Qual("context", "Context"),
@@ -397,7 +435,7 @@ func datasourceExactlyOneOf(def *Definition) jen.Code {
 		).
 		Index().Qual(datasourcePkg, "ConfigValidator").
 		Block(
-			jen.Return(validators),
+			jen.Return(list),
 		)
 }
 
@@ -410,6 +448,33 @@ func filterAppearsIn(items []*Item, appearsIn AppearsIn) []*Item {
 		}
 	}
 	return props
+}
+
+// renameFieldsArg builds the adapter.RenameFields(...) modifier for the subset of
+// def.Rename that the schema actually carries. Returns nil when nothing applies.
+// forExpand=true emits {tfName: jsonName} (Expand: TF -> request); otherwise
+// {jsonName: tfName} (Flatten: response -> TF).
+func renameFieldsArg(rename map[string]string, schema *OASchema, forExpand bool) jen.Code {
+	if len(rename) == 0 || schema == nil {
+		return nil
+	}
+	dict := make(jen.Dict)
+	for jsonName, tfName := range rename {
+		if _, ok := schema.Properties[jsonName]; !ok {
+			continue
+		}
+		if forExpand {
+			dict[jen.Lit(tfName)] = jen.Lit(jsonName)
+		} else {
+			dict[jen.Lit(jsonName)] = jen.Lit(tfName)
+		}
+	}
+	if len(dict) == 0 {
+		return nil
+	}
+	return jen.Qual(adapterPackage, renameFieldsModifier).Call(
+		jen.Map(jen.String()).String().Values(dict),
+	)
 }
 
 // humanizeCodeList turns ["foo", "bar", "baz"] -> "`foo`, `bar` and `baz`"

@@ -6,7 +6,6 @@ package staticip
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/staticip"
@@ -54,21 +53,13 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
+	match, err := adapter.FindOne(rsp, func(i int) bool {
 		return adapter.Equal(rsp[i].StaticIPAddressId, d.Get("static_ip_address_id"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0])
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_static_ip` with given `static_ip_address_id` not found",
-			OperationID: "StaticIPList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_static_ip` with given `static_ip_address_id`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_static_ip` by `static_ip_address_id`: %w", err)
 	}
+	return d.Flatten(&match)
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

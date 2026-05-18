@@ -14,7 +14,7 @@ Gets information about an organization.
 
 ```terraform
 data "aiven_organization" "example" {
-  // REQUIRED EXACTLY ONE
+  // LOOKUP — provide `id` or `name`
   id      = "org1a23f456789"
   // name = "Aiven Ltd"
 

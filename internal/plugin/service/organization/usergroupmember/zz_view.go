@@ -6,7 +6,6 @@ package usergroupmember
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 
@@ -37,19 +36,11 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
+	match, err := adapter.FindOne(rsp, func(i int) bool {
 		return adapter.Equal(rsp[i].UserId, d.Get("user_id"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0])
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_organization_user_group_member` with given `user_id` not found",
-			OperationID: "UserGroupMemberList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_organization_user_group_member` with given `user_id`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_organization_user_group_member` by `user_id`: %w", err)
 	}
+	return d.Flatten(&match)
 }

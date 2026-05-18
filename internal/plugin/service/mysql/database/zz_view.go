@@ -6,7 +6,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -57,21 +56,13 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	found := adapter.FilterIndex(rsp, func(i int) bool {
+	match, err := adapter.FindOne(rsp, func(i int) bool {
 		return adapter.Equal(rsp[i].DatabaseName, d.Get("database_name"))
 	})
-	switch len(found) {
-	case 1:
-		return d.Flatten(&found[0])
-	case 0:
-		return avngen.Error{
-			Message:     "`aiven_mysql_database` with given `database_name` not found",
-			OperationID: "ServiceDatabaseList",
-			Status:      http.StatusNotFound,
-		}
-	default:
-		return fmt.Errorf("found %d `aiven_mysql_database` with given `database_name`", len(found))
+	if err != nil {
+		return fmt.Errorf("lookup `aiven_mysql_database` by `database_name`: %w", err)
 	}
+	return d.Flatten(&match)
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

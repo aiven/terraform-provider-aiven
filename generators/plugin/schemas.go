@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/samber/lo"
@@ -104,7 +103,7 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 				values["ElementType"] = value
 			}
 
-			if !entity.isResource() && item.IsRoot() && slices.Contains(def.Datasource.ExactlyOneOf, k) {
+			if !entity.isResource() && item.IsRoot() && def.DatasourceLookupHas(k) {
 				delete(values, "Required")
 				values["Optional"] = jen.True()
 				values["Computed"] = jen.True()
@@ -296,7 +295,7 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		properties[jen.Lit(k)] = prop
 	}
 
-	if item.Computed || item.IsRootProperty() && !entity.isResource() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
+	if item.Computed || item.IsRootProperty() && !entity.isResource() && def.DatasourceLookupHas(item.Name) {
 		params[jen.Id("Computed")] = jen.True()
 	}
 
