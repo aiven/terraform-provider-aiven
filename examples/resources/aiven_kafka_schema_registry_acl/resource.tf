@@ -1,7 +1,11 @@
-resource "aiven_kafka_schema_registry_acl" "foo" {
-  project      = aiven_project.kafka-schemas-project1.project
-  service_name = aiven_kafka.kafka-service1.service_name
-  resource     = "Subject:topic-1"
-  username     = "group-user-*"
-  permission   = "schema_registry_read"
+resource "aiven_kafka_schema_registry_acl" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka" // Force new
+  permission   = "schema_registry_read" // Force new
+  resource     = "Config:" // Force new
+  username     = "admin*" // Force new
+
+  /* COMPUTED FIELDS
+  acl_id = "foo"
+  */
 }

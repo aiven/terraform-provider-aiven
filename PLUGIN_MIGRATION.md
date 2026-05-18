@@ -51,7 +51,7 @@
 | 45 | aiven_kafka_quota                           |        |     1 |
 | 46 | aiven_kafka_schema                          |        |     2 |
 | 47 | aiven_kafka_schema_configuration            |        |     2 |
-| 48 | aiven_kafka_schema_registry_acl             |        |     2 |
+| 48 | aiven_kafka_schema_registry_acl             | yes    |     2 |
 | 49 | aiven_kafka_topic                           |        |     2 |
 | 50 | aiven_kafka_topic_list                      | yes    |     1 |
 | 51 | aiven_kafka_user                            |        |     2 |
@@ -100,6 +100,6 @@
 | 94 | aiven_valkey                                |        |     2 |
 | 95 | aiven_valkey_user                           |        |     2 |
 +----+---------------------------------------------+--------+-------+
-|    | TOTAL MIGRATED 35%                          | 55     |   159 |
+|    | TOTAL MIGRATED 36%                          | 57     |   159 |
 +----+---------------------------------------------+--------+-------+
 ```

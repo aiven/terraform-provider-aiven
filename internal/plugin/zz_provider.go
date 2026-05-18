@@ -19,6 +19,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema/registryacl"
 	database1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
 	user1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/securitypluginconfig"
@@ -57,6 +58,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
+		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(registryacl.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(user1.ResourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(securitypluginconfig.ResourceOptions),
@@ -81,6 +83,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(user.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
+		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(registryacl.DataSourceOptions),
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(topiclist.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(user1.DataSourceOptions),
