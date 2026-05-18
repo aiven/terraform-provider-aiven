@@ -23,6 +23,7 @@ nav_order: 1
 - Change `aiven_service_integration_endpoint` field `external_opensearch_logs_user_config.url`: sensitive ~~`false`~~ → `true`
 - Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.auto_offset_reset_by_duration_ms`: When
   set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - auto_offset_reset_by_duration_ms)
+- Change `aiven_cmk` resource field `cmk_provider` (enum): add `azure`
 
 ## [4.56.0] - 2026-05-07
 
