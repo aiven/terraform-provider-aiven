@@ -79,6 +79,22 @@ properties:
         type: boolean
         $comment: |
           Set to true to disable Terraform example file generation for this resource.
+      validateConfig:
+        type: boolean
+        $comment: |
+          Set to true to wire `validateConfig` as the resource's ResourceWithValidateConfig
+          handler. The package must declare a function named `validateConfig` with the
+          adapter.ResourceOptions.ValidateConfig signature. Use this for config-only,
+          cross-field validation that does not need prior state.
+          https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#validateconfig-method
+      modifyPlan:
+        type: boolean
+        $comment: |
+          Set to true to wire `modifyPlan` as the resource's ResourceWithModifyPlan handler.
+          The package must declare a function named `modifyPlan` with the
+          adapter.ResourceOptions.ModifyPlan signature. Use this for plan-time checks that
+          need access to prior state (e.g. forbidding a decrease in a numeric attribute).
+          https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
