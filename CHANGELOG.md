@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.57.0] - 2026-05-19
+
 - Add `aiven_upgrade_step` resource: manages Upgrade Pipeline steps between source and destination services.
 - Add `aiven_clickhouse` field `clickhouse_user_config.private_access.clickhouse_arrowflight`: Allow clients to connect
   to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses
