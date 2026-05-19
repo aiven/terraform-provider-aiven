@@ -305,6 +305,14 @@ definitions:
         $comment: |
           Updated description for the attribute.
           Example: "The size of the instance in GB"
+      example:
+        type: any
+        $comment: |
+          Example value rendered into the generated example .tf files (and surfaced
+          in the docs). The literal type should match the attribute's `type` (string
+          for strings, integer for ints, etc.). Examples are also auto-loaded from
+          the OpenAPI spec; set this only when the spec lacks one or you need to
+          override it.
       items:
         $ref: "#/definitions/Schema"
         $comment: Array item or Map item configuration

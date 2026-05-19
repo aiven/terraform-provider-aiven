@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafka/topic
+version: 1
+resource:
+  description: Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).
+  terminationProtection: true
+  removeMissing: true
+  validateConfig: true
+  modifyPlan: true
+datasource:
+  description: Gets information about an Aiven for Apache Kafka® topic.
+clientHandler: kafkatopic
+idAttributeComposed: [project, service_name, topic_name]
+legacyTimeouts: true
+# All CRUD views are hand-written and delegate to the shared
+# kafkatopicrepository, which provides batching, caching, the special V2-list
+# read shape and (on Delete) cache invalidation. Skipping the repository for
+# Delete would leave the seenTopics cache stale and trip modifyPlan's Exists()
+# check on a topic destroyed and re-created in the same provider process.
+operations:
+  - id: ServiceKafkaTopicCreate
+    type: create
+    disableView: true
+  # Use ServiceKafkaTopicUpdate as the source of path parameters and the request
+  # body schema for the "read" entry. ServiceKafkaTopicGet returns a different
+  # shape (config wrapped in {value,source,synonyms}, partitions as a list of
+  # partition objects) which we re-flatten manually in readView.
+  - id: ServiceKafkaTopicUpdate
+    type: read
+    disableView: true
+  - id: ServiceKafkaTopicUpdate
+    type: update
+    disableView: true
+  - id: ServiceKafkaTopicDelete
+    type: delete
+    disableView: true
+rename:
+  tags: tag # SDKv2 schema used the singular block name.
+# Deprecated top-level kafka topic fields that are mirrored in `config`.
+remove:
+  - cleanup_policy
+  - min_insync_replicas
+  - retention_bytes
+  - retention_hours
+schema:
+  # Both fields are computed+optional on the backend, but for backward compatibility
+  # with the SDKv2-based resource (which never read the topic back after create
+  # because the list endpoint can take up to a minute), they remain required.
+  partitions:
+    required: true
+    # Override the OpenAPI example (1) so the generated example HCL shows a
+    # more representative multi-partition topic.
+    example: 3
+  replication:
+    required: true
+    # Override the OpenAPI example (1) so the generated example HCL is
+    # internally consistent: the `min_insync_replicas` example is "2", which
+    # would be invalid against a single-replica topic.
+    example: 3
+  # Configuration block for advanced topic settings.
+  # All fields are treated as optional by the API, and their values
+  # are refreshed from the backend (kafkatopicrepository), making each field computed.
+  # Integer settings are represented as strings for compatibility with the SDKv2-based resource.
+  # Example values are provided for clear usage guidance in documentation snippets.
+  config:
+    computed: true
+    useStateForUnknown: true
+    description: |
+      [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics.
+      Removing the block won't reset the topic configuration to default values.
+      Instead, the topic will retain its last known configuration.
+    properties:
+      delete_retention_ms:
+        type: string
+        example: "86400000"
+      file_delete_delay_ms:
+        type: string
+        example: "60000"
+      flush_messages:
+        type: string
+        example: "9223372036854775807"
+      flush_ms:
+        type: string
+        example: "9223372036854775807"
+      index_interval_bytes:
+        type: string
+        example: "4096"
+      local_retention_bytes:
+        type: string
+        example: "1073741824"
+        alsoRequires: [retention_bytes]
+      local_retention_ms:
+        type: string
+        example: "300000"
+        alsoRequires: [retention_ms]
+      max_compaction_lag_ms:
+        type: string
+        example: "86400000"
+      max_message_bytes:
+        type: string
+        example: "1048588"
+      message_timestamp_after_max_ms:
+        type: string
+        example: "3600000"
+      message_timestamp_before_max_ms:
+        type: string
+        example: "9223372036854775807"
+      message_timestamp_difference_max_ms:
+        type: string
+        example: "9223372036854775807"
+      min_compaction_lag_ms:
+        type: string
+        example: "0"
+      min_insync_replicas:
+        type: string
+        example: "2"
+      retention_bytes:
+        type: string
+        example: "-1"
+      retention_ms:
+        type: string
+        example: "604800000"
+      segment_bytes:
+        type: string
+        example: "1073741824"
+      segment_index_bytes:
+        type: string
+        example: "10485760"
+      segment_jitter_ms:
+        type: string
+        example: "0"
+      segment_ms:
+        type: string
+        example: "604800000"
