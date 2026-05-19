@@ -1,6 +1,7 @@
 package userconfig
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -54,12 +55,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the resou
 		{
 			name: "adds beta and limited availability warnings",
 			desc: Desc("Service setting").Beta().LimitedAvailability(),
-			want: "Service setting. " + `
-
-**This resource is in the beta stage and may change without notice.** Set
-the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the resource. ` + `
-
-**This resource is in the limited availability stage and may change without notice.** ` + LimitedAvailabilityMessage,
+			want: "Service setting. " + fmt.Sprintf(BetaLimitedAvailabilityText, "resource"),
 		},
 	}
 

@@ -13,8 +13,10 @@ const (
 	Resource EntityType = iota
 	// DataSource is a constant that represents the data source entity type.
 	DataSource
-	PossibleValuesPrefix       = "The possible value"
-	LimitedAvailabilityMessage = "To enable this feature, contact the [sales team](http://aiven.io/contact)."
+	PossibleValuesPrefix        = "The possible value"
+	LimitedAvailabilityMarker   = "limited availability stage and may change without notice"
+	LimitedAvailabilityMessage  = "To enable this feature, contact the [sales team](http://aiven.io/contact)."
+	BetaLimitedAvailabilityText = "This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %[1]s."
 )
 
 // String is a function that returns the string representation of the entity type.
@@ -195,16 +197,18 @@ func (db *DescriptionBuilder) Build() string {
 
 **This %[1]s is in the %[2]s stage and may change without notice.** %[3]s`
 
-	if db.withBeta {
+	switch {
+	case db.withBeta && db.withLimitedAvailability:
+		builder.WriteRune(' ')
+		fmt.Fprintf(builder, BetaLimitedAvailabilityText, db.entityType.String())
+	case db.withBeta:
 		builder.WriteRune(' ')
 		fmt.Fprintf(builder,
 			availabilityCommonPart,
 			db.entityType.String(),
 			"beta",
 			fmt.Sprintf("Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %s.", db.entityType.String()))
-	}
-
-	if db.withLimitedAvailability {
+	case db.withLimitedAvailability:
 		builder.WriteRune(' ')
 		fmt.Fprintf(builder,
 			availabilityCommonPart,

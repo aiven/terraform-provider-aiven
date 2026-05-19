@@ -61,7 +61,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages an Aiven Upgrade Pipeline step between source and destination services. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. \n\n**This resource is in the limited availability stage and may change without notice.** To enable this feature, contact the [sales team](http://aiven.io/contact).",
+		MarkdownDescription: "Creates and manages an Aiven Upgrade Pipeline step between source and destination services. This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {

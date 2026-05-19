@@ -17,7 +17,9 @@ func hasBeta(description string) bool {
 }
 
 func hasLimited(description string) bool {
-	return strings.Contains(strings.ToLower(description), strings.ToLower(userconfig.LimitedAvailabilityMessage))
+	description = strings.ToLower(description)
+	return strings.Contains(description, strings.ToLower(userconfig.LimitedAvailabilityMarker)) ||
+		strings.Contains(description, strings.ToLower(userconfig.LimitedAvailabilityMessage))
 }
 
 // reEnum finds enum values from the description: "Enum: `foo`, `bar`"
