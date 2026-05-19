@@ -82,6 +82,7 @@ nav_order: 1
 - Remove fields `errors`, `state`, `update_time` from `aiven_byoc_aws_entity` resource: they are not useful when only
   defining the BYOC entity, and would unnecessarily invalidate the resource's state on every update, causing a cascade
   of unrelated updates to dependent BYOC resources.
+- Change `aiven_kafka_topic`: migrate to Terraform Plugin Framework.
 
 ## [4.57.0] - 2026-05-19
 

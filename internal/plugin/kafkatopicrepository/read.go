@@ -156,8 +156,8 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 				return nil
 			}, retry.Context(ctx), retry.Delay(rep.v2ListRetryDelay))
 			if err != nil {
-				// Send errors
-				// Flattens error to a string, because it might go really completed for testing
+				// Flatten the error to a string because the retry-wrapped form
+				// is too convoluted to assert against in tests.
 				err = fmt.Errorf("topic read error: %w", err)
 				for _, r := range reqs {
 					r.send(nil, err)

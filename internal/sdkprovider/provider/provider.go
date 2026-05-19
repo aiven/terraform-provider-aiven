@@ -20,7 +20,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
@@ -103,7 +102,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka":                        kafka.DatasourceKafka(),
 			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
-			"aiven_kafka_topic":                  kafkatopic.DatasourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafkaschema.DatasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafkaschema.DatasourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.DatasourceKafkaConnector(),
@@ -186,7 +184,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
 			"aiven_kafka_native_acl":             kafka.ResourceKafkaNativeACL(),
-			"aiven_kafka_topic":                  kafkatopic.ResourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),

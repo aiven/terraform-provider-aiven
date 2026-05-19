@@ -56,7 +56,7 @@
 |  50 | aiven_kafka_schema                          |        |     2 |
 |  51 | aiven_kafka_schema_configuration            |        |     2 |
 |  52 | aiven_kafka_schema_registry_acl             | yes    |     2 |
-|  53 | aiven_kafka_topic                           |        |     2 |
+|  53 | aiven_kafka_topic                           | yes    |     2 |
 |  54 | aiven_kafka_topic_list                      | yes    |     1 |
 |  55 | aiven_kafka_user                            |        |     2 |
 |  56 | aiven_mirrormaker_replication_flow          |        |     2 |
