@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func TestCompare(t *testing.T) {
@@ -100,6 +102,64 @@ func TestCompare(t *testing.T) {
 				Path:        "foo",
 				Root:        "foo",
 				Description: "does stuff, PROVIDER_AIVEN_ENABLE_BETA",
+			},
+		},
+		{
+			name:   "remove limited availability from the field",
+			expect: "Change `foo` resource field `bar`: no longer limited availability",
+			old: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Root:        "foo",
+				Description: userconfig.LimitedAvailabilityMessage,
+			},
+			new: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Root:        "foo",
+				Description: "Foo",
+			},
+		},
+		{
+			name:   "mark field as limited availability",
+			expect: "Change `foo` resource field `bar`: marked as limited availability",
+			old: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Root:        "foo",
+				Description: "Foo",
+			},
+			new: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Root:        "foo",
+				Description: userconfig.LimitedAvailabilityMessage,
+			},
+		},
+		{
+			name:   "add limited availability resource",
+			expect: "Add `foo` resource _(limited availability)_: does stuff, " + userconfig.LimitedAvailabilityMessage,
+			new: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo",
+				Root:        "foo",
+				Description: "does stuff, " + userconfig.LimitedAvailabilityMessage,
+			},
+		},
+		{
+			name:   "add beta limited availability resource",
+			expect: "Add `foo` resource _(beta)_ _(limited availability)_: does stuff, " + userconfig.LimitedAvailabilityMessage + ", PROVIDER_AIVEN_ENABLE_BETA",
+			new: &Item{
+				Kind:        ResourceRootKind,
+				Type:        schema.TypeString,
+				Path:        "foo",
+				Root:        "foo",
+				Description: "does stuff, " + userconfig.LimitedAvailabilityMessage + ", PROVIDER_AIVEN_ENABLE_BETA",
 			},
 		},
 		{

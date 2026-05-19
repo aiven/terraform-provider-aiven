@@ -13,7 +13,10 @@ const (
 	Resource EntityType = iota
 	// DataSource is a constant that represents the data source entity type.
 	DataSource
-	PossibleValuesPrefix = "The possible value"
+	PossibleValuesPrefix        = "The possible value"
+	LimitedAvailabilityMarker   = "limited availability stage and may change without notice"
+	LimitedAvailabilityMessage  = "To enable this feature, contact the [sales team](http://aiven.io/contact)."
+	BetaLimitedAvailabilityText = "This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %[1]s."
 )
 
 // String is a function that returns the string representation of the entity type.
@@ -21,24 +24,16 @@ func (et EntityType) String() string {
 	return [...]string{"resource", "data source"}[et]
 }
 
-// AvailabilityType is a type that represents the availability type of an entity.
-type AvailabilityType int
-
-const (
-	// Beta is a constant that represents the beta availability type.
-	Beta AvailabilityType = iota + 1
-	// Limited is a constant that represents the limited availability type.
-	Limited
-)
-
 // DescriptionBuilder is a helper to build complex descriptions in a consistent way.
 type DescriptionBuilder struct {
 	// entityType is the type of the entity that the description is for.
 	entityType EntityType
 	// base is the base of the description.
 	base string
-	// availabilityType is the availability type of the entity that the description is for.
-	availabilityType AvailabilityType
+	// withBeta adds a beta availability warning.
+	withBeta bool
+	// withLimitedAvailability adds a limited availability warning.
+	withLimitedAvailability bool
 	// withPossibleValues is a flag that indicates if the possible values should be included.
 	withPossibleValues []string
 	// withMinLen is a flag that indicates if the minimum length should be included.
@@ -88,9 +83,13 @@ func (db *DescriptionBuilder) MarkAsDataSource() *DescriptionBuilder {
 	return db
 }
 
-// AvailabilityType is a function that sets the availabilityType field.
-func (db *DescriptionBuilder) AvailabilityType(t AvailabilityType) *DescriptionBuilder {
-	db.availabilityType = t
+func (db *DescriptionBuilder) Beta() *DescriptionBuilder {
+	db.withBeta = true
+	return db
+}
+
+func (db *DescriptionBuilder) LimitedAvailability() *DescriptionBuilder {
+	db.withLimitedAvailability = true
 	return db
 }
 
@@ -194,30 +193,28 @@ func (db *DescriptionBuilder) Build() string {
 		builder.WriteString(".")
 	}
 
-	if db.availabilityType != 0 {
+	const availabilityCommonPart = `
+
+**This %[1]s is in the %[2]s stage and may change without notice.** %[3]s`
+
+	switch {
+	case db.withBeta && db.withLimitedAvailability:
 		builder.WriteRune(' ')
-
-		const availabilityCommonPart = `
-
-**This %[1]s is in the %[2]s stage and may change without notice.** %[3]s
-the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s.`
-
-		switch db.availabilityType {
-		case Beta:
-			builder.WriteString(fmt.Sprintf(
-				availabilityCommonPart,
-				db.entityType.String(),
-				"beta",
-				"Set",
-			))
-		case Limited:
-			builder.WriteString(fmt.Sprintf(
-				availabilityCommonPart,
-				db.entityType.String(),
-				"limited availability",
-				" To enable this feature, contact the [sales team](http://aiven.io/contact). After it's enabled, set",
-			))
-		}
+		fmt.Fprintf(builder, BetaLimitedAvailabilityText, db.entityType.String())
+	case db.withBeta:
+		builder.WriteRune(' ')
+		fmt.Fprintf(builder,
+			availabilityCommonPart,
+			db.entityType.String(),
+			"beta",
+			fmt.Sprintf("Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %s.", db.entityType.String()))
+	case db.withLimitedAvailability:
+		builder.WriteRune(' ')
+		fmt.Fprintf(builder,
+			availabilityCommonPart,
+			db.entityType.String(),
+			"limited availability",
+			LimitedAvailabilityMessage)
 	}
 
 	if db.withPossibleValues != nil {

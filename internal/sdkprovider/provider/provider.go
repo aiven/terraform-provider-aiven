@@ -310,7 +310,7 @@ func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
 		}
 
 		if isBeta {
-			v.Description = userconfig.Desc(v.Description).AvailabilityType(userconfig.Beta).Build()
+			v.Description = userconfig.Desc(v.Description).Beta().Build()
 		} else {
 			delete(m, k)
 		}

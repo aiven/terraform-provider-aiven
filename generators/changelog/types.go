@@ -72,6 +72,9 @@ func (c *Diff) String() string {
 	if hasBeta(c.Description) {
 		msg = fmt.Sprintf("%s _(beta)_", msg)
 	}
+	if hasLimited(c.Description) {
+		msg = fmt.Sprintf("%s _(limited availability)_", msg)
+	}
 
 	// Adds description
 	if c.Description != "" {

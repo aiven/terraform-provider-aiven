@@ -153,6 +153,7 @@ Common fields:
 - `expandModifier` / `flattenModifier` / `planModifier` - Enable custom Go modifiers
 - `version` - Schema version (for state upgrades)
 - `beta` - Mark resource as beta (requires `PROVIDER_AIVEN_ENABLE_BETA` env var)
+- `limitedAvailability` - Mark resource as limited availability
 - `legacyTimeouts` - Enable SDK v2-style timeout blocks
 
 ### Resource Configuration

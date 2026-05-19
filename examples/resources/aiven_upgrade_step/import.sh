@@ -1,0 +1,1 @@
+terraform import aiven_upgrade_step.example ORGANIZATION_ID/STEP_ID

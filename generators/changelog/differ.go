@@ -63,6 +63,11 @@ func diffItems(was, have *Item) (*Diff, error) {
 			if !haveValue.(bool) {
 				entry = "no longer beta"
 			}
+		case "limited availability":
+			entry = "marked as limited availability"
+			if !haveValue.(bool) {
+				entry = "no longer limited availability"
+			}
 		case "enum":
 			entry = cmpList(wasValue.([]string), haveValue.([]string))
 		default:
@@ -150,6 +155,7 @@ func toMap(item *Item) (map[string]any, error) {
 
 	m["enum"] = findEnums(item.Description)
 	m["beta"] = hasBeta(item.Description)
+	m["limitedAvailability"] = hasLimited(item.Description)
 	m["type"] = strValueType(item.Type)
 	m["elementType"] = strValueType(item.ElementType)
 

@@ -97,9 +97,10 @@
 | 91 | aiven_static_ip                             | yes    |     1 |
 | 92 | aiven_thanos                                |        |     2 |
 | 93 | aiven_transit_gateway_vpc_attachment        |        |     2 |
-| 94 | aiven_valkey                                |        |     2 |
-| 95 | aiven_valkey_user                           |        |     2 |
+| 94 | aiven_upgrade_step                          | yes    |     1 |
+| 95 | aiven_valkey                                |        |     2 |
+| 96 | aiven_valkey_user                           |        |     2 |
 +----+---------------------------------------------+--------+-------+
-|    | TOTAL MIGRATED 36%                          | 57     |   159 |
+|    | TOTAL MIGRATED 36%                          | 58     |   160 |
 +----+---------------------------------------------+--------+-------+
 ```

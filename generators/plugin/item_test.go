@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
+	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,6 +34,44 @@ func TestItemPath(t *testing.T) {
 	items.Parent = array
 	assert.Equal(t, "array", array.Path())
 	assert.Equal(t, "array", items.Path())
+}
+
+func TestLimitedAvailabilitySchemaDescription(t *testing.T) {
+	code, err := genSchema(
+		&Definition{
+			LimitedAvailability: lo.ToPtr(true),
+			Resource:            &SchemaMeta{},
+		},
+		resourceType,
+		&Item{
+			Name:        "foo",
+			Description: "Does stuff",
+			Type:        SchemaTypeObject,
+			Properties:  map[string]*Item{},
+		},
+	)
+	require.NoError(t, err)
+
+	file := jen.NewFile("test")
+	file.Add(code)
+
+	var b bytes.Buffer
+	require.NoError(t, file.Render(&b))
+	got := b.String()
+
+	require.Contains(t, got, "limited availability")
+	require.Contains(t, got, "contact the [sales team](http://aiven.io/contact)")
+}
+
+func TestLimitedAvailabilityViewOptions(t *testing.T) {
+	file := jen.NewFile("test")
+	file.Add(genNewResource(resourceType, &Definition{LimitedAvailability: lo.ToPtr(true), Resource: &SchemaMeta{}}, false))
+
+	var b bytes.Buffer
+	require.NoError(t, file.Render(&b))
+	got := b.String()
+
+	require.NotContains(t, got, "Limited:")
 }
 
 // TestItemRemoveElements verifies that elements are correctly removed from nested structures.
