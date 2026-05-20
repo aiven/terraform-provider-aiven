@@ -165,7 +165,7 @@ func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
 }
 
-func (d *resourceData) set(key string, value any, ignoreUnknown bool) error {
+func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {
 	prop, ok := d.schema.Properties[key]
 	if !ok {
 		return fmt.Errorf("key %q not found in schema", key)
@@ -176,7 +176,7 @@ func (d *resourceData) set(key string, value any, ignoreUnknown bool) error {
 		// Nil is a special case, means "remove"
 		delete(state, key)
 	} else {
-		norm, err := normalizeAny(prop, value, ignoreUnknown, true)
+		norm, err := normalizeAny(prop, value, ignoreUnknownKeys, true)
 		if err != nil {
 			return err
 		}
@@ -191,13 +191,7 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 		return fmt.Errorf("no plan provided")
 	}
 
-	var m map[string]any
-	err := remarshal(&d.plan, &m)
-	if err != nil {
-		return err
-	}
-
-	norm, err := normalizeTyped(d.schema, m, false, false)
+	norm, err := normalizeTyped(d.schema, d.plan, false, false)
 	if err != nil {
 		return err
 	}
@@ -300,7 +294,7 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 	for part := range parts {
 		switch sch.Type {
 		case SchemaTypeSet:
-			return nil, nil, false, fmt.Errorf("invalid path %q: set is not supported", path)
+			return nil, nil, false, fmt.Errorf("invalid path %q: set indexing is not supported", path)
 		case SchemaTypeList:
 			index, err := strconv.Atoi(part)
 			if err != nil {
@@ -353,6 +347,11 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 			}
 			data = val
 		}
+
+		// This is a preserved nil/unknown value for ModifyPlan.
+		if _, ok := data.(tftypes.Value); ok {
+			return zeroValue(sch.Type), sch, false, nil
+		}
 	}
 
 	return data, sch, true, nil
@@ -373,7 +372,7 @@ func NewResourceDataFromMaps(schema *Schema, idFields []string, plan, state, con
 	return rd, nil
 }
 
-func NewResourceData(schema *Schema, idFields []string, plan *tfsdk.Plan, state *tfsdk.State, config *tfsdk.Config) (ResourceData, error) {
+func NewResourceData(schema *Schema, idFields []string, plan *tfsdk.Plan, state *tfsdk.State, config *tfsdk.Config, preservePlanValues bool) (ResourceData, error) {
 	var err error
 	var planMap, stateMap, configMap map[string]any
 	if plan == nil && state == nil && config == nil {
@@ -381,21 +380,21 @@ func NewResourceData(schema *Schema, idFields []string, plan *tfsdk.Plan, state 
 	}
 
 	if plan != nil && !plan.Raw.IsNull() {
-		planMap, err = fromTFValue(schema, plan.Raw)
+		planMap, err = fromTFValue(schema, plan.Raw, preservePlanValues)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode plan: %w", err)
 		}
 	}
 
 	if state != nil && !state.Raw.IsNull() {
-		stateMap, err = fromTFValue(schema, state.Raw)
+		stateMap, err = fromTFValue(schema, state.Raw, false)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode state: %w", err)
 		}
 	}
 
 	if config != nil && !config.Raw.IsNull() {
-		configMap, err = fromTFValue(schema, config.Raw)
+		configMap, err = fromTFValue(schema, config.Raw, false)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode config: %w", err)
 		}
@@ -405,8 +404,8 @@ func NewResourceData(schema *Schema, idFields []string, plan *tfsdk.Plan, state 
 }
 
 // normalizeTyped see normalizeAny for more details.
-func normalizeTyped[T any](sch *Schema, m T, ignoreUnknown bool, setFlow bool) (T, error) {
-	v, err := normalizeAny(sch, m, ignoreUnknown, setFlow)
+func normalizeTyped[T any](sch *Schema, m T, ignoreUnknownKeys bool, setFlow bool) (T, error) {
+	v, err := normalizeAny(sch, m, ignoreUnknownKeys, setFlow)
 	if err != nil {
 		return m, err
 	}
@@ -416,6 +415,44 @@ func normalizeTyped[T any](sch *Schema, m T, ignoreUnknown bool, setFlow bool) (
 		return t, fmt.Errorf("expected %T, got %T", t, m)
 	}
 	return t, nil
+}
+
+// asAnyMap returns the value as map[string]any. The fast path is a direct
+// type assertion; the slow path uses reflection to convert any string-keyed
+// map (e.g. map[string]string) so callers don't have to JSON round-trip
+// strictly-typed maps to satisfy a map[string]any assertion. Entry values
+// are returned as-is; downstream normalization handles their conversion.
+func asAnyMap(value any) (map[string]any, bool) {
+	if m, ok := value.(map[string]any); ok {
+		return m, true
+	}
+	rv := reflect.ValueOf(value)
+	if !rv.IsValid() || rv.Kind() != reflect.Map || rv.Type().Key().Kind() != reflect.String {
+		return nil, false
+	}
+	out := make(map[string]any, rv.Len())
+	for _, k := range rv.MapKeys() {
+		out[k.String()] = rv.MapIndex(k).Interface()
+	}
+	return out, true
+}
+
+// asAnySlice mirrors asAnyMap for slices and arrays: fast path is a direct
+// type assertion to []any, slow path reflects any slice/array element type
+// into []any.
+func asAnySlice(value any) ([]any, bool) {
+	if s, ok := value.([]any); ok {
+		return s, true
+	}
+	rv := reflect.ValueOf(value)
+	if !rv.IsValid() || (rv.Kind() != reflect.Slice && rv.Kind() != reflect.Array) {
+		return nil, false
+	}
+	out := make([]any, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		out[i] = rv.Index(i).Interface()
+	}
+	return out, true
 }
 
 // dereference dereferences a pointer: only a single level of indirection is allowed.
@@ -442,9 +479,9 @@ func dereference(value any) (any, error) {
 // normalizeAny
 // For reads: returns a typed value from an "any" type, so you can safely do "any.(int)".
 // For writes: validates and casts the value according to the schema.
-// ignoreUnknown — when true, unknown fields are ignored (useful when ResourceData.Flatten sets values; new fields from the API can be safely skipped).
+// ignoreUnknownKeys — when true, unknown fields are ignored (useful when ResourceData.Flatten sets values; new fields from the API can be safely skipped).
 // setFlow — when true, objects must be wrapped in a list. See Schema.IsObject for more details.
-func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any, error) {
+func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) (any, error) {
 	value, err := dereference(value)
 	if err != nil {
 		return nil, err
@@ -453,8 +490,17 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 		return zeroValue(sch.Type), nil
 	}
 
-	if isScalar(sch.Type) {
+	// Preserved nil/unknown values from ModifyPlan are not real data; treat
+	// them as missing so Expand / tfValue don't trip on the raw tftypes.Value.
+	// Mirrors the same special case in getOk.
+	if _, ok := value.(tftypes.Value); ok {
+		return zeroValue(sch.Type), nil
+	}
+
+	if sch.Type.IsPrimitive() {
 		str := fmt.Sprint(value)
+		var v any
+		var err error
 		switch sch.Type {
 		case SchemaTypeString:
 			if str == "" && setFlow {
@@ -463,17 +509,21 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 			}
 			return str, nil
 		case SchemaTypeInt:
-			return strconv.ParseInt(str, 10, 64)
+			v, err = strconv.Atoi(str)
 		case SchemaTypeFloat:
-			return strconv.ParseFloat(str, 64)
+			v, err = strconv.ParseFloat(str, 64)
 		case SchemaTypeBool:
-			return strconv.ParseBool(str)
+			v, err = strconv.ParseBool(str)
 		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse %q as %s: %w", str, sch.Type, err)
+		}
+		return v, nil
 	}
 
 	switch sch.Type {
 	case SchemaTypeSet, SchemaTypeList:
-		list, ok := value.([]any)
+		list, ok := asAnySlice(value)
 		if !ok {
 			if sch.IsObject && setFlow {
 				// Objects are lists of a single object.
@@ -484,7 +534,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 		}
 		norm := make([]any, 0, len(list))
 		for _, elem := range list {
-			item, err := normalizeAny(sch.Items, elem, ignoreUnknown, setFlow)
+			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
 			if err != nil {
 				return nil, err
 			}
@@ -497,13 +547,13 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 		}
 		return norm, nil
 	case SchemaTypeMap:
-		dict, ok := value.(map[string]any)
+		dict, ok := asAnyMap(value)
 		if !ok {
 			return nil, fmt.Errorf("expected map, got %T", value)
 		}
 		norm := make(map[string]any, len(dict))
 		for key, elem := range dict {
-			item, err := normalizeAny(sch.Items, elem, ignoreUnknown, setFlow)
+			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
 			if err != nil {
 				return nil, err
 			}
@@ -511,7 +561,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 		}
 		return norm, nil
 	case SchemaTypeObject:
-		dict, ok := value.(map[string]any)
+		dict, ok := asAnyMap(value)
 		if !ok {
 			return nil, fmt.Errorf("expected object, got %T", value)
 		}
@@ -519,13 +569,14 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 		for key, elem := range dict {
 			prop, ok := sch.Properties[key]
 			if !ok {
-				if ignoreUnknown {
+				if ignoreUnknownKeys {
 					// This is likely a new field from the API or a field we do not want to expose to the user.
+					// Terraform might complain about unknown properties.
 					continue
 				}
 				return nil, fmt.Errorf("unknown property %q", key)
 			}
-			item, err := normalizeAny(prop, elem, ignoreUnknown, setFlow)
+			item, err := normalizeAny(prop, elem, ignoreUnknownKeys, setFlow)
 			if err != nil {
 				return nil, err
 			}

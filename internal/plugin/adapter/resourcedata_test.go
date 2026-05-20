@@ -5,6 +5,7 @@ package adapter
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,6 +45,112 @@ func TestDereference(t *testing.T) {
 			}
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// TestResourceDataAcceptsTypedContainers verifies that Expand, tfValue and
+// Set all transparently accept strictly-typed string-keyed maps and slices
+// (e.g. map[string]string, []string) via reflective conversion in
+// asAnyMap / asAnySlice, with no JSON round-trip.
+func TestResourceDataAcceptsTypedContainers(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"nested": {
+				Type: SchemaTypeObject,
+				Properties: map[string]*Schema{
+					"bar": {Type: SchemaTypeString},
+				},
+			},
+			"tags": {
+				Type:  SchemaTypeList,
+				Items: &Schema{Type: SchemaTypeString},
+			},
+			"labels": {
+				Type:  SchemaTypeMap,
+				Items: &Schema{Type: SchemaTypeString},
+			},
+		},
+	}
+
+	rd, err := NewResourceDataFromMaps(sch, nil, map[string]any{
+		"nested": map[string]string{"bar": "baz"},
+		"tags":   []string{"a", "b"},
+		"labels": map[string]string{"k": "v"},
+	}, nil, nil)
+	require.NoError(t, err)
+
+	var out map[string]any
+	require.NoError(t, rd.Expand(&out))
+	require.Equal(t, map[string]any{
+		"nested": map[string]any{"bar": "baz"},
+		"tags":   []any{"a", "b"},
+		"labels": map[string]any{"k": "v"},
+	}, out)
+
+	require.NotPanics(t, func() { _ = rd.(*resourceData).tfValue() })
+
+	require.NoError(t, rd.Set("nested", map[string]string{"bar": "baz2"}))
+	require.NoError(t, rd.Set("tags", []string{"c"}))
+	require.NoError(t, rd.Set("labels", map[string]string{"k": "v2"}))
+}
+
+// TestResourceDataPreservedUnknownAndNullPlan verifies that preserved
+// tftypes.Value entries (produced by fromTFValue with preservePlanValues=true
+// for the ModifyPlan flow) are coerced to zero values by normalizeAny, so
+// Expand and tfValue never see the raw tftypes.Value and never panic. This
+// mirrors the existing tftypes.Value short-circuit in getOk.
+func TestResourceDataPreservedUnknownAndNullPlan(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":      {Type: SchemaTypeString, Computed: true},
+			"name":    {Type: SchemaTypeString},
+			"enabled": {Type: SchemaTypeBool},
+		},
+	}
+
+	type request struct {
+		Enabled bool   `json:"enabled,omitempty"`
+		Name    string `json:"name,omitempty"`
+	}
+
+	cases := []struct {
+		name string
+		plan map[string]any
+		want request
+	}{
+		{
+			name: "unknown_string",
+			plan: map[string]any{
+				"name": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			},
+		},
+		{
+			name: "null_bool",
+			plan: map[string]any{
+				"name":    "target",
+				"enabled": tftypes.NewValue(tftypes.Bool, nil),
+			},
+			want: request{Name: "target"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rd, err := NewResourceDataFromMaps(sch, []string{"id"}, tc.plan, nil, nil)
+			require.NoError(t, err)
+
+			var got request
+			require.NoError(t, rd.Expand(&got))
+			require.Equal(t, tc.want, got)
+
+			require.NotPanics(t, func() { _ = rd.(*resourceData).tfValue() })
 		})
 	}
 }

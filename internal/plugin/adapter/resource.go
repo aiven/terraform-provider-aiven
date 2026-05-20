@@ -167,7 +167,7 @@ func (a *resourceAdapter) Create(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, nil, &req.Config)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, nil, &req.Config, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -207,7 +207,7 @@ func (a *resourceAdapter) Read(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -297,7 +297,7 @@ func (a *resourceAdapter) Update(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, &req.State, &req.Config)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, &req.State, &req.Config, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -347,7 +347,7 @@ func (a *resourceAdapter) Delete(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -424,7 +424,7 @@ func (a *resourceAdapter) ValidateConfig(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, nil, &req.Config)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, nil, &req.Config, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -486,7 +486,7 @@ func (a *resourceAdapter) ModifyPlan(
 		stateOrNil = &req.State
 	}
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, stateOrNil, &req.Config)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, stateOrNil, &req.Config, true)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return

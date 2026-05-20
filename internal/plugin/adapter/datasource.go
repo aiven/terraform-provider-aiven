@@ -107,7 +107,7 @@ func (a *datasourceAdapter) Read(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config)
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config, false)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -145,7 +145,7 @@ func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.V
 		return
 	}
 
-	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config)
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields, nil, nil, &req.Config, false)
 	if err != nil {
 		rsp.Diagnostics.AddError("failed to create ResourceData", err.Error())
 		return

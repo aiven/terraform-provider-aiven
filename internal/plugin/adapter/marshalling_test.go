@@ -30,7 +30,7 @@ func TestFromTFValueAny_Map(t *testing.T) {
 			},
 		)
 
-		got, err := fromTFValueAny(sch, val)
+		got, err := fromTFValueAny(sch, val, false)
 		require.NoError(t, err)
 		require.Equal(t, map[string]any{"foo": "bar", "baz": "qux"}, got)
 	})
@@ -66,7 +66,7 @@ func TestFromTFValueAny_Map(t *testing.T) {
 			},
 		)
 
-		got, err := fromTFValueAny(sch, val)
+		got, err := fromTFValueAny(sch, val, false)
 		require.NoError(t, err)
 		require.Equal(t, map[string]any{
 			"us_east_1a": map[string]any{
@@ -87,7 +87,7 @@ func TestFromTFValueAny_Map(t *testing.T) {
 			map[string]tftypes.Value{"foo": tftypes.NewValue(tftypes.String, "bar")},
 		)
 
-		_, err := fromTFValueAny(sch, val)
+		_, err := fromTFValueAny(sch, val, false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "map items is nil")
 	})
@@ -102,7 +102,7 @@ func TestFromTFValueAny_Map(t *testing.T) {
 			map[string]tftypes.Value{},
 		)
 
-		got, err := fromTFValueAny(sch, val)
+		got, err := fromTFValueAny(sch, val, false)
 		require.NoError(t, err)
 		require.Equal(t, map[string]any{}, got)
 	})
@@ -132,7 +132,7 @@ func TestFromTFValueAny_Object(t *testing.T) {
 			"count": tftypes.NewValue(tftypes.Number, 3),
 		})
 
-		got, err := fromTFValueAny(sch, val)
+		got, err := fromTFValueAny(sch, val, false)
 		require.NoError(t, err)
 		require.Equal(t, map[string]any{"name": "alpha", "count": 3}, got)
 	})
@@ -159,7 +159,7 @@ func TestFromTFValueAny_Object(t *testing.T) {
 			"extra": tftypes.NewValue(tftypes.String, "surprise"),
 		})
 
-		_, err := fromTFValueAny(sch, val)
+		_, err := fromTFValueAny(sch, val, false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `unknown property "extra"`)
 	})
