@@ -316,7 +316,7 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 			}
 		}
 
-		return cty.StringVal(anyValue.(string)), nil
+		return cty.StringVal(fmt.Sprint(anyValue)), nil
 	case SchemaTypeBoolean:
 		if anyValue == nil {
 			anyValue = true

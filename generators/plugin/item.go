@@ -142,6 +142,8 @@ type SchemaMeta struct {
 	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
 	IgnoreAlreadyExists   bool          `yaml:"ignoreAlreadyExists,omitempty"`
 	DisableExample        bool          `yaml:"disableExample,omitempty"`
+	ValidateConfig        bool          `yaml:"validateConfig,omitempty"`
+	ModifyPlan            bool          `yaml:"modifyPlan,omitempty"`
 }
 
 type Definition struct {

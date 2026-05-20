@@ -27,6 +27,7 @@ nav_order: 1
 - Add `aiven_service_integration` field `clickhouse_kafka_user_config.tables.auto_offset_reset_by_duration_ms`: When
   set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - auto_offset_reset_by_duration_ms)
 - Change `aiven_cmk` resource field `cmk_provider` (enum): add `azure`
+- Migrate `aiven_kafka_schema_registry_acl` resource and data source to the Plugin Framework.
 
 ## [4.56.0] - 2026-05-07
 
@@ -34,7 +35,6 @@ nav_order: 1
   Key](https://aiven.io/docs/platform/howto/bring-your-own-key) with the service. Set the field to the all-zero UUID
   `00000000-0000-0000-0000-000000000000` to detach an existing key; removing the attribute from configuration
   is intentionally not enough to trigger a reset.
-- Migrate `aiven_kafka_schema_registry_acl` resource and data source to the Plugin Framework.
 - Remove user configuration options for Cassandra, InfluxDB, AlloyDB Omni, M3DB, and M3Aggregator, as these services have
   reached EOL.
 - Remove `aiven_cassandra` and `aiven_cassandra_user` resources: Cassandra service reached end-of-life on [January 7,

@@ -17,6 +17,8 @@ const (
 	optionsSuffix              = "Options"
 	configValidatorsFuncSuffix = "ConfigValidators"
 	planModifier               = "planModifier"
+	validateConfig             = "validateConfig"
+	modifyPlan                 = "modifyPlan"
 	resourceData               = "ResourceData"
 	renameFieldsModifier       = "RenameFields"
 	flattenModifier            = "flattenModifier"
@@ -109,6 +111,14 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 
 		if def.Resource.TerminationProtection {
 			values["TerminationProtection"] = jen.True()
+		}
+
+		if def.Resource.ValidateConfig {
+			values["ValidateConfig"] = jen.Id(validateConfig)
+		}
+
+		if def.Resource.ModifyPlan {
+			values["ModifyPlan"] = jen.Id(modifyPlan)
 		}
 	}
 
