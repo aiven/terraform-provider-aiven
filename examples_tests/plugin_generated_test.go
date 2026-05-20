@@ -3,6 +3,8 @@ package examples
 import (
 	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -26,6 +28,13 @@ type definition struct {
 	Datasource *struct {
 		DisableExample bool `yaml:"disableExample"`
 	} `yaml:"datasource"`
+}
+
+// knownAPICallers returns a list of resources that make API calls during the plan.
+func knownAPICallers() []string {
+	return []string{
+		"aiven_kafka_topic", // Validates "topic already exists" during the plan.
+	}
 }
 
 // TestAccGeneratedExamples tests the generated examples for the provider.
@@ -59,7 +68,8 @@ func TestAccGeneratedExamples(t *testing.T) {
 	// Resources usually don't make any API calls during the plan.
 	// If any does, this is the place to fix the test.
 	for _, f := range resourceFiles {
-		t.Run(f, func(t *testing.T) {
+		aivenName := filepath.Base(filepath.Dir(f))
+		t.Run(aivenName, func(t *testing.T) {
 			config, err := os.ReadFile(f)
 			require.NoError(t, err)
 
@@ -71,6 +81,12 @@ func TestAccGeneratedExamples(t *testing.T) {
 						PlanOnly:           true,
 						Config:             string(config),
 						ExpectNonEmptyPlan: true,
+						ExpectError: func() *regexp.Regexp {
+							if slices.Contains(knownAPICallers(), aivenName) {
+								return acctest.ErrNoopErrorRegex
+							}
+							return nil
+						}(),
 					},
 				},
 			})
