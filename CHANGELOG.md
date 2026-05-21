@@ -1,4 +1,4 @@
----
+ ---
 title: Changelog
 parent: README
 nav_order: 1
@@ -11,6 +11,10 @@ nav_order: 1
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Promote `aiven_organization_billing_group` resource and data source, and `aiven_organization_billing_group_list`
+  data source to general availability.
+- Deprecate `aiven_billing_group` resource and data source: use `aiven_organization_billing_group` instead.
 
 ## [4.57.0] - 2026-05-19
 

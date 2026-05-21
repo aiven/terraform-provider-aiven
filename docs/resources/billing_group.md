@@ -3,12 +3,12 @@
 page_title: "aiven_billing_group Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages billing groups https://aiven.io/docs/platform/concepts/billing-groups and assigns them to projects.
+  Creates and manages billing groups https://aiven.io/docs/platform/concepts/billing-groups and assigns them to projects. Deprecated: Use aiven_organization_billing_group instead. This resource will be removed in the next major release.
 ---
 
 # aiven_billing_group (Resource)
 
-Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.
+Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects. **Deprecated**: Use `aiven_organization_billing_group` instead. This resource will be removed in the next major release.
 
 ## Example Usage
 

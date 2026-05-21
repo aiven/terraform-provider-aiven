@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
+beta: false
 location: internal/plugin/service/organization/billinggrouplist
 datasource:
   description: Lists billing groups for an organization.
