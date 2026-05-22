@@ -21,7 +21,6 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:           true,
 	Create:         createView,
 	Delete:         deleteView,
 	IDFields:       idFields(),
@@ -33,7 +32,6 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	Beta:           true,
 	IDFields:       idFields(),
 	Read:           readView,
 	Schema:         datasourceSchema,

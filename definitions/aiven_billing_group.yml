@@ -2,8 +2,10 @@
 location: internal/plugin/service/billinggroup
 resource:
   description: Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.
+  deprecationMessage: Use `aiven_organization_billing_group` instead. This resource will be removed in the next major release.
 datasource:
   description: Gets information about a billing group.
+  deprecationMessage: Use `aiven_organization_billing_group` instead. This data source will be removed in the next major release.
 clientHandler: billinggroup
 expandModifier: true
 flattenModifier: true
