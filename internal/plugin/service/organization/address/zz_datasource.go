@@ -26,7 +26,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"address_lines": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "Address Lines.",
+				MarkdownDescription: "Address lines.",
 			},
 			"city": schema.StringAttribute{
 				Computed:            true,
@@ -46,7 +46,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Name of a company.",
+				MarkdownDescription: "Name.",
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization.",

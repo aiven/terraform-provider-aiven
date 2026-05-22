@@ -294,6 +294,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"performance_schema_events_statements_history_size": {
+						Description: "The number of rows per thread in the events_statements_history table. Changing this parameter will lead to a restart of the MySQL service.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"slow_query_log": {
 						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
 						Optional:    true,

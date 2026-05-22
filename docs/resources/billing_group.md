@@ -55,14 +55,14 @@ resource "aiven_billing_group" "example" {
 - `billing_emails` (Set of String) List of project billing email addresses.
 - `billing_extra_text` (String) Extra text to be included in all project invoices, e.g. purchase order or cost center number. Maximum length: `1000`.
 - `card_id` (String) Credit card ID. Maximum length: `64`.
-- `city` (String) Address city. Maximum length: `512`.
-- `company` (String) Name of a company. Maximum length: `128`.
+- `city` (String) Address city. Maximum length: `50`.
+- `company` (String) Name of a company. Maximum length: `83`.
 - `copy_from_billing_group` (String) Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.
 - `country_code` (String) Two letter country code for billing country. Maximum length: `2`.
-- `state` (String) Address state or province. Maximum length: `128`.
+- `state` (String) Address state or province. Maximum length: `30`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) EU VAT Identification Number. Maximum length: `64`.
-- `zip_code` (String) Address zip code. Maximum length: `32`.
+- `zip_code` (String) Address zip code. Maximum length: `36`.
 
 ### Read-Only
 

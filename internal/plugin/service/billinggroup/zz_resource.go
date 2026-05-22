@@ -32,7 +32,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "Address lines 1 and 2. For example, street, PO box, or building.",
 				Optional:            true,
-				Validators:          []validator.Set{setvalidator.SizeAtMost(16)},
+				Validators:          []validator.Set{setvalidator.SizeAtMost(3)},
 			},
 			"billing_contact_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
@@ -68,15 +68,15 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"city": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Address city. Maximum length: `512`.",
+				MarkdownDescription: "Address city. Maximum length: `50`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(512)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(50)},
 			},
 			"company": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Name of a company. Maximum length: `128`.",
+				MarkdownDescription: "Name of a company. Maximum length: `83`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(83)},
 			},
 			"copy_from_billing_group": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
@@ -105,9 +105,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"state": schema.StringAttribute{
-				MarkdownDescription: "Address state or province. Maximum length: `128`.",
+				MarkdownDescription: "Address state or province. Maximum length: `30`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(30)},
 			},
 			"vat_id": schema.StringAttribute{
 				Computed:            true,
@@ -116,9 +116,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
 			"zip_code": schema.StringAttribute{
-				MarkdownDescription: "Address zip code. Maximum length: `32`.",
+				MarkdownDescription: "Address zip code. Maximum length: `36`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(32)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},

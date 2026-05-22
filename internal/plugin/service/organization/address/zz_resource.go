@@ -27,14 +27,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"address_lines": schema.ListAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "Address Lines.",
+				MarkdownDescription: "Address lines.",
 				Required:            true,
-				Validators:          []validator.List{listvalidator.SizeBetween(1, 5)},
+				Validators:          []validator.List{listvalidator.SizeBetween(1, 3)},
 			},
 			"city": schema.StringAttribute{
-				MarkdownDescription: "City. Maximum length: `125`.",
+				MarkdownDescription: "City. Maximum length: `50`.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(125)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(50)},
 			},
 			"country_code": schema.StringAttribute{
 				MarkdownDescription: "Country Code. Maximum length: `2`.",
@@ -51,7 +51,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of a company. Length must be between `1` and `83`.",
+				MarkdownDescription: "Name. Length must be between `1` and `83`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 83)},
 			},
@@ -62,18 +62,18 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 			"state": schema.StringAttribute{
-				MarkdownDescription: "State. Maximum length: `128`.",
+				MarkdownDescription: "State. Maximum length: `30`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(128)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(30)},
 			},
 			"update_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Update Time.",
 			},
 			"zip_code": schema.StringAttribute{
-				MarkdownDescription: "Zip Code. Maximum length: `10`.",
+				MarkdownDescription: "Zip Code. Maximum length: `36`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(10)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},

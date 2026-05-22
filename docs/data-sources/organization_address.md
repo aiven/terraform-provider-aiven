@@ -23,7 +23,7 @@ data "aiven_organization_address" "example" {
   address_id      = "foo"
 
   /* COMPUTED FIELDS
-  address_lines = ["Main Street 1"]
+  address_lines = ["Street 1"]
   city          = "Helsinki"
   country_code  = "FI"
   create_time   = "2021-01-01T00:00:00Z"
@@ -49,12 +49,12 @@ data "aiven_organization_address" "example" {
 
 ### Read-Only
 
-- `address_lines` (List of String) Address Lines.
+- `address_lines` (List of String) Address lines.
 - `city` (String) City.
 - `country_code` (String) Country Code.
 - `create_time` (String) Create Time.
 - `id` (String) Resource ID composed as: `organization_id/address_id`.
-- `name` (String) Name of a company.
+- `name` (String) Name.
 - `state` (String) State.
 - `update_time` (String) Update Time.
 - `zip_code` (String) Zip Code.
