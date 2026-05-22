@@ -186,6 +186,7 @@ Read-Only:
 - `net_buffer_length` (Number)
 - `net_read_timeout` (Number)
 - `net_write_timeout` (Number)
+- `performance_schema_events_statements_history_size` (Number)
 - `slow_query_log` (Boolean)
 - `sort_buffer_size` (Number)
 - `sql_mode` (String)

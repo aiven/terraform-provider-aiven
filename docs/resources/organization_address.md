@@ -20,7 +20,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 ```terraform
 resource "aiven_organization_address" "example" {
   organization_id = "org1a23f456789" // Force new
-  address_lines   = ["Main Street 1"]
+  address_lines   = ["Street 1"]
   city            = "Helsinki"
   country_code    = "FI"
   name            = "Aiven Oy"
@@ -42,17 +42,17 @@ resource "aiven_organization_address" "example" {
 
 ### Required
 
-- `address_lines` (List of String) Address Lines.
-- `city` (String) City. Maximum length: `125`.
+- `address_lines` (List of String) Address lines.
+- `city` (String) City. Maximum length: `50`.
 - `country_code` (String) Country Code. Maximum length: `2`.
-- `name` (String) Name of a company. Length must be between `1` and `83`.
+- `name` (String) Name. Length must be between `1` and `83`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `state` (String) State. Maximum length: `128`.
+- `state` (String) State. Maximum length: `30`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `zip_code` (String) Zip Code. Maximum length: `10`.
+- `zip_code` (String) Zip Code. Maximum length: `36`.
 
 ### Read-Only
 
