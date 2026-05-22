@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ettle/strcase"
+	"gopkg.in/yaml.v3"
 )
 
 // AppearsIn is a bitmask for the field appearance (request, response, etc.)
@@ -69,6 +70,7 @@ type Operation struct {
 	ID                   OperationID       `yaml:"id"`
 	Type                 OperationType     `yaml:"type"`
 	DisableView          bool              `yaml:"disableView"`
+	WaitForDeletion      bool              `yaml:"waitForDeletion"`
 	DatasourceLookup     bool              `yaml:"datasourceLookup"`     // Inline this read op as the data source readView's id-empty branch (lookup by alternative key). Not wired into resource views.
 	ResultIDField        string            `yaml:"resultIDField"`        // Go field name on the lookup result item that holds the primary id. When set on a datasourceLookup op, the lookup resolves the id and control falls through to the canonical read body in the same readView.
 	ResultKey            string            `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
@@ -144,6 +146,7 @@ type SchemaMeta struct {
 	DisableExample        bool          `yaml:"disableExample,omitempty"`
 	ValidateConfig        bool          `yaml:"validateConfig,omitempty"`
 	ModifyPlan            bool          `yaml:"modifyPlan,omitempty"`
+	LookupIDAttribute     string        `yaml:"lookupIDAttribute,omitempty"`
 }
 
 type Definition struct {
@@ -157,7 +160,7 @@ type Definition struct {
 	Rename              map[string]string `yaml:"rename,omitempty"`
 	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
 	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
+	IDAttributeComposed IDAttribute       `yaml:"idAttributeComposed,omitempty"`
 	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
 	Operations          Operations        `yaml:"operations"`
 	Version             *int              `yaml:"version"`
@@ -165,6 +168,28 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+}
+
+type IDAttribute struct {
+	Fields               []string `yaml:"fields"`
+	PopulateFieldsFromID bool     `yaml:"populateFieldsFromID,omitempty"`
+}
+
+func (id *IDAttribute) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.SequenceNode:
+		return value.Decode(&id.Fields)
+	case yaml.MappingNode:
+		type rawIDAttribute IDAttribute
+		var raw rawIDAttribute
+		if err := value.Decode(&raw); err != nil {
+			return err
+		}
+		*id = IDAttribute(raw)
+		return nil
+	default:
+		return fmt.Errorf("idAttributeComposed must be a list of fields or an object")
+	}
 }
 
 // DatasourceLookupOp returns the single read op marked `datasourceLookup`, or nil. It
@@ -182,14 +207,40 @@ func (d *Definition) DatasourceLookupOp() *Operation {
 	return nil
 }
 
-// DatasourceLookupID returns the name of the primary lookup attribute used to
-// identify a single resource via the data source. For composite IDs, this is the
-// most specific (leaf) segment; otherwise it falls back to Terraform's standard "id".
-func (d *Definition) DatasourceLookupID() string {
-	if n := len(d.IDAttributeComposed); n > 0 {
-		return d.IDAttributeComposed[n-1]
+// DatasourceCanonicalID returns the canonical id attribute used by the read endpoint.
+// For composite IDs, this is the most specific (leaf) segment; otherwise it falls
+// back to Terraform's standard "id".
+func (d *Definition) DatasourceCanonicalID() string {
+	if n := len(d.IDAttributeComposed.Fields); n > 0 {
+		return d.IDAttributeComposed.Fields[n-1]
 	}
 	return "id"
+}
+
+// DatasourceLookupID returns the public lookup id accepted by the data source. By
+// default it matches the canonical id, but a definition can expose a composed
+// lookup alias such as vpc_id=project/project_vpc_id.
+func (d *Definition) DatasourceLookupID() string {
+	if d != nil && d.Datasource != nil && d.Datasource.LookupIDAttribute != "" {
+		return d.Datasource.LookupIDAttribute
+	}
+	return d.DatasourceCanonicalID()
+}
+
+// DatasourceLookupIDComposed returns the canonical ID fields derived from the
+// public lookup id alias.
+func (d *Definition) DatasourceLookupIDComposed() []string {
+	if d == nil || d.Datasource == nil || d.Datasource.LookupIDAttribute == "" {
+		return nil
+	}
+	if len(d.IDAttributeComposed.Fields) > 0 {
+		return slices.Clone(d.IDAttributeComposed.Fields)
+	}
+	return []string{d.DatasourceCanonicalID()}
+}
+
+func (d *Definition) hasDatasourceLookupAlias() bool {
+	return len(d.DatasourceLookupIDComposed()) > 0
 }
 
 // DatasourceLookupComposedOf returns the alternative lookup attributes — sorted values
@@ -204,8 +255,9 @@ func (d *Definition) DatasourceLookupComposedOf() []string {
 	return out
 }
 
-// DatasourceLookupHas reports whether name is part of the lookup set (id or composedOf).
-// Returns false on a nil Definition or when no datasourceLookup op exists.
+// DatasourceLookupHas reports whether name is a public lookup key (id or
+// alternative keys). Returns false on a nil Definition or when no datasourceLookup
+// op exists.
 func (d *Definition) DatasourceLookupHas(name string) bool {
 	if d == nil || d.DatasourceLookupOp() == nil {
 		return false
@@ -214,6 +266,43 @@ func (d *Definition) DatasourceLookupHas(name string) bool {
 		return true
 	}
 	return slices.Contains(d.DatasourceLookupComposedOf(), name)
+}
+
+func (item *Item) isDatasourceLookupDerivedPathParam(def *Definition) bool {
+	if def == nil || !def.hasDatasourceLookupAlias() || !item.IsRootProperty() {
+		return false
+	}
+
+	if !slices.Contains(def.DatasourceLookupIDComposed(), item.Name) {
+		return false
+	}
+
+	op := def.DatasourceLookupOp()
+	if op == nil {
+		return false
+	}
+
+	return item.AppearsIn.Contains(def.Operations.AppearsInID(op.ID, op.Type, PathParameter))
+}
+
+func (item *Item) isDatasourceLookupInput(def *Definition) bool {
+	return def.DatasourceLookupHas(item.Name) || item.isDatasourceLookupDerivedPathParam(def)
+}
+
+func (item *Item) isDatasourceLookupComputedInput(def *Definition) bool {
+	if def == nil {
+		return false
+	}
+	if item.isDatasourceLookupDerivedPathParam(def) {
+		return true
+	}
+	if !def.DatasourceLookupHas(item.Name) {
+		return false
+	}
+	if def.hasDatasourceLookupAlias() && item.Name == def.DatasourceLookupID() {
+		return false
+	}
+	return true
 }
 
 type Item struct {
@@ -344,7 +433,7 @@ func (item *Item) IsRequired(def *Definition, entity entityType) bool {
 	}
 
 	// ID attributes are required in data sources, except when they participate in the lookup set.
-	return item.IDAttribute && !def.DatasourceLookupHas(item.Name)
+	return item.IDAttribute && !item.isDatasourceLookupInput(def) && !slices.Contains(def.DatasourceLookupIDComposed(), item.Name)
 }
 
 func (item *Item) IsOptional(def *Definition, entity entityType) bool {
@@ -352,7 +441,7 @@ func (item *Item) IsOptional(def *Definition, entity entityType) bool {
 		return item.Optional
 	}
 
-	return def.DatasourceLookupHas(item.Name)
+	return item.isDatasourceLookupInput(def) || item.Optional && item.DatasourceOnly
 }
 
 func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {

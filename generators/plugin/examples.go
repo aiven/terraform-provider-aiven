@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -130,7 +131,7 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 				comment = "// OPTIONAL FIELDS"
 
 				if hasLookup {
-					comment = lookupExampleHint(def)
+					comment = lookupExampleHint(def, item)
 				}
 
 			} else if !seenComputed && v.IsReadOnly(def, entity) {
@@ -230,7 +231,7 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 		}
 
 		fieldName := k
-		if hasLookup && slices.Contains(def.DatasourceLookupComposedOf(), k) {
+		if hasLookup && (slices.Contains(def.DatasourceLookupComposedOf(), k) || v.isDatasourceLookupDerivedPathParam(def)) {
 			// Comments out composedOf alternatives so the example uses the primary id field
 			// and the validator does not complain about conflicting fields.
 			fieldName = "// " + k
@@ -344,9 +345,21 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 
 // lookupExampleHint renders the inline HCL comment above the lookup block, mirroring
 // the validator contract. Assumes a datasourceLookup op is present.
-func lookupExampleHint(def *Definition) string {
+func lookupExampleHint(def *Definition, item *Item) string {
 	id := def.DatasourceLookupID()
 	composedOf := def.DatasourceLookupComposedOf()
+	if def.hasDatasourceLookupAlias() {
+		op := def.DatasourceLookupOp()
+		lookupPathParams := filterAppearsIn(
+			slices.Collect(maps.Values(item.Properties)),
+			def.Operations.AppearsInID(op.ID, op.Type, PathParameter),
+		)
+		for _, v := range lookupPathParams {
+			composedOf = append(composedOf, v.Name)
+		}
+		slices.Sort(composedOf)
+		composedOf = slices.Compact(composedOf)
+	}
 	if len(composedOf) == 1 {
 		return fmt.Sprintf("// LOOKUP — provide `%s` or %s", id, humanizeCodeList(composedOf, " and "))
 	}

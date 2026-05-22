@@ -74,6 +74,85 @@ func TestLimitedAvailabilityViewOptions(t *testing.T) {
 	require.NotContains(t, got, "Limited:")
 }
 
+func TestDatasourceLookupAliasSchemaContract(t *testing.T) {
+	def, root := testDatasourceLookupAliasDefinition()
+
+	assert.Equal(t, "project_vpc_id", def.DatasourceCanonicalID())
+	assert.Equal(t, "vpc_id", def.DatasourceLookupID())
+
+	project := root.Properties["project"]
+	projectVPCID := root.Properties["project_vpc_id"]
+	vpcID := root.Properties["vpc_id"]
+	cloudName := root.Properties["cloud_name"]
+
+	assert.False(t, project.IsRequired(def, datasourceType))
+	assert.True(t, project.IsOptional(def, datasourceType))
+	assert.True(t, project.isDatasourceLookupComputedInput(def))
+
+	assert.False(t, projectVPCID.IsRequired(def, datasourceType))
+	assert.False(t, projectVPCID.IsOptional(def, datasourceType))
+	assert.True(t, projectVPCID.IsReadOnly(def, datasourceType))
+
+	assert.False(t, vpcID.IsRequired(def, datasourceType))
+	assert.True(t, vpcID.IsOptional(def, datasourceType))
+	assert.False(t, vpcID.isDatasourceLookupComputedInput(def))
+
+	assert.False(t, cloudName.IsRequired(def, datasourceType))
+	assert.True(t, cloudName.IsOptional(def, datasourceType))
+	assert.True(t, cloudName.isDatasourceLookupComputedInput(def))
+}
+
+func TestDatasourceLookupAliasGeneratedReadViewContract(t *testing.T) {
+	def, root := testDatasourceLookupAliasDefinition()
+
+	file := jen.NewFile("test")
+	file.Add(jen.Func().Id("readView").Params().Error().BlockFunc(func(g *jen.Group) {
+		emitDatasourceLookupIDSplit(g, def)
+	}))
+	file.Add(datasourceLookupValidators(def, root))
+
+	var b bytes.Buffer
+	require.NoError(t, file.Render(&b))
+	got := b.String()
+
+	require.Contains(t, got, `if _, exists := d.Schema().Properties["vpc_id"]; exists {`)
+	require.Contains(t, got, `if v, ok := d.GetOk("vpc_id"); ok {`)
+	require.Contains(t, got, `schemautil.SplitResourceID(v.(string), 2)`)
+	require.Contains(t, got, `d.Set("project", parts[0])`)
+	require.Contains(t, got, `d.Set("project_vpc_id", parts[1])`)
+	require.Contains(t, got, `datasourcevalidator.ExactlyOneOf`)
+	require.Contains(t, got, `path.MatchRoot("vpc_id")`)
+	require.Contains(t, got, `datasourcevalidator.RequiredTogether`)
+	require.Contains(t, got, `path.MatchRoot("cloud_name")`)
+	require.Contains(t, got, `path.MatchRoot("project")`)
+	require.Contains(t, got, `datasourcevalidator.Conflicting`)
+}
+
+func testDatasourceLookupAliasDefinition() (*Definition, *Item) {
+	def := &Definition{
+		Datasource:          &SchemaMeta{LookupIDAttribute: "vpc_id"},
+		IDAttributeComposed: IDAttribute{Fields: []string{"project", "project_vpc_id"}},
+		Operations: Operations{
+			{ID: "VpcGet", Type: OperationRead},
+			{
+				ID:                   "VpcList",
+				Type:                 OperationRead,
+				DatasourceLookup:     true,
+				ResultIDField:        "ProjectVpcId",
+				ResultListLookupKeys: map[string]string{"CloudName": "cloud_name"},
+			},
+		},
+	}
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	root.Properties["project"] = &Item{Name: "project", Parent: root, Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 0}
+	root.Properties["project_vpc_id"] = &Item{Name: "project_vpc_id", Parent: root, Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 1}
+	root.Properties["vpc_id"] = &Item{Name: "vpc_id", Parent: root, Type: SchemaTypeString, Optional: true, DatasourceOnly: true}
+	root.Properties["cloud_name"] = &Item{Name: "cloud_name", Parent: root, Type: SchemaTypeString}
+
+	root.Properties["project"].AppearsIn = def.Operations.AppearsInID("VpcList", OperationRead, PathParameter)
+	return def, root
+}
+
 // TestItemRemoveElements verifies that elements are correctly removed from nested structures.
 func TestItemRemoveElements(t *testing.T) {
 	tests := []struct {

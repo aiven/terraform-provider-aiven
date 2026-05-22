@@ -48,6 +48,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
 )
 
 func Resources() map[string]func() resource.Resource {
@@ -77,6 +78,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organizational_unit":                 adapter.NewLazyResource(unit.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(database2.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(user3.ResourceOptions),
+		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(step.ResourceOptions),
 	}
@@ -111,6 +113,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organizational_unit":                 adapter.NewLazyDataSource(unit.DataSourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyDataSource(database2.DataSourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyDataSource(user3.DataSourceOptions),
+		"aiven_project_vpc":                         adapter.NewLazyDataSource(projectvpc.DataSourceOptions),
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(plan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(planlist.DataSourceOptions),

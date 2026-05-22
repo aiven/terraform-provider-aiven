@@ -13,9 +13,18 @@ Gets information about the VPC for an Aiven project.
 ## Example Usage
 
 ```terraform
-data "aiven_project_vpc" "example_vpc" {
-  project    = data.aiven_project.example_project.project
-  cloud_name = "google-europe-west1"
+data "aiven_project_vpc" "example" {
+
+  // LOOKUP — provide `vpc_id`, or all of: `cloud_name` and `project`
+  // project    = "my-project"
+  vpc_id        = "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  // cloud_name = "aws-eu-central-1"
+
+  /* COMPUTED FIELDS
+  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  network_cidr   = "192.168.6.0/24"
+  state          = "ACTIVE"
+  */
 }
 ```
 
@@ -24,12 +33,21 @@ data "aiven_project_vpc" "example_vpc" {
 
 ### Optional
 
-- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
-- `project` (String) Identifies the project this resource belongs to.
-- `vpc_id` (String) The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.
+- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.
+- `project` (String) The name of the project this resource belongs to.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `vpc_id` (String) The ID of the VPC in `project/project_vpc_id` format. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Resource ID composed as: `project/project_vpc_id`.
 - `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
-- `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
+- `project_vpc_id` (String) Project VPC ID.
+- `state` (String) Project VPC state. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

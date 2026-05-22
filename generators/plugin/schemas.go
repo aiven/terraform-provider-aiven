@@ -106,12 +106,6 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 				values["ElementType"] = value
 			}
 
-			if !entity.isResource() && item.IsRoot() && def.DatasourceLookupHas(k) {
-				delete(values, "Required")
-				values["Optional"] = jen.True()
-				values["Computed"] = jen.True()
-			}
-
 			attrs[key] = jen.Qual(pkg, v.TFType()+"Attribute").Values(dictFromMap(values, false))
 		}
 	}
@@ -222,9 +216,15 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 				values["Computed"] = jen.True()
 			}
 		} else {
-			if item.IDAttribute && !item.Virtual {
+			switch {
+			case item.IsRequired(def, entity) && !item.Virtual:
 				values["Required"] = jen.True()
-			} else {
+			case item.IsOptional(def, entity):
+				values["Optional"] = jen.True()
+				if item.isDatasourceLookupComputedInput(def) {
+					values["Computed"] = jen.True()
+				}
+			default:
 				values["Computed"] = jen.True()
 			}
 		}
@@ -298,7 +298,7 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		properties[jen.Lit(k)] = prop
 	}
 
-	if item.Computed || item.IsRootProperty() && !entity.isResource() && def.DatasourceLookupHas(item.Name) {
+	if item.Computed || item.IsRootProperty() && !entity.isResource() && item.isDatasourceLookupComputedInput(def) {
 		params[jen.Id("Computed")] = jen.True()
 	}
 

@@ -111,6 +111,13 @@ properties:
         type: boolean
         $comment: |
           Set to true to disable Terraform example file generation for this datasource.
+      lookupIDAttribute:
+        type: string
+        $comment: |
+          Public lookup ID attribute accepted by the datasource. Use this when the
+          datasource must accept a composed legacy ID alias instead of the canonical
+          leaf ID used by the read operation. The alias is split using the top-level
+          idAttributeComposed fields.
     $comment: |
       Documentation and configuration specific to this datasource.
       Use this to provide clear descriptions for your datasource in the Terraform registry.
@@ -120,11 +127,27 @@ properties:
       List of attributes to remove from the resource/datasource.
       Example: remove: ["openapi_name1", "openapi_name2"]
   idAttributeComposed:
-    type: array
-    minItems: 1
-    items:
-      type: string
-      $comment: A list of fields to compose the ID attribute from
+    oneOf:
+      - type: array
+        minItems: 1
+        items:
+          type: string
+          $comment: A list of fields to compose the ID attribute from
+      - type: object
+        required:
+          - fields
+        additionalProperties: false
+        properties:
+          fields:
+            type: array
+            minItems: 1
+            items:
+              type: string
+            $comment: A list of fields to compose the ID attribute from
+          populateFieldsFromID:
+            type: boolean
+            $comment: |
+              Populate missing ID attribute fields by splitting the composed ID before generated resource read/delete operations.
   location:
     type: string
     $comment: |
@@ -189,6 +212,10 @@ definitions:
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
+      waitForDeletion:
+        type: boolean
+        $comment: |
+          Call the package's waitForDeletion(ctx, client, d) function after a successful delete operation.
       datasourceLookup:
         type: boolean
         $comment: |

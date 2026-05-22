@@ -56,6 +56,7 @@ const (
 	validatorPackage      = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	utilPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	adapterPackage        = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	schemautilPackage     = "github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	legacyTimeoutsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 	avnGenPackage         = "github.com/aiven/go-client-codegen"
 	errMsgPackage         = "github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"

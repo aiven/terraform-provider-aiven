@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/projectvpc
+resource:
+  refreshState: true
+  refreshStateWaiter: true
+  removeMissing: true
+  description: Creates and manages a VPC for an Aiven project.
+datasource:
+  description: Gets information about the VPC for an Aiven project.
+  lookupIDAttribute: vpc_id
+clientHandler: vpc
+idAttributeComposed:
+  fields: [project, project_vpc_id]
+  populateFieldsFromID: true
+legacyTimeouts: true
+expandModifier: true
+operations:
+  - id: VpcCreate
+    type: create
+  - id: VpcGet
+    type: read
+  - id: VpcList
+    type: read
+    datasourceLookup: true
+    resultIDField: ProjectVpcId
+    resultListLookupKeys:
+      CloudName: cloud_name
+  - id: VpcDelete
+    type: delete
+    waitForDeletion: true
+remove:
+  - create_time
+  - peering_connections
+  - pending_build_only_peering_connections
+  - update_time
+schema:
+  project:
+    pattern: "^[a-zA-Z0-9_-]*$"
+    description: The name of the project this resource belongs to.
+  cloud_name:
+    description: The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
+  network_cidr:
+    description: Network address range used by the VPC. For example, `192.168.0.0/24`.
+  project_vpc_id:
+    useStateForUnknown: true
+  vpc_id:
+    type: string
+    optional: true
+    datasourceOnly: true
+    example: "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+    description: The ID of the VPC in `project/project_vpc_id` format.
