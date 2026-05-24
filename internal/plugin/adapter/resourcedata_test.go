@@ -5,6 +5,7 @@ package adapter
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,4 +47,125 @@ func TestDereference(t *testing.T) {
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+// TestFlatten_EmptyCollectionOverlay covers the Flatten rule that drops
+// empty-collection fields from an API response when the user (plan in
+// Create/Update, prior state in Read) never set them. Without the rule,
+// overlaying produces encoded `SetValEmpty` for attrs that were null in
+// plan, which TF rejects as "inconsistent result after apply".
+//
+// Symmetric to TestToTFValue_EmptyCollectionsAreKnown (marshalling_test.go):
+// that test covers the Required-empty encode; this one covers the
+// Optional-omitted filter so both cases work together.
+func TestFlatten_EmptyCollectionOverlay(t *testing.T) {
+	t.Parallel()
+
+	strSch := &Schema{Type: SchemaTypeString}
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":     strSch,
+			"tags":   {Type: SchemaTypeList, Items: strSch},
+			"labels": {Type: SchemaTypeMap, Items: strSch},
+		},
+	}
+
+	attr := func(t *testing.T, v tftypes.Value, name string) tftypes.Value {
+		t.Helper()
+		var m map[string]tftypes.Value
+		require.NoError(t, v.As(&m))
+		got, ok := m[name]
+		require.True(t, ok, "attribute %q missing", name)
+		return got
+	}
+
+	t.Run("API empty, plan omitted → dropped, encodes null", func(t *testing.T) {
+		plan := map[string]any{"id": "x"}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, plan, nil, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":   "x",
+			"tags": []any{},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		require.True(t, attr(t, v, "tags").IsNull())
+	})
+
+	t.Run("API empty, plan has explicit [] → preserved, encodes empty-known", func(t *testing.T) {
+		plan := map[string]any{"id": "x", "tags": []any{}}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, plan, nil, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":   "x",
+			"tags": []any{},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		got := attr(t, v, "tags")
+		require.False(t, got.IsNull())
+		require.True(t, got.IsKnown())
+	})
+
+	t.Run("Read path: API empty, prior state omitted → dropped", func(t *testing.T) {
+		state := map[string]any{"id": "x"}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, nil, state, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":   "x",
+			"tags": []any{},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		require.True(t, attr(t, v, "tags").IsNull())
+	})
+
+	t.Run("Read path: API empty, prior state has [] → preserved", func(t *testing.T) {
+		state := map[string]any{"id": "x", "tags": []any{}}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, nil, state, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":   "x",
+			"tags": []any{},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		require.False(t, attr(t, v, "tags").IsNull())
+	})
+
+	t.Run("empty map follows same rule", func(t *testing.T) {
+		plan := map[string]any{"id": "x"}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, plan, nil, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":     "x",
+			"labels": map[string]any{},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		require.True(t, attr(t, v, "labels").IsNull())
+	})
+
+	t.Run("non-empty API response always preserved", func(t *testing.T) {
+		plan := map[string]any{"id": "x"}
+		rd, err := NewResourceDataFromMaps(sch, []string{"id"}, plan, nil, nil)
+		require.NoError(t, err)
+
+		require.NoError(t, rd.(*resourceData).Flatten(map[string]any{
+			"id":   "x",
+			"tags": []any{"a"},
+		}))
+
+		v := rd.(*resourceData).tfValue()
+		got := attr(t, v, "tags")
+		var list []tftypes.Value
+		require.NoError(t, got.As(&list))
+		require.Len(t, list, 1)
+	})
 }

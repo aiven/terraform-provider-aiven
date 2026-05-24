@@ -253,6 +253,22 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 
 	// todo: remove stale data
 	state := d.currentState()
+
+	// Drop empty-collection fields the API returned by default when the user
+	// (in plan/prior-state) never set them. Overlaying would encode
+	// empty-known tftypes, causing TF to reject the apply with
+	// `was null, but now cty.SetValEmpty(...)`. Existing keys — including
+	// explicit `attr = []` — are preserved to keep the Required-empty case
+	// working (see marshalling.go toTFValue SchemaTypeList/Set branches).
+	for k, v := range norm {
+		if !isEmptyCollection(v) {
+			continue
+		}
+		if _, existed := state[k]; !existed {
+			delete(norm, k)
+		}
+	}
+
 	maps.Copy(state, norm)
 
 	id := make([]string, len(d.idFields))
@@ -535,6 +551,16 @@ func normalizeAny(sch *Schema, value any, ignoreUnknown bool, setFlow bool) (any
 	default:
 		return nil, fmt.Errorf("can't normalize type: %T", value)
 	}
+}
+
+func isEmptyCollection(v any) bool {
+	switch x := v.(type) {
+	case []any:
+		return len(x) == 0
+	case map[string]any:
+		return len(x) == 0
+	}
+	return false
 }
 
 func zeroValue(kind SchemaType) any {
