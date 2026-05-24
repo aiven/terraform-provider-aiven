@@ -127,7 +127,7 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 	}
 }
 
-func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
+func toTFValue(sch *Schema, value any, dropEmpty bool) (tftypes.Value, error) {
 	if sch == nil {
 		return tftypes.Value{}, fmt.Errorf("schema is nil")
 	}
@@ -161,71 +161,48 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 			return tftypes.Value{}, fmt.Errorf("expected bool, got %T", value)
 		}
 		return tftypes.NewValue(tftypes.Bool, v), nil
-	case SchemaTypeList:
+	case SchemaTypeSet, SchemaTypeList:
 		if sch.Items == nil {
-			return tftypes.Value{}, fmt.Errorf("list items is nil")
+			return tftypes.Value{}, fmt.Errorf("%s items is nil", sch.Type)
 		}
-		nullItem, err := toTFValue(sch.Items, nil)
+		nullItem, err := toTFValue(sch.Items, nil, dropEmpty)
 		if err != nil {
-			return tftypes.Value{}, fmt.Errorf("failed to build list item type: %w", err)
+			return tftypes.Value{}, fmt.Errorf("failed to build %s item type: %w", sch.Type, err)
 		}
-		listType := tftypes.List{ElementType: nullItem.Type()}
+
+		var arrayType tftypes.Type
+		if sch.Type == SchemaTypeSet {
+			arrayType = tftypes.Set{ElementType: nullItem.Type()}
+		} else {
+			arrayType = tftypes.List{ElementType: nullItem.Type()}
+		}
+
 		if value == nil {
-			return tftypes.NewValue(listType, nil), nil
+			return tftypes.NewValue(arrayType, nil), nil
 		}
-		list, ok := value.([]any)
+		array, ok := value.([]any)
 		if !ok {
 			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
 		}
 
-		if len(list) == 0 {
-			return tftypes.NewValue(listType, nil), nil
+		if len(array) == 0 && dropEmpty {
+			return tftypes.NewValue(arrayType, nil), nil
 		}
 
-		result := make([]tftypes.Value, len(list))
-		for i, item := range list {
-			converted, err := toTFValue(sch.Items, item)
+		result := make([]tftypes.Value, len(array))
+		for i, item := range array {
+			converted, err := toTFValue(sch.Items, item, dropEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
 			}
 			result[i] = converted
 		}
-		return tftypes.NewValue(listType, result), nil
-	case SchemaTypeSet:
-		if sch.Items == nil {
-			return tftypes.Value{}, fmt.Errorf("set items is nil")
-		}
-		nullItem, err := toTFValue(sch.Items, nil)
-		if err != nil {
-			return tftypes.Value{}, fmt.Errorf("failed to build set item type: %w", err)
-		}
-		setType := tftypes.Set{ElementType: nullItem.Type()}
-		if value == nil {
-			return tftypes.NewValue(setType, nil), nil
-		}
-		set, ok := value.([]any)
-		if !ok {
-			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
-		}
-
-		if len(set) == 0 {
-			return tftypes.NewValue(setType, nil), nil
-		}
-
-		result := make([]tftypes.Value, len(set))
-		for i, item := range set {
-			converted, err := toTFValue(sch.Items, item)
-			if err != nil {
-				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
-			}
-			result[i] = converted
-		}
-		return tftypes.NewValue(setType, result), nil
+		return tftypes.NewValue(arrayType, result), nil
 	case SchemaTypeMap:
 		if sch.Items == nil {
 			return tftypes.Value{}, fmt.Errorf("map items is nil")
 		}
-		nullItem, err := toTFValue(sch.Items, nil)
+		nullItem, err := toTFValue(sch.Items, nil, dropEmpty)
 		if err != nil {
 			return tftypes.Value{}, fmt.Errorf("failed to build map item type: %w", err)
 		}
@@ -240,7 +217,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 
 		result := make(map[string]tftypes.Value, len(m))
 		for k, item := range m {
-			converted, err := toTFValue(sch.Items, item)
+			converted, err := toTFValue(sch.Items, item, dropEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid map value for key %q: %w", k, err)
 			}
@@ -250,7 +227,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 	case SchemaTypeObject:
 		attrs := make(map[string]tftypes.Type, len(sch.Properties))
 		for key, prop := range sch.Properties {
-			nullProp, err := toTFValue(prop, nil)
+			nullProp, err := toTFValue(prop, nil, dropEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("failed to build object property %q type: %w", key, err)
 			}
@@ -271,7 +248,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		for key, prop := range sch.Properties {
 			item, exists := m[key]
 			if !exists {
-				nullValue, err := toTFValue(prop, nil)
+				nullValue, err := toTFValue(prop, nil, dropEmpty)
 				if err != nil {
 					return tftypes.Value{}, fmt.Errorf("invalid object property %q: %w", key, err)
 				}
@@ -279,7 +256,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 				continue
 			}
 
-			converted, err := toTFValue(prop, item)
+			converted, err := toTFValue(prop, item, dropEmpty)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid object property %q: %w", key, err)
 			}
