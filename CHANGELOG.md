@@ -17,6 +17,10 @@ nav_order: 1
 - Deprecate `aiven_billing_group` resource and data source: use `aiven_organization_billing_group` instead.
 - Add `aiven_mysql` field `mysql_user_config.mysql.performance_schema_events_statements_history_size`: The number of rows
   per thread in the events_statements_history table
+- Add `aiven_cmk_accessor_aws` datasource: Gets the AWS CMK accessor for an Aiven project.
+- Add `aiven_cmk_accessor_azure` datasource: Gets the Azure CMK accessor for an Aiven project.
+- Add `aiven_cmk_accessor_gcp` datasource: Gets the GCP CMK accessor for an Aiven project.
+- Add `aiven_cmk_accessor_oci` datasource: Gets the OCI CMK accessor for an Aiven project.
 
 ## [4.57.0] - 2026-05-19
 

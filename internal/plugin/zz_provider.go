@@ -15,6 +15,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/aws"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/azure"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/gcp"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/oci"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
@@ -83,6 +87,10 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(user.DataSourceOptions),
+		"aiven_cmk_accessor_aws":                    adapter.NewLazyDataSource(aws.DataSourceOptions),
+		"aiven_cmk_accessor_azure":                  adapter.NewLazyDataSource(azure.DataSourceOptions),
+		"aiven_cmk_accessor_gcp":                    adapter.NewLazyDataSource(gcp.DataSourceOptions),
+		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(oci.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(registryacl.DataSourceOptions),
