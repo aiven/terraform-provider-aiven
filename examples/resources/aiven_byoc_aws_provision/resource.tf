@@ -6,5 +6,7 @@ resource "aiven_byoc_aws_provision" "example" {
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id = "admin"
   aiven_aws_account_principal       = "foo"
+  custom_cloud_names                = ["foo"]
+  state                             = "active"
   */
 }

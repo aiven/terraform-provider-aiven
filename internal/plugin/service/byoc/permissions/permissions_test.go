@@ -13,8 +13,6 @@ import (
 func TestAccAivenBYOCPermissions(t *testing.T) {
 	acc.SkipIfNotBeta(t)
 
-	envVars := acc.RequireEnvVars(t, "AIVEN_BYOC_AWS_IAM_ROLE_ARN")
-	iamRoleARN := envVars["AIVEN_BYOC_AWS_IAM_ROLE_ARN"]
 	organizationName := acc.OrganizationName()
 
 	const resourceName = "aiven_byoc_permissions.example"
@@ -31,14 +29,13 @@ resource "aiven_byoc_aws_entity" "example" {
   cloud_region     = "aws-eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
-  aws_iam_role_arn = %q
 
   contact_emails {
     email     = "ops@example.com"
     real_name = "Ops Team"
     role      = "admin"
   }
-}`, organizationName, iamRoleARN)
+}`, organizationName)
 
 	initialConfig := baseConfig + `
 resource "aiven_byoc_permissions" "example" {

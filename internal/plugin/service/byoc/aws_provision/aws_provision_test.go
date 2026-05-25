@@ -30,7 +30,6 @@ resource "aiven_byoc_aws_entity" "example" {
   cloud_region     = "aws-eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
-  aws_iam_role_arn = %[2]q
 
   contact_emails {
     email = "ops@example.com"
@@ -41,7 +40,7 @@ resource "aiven_byoc_aws_entity" "example" {
 resource "aiven_byoc_aws_provision" "example" {
   organization_id             = data.aiven_organization.org.id
   custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id
-  aws_iam_role_arn            = %[2]q
+  aws_iam_role_arn            = %q
 }`, organizationName, iamRoleARN)
 
 	resource.ParallelTest(t, resource.TestCase{

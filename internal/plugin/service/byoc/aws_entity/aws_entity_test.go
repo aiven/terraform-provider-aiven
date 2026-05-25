@@ -13,8 +13,6 @@ import (
 func TestAccAivenBYOCAWSEntity(t *testing.T) {
 	acc.SkipIfNotBeta(t)
 
-	envVars := acc.RequireEnvVars(t, "AIVEN_BYOC_AWS_IAM_ROLE_ARN")
-	iamRoleARN := envVars["AIVEN_BYOC_AWS_IAM_ROLE_ARN"]
 	organizationName := acc.OrganizationName()
 
 	const resourceName = "aiven_byoc_aws_entity.example"
@@ -24,7 +22,7 @@ data "aiven_organization" "org" {
   name = %q
 }`, organizationName)
 
-	initialConfig := baseConfig + fmt.Sprintf(`
+	initialConfig := baseConfig + `
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc"
@@ -32,16 +30,15 @@ resource "aiven_byoc_aws_entity" "example" {
   cloud_region     = "aws-eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
-  aws_iam_role_arn = %q
 
   contact_emails {
     email     = "ops@example.com"
     real_name = "Ops Team"
     role      = "admin"
   }
-}`, iamRoleARN)
+}`
 
-	updatedConfig := baseConfig + fmt.Sprintf(`
+	updatedConfig := baseConfig + `
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc-updated"
@@ -49,7 +46,6 @@ resource "aiven_byoc_aws_entity" "example" {
   cloud_region     = "aws-eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
-  aws_iam_role_arn = %q
 
   contact_emails {
     email     = "ops@example.com"
@@ -61,9 +57,9 @@ resource "aiven_byoc_aws_entity" "example" {
     email = "devops@example.com"
     role  = "ops"
   }
-}`, iamRoleARN)
+}`
 
-	regionChangeConfig := baseConfig + fmt.Sprintf(`
+	regionChangeConfig := baseConfig + `
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc-updated"
@@ -71,7 +67,6 @@ resource "aiven_byoc_aws_entity" "example" {
   cloud_region     = "aws-us-east-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
-  aws_iam_role_arn = %q
 
   contact_emails {
     email     = "ops@example.com"
@@ -83,7 +78,7 @@ resource "aiven_byoc_aws_entity" "example" {
     email = "devops@example.com"
     role  = "ops"
   }
-}`, iamRoleARN)
+}`
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -100,7 +95,6 @@ resource "aiven_byoc_aws_entity" "example" {
 					resource.TestCheckResourceAttr(resourceName, "cloud_region", "aws-eu-west-1"),
 					resource.TestCheckResourceAttr(resourceName, "deployment_model", "standard"),
 					resource.TestCheckResourceAttr(resourceName, "reserved_cidr", "10.0.0.0/16"),
-					resource.TestCheckResourceAttr(resourceName, "aws_iam_role_arn", iamRoleARN),
 					resource.TestCheckResourceAttr(resourceName, "contact_emails.#", "1"),
 					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "contact_emails.*", map[string]string{
 						"email":     "ops@example.com",
@@ -126,7 +120,6 @@ resource "aiven_byoc_aws_entity" "example" {
 			},
 			{
 				Config:             regionChangeConfig,
-				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{

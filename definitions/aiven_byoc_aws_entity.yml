@@ -4,7 +4,6 @@ location: internal/plugin/service/byoc/aws_entity
 resource:
   description: |
     Creates and manages a BYOC custom cloud environment on AWS.
-
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]
 operations:
@@ -27,6 +26,11 @@ remove:
   - oracle_compartment_id
   - oracle_subnet_bastion
   - oracle_subnet_workload
+  - custom_cloud_names
+  - errors
+  - state
+  - update_time
+  - aws_iam_role_arn
 schema:
   cloud_provider:
     forceNew: true

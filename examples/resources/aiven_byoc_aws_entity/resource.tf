@@ -7,7 +7,6 @@ resource "aiven_byoc_aws_entity" "example" {
   reserved_cidr    = "192.168.6.0/24" // Force new
 
   // OPTIONAL FIELDS
-  aws_iam_role_arn = "arn:aws:iam::012345678901:root"
   contact_emails {
     email = "jane@example.com"
 
@@ -39,14 +38,7 @@ resource "aiven_byoc_aws_entity" "example" {
   byoc_resource_tags = {
     foo = "foo"
   }
-  byoc_unique_name   = "foo"
-  custom_cloud_names = ["foo"]
-  errors {
-    category = "general_error"
-    message  = "foo"
-  }
-  state                      = "active"
-  update_time                = "2021-01-01T00:00:00Z"
+  byoc_unique_name           = "foo"
   use_customer_owned_storage = true
   */
 }

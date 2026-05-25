@@ -3,19 +3,16 @@ beta: true
 location: internal/plugin/service/byoc/aws_provision
 resource:
   ignoreAlreadyExists: true
-  refreshState: true
   description: |
     Provisions a BYOC custom cloud environment by handing Aiven the IAM role
     ARN created in the customer AWS account. Transitions the environment from
     `draft` to `active` so services can be deployed into it.
 
     Create this resource after the customer-side AWS infrastructure
-    (IAM role, VPC, subnets, security groups, buckets) has been applied, and
-    before `aiven_byoc_permissions`.
-
-    `terraform destroy` on this resource is a state-only operation -- it does
-    not reverse provisioning. To tear down, destroy the underlying
-    `aiven_byoc_aws_entity`.
+    (IAM role, VPC, subnets, security groups, buckets) has been defined.
+  refreshState: true
+  refreshStateDesired:
+    state: active
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]
 operations:
@@ -25,6 +22,9 @@ operations:
   - id: CustomCloudEnvironmentGet
     type: read
     resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentDelete
+    type: delete
+    disableView: true
 remove:
   - aiven_aws_object_storage_credentials_creator_arn
   - aiven_aws_object_storage_user_arn
@@ -39,7 +39,6 @@ remove:
   - cloud_provider
   - cloud_region
   - contact_emails
-  - custom_cloud_names
   - deployment_model
   - display_name
   - errors
@@ -50,7 +49,6 @@ remove:
   - oracle_subnet_bastion
   - oracle_subnet_workload
   - reserved_cidr
-  - state
   - tags
   - update_time
   - use_customer_owned_storage
