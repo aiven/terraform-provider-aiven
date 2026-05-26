@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-func fromTFValue(sch *Schema, value tftypes.Value) (map[string]any, error) {
+func fromTFValue(sch *Schema, value tftypes.Value, preserveNilUnknown bool) (map[string]any, error) {
 	if !value.IsKnown() || value.IsNull() {
 		return nil, nil
 	}
 
-	val, err := fromTFValueAny(sch, value)
+	val, err := fromTFValueAny(sch, value, preserveNilUnknown)
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +24,11 @@ func fromTFValue(sch *Schema, value tftypes.Value) (map[string]any, error) {
 	return m, nil
 }
 
-func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
+func fromTFValueAny(sch *Schema, value tftypes.Value, preserveNilUnknown bool) (any, error) {
 	if !value.IsKnown() || value.IsNull() {
+		if preserveNilUnknown {
+			return value, nil
+		}
 		return zeroValue(sch.Type), nil
 	}
 
@@ -33,28 +36,40 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 	case SchemaTypeString:
 		var s string
 		err := value.As(&s)
-		return s, err
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert string: %w", err)
+		}
+		return s, nil
 	case SchemaTypeInt:
 		var i big.Float
 		err := value.As(&i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert int: %w", err)
+		}
 		v, _ := i.Int64()
-		return int(v), err
+		return int(v), nil
 	case SchemaTypeFloat:
 		var f big.Float
 		err := value.As(&f)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert float: %w", err)
+		}
 		v, _ := f.Float64()
-		return v, err
+		return v, nil
 	case SchemaTypeBool:
 		var b bool
 		err := value.As(&b)
-		return b, err
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert bool: %w", err)
+		}
+		return b, nil
 	case SchemaTypeList, SchemaTypeSet:
-		var list []tftypes.Value
-		if err := value.As(&list); err != nil {
-			return nil, err
+		var array []tftypes.Value
+		if err := value.As(&array); err != nil {
+			return nil, fmt.Errorf("failed to convert %s: %w", sch.Type, err)
 		}
 
-		if len(list) == 0 {
+		if len(array) == 0 {
 			return []any{}, nil
 		}
 
@@ -62,9 +77,9 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 			return nil, fmt.Errorf("items is nil")
 		}
 
-		result := make([]any, 0, len(list))
-		for _, elem := range list {
-			item, err := fromTFValueAny(sch.Items, elem)
+		result := make([]any, 0, len(array))
+		for _, elem := range array {
+			item, err := fromTFValueAny(sch.Items, elem, preserveNilUnknown)
 			if err != nil {
 				return nil, err
 			}
@@ -82,10 +97,10 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 		}
 		result := make(map[string]any, len(mapVal))
 		for key, elem := range mapVal {
-			if !elem.IsKnown() || elem.IsNull() {
+			if !preserveNilUnknown && (!elem.IsKnown() || elem.IsNull()) {
 				continue
 			}
-			item, err := fromTFValueAny(sch.Items, elem)
+			item, err := fromTFValueAny(sch.Items, elem, preserveNilUnknown)
 			if err != nil {
 				return nil, err
 			}
@@ -103,7 +118,7 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 		}
 		result := make(map[string]any, len(mapVal))
 		for key, elem := range mapVal {
-			if !elem.IsKnown() || elem.IsNull() {
+			if !preserveNilUnknown && (!elem.IsKnown() || elem.IsNull()) {
 				continue
 			}
 			itemSch, ok := sch.Properties[key]
@@ -111,7 +126,7 @@ func fromTFValueAny(sch *Schema, value tftypes.Value) (any, error) {
 				return nil, fmt.Errorf("unknown property %q", key)
 			}
 
-			item, err := fromTFValueAny(itemSch, elem)
+			item, err := fromTFValueAny(itemSch, elem, preserveNilUnknown)
 			if err != nil {
 				return nil, err
 			}
@@ -132,95 +147,59 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		return tftypes.Value{}, fmt.Errorf("schema is nil")
 	}
 
+	// This is a preserved nil/unknown value for ModifyPlan.
+	if v, ok := value.(tftypes.Value); ok {
+		return v, nil
+	}
+
+	if sch.Type.IsPrimitive() {
+		t := map[SchemaType]tftypes.Type{
+			SchemaTypeString: tftypes.String,
+			SchemaTypeInt:    tftypes.Number,
+			SchemaTypeFloat:  tftypes.Number,
+			SchemaTypeBool:   tftypes.Bool,
+		}
+		return tftypes.NewValue(t[sch.Type], value), nil
+	}
+
 	switch sch.Type {
-	case SchemaTypeString:
-		if value == nil {
-			return tftypes.NewValue(tftypes.String, nil), nil
-		}
-		v, ok := value.(string)
-		if !ok {
-			return tftypes.Value{}, fmt.Errorf("expected string, got %T", value)
-		}
-		return tftypes.NewValue(tftypes.String, v), nil
-	case SchemaTypeInt:
-		if value == nil {
-			return tftypes.NewValue(tftypes.Number, nil), nil
-		}
-		return tftypes.NewValue(tftypes.Number, value), nil
-	case SchemaTypeFloat:
-		if value == nil {
-			return tftypes.NewValue(tftypes.Number, nil), nil
-		}
-		return tftypes.NewValue(tftypes.Number, value), nil
-	case SchemaTypeBool:
-		if value == nil {
-			return tftypes.NewValue(tftypes.Bool, nil), nil
-		}
-		v, ok := value.(bool)
-		if !ok {
-			return tftypes.Value{}, fmt.Errorf("expected bool, got %T", value)
-		}
-		return tftypes.NewValue(tftypes.Bool, v), nil
-	case SchemaTypeList:
+	case SchemaTypeList, SchemaTypeSet:
 		if sch.Items == nil {
-			return tftypes.Value{}, fmt.Errorf("list items is nil")
+			return tftypes.Value{}, fmt.Errorf("%s items is nil", sch.Type)
 		}
 		nullItem, err := toTFValue(sch.Items, nil)
 		if err != nil {
-			return tftypes.Value{}, fmt.Errorf("failed to build list item type: %w", err)
+			return tftypes.Value{}, fmt.Errorf("failed to build %s item type: %w", sch.Type, err)
 		}
-		listType := tftypes.List{ElementType: nullItem.Type()}
+
+		var arrayType tftypes.Type
+		if sch.Type == SchemaTypeSet {
+			arrayType = tftypes.Set{ElementType: nullItem.Type()}
+		} else {
+			arrayType = tftypes.List{ElementType: nullItem.Type()}
+		}
+
 		if value == nil {
-			return tftypes.NewValue(listType, nil), nil
+			return tftypes.NewValue(arrayType, nil), nil
 		}
-		list, ok := value.([]any)
+		array, ok := asAnySlice(value)
 		if !ok {
-			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
+			return tftypes.Value{}, fmt.Errorf("expected %s, got %T", sch.Type, value)
 		}
 
-		if len(list) == 0 {
-			return tftypes.NewValue(listType, nil), nil
+		if len(array) == 0 {
+			return tftypes.NewValue(arrayType, nil), nil
 		}
 
-		result := make([]tftypes.Value, len(list))
-		for i, item := range list {
+		result := make([]tftypes.Value, len(array))
+		for i, item := range array {
 			converted, err := toTFValue(sch.Items, item)
 			if err != nil {
 				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
 			}
 			result[i] = converted
 		}
-		return tftypes.NewValue(listType, result), nil
-	case SchemaTypeSet:
-		if sch.Items == nil {
-			return tftypes.Value{}, fmt.Errorf("set items is nil")
-		}
-		nullItem, err := toTFValue(sch.Items, nil)
-		if err != nil {
-			return tftypes.Value{}, fmt.Errorf("failed to build set item type: %w", err)
-		}
-		setType := tftypes.Set{ElementType: nullItem.Type()}
-		if value == nil {
-			return tftypes.NewValue(setType, nil), nil
-		}
-		set, ok := value.([]any)
-		if !ok {
-			return tftypes.Value{}, fmt.Errorf("expected []any, got %T", value)
-		}
-
-		if len(set) == 0 {
-			return tftypes.NewValue(setType, nil), nil
-		}
-
-		result := make([]tftypes.Value, len(set))
-		for i, item := range set {
-			converted, err := toTFValue(sch.Items, item)
-			if err != nil {
-				return tftypes.Value{}, fmt.Errorf("invalid item at index %d: %w", i, err)
-			}
-			result[i] = converted
-		}
-		return tftypes.NewValue(setType, result), nil
+		return tftypes.NewValue(arrayType, result), nil
 	case SchemaTypeMap:
 		if sch.Items == nil {
 			return tftypes.Value{}, fmt.Errorf("map items is nil")
@@ -233,7 +212,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 		if value == nil {
 			return tftypes.NewValue(mapType, nil), nil
 		}
-		m, ok := value.(map[string]any)
+		m, ok := asAnyMap(value)
 		if !ok {
 			return tftypes.Value{}, fmt.Errorf("expected map[string]any, got %T", value)
 		}
@@ -261,7 +240,7 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 			return tftypes.NewValue(objectType, nil), nil
 		}
 
-		m, ok := value.(map[string]any)
+		m, ok := asAnyMap(value)
 		if !ok {
 			return tftypes.Value{}, fmt.Errorf("expected map[string]any, got %T", value)
 		}

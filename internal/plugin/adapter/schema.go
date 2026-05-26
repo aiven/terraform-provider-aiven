@@ -13,6 +13,14 @@ const (
 	SchemaTypeObject SchemaType = "object"
 )
 
+func (t SchemaType) IsPrimitive() bool {
+	switch t {
+	case SchemaTypeString, SchemaTypeFloat, SchemaTypeInt, SchemaTypeBool:
+		return true
+	}
+	return false
+}
+
 // Schema simplified schema similar to OpenAPI spec.
 // Used internally to perform data normalization and validation,
 // because TF schemas have different types for resource and datasource,
@@ -35,12 +43,4 @@ type Schema struct {
 	// Because we can't distinguish between zero values and missing values in the SDKv2 state,
 	// this flag allows such cases to be ignored.
 	ZeroNotAllowed bool
-}
-
-func isScalar(kind SchemaType) bool {
-	switch kind {
-	case SchemaTypeString, SchemaTypeInt, SchemaTypeFloat, SchemaTypeBool:
-		return true
-	}
-	return false
 }
