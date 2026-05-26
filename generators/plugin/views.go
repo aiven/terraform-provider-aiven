@@ -24,7 +24,6 @@ const (
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
 	refreshStateWaiter         = "refreshStateWaiter"
-	populateIDFieldsFromID     = "populateIDFieldsFromID"
 	waitForDeletion            = "waitForDeletion"
 )
 
@@ -41,10 +40,6 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 		}
 	}
 
-	if def.Resource != nil && def.IDAttributeComposed.PopulateFieldsFromID {
-		codes = append(codes, genPopulateIDFieldsFromID(def))
-	}
-
 	builders := make([]jen.Code, 0)
 	if def.Resource != nil {
 		builders = append(builders, genNewResource(resourceType, def, false))
@@ -52,11 +47,13 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 
 	if def.Datasource != nil {
 		hasLookup := def.DatasourceLookupOp() != nil
-		if hasLookup {
-			codes = append(codes, datasourceLookupValidators(def, item))
+		hasExactlyOneOf := len(def.Datasource.ExactlyOneOf) > 0
+		hasConfigValidators := hasLookup || hasExactlyOneOf
+		if hasConfigValidators {
+			codes = append(codes, datasourceLookupValidators(def))
 		}
 
-		builders = append(builders, genNewResource(datasourceType, def, hasLookup))
+		builders = append(builders, genNewResource(datasourceType, def, hasConfigValidators))
 	}
 
 	return append(builders, codes...), nil
@@ -78,7 +75,7 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	for _, v := range def.Operations {
-		if entity == datasourceType {
+		if entity.IsDataSource() {
 			if v.Type != OperationRead {
 				// Datasource only supports Read operation
 				continue
@@ -171,19 +168,13 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	errM := new(multierror.Error)
 	view.BlockFunc(func(g *jen.Group) {
 		if operation == OperationRead {
-			emitDatasourceLookupIDSplit(g, def)
-		}
-
-		emitPopulateIDFieldsFromID(g, def, operation)
-
-		if operation == OperationRead {
 			emitPlanModifier(g, def)
 		}
 
 		if lookupOp != nil {
 			var lookupErr error
 			g.If(
-				jen.Id("d").Dot("Get").Call(jen.Lit(def.DatasourceCanonicalID())).Op(".").Parens(jen.String()).Op("==").Lit(""),
+				jen.Id("d").Dot("Get").Call(jen.Lit(def.DatasourceLookupID())).Op(".").Parens(jen.String()).Op("==").Lit(""),
 			).BlockFunc(func(g *jen.Group) {
 				lookupErr = genGenericViewOperation(g, 0, 1, def, item, lookupOp)
 			})
@@ -203,41 +194,6 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	return view, errM.ErrorOrNil()
 }
 
-func emitDatasourceLookupIDSplit(g *jen.Group, def *Definition) {
-	composed := def.DatasourceLookupIDComposed()
-	if len(composed) == 0 {
-		return
-	}
-
-	lookupID := def.DatasourceLookupID()
-	format := strings.Join(composed, "/")
-	g.If(
-		jen.List(jen.Id("_"), jen.Id("exists")).Op(":=").Id("d").Dot("Schema").Call().Dot("Properties").Index(jen.Lit(lookupID)),
-		jen.Id("exists"),
-	).BlockFunc(func(g *jen.Group) {
-		g.If(
-			jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Id("d").Dot("GetOk").Call(jen.Lit(lookupID)),
-			jen.Id("ok"),
-		).BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("parts"), jen.Err()).Op(":=").Qual(schemautilPackage, "SplitResourceID").
-				Call(jen.Id("v").Op(".").Parens(jen.String()), jen.Lit(len(composed)))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return().Qual("fmt", "Errorf").Call(
-					jen.Lit(fmt.Sprintf("invalid %s, expected format %s: %%w", lookupID, format)),
-					jen.Err(),
-				),
-			)
-
-			for i, name := range composed {
-				g.If(
-					jen.Err().Op(":=").Id("d").Dot("Set").Call(jen.Lit(name), jen.Id("parts").Index(jen.Lit(i))),
-					jen.Err().Op("!=").Nil(),
-				).Block(jen.Return().Err())
-			}
-		})
-	})
-}
-
 // emitPlanModifier prepends the planModifier call to a Read-style view body.
 // No-op when the definition does not opt in via planModifier: true.
 func emitPlanModifier(g *jen.Group, def *Definition) {
@@ -252,63 +208,8 @@ func emitPlanModifier(g *jen.Group, def *Definition) {
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 }
 
-func shouldPopulateIDFieldsFromID(def *Definition, operation OperationType) bool {
-	return def.Resource != nil &&
-		def.IDAttributeComposed.PopulateFieldsFromID &&
-		(operation == OperationRead || operation == OperationDelete)
-}
-
-func emitPopulateIDFieldsFromID(g *jen.Group, def *Definition, operation OperationType) {
-	if !shouldPopulateIDFieldsFromID(def, operation) {
-		return
-	}
-	g.If(
-		jen.Err().Op(":=").Id(populateIDFieldsFromID).Call(jen.Id("d")),
-		jen.Err().Op("!=").Nil(),
-	).Block(jen.Return().Err())
-}
-
-func genPopulateIDFieldsFromID(def *Definition) jen.Code {
-	return jen.Func().Id(populateIDFieldsFromID).
-		Params(jen.Id("d").Qual(adapterPackage, resourceData)).
-		Error().
-		Block(
-			jen.If(jen.Id("d").Dot("ID").Call().Op("==").Lit("")).Block(jen.Return().Nil()),
-			jen.Id("fields").Op(":=").Id(funcIDFields).Call(),
-			jen.List(jen.Id("chunks"), jen.Err()).Op(":=").Qual(schemautilPackage, "SplitResourceID").Call(
-				jen.Id("d").Dot("ID").Call(),
-				jen.Len(jen.Id("fields")),
-			),
-			jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return().Qual("fmt", "Errorf").Call(
-					jen.Lit("invalid "+def.typeName+" id %q: %w"),
-					jen.Id("d").Dot("ID").Call(),
-					jen.Err(),
-				),
-			),
-			jen.For(jen.List(jen.Id("i"), jen.Id("field")).Op(":=").Range().Id("fields")).Block(
-				jen.If(jen.Id("d").Dot("Get").Call(jen.Id("field")).Op(".").Parens(jen.String()).Op("!=").Lit("")).Block(jen.Continue()),
-				jen.If(
-					jen.Err().Op(":=").Id("d").Dot("Set").Call(jen.Id("field"), jen.Id("chunks").Index(jen.Id("i"))),
-					jen.Err().Op("!=").Nil(),
-				).Block(jen.Return().Err()),
-			),
-			jen.Return().Nil(),
-		)
-}
-
 func genWaitForDeletionCall() *jen.Statement {
 	return jen.Id(waitForDeletion).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
-}
-
-func genReturnErrOrWaitForDeletion(g *jen.Group, operation *Operation) {
-	if !operation.WaitForDeletion {
-		g.Return().Err()
-		return
-	}
-
-	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
-	g.Return().Add(genWaitForDeletionCall())
 }
 
 func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Definition, item *Item, operation *Operation) error {
@@ -412,7 +313,13 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	}
 
 	if !hasResponse || operation.Type == OperationDelete {
-		genReturnErrOrWaitForDeletion(g, operation)
+		if !operation.WaitForDeletion {
+			g.Return().Err()
+			return nil
+		}
+
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+		g.Return().Add(genWaitForDeletionCall())
 		return nil
 	}
 
@@ -503,7 +410,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	if operation.DatasourceLookup && operation.ResultIDField != "" {
 		g.If(
 			jen.Err().Op(":=").Id("d").Dot("Set").Call(
-				jen.Lit(def.DatasourceCanonicalID()),
+				jen.Lit(def.DatasourceLookupID()),
 				jen.Id(matchName).Dot(operation.ResultIDField),
 			),
 			jen.Err().Op("!=").Nil(),
@@ -524,66 +431,33 @@ func lookupFieldsList(op *Operation) string {
 	return humanizeCodeList(values, " and ")
 }
 
-// datasourceLookupValidators emits the config-level validation for a datasource lookup.
-// With the default leaf id lookup it preserves the existing id-or-alt-key contract.
-// With a composed public lookup alias it also requires the path parameters needed
-// by the alternative lookup branch and conflicts those parameters with the alias.
-func datasourceLookupValidators(def *Definition, item *Item) jen.Code {
-	id := def.DatasourceLookupID()
-	composedOf := def.DatasourceLookupComposedOf()
+// datasourceLookupValidators emits the datasource's ConfigValidators function.
+// When `datasource.exactlyOneOf` is set, it emits a single
+// `datasourcevalidator.ExactlyOneOf(...)` over its members; otherwise it
+// falls back to the lookup-contract pair (id vs composedOf[0]) plus
+// RequiredTogether when composedOf has more than one field.
+func datasourceLookupValidators(def *Definition) jen.Code {
 	pkg := datasourceType.Import(entityValidatorPkgFmt)
-
-	matchRoot := func(name string) jen.Code {
-		return jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(name))
+	matchRoots := func(names ...string) []jen.Code {
+		return lo.Map(names, func(name string, _ int) jen.Code {
+			return jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(name))
+		})
 	}
 
-	validators := make([]jen.Code, 0, 2)
-	validators = append(validators, jen.Qual(pkg, "ExactlyOneOf").Custom(
-		multilineCall(),
-		matchRoot(id),
-		matchRoot(composedOf[0]),
-	))
-
-	togetherFields := composedOf
-	if def.hasDatasourceLookupAlias() {
-		op := def.DatasourceLookupOp()
-		lookupPathParams := filterAppearsIn(
-			slices.Collect(maps.Values(item.Properties)),
-			def.Operations.AppearsInID(op.ID, op.Type, PathParameter),
-		)
-		for _, v := range lookupPathParams {
-			togetherFields = append(togetherFields, v.Name)
-		}
-		slices.Sort(togetherFields)
-		togetherFields = slices.Compact(togetherFields)
+	var names, composedOf []string
+	if eo := def.Datasource.ExactlyOneOf; len(eo) > 0 {
+		names = eo
+	} else if def.DatasourceLookupOp() != nil {
+		composedOf = def.DatasourceLookupComposedOf()
+		names = []string{def.DatasourceLookupID(), composedOf[0]}
 	}
 
-	if len(togetherFields) > 1 {
-		together := make([]jen.Code, len(togetherFields))
-		for i, v := range togetherFields {
-			together[i] = matchRoot(v)
-		}
-		validators = append(validators, jen.Qual(pkg, "RequiredTogether").Custom(multilineCall(), together...))
+	var validators []jen.Code
+	if len(names) > 0 {
+		validators = append(validators, jen.Qual(pkg, "ExactlyOneOf").Custom(multilineCall(), matchRoots(names...)...))
 	}
-
-	if def.hasDatasourceLookupAlias() {
-		conflictsWithAlias := make([]jen.Code, 0)
-		for _, v := range def.DatasourceLookupIDComposed() {
-			if v == def.DatasourceCanonicalID() || v == id {
-				continue
-			}
-			prop, ok := item.Properties[v]
-			if !ok || !prop.IsOptional(def, datasourceType) {
-				continue
-			}
-			conflictsWithAlias = append(conflictsWithAlias, matchRoot(v))
-		}
-		if len(conflictsWithAlias) > 0 {
-			validators = append(validators, jen.Qual(pkg, "Conflicting").Custom(
-				multilineCall(),
-				append([]jen.Code{matchRoot(id)}, conflictsWithAlias...)...,
-			))
-		}
+	if len(composedOf) > 1 {
+		validators = append(validators, jen.Qual(pkg, "RequiredTogether").Custom(multilineCall(), matchRoots(composedOf...)...))
 	}
 
 	list := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(multilineValues(), validators...)

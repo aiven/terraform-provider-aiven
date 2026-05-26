@@ -67,7 +67,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"database_name": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"database_name": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -87,7 +90,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
 			},
-			"username": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"username": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

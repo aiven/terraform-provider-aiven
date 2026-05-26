@@ -204,35 +204,24 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 					Values(planModifiers...)
 			}
 
-			if item.Required {
-				values["Required"] = jen.True()
-			}
+		}
 
-			if item.Optional {
-				values["Optional"] = jen.True()
-			}
+		if item.IsRequired(def, entity) {
+			values["Required"] = jen.True()
+		}
 
-			if item.Computed {
-				values["Computed"] = jen.True()
-			}
-		} else {
-			switch {
-			case item.IsRequired(def, entity) && !item.Virtual:
-				values["Required"] = jen.True()
-			case item.IsOptional(def, entity):
-				values["Optional"] = jen.True()
-				if item.isDatasourceLookupComputedInput(def) {
-					values["Computed"] = jen.True()
-				}
-			default:
-				values["Computed"] = jen.True()
-			}
+		if item.IsOptional(def, entity) {
+			values["Optional"] = jen.True()
+		}
+
+		if item.IsComputed(def, entity) {
+			values["Computed"] = jen.True()
 		}
 	}
 
 	// So far no validations for datasources
 	if !item.IsReadOnly(def, entity) {
-		validators, err := genValidators(item)
+		validators, err := genValidators(def, entity, item)
 		if err != nil {
 			return nil, err
 		}
@@ -241,7 +230,7 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 			values["Validators"] = jen.Index().Qual(validatorPackage, item.TFType()).Values(validators...)
 		}
 
-		if item.Default != nil {
+		if entity.isResource() && item.Default != nil {
 			values["Default"] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
 		}
 	}
@@ -298,7 +287,7 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		properties[jen.Lit(k)] = prop
 	}
 
-	if item.Computed || item.IsRootProperty() && !entity.isResource() && item.isDatasourceLookupComputedInput(def) {
+	if item.IsComputed(def, entity) {
 		params[jen.Id("Computed")] = jen.True()
 	}
 

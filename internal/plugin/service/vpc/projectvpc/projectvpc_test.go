@@ -13,21 +13,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-func TestPopulateIDFieldsFromIDSplitsLegacyResourceID(t *testing.T) {
-	d, err := adapter.NewResourceDataFromMaps(
-		resourceSchemaInternal(),
-		idFields(),
-		nil,
-		map[string]any{"id": "example-project/example-vpc-id"},
-		nil,
-	)
-	require.NoError(t, err)
-
-	require.NoError(t, populateIDFieldsFromID(d))
-	require.Equal(t, "example-project", d.Get("project"))
-	require.Equal(t, "example-vpc-id", d.Get("project_vpc_id"))
-}
-
 func TestCreateViewSendsEmptyPeeringConnections(t *testing.T) {
 	ctx := context.Background()
 	client := avngen.NewMockClient(t)
@@ -66,7 +51,7 @@ func TestCreateViewSendsEmptyPeeringConnections(t *testing.T) {
 func TestDeleteViewDeletesOnceThenWaits(t *testing.T) {
 	ctx := context.Background()
 	client := avngen.NewMockClient(t)
-	d := newLegacyProjectVPCResourceData(t)
+	d := newProjectVPCResourceData(t)
 
 	client.EXPECT().
 		VpcDelete(ctx, "example-project", "example-vpc-id").
@@ -91,21 +76,6 @@ func TestWaitForDeletionReturnsNilWhenAlreadyDeleted(t *testing.T) {
 		Once()
 
 	require.NoError(t, waitForDeletion(ctx, client, d))
-}
-
-func newLegacyProjectVPCResourceData(t *testing.T) adapter.ResourceData {
-	t.Helper()
-
-	d, err := adapter.NewResourceDataFromMaps(
-		resourceSchemaInternal(),
-		idFields(),
-		nil,
-		map[string]any{"id": "example-project/example-vpc-id"},
-		nil,
-	)
-	require.NoError(t, err)
-
-	return d
 }
 
 func newProjectVPCResourceData(t *testing.T) adapter.ResourceData {

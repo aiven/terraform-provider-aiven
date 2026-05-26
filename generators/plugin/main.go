@@ -133,12 +133,22 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		}
 
 		root.Name = strings.TrimPrefix(def.typeName, typeNamePrefix)
-		schema, err := genSchema(def, entity, root)
+
+		// Datasource-only schema overlay. Applied on a deep copy of the root
+		// (which has already had base-schema merged and recalcDeep run) so
+		// schema rendering and examples see the override-aware tree without
+		// touching the base root used for shared view generation.
+		renderRoot, err := applySchemaOverride(def, resDat, root)
+		if err != nil {
+			return fmt.Errorf("apply schemaOverride: %w", err)
+		}
+
+		schema, err := genSchema(def, entity, renderRoot)
 		if err != nil {
 			return err
 		}
 
-		schemaSimple, err := genSchemaInternal(def, entity, root)
+		schemaSimple, err := genSchemaInternal(def, entity, renderRoot)
 		if err != nil {
 			return err
 		}
@@ -208,7 +218,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			idPath := def.IDAttributeComposed.Fields
+			idPath := def.IDAttributeComposed
 			if len(idPath) == 0 {
 				idPath = append(idPath, root.Name+"_id")
 			}
@@ -235,7 +245,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			if err != nil {
 				return fmt.Errorf("could not create directory %s: %w", exampleDir, err)
 			}
-			exampleBytes, err := exampleRoot(def, entity, root)
+			exampleBytes, err := exampleRoot(def, entity, renderRoot)
 			if err != nil {
 				return fmt.Errorf("could not generate example: %w", err)
 			}
@@ -358,7 +368,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Adds the 'id' field if missing
 	idField, idExists := root.Properties["id"]
 	if !idExists {
-		if len(pkg.IDAttributeComposed.Fields) == 0 {
+		if len(pkg.IDAttributeComposed) == 0 {
 			return nil, fmt.Errorf("no 'id' field found and no IDAttributeComposed defined")
 		}
 
@@ -375,11 +385,11 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	idField.IDAttribute = true
-	if idField.Description == "" && len(pkg.IDAttributeComposed.Fields) != 0 {
-		if len(pkg.IDAttributeComposed.Fields) > 1 {
-			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed.Fields...))
+	if idField.Description == "" && len(pkg.IDAttributeComposed) != 0 {
+		if len(pkg.IDAttributeComposed) > 1 {
+			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed...))
 		} else {
-			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed.Fields[0])
+			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed[0])
 		}
 	}
 
@@ -391,7 +401,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Marks ID fields
 	isMutable := scope.Definition.Operations.AppearsInHandler(OperationUpdate, RequestBody)
 	idField.UseStateForUnknown = true
-	for i, v := range pkg.IDAttributeComposed.Fields {
+	for i, v := range pkg.IDAttributeComposed {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
 			return nil, fmt.Errorf("ID field %q not found in: %s", v, strings.Join(keys, ", "))
@@ -711,16 +721,82 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 			}
 			lookupOp = op
 		}
-		if def.Datasource != nil {
-			if def.Datasource.LookupIDAttribute != "" && lookupOp == nil {
-				return nil, fmt.Errorf("definition %q: datasource lookupIDAttribute requires a datasourceLookup read operation", name)
-			}
-		}
 
 		defs = append(defs, def)
 	}
 
 	return defs, nil
+}
+
+// deepCopyItem returns a deep copy of item via a yaml round-trip. Every Item
+// field carries a yaml tag — user-facing names for user-settable fields and
+// underscore-prefixed names for runtime state — so the round-trip preserves
+// the full state without enumerating fields by hand. Parent is the only field
+// excluded from serialization (it forms a cycle) and is re-wired after
+// unmarshal by setParents.
+func deepCopyItem(item *Item) (*Item, error) {
+	if item == nil {
+		return nil, nil
+	}
+	data, err := yaml.Marshal(item)
+	if err != nil {
+		return nil, fmt.Errorf("deep copy marshal: %w", err)
+	}
+	cp := &Item{}
+	if err := yaml.Unmarshal(data, cp); err != nil {
+		return nil, fmt.Errorf("deep copy unmarshal: %w", err)
+	}
+	setParents(cp, nil)
+	return cp, nil
+}
+
+// setParents walks the (newly-copied) tree and re-wires the Parent pointers
+// to point at the parents within the new tree.
+func setParents(item, parent *Item) {
+	if item == nil {
+		return
+	}
+	item.Parent = parent
+	for _, child := range item.Properties {
+		setParents(child, item)
+	}
+	setParents(item.Items, item)
+	setParents(item.AdditionalProperties, item)
+}
+
+// applySchemaOverride deep-copies root, merges meta.SchemaOverride entries on
+// top of the copy and re-runs recalcDeep so override-introduced values settle.
+// Every touched attribute (whether newly added or re-declaring a base-schema /
+// API entry) is tagged with the internal FromSchemaOverride flag so the
+// datasource branch of Item.IsRequired/IsOptional/IsComputed honours the
+// user-set values rather than the entity-aware default rules. The original
+// root is left untouched. When meta or its SchemaOverride is empty, root is
+// returned as-is.
+func applySchemaOverride(def *Definition, meta *SchemaMeta, root *Item) (*Item, error) {
+	if meta == nil || len(meta.SchemaOverride) == 0 {
+		return root, nil
+	}
+
+	root, err := deepCopyItem(root)
+	if err != nil {
+		return nil, fmt.Errorf("deep copy root: %w", err)
+	}
+	for k, v := range meta.SchemaOverride {
+		if err := fillOptionalFields(root, v, k); err != nil {
+			return nil, fmt.Errorf("schemaOverride %s: %w", k, err)
+		}
+		merged, err := mergeItem(root, root.Properties[k], v)
+		if err != nil {
+			return nil, fmt.Errorf("can't merge schemaOverride %q: %w", k, err)
+		}
+		merged.FromSchemaOverride = true
+		root.Properties[k] = merged
+	}
+
+	if err := recalcDeep(def, root); err != nil {
+		return nil, fmt.Errorf("recalc after schemaOverride: %w", err)
+	}
+	return root, nil
 }
 
 func mergeItem(parent, a, b *Item) (*Item, error) {
@@ -813,7 +889,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.OverrideForceNew = or(b.OverrideForceNew, a.OverrideForceNew)
 	a.UseStateForUnknown = a.UseStateForUnknown || b.UseStateForUnknown
 	a.WriteOnly = a.WriteOnly || b.WriteOnly
-	a.DatasourceOnly = a.DatasourceOnly || b.DatasourceOnly
+	a.FromSchemaOverride = a.FromSchemaOverride || b.FromSchemaOverride
 
 	if a.Name == "" {
 		return nil, fmt.Errorf("node doesn't have name set, parent: %q", parent.Name)

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/ettle/strcase"
-	"gopkg.in/yaml.v3"
 )
 
 // AppearsIn is a bitmask for the field appearance (request, response, etc.)
@@ -146,7 +145,16 @@ type SchemaMeta struct {
 	DisableExample        bool          `yaml:"disableExample,omitempty"`
 	ValidateConfig        bool          `yaml:"validateConfig,omitempty"`
 	ModifyPlan            bool          `yaml:"modifyPlan,omitempty"`
-	LookupIDAttribute     string        `yaml:"lookupIDAttribute,omitempty"`
+
+	// SchemaOverride is a datasource-only schema overlay merged on top of the
+	// base Definition.Schema when generating the datasource. Resource
+	// generation ignores this field. Only meaningful on Definition.Datasource.
+	SchemaOverride map[string]*Item `yaml:"schemaOverride,omitempty"`
+
+	// ExactlyOneOf declares the datasource's top-level "exactly one of"
+	// discriminator group. Drives the example LOOKUP hint and the
+	// `datasourcevalidator.ExactlyOneOf` block in datasourceConfigValidators.
+	ExactlyOneOf []string `yaml:"exactlyOneOf,omitempty"`
 }
 
 type Definition struct {
@@ -160,7 +168,7 @@ type Definition struct {
 	Rename              map[string]string `yaml:"rename,omitempty"`
 	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
 	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttributeComposed IDAttribute       `yaml:"idAttributeComposed,omitempty"`
+	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
 	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
 	Operations          Operations        `yaml:"operations"`
 	Version             *int              `yaml:"version"`
@@ -168,28 +176,6 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
-}
-
-type IDAttribute struct {
-	Fields               []string `yaml:"fields"`
-	PopulateFieldsFromID bool     `yaml:"populateFieldsFromID,omitempty"`
-}
-
-func (id *IDAttribute) UnmarshalYAML(value *yaml.Node) error {
-	switch value.Kind {
-	case yaml.SequenceNode:
-		return value.Decode(&id.Fields)
-	case yaml.MappingNode:
-		type rawIDAttribute IDAttribute
-		var raw rawIDAttribute
-		if err := value.Decode(&raw); err != nil {
-			return err
-		}
-		*id = IDAttribute(raw)
-		return nil
-	default:
-		return fmt.Errorf("idAttributeComposed must be a list of fields or an object")
-	}
 }
 
 // DatasourceLookupOp returns the single read op marked `datasourceLookup`, or nil. It
@@ -207,40 +193,14 @@ func (d *Definition) DatasourceLookupOp() *Operation {
 	return nil
 }
 
-// DatasourceCanonicalID returns the canonical id attribute used by the read endpoint.
-// For composite IDs, this is the most specific (leaf) segment; otherwise it falls
-// back to Terraform's standard "id".
-func (d *Definition) DatasourceCanonicalID() string {
-	if n := len(d.IDAttributeComposed.Fields); n > 0 {
-		return d.IDAttributeComposed.Fields[n-1]
+// DatasourceLookupID returns the name of the primary lookup attribute used to
+// identify a single resource via the data source. For composite IDs, this is the
+// most specific (leaf) segment; otherwise it falls back to Terraform's standard "id".
+func (d *Definition) DatasourceLookupID() string {
+	if n := len(d.IDAttributeComposed); n > 0 {
+		return d.IDAttributeComposed[n-1]
 	}
 	return "id"
-}
-
-// DatasourceLookupID returns the public lookup id accepted by the data source. By
-// default it matches the canonical id, but a definition can expose a composed
-// lookup alias such as vpc_id=project/project_vpc_id.
-func (d *Definition) DatasourceLookupID() string {
-	if d != nil && d.Datasource != nil && d.Datasource.LookupIDAttribute != "" {
-		return d.Datasource.LookupIDAttribute
-	}
-	return d.DatasourceCanonicalID()
-}
-
-// DatasourceLookupIDComposed returns the canonical ID fields derived from the
-// public lookup id alias.
-func (d *Definition) DatasourceLookupIDComposed() []string {
-	if d == nil || d.Datasource == nil || d.Datasource.LookupIDAttribute == "" {
-		return nil
-	}
-	if len(d.IDAttributeComposed.Fields) > 0 {
-		return slices.Clone(d.IDAttributeComposed.Fields)
-	}
-	return []string{d.DatasourceCanonicalID()}
-}
-
-func (d *Definition) hasDatasourceLookupAlias() bool {
-	return len(d.DatasourceLookupIDComposed()) > 0
 }
 
 // DatasourceLookupComposedOf returns the alternative lookup attributes — sorted values
@@ -255,9 +215,8 @@ func (d *Definition) DatasourceLookupComposedOf() []string {
 	return out
 }
 
-// DatasourceLookupHas reports whether name is a public lookup key (id or
-// alternative keys). Returns false on a nil Definition or when no datasourceLookup
-// op exists.
+// DatasourceLookupHas reports whether name is part of the lookup set (id or composedOf).
+// Returns false on a nil Definition or when no datasourceLookup op exists.
 func (d *Definition) DatasourceLookupHas(name string) bool {
 	if d == nil || d.DatasourceLookupOp() == nil {
 		return false
@@ -268,96 +227,79 @@ func (d *Definition) DatasourceLookupHas(name string) bool {
 	return slices.Contains(d.DatasourceLookupComposedOf(), name)
 }
 
-func (item *Item) isDatasourceLookupDerivedPathParam(def *Definition) bool {
-	if def == nil || !def.hasDatasourceLookupAlias() || !item.IsRootProperty() {
-		return false
-	}
-
-	if !slices.Contains(def.DatasourceLookupIDComposed(), item.Name) {
-		return false
-	}
-
-	op := def.DatasourceLookupOp()
-	if op == nil {
-		return false
-	}
-
-	return item.AppearsIn.Contains(def.Operations.AppearsInID(op.ID, op.Type, PathParameter))
-}
-
-func (item *Item) isDatasourceLookupInput(def *Definition) bool {
-	return def.DatasourceLookupHas(item.Name) || item.isDatasourceLookupDerivedPathParam(def)
-}
-
-func (item *Item) isDatasourceLookupComputedInput(def *Definition) bool {
-	if def == nil {
-		return false
-	}
-	if item.isDatasourceLookupDerivedPathParam(def) {
-		return true
-	}
-	if !def.DatasourceLookupHas(item.Name) {
-		return false
-	}
-	if def.hasDatasourceLookupAlias() && item.Name == def.DatasourceLookupID() {
-		return false
-	}
-	return true
-}
-
+// Item carries every piece of information the generator needs about a single
+// schema node (root, property, array element, map value). Public-facing
+// `yaml:"..."` tags mirror the keys users write in definition YAML files
+// (e.g. `required`, `optional`, `computed` map into the Override* pointers
+// so user values cleanly override the API-derived defaults). Internal runtime
+// fields — set by createRootItem / fillOptionalFields / recalcDeep — use an
+// underscore-prefixed tag (`_appearsIn`, `_required`, …) so a yaml round-trip
+// can deep-copy an Item without losing computed state, without clashing with
+// the user-facing keys, and without being settable from user YAML (the schema
+// validator rejects unknown keys, and underscore-prefixed names are reserved
+// for the generator). Only `Parent` is excluded (`yaml:"-"`) because it forms
+// a cycle; deepCopyItem re-wires it after unmarshal.
 type Item struct {
 	Parent              *Item     `yaml:"-"`
-	AppearsIn           AppearsIn `yaml:"-"` // In Create, Read, Update, Delete request or response
-	Name                string    `yaml:"-"`
-	IDAttribute         bool      `yaml:"-"` // If field is part of ID attribute or it is ID attribute
-	IDAttributePosition int       `yaml:"-"` // Position in the ID field
+	AppearsIn           AppearsIn `yaml:"_appearsIn,omitempty"` // In Create, Read, Update, Delete request or response
+	Name                string    `yaml:"_name,omitempty"`
+	IDAttribute         bool      `yaml:"_idAttribute,omitempty"` // If field is part of ID attribute or it is ID attribute
+	IDAttributePosition int       `yaml:"_idAttributePosition,omitempty"`
 
 	// Tagged fields are exposed to the Definition.yaml
-	Properties map[string]*Item `yaml:"properties"`
-	Items      *Item            `yaml:"items"` // Array item or Map item
+	Properties map[string]*Item `yaml:"properties,omitempty"`
+	Items      *Item            `yaml:"items,omitempty"` // Array item or Map item
 
 	// Inherited from the user definition and propagated to "Items";
 	// this simplifies generation logic, as both arrays and maps use "Items" similarly.
-	AdditionalProperties *Item `yaml:"additionalProperties"`
+	AdditionalProperties *Item `yaml:"additionalProperties,omitempty"`
 
 	// User-defined fields for YAML generation
-	OverrideRequired   *bool `yaml:"required"`
-	OverrideComputed   *bool `yaml:"computed"`
-	OverrideOptional   *bool `yaml:"optional"`
-	OverrideSensitive  *bool `yaml:"sensitive"`
-	OverrideForceNew   *bool `yaml:"forceNew"`
-	UseStateForUnknown bool  `yaml:"useStateForUnknown"`
-	WriteOnly          bool  `yaml:"writeOnly"`
-	DatasourceOnly     bool  `yaml:"datasourceOnly"`
+	OverrideRequired   *bool `yaml:"required,omitempty"`
+	OverrideComputed   *bool `yaml:"computed,omitempty"`
+	OverrideOptional   *bool `yaml:"optional,omitempty"`
+	OverrideSensitive  *bool `yaml:"sensitive,omitempty"`
+	OverrideForceNew   *bool `yaml:"forceNew,omitempty"`
+	UseStateForUnknown bool  `yaml:"useStateForUnknown,omitempty"`
+	WriteOnly          bool  `yaml:"writeOnly,omitempty"`
+
+	// FromSchemaOverride is an internal flag set during datasource.schemaOverride
+	// merging on every item the overlay touched. The datasource branch of
+	// IsRequired/IsOptional/IsComputed honours the merged Required/Optional/
+	// Computed values for these items so user-set Required/Optional/Computed
+	// (and the cascading effects of e.g. overriding an ID attribute to Optional)
+	// survive without being rewritten by the entity-aware default rules.
+	// Not user-settable from YAML.
+	FromSchemaOverride bool `yaml:"_fromSchemaOverride,omitempty"`
 
 	// TF Validators
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
-	ConflictsWith []string `yaml:"conflictsWith"`
-	ExactlyOneOf  []string `yaml:"exactlyOneOf"`
-	AtLeastOneOf  []string `yaml:"atLeastOneOf"`
-	AlsoRequires  []string `yaml:"alsoRequires"`
+	ConflictsWith []string `yaml:"conflictsWith,omitempty"`
+	ExactlyOneOf  []string `yaml:"exactlyOneOf,omitempty"`
+	AtLeastOneOf  []string `yaml:"atLeastOneOf,omitempty"`
+	AlsoRequires  []string `yaml:"alsoRequires,omitempty"`
 
-	JSONName           string     `yaml:"jsonName"`
-	Type               SchemaType `yaml:"type"`
-	Description        string     `yaml:"description"`
-	DeprecationMessage string     `yaml:"deprecationMessage"`
-	Pattern            string     `yaml:"pattern"`
-	Required           bool       `yaml:"-"`
-	Computed           bool       `yaml:"-"`
-	Virtual            bool       `yaml:"-"` // The field doesn't appear in API request/response. Only "id" for now.
-	Nullable           bool       `yaml:"-"`
-	Optional           bool       `yaml:"-"`
-	Sensitive          bool       `yaml:"-"`
-	ForceNew           bool       `yaml:"-"`
-	Default            any        `yaml:"default"`
-	Enum               []any      `yaml:"enum"`
-	MinLength          int        `yaml:"minLength"`
-	MaxLength          int        `yaml:"maxLength"`
-	MinItems           int        `yaml:"minItems"`
-	MaxItems           int        `yaml:"maxItems"`
-	Minimum            int        `yaml:"minimum"`
-	Maximum            int        `yaml:"maximum"`
-	Example            any        `yaml:"example"`
+	JSONName           string     `yaml:"jsonName,omitempty"`
+	Type               SchemaType `yaml:"type,omitempty"`
+	Description        string     `yaml:"description,omitempty"`
+	DeprecationMessage string     `yaml:"deprecationMessage,omitempty"`
+	Pattern            string     `yaml:"pattern,omitempty"`
+	Required           bool       `yaml:"_required,omitempty"`
+	Computed           bool       `yaml:"_computed,omitempty"`
+	Virtual            bool       `yaml:"_virtual,omitempty"` // The field doesn't appear in API request/response. Only "id" for now.
+	Nullable           bool       `yaml:"_nullable,omitempty"`
+	Optional           bool       `yaml:"_optional,omitempty"`
+	Sensitive          bool       `yaml:"_sensitive,omitempty"`
+	ForceNew           bool       `yaml:"_forceNew,omitempty"`
+	Default            any        `yaml:"default,omitempty"`
+	Enum               []any      `yaml:"enum,omitempty"`
+	MinLength          int        `yaml:"minLength,omitempty"`
+	MaxLength          int        `yaml:"maxLength,omitempty"`
+	MinItems           int        `yaml:"minItems,omitempty"`
+	MaxItems           int        `yaml:"maxItems,omitempty"`
+	Minimum            int        `yaml:"minimum,omitempty"`
+	Maximum            int        `yaml:"maximum,omitempty"`
+	Example            any        `yaml:"example,omitempty"`
 }
 
 // UniqueName generates unique name by composing all ancestor names
@@ -428,35 +370,50 @@ func (item *Item) Path() string {
 }
 
 func (item *Item) IsRequired(def *Definition, entity entityType) bool {
-	if entity.isResource() {
+	if entity.isResource() || item.FromSchemaOverride {
 		return item.Required
 	}
 
+	if item.Virtual {
+		return false
+	}
+
 	// ID attributes are required in data sources, except when they participate in the lookup set.
-	return item.IDAttribute && !item.isDatasourceLookupInput(def) && !slices.Contains(def.DatasourceLookupIDComposed(), item.Name)
+	return item.IDAttribute && !def.DatasourceLookupHas(item.Name)
 }
 
 func (item *Item) IsOptional(def *Definition, entity entityType) bool {
-	if entity.isResource() {
+	if entity.isResource() || item.FromSchemaOverride {
 		return item.Optional
 	}
 
-	return item.isDatasourceLookupInput(def) || item.Optional && item.DatasourceOnly
+	if item.Virtual {
+		return false
+	}
+
+	return def.DatasourceLookupHas(item.Name)
+}
+
+func (item *Item) IsComputed(def *Definition, entity entityType) bool {
+	if item.IsRoot() {
+		return false
+	}
+
+	if entity.isResource() || item.FromSchemaOverride {
+		return item.Computed
+	}
+
+	return !item.IsRequired(def, entity)
 }
 
 func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
-	if entity.isResource() {
-		return !item.Required && !item.Optional
-	}
-
-	// ID attributes are not read-only in data sources
 	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
 }
 
 func (item *Item) PropertiesByEntity(entity entityType) map[string]*Item {
 	props := maps.Clone(item.Properties)
 	for k, v := range item.Properties {
-		if entity == resourceType && v.DatasourceOnly || entity == datasourceType && v.WriteOnly {
+		if entity.IsDataSource() && v.WriteOnly {
 			delete(props, k)
 			for _, a := range v.AlsoRequires {
 				delete(props, a)

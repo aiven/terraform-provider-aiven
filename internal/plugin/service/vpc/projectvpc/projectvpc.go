@@ -10,7 +10,12 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
+
+func init() {
+	DataSourceOptions.Read = datasourceReadView
+}
 
 func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 	return func(_ adapter.ResourceData, dto map[string]any) error {
@@ -27,7 +32,7 @@ func refreshStateWaiter(ctx context.Context, client avngen.Client, d adapter.Res
 		func() error {
 			rsp, err := client.VpcGet(ctx, project, vpcID)
 			if err != nil {
-				return retry.Unrecoverable(err)
+				return err
 			}
 
 			if rsp.State == vpc.VpcStateTypeActive {
@@ -39,6 +44,7 @@ func refreshStateWaiter(ctx context.Context, client avngen.Client, d adapter.Res
 		retry.Context(ctx),
 		retry.Delay(common.DefaultStateChangeDelay),
 		retry.LastErrorOnly(true),
+		retry.RetryIf(avngen.IsNotFound), // Resource may not be available right after creation.
 	)
 }
 
@@ -66,4 +72,21 @@ func waitForDeletion(ctx context.Context, client avngen.Client, d adapter.Resour
 		retry.Delay(common.DefaultStateChangeDelay),
 		retry.LastErrorOnly(true),
 	)
+}
+
+func datasourceReadView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	vpcID := d.Get("vpc_id").(string)
+	if vpcID != "" {
+		project, vpcID, err := schemautil.SplitResourceID2(vpcID)
+		if err != nil {
+			return err
+		}
+		if err := d.Set("project", project); err != nil {
+			return err
+		}
+		if err := d.Set("project_vpc_id", vpcID); err != nil {
+			return err
+		}
+	}
+	return readView(ctx, client, d)
 }

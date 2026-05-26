@@ -5,11 +5,11 @@ package projectvpc
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -20,9 +20,9 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"cloud_name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.",
+				MarkdownDescription: "Target cloud. The field is required with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(256), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project"))},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -30,25 +30,28 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"network_cidr": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Network address range used by the VPC. For example, `192.168.0.0/24`.",
+				MarkdownDescription: "IPv4 network range CIDR.",
 			},
 			"project": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The name of the project this resource belongs to.",
+				MarkdownDescription: "Project name.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"project_vpc_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Project VPC ID.",
+				MarkdownDescription: "Project VPC ID. The field is required with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project"))},
 			},
 			"state": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Project VPC state. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.",
 			},
 			"vpc_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the VPC in `project/project_vpc_id` format. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.",
+				DeprecationMessage:  "This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.",
+				MarkdownDescription: "The ID of the VPC in `project/project_vpc_id` format. The field conflicts with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`. **Deprecated**: This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.",
 				Optional:            true,
+				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("project"))},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
@@ -66,7 +69,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"network_cidr": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"network_cidr": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"project": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,

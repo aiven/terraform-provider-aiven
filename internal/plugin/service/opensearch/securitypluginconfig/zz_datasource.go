@@ -56,7 +56,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,
 			},
-			"admin_password": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"admin_password": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"available": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,

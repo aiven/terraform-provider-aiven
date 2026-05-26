@@ -52,47 +52,6 @@ func TestGenGenericViewOperationWaitForDeletion(t *testing.T) {
 	require.Contains(t, got, "return waitForDeletion(ctx, client, d)")
 }
 
-func TestGenPopulateIDFieldsFromID(t *testing.T) {
-	operation := &Operation{
-		ID:   "VpcDelete",
-		Type: OperationDelete,
-	}
-	definition := &Definition{
-		typeName:            "aiven_project_vpc",
-		Resource:            &SchemaMeta{},
-		ClientHandler:       "vpc",
-		IDAttributeComposed: IDAttribute{Fields: []string{"project", "project_vpc_id"}, PopulateFieldsFromID: true},
-		Operations:          Operations{operation},
-	}
-
-	inPath := definition.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
-	item := &Item{
-		Properties: map[string]*Item{
-			"project": {
-				Name:                "project",
-				Type:                SchemaTypeString,
-				AppearsIn:           inPath,
-				IDAttributePosition: 0,
-			},
-			"project_vpc_id": {
-				Name:                "project_vpc_id",
-				Type:                SchemaTypeString,
-				AppearsIn:           inPath,
-				IDAttributePosition: 1,
-			},
-		},
-	}
-
-	view, err := genGenericView(definition, item, OperationDelete)
-	require.NoError(t, err)
-
-	got := renderCode(t, view, genPopulateIDFieldsFromID(definition))
-	require.Contains(t, got, "if err := populateIDFieldsFromID(d); err != nil")
-	require.Contains(t, got, "schemautil.SplitResourceID(d.ID(), len(fields))")
-	require.Contains(t, got, `fmt.Errorf("invalid aiven_project_vpc id %q: %w", d.ID(), err)`)
-	require.Contains(t, got, "d.Set(field, chunks[i])")
-}
-
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 

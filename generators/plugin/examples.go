@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -98,6 +97,10 @@ func getExampleItemPriority(def *Definition, entity entityType, item *Item) int 
 func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hclwrite.Body, inComputedBlock bool) error {
 	var seenComputed, seenOptional bool
 	conflictsWith := make(map[string]bool)
+	alternatives, err := datasourceAlternativeAttrs(def, entity, item)
+	if err != nil {
+		return err
+	}
 
 	for i, k := range sortedKeysPriority(def, entity, item) {
 		v := item.Properties[k]
@@ -107,16 +110,18 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			continue
 		}
 
-		// The field conflicts with an rendered property, skip it.
-		if conflictsWith[v.Name] {
+		// Lookup alternatives are exempt: they surface as commented hints below.
+		if conflictsWith[v.Name] && !alternatives[v.Name] {
 			continue
 		}
 
-		// Stores conflicts with other properties so the example doesn't render them.
 		for _, c := range v.ConflictsWith {
+			if alternatives[c] {
+				continue
+			}
 			conflictsWith[c] = true
-			for _, c := range item.Properties[c].AlsoRequires {
-				conflictsWith[c] = true
+			for _, sub := range item.Properties[c].AlsoRequires {
+				conflictsWith[sub] = true
 			}
 		}
 
@@ -231,9 +236,7 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 		}
 
 		fieldName := k
-		if hasLookup && (slices.Contains(def.DatasourceLookupComposedOf(), k) || v.isDatasourceLookupDerivedPathParam(def)) {
-			// Comments out composedOf alternatives so the example uses the primary id field
-			// and the validator does not complain about conflicting fields.
+		if alternatives[k] {
 			fieldName = "// " + k
 		}
 
@@ -343,25 +346,72 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 	return cty.NilVal, fmt.Errorf("unknown scalar type %q for %q", item.Type, item.Path())
 }
 
-// lookupExampleHint renders the inline HCL comment above the lookup block, mirroring
-// the validator contract. Assumes a datasourceLookup op is present.
-func lookupExampleHint(def *Definition, item *Item) string {
+// liveExactlyOneOf returns the non-deprecated members of
+// `def.Datasource.ExactlyOneOf` in YAML order. Errors when a listed name
+// does not exist on the root.
+func liveExactlyOneOf(def *Definition, root *Item) ([]string, error) {
+	var live []string
+	for _, name := range def.Datasource.ExactlyOneOf {
+		p, ok := root.Properties[name]
+		if !ok {
+			return nil, fmt.Errorf("datasource.exactlyOneOf references unknown attribute %q on %s", name, def.typeName)
+		}
+		if p.DeprecationMessage == "" {
+			live = append(live, name)
+		}
+	}
+	return live, nil
+}
+
+// lookupExampleHint renders the HCL comment above the lookup block, mirroring
+// the validator contract: `datasource.exactlyOneOf` when set, otherwise the
+// lookup id and composedOf keys from the read op. Returns an empty string
+// when fewer than two non-deprecated exactlyOneOf members remain — there's
+// no real choice to advertise.
+func lookupExampleHint(def *Definition, root *Item) string {
+	if len(def.Datasource.ExactlyOneOf) > 0 {
+		live, _ := liveExactlyOneOf(def, root)
+		if len(live) < 2 {
+			return ""
+		}
+		return fmt.Sprintf("// LOOKUP — exactly one of: %s", humanizeCodeList(live, " or "))
+	}
 	id := def.DatasourceLookupID()
 	composedOf := def.DatasourceLookupComposedOf()
-	if def.hasDatasourceLookupAlias() {
-		op := def.DatasourceLookupOp()
-		lookupPathParams := filterAppearsIn(
-			slices.Collect(maps.Values(item.Properties)),
-			def.Operations.AppearsInID(op.ID, op.Type, PathParameter),
-		)
-		for _, v := range lookupPathParams {
-			composedOf = append(composedOf, v.Name)
-		}
-		slices.Sort(composedOf)
-		composedOf = slices.Compact(composedOf)
-	}
 	if len(composedOf) == 1 {
 		return fmt.Sprintf("// LOOKUP — provide `%s` or %s", id, humanizeCodeList(composedOf, " and "))
 	}
 	return fmt.Sprintf("// LOOKUP — provide `%s`, or all of: %s", id, humanizeCodeList(composedOf, " and "))
+}
+
+// datasourceAlternativeAttrs returns root-level attribute names rendered as
+// commented hints. When `datasource.exactlyOneOf` is set it is authoritative:
+// every non-deprecated member except the first (the primary) becomes an
+// alternative. Otherwise we fall back to the lookup op's composedOf keys.
+// composedOf is intentionally ignored when exactlyOneOf is set so a key that
+// appears in both (e.g. resultListLookupKeys → cloud_name and live[0]) is not
+// demoted to a commented alternative, which would leave the LOOKUP block with
+// no uncommented primary.
+func datasourceAlternativeAttrs(def *Definition, entity entityType, item *Item) (map[string]bool, error) {
+	out := make(map[string]bool)
+	if entity.isResource() || !item.IsRoot() {
+		return out, nil
+	}
+	live, err := liveExactlyOneOf(def, item)
+	if err != nil {
+		return nil, err
+	}
+	var list []string
+	switch len(live) {
+	case 1:
+		// no alternatives if only one; leave list empty
+	case 0:
+		list = def.DatasourceLookupComposedOf()
+	default:
+		list = live[1:]
+	}
+	for _, name := range list {
+		out[name] = true
+	}
+	return out, nil
 }

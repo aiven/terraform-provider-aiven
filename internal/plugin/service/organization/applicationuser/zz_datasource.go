@@ -68,16 +68,16 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,
 			},
-			"name":            &adapter.Schema{Type: adapter.SchemaTypeString},
+			"name": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
 			},
-			"user_id": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
+			"user_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

@@ -5,7 +5,6 @@ package projectvpc
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -21,7 +20,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"cloud_name": schema.StringAttribute{
-				MarkdownDescription: "The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Maximum length: `256`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Target cloud. Maximum length: `256`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
@@ -32,16 +31,15 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"network_cidr": schema.StringAttribute{
-				MarkdownDescription: "Network address range used by the VPC. For example, `192.168.0.0/24`. Maximum length: `18`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "IPv4 network range CIDR. Maximum length: `18`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
 			},
 			"project": schema.StringAttribute{
-				MarkdownDescription: "The name of the project this resource belongs to. Must match pattern: `^[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Project name. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"project_vpc_id": schema.StringAttribute{
 				Computed:            true,

@@ -14,16 +14,14 @@ Gets information about the VPC for an Aiven project.
 
 ```terraform
 data "aiven_project_vpc" "example" {
-
-  // LOOKUP — provide `vpc_id`, or all of: `cloud_name` and `project`
-  // project    = "my-project"
-  vpc_id        = "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
-  // cloud_name = "aws-eu-central-1"
+  // LOOKUP — exactly one of: `project_vpc_id` or `cloud_name`
+  project        = "my-project"
+  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  // cloud_name  = "aws-eu-central-1"
 
   /* COMPUTED FIELDS
-  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
-  network_cidr   = "192.168.6.0/24"
-  state          = "ACTIVE"
+  network_cidr = "192.168.6.0/24"
+  state        = "ACTIVE"
   */
 }
 ```
@@ -33,16 +31,16 @@ data "aiven_project_vpc" "example" {
 
 ### Optional
 
-- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.
-- `project` (String) The name of the project this resource belongs to.
+- `cloud_name` (String) Target cloud. The field is required with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`.
+- `project` (String) Project name.
+- `project_vpc_id` (String) Project VPC ID. The field is required with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `vpc_id` (String) The ID of the VPC in `project/project_vpc_id` format. Exactly one of the fields must be specified: `vpc_id` or `cloud_name`.
+- `vpc_id` (String, Deprecated) The ID of the VPC in `project/project_vpc_id` format. The field conflicts with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`. **Deprecated**: This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.
 
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/project_vpc_id`.
-- `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
-- `project_vpc_id` (String) Project VPC ID.
+- `network_cidr` (String) IPv4 network range CIDR.
 - `state` (String) Project VPC state. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
 
 <a id="nestedblock--timeouts"></a>

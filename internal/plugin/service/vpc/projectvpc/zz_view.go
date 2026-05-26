@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	schemautil "github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 const typeName = "aiven_project_vpc"
@@ -61,23 +60,6 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	if _, exists := d.Schema().Properties["vpc_id"]; exists {
-		if v, ok := d.GetOk("vpc_id"); ok {
-			parts, err := schemautil.SplitResourceID(v.(string), 2)
-			if err != nil {
-				return fmt.Errorf("invalid vpc_id, expected format project/project_vpc_id: %w", err)
-			}
-			if err := d.Set("project", parts[0]); err != nil {
-				return err
-			}
-			if err := d.Set("project_vpc_id", parts[1]); err != nil {
-				return err
-			}
-		}
-	}
-	if err := populateIDFieldsFromID(d); err != nil {
-		return err
-	}
 	if d.Get("project_vpc_id").(string) == "" {
 		rsp, err := client.VpcList(ctx, d.Get("project").(string))
 		if err != nil {
@@ -101,9 +83,6 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	if err := populateIDFieldsFromID(d); err != nil {
-		return err
-	}
 	_, err := client.VpcDelete(ctx, d.Get("project").(string), d.Get("project_vpc_id").(string))
 	if err != nil {
 		return err
@@ -111,39 +90,12 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 	return waitForDeletion(ctx, client, d)
 }
 
-func populateIDFieldsFromID(d adapter.ResourceData) error {
-	if d.ID() == "" {
-		return nil
-	}
-	fields := idFields()
-	chunks, err := schemautil.SplitResourceID(d.ID(), len(fields))
-	if err != nil {
-		return fmt.Errorf("invalid aiven_project_vpc id %q: %w", d.ID(), err)
-	}
-	for i, field := range fields {
-		if d.Get(field).(string) != "" {
-			continue
-		}
-		if err := d.Set(field, chunks[i]); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
 	return []datasource.ConfigValidator{
 		datasourcevalidator.ExactlyOneOf(
-			path.MatchRoot("vpc_id"),
+			path.MatchRoot("project_vpc_id"),
 			path.MatchRoot("cloud_name"),
-		),
-		datasourcevalidator.RequiredTogether(
-			path.MatchRoot("cloud_name"),
-			path.MatchRoot("project"),
-		),
-		datasourcevalidator.Conflicting(
 			path.MatchRoot("vpc_id"),
-			path.MatchRoot("project"),
 		),
 	}
 }

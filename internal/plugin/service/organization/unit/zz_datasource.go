@@ -65,7 +65,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"parent_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"parent_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"tenant_id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
