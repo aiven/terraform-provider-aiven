@@ -17,6 +17,19 @@ nav_order: 1
 - Deprecate `aiven_billing_group` resource and data source: use `aiven_organization_billing_group` instead.
 - Add `aiven_mysql` field `mysql_user_config.mysql.performance_schema_events_statements_history_size`: The number of rows
   per thread in the events_statements_history table
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.consumer_fetch_max_bytes`:
+  The maximum amount of data the server should return for a fetch request.
+- Add `aiven_service_integration` field
+  `kafka_mirrormaker_user_config.kafka_mirrormaker.consumer_max_partition_fetch_bytes`: The maximum amount of data
+  per partition the server will return.
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.consumer_receive_buffer_bytes`:
+  The size of the TCP receive buffer (SO_RCVBUF) to use when reading data
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.consumer_request_timeout_ms`:
+  The maximum time the client will wait for a response to a request
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.producer_request_timeout_ms`:
+  The maximum time the client will wait for a response to a request
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.producer_send_buffer_bytes`:
+  The size of the TCP send buffer (SO_SNDBUF) to use when sending data
 
 ## [4.57.0] - 2026-05-19
 
