@@ -195,7 +195,15 @@ operations:
                                     # the id, then control falls through to the canonical
                                     # read body in the same readView. Requires
                                     # datasourceLookup + resultListLookupKeys.
-    resultKey: nested_field          # Extract from response.nested_field
+    resultKey: nested_field          # Extract from response.nested_field (schema/JSON path,
+                                     # used at generation time to scope the OpenAPI schema)
+    resultKeyField: GoField          # Go field name on the client response to drill into at
+                                     # runtime, e.g. d.Flatten(rsp.GoField). Use when the Go
+                                     # client doesn't strip an extra wrapper exposed by the API
+                                     # (response is {accessors: {aws: {...}}} but the client
+                                     # returns *CMKAccessorsListOut, so set resultKeyField: Aws).
+                                     # When combined with resultListLookupKeys, points at the
+                                     # list to search (e.g. resultKeyField: ConnectionPools).
     resultToKey: wrapper_key         # Wrap response as {wrapper_key: ...}
     resultListLookupKeys:            # For list responses
       APIField: terraform_field      # Match items by field

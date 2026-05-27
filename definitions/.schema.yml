@@ -215,9 +215,17 @@ definitions:
         $comment: |
           The key to extract the result object from the response (if the API nests result under a property)
           E.g.: resultKey: "result" retrieves response.result
-      resultListLookup:
+      resultKeyField:
         type: string
-        $comment: The name of the list to lookup the item in the response
+        $comment: |
+          Go field name on the client response struct to drill into before further processing.
+          Use when the API nests the actual resource (or the list of candidates) under an
+          extra wrapper that the Go client does not strip.
+          Examples:
+            - resultKeyField: "Aws" with no resultListLookupKeys -> d.Flatten(rsp.Aws)
+              (single nested object, e.g. {accessors: {aws: {...}}}).
+            - resultKeyField: "ConnectionPools" with resultListLookupKeys -> the list
+              `rsp.ConnectionPools` is searched by the lookup keys to find the item.
       resultListLookupKeys:
         type: object
         additionalProperties:

@@ -10,6 +10,7 @@ operations:
   - id: CMKAccessorsList
     type: read
     resultKey: accessors/azure
+    resultKeyField: Azure
 schema:
   app_id:
     description: The Azure application ID that Aiven uses to access your Key Vault.

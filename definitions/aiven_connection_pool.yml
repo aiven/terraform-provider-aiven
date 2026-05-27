@@ -21,7 +21,7 @@ operations:
   - id: ServiceGet
     type: read
     resultKey: service/connection_pools
-    resultListLookup: ConnectionPools
+    resultKeyField: ConnectionPools
     resultListLookupKeys:
       PoolName: pool_name
 schema:

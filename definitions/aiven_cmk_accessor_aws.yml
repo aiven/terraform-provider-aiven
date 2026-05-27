@@ -10,6 +10,7 @@ operations:
   - id: CMKAccessorsList
     type: read
     resultKey: accessors/aws
+    resultKeyField: Aws
 schema:
   principal:
     description: The AWS IAM principal ARN that Aiven uses to access your KMS key.
