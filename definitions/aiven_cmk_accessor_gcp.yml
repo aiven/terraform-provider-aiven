@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/cmk/accessor/gcp
+datasource:
+  description: |
+    Gets the GCP CMK accessor for an Aiven project.
+    The accessor is used to authenticate Aiven to your Google Cloud Key Management Service (KMS).
+clientHandler: cmk
+idAttributeComposed: [project]
+operations:
+  - id: CMKAccessorsList
+    type: read
+    resultKey: accessors/gcp
+schema:
+  access_group:
+    description: The GCP access group that Aiven uses to access your Cloud KMS key.
