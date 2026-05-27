@@ -10,6 +10,7 @@ operations:
   - id: CMKAccessorsList
     type: read
     resultKey: accessors/oci
+    resultKeyField: Oci
 schema:
   access_group:
     description: The OCI access group that Aiven uses to access your OCI Vault key.

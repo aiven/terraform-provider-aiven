@@ -72,7 +72,7 @@ type Operation struct {
 	DatasourceLookup     bool              `yaml:"datasourceLookup"`     // Inline this read op as the data source readView's id-empty branch (lookup by alternative key). Not wired into resource views.
 	ResultIDField        string            `yaml:"resultIDField"`        // Go field name on the lookup result item that holds the primary id. When set on a datasourceLookup op, the lookup resolves the id and control falls through to the canonical read body in the same readView.
 	ResultKey            string            `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
-	ResultListLookup     string            `yaml:"resultListLookup"`     // The list name to lookup the item in the response
+	ResultKeyField       string            `yaml:"resultKeyField"`       // Go field name on the client response struct to drill into before further processing. Combined with resultListLookupKeys it points at the list to search; otherwise it points at the inner object to flatten. E.g.: "Aws" emits d.Flatten(rsp.Aws).
 	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`

@@ -10,6 +10,7 @@ operations:
   - id: CMKAccessorsList
     type: read
     resultKey: accessors/gcp
+    resultKeyField: Gcp
 schema:
   access_group:
     description: The GCP access group that Aiven uses to access your Cloud KMS key.

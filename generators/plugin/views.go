@@ -331,25 +331,29 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		return v
 	}
 
+	// rspCode is the response expression, optionally traversed by
+	// ResultKeyField (e.g. rsp.Aws or rsp.ConnectionPools) when the Go
+	// client doesn't strip an extra wrapper exposed by the API.
+	rspCode := jen.Id(rspName)
+	if operation.ResultKeyField != "" {
+		rspCode.Dot(operation.ResultKeyField)
+	}
+
 	// Wraps the result into a map by the specified key
 	if operation.ResultToKey != "" {
 		m := jen.Op("&").Map(jen.String()).Any()
-		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultToKey): jen.Id(rspName)})))
+		g.Add(flatten(m.Values(jen.Dict{jen.Lit(operation.ResultToKey): rspCode})))
 		return nil
 	}
 
 	// Flattens the response directly, because it is not a list but an object
 	if len(operation.ResultListLookupKeys) == 0 {
-		g.Add(flatten(jen.Id(rspName)))
+		g.Add(flatten(rspCode))
 		return nil
 	}
 
 	// Finds a match in the list.
 	// E.g. rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
-	rspCode := jen.Id(rspName)
-	if operation.ResultListLookup != "" {
-		rspCode.Dot(operation.ResultListLookup)
-	}
 
 	var fieldsMatch jen.Statement
 	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
