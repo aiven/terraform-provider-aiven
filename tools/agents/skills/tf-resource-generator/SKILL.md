@@ -8,6 +8,16 @@ allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task
 
 Generate new Terraform resources and data sources by learning from existing patterns in the codebase.
 
+## Tooling Rule (read first)
+
+Always drive generation, formatting, and linting through Task:
+
+- `task generate` — generates code and runs `task fmt` automatically at the end
+- `task fmt` — formats Go, Terraform, and whitespace
+- `task lint` — runs all linters
+
+Do NOT use `go run ./generators/...`, `go generate`, `gofmt`, `goimports`, `golangci-lint`, or `make` for these workflows. See `AGENTS.md` and `Taskfile.dist.yml` (run `task --list`) for the full command surface.
+
 ## Overview
 
 The generator creates Terraform resources by combining:
