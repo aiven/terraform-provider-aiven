@@ -65,8 +65,11 @@ func TestLimitedAvailabilitySchemaDescription(t *testing.T) {
 }
 
 func TestLimitedAvailabilityViewOptions(t *testing.T) {
+	code, err := genNewResource(resourceType, &Definition{LimitedAvailability: lo.ToPtr(true), Resource: &SchemaMeta{}}, &Item{}, false)
+	require.NoError(t, err)
+
 	file := jen.NewFile("test")
-	file.Add(genNewResource(resourceType, &Definition{LimitedAvailability: lo.ToPtr(true), Resource: &SchemaMeta{}}, false))
+	file.Add(code)
 
 	var b bytes.Buffer
 	require.NoError(t, file.Render(&b))

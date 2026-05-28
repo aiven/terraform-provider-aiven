@@ -172,11 +172,15 @@ Common fields:
 resource:
   description: "..."
   deprecationMessage: "..."
-  terminationProtection: true       # Check field before delete
-  refreshState: true                # Call Read after Create/Update
-  refreshStateDelay: "15s"          # Wait before Read
-  removeMissing: true               # Remove from state on 404
+  terminationProtection: true # Check field before delete
+  refreshState: true # Call Read after Create/Update
+  refreshStateDelay: "15s" # Wait before Read
+  refreshStateDesired: # Retry Read until fields match desired values
+    state: ACTIVE
+  removeMissing: true # Remove from state on 404
 ```
+
+`refreshStateDesired` replaces ad-hoc refresh waiters for simple state transitions. Use it when the resource should settle into a known value after create/update (for example, `state: ACTIVE`).
 
 ### Datasource Configuration
 
@@ -269,6 +273,7 @@ var ResourceOptions = adapter.ResourceOptions{
     Read:              readView,
     RefreshState:      true,
     RefreshStateDelay: adapter.MustParseDuration("15s"),
+    RefreshStateDesired: map[string]string{"state": "ACTIVE"},
     RemoveMissing:     true,
     Schema:            resourceSchema,
     SchemaInternal:    resourceSchemaInternal(),

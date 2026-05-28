@@ -23,7 +23,6 @@ const (
 	renameFieldsModifier       = "RenameFields"
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
-	refreshStateWaiter         = "refreshStateWaiter"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -41,7 +40,11 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 
 	builders := make([]jen.Code, 0)
 	if def.Resource != nil {
-		builders = append(builders, genNewResource(resourceType, def, false))
+		v, err := genNewResource(resourceType, def, item, false)
+		if err != nil {
+			return nil, fmt.Errorf("resource builder error: %w", err)
+		}
+		builders = append(builders, v)
 	}
 
 	if def.Datasource != nil {
@@ -52,14 +55,18 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 			codes = append(codes, datasourceLookupValidators(def))
 		}
 
-		builders = append(builders, genNewResource(datasourceType, def, hasConfigValidators))
+		v, err := genNewResource(datasourceType, def, item, hasConfigValidators)
+		if err != nil {
+			return nil, fmt.Errorf("datasource builder error: %w", err)
+		}
+		builders = append(builders, v)
 	}
 
 	return append(builders, codes...), nil
 }
 
 // genNewResource generates NewResource or NewDatasource function
-func genNewResource(entity entityType, def *Definition, hasConfigValidators bool) jen.Code {
+func genNewResource(entity entityType, def *Definition, item *Item, hasConfigValidators bool) (jen.Code, error) {
 	// Resource might have multiple read operations.
 	// We use here a dict, so we don't need to handle duplicates.
 	values := map[string]jen.Code{
@@ -98,8 +105,20 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(def.Resource.RefreshStateDelay.String()))
 			}
 
-			if def.Resource.RefreshStateWaiter {
-				values["RefreshStateWaiter"] = jen.Id(refreshStateWaiter)
+			if len(def.Resource.RefreshStateDesired) > 0 {
+				dict := make(jen.Dict, len(def.Resource.RefreshStateDesired))
+				for _, k := range sortedKeys(def.Resource.RefreshStateDesired) {
+					want := def.Resource.RefreshStateDesired[k]
+					prop, ok := item.Properties[k]
+					if !ok {
+						return nil, fmt.Errorf("refreshStateDesired: unknown field %q (not present in schema)", k)
+					}
+					if prop.IsEnum() && !enumContainsString(prop.Enum, want) {
+						return nil, fmt.Errorf("refreshStateDesired: field %q has enum %v but desired value %q is not allowed", k, prop.Enum, want)
+					}
+					dict[jen.Lit(k)] = jen.Lit(want)
+				}
+				values["RefreshStateDesired"] = jen.Map(jen.String()).String().Values(dict)
 			}
 		}
 
@@ -130,7 +149,14 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 
 	title := entity.Title() + optionsSuffix
 	returnValue := jen.Qual(adapterPackage, title).Values(dictFromMap(values, false))
-	return jen.Var().Id(title).Op("=").Add(returnValue)
+	return jen.Var().Id(title).Op("=").Add(returnValue), nil
+}
+
+// enumContainsString reports whether enum contains want under fmt.Sprint comparison.
+// Matches the runtime semantics of adapter.Equal so generator-time validation and
+// the runtime RefreshStateDesired check agree on equality.
+func enumContainsString(enum []any, want string) bool {
+	return slices.ContainsFunc(enum, func(v any) bool { return fmt.Sprint(v) == want })
 }
 
 func genGenericView(def *Definition, item *Item, operation OperationType) (jen.Code, error) {
