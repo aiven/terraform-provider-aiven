@@ -2,11 +2,14 @@
 
 Reusable skill definitions for AI coding assistants. Each skill provides structured instructions for common development tasks in this repository.
 
+Repo-wide conventions (tooling, where new code goes) live in [`AGENTS.md`](../../../AGENTS.md) at the repo root and are auto-loaded by most agents. The skills here are the deep references for resource generation and migration specifically.
+
 ## Available Skills
 
 | Skill | Description |
 |-------|-------------|
 | [tf-resource-generator](./tf-resource-generator/SKILL.md) | Generate new Terraform resources and data sources from YAML definitions and OpenAPI specs |
+| [tf-resource-migration](./tf-resource-migration/SKILL.md) | Migrate existing SDK-based resources to the Plugin Framework while preserving state and behavior |
 
 ## Usage
 

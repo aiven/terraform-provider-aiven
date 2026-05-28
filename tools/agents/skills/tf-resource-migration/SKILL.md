@@ -8,6 +8,16 @@ allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task
 
 Migrate existing SDK-based resources to Plugin Framework while maintaining state compatibility and behavior parity.
 
+## Tooling Rule (read first)
+
+Always drive generation, formatting, and linting through Task:
+
+- `task generate` — generates code and runs `task fmt` automatically at the end
+- `task fmt` — formats Go, Terraform, and whitespace
+- `task lint` — runs all linters
+
+Do NOT use `go run ./generators/...`, `go generate`, `gofmt`, `goimports`, `golangci-lint`, or `make` for these workflows. See `AGENTS.md` and `Taskfile.dist.yml` (run `task --list`) for the full command surface.
+
 ## Overview
 
 This skill guides migration of resources from:
