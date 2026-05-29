@@ -28,13 +28,33 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
+					"consumer_fetch_max_bytes": {
+						Description: "The maximum amount of data the server should return for a fetch request.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"consumer_fetch_min_bytes": {
 						Description: "The minimum amount of data the server should return for a fetch request. Example: `1024`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"consumer_max_partition_fetch_bytes": {
+						Description: "The maximum amount of data per partition the server will return.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"consumer_max_poll_records": {
 						Description: "Set consumer max.poll.records. The default is 500. Example: `500`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"consumer_receive_buffer_bytes": {
+						Description: "The size of the TCP receive buffer (SO_RCVBUF) to use when reading data. -1 uses the OS default. Example: `65536`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"consumer_request_timeout_ms": {
+						Description: "The maximum time the client will wait for a response to a request. Example: `30000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -61,6 +81,16 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 					},
 					"producer_max_request_size": {
 						Description: "The maximum request size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"producer_request_timeout_ms": {
+						Description: "The maximum time the client will wait for a response to a request. Example: `30000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"producer_send_buffer_bytes": {
+						Description: "The size of the TCP send buffer (SO_SNDBUF) to use when sending data. -1 uses the OS default. Example: `131072`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
