@@ -45,7 +45,7 @@ operations:
       CloudName: cloud_name
   - id: VpcDelete
     type: delete
-    waitForDeletion: true
+    disableView: true
 remove:
   - create_time
   - peering_connections

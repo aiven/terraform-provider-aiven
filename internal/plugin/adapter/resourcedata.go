@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/samber/lo"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 const idField = "id"

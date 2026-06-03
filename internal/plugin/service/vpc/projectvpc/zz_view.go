@@ -82,14 +82,6 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	return d.Flatten(rsp)
 }
 
-func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	_, err := client.VpcDelete(ctx, d.Get("project").(string), d.Get("project_vpc_id").(string))
-	if err != nil {
-		return err
-	}
-	return waitForDeletion(ctx, client, d)
-}
-
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {
 	return []datasource.ConfigValidator{
 		datasourcevalidator.ExactlyOneOf(

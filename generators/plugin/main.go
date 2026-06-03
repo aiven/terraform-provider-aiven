@@ -698,18 +698,6 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 		// At most one datasourceLookup read op so DatasourceLookupOp stays a single-op getter.
 		var lookupOp *Operation
 		for _, op := range def.Operations {
-			if op.WaitForDeletion {
-				if op.Type != OperationDelete {
-					return nil, fmt.Errorf("definition %q: operation %q uses waitForDeletion, but only delete operations support it", name, op.ID)
-				}
-				if def.Resource == nil {
-					return nil, fmt.Errorf("definition %q: operation %q uses waitForDeletion without a resource", name, op.ID)
-				}
-				if op.DisableView {
-					return nil, fmt.Errorf("definition %q: operation %q uses waitForDeletion, but view generation is disabled", name, op.ID)
-				}
-			}
-
 			if op.Type != OperationRead || op.DisableView || !op.DatasourceLookup {
 				continue
 			}

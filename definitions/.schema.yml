@@ -209,10 +209,6 @@ definitions:
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
-      waitForDeletion:
-        type: boolean
-        $comment: |
-          Call the package's waitForDeletion(ctx, client, d) function after a successful delete operation.
       datasourceLookup:
         type: boolean
         $comment: |

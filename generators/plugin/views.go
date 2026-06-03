@@ -24,7 +24,6 @@ const (
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
 	refreshStateWaiter         = "refreshStateWaiter"
-	waitForDeletion            = "waitForDeletion"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -208,10 +207,6 @@ func emitPlanModifier(g *jen.Group, def *Definition) {
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 }
 
-func genWaitForDeletionCall() *jen.Statement {
-	return jen.Id(waitForDeletion).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
-}
-
 func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Definition, item *Item, operation *Operation) error {
 	if operation.DatasourceLookup && len(operation.ResultListLookupKeys) == 0 {
 		return fmt.Errorf("datasourceLookup operation %q must declare resultListLookupKeys for filtering", operation.ID)
@@ -257,7 +252,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	// otherwise "rsp, err :="
 	var clientCall *jen.Statement
 	switch {
-	case mustReturnResult && !operation.WaitForDeletion:
+	case mustReturnResult:
 		clientCall = jen.Return()
 	case funcIndex == 0:
 		clientCall = jen.Err().Op(":=")
@@ -305,21 +300,11 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	)
 
 	if mustReturnResult {
-		if operation.WaitForDeletion {
-			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
-			g.Return().Add(genWaitForDeletionCall())
-		}
 		return nil
 	}
 
 	if !hasResponse || operation.Type == OperationDelete {
-		if !operation.WaitForDeletion {
-			g.Return().Err()
-			return nil
-		}
-
-		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
-		g.Return().Add(genWaitForDeletionCall())
+		g.Return().Err()
 		return nil
 	}
 

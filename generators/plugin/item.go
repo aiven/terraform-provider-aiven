@@ -69,7 +69,6 @@ type Operation struct {
 	ID                   OperationID       `yaml:"id"`
 	Type                 OperationType     `yaml:"type"`
 	DisableView          bool              `yaml:"disableView"`
-	WaitForDeletion      bool              `yaml:"waitForDeletion"`
 	DatasourceLookup     bool              `yaml:"datasourceLookup"`     // Inline this read op as the data source readView's id-empty branch (lookup by alternative key). Not wired into resource views.
 	ResultIDField        string            `yaml:"resultIDField"`        // Go field name on the lookup result item that holds the primary id. When set on a datasourceLookup op, the lookup resolves the id and control falls through to the canonical read body in the same readView.
 	ResultKey            string            `yaml:"resultKey"`            // E.g.: {errors: [], result: {}} - extract "result"
