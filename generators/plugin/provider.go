@@ -10,7 +10,7 @@ func genEntityProvider(file *jen.File, entity entityType, definitions []*Definit
 	title := entity.Title()
 	values := make(jen.Dict)
 	for _, def := range definitions {
-		if entity == datasourceType && def.Datasource == nil || entity == resourceType && def.Resource == nil {
+		if entity.IsDataSource() && def.Datasource == nil || entity == resourceType && def.Resource == nil {
 			continue
 		}
 

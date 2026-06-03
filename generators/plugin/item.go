@@ -144,6 +144,16 @@ type SchemaMeta struct {
 	DisableExample        bool          `yaml:"disableExample,omitempty"`
 	ValidateConfig        bool          `yaml:"validateConfig,omitempty"`
 	ModifyPlan            bool          `yaml:"modifyPlan,omitempty"`
+
+	// SchemaOverride is a datasource-only schema overlay merged on top of the
+	// base Definition.Schema when generating the datasource. Resource
+	// generation ignores this field. Only meaningful on Definition.Datasource.
+	SchemaOverride map[string]*Item `yaml:"schemaOverride,omitempty"`
+
+	// ExactlyOneOf declares the datasource's top-level "exactly one of"
+	// discriminator group. Drives the example LOOKUP hint and the
+	// `datasourcevalidator.ExactlyOneOf` block in datasourceConfigValidators.
+	ExactlyOneOf []string `yaml:"exactlyOneOf,omitempty"`
 }
 
 type Definition struct {
@@ -216,59 +226,79 @@ func (d *Definition) DatasourceLookupHas(name string) bool {
 	return slices.Contains(d.DatasourceLookupComposedOf(), name)
 }
 
+// Item carries every piece of information the generator needs about a single
+// schema node (root, property, array element, map value). Public-facing
+// `yaml:"..."` tags mirror the keys users write in definition YAML files
+// (e.g. `required`, `optional`, `computed` map into the Override* pointers
+// so user values cleanly override the API-derived defaults). Internal runtime
+// fields — set by createRootItem / fillOptionalFields / recalcDeep — use an
+// underscore-prefixed tag (`_appearsIn`, `_required`, …) so a yaml round-trip
+// can deep-copy an Item without losing computed state, without clashing with
+// the user-facing keys, and without being settable from user YAML (the schema
+// validator rejects unknown keys, and underscore-prefixed names are reserved
+// for the generator). Only `Parent` is excluded (`yaml:"-"`) because it forms
+// a cycle; deepCopyItem re-wires it after unmarshal.
 type Item struct {
 	Parent              *Item     `yaml:"-"`
-	AppearsIn           AppearsIn `yaml:"-"` // In Create, Read, Update, Delete request or response
-	Name                string    `yaml:"-"`
-	IDAttribute         bool      `yaml:"-"` // If field is part of ID attribute or it is ID attribute
-	IDAttributePosition int       `yaml:"-"` // Position in the ID field
+	AppearsIn           AppearsIn `yaml:"_appearsIn,omitempty"` // In Create, Read, Update, Delete request or response
+	Name                string    `yaml:"_name,omitempty"`
+	IDAttribute         bool      `yaml:"_idAttribute,omitempty"` // If field is part of ID attribute or it is ID attribute
+	IDAttributePosition int       `yaml:"_idAttributePosition,omitempty"`
 
 	// Tagged fields are exposed to the Definition.yaml
-	Properties map[string]*Item `yaml:"properties"`
-	Items      *Item            `yaml:"items"` // Array item or Map item
+	Properties map[string]*Item `yaml:"properties,omitempty"`
+	Items      *Item            `yaml:"items,omitempty"` // Array item or Map item
 
 	// Inherited from the user definition and propagated to "Items";
 	// this simplifies generation logic, as both arrays and maps use "Items" similarly.
-	AdditionalProperties *Item `yaml:"additionalProperties"`
+	AdditionalProperties *Item `yaml:"additionalProperties,omitempty"`
 
 	// User-defined fields for YAML generation
-	OverrideRequired   *bool `yaml:"required"`
-	OverrideComputed   *bool `yaml:"computed"`
-	OverrideOptional   *bool `yaml:"optional"`
-	OverrideSensitive  *bool `yaml:"sensitive"`
-	OverrideForceNew   *bool `yaml:"forceNew"`
-	UseStateForUnknown bool  `yaml:"useStateForUnknown"`
-	WriteOnly          bool  `yaml:"writeOnly"`
-	DatasourceOnly     bool  `yaml:"datasourceOnly"`
+	OverrideRequired   *bool `yaml:"required,omitempty"`
+	OverrideComputed   *bool `yaml:"computed,omitempty"`
+	OverrideOptional   *bool `yaml:"optional,omitempty"`
+	OverrideSensitive  *bool `yaml:"sensitive,omitempty"`
+	OverrideForceNew   *bool `yaml:"forceNew,omitempty"`
+	UseStateForUnknown bool  `yaml:"useStateForUnknown,omitempty"`
+	WriteOnly          bool  `yaml:"writeOnly,omitempty"`
+
+	// FromSchemaOverride is an internal flag set during datasource.schemaOverride
+	// merging on every item the overlay touched. The datasource branch of
+	// IsRequired/IsOptional/IsComputed honours the merged Required/Optional/
+	// Computed values for these items so user-set Required/Optional/Computed
+	// (and the cascading effects of e.g. overriding an ID attribute to Optional)
+	// survive without being rewritten by the entity-aware default rules.
+	// Not user-settable from YAML.
+	FromSchemaOverride bool `yaml:"_fromSchemaOverride,omitempty"`
 
 	// TF Validators
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#background
-	ConflictsWith []string `yaml:"conflictsWith"`
-	ExactlyOneOf  []string `yaml:"exactlyOneOf"`
-	AtLeastOneOf  []string `yaml:"atLeastOneOf"`
-	AlsoRequires  []string `yaml:"alsoRequires"`
+	ConflictsWith []string `yaml:"conflictsWith,omitempty"`
+	ExactlyOneOf  []string `yaml:"exactlyOneOf,omitempty"`
+	AtLeastOneOf  []string `yaml:"atLeastOneOf,omitempty"`
+	AlsoRequires  []string `yaml:"alsoRequires,omitempty"`
 
-	JSONName           string     `yaml:"jsonName"`
-	Type               SchemaType `yaml:"type"`
-	Description        string     `yaml:"description"`
-	DeprecationMessage string     `yaml:"deprecationMessage"`
-	Pattern            string     `yaml:"pattern"`
-	Required           bool       `yaml:"-"`
-	Computed           bool       `yaml:"-"`
-	Virtual            bool       `yaml:"-"` // The field doesn't appear in API request/response. Only "id" for now.
-	Nullable           bool       `yaml:"-"`
-	Optional           bool       `yaml:"-"`
-	Sensitive          bool       `yaml:"-"`
-	ForceNew           bool       `yaml:"-"`
-	Default            any        `yaml:"default"`
-	Enum               []any      `yaml:"enum"`
-	MinLength          int        `yaml:"minLength"`
-	MaxLength          int        `yaml:"maxLength"`
-	MinItems           int        `yaml:"minItems"`
-	MaxItems           int        `yaml:"maxItems"`
-	Minimum            int        `yaml:"minimum"`
-	Maximum            int        `yaml:"maximum"`
-	Example            any        `yaml:"example"`
+	JSONName           string     `yaml:"jsonName,omitempty"`
+	Type               SchemaType `yaml:"type,omitempty"`
+	Description        string     `yaml:"description,omitempty"`
+	DeprecationMessage string     `yaml:"deprecationMessage,omitempty"`
+	Pattern            string     `yaml:"pattern,omitempty"`
+	Required           bool       `yaml:"_required,omitempty"`
+	Computed           bool       `yaml:"_computed,omitempty"`
+	Virtual            bool       `yaml:"_virtual,omitempty"` // The field doesn't appear in API request/response. Only "id" for now.
+	Nullable           bool       `yaml:"_nullable,omitempty"`
+	Optional           bool       `yaml:"_optional,omitempty"`
+	Sensitive          bool       `yaml:"_sensitive,omitempty"`
+	ForceNew           bool       `yaml:"_forceNew,omitempty"`
+	Default            any        `yaml:"default,omitempty"`
+	Enum               []any      `yaml:"enum,omitempty"`
+	MinLength          int        `yaml:"minLength,omitempty"`
+	MaxLength          int        `yaml:"maxLength,omitempty"`
+	MinItems           int        `yaml:"minItems,omitempty"`
+	MaxItems           int        `yaml:"maxItems,omitempty"`
+	Minimum            int        `yaml:"minimum,omitempty"`
+	Maximum            int        `yaml:"maximum,omitempty"`
+	Example            any        `yaml:"example,omitempty"`
 }
 
 // UniqueName generates unique name by composing all ancestor names
@@ -339,8 +369,12 @@ func (item *Item) Path() string {
 }
 
 func (item *Item) IsRequired(def *Definition, entity entityType) bool {
-	if entity.isResource() {
+	if entity.isResource() || item.FromSchemaOverride {
 		return item.Required
+	}
+
+	if item.Virtual {
+		return false
 	}
 
 	// ID attributes are required in data sources, except when they participate in the lookup set.
@@ -348,26 +382,37 @@ func (item *Item) IsRequired(def *Definition, entity entityType) bool {
 }
 
 func (item *Item) IsOptional(def *Definition, entity entityType) bool {
-	if entity.isResource() {
+	if entity.isResource() || item.FromSchemaOverride {
 		return item.Optional
+	}
+
+	if item.Virtual {
+		return false
 	}
 
 	return def.DatasourceLookupHas(item.Name)
 }
 
-func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
-	if entity.isResource() {
-		return !item.Required && !item.Optional
+func (item *Item) IsComputed(def *Definition, entity entityType) bool {
+	if item.IsRoot() {
+		return false
 	}
 
-	// ID attributes are not read-only in data sources
+	if entity.isResource() || item.FromSchemaOverride {
+		return item.Computed
+	}
+
+	return !item.IsRequired(def, entity)
+}
+
+func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
 	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
 }
 
 func (item *Item) PropertiesByEntity(entity entityType) map[string]*Item {
 	props := maps.Clone(item.Properties)
 	for k, v := range item.Properties {
-		if entity == resourceType && v.DatasourceOnly || entity == datasourceType && v.WriteOnly {
+		if entity.IsDataSource() && v.WriteOnly {
 			delete(props, k)
 			for _, a := range v.AlsoRequires {
 				delete(props, a)

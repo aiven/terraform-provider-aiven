@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -110,8 +111,13 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	isResource := entity.isResource()
 	if !isResource {
 		b.MarkAsDataSource()
-		if item.IsRootProperty() && def.DatasourceLookupHas(item.Name) {
-			b.Lookup(def.DatasourceLookupID(), def.DatasourceLookupComposedOf()...)
+		if item.IsRootProperty() {
+			switch {
+			case slices.Contains(def.Datasource.ExactlyOneOf, item.Name):
+				b.ExactlyOneOf(def.Datasource.ExactlyOneOf...)
+			case !item.FromSchemaOverride && def.DatasourceLookupHas(item.Name):
+				b.Lookup(def.DatasourceLookupID(), def.DatasourceLookupComposedOf()...)
+			}
 		}
 	} else if !item.IsReadOnly(def, entity) {
 		if item.ForceNew {
@@ -155,8 +161,14 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	if item.AlsoRequires != nil {
 		b.RequiredWith(item.AlsoRequires...)
 	}
-	if item.ConflictsWith != nil {
-		b.ConflictsWith(item.ConflictsWith...)
+	// ExactlyOneOf already implies "not together", so suppress overlapping
+	// ConflictsWith. Mirrored in genValidators.
+	exactly := item.ExactlyOneOf
+	if !isResource && item.IsRootProperty() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
+		exactly = def.Datasource.ExactlyOneOf
+	}
+	if conflicts := lo.Without(item.ConflictsWith, exactly...); len(conflicts) > 0 {
+		b.ConflictsWith(conflicts...)
 	}
 	if item.ExactlyOneOf != nil {
 		b.ExactlyOneOf(item.ExactlyOneOf...)

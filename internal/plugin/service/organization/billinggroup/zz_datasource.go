@@ -87,27 +87,43 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 func datasourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
-			"billing_address_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_address_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"billing_contact_emails": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
-					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
-					Type:       adapter.SchemaTypeObject,
+					Computed: true,
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{
+						Computed: true,
+						Type:     adapter.SchemaTypeString,
+					}},
+					Type: adapter.SchemaTypeObject,
 				},
 				Type: adapter.SchemaTypeSet,
 			},
 			"billing_emails": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
-					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
-					Type:       adapter.SchemaTypeObject,
+					Computed: true,
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{
+						Computed: true,
+						Type:     adapter.SchemaTypeString,
+					}},
+					Type: adapter.SchemaTypeObject,
 				},
 				Type: adapter.SchemaTypeSet,
 			},
-			"billing_group_id": &adapter.Schema{
+			"billing_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_name": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"billing_group_name":  &adapter.Schema{Type: adapter.SchemaTypeString},
-			"custom_invoice_text": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"custom_invoice_text": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -116,20 +132,33 @@ func datasourceSchemaInternal() *adapter.Schema {
 			"payment_method": &adapter.Schema{
 				IsObject: true,
 				Items: &adapter.Schema{
+					Computed: true,
 					Properties: map[string]*adapter.Schema{
-						"payment_method_id":   &adapter.Schema{Type: adapter.SchemaTypeString},
-						"payment_method_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"payment_method_id": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"payment_method_type": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
 					},
 					Type: adapter.SchemaTypeObject,
 				},
 				Type: adapter.SchemaTypeList,
 			},
-			"shipping_address_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"shipping_address_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
 			},
-			"vat_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"vat_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

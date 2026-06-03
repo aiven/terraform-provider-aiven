@@ -80,7 +80,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeInt,
 			},
-			"billing_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"ca_cert": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -90,21 +93,36 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"parent_id":       &adapter.Schema{Type: adapter.SchemaTypeString},
-			"project_id":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"parent_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"tag": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
+					Computed: true,
 					Properties: map[string]*adapter.Schema{
-						"key":   &adapter.Schema{Type: adapter.SchemaTypeString},
-						"value": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"key": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"value": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
 					},
 					Type: adapter.SchemaTypeObject,
 				},
 				Type: adapter.SchemaTypeSet,
 			},
 			"technical_emails": &adapter.Schema{
-				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
-				Type:  adapter.SchemaTypeSet,
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},

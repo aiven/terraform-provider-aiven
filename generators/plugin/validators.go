@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"slices"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/samber/lo"
 )
 
-func genValidators(item *Item) ([]jen.Code, error) {
+func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, error) {
 	pkg := getTypedImport(item.Type, validatorTypedImport)
 	codes := make([]jen.Code, 0)
 
@@ -73,11 +74,17 @@ func genValidators(item *Item) ([]jen.Code, error) {
 		}
 	}
 
-	// A quick implementation of validators
-	// It might be that root level rules require a better way of building "paths"
+	// A quick implementation of validators.
+	// It might be that root level rules require a better way of building "paths".
 	// https://developer.hashicorp.com/terraform/plugin/framework/migrating/attributes-blocks/validators-predefined#examples
+	//
+	// Overlap with ExactlyOneOf is suppressed; mirrored in fmtDescription.
+	exactly := item.ExactlyOneOf
+	if !entity.isResource() && item.IsRootProperty() && slices.Contains(def.Datasource.ExactlyOneOf, item.Name) {
+		exactly = def.Datasource.ExactlyOneOf
+	}
 	validators := map[string][]string{
-		"ConflictsWith": item.ConflictsWith,
+		"ConflictsWith": lo.Without(item.ConflictsWith, exactly...),
 		"ExactlyOneOf":  item.ExactlyOneOf,
 		"AtLeastOneOf":  item.AtLeastOneOf,
 		"AlsoRequires":  item.AlsoRequires,

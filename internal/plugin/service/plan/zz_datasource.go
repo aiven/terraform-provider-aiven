@@ -196,10 +196,7 @@ func datasourceSchemaInternal() *adapter.Schema {
 			},
 			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_plan": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"service_type": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
+			"service_type": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"shard_count": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeInt,

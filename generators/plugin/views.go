@@ -46,11 +46,13 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 
 	if def.Datasource != nil {
 		hasLookup := def.DatasourceLookupOp() != nil
-		if hasLookup {
+		hasExactlyOneOf := len(def.Datasource.ExactlyOneOf) > 0
+		hasConfigValidators := hasLookup || hasExactlyOneOf
+		if hasConfigValidators {
 			codes = append(codes, datasourceLookupValidators(def))
 		}
 
-		builders = append(builders, genNewResource(datasourceType, def, hasLookup))
+		builders = append(builders, genNewResource(datasourceType, def, hasConfigValidators))
 	}
 
 	return append(builders, codes...), nil
@@ -72,7 +74,7 @@ func genNewResource(entity entityType, def *Definition, hasConfigValidators bool
 	}
 
 	for _, v := range def.Operations {
-		if entity == datasourceType {
+		if entity.IsDataSource() {
 			if v.Type != OperationRead {
 				// Datasource only supports Read operation
 				continue
@@ -414,31 +416,33 @@ func lookupFieldsList(op *Operation) string {
 	return humanizeCodeList(values, " and ")
 }
 
-// datasourceLookupValidators emits ExactlyOneOf(id, composedOf[0]) and, when composedOf
-// has more than one field, RequiredTogether(composedOf...). Assumes a datasourceLookup op
-// is present; the caller gates on that.
+// datasourceLookupValidators emits the datasource's ConfigValidators function.
+// When `datasource.exactlyOneOf` is set, it emits a single
+// `datasourcevalidator.ExactlyOneOf(...)` over its members; otherwise it
+// falls back to the lookup-contract pair (id vs composedOf[0]) plus
+// RequiredTogether when composedOf has more than one field.
 func datasourceLookupValidators(def *Definition) jen.Code {
-	id := def.DatasourceLookupID()
-	composedOf := def.DatasourceLookupComposedOf()
 	pkg := datasourceType.Import(entityValidatorPkgFmt)
-
-	matchRoot := func(name string) jen.Code {
-		return jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(name))
+	matchRoots := func(names ...string) []jen.Code {
+		return lo.Map(names, func(name string, _ int) jen.Code {
+			return jen.Qual(pathPackage, "MatchRoot").Call(jen.Lit(name))
+		})
 	}
 
-	validators := make([]jen.Code, 0, 2)
-	validators = append(validators, jen.Qual(pkg, "ExactlyOneOf").Custom(
-		multilineCall(),
-		matchRoot(id),
-		matchRoot(composedOf[0]),
-	))
+	var names, composedOf []string
+	if eo := def.Datasource.ExactlyOneOf; len(eo) > 0 {
+		names = eo
+	} else if def.DatasourceLookupOp() != nil {
+		composedOf = def.DatasourceLookupComposedOf()
+		names = []string{def.DatasourceLookupID(), composedOf[0]}
+	}
 
+	var validators []jen.Code
+	if len(names) > 0 {
+		validators = append(validators, jen.Qual(pkg, "ExactlyOneOf").Custom(multilineCall(), matchRoots(names...)...))
+	}
 	if len(composedOf) > 1 {
-		together := make([]jen.Code, len(composedOf))
-		for i, v := range composedOf {
-			together[i] = matchRoot(v)
-		}
-		validators = append(validators, jen.Qual(pkg, "RequiredTogether").Custom(multilineCall(), together...))
+		validators = append(validators, jen.Qual(pkg, "RequiredTogether").Custom(multilineCall(), matchRoots(composedOf...)...))
 	}
 
 	list := jen.Index().Qual(datasourcePkg, "ConfigValidator").Custom(multilineValues(), validators...)

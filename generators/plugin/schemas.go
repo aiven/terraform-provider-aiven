@@ -106,12 +106,6 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 				values["ElementType"] = value
 			}
 
-			if !entity.isResource() && item.IsRoot() && def.DatasourceLookupHas(k) {
-				delete(values, "Required")
-				values["Optional"] = jen.True()
-				values["Computed"] = jen.True()
-			}
-
 			attrs[key] = jen.Qual(pkg, v.TFType()+"Attribute").Values(dictFromMap(values, false))
 		}
 	}
@@ -210,29 +204,24 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 					Values(planModifiers...)
 			}
 
-			if item.Required {
-				values["Required"] = jen.True()
-			}
+		}
 
-			if item.Optional {
-				values["Optional"] = jen.True()
-			}
+		if item.IsRequired(def, entity) {
+			values["Required"] = jen.True()
+		}
 
-			if item.Computed {
-				values["Computed"] = jen.True()
-			}
-		} else {
-			if item.IDAttribute && !item.Virtual {
-				values["Required"] = jen.True()
-			} else {
-				values["Computed"] = jen.True()
-			}
+		if item.IsOptional(def, entity) {
+			values["Optional"] = jen.True()
+		}
+
+		if item.IsComputed(def, entity) {
+			values["Computed"] = jen.True()
 		}
 	}
 
 	// So far no validations for datasources
 	if !item.IsReadOnly(def, entity) {
-		validators, err := genValidators(item)
+		validators, err := genValidators(def, entity, item)
 		if err != nil {
 			return nil, err
 		}
@@ -241,7 +230,7 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 			values["Validators"] = jen.Index().Qual(validatorPackage, item.TFType()).Values(validators...)
 		}
 
-		if item.Default != nil {
+		if entity.isResource() && item.Default != nil {
 			values["Default"] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
 		}
 	}
@@ -298,7 +287,7 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		properties[jen.Lit(k)] = prop
 	}
 
-	if item.Computed || item.IsRootProperty() && !entity.isResource() && def.DatasourceLookupHas(item.Name) {
+	if item.IsComputed(def, entity) {
 		params[jen.Id("Computed")] = jen.True()
 	}
 

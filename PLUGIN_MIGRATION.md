@@ -91,7 +91,7 @@
 |  85 | aiven_pg_user                               | yes    |     2 |
 |  86 | aiven_project                               |        |     2 |
 |  87 | aiven_project_user                          |        |     2 |
-|  88 | aiven_project_vpc                           |        |     2 |
+|  88 | aiven_project_vpc                           | yes    |     2 |
 |  89 | aiven_service_component                     |        |     1 |
 |  90 | aiven_service_integration                   |        |     2 |
 |  91 | aiven_service_integration_endpoint          |        |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 38%                          | 62     |   164 |
+|     | TOTAL MIGRATED 39%                          | 64     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```

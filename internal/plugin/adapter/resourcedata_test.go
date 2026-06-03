@@ -154,3 +154,99 @@ func TestResourceDataPreservedUnknownAndNullPlan(t *testing.T) {
 		})
 	}
 }
+
+// TestResourceDataGetOkSplitsCompositeID verifies that GetOk derives id-field
+// component values by splitting the composite "id" string from state when the
+// components are not stored as their own top-level fields (e.g. legacy state
+// produced by older provider versions, or right after import).
+func TestResourceDataGetOkSplitsCompositeID(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":      {Type: SchemaTypeString, Computed: true},
+			"project": {Type: SchemaTypeString},
+			"vpc_id":  {Type: SchemaTypeString},
+		},
+	}
+	idFields := []string{"project", "vpc_id"}
+
+	cases := []struct {
+		name        string
+		plan        map[string]any
+		state       map[string]any
+		wantProject string
+		wantVPC     string
+	}{
+		{
+			// Read/Delete flow: only state, and state has only the composite id.
+			name:        "no_plan_components_derived_from_composite_id",
+			state:       map[string]any{"id": "my-proj/vpc-123"},
+			wantProject: "my-proj",
+			wantVPC:     "vpc-123",
+		},
+		{
+			// Update flow: plan is set but does not carry id components;
+			// they must still be derived from state's composite id for API calls.
+			name:        "update_with_plan_still_derives_id_components",
+			plan:        map[string]any{},
+			state:       map[string]any{"id": "my-proj/vpc-123"},
+			wantProject: "my-proj",
+			wantVPC:     "vpc-123",
+		},
+		{
+			// When the component is stored directly in state, that value wins
+			// over splitting the (potentially stale) composite id.
+			name: "direct_state_field_takes_precedence_over_split",
+			state: map[string]any{
+				"id":      "stale/old",
+				"project": "fresh-proj",
+				"vpc_id":  "fresh-vpc",
+			},
+			wantProject: "fresh-proj",
+			wantVPC:     "fresh-vpc",
+		},
+		{
+			// Some resources allow changing id-field components on Update
+			// (the new values arrive via the plan). The plan is checked before
+			// state so those new values are picked up — otherwise we'd send
+			// stale ids from state to the API.
+			name: "plan_takes_precedence_over_state",
+			plan: map[string]any{
+				"project": "plan-proj",
+				"vpc_id":  "plan-vpc",
+			},
+			state: map[string]any{
+				"id":      "state-proj/state-vpc",
+				"project": "state-proj",
+				"vpc_id":  "state-vpc",
+			},
+			wantProject: "plan-proj",
+			wantVPC:     "plan-vpc",
+		},
+		{
+			// No state at all: nothing to fall back to.
+			name:        "no_state_returns_zero",
+			wantProject: "",
+			wantVPC:     "",
+		},
+		{
+			// State has neither the components nor a composite id.
+			name:        "empty_state_returns_zero",
+			state:       map[string]any{},
+			wantProject: "",
+			wantVPC:     "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rd, err := NewResourceDataFromMaps(sch, idFields, tc.plan, tc.state, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, tc.wantProject, rd.Get("project"), "project")
+			require.Equal(t, tc.wantVPC, rd.Get("vpc_id"), "vpc_id")
+		})
+	}
+}

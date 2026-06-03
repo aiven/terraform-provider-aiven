@@ -73,16 +73,23 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 func datasourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
-			"address_id": &adapter.Schema{
+			"address_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"address_lines": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+			"city": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"address_lines": &adapter.Schema{
-				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
-				Type:  adapter.SchemaTypeList,
+			"country_code": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
 			},
-			"city":         &adapter.Schema{Type: adapter.SchemaTypeString},
-			"country_code": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"create_time": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -91,9 +98,15 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"name":            &adapter.Schema{Type: adapter.SchemaTypeString},
+			"name": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"state":           &adapter.Schema{Type: adapter.SchemaTypeString},
+			"state": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
@@ -102,7 +115,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"zip_code": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"zip_code": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

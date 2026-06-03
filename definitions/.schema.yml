@@ -111,6 +111,26 @@ properties:
         type: boolean
         $comment: |
           Set to true to disable Terraform example file generation for this datasource.
+      schemaOverride:
+        type: object
+        additionalProperties:
+          $ref: "#/definitions/Schema"
+        $comment: |
+          Datasource-only schema overlay. Has the same shape as the top-level
+          `schema` field, but is merged on top of the base schema only when the
+          datasource is generated. Use this to add datasource-only attributes
+          (e.g. composed-id aliases) or to override base schema entries solely
+          for the datasource. Resource schema generation ignores this block.
+      exactlyOneOf:
+        type: array
+        items:
+          type: string
+        minItems: 2
+        $comment: |
+          Top-level "exactly one of" discriminator group. Emits
+          `datasourcevalidator.ExactlyOneOf(...)` in datasourceConfigValidators
+          and drives the example LOOKUP hint. Supersedes the legacy
+          lookup-contract validator when set.
     $comment: |
       Documentation and configuration specific to this datasource.
       Use this to provide clear descriptions for your datasource in the Terraform registry.
@@ -328,10 +348,6 @@ definitions:
         type: boolean
         $comment: |
           Set to true if this attribute is write-only. See https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
-      datasourceOnly:
-        type: boolean
-        $comment: |
-          Set to true if this attribute should appear only in the datasource schema and be omitted from the resource schema.
       properties:
         type: object
         additionalProperties:
@@ -365,7 +381,10 @@ definitions:
         type: array
         items:
           type: string
-        $comment: List of attributes of which exactly one must be set
+        $comment: |
+          List of attributes of which exactly one must be set. Emits the
+          per-attribute `stringvalidator.ExactlyOneOf`. For the datasource-level
+          group see `datasource.exactlyOneOf`.
       atLeastOneOf:
         type: array
         items:

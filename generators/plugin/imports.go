@@ -21,6 +21,10 @@ func (e entityType) isResource() bool {
 	return e == resourceType
 }
 
+func (e entityType) IsDataSource() bool {
+	return e == datasourceType
+}
+
 func (e entityType) String() string {
 	return string(e)
 }

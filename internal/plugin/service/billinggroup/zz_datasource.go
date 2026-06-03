@@ -109,13 +109,22 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"address_lines": &adapter.Schema{
-				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
-				Type:  adapter.SchemaTypeSet,
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"billing_contact_emails": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
-					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
-					Type:       adapter.SchemaTypeString,
+					Computed: true,
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{
+						Computed: true,
+						Type:     adapter.SchemaTypeString,
+					}},
+					Type: adapter.SchemaTypeString,
 				},
 				Type: adapter.SchemaTypeSet,
 			},
@@ -124,18 +133,26 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"billing_emails": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
-					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{Type: adapter.SchemaTypeString}},
-					Type:       adapter.SchemaTypeString,
+					Computed: true,
+					Properties: map[string]*adapter.Schema{"email": &adapter.Schema{
+						Computed: true,
+						Type:     adapter.SchemaTypeString,
+					}},
+					Type: adapter.SchemaTypeString,
 				},
 				Type: adapter.SchemaTypeSet,
 			},
-			"billing_extra_text": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"billing_group_id": &adapter.Schema{
+			"billing_extra_text": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"card_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"billing_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"card_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"city": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -144,7 +161,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"copy_from_billing_group": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"copy_from_billing_group": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"country_code": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -153,9 +173,18 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"name":      &adapter.Schema{Type: adapter.SchemaTypeString},
-			"parent_id": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"state":     &adapter.Schema{Type: adapter.SchemaTypeString},
+			"name": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"parent_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"state": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
@@ -164,7 +193,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"zip_code": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"zip_code": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

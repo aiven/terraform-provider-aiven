@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/projectvpc
+resource:
+  refreshState: true
+  refreshStateWaiter: true
+  removeMissing: true
+  description: Creates and manages a VPC for an Aiven project.
+datasource:
+  description: Gets information about the VPC for an Aiven project.
+  exactlyOneOf: [project_vpc_id, cloud_name, vpc_id]
+  schemaOverride:
+    project:
+      optional: true
+      computed: true
+    cloud_name:
+      optional: true
+      computed: true
+      alsoRequires: [project]
+    project_vpc_id:
+      type: string
+      optional: true
+      computed: true
+      alsoRequires: [project]
+    vpc_id:
+      type: string
+      optional: true
+      conflictsWith: [project]
+      example: "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+      description: The ID of the VPC in `project/project_vpc_id` format.
+      deprecationMessage: This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.
+clientHandler: vpc
+idAttributeComposed: [project, project_vpc_id]
+legacyTimeouts: true
+expandModifier: true
+operations:
+  - id: VpcCreate
+    type: create
+  - id: VpcGet
+    type: read
+  - id: VpcList
+    type: read
+    datasourceLookup: true
+    resultIDField: ProjectVpcId
+    resultListLookupKeys:
+      CloudName: cloud_name
+  - id: VpcDelete
+    type: delete
+    disableView: true
+remove:
+  - create_time
+  - peering_connections
+  - pending_build_only_peering_connections
+  - update_time
+schema:
+  project_vpc_id:
+    useStateForUnknown: true

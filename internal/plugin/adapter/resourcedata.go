@@ -14,7 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/samber/lo"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
+
+const idField = "id"
 
 type ResourceData interface {
 	Get(key string) any
@@ -42,7 +46,7 @@ var _ ResourceData = (*resourceData)(nil)
 // ID returns the value of the "id" field
 // which is mandatory for all resources and datasources.
 func (d *resourceData) ID() string {
-	return d.Get("id").(string)
+	return d.Get(idField).(string)
 }
 
 // IsNewResource returns true if the resource is being created.
@@ -52,7 +56,7 @@ func (d *resourceData) IsNewResource() bool {
 
 // SetID sets the value of the "id" field in path-like format.
 func (d *resourceData) SetID(parts ...string) error {
-	return d.Set("id", strings.Join(parts, "/"))
+	return d.Set(idField, strings.Join(parts, "/"))
 }
 
 // Schema returns the schema of the resource.
@@ -110,15 +114,33 @@ func (d *resourceData) GetOk(key string) (any, bool) {
 		}
 	}
 
-	// 1. Read and Delete operations do not have a "plan"; in these cases, all values should be read from the state.
-	// 2. During Update (state and plan are present), values should not be read from the state
-	//    so that it is possible to detect when a value has been removed.
-	// 3. A special case applies to the "id" field and its components: they might not be present in the plan,
-	//    but are still needed for API calls.
-	if d.state != nil && (d.plan == nil || key == "id" || slices.Contains(d.idFields, key)) {
-		v, _, ok, err = getOk(d.schema, d.state, key)
-		if err != nil {
-			panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
+	// State is consulted only in these cases:
+	//   - Read/Delete operations (no plan): state is the source of truth.
+	//   - "id" and its components: always needed for API calls, even during Update,
+	//     where reading other fields from state could resurrect values the user removed.
+	isIDComponent := slices.Contains(d.idFields, key)
+	if d.state == nil || (d.plan != nil && key != idField && !isIDComponent) {
+		return v, ok
+	}
+
+	v, _, ok, err = getOk(d.schema, d.state, key)
+	if err != nil {
+		panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
+	}
+	if ok {
+		return v, true
+	}
+
+	// An id-field component may not be stored as its own field in state
+	// (e.g. some legacy resources only persist the composite "id"). Try to derive it
+	// by splitting the composite id, e.g. "project/vpc_id" -> ["project", "vpc_id"].
+	if isIDComponent {
+		if idStr, _ := d.state[idField].(string); idStr != "" {
+			parts, err := schemautil.SplitResourceID(idStr, len(d.idFields))
+			if err != nil {
+				panic(fmt.Errorf("failed to split id from state: %w", err))
+			}
+			return parts[slices.Index(d.idFields, key)], true
 		}
 	}
 
