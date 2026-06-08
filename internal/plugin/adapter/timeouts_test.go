@@ -17,16 +17,13 @@ func timeoutsTestSchema() *Schema {
 		Properties: map[string]*Schema{
 			"id": {Type: SchemaTypeString},
 			"timeouts": {
-				Type: SchemaTypeList,
-				Items: &Schema{
-					Type: SchemaTypeObject,
-					Properties: map[string]*Schema{
-						"create":  {Type: SchemaTypeString},
-						"read":    {Type: SchemaTypeString},
-						"update":  {Type: SchemaTypeString},
-						"delete":  {Type: SchemaTypeString},
-						"default": {Type: SchemaTypeString},
-					},
+				Type: SchemaTypeObject,
+				Properties: map[string]*Schema{
+					"create":  {Type: SchemaTypeString},
+					"read":    {Type: SchemaTypeString},
+					"update":  {Type: SchemaTypeString},
+					"delete":  {Type: SchemaTypeString},
+					"default": {Type: SchemaTypeString},
 				},
 			},
 		},
@@ -112,7 +109,7 @@ func TestGetTimeoutValue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			plan := map[string]any{
 				"id":       "test-id",
-				"timeouts": []any{tt.timeouts},
+				"timeouts": tt.timeouts,
 			}
 			d, err := NewResourceData(timeoutsTestSchema(), []string{"id"},
 				WithTestPlan(plan),

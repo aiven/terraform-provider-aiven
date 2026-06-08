@@ -50,11 +50,12 @@ func getTimeoutValue(
 	timeoutKey timeoutType,
 	fallback time.Duration,
 ) (time.Duration, error) {
-	v, ok := d.GetOk(fmt.Sprintf("timeouts.0.%s", timeoutKey))
+	// Note: the timeouts block is not represented as a list of objects, hence the index is not used.
+	v, ok := d.GetOk(fmt.Sprintf("timeouts.%s", timeoutKey))
 	if ok {
 		tflog.Info(ctx, fmt.Sprintf("Using user %q timeout: %s", timeoutKey, v))
 	} else {
-		v, ok = d.GetOk(fmt.Sprintf("timeouts.0.%s", timeoutDefault))
+		v, ok = d.GetOk(fmt.Sprintf("timeouts.%s", timeoutDefault))
 		if ok {
 			tflog.Info(ctx, fmt.Sprintf("Using %q value for %q timeout: %s", timeoutDefault, timeoutKey, v))
 		} else {
