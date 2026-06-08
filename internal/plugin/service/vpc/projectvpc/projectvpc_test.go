@@ -17,16 +17,14 @@ import (
 func TestCreateViewSendsEmptyPeeringConnections(t *testing.T) {
 	ctx := context.Background()
 	client := avngen.NewMockClient(t)
-	d, err := adapter.NewResourceDataFromMaps(
+	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
 		idFields(),
-		map[string]any{
+		adapter.WithTestPlan(map[string]any{
 			"project":      "example-project",
 			"cloud_name":   "google-europe-west2",
 			"network_cidr": "192.168.0.0/24",
-		},
-		nil,
-		nil,
+		}),
 	)
 	require.NoError(t, err)
 
@@ -112,16 +110,14 @@ func TestWaitForDeletionReturnsNilWhenAlreadyDeleted(t *testing.T) {
 func newProjectVPCResourceData(t *testing.T) adapter.ResourceData {
 	t.Helper()
 
-	d, err := adapter.NewResourceDataFromMaps(
+	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
 		idFields(),
-		nil,
-		map[string]any{
+		adapter.WithTestState(map[string]any{
 			"id":             "example-project/example-vpc-id",
 			"project":        "example-project",
 			"project_vpc_id": "example-vpc-id",
-		},
-		nil,
+		}),
 	)
 	require.NoError(t, err)
 

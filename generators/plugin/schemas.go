@@ -325,6 +325,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 			jen.Id("Items"):    s.Clone().Values(params),
 			jen.Id("IsObject"): jen.True(),
 		}
+
+		if item.IsComputed(def, entity) {
+			params[jen.Id("Computed")] = jen.True()
+		}
 	}
 
 	sch := s.Clone().Values(params)

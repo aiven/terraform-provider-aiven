@@ -76,11 +76,13 @@ func TestResourceDataAcceptsTypedContainers(t *testing.T) {
 		},
 	}
 
-	rd, err := NewResourceDataFromMaps(sch, nil, map[string]any{
-		"nested": map[string]string{"bar": "baz"},
-		"tags":   []string{"a", "b"},
-		"labels": map[string]string{"k": "v"},
-	}, nil, nil)
+	rd, err := NewResourceData(sch, nil,
+		WithTestPlan(map[string]any{
+			"nested": map[string]string{"bar": "baz"},
+			"tags":   []string{"a", "b"},
+			"labels": map[string]string{"k": "v"},
+		}),
+	)
 	require.NoError(t, err)
 
 	var out map[string]any
@@ -143,7 +145,9 @@ func TestResourceDataPreservedUnknownAndNullPlan(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			rd, err := NewResourceDataFromMaps(sch, []string{"id"}, tc.plan, nil, nil)
+			rd, err := NewResourceData(sch, []string{"id"},
+				WithTestPlan(tc.plan),
+			)
 			require.NoError(t, err)
 
 			var got request
@@ -242,11 +246,96 @@ func TestResourceDataGetOkSplitsCompositeID(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			rd, err := NewResourceDataFromMaps(sch, idFields, tc.plan, tc.state, nil)
+			rd, err := NewResourceData(sch, idFields,
+				WithTestPlan(tc.plan),
+				WithTestState(tc.state),
+			)
 			require.NoError(t, err)
 
 			require.Equal(t, tc.wantProject, rd.Get("project"), "project")
 			require.Equal(t, tc.wantVPC, rd.Get("vpc_id"), "vpc_id")
 		})
 	}
+}
+
+// TestResourceDataFlattenRemovesEmptyComputedBlocks verifies that Flatten strips
+// unconfigured computed object blocks from resources but keeps them for data sources.
+func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":   {Type: SchemaTypeString, Computed: true},
+			"name": {Type: SchemaTypeString},
+			"metadata": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Computed: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"key": {Type: SchemaTypeString, Computed: true},
+					},
+				},
+			},
+		},
+	}
+	flattenIn := map[string]any{
+		"name": "my-resource",
+		"metadata": []any{
+			map[string]any{"key": "value"},
+		},
+	}
+
+	t.Run("resource omits unconfigured computed block", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestPlan(map[string]any{"name": "my-resource"}),
+			WithTestConfig(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(flattenIn))
+
+		_, ok := rd.GetOk("metadata")
+		require.False(t, ok)
+	})
+
+	t.Run("resource keeps configured computed block", func(t *testing.T) {
+		configMetadata := []any{
+			map[string]any{"key": "configured"},
+		}
+
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestPlan(map[string]any{
+				"name":     "my-resource",
+				"metadata": configMetadata,
+			}),
+			WithTestConfig(map[string]any{
+				"name":     "my-resource",
+				"metadata": configMetadata,
+			}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{
+			"name":     "my-resource",
+			"metadata": configMetadata,
+		}))
+
+		got, ok := rd.GetOk("metadata")
+		require.True(t, ok)
+		require.Equal(t, configMetadata, got)
+	})
+
+	t.Run("data source keeps computed block", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithIsDataSource(),
+			WithTestState(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(flattenIn))
+
+		got, ok := rd.GetOk("metadata")
+		require.True(t, ok)
+		require.Equal(t, flattenIn["metadata"], got)
+	})
 }

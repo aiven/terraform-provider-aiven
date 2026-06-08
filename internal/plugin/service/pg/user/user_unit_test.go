@@ -162,7 +162,11 @@ func TestResetPassword(t *testing.T) {
 			if config == nil {
 				config = tt.plan
 			}
-			d, err := adapter.NewResourceDataFromMaps(resourceSchemaInternal(), idFields(), tt.plan, tt.state, config)
+			d, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(),
+				adapter.WithTestPlan(tt.plan),
+				adapter.WithTestState(tt.state),
+				adapter.WithTestConfig(config),
+			)
 			require.NoError(t, err)
 
 			if tt.wantModifyCall {
