@@ -133,17 +133,17 @@ type Scope struct {
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description           string        `yaml:"description"`
-	DeprecationMessage    string        `yaml:"deprecationMessage,omitempty"`
-	TerminationProtection bool          `yaml:"terminationProtection,omitempty"`
-	RefreshState          bool          `yaml:"refreshState,omitempty"`
-	RefreshStateDelay     time.Duration `yaml:"refreshStateDelay,omitempty"`
-	RefreshStateWaiter    bool          `yaml:"refreshStateWaiter,omitempty"`
-	RemoveMissing         bool          `yaml:"removeMissing,omitempty"`
-	IgnoreAlreadyExists   bool          `yaml:"ignoreAlreadyExists,omitempty"`
-	DisableExample        bool          `yaml:"disableExample,omitempty"`
-	ValidateConfig        bool          `yaml:"validateConfig,omitempty"`
-	ModifyPlan            bool          `yaml:"modifyPlan,omitempty"`
+	Description           string            `yaml:"description"`
+	DeprecationMessage    string            `yaml:"deprecationMessage,omitempty"`
+	TerminationProtection bool              `yaml:"terminationProtection,omitempty"`
+	RefreshState          bool              `yaml:"refreshState,omitempty"`
+	RefreshStateDelay     time.Duration     `yaml:"refreshStateDelay,omitempty"`
+	RefreshStateDesired   map[string]string `yaml:"refreshStateDesired,omitempty"`
+	RemoveMissing         bool              `yaml:"removeMissing,omitempty"`
+	IgnoreAlreadyExists   bool              `yaml:"ignoreAlreadyExists,omitempty"`
+	DisableExample        bool              `yaml:"disableExample,omitempty"`
+	ValidateConfig        bool              `yaml:"validateConfig,omitempty"`
+	ModifyPlan            bool              `yaml:"modifyPlan,omitempty"`
 
 	// SchemaOverride is a datasource-only schema overlay merged on top of the
 	// base Definition.Schema when generating the datasource. Resource

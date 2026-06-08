@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -13,6 +14,33 @@ import (
 )
 
 func TestResourceAdapter_refreshState(t *testing.T) {
+	// Use short retry delays so retry-go's exponential backoff stays in the microsecond range.
+	const (
+		fastRetryDelay = time.Microsecond
+		fastAttempts   = uint(5)
+	)
+
+	// fastAdapter builds a *resourceAdapter wired for fast tests: short retry delay and a low
+	// attempt cap. Per-test config (RefreshStateDelay, RefreshStateDesired, etc.) is layered on
+	// top of the returned adapter's resource by the caller.
+	fastAdapter := func(read func(ctx context.Context, client avngen.Client, rd ResourceData) error) *resourceAdapter {
+		return &resourceAdapter{
+			resource: ResourceOptions{
+				Read:                    read,
+				refreshStateRetryDelay:  fastRetryDelay,
+				refreshStateMaxAttempts: fastAttempts,
+			},
+		}
+	}
+
+	// statusSchema is a minimal schema used by tests that exercise RefreshStateDesired.
+	statusSchema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"status": {Type: SchemaTypeString},
+		},
+	}
+
 	warning := func(summary string) diag.Diagnostic {
 		return diag.NewWarningDiagnostic(summary, "detail")
 	}
@@ -61,6 +89,217 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.False(t, target.Contains(warning("try-1-a")))
 		require.False(t, target.Contains(warning("try-1-b")))
 	})
+
+	t.Run("returns nil when read succeeds on the first try", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.NoError(t, err)
+		require.Equal(t, 1, attempts)
+	})
+
+	t.Run("does not retry on a non-retryable error", func(t *testing.T) {
+		t.Parallel()
+
+		boom := errors.New("boom")
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return boom
+		})
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.ErrorIs(t, err, boom)
+		require.Equal(t, 1, attempts, "non-retryable errors must not trigger retries")
+	})
+
+	t.Run("retries on 404 then succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			if attempts < 3 {
+				return avngen.Error{Status: http.StatusNotFound, Message: "not ready"}
+			}
+			return nil
+		})
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.NoError(t, err)
+		require.Equal(t, 3, attempts)
+	})
+
+	t.Run("retries on wrapped ErrNotFound then succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			if attempts == 1 {
+				return fmt.Errorf("lookup: %w", ErrNotFound)
+			}
+			return nil
+		})
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.NoError(t, err)
+		require.Equal(t, 2, attempts)
+	})
+
+	t.Run("retries on 403 then succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			if attempts == 1 {
+				return avngen.Error{Status: http.StatusForbidden, Message: "eventual consistency"}
+			}
+			return nil
+		})
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.NoError(t, err)
+		require.Equal(t, 2, attempts)
+	})
+
+	t.Run("retries when desired attribute does not match, then succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		// rd starts with status "PENDING" and flips to "ACTIVE" after the first Read.
+		rd, err := NewResourceDataFromMaps(
+			statusSchema,
+			nil,
+			nil,
+			map[string]any{"status": "PENDING"},
+			nil,
+		)
+		require.NoError(t, err)
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, rd ResourceData) error {
+			attempts++
+			if attempts >= 2 {
+				require.NoError(t, rd.Set("status", "ACTIVE"))
+			}
+			return nil
+		})
+		a.resource.RefreshStateDesired = map[string]string{"status": "ACTIVE"}
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.NoError(t, err)
+		require.Equal(t, 2, attempts)
+		require.Equal(t, "ACTIVE", rd.Get("status"))
+	})
+
+	t.Run("returns ErrRefreshStateDesired after exhausting retries", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceDataFromMaps(
+			statusSchema,
+			nil,
+			nil,
+			map[string]any{"status": "PENDING"},
+			nil,
+		)
+		require.NoError(t, err)
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshStateDesired = map[string]string{"status": "ACTIVE"}
+		a.resource.refreshStateMaxAttempts = 3
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.ErrorIs(t, err, ErrRefreshStateDesired)
+		require.Equal(t, 3, attempts)
+	})
+
+	t.Run("returns ctx error when RefreshStateDelay is interrupted by ctx cancellation", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, cancel := context.WithCancel(t.Context())
+		cancel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshStateDelay = time.Hour
+
+		err := a.refreshState(ctx, nil)
+
+		require.ErrorIs(t, err, context.Canceled)
+		require.Equal(t, 0, attempts, "read must not be called when ctx is cancelled during RefreshStateDelay")
+	})
+
+	t.Run("applies RefreshStateDelay before the first attempt", func(t *testing.T) {
+		t.Parallel()
+
+		const refreshStateDelay = 25 * time.Millisecond
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshStateDelay = refreshStateDelay
+
+		start := time.Now()
+		err := a.refreshState(t.Context(), nil)
+		elapsed := time.Since(start)
+
+		require.NoError(t, err)
+		require.Equal(t, 1, attempts)
+		require.GreaterOrEqual(t, elapsed, refreshStateDelay)
+	})
+}
+
+func TestIsRefreshStateRetryable(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{name: "nil error", err: nil, want: false},
+		{name: "ErrNotFound sentinel", err: ErrNotFound, want: true},
+		{name: "wrapped ErrNotFound", err: fmt.Errorf("lookup: %w", ErrNotFound), want: true},
+		{name: "avngen 404", err: avngen.Error{Status: http.StatusNotFound}, want: true},
+		{name: "wrapped avngen 404", err: fmt.Errorf("api: %w", avngen.Error{Status: http.StatusNotFound}), want: true},
+		{name: "avngen 403", err: avngen.Error{Status: http.StatusForbidden}, want: true},
+		{name: "wrapped avngen 403", err: fmt.Errorf("api: %w", avngen.Error{Status: http.StatusForbidden}), want: true},
+		{name: "ErrRefreshStateDesired sentinel", err: ErrRefreshStateDesired, want: true},
+		{name: "wrapped ErrRefreshStateDesired", err: fmt.Errorf("mismatch: %w", ErrRefreshStateDesired), want: true},
+		{name: "avngen 500", err: avngen.Error{Status: http.StatusInternalServerError}, want: false},
+		{name: "avngen 400", err: avngen.Error{Status: http.StatusBadRequest}, want: false},
+		{name: "unrelated error", err: errors.New("boom"), want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tt.want, isRefreshStateRetryable(tt.err))
+		})
+	}
 }
 
 func TestEqual(t *testing.T) {

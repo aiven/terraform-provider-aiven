@@ -6,7 +6,8 @@ resource:
     Please note that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled.
     Plans that would delete static ips that are in the assigned state will be blocked.
   refreshState: true
-  refreshStateWaiter: true
+  refreshStateDesired:
+    state: created
 clientHandler: staticip
 idAttributeComposed: [project, static_ip_address_id]
 legacyTimeouts: true

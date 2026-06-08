@@ -27,7 +27,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	IDFields:              idFields(),
 	Read:                  readView,
 	RefreshState:          true,
-	RefreshStateWaiter:    refreshStateWaiter,
+	RefreshStateDesired:   map[string]string{"state": "created"},
 	Schema:                resourceSchema,
 	SchemaInternal:        resourceSchemaInternal(),
 	TerminationProtection: true,

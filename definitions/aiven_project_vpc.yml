@@ -2,7 +2,8 @@
 location: internal/plugin/service/vpc/projectvpc
 resource:
   refreshState: true
-  refreshStateWaiter: true
+  refreshStateDesired:
+    state: ACTIVE
   removeMissing: true
   description: Creates and manages a VPC for an Aiven project.
 datasource:

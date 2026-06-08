@@ -38,15 +38,25 @@ type ResourceOptions struct {
 	IDFields []string
 
 	// Whether to call Read after Create and Update operations.
-	// Retries common errors like 404 and 403 (see the implementation for details).
+	// Implemented by refreshState; see that function for retry behavior.
 	RefreshState bool
 
 	// Time to wait after creating or updating the resource to let the backend catch up.
 	RefreshStateDelay time.Duration
 
-	// RefreshStateWaiter is a function that waits for the resource to be in the desired state.
-	// It is called after the resource is created/updated and before the state is refreshed.
-	RefreshStateWaiter func(ctx context.Context, client avngen.Client, d ResourceData) error
+	// Attribute names and values that must match after Read before refreshState succeeds.
+	// Mismatches return ErrRefreshStateDesired and are retried with the same backoff as transient Read errors.
+	RefreshStateDesired map[string]string
+
+	// refreshStateRetryDelay is the base delay used by retry-go's BackOff between Read attempts in refreshState.
+	// Zero falls back to the package default (defaultRefreshStateRetryDelay). Unexported: intended for tests
+	// inside the adapter package only; not wired through the YAML schema or the generator.
+	refreshStateRetryDelay time.Duration
+
+	// refreshStateMaxAttempts caps the number of Read attempts in refreshState.
+	// Zero falls back to the package default (defaultRefreshStateMaxAttempts). Unexported: intended for tests
+	// inside the adapter package only; not wired through the YAML schema or the generator.
+	refreshStateMaxAttempts uint
 
 	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an IsNotFound error).
 	// This is useful for resources that Aiven may automatically delete,
@@ -223,7 +233,7 @@ func (a *resourceAdapter) Read(
 	ctx, drainWarnings := withWarnings(ctx, diags)
 	defer drainWarnings()
 
-	// When RemoveResource is enabled, we remove the resource from the state if it's missing.
+	// When RemoveMissing is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
 	err = a.resource.Read(ctx, a.client, d)
 	if a.resource.RemoveMissing && IsNotFound(err) {
@@ -240,10 +250,38 @@ func (a *resourceAdapter) Read(
 	rsp.State.Raw = d.tfValue()
 }
 
-// refreshState reads the resource state after Create or Update operation.
-// Optionally waits RefreshStateDelay before reading. In rare cases, the backend might be
-// inconsistent right after the operation; retries known errors.
+// ErrRefreshStateDesired indicates a RefreshStateDesired attribute did not match after Read.
+var ErrRefreshStateDesired = errors.New("resource is not in the desired state")
+
+const (
+	// defaultRefreshStateRetryDelay is the fallback base delay used by retry-go's BackOff between Read
+	// attempts in refreshState when ResourceOptions.refreshStateRetryDelay is zero.
+	defaultRefreshStateRetryDelay = time.Second * 5
+	// defaultRefreshStateMaxAttempts is the fallback cap on the number of Read attempts in
+	// refreshState when ResourceOptions.refreshStateMaxAttempts is zero.
+	defaultRefreshStateMaxAttempts uint = 10
+)
+
+// refreshState reads the resource state after Create or Update with retries, then validates the
+// resulting state against ResourceOptions.RefreshStateDesired.
+//
+// When ResourceOptions.RefreshStateDelay is non-zero, it waits that duration before the first
+// attempt (honoring ctx). Each attempt installs a child warning collector so attempt warnings are
+// buffered separately; only the last attempt's warnings are merged into the outer warning
+// collector in ctx. retry-go's BackOff uses ResourceOptions.refreshStateRetryDelay as the base
+// delay between attempts and ResourceOptions.refreshStateMaxAttempts as the total attempt cap;
+// zero values fall back to defaultRefreshStateRetryDelay / defaultRefreshStateMaxAttempts
+// respectively. Retries are limited to the errors accepted by isRefreshStateRetryable.
 func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) error {
+	retryDelay := a.resource.refreshStateRetryDelay
+	if retryDelay == 0 {
+		retryDelay = defaultRefreshStateRetryDelay
+	}
+	attempts := a.resource.refreshStateMaxAttempts
+	if attempts == 0 {
+		attempts = defaultRefreshStateMaxAttempts
+	}
+
 	if a.resource.RefreshStateDelay != 0 {
 		delay := time.NewTimer(a.resource.RefreshStateDelay)
 		defer delay.Stop()
@@ -251,13 +289,6 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-delay.C:
-		}
-	}
-
-	if a.resource.RefreshStateWaiter != nil {
-		err := a.resource.RefreshStateWaiter(ctx, a.client, rd)
-		if err != nil {
-			return fmt.Errorf("failed to wait for resource to be in desired state: %w", err)
 		}
 	}
 
@@ -272,22 +303,41 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 			err := a.resource.Read(ctx, a.client, rd)
 			drainWarnings()
 			lastAttemptWarnings = attemptWarnings
-			return err
+
+			if err != nil {
+				return err
+			}
+
+			for key, want := range a.resource.RefreshStateDesired {
+				state := rd.Get(key)
+				if !Equal(state, want) {
+					return fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrRefreshStateDesired, key, want, state)
+				}
+			}
+			return nil
 		},
-		retry.Delay(time.Second*5),
-		retry.Attempts(10),
+		retry.Delay(retryDelay),
+		retry.Attempts(attempts),
 		retry.LastErrorOnly(true),
 		retry.Context(ctx),
-		retry.RetryIf(func(err error) bool {
-			// 404: The API is inconsistent, returns 404 after Create/Update
-			// 403: Eventual consistency might cause permission errors, for instance for "organization_project"
-			return IsNotFound(err) || isAivenError(err, http.StatusForbidden)
-		}),
+		retry.RetryIf(isRefreshStateRetryable),
 	)
 
 	AddWarnings(ctx, lastAttemptWarnings...)
 
 	return err
+}
+
+// isRefreshStateRetryable reports whether refreshState should retry after err.
+//
+// Retry on:
+//   - 404 Not Found (including ErrNotFound): API may not immediately reflect new/updated resources;
+//     resource might not be present in list or direct GET call.
+//   - 403 Forbidden: Temporary permission issues can occur due to eventual consistency
+//     (e.g., "organization_project").
+//   - ErrRefreshStateDesired: A RefreshStateDesired attribute did not match after Read.
+func isRefreshStateRetryable(err error) bool {
+	return IsNotFound(err) || isAivenError(err, http.StatusForbidden) || errors.Is(err, ErrRefreshStateDesired)
 }
 
 func (a *resourceAdapter) Update(

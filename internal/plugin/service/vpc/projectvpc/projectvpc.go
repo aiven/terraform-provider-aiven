@@ -26,36 +26,6 @@ func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 	}
 }
 
-func refreshStateWaiter(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	project := d.Get("project").(string)
-	vpcID := d.Get("project_vpc_id").(string)
-
-	return retry.Do(
-		func() error {
-			rsp, err := client.VpcGet(ctx, project, vpcID)
-			if err != nil {
-				if avngen.IsNotFound(err) {
-					// The resource may not be available immediately after creation; retry.
-					return err
-				}
-
-				// Do not retry on client errors such as 401.
-				// 5xx errors are already retried by the client.
-				return retry.Unrecoverable(err)
-			}
-
-			if rsp.State == vpc.VpcStateTypeActive {
-				return nil
-			}
-
-			return fmt.Errorf("project VPC %s in state %s, waiting for ACTIVE", vpcID, rsp.State)
-		},
-		retry.Context(ctx),
-		retry.Delay(common.DefaultStateChangeDelay),
-		retry.LastErrorOnly(true),
-	)
-}
-
 // deleteViewInternal deletes an Aiven project VPC and waits until it reaches the DELETED state or VpcGet returns 404.
 func deleteViewInternal(ctx context.Context, client avngen.Client, d adapter.ResourceData, retryDelay time.Duration) error {
 	project := d.Get("project").(string)

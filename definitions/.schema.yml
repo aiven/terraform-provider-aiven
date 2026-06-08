@@ -54,10 +54,16 @@ properties:
           So we sleep for a few seconds to give the backend time to catch up.
         dependencies:
           - refreshState
-      refreshStateWaiter:
-        type: boolean
+      refreshStateDesired:
+        type: object
+        additionalProperties:
+          type: string
         $comment: |
-          Set to true to generate a function placeholder that waits for the resource to be in the desired state before calling refreshState.
+          Map of Terraform attribute names to the desired value the adapter must observe before
+          treating the post-Create/Update Read as successful. Each entry is checked after a Read
+          attempt during refreshState; mismatches retry under the same backoff as the standard
+          404/403 cases. Use this for resources whose API reports a transient state
+          (e.g. `state: ACTIVE`) without custom waiter logic.
         dependencies:
           - refreshState
       removeMissing:
