@@ -308,13 +308,19 @@ Read-Only:
 Read-Only:
 
 - `consumer_auto_offset_reset` (String)
+- `consumer_fetch_max_bytes` (Number)
 - `consumer_fetch_min_bytes` (Number)
+- `consumer_max_partition_fetch_bytes` (Number)
 - `consumer_max_poll_records` (Number)
+- `consumer_receive_buffer_bytes` (Number)
+- `consumer_request_timeout_ms` (Number)
 - `producer_batch_size` (Number)
 - `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)
 - `producer_linger_ms` (Number)
 - `producer_max_request_size` (Number)
+- `producer_request_timeout_ms` (Number)
+- `producer_send_buffer_bytes` (Number)
 
 
 
