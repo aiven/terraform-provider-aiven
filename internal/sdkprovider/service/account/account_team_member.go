@@ -5,7 +5,6 @@ import (
 	"log"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/aiven/go-client-codegen/handler/accountteammember"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -82,12 +81,7 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 		userEmail = d.Get("user_email").(string)
 	)
 
-	if err := client.AccountTeamMembersInvite(
-		ctx,
-		accountID,
-		teamID,
-		&accountteammember.AccountTeamMembersInviteIn{Email: userEmail},
-	); err != nil {
+	if err := client.AccountTeamMembersInvite(ctx, accountID, teamID); err != nil {
 		return err
 	}
 

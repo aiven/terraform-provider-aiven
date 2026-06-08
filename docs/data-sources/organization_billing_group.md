@@ -28,6 +28,7 @@ data "aiven_organization_billing_group" "example" {
     email = "jane@example.com"
   }
   billing_group_name  = "Default billing group for the organization"
+  create_time         = "2021-01-01T00:00:00Z"
   custom_invoice_text = "Extra billing text"
   payment_method {
     payment_method_id   = "pm4b1ff1ceeaa"
@@ -55,6 +56,7 @@ data "aiven_organization_billing_group" "example" {
 - `billing_contact_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_contact_emails))
 - `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_emails))
 - `billing_group_name` (String) Billing Group Name.
+- `create_time` (String) The date when this billing group was created.
 - `custom_invoice_text` (String) Extra billing text.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 - `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))

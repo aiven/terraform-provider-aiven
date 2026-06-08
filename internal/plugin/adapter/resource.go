@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
@@ -177,7 +176,10 @@ func (a *resourceAdapter) Create(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, nil, &req.Config, false)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+		WithPlan(req.Plan),
+		WithConfig(req.Config),
+	)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -217,7 +219,9 @@ func (a *resourceAdapter) Read(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil, false)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+		WithState(req.State),
+	)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -347,7 +351,11 @@ func (a *resourceAdapter) Update(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, &req.State, &req.Config, false)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+		WithPlan(req.Plan),
+		WithState(req.State),
+		WithConfig(req.Config),
+	)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -397,7 +405,9 @@ func (a *resourceAdapter) Delete(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, &req.State, nil, false)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+		WithState(req.State),
+	)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -474,7 +484,9 @@ func (a *resourceAdapter) ValidateConfig(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, nil, nil, &req.Config, false)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+		WithConfig(req.Config),
+	)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
@@ -531,12 +543,14 @@ func (a *resourceAdapter) ModifyPlan(
 	}
 
 	diags := &rsp.Diagnostics
-	var stateOrNil *tfsdk.State
-	if !req.State.Raw.IsNull() {
-		stateOrNil = &req.State
+	opts := []ResourceDataOpt{
+		WithPreservePlanValues(),
+		WithPlan(req.Plan),
+		WithState(req.State),
+		WithConfig(req.Config),
 	}
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, &req.Plan, stateOrNil, &req.Config, true)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, opts...)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return

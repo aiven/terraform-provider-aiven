@@ -35,6 +35,7 @@ resource "aiven_organization_billing_group" "example" {
 
   /* COMPUTED FIELDS
   billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  create_time      = "2021-01-01T00:00:00Z"
   */
 }
 ```
@@ -61,6 +62,7 @@ resource "aiven_organization_billing_group" "example" {
 ### Read-Only
 
 - `billing_group_id` (String) Billing group ID.
+- `create_time` (String) The date when this billing group was created.
 - `id` (String) Resource ID composed as: `organization_id/billing_group_id`.
 
 <a id="nestedblock--billing_contact_emails"></a>

@@ -119,6 +119,7 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Type:     adapter.SchemaTypeString,
 						},
 						"user_info": &adapter.Schema{
+							Computed: true,
 							IsObject: true,
 							Items: &adapter.Schema{
 								Computed: true,

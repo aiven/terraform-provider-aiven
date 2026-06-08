@@ -120,6 +120,7 @@ func datasourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
 			"backup_config": &adapter.Schema{
+				Computed: true,
 				IsObject: true,
 				Items: &adapter.Schema{
 					Computed: true,

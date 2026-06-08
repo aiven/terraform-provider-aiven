@@ -73,18 +73,23 @@ func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, clie
 		accountID = d.Get("account_id").(string)
 	)
 
-	resp, err := client.AccountTeamCreate(ctx, accountID, &accountteam.AccountTeamCreateIn{
+	resp, err := client.AccountTeamCreate(ctx, accountID)
+	if err != nil {
+		return err
+	}
+
+	updated, err := client.AccountTeamUpdate(ctx, accountID, resp.TeamId, &accountteam.AccountTeamUpdateIn{
 		TeamName: name,
 	})
 	if err != nil {
 		return err
 	}
 
-	if resp.AccountId == nil {
+	if updated.AccountId == nil {
 		return fmt.Errorf("account team create response missing account_id field")
 	}
 
-	d.SetId(schemautil.BuildResourceID(*resp.AccountId, resp.TeamId))
+	d.SetId(schemautil.BuildResourceID(*updated.AccountId, updated.TeamId))
 
 	return resourceAccountTeamRead(ctx, d, client)
 }

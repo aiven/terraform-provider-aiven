@@ -146,7 +146,11 @@ func TestResetPassword(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client := avngen.NewMockClient(t)
-			d, err := adapter.NewResourceDataFromMaps(resourceSchemaInternal(), idFields(), tt.plan, tt.state, tt.config)
+			d, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(),
+				adapter.WithTestPlan(tt.plan),
+				adapter.WithTestState(tt.state),
+				adapter.WithTestConfig(tt.config),
+			)
 			require.NoError(t, err)
 
 			if tt.wantModifyCall {

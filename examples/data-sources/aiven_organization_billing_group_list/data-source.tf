@@ -15,6 +15,7 @@ data "aiven_organization_billing_group_list" "example" {
       email = "foo@example.com"
     }
     billing_group_name  = "foo"
+    create_time         = "2021-01-01T00:00:00Z"
     custom_invoice_text = "foo"
     payment_method {
       payment_method_id   = "foo"

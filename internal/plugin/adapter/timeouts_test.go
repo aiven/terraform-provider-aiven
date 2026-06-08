@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// timeoutsTestSchema returns a minimal schema for testing getTimeoutValue with NewResourceDataFromMaps.
+// timeoutsTestSchema returns a minimal schema for testing getTimeoutValue with NewResourceData.
 func timeoutsTestSchema() *Schema {
 	return &Schema{
 		Type: SchemaTypeObject,
@@ -114,7 +114,9 @@ func TestGetTimeoutValue(t *testing.T) {
 				"id":       "test-id",
 				"timeouts": []any{tt.timeouts},
 			}
-			d, err := NewResourceDataFromMaps(timeoutsTestSchema(), []string{"id"}, plan, nil, nil)
+			d, err := NewResourceData(timeoutsTestSchema(), []string{"id"},
+				WithTestPlan(plan),
+			)
 			require.NoError(t, err)
 
 			got, err := getTimeoutValue(ctx, d, tt.timeoutType, fallbackTimeout)

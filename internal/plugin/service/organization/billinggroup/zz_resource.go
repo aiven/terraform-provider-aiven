@@ -35,6 +35,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 128)},
 			},
+			"create_time": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The date when this billing group was created.",
+			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `256`.",
 				Optional:            true,
@@ -126,6 +130,10 @@ func resourceSchemaInternal() *adapter.Schema {
 			"billing_group_name": &adapter.Schema{
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
+			},
+			"create_time": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
 			},
 			"custom_invoice_text": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"id": &adapter.Schema{

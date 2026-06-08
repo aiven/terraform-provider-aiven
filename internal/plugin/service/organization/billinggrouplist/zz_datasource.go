@@ -41,6 +41,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							MarkdownDescription: "Billing Group Name.",
 						},
+						"create_time": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "The date when this billing group was created.",
+						},
 						"custom_invoice_text": schema.StringAttribute{
 							Computed:            true,
 							MarkdownDescription: "Extra billing text.",
@@ -138,6 +142,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
 						},
+						"create_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
 						"custom_invoice_text": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
@@ -147,6 +155,7 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Type:     adapter.SchemaTypeString,
 						},
 						"payment_method": &adapter.Schema{
+							Computed: true,
 							IsObject: true,
 							Items: &adapter.Schema{
 								Computed: true,

@@ -179,12 +179,10 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		t.Parallel()
 
 		// rd starts with status "PENDING" and flips to "ACTIVE" after the first Read.
-		rd, err := NewResourceDataFromMaps(
+		rd, err := NewResourceData(
 			statusSchema,
 			nil,
-			nil,
-			map[string]any{"status": "PENDING"},
-			nil,
+			WithTestState(map[string]any{"status": "PENDING"}),
 		)
 		require.NoError(t, err)
 
@@ -208,12 +206,10 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 	t.Run("returns ErrRefreshStateDesired after exhausting retries", func(t *testing.T) {
 		t.Parallel()
 
-		rd, err := NewResourceDataFromMaps(
+		rd, err := NewResourceData(
 			statusSchema,
 			nil,
-			nil,
-			map[string]any{"status": "PENDING"},
-			nil,
+			WithTestState(map[string]any{"status": "PENDING"}),
 		)
 		require.NoError(t, err)
 

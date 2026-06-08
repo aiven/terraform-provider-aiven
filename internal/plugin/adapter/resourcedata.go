@@ -29,6 +29,8 @@ type ResourceData interface {
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
+	IsDataSource() bool
+	IsResource() bool
 	Schema() *Schema
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
@@ -39,6 +41,8 @@ type resourceData struct {
 	schema              *Schema
 	plan, state, config map[string]any
 	idFields            []string
+	isDataSource        bool
+	preservePlanValues  bool
 }
 
 var _ ResourceData = (*resourceData)(nil)
@@ -52,6 +56,16 @@ func (d *resourceData) ID() string {
 // IsNewResource returns true if the resource is being created.
 func (d *resourceData) IsNewResource() bool {
 	return d.ID() == ""
+}
+
+// IsDataSource returns true if the ResourceData was created for a data source.
+func (d *resourceData) IsDataSource() bool {
+	return d.isDataSource
+}
+
+// IsResource returns true if the ResourceData was created for a managed resource.
+func (d *resourceData) IsResource() bool {
+	return !d.isDataSource
 }
 
 // SetID sets the value of the "id" field in path-like format.
@@ -267,6 +281,19 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		return err
 	}
 
+	// The Plugin Framework does not support computed blocks:
+	// https://discuss.hashicorp.com/t/provider-plugin-framework-computed-blocks-block-count-changed-from-x-to-y/72955/2
+	// Remove computed blocks from resources (data sources are essentially computed) when values are not set.
+	// Currently, this is applied only at the top level.
+	// todo: remove in v5.0.0, this is a legacy.
+	if d.IsResource() && d.config != nil {
+		for k, v := range d.schema.Properties {
+			if v.IsObject && v.Computed && isEmpty(d.config[k]) {
+				delete(norm, k)
+			}
+		}
+	}
+
 	// todo: remove stale data
 	state := d.currentState()
 	maps.Copy(state, norm)
@@ -379,50 +406,101 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 	return data, sch, true, nil
 }
 
-// NewResourceDataFromMaps creates a new ResourceData from maps.
-// Create operation needs plan and config.
-// Update operation needs plan, state and config.
-// Read and Delete operations need state.
-func NewResourceDataFromMaps(schema *Schema, idFields []string, plan, state, config map[string]any) (ResourceData, error) {
+// ResourceDataOpt configures a resourceData instance during construction.
+type ResourceDataOpt func(*resourceData) error
+
+// NewResourceData creates a new ResourceData from the given options.
+// Create operation needs WithPlan and WithConfig.
+// Update operation needs WithPlan, WithState and WithConfig.
+// Read and Delete operations need WithState.
+func NewResourceData(schema *Schema, idFields []string, opts ...ResourceDataOpt) (ResourceData, error) {
 	rd := &resourceData{
 		schema:   schema,
 		idFields: idFields,
 	}
-	rd.plan = plan
-	rd.state = state
-	rd.config = config
+	for _, opt := range opts {
+		if err := opt(rd); err != nil {
+			return nil, err
+		}
+	}
 	return rd, nil
 }
 
-func NewResourceData(schema *Schema, idFields []string, plan *tfsdk.Plan, state *tfsdk.State, config *tfsdk.Config, preservePlanValues bool) (ResourceData, error) {
-	var err error
-	var planMap, stateMap, configMap map[string]any
-	if plan == nil && state == nil && config == nil {
-		return nil, fmt.Errorf("plan, state and config are nil")
+// WithPreservePlanValues keeps nil/unknown tftypes.Value entries in the plan map.
+// Must be applied before WithPlan.
+func WithPreservePlanValues() ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.preservePlanValues = true
+		return nil
 	}
+}
 
-	if plan != nil && !plan.Raw.IsNull() {
-		planMap, err = fromTFValue(schema, plan.Raw, preservePlanValues)
+// WithPlan decodes the Terraform plan into ResourceData.
+func WithPlan(plan tfsdk.Plan) ResourceDataOpt {
+	return func(d *resourceData) error {
+		planMap, err := fromTFValue(d.schema, plan.Raw, d.preservePlanValues)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode plan: %w", err)
+			return fmt.Errorf("failed to decode plan: %w", err)
 		}
+		d.plan = planMap
+		return nil
 	}
+}
 
-	if state != nil && !state.Raw.IsNull() {
-		stateMap, err = fromTFValue(schema, state.Raw, false)
+// WithState decodes the Terraform state into ResourceData.
+func WithState(state tfsdk.State) ResourceDataOpt {
+	return func(d *resourceData) error {
+		stateMap, err := fromTFValue(d.schema, state.Raw, false)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode state: %w", err)
+			return fmt.Errorf("failed to decode state: %w", err)
 		}
+		d.state = stateMap
+		return nil
 	}
+}
 
-	if config != nil && !config.Raw.IsNull() {
-		configMap, err = fromTFValue(schema, config.Raw, false)
+// WithConfig decodes the Terraform config into ResourceData.
+func WithConfig(config tfsdk.Config) ResourceDataOpt {
+	return func(d *resourceData) error {
+		configMap, err := fromTFValue(d.schema, config.Raw, false)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode config: %w", err)
+			return fmt.Errorf("failed to decode config: %w", err)
 		}
+		d.config = configMap
+		return nil
 	}
+}
 
-	return NewResourceDataFromMaps(schema, idFields, planMap, stateMap, configMap)
+// WithIsDataSource marks ResourceData as belonging to a data source.
+func WithIsDataSource() ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.isDataSource = true
+		return nil
+	}
+}
+
+// WithTestPlan sets the plan from a map. For tests only.
+func WithTestPlan(plan map[string]any) ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.plan = plan
+		return nil
+	}
+}
+
+// WithTestState sets the state from a map. For tests only.
+func WithTestState(state map[string]any) ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.state = state
+		return nil
+	}
+}
+
+// WithTestConfig sets the config from a map. For tests only.
+func WithTestConfig(config map[string]any) ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.config = config
+		return nil
+	}
 }
 
 // normalizeTyped see normalizeAny for more details.
@@ -638,4 +716,19 @@ func remarshal(in, out any) error {
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.UseNumber()
 	return d.Decode(out)
+}
+
+// isEmpty checks if the value is empty — has length zero.
+func isEmpty(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.String, reflect.Array, reflect.Slice, reflect.Map:
+		return rv.Len() == 0
+	}
+
+	return false
 }
