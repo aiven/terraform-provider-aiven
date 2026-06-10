@@ -118,11 +118,15 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "The number of trial or promotional credits remaining for this project.",
+		Deprecated: "This field is deprecated on the resource and is no longer populated. " +
+			"Use the `aiven_project` data source to read this value. It will be removed in the next major release.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "The monthly running estimate for this project for the current billing period.",
+		Deprecated: "This field is deprecated on the resource and is no longer populated. " +
+			"Use the `aiven_project` data source to read this value. It will be removed in the next major release.",
 	},
 }
 
@@ -456,12 +460,6 @@ func setProjectTerraformProperties(
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {
-		return diag.FromErr(err)
-	}
 	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
 		return diag.FromErr(err)
 	}
@@ -472,6 +470,17 @@ func setProjectTerraformProperties(
 		return diag.FromErr(err)
 	}
 
+	return nil
+}
+
+// setProjectBillingProperties sets the deprecated billing fields
+func setProjectBillingProperties(d *schema.ResourceData, project *aiven.Project) diag.Diagnostics {
+	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
