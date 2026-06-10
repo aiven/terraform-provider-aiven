@@ -20,7 +20,6 @@ func idFields() []string {
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	Beta:           true,
 	IDFields:       idFields(),
 	Read:           readView,
 	Schema:         datasourceSchema,

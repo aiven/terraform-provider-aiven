@@ -77,7 +77,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages an organization address. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Creates and manages an organization address.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {
