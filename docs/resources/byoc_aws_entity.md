@@ -27,7 +27,6 @@ resource "aiven_byoc_aws_entity" "example" {
   reserved_cidr    = "192.168.6.0/24" // Force new
 
   // OPTIONAL FIELDS
-  aws_iam_role_arn = "arn:aws:iam::012345678901:root"
   contact_emails {
     email = "jane@example.com"
 
@@ -59,14 +58,7 @@ resource "aiven_byoc_aws_entity" "example" {
   byoc_resource_tags = {
     foo = "foo"
   }
-  byoc_unique_name   = "foo"
-  custom_cloud_names = ["foo"]
-  errors {
-    category = "general_error"
-    message  = "foo"
-  }
-  state                      = "active"
-  update_time                = "2021-01-01T00:00:00Z"
+  byoc_unique_name           = "foo"
   use_customer_owned_storage = true
   */
 }
@@ -86,7 +78,6 @@ resource "aiven_byoc_aws_entity" "example" {
 
 ### Optional
 
-- `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`.
 - `contact_emails` (Block Set) Email addresses for notifications and alerts for this BYOC cloud. (see [below for nested schema](#nestedblock--contact_emails))
 - `tags` (Map of String) Set of resource tags.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -105,11 +96,7 @@ resource "aiven_byoc_aws_entity" "example" {
 - `byoc_resource_tags` (Map of String) Set of tags for the resources provisioned on the BYOC account.
 - `byoc_unique_name` (String) Name for all the resources created for the custom cloud environment.
 - `custom_cloud_environment_id` (String) ID of a custom cloud environment.
-- `custom_cloud_names` (Set of String) Cloud names that can be used to provision a service on this BYOC.
-- `errors` (Block Set) List of errors for this custom cloud environment. (see [below for nested schema](#nestedblock--errors))
 - `id` (String) Resource ID composed as: `organization_id/custom_cloud_environment_id`.
-- `state` (String) State of this BYOC cloud. The possible values are `active`, `creating`, `creation_failed`, `deleted`, `deleting`, `deletion_failed`, `disconnected`, `draft`, `reconnecting` and `validating`.
-- `update_time` (String) Custom cloud environment last update timestamp (ISO 8601).
 - `use_customer_owned_storage` (Boolean) True if this BYOC cloud is using customer owned storage.
 
 <a id="nestedblock--contact_emails"></a>
@@ -134,15 +121,6 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedblock--errors"></a>
-### Nested Schema for `errors`
-
-Read-Only:
-
-- `category` (String) Category of this error. The possible value is `general_error`.
-- `message` (String) Description of this error.
 
 ## Import
 

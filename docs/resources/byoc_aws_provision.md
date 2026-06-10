@@ -3,14 +3,14 @@
 page_title: "aiven_byoc_aws_provision Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from draft to active so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been applied, and before aiven_byoc_permissions. terraform destroy on this resource is a state-only operation -- it does not reverse provisioning. To tear down, destroy the underlying aiven_byoc_aws_entity.
+  Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from draft to active so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been defined.
   This resource is in the beta stage and may change without notice. Set
   the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_byoc_aws_provision (Resource)
 
-Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been applied, and before `aiven_byoc_permissions`. `terraform destroy` on this resource is a state-only operation -- it does not reverse provisioning. To tear down, destroy the underlying `aiven_byoc_aws_entity`.
+Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been defined.
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -26,6 +26,8 @@ resource "aiven_byoc_aws_provision" "example" {
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id = "admin"
   aiven_aws_account_principal       = "foo"
+  custom_cloud_names                = ["foo"]
+  state                             = "active"
   */
 }
 ```
@@ -47,7 +49,9 @@ resource "aiven_byoc_aws_provision" "example" {
 
 - `aiven_aws_account_principal` (String) Entity that assumes the IAM role for controlling the BYOC account.
 - `aiven_aws_assume_role_external_id` (String) External ID for assuming the IAM role for controlling the BYOC account.
+- `custom_cloud_names` (Set of String) Cloud names that can be used to provision a service on this BYOC.
 - `id` (String) Resource ID composed as: `organization_id/custom_cloud_environment_id`.
+- `state` (String) State of this BYOC cloud. The possible values are `active`, `creating`, `creation_failed`, `deleted`, `deleting`, `deletion_failed`, `disconnected`, `draft`, `reconnecting` and `validating`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

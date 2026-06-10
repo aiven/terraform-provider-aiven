@@ -38,6 +38,16 @@ nav_order: 1
 - Change `aiven_service_integration_endpoint` field `datadog_user_config.site` (enum): add `us2.ddog-gov.com`
 - Change `aiven_organization_address`: no longer beta
 - Change `aiven_organization_payment_method_list` datasource: no longer beta
+- Fix `aiven_byoc_aws_provision`: when provisioning a new cloud, the resource will now wait for the custom cloud
+  environment to be `active` before it can be used by service resources. Also when destroying the provisioned custom
+  cloud, it will free its managed cloud resources before the IAM role is destroyed.
+- Remove field `custom_cloud_names` from `aiven_byoc_aws_entity` resource and add it to `aiven_byoc_aws_provision`:
+  the field is only populated after the custom cloud is provisioned.
+- Remove field `aws_iam_role_arn` from `aiven_byoc_aws_entity` resource: it is not used by this resource, and instead
+  it is a required input for provisioning the custom cloud environment.
+- Remove fields `errors`, `state`, `update_time` from `aiven_byoc_aws_entity` resource: they are not useful when only
+  defining the BYOC entity, and would unnecessarily invalidate the resource's state on every update, causing a cascade
+  of unrelated updates to dependent BYOC resources.
 
 ## [4.57.0] - 2026-05-19
 

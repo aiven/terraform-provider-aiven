@@ -46,11 +46,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Google account identifier.",
 			},
-			"aws_iam_role_arn": schema.StringAttribute{
-				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`.",
-				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
-			},
 			"aws_subnets_bastion": schema.MapAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -91,11 +86,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "ID of a custom cloud environment.",
 			},
-			"custom_cloud_names": schema.SetAttribute{
-				Computed:            true,
-				ElementType:         types.StringType,
-				MarkdownDescription: "Cloud names that can be used to provision a service on this BYOC.",
-			},
 			"deployment_model": schema.StringAttribute{
 				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
@@ -123,18 +113,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
 			},
-			"state": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "State of this BYOC cloud. The possible values are `active`, `creating`, `creation_failed`, `deleted`, `deleting`, `deletion_failed`, `disconnected`, `draft`, `reconnecting` and `validating`.",
-			},
 			"tags": schema.MapAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Set of resource tags.",
 				Optional:            true,
-			},
-			"update_time": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Custom cloud environment last update timestamp (ISO 8601).",
 			},
 			"use_customer_owned_storage": schema.BoolAttribute{
 				Computed:            true,
@@ -162,19 +144,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 				}},
 				Validators: []validator.Set{setvalidator.SizeBetween(1, 10)},
-			},
-			"errors": schema.SetNestedBlock{
-				MarkdownDescription: "List of errors for this custom cloud environment.",
-				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
-					"category": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Category of this error. The possible value is `general_error`.",
-					},
-					"message": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "Description of this error.",
-					},
-				}},
 			},
 			"timeouts": timeouts.BlockAll(ctx),
 		},
@@ -213,7 +182,6 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"aws_iam_role_arn": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"aws_subnets_bastion": &adapter.Schema{
 				Computed: true,
 				Items: &adapter.Schema{
@@ -269,44 +237,14 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
 			},
-			"custom_cloud_names": &adapter.Schema{
-				Computed: true,
-				Items: &adapter.Schema{
-					Computed: true,
-					Type:     adapter.SchemaTypeString,
-				},
-				Type: adapter.SchemaTypeSet,
-			},
 			"deployment_model": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"display_name":     &adapter.Schema{Type: adapter.SchemaTypeString},
-			"errors": &adapter.Schema{
-				Computed: true,
-				Items: &adapter.Schema{
-					Computed: true,
-					Properties: map[string]*adapter.Schema{
-						"category": &adapter.Schema{
-							Computed: true,
-							Type:     adapter.SchemaTypeString,
-						},
-						"message": &adapter.Schema{
-							Computed: true,
-							Type:     adapter.SchemaTypeString,
-						},
-					},
-					Type: adapter.SchemaTypeObject,
-				},
-				Type: adapter.SchemaTypeSet,
-			},
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"reserved_cidr":   &adapter.Schema{Type: adapter.SchemaTypeString},
-			"state": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
 			"tags": &adapter.Schema{
 				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
 				Type:  adapter.SchemaTypeMap,
@@ -319,10 +257,6 @@ func resourceSchemaInternal() *adapter.Schema {
 					"update": &adapter.Schema{Type: adapter.SchemaTypeString},
 				},
 				Type: adapter.SchemaTypeObject,
-			},
-			"update_time": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
 			},
 			"use_customer_owned_storage": &adapter.Schema{
 				Computed: true,
