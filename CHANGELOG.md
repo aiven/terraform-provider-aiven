@@ -36,6 +36,8 @@ nav_order: 1
 - Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.producer_send_buffer_bytes`:
   The size of the TCP send buffer (SO_SNDBUF) to use when sending data
 - Change `aiven_service_integration_endpoint` field `datadog_user_config.site` (enum): add `us2.ddog-gov.com`
+- Change `aiven_organization_address`: no longer beta
+- Change `aiven_organization_payment_method_list` datasource: no longer beta
 
 ## [4.57.0] - 2026-05-19
 

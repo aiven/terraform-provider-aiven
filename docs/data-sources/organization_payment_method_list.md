@@ -4,16 +4,11 @@ page_title: "aiven_organization_payment_method_list Data Source - terraform-prov
 subcategory: ""
 description: |-
   Lists payment methods for an organization.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_payment_method_list (Data Source)
 
 Lists payment methods for an organization.
-
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

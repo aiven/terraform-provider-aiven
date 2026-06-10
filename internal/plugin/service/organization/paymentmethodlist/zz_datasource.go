@@ -40,7 +40,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": timeouts.Block(ctx),
 		},
-		MarkdownDescription: "Lists payment methods for an organization. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Lists payment methods for an organization.",
 	}
 }
 func datasourceSchemaInternal() *adapter.Schema {
