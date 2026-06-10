@@ -128,3 +128,40 @@ func TestGetTimeoutValue(t *testing.T) {
 		})
 	}
 }
+
+// Plugin Framework timeout blocks don't expose the legacy SDKv2 `timeouts.default` field.
+// The timeout resolver must only read that field when the current schema supports it.
+func TestTimeoutWithDefault(t *testing.T) {
+	t.Parallel()
+
+	const fallbackTimeout = 5 * time.Minute
+
+	t.Run("falls back when schema doesn't support default", func(t *testing.T) {
+		schema := timeoutsTestSchema()
+		delete(schema.Properties["timeouts"].Properties, string(timeoutDefault))
+
+		plan := map[string]any{
+			"id":       "test-id",
+			"timeouts": map[string]any{"update": "45s"},
+		}
+		d, err := NewResourceData(schema, []string{"id"}, WithTestPlan(plan))
+		require.NoError(t, err)
+
+		got, err := getTimeoutValue(t.Context(), d, timeoutCreate, fallbackTimeout)
+		require.NoError(t, err)
+		require.Equal(t, fallbackTimeout, got)
+	})
+
+	t.Run("uses default when schema supports it", func(t *testing.T) {
+		plan := map[string]any{
+			"id":       "test-id",
+			"timeouts": map[string]any{"update": "45s", "default": "90s"},
+		}
+		d, err := NewResourceData(timeoutsTestSchema(), []string{"id"}, WithTestPlan(plan))
+		require.NoError(t, err)
+
+		got, err := getTimeoutValue(t.Context(), d, timeoutCreate, fallbackTimeout)
+		require.NoError(t, err)
+		require.Equal(t, 90*time.Second, got)
+	})
+}
