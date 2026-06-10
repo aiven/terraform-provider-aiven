@@ -37,11 +37,12 @@ func withTimeout(ctx context.Context, d resourceDataTimeouts, timeoutKey timeout
 
 type resourceDataTimeouts interface {
 	GetOk(key string) (any, bool)
+	Schema() *Schema
 }
 
-// getTimeoutValue retrieves the timeout value in SDKv2 legacy manner (the plugin framework doesn't have "default" key):
+// getTimeoutValue retrieves the timeout value:
 // 1. The specific timeout value for the given key (e.g. "create", "read", "update", "delete")
-// 2. The "default" timeout value if specific one not found
+// 2. The legacy "default" timeout value if the schema supports it and specific one not found
 // 3. The provided fallback duration if no timeouts configured
 // Returns the resolved duration and any validation diagnostics.
 func getTimeoutValue(
@@ -55,10 +56,17 @@ func getTimeoutValue(
 	if ok {
 		tflog.Info(ctx, fmt.Sprintf("Using user %q timeout: %s", timeoutKey, v))
 	} else {
-		v, ok = d.GetOk(fmt.Sprintf("timeouts.%s", timeoutDefault))
-		if ok {
-			tflog.Info(ctx, fmt.Sprintf("Using %q value for %q timeout: %s", timeoutDefault, timeoutKey, v))
-		} else {
+		if schema := d.Schema(); schema != nil {
+			if timeouts, hasTimeouts := schema.Properties["timeouts"]; hasTimeouts && timeouts != nil {
+				if _, hasTimeoutDefault := timeouts.Properties[string(timeoutDefault)]; hasTimeoutDefault {
+					v, ok = d.GetOk(fmt.Sprintf("timeouts.%s", timeoutDefault))
+					if ok {
+						tflog.Info(ctx, fmt.Sprintf("Using %q value for %q timeout: %s", timeoutDefault, timeoutKey, v))
+					}
+				}
+			}
+		}
+		if !ok {
 			tflog.Info(ctx, fmt.Sprintf("Using fallback timeout for %q: %s", timeoutKey, fallback))
 			return fallback, nil
 		}

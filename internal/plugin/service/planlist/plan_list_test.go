@@ -61,3 +61,39 @@ data "aiven_service_plan_list" "plans" {
 		},
 	})
 }
+
+// This test is about the shared timeout adapter. `aiven_service_plan_list` is used because it's a cheap data source whose read path runs during plan.
+func TestAccAivenPlanListDataSourceTimeouts(t *testing.T) {
+	var (
+		projectName = acc.ProjectName()
+		serviceType = "kafka"
+	)
+
+	config := func(timeouts string) string {
+		return fmt.Sprintf(`
+data "aiven_service_plan_list" "plans" {
+  project      = %q
+  service_type = %q
+
+  timeouts {
+%s
+  }
+}
+`, projectName, serviceType, timeouts)
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:   config(""),
+				PlanOnly: true,
+			},
+			{
+				Config:   config(`    read = "5m"`),
+				PlanOnly: true,
+			},
+		},
+	})
+}
