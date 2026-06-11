@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccAivenBYOCPermissions(t *testing.T) {
+	acc.SkipBYOC(t)
 	acc.SkipIfNotBeta(t)
 
 	organizationName := acc.OrganizationName()
@@ -26,7 +27,7 @@ resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-permissions-acc"
   cloud_provider   = "aws"
-  cloud_region     = "aws-eu-west-1"
+  cloud_region     = "eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
 
