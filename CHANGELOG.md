@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.58.0] - 2026-06-11
+
 - Fix: timeouts block values are now properly supported for resources implemented with the Plugin Framework
 - Deprecate `aiven_project` resource fields `estimated_balance` and `available_credits`, they are no longer populated on the resource. Use the `aiven_project` data source
   to read them.
