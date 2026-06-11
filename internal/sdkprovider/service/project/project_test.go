@@ -33,6 +33,11 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					// estimated_balance is deprecated and not populated on the resource, but available on the data source
+					resource.TestCheckNoResourceAttr(resourceName, "estimated_balance"),
+					resource.TestCheckNoResourceAttr(resourceName, "available_credits"),
+					resource.TestCheckResourceAttrSet("data.aiven_project.project", "estimated_balance"),
+					resource.TestCheckResourceAttrSet("data.aiven_project.project", "available_credits"),
 				),
 			},
 			{

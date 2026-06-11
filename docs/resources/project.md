@@ -48,9 +48,9 @@ resource "aiven_project" "example_project" {
 
 ### Read-Only
 
-- `available_credits` (String) The number of trial or promotional credits remaining for this project.
+- `available_credits` (String, Deprecated) The number of trial or promotional credits remaining for this project.
 - `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.
-- `estimated_balance` (String) The monthly running estimate for this project for the current billing period.
+- `estimated_balance` (String, Deprecated) The monthly running estimate for this project for the current billing period.
 - `id` (String) The ID of this resource.
 - `payment_method` (String) The payment type used for this project. For example,`card`.
 

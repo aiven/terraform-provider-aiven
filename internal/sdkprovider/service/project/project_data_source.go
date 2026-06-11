@@ -31,7 +31,11 @@ func datasourceProjectRead(ctx context.Context, d *schema.ResourceData, m any) d
 	for _, project := range projects {
 		if project.Name == projectName {
 			d.SetId(projectName)
-			return resourceProjectRead(ctx, d, m)
+			if diags := resourceProjectRead(ctx, d, m); diags.HasError() {
+				return diags
+			}
+			// populate billing fields
+			return setProjectBillingProperties(d, project)
 		}
 	}
 
