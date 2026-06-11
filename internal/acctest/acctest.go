@@ -83,6 +83,13 @@ func SkipIfNotBeta(t *testing.T) {
 	}
 }
 
+// SkipBYOC skips BYOC tests that creates a custom cloud environment.
+func SkipBYOC(t *testing.T) {
+	t.Helper()
+
+	t.Skip("Skipping BYOC test")
+}
+
 // SkipIfNotAcc skips the test if acceptance tests are not enabled
 func SkipIfNotAcc(t *testing.T) {
 	t.Helper()

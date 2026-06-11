@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccAivenBYOCAWSEntity(t *testing.T) {
+	acc.SkipBYOC(t)
 	acc.SkipIfNotBeta(t)
 
 	organizationName := acc.OrganizationName()
@@ -27,7 +28,7 @@ resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc"
   cloud_provider   = "aws"
-  cloud_region     = "aws-eu-west-1"
+  cloud_region     = "eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
 
@@ -43,7 +44,7 @@ resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc-updated"
   cloud_provider   = "aws"
-  cloud_region     = "aws-eu-west-1"
+  cloud_region     = "eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
 
@@ -64,7 +65,7 @@ resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-acc-updated"
   cloud_provider   = "aws"
-  cloud_region     = "aws-us-east-1"
+  cloud_region     = "us-east-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"
 
@@ -92,7 +93,7 @@ resource "aiven_byoc_aws_entity" "example" {
 					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "data.aiven_organization.org", "id"),
 					resource.TestCheckResourceAttr(resourceName, "display_name", "test-byoc-acc"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_provider", "aws"),
-					resource.TestCheckResourceAttr(resourceName, "cloud_region", "aws-eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_region", "eu-west-1"),
 					resource.TestCheckResourceAttr(resourceName, "deployment_model", "standard"),
 					resource.TestCheckResourceAttr(resourceName, "reserved_cidr", "10.0.0.0/16"),
 					resource.TestCheckResourceAttr(resourceName, "contact_emails.#", "1"),
