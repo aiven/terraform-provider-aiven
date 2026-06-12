@@ -299,6 +299,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"relay_log_space_limit": {
+						Description: "The maximum amount of space in bytes to use for all relay logs while replicating from an external migration source. When the limit is reached, the replication I/O thread stops fetching relay log events until the SQL thread has caught up. Raise this to give a large migration a bigger relay-log budget; ensure the service disk is sized accordingly. The setting applies only on the node replicating from the external source; standby nodes always use the Aiven-managed default (the smaller of 5 GiB and 30% of the service disk), which is also used when this option is left unset. Changing this parameter will lead to a restart of the MySQL service.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"slow_query_log": {
 						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
 						Optional:    true,

@@ -181,9 +181,23 @@ Optional:
 - `compression_type` (String) Enum: `gzip`, `lz4`, `producer`, `snappy`, `uncompressed`, `zstd`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.
 - `default_replication_factor` (Number) Replication factor for auto-created topics (Default: 3).
+- `group_coordinator_rebalance_protocols` (String) Enum: `classic`, `classic,consumer`, `classic,consumer,share`, `classic,consumer,share,streams`, `classic,consumer,streams`, `classic,share`, `classic,streams`. The enabled consumer group rebalance protocols. Use consumer, classic, share, streams to enable Kafka share groups.
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. (Default: 3000 ms (3 seconds)). Example: `3000`.
 - `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes).
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. (Default: 6000 ms (6 seconds)). Example: `6000`.
+- `group_share_delivery_count_limit` (Number) The maximum delivery attempts for a share-group record. Example: `5`.
+- `group_share_heartbeat_interval_ms` (Number) The heartbeat interval used by share group members. Example: `5000`.
+- `group_share_max_groups` (Number) The maximum number of share groups allowed on the broker.
+- `group_share_max_heartbeat_interval_ms` (Number) The maximum heartbeat interval allowed for share group members. Example: `15000`.
+- `group_share_max_record_lock_duration_ms` (Number) The maximum record lock duration allowed for share groups. Example: `60000`.
+- `group_share_max_session_timeout_ms` (Number) The maximum session timeout allowed for share group members. Example: `60000`.
+- `group_share_max_size` (Number) The maximum number of members allowed in a share group. Example: `200`.
+- `group_share_min_heartbeat_interval_ms` (Number) The minimum heartbeat interval allowed for share group members. Example: `5000`.
+- `group_share_min_record_lock_duration_ms` (Number) The minimum record lock duration allowed for share groups. Example: `15000`.
+- `group_share_min_session_timeout_ms` (Number) The minimum session timeout allowed for share group members. Example: `45000`.
+- `group_share_partition_max_record_locks` (Number) The maximum number of record locks allowed per share group partition. Example: `2000`.
+- `group_share_record_lock_duration_ms` (Number) The duration for which a fetched share-group record is locked. Example: `30000`.
+- `group_share_session_timeout_ms` (Number) The timeout used to detect share group member failures. Example: `45000`.
 - `log_cleaner_delete_retention_ms` (Number) How long are delete records retained? (Default: 86400000 (1 day)).
 - `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted. (Default: 9223372036854775807 ms (Long.MAX_VALUE)).
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. (Default: 0.5). Example: `0.5`.
