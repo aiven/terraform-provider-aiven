@@ -68,9 +68,10 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	if item.IsNested() {
 		if item.Required {
 			codes = append(codes, jen.Qual(pkg, "IsRequired").Call())
-			if item.IsObject() {
-				codes = append(codes, jen.Qual(pkg, "SizeAtMost").Call(jen.Lit(1)))
-			}
+		}
+
+		if entity.isResource() && item.IsObject() {
+			codes = append(codes, jen.Qual(pkg, "SizeAtMost").Call(jen.Lit(1)))
 		}
 	}
 

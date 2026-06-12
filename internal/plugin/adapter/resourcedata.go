@@ -632,6 +632,9 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 				return nil, fmt.Errorf("expected set or list, got %T", value)
 			}
 		}
+		if sch.IsObject && len(list) > 1 {
+			return nil, fmt.Errorf("expected at most one object, got %d", len(list))
+		}
 		norm := make([]any, 0, len(list))
 		for _, elem := range list {
 			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
