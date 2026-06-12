@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -265,6 +266,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 					},
 				}},
+				Validators: []validator.List{listvalidator.SizeAtMost(1)},
 			},
 			"tag": schema.SetNestedBlock{
 				MarkdownDescription: "Topic tags.",

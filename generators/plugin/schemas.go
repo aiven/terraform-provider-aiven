@@ -219,8 +219,9 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 		}
 	}
 
-	// So far no validations for datasources
-	if !item.IsReadOnly(def, entity) {
+	// So far no validations for datasources. Resource object blocks are always
+	// singletons even when rendered as ListNestedBlock for SDKv2 compatibility.
+	if !item.IsReadOnly(def, entity) || (entity.isResource() && item.IsObject()) {
 		validators, err := genValidators(def, entity, item)
 		if err != nil {
 			return nil, err

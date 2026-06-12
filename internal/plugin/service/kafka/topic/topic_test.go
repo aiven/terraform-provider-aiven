@@ -671,6 +671,35 @@ resource "aiven_kafka_topic" "topic_conflict" {
 `, projectName, kafkaName, topicName)
 }
 
+func TestAccAivenKafkaTopic_config_max_items(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				PlanOnly: true,
+				Config: `
+resource "aiven_kafka_topic" "topic" {
+  project      = "foo"
+  service_name = "bar"
+  topic_name   = "foo"
+  partitions   = 5
+  replication  = 2
+
+  config {
+    retention_ms = 1000
+  }
+
+  config {
+    segment_ms = 2000
+  }
+}`,
+				ExpectError: regexp.MustCompile(`(?s)((config|Config).*(at most 1|No more than 1)|(at most 1|No more than 1).*(config|Config))`),
+			},
+		},
+	})
+}
+
 func TestAccAivenKafkaTopic_local_retention_bytes_validation(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
