@@ -185,7 +185,7 @@ func aivenKafkaTopicConfigSchema() map[string]*schema.Schema {
 		},
 		"diskless_enable": {
 			Type:        schema.TypeBool,
-			Description: "Creates a [diskless topic](https://aiven.io/docs/products/diskless). You can only do this when you create the topic and you cannot change it later. Diskless topics are only available for bring your own cloud (BYOC) services that have the feature enabled.",
+			Description: "Creates a [diskless topic](https://aiven.io/docs/products/diskless). You can only do this when you create the topic and you cannot change it later.",
 			Optional:    true,
 		},
 	}
