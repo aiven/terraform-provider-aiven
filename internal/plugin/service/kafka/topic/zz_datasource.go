@@ -114,7 +114,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"message_format_version": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'. The possible values are `0.10.0`, `0.10.0-IV0`, `0.10.0-IV1`, `0.10.1`, `0.10.1-IV0`, `0.10.1-IV1`, `0.10.1-IV2`, `0.10.2`, `0.10.2-IV0`, `0.11.0`, `0.11.0-IV0`, `0.11.0-IV1`, `0.11.0-IV2`, `0.8.0`, `0.8.1`, `0.8.2`, `0.9.0`, `1.0`, `1.0-IV0`, `1.1`, `1.1-IV0`, `2.0`, `2.0-IV0`, `2.0-IV1`, `2.1`, `2.1-IV0`, `2.1-IV1`, `2.1-IV2`, `2.2`, `2.2-IV0`, `2.2-IV1`, `2.3`, `2.3-IV0`, `2.3-IV1`, `2.4`, `2.4-IV0`, `2.4-IV1`, `2.5`, `2.5-IV0`, `2.6`, `2.6-IV0`, `2.7`, `2.7-IV0`, `2.7-IV1`, `2.7-IV2`, `2.8`, `2.8-IV0`, `2.8-IV1`, `3.0`, `3.0-IV0`, `3.0-IV1`, `3.1`, `3.1-IV0`, `3.2`, `3.2-IV0`, `3.3`, `3.3-IV0`, `3.3-IV1`, `3.3-IV2`, `3.3-IV3`, `3.4`, `3.4-IV0`, `3.5`, `3.5-IV0`, `3.5-IV1`, `3.5-IV2`, `3.6`, `3.6-IV0`, `3.6-IV1`, `3.6-IV2`, `3.7`, `3.7-IV0`, `3.7-IV1`, `3.7-IV2`, `3.7-IV3`, `3.7-IV4`, `3.8`, `3.8-IV0`, `3.9`, `3.9-IV0`, `3.9-IV1`, `4.0`, `4.0-IV0`, `4.1` and `4.1-IV0`.",
+						MarkdownDescription: "Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'. The possible values are `0.10.0`, `0.10.0-IV0`, `0.10.0-IV1`, `0.10.1`, `0.10.1-IV0`, `0.10.1-IV1`, `0.10.1-IV2`, `0.10.2`, `0.10.2-IV0`, `0.11.0`, `0.11.0-IV0`, `0.11.0-IV1`, `0.11.0-IV2`, `0.8.0`, `0.8.1`, `0.8.2`, `0.9.0`, `1.0`, `1.0-IV0`, `1.1`, `1.1-IV0`, `2.0`, `2.0-IV0`, `2.0-IV1`, `2.1`, `2.1-IV0`, `2.1-IV1`, `2.1-IV2`, `2.2`, `2.2-IV0`, `2.2-IV1`, `2.3`, `2.3-IV0`, `2.3-IV1`, `2.4`, `2.4-IV0`, `2.4-IV1`, `2.5`, `2.5-IV0`, `2.6`, `2.6-IV0`, `2.7`, `2.7-IV0`, `2.7-IV1`, `2.7-IV2`, `2.8`, `2.8-IV0`, `2.8-IV1`, `3.0`, `3.0-IV0`, `3.0-IV1`, `3.1`, `3.1-IV0`, `3.2`, `3.2-IV0`, `3.3`, `3.3-IV0`, `3.3-IV1`, `3.3-IV2`, `3.3-IV3`, `3.4`, `3.4-IV0`, `3.5`, `3.5-IV0`, `3.5-IV1`, `3.5-IV2`, `3.6`, `3.6-IV0`, `3.6-IV1`, `3.6-IV2`, `3.7`, `3.7-IV0`, `3.7-IV1`, `3.7-IV2`, `3.7-IV3`, `3.7-IV4`, `3.8`, `3.8-IV0`, `3.9`, `3.9-IV0`, `3.9-IV1`, `4.0`, `4.0-IV0`, `4.1`, `4.1-IV0`, `4.2` and `4.2-IV0`.",
 					},
 					"message_timestamp_after_max_ms": schema.StringAttribute{
 						Computed:            true,
@@ -204,6 +204,7 @@ func datasourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
 			"config": &adapter.Schema{
+				Computed: true,
 				IsObject: true,
 				Items: &adapter.Schema{
 					Computed: true,
@@ -337,16 +338,33 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"owner_user_group_id": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"partitions":          &adapter.Schema{Type: adapter.SchemaTypeInt},
-			"project":             &adapter.Schema{Type: adapter.SchemaTypeString},
-			"replication":         &adapter.Schema{Type: adapter.SchemaTypeInt},
-			"service_name":        &adapter.Schema{Type: adapter.SchemaTypeString},
+			"owner_user_group_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"partitions": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"replication": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeInt,
+			},
+			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"tag": &adapter.Schema{
+				Computed: true,
 				Items: &adapter.Schema{
+					Computed: true,
 					Properties: map[string]*adapter.Schema{
-						"key":   &adapter.Schema{Type: adapter.SchemaTypeString},
-						"value": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"key": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"value": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
 					},
 					Type: adapter.SchemaTypeObject,
 				},
@@ -360,8 +378,11 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
 			},
-			"topic_description": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"topic_name":        &adapter.Schema{Type: adapter.SchemaTypeString},
+			"topic_description": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"topic_name": &adapter.Schema{Type: adapter.SchemaTypeString},
 		},
 		Type: adapter.SchemaTypeObject,
 	}
