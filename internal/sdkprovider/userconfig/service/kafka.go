@@ -143,6 +143,12 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"group_coordinator_rebalance_protocols": {
+						Description:  "Enum: `classic`, `classic,consumer`, `classic,consumer,share`, `classic,consumer,share,streams`, `classic,consumer,streams`, `classic,share`, `classic,streams`. The enabled consumer group rebalance protocols. Use consumer, classic, share, streams to enable Kafka share groups.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"classic", "classic,consumer", "classic,consumer,share", "classic,consumer,share,streams", "classic,consumer,streams", "classic,share", "classic,streams"}, false),
+					},
 					"group_initial_rebalance_delay_ms": {
 						Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. (Default: 3000 ms (3 seconds)). Example: `3000`.",
 						Optional:    true,
@@ -155,6 +161,71 @@ func kafkaUserConfig() *schema.Schema {
 					},
 					"group_min_session_timeout_ms": {
 						Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. (Default: 6000 ms (6 seconds)). Example: `6000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_delivery_count_limit": {
+						Description: "The maximum delivery attempts for a share-group record. Example: `5`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_heartbeat_interval_ms": {
+						Description: "The heartbeat interval used by share group members. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_groups": {
+						Description: "The maximum number of share groups allowed on the broker.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_heartbeat_interval_ms": {
+						Description: "The maximum heartbeat interval allowed for share group members. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_record_lock_duration_ms": {
+						Description: "The maximum record lock duration allowed for share groups. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_session_timeout_ms": {
+						Description: "The maximum session timeout allowed for share group members. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_size": {
+						Description: "The maximum number of members allowed in a share group. Example: `200`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_heartbeat_interval_ms": {
+						Description: "The minimum heartbeat interval allowed for share group members. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_record_lock_duration_ms": {
+						Description: "The minimum record lock duration allowed for share groups. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_session_timeout_ms": {
+						Description: "The minimum session timeout allowed for share group members. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_partition_max_record_locks": {
+						Description: "The maximum number of record locks allowed per share group partition. Example: `2000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_record_lock_duration_ms": {
+						Description: "The duration for which a fetched share-group record is locked. Example: `30000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_session_timeout_ms": {
+						Description: "The timeout used to detect share group member failures. Example: `45000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

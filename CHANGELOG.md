@@ -12,6 +12,35 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_coordinator_rebalance_protocols` (enum): The enabled consumer
+  group rebalance protocols
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_delivery_count_limit`: The maximum delivery attempts
+  for a share-group record
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_heartbeat_interval_ms`: The heartbeat interval used
+  by share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_groups`: The maximum number of share groups allowed on the broker.
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_heartbeat_interval_ms`: The maximum heartbeat interval
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_record_lock_duration_ms`: The maximum record lock
+  duration allowed for share groups
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_session_timeout_ms`: The maximum session timeout
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_size`: The maximum number of members allowed in a share group
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_heartbeat_interval_ms`: The minimum heartbeat interval
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_record_lock_duration_ms`: The minimum record lock
+  duration allowed for share groups
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_session_timeout_ms`: The minimum session timeout
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_partition_max_record_locks`: The maximum number of record
+  locks allowed per share group partition
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_record_lock_duration_ms`: The duration for which a fetched
+  share-group record is locked
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_session_timeout_ms`: The timeout used to detect share group
+  member failures
+- Add `aiven_mysql` field `mysql_user_config.mysql.relay_log_space_limit`: The maximum amount of space in bytes
+  to use for all relay logs while replicating from an external migration source
+
 ## [4.58.0] - 2026-06-11
 
 - Fix: timeouts block values are now properly supported for resources implemented with the Plugin Framework
