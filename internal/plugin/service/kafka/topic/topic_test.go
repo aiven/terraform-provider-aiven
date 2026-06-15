@@ -54,6 +54,7 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 		resourceName := "aiven_kafka_topic.foo"
 		stringsResourceName := "aiven_kafka_topic.foo_strings"
 		topic2ResourceName := "aiven_kafka_topic.topic2"
+		topic2DataSourceName := "data.aiven_kafka_topic.topic2"
 		topicName := acc.RandName("topic")
 		topicStringsName := acc.RandName("topic-strs")
 		topic2Name := acc.RandName("topic2")
@@ -100,6 +101,11 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 						resource.TestCheckResourceAttr(topic2ResourceName, "config.#", "0"),
 						// topic2 has no tags configured either
 						resource.TestCheckResourceAttr(topic2ResourceName, "tag.#", "0"),
+
+						// The data source should expose Kafka defaults even when the topic
+						// resource itself has no user-defined config overrides.
+						resource.TestCheckResourceAttr(topic2DataSourceName, "config.#", "1"),
+						resource.TestCheckResourceAttrSet(topic2DataSourceName, "config.0.retention_ms"),
 
 						// The "_strings" clone proves that a config written with quoted
 						// numeric literals (the SDKv2-era shape) round-trips into the
@@ -543,6 +549,14 @@ resource "aiven_kafka_topic" "topic2" {
   owner_user_group_id = aiven_organization_user_group.foo.group_id
   partitions          = 3
   replication         = 2
+}
+
+data "aiven_kafka_topic" "topic2" {
+  project      = aiven_kafka_topic.topic2.project
+  service_name = aiven_kafka_topic.topic2.service_name
+  topic_name   = aiven_kafka_topic.topic2.topic_name
+
+  depends_on = [aiven_kafka_topic.topic2]
 }`, orgName, projectName, kafkaName, topicName, topicStringsName, topic2Name, topic2Desc, userGroupName)
 }
 
