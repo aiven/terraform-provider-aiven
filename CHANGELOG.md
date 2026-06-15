@@ -41,6 +41,9 @@ nav_order: 1
   member failures
 - Add `aiven_mysql` field `mysql_user_config.mysql.relay_log_space_limit`: The maximum amount of space in bytes
   to use for all relay logs while replicating from an external migration source
+- Change `aiven_kafka_topic`: migrate to Terraform Plugin Framework.
+  Note: direct upgrades of very old `aiven_kafka_topic` state may require upgrading through a recent provider version
+  first or re-importing the resource.
 
 ## [4.58.0] - 2026-06-11
 
@@ -82,7 +85,6 @@ nav_order: 1
 - Remove fields `errors`, `state`, `update_time` from `aiven_byoc_aws_entity` resource: they are not useful when only
   defining the BYOC entity, and would unnecessarily invalidate the resource's state on every update, causing a cascade
   of unrelated updates to dependent BYOC resources.
-- Change `aiven_kafka_topic`: migrate to Terraform Plugin Framework.
 
 ## [4.57.0] - 2026-05-19
 
