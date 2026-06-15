@@ -4,9 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/samber/lo"
-
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 const schemaSuffix = "Schema"
@@ -23,17 +20,8 @@ func genSchema(def *Definition, entity entityType, item *Item) (jen.Code, error)
 		attrs[jen.Id("DeprecationMessage")] = jen.Lit(item.DeprecationMessage)
 	}
 
-	desc := userconfig.Desc(fmtDescription(def, entity, item))
-	if lo.FromPtr(def.Beta) {
-		desc = desc.Beta()
-	}
-	if lo.FromPtr(def.LimitedAvailability) {
-		desc = desc.LimitedAvailability()
-	}
-	if entity.isResource() && def.Resource.RemoveMissing {
-		desc = desc.RemoveMissing()
-	}
-	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc.Build())
+	desc := fmtDescription(def, entity, item)
+	attrs[jen.Id("MarkdownDescription")] = jen.Lit(desc)
 
 	if entity.isResource() && def.Version != nil {
 		// Only resources have Version field

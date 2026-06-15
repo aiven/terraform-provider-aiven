@@ -177,6 +177,20 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 		b.AtLeastOneOf(item.AtLeastOneOf...)
 	}
 
+	if item.IsRoot() {
+		b.IsRoot()
+
+		if lo.FromPtr(def.Beta) {
+			b.Beta()
+		}
+		if lo.FromPtr(def.LimitedAvailability) {
+			b.LimitedAvailability()
+		}
+		if entity.isResource() && def.Resource.RemoveMissing {
+			b.RemoveMissing()
+		}
+	}
+
 	return b.Build()
 }
 
