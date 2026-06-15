@@ -278,7 +278,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"value": schema.StringAttribute{
 						MarkdownDescription: "Tag value. Maximum length: `256`.",
-						Required:            true,
+						Optional:            true,
 						Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 					},
 				}},

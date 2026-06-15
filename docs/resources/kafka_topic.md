@@ -57,7 +57,9 @@ resource "aiven_kafka_topic" "example" {
     unclean_leader_election_enable      = false
   }
   tag {
-    key   = "My-tag_key"
+    key = "My-tag_key"
+
+    // OPTIONAL FIELDS
     value = "My tag value, value."
   }
   topic_description = "Platform events"
@@ -131,6 +133,9 @@ Optional:
 Required:
 
 - `key` (String) Tag key. Length must be between `1` and `64`.
+
+Optional:
+
 - `value` (String) Tag value. Maximum length: `256`.
 
 

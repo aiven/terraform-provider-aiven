@@ -42,7 +42,9 @@ resource "aiven_kafka_topic" "example" {
     unclean_leader_election_enable      = false
   }
   tag {
-    key   = "My-tag_key"
+    key = "My-tag_key"
+
+    // OPTIONAL FIELDS
     value = "My tag value, value."
   }
   topic_description = "Platform events"
