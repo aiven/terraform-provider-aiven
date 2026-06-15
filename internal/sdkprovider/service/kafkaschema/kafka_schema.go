@@ -76,6 +76,34 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		},
 		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValuesString(kafkaschemaregistry.CompatibilityTypeChoices()...).Build(),
 	},
+	"references": {
+		Type:        schema.TypeSet,
+		Optional:    true,
+		MaxItems:    128,
+		Description: "Schema references.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: validation.StringLenBetween(1, 1024),
+					Description:  userconfig.Desc("The name used to reference the provided subject and version.").MaxLen(1024).Build(),
+				},
+				"subject": {
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: validation.StringLenBetween(1, 1024),
+					Description:  userconfig.Desc("Subject.").MaxLen(1024).Build(),
+				},
+				"version": {
+					Type:         schema.TypeInt,
+					Required:     true,
+					ValidateFunc: validation.IntAtLeast(0),
+					Description:  "Version.",
+				},
+			},
+		},
+	},
 }
 
 // diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
@@ -141,7 +169,7 @@ func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, clie
 	serviceName := d.Get("service_name").(string)
 	subjectName := d.Get("subject_name").(string)
 
-	if d.HasChange("schema") {
+	if d.HasChange("schema") || d.HasChange("references") {
 		// This call returns Schema ID, not its version
 		schemaId, err := client.ServiceSchemaRegistrySubjectVersionPost(
 			ctx,
@@ -149,6 +177,7 @@ func resourceKafkaSchemaUpsert(ctx context.Context, d *schema.ResourceData, clie
 			serviceName,
 			subjectName,
 			&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionPostIn{
+				References: expandKafkaSchemaReferences(d),
 				Schema:     d.Get("schema").(string),
 				SchemaType: kafkaschemaregistry.SchemaType(d.Get("schema_type").(string)),
 			},
@@ -252,6 +281,10 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, client
 		return diag.FromErr(err)
 	}
 
+	if err := d.Set("references", flattenKafkaSchemaReferences(s.References)); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err := d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
@@ -284,6 +317,47 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, client
 	return nil
 }
 
+func expandKafkaSchemaReferences(d *schema.ResourceData) *[]kafkaschemaregistry.ReferenceIn {
+	referenceSet, ok := d.GetOk("references")
+	if !ok {
+		return nil
+	}
+
+	set := referenceSet.(*schema.Set)
+	if set.Len() == 0 {
+		return nil
+	}
+
+	refs := make([]kafkaschemaregistry.ReferenceIn, 0, set.Len())
+	for _, item := range set.List() {
+		m := item.(map[string]any)
+		refs = append(refs, kafkaschemaregistry.ReferenceIn{
+			Name:    m["name"].(string),
+			Subject: m["subject"].(string),
+			Version: m["version"].(int),
+		})
+	}
+
+	return &refs
+}
+
+func flattenKafkaSchemaReferences(references []kafkaschemaregistry.ReferenceOut) []map[string]any {
+	if len(references) == 0 {
+		return nil
+	}
+
+	refs := make([]map[string]any, 0, len(references))
+	for _, reference := range references {
+		refs = append(refs, map[string]any{
+			"name":    reference.Name,
+			"subject": reference.Subject,
+			"version": reference.Version,
+		})
+	}
+
+	return refs
+}
+
 func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project, serviceName, schemaName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
@@ -298,10 +372,23 @@ func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, clie
 		return nil
 	}
 
-	err = client.ServiceSchemaRegistrySubjectDelete(ctx, project, serviceName, schemaName)
-	if err != nil {
-		if common.IsCritical(err) {
-			return diag.FromErr(err)
+	// If a schema has references, it must be hard deleted to allow the deletion of its referenced schemas.
+	// Hard deletion can only be performed after a soft deletion.
+	// Schemas without references are only soft deleted: the concept of hard deletion was introduced in 2023, while this resource was added in 2020,
+	// so this logic preserves backward compatibility.
+	for _, permanent := range []bool{false, true} {
+		if permanent && expandKafkaSchemaReferences(d) == nil {
+			break
+		}
+
+		err = client.ServiceSchemaRegistrySubjectDelete(
+			ctx, project, serviceName, schemaName,
+			kafkaschemaregistry.ServiceSchemaRegistrySubjectDeletePermanent(permanent),
+		)
+		if err != nil {
+			if common.IsCritical(err) {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -316,11 +403,15 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 
 	schemaType := kafkaschemaregistry.SchemaType(d.Get("schema_type").(string))
 	schemaPayload := d.Get("schema").(string)
-	if schemaType == kafkaschemaregistry.SchemaTypeAvro {
+	switch schemaType {
+	case kafkaschemaregistry.SchemaTypeAvro:
 		_, err = avro.Parse(schemaPayload)
 		if err != nil {
 			return fmt.Errorf("schema validation error: %w", err)
 		}
+	case kafkaschemaregistry.SchemaTypeProtobuf:
+		// The API is unable to validate schema correctness for Protobuf.
+		return nil
 	}
 
 	// no previous version: allow the diff, nothing to check compatibility against

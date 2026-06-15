@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -243,6 +244,113 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccAivenKafkaSchema_references(t *testing.T) {
+	projectName := acc.ProjectName()
+	serviceName := acc.RandName("kafka")
+	serviceIsReady := acc.CreateTestService(
+		t,
+		projectName,
+		serviceName,
+		acc.WithServiceType("kafka"),
+		acc.WithPlan("startup-4"),
+		acc.WithCloud("google-europe-west1"),
+		acc.WithUserConfig(map[string]any{"schema_registry": true}),
+	)
+
+	resourceName := "aiven_kafka_schema.dep"
+	dataSourceName := "data.aiven_kafka_schema.dep"
+	refSubject := fmt.Sprintf("ref-%s.proto", acc.RandStr())
+	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			acc.TestAccPreCheck(t)
+			require.NoError(t, <-serviceIsReady)
+		},
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", depSubject),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
+						"name":    refSubject,
+						"subject": refSubject,
+						"version": "1",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "references.*", map[string]string{
+						"name":    refSubject,
+						"subject": refSubject,
+						"version": "1",
+					}),
+				),
+			},
+			{
+				Config:             testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "NONE"
+}
+
+resource "aiven_kafka_schema" "ref" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[3]q
+  schema_type  = "PROTOBUF"
+
+  schema = <<EOT
+syntax = "proto3";
+
+message OtherRecord {
+  int32 other_id = 1;
+}
+EOT
+}
+
+resource "aiven_kafka_schema" "dep" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[4]q
+  schema_type  = "PROTOBUF"
+
+  references {
+    name    = %[3]q
+    subject = aiven_kafka_schema.ref.subject_name
+    version = aiven_kafka_schema.ref.version
+  }
+
+  schema = <<EOT
+syntax = "proto3";
+import %[3]q;
+
+message MyRecord {
+  string f1 = 1;
+  OtherRecord f2 = 2;
+}
+EOT
+}
+
+data "aiven_kafka_schema" "dep" {
+  project      = aiven_kafka_schema.dep.project
+  service_name = aiven_kafka_schema.dep.service_name
+  subject_name = aiven_kafka_schema.dep.subject_name
+}`, projectName, serviceName, refSubject, depSubject)
 }
 
 func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {

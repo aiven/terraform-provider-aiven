@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_kafka_schema` field `references`: Schema references to other registered subjects.
 - Add `aiven_kafka` field `kafka_user_config.kafka.group_coordinator_rebalance_protocols` (enum): The enabled consumer
   group rebalance protocols
 - Add `aiven_kafka` field `kafka_user_config.kafka.group_share_delivery_count_limit`: The maximum delivery attempts

@@ -32,7 +32,17 @@ resource "aiven_kafka_schema_configuration" "config" {
 
 - `compatibility_level` (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
 - `id` (String) The ID of this resource.
+- `references` (Set of Object) Schema references. (see [below for nested schema](#nestedatt--references))
 - `schema` (String) Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema, depending on the schema type.
 - `schema_type` (String) Kafka Schema configuration type. Defaults to AVRO. The possible values are `AVRO`, `JSON` and `PROTOBUF`.
 - `subject_name` (String) The Kafka Schema Subject name. Changing this property forces recreation of the resource.
 - `version` (Number) Kafka Schema configuration version.
+
+<a id="nestedatt--references"></a>
+### Nested Schema for `references`
+
+Read-Only:
+
+- `name` (String)
+- `subject` (String)
+- `version` (Number)

@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -263,6 +264,19 @@ func WithCloud(cloud string) CreateTestServiceOpt {
 func WithPlan(plan string) CreateTestServiceOpt {
 	return func(req *service.ServiceCreateIn) {
 		req.Plan = plan
+	}
+}
+
+func WithUserConfig(m map[string]any) CreateTestServiceOpt {
+	return func(req *service.ServiceCreateIn) {
+		config := lo.FromPtr(req.UserConfig)
+		if config == nil {
+			config = make(map[string]any)
+		}
+		for k, v := range m {
+			config[k] = v
+		}
+		req.UserConfig = &config
 	}
 }
 
