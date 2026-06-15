@@ -302,6 +302,36 @@ data "aiven_kafka_topic" "whatever" {
 		})
 	})
 
+	// Verifies that HCL accepted by the SDKv2 provider remains valid after
+	// switching to the Plugin Framework resource. The SDK schema allowed tag
+	// blocks without value and treated the missing value as an empty string.
+	t.Run("backward_compat_optional_tag_value", func(t *testing.T) {
+		const oldVersion = "4.56.0"
+
+		topicName := acc.RandName("topic")
+		config := testAccAivenKafkaTopicOptionalTagValueConfig(projectName, kafkaName, topicName)
+
+		resource.Test(t, resource.TestCase{
+			PreCheck: func() { acc.TestAccPreCheck(t) },
+			Steps: []resource.TestStep{
+				{
+					ExternalProviders: map[string]resource.ExternalProvider{
+						"aiven": acc.ExternalAivenProvider(t, oldVersion),
+					},
+					Config:             config,
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+				},
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					Config:                   config,
+					PlanOnly:                 true,
+					ExpectNonEmptyPlan:       true,
+				},
+			},
+		})
+	})
+
 	// Verifies that a Kafka topic created with the last published provider version
 	// (which modelled numeric config fields as `string`) can be re-applied by the
 	// current dev version (which models them as `int64` directly from the OpenAPI
@@ -356,6 +386,22 @@ data "aiven_kafka_topic" "whatever" {
 			}),
 		})
 	})
+}
+
+func testAccAivenKafkaTopicOptionalTagValueConfig(projectName, kafkaName, topicName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_topic" "test" {
+  project                = %[1]q
+  service_name           = %[2]q
+  topic_name             = %[3]q
+  partitions             = 3
+  replication            = 2
+  termination_protection = false
+
+  tag {
+    key = "environment"
+  }
+}`, projectName, kafkaName, topicName)
 }
 
 // testAccAivenKafkaTopicBackwardCompatConfig deliberately uses string literals for

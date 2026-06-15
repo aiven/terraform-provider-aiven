@@ -132,3 +132,11 @@ schema:
       segment_ms:
         type: string
         example: "604800000"
+  tag:
+    type: array
+    items:
+      type: object
+      properties:
+        value:
+          type: string
+          optional: true
