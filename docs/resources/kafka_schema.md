@@ -3,12 +3,12 @@
 page_title: "aiven_kafka_schema Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.
+  The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas. Schemas with references are hard deleted, while schemas without references are only soft deleted.
 ---
 
 # aiven_kafka_schema (Resource)
 
-The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.
+The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas. Schemas with references are hard deleted, while schemas without references are only soft deleted.
 
 ## Example Usage
 
@@ -52,6 +52,7 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 ### Optional
 
 - `compatibility_level` (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
+- `references` (Block Set, Max: 128) Schema references. (see [below for nested schema](#nestedblock--references))
 - `schema_type` (String) Kafka Schema configuration type. Defaults to AVRO. The possible values are `AVRO`, `JSON` and `PROTOBUF`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -59,6 +60,16 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
 - `id` (String) The ID of this resource.
 - `version` (Number) Kafka Schema configuration version.
+
+<a id="nestedblock--references"></a>
+### Nested Schema for `references`
+
+Required:
+
+- `name` (String) The name used to reference the provided subject and version. Maximum length: `1024`.
+- `subject` (String) Subject. Maximum length: `1024`.
+- `version` (Number) Version.
+
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
