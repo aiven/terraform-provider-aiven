@@ -113,7 +113,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": timeouts.Block(ctx),
 		},
-		MarkdownDescription: "Gets detailed information about a specific service plan, including specifications and pricing for a cloud region. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Gets detailed information about a specific service plan, including specifications and pricing for a cloud region. \n\n**This data source is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the data source.",
 	}
 }
 func datasourceSchemaInternal() *adapter.Schema {

@@ -3,12 +3,17 @@
 page_title: "aiven_billing_group Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Gets information about a billing group. Deprecated: Use aiven_organization_billing_group instead. This data source will be removed in the next major release.
+  Gets information about a billing group.
+  ~> This data source is deprecated
+  Use aiven_organization_billing_group instead. This data source will be removed in the next major release.
 ---
 
 # aiven_billing_group (Data Source)
 
-Gets information about a billing group. **Deprecated**: Use `aiven_organization_billing_group` instead. This data source will be removed in the next major release.
+Gets information about a billing group.
+
+~> **This data source is deprecated**
+Use `aiven_organization_billing_group` instead. This data source will be removed in the next major release.
 
 ## Example Usage
 
