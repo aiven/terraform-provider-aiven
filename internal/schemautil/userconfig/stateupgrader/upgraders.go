@@ -73,16 +73,6 @@ func KafkaMirrormaker() []schema.StateUpgrader {
 	}
 }
 
-func KafkaTopic() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    kafka.ResourceKafkaTopic().CoreConfigSchema().ImpliedType(),
-			Upgrade: kafka.ResourceKafkaTopicStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
 func MySQL() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
