@@ -13,6 +13,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `aiven_kafka_schema` field `references`: Schema references to other registered subjects.
+- Change `aiven_kafka_topic`: migrated to Terraform Plugin Framework. Recommended: upgrade state via v4.58.0 or re-import
+  if coming from v3.
 - Add `aiven_kafka` field `kafka_user_config.kafka.group_coordinator_rebalance_protocols` (enum): The enabled consumer
   group rebalance protocols
 - Add `aiven_kafka` field `kafka_user_config.kafka.group_share_delivery_count_limit`: The maximum delivery attempts
@@ -41,9 +43,6 @@ nav_order: 1
   member failures
 - Add `aiven_mysql` field `mysql_user_config.mysql.relay_log_space_limit`: The maximum amount of space in bytes
   to use for all relay logs while replicating from an external migration source
-- Change `aiven_kafka_topic`: migrate to Terraform Plugin Framework.
-  Note: direct upgrades of very old `aiven_kafka_topic` state may require upgrading through a recent provider version
-  first or re-importing the resource.
 
 ## [4.58.0] - 2026-06-11
 
