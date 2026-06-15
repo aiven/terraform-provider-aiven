@@ -191,7 +191,7 @@ func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 // the framework has no computed blocks.
 // todo: remove in v5.0.0, use attribute.Computed instead.
 func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier {
-	return func(_ adapter.ResourceData, dto map[string]any) error {
+	return func(d adapter.ResourceData, dto map[string]any) error {
 		rspConfig := new(kafkaTopicConfig)
 		if err := schemautil.Remarshal(rsp, rspConfig); err != nil {
 			return err
@@ -199,7 +199,8 @@ func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier 
 
 		userConfig := make(map[string]any, len(rspConfig.Config))
 		for k, v := range rspConfig.Config {
-			if v.Source != kafkatopic.SourceTypeTopicConfig {
+			if d.IsResource() && v.Source != kafkatopic.SourceTypeTopicConfig {
+				// Keeps user config values for resources only
 				continue
 			}
 			userConfig[k] = v.Value

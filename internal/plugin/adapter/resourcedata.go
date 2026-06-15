@@ -281,19 +281,6 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		return err
 	}
 
-	// The Plugin Framework does not support computed blocks:
-	// https://discuss.hashicorp.com/t/provider-plugin-framework-computed-blocks-block-count-changed-from-x-to-y/72955/2
-	// Remove computed blocks from resources (data sources are essentially computed) when values are not set.
-	// Currently, this is applied only at the top level.
-	// todo: remove in v5.0.0, this is a legacy.
-	if d.IsResource() && d.config != nil {
-		for k, v := range d.schema.Properties {
-			if v.IsObject && v.Computed && isEmpty(d.config[k]) {
-				delete(norm, k)
-			}
-		}
-	}
-
 	// todo: remove stale data
 	state := d.currentState()
 	maps.Copy(state, norm)
