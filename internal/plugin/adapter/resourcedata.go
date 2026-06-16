@@ -281,8 +281,8 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		return err
 	}
 
-	// todo: remove stale data
 	state := d.currentState()
+	d.pruneResourceComputedObjectBlocks(state, norm)
 	maps.Copy(state, norm)
 
 	id := make([]string, len(d.idFields))
@@ -295,6 +295,53 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 	}
 
 	return d.SetID(id...)
+}
+
+func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]any) {
+	if !d.IsResource() {
+		return
+	}
+
+	for name, sch := range d.schema.Properties {
+		if !sch.IsObject || !sch.Computed {
+			continue
+		}
+
+		if isMapValueUnsetOrEmpty(norm, name) {
+			delete(norm, name)
+			delete(state, name)
+			continue
+		}
+
+		if d.config != nil {
+			if isMapValueUnsetOrEmpty(d.config, name) {
+				delete(norm, name)
+				delete(state, name)
+			}
+			continue
+		}
+
+		// During resource Read the framework doesn't provide raw config. Avoid introducing a computed block that was absent from prior state.
+		// Plugin Framework cannot add resource blocks that are absent from configuration.
+		if isMapValueUnsetOrEmpty(state, name) {
+			delete(norm, name)
+		}
+	}
+}
+
+func isMapValueUnsetOrEmpty(m map[string]any, key string) bool {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return rv.Len() == 0
+	default:
+		return false
+	}
 }
 
 // tfValue converts the current state to tftypes.Value to write it to the user's state.
