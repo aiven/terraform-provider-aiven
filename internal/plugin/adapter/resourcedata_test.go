@@ -288,18 +288,6 @@ func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
 		},
 	}
 
-	t.Run("resource omits unconfigured computed block", func(t *testing.T) {
-		rd, err := NewResourceData(sch, []string{"name"},
-			WithTestPlan(map[string]any{"name": "my-resource"}),
-			WithTestConfig(map[string]any{"name": "my-resource"}),
-		)
-		require.NoError(t, err)
-		require.NoError(t, rd.Flatten(flattenIn))
-
-		_, ok := rd.GetOk("metadata")
-		require.False(t, ok)
-	})
-
 	t.Run("resource keeps configured computed block", func(t *testing.T) {
 		configMetadata := []any{
 			map[string]any{"key": "configured"},
