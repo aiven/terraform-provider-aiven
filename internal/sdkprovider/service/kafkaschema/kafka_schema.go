@@ -372,12 +372,17 @@ func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, clie
 		return nil
 	}
 
-	// If a schema has references, it must be hard deleted to allow the deletion of its referenced schemas.
+	hasReferences, err := kafkaSchemaHasAnyVersionReferences(ctx, client, project, serviceName, schemaName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// If any schema version has references, the subject must be hard deleted to allow the deletion of its referenced schemas.
 	// Hard deletion can only be performed after a soft deletion.
 	// Schemas without references are only soft deleted: the concept of hard deletion was introduced in 2023, while this resource was added in 2020,
 	// so this logic preserves backward compatibility.
 	for _, permanent := range []bool{false, true} {
-		if permanent && expandKafkaSchemaReferences(d) == nil {
+		if permanent && !hasReferences {
 			break
 		}
 
@@ -393,6 +398,36 @@ func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, clie
 	}
 
 	return nil
+}
+
+func kafkaSchemaHasAnyVersionReferences(
+	ctx context.Context,
+	client avngen.Client,
+	project, serviceName, subjectName string,
+) (bool, error) {
+	versions, err := client.ServiceSchemaRegistrySubjectVersionsGet(ctx, project, serviceName, subjectName)
+	if err != nil {
+		if avngen.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	for _, version := range versions {
+		s, err := client.ServiceSchemaRegistrySubjectVersionGet(ctx, project, serviceName, subjectName, version)
+		if err != nil {
+			if avngen.IsNotFound(err) {
+				continue
+			}
+			return false, err
+		}
+
+		if len(s.References) > 0 {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, _ any) error {
