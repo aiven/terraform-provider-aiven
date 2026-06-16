@@ -317,7 +317,11 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, client
 	return nil
 }
 
-func expandKafkaSchemaReferences(d *schema.ResourceData) *[]kafkaschemaregistry.ReferenceIn {
+type resourceData interface {
+	GetOk(string) (any, bool)
+}
+
+func expandKafkaSchemaReferences(d resourceData) *[]kafkaschemaregistry.ReferenceIn {
 	referenceSet, ok := d.GetOk("references")
 	if !ok {
 		return nil
@@ -438,19 +442,20 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 
 	schemaType := kafkaschemaregistry.SchemaType(d.Get("schema_type").(string))
 	schemaPayload := d.Get("schema").(string)
-	switch schemaType {
-	case kafkaschemaregistry.SchemaTypeAvro:
+	if schemaType == kafkaschemaregistry.SchemaTypeAvro {
 		_, err = avro.Parse(schemaPayload)
 		if err != nil {
 			return fmt.Errorf("schema validation error: %w", err)
 		}
-	case kafkaschemaregistry.SchemaTypeProtobuf:
-		// The API is unable to validate schema correctness for Protobuf.
-		return nil
 	}
 
 	// no previous version: allow the diff, nothing to check compatibility against
 	if _, ok := d.GetOk("version"); !ok {
+		return nil
+	}
+
+	// If the schema has references, the API is unable to validate schema compatibility.
+	if expandKafkaSchemaReferences(d) != nil {
 		return nil
 	}
 

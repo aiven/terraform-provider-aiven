@@ -248,8 +248,8 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 }
 
 func TestAccAivenKafkaSchema_avroReferencesPlan(t *testing.T) {
-	refSubject := fmt.Sprintf("ref-%s", acc.RandStr())
-	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+	refSubject := acc.RandName("ref")
+	depSubject := acc.RandName("dep")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -277,115 +277,113 @@ func TestAccAivenKafkaSchema_references(t *testing.T) {
 		acc.WithUserConfig(map[string]any{"schema_registry": true}),
 	)
 
-	resourceName := "aiven_kafka_schema.dep"
-	avroResourceName := "aiven_kafka_schema.avro_dep"
-	dataSourceName := "data.aiven_kafka_schema.dep"
-	refSubject := fmt.Sprintf("ref-%s.proto", acc.RandStr())
-	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
-	avroRefSubject := fmt.Sprintf("ref-%s", acc.RandStr())
-	avroDepSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+	t.Run("references", func(t *testing.T) {
+		resourceName := "aiven_kafka_schema.dep"
+		avroResourceName := "aiven_kafka_schema.avro_dep"
+		dataSourceName := "data.aiven_kafka_schema.dep"
+		refSubject := acc.RandName("ref") + ".proto"
+		depSubject := acc.RandName("dep")
+		avroRefSubject := acc.RandName("ref")
+		avroDepSubject := acc.RandName("dep")
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			acc.TestAccPreCheck(t)
-			require.NoError(t, <-serviceIsReady)
-		},
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "project", projectName),
-					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-					resource.TestCheckResourceAttr(resourceName, "subject_name", depSubject),
-					resource.TestCheckResourceAttr(resourceName, "version", "1"),
-					resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
-					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
-						"name":    refSubject,
-						"subject": refSubject,
-						"version": "1",
-					}),
-					resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "references.*", map[string]string{
-						"name":    refSubject,
-						"subject": refSubject,
-						"version": "1",
-					}),
-				),
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck: func() {
+				acc.TestAccPreCheck(t)
+				require.NoError(t, <-serviceIsReady)
 			},
-			{
-				Config:             testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
-				ExpectNonEmptyPlan: false,
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "project", projectName),
+						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(resourceName, "subject_name", depSubject),
+						resource.TestCheckResourceAttr(resourceName, "version", "1"),
+						resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
+						resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
+							"name":    refSubject,
+							"subject": refSubject,
+							"version": "1",
+						}),
+						resource.TestCheckTypeSetElemNestedAttrs(dataSourceName, "references.*", map[string]string{
+							"name":    refSubject,
+							"subject": refSubject,
+							"version": "1",
+						}),
+					),
+				},
+				{
+					Config:             testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+					ExpectNonEmptyPlan: false,
+				},
+				{
+					Config: testAccKafkaSchemaAVROReferencesResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(avroResourceName, "project", projectName),
+						resource.TestCheckResourceAttr(avroResourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(avroResourceName, "subject_name", avroDepSubject),
+						resource.TestCheckResourceAttr(avroResourceName, "version", "1"),
+						resource.TestCheckResourceAttr(avroResourceName, "schema_type", "AVRO"),
+					),
+				},
+				{
+					Config: testAccKafkaSchemaAVROReferencesCompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(avroResourceName, "version", "2"),
+						resource.TestCheckResourceAttr(avroResourceName, "schema_type", "AVRO"),
+					),
+				},
+				// Schemas with references skip compatibility checks in CustomizeDiff, so an
+				// incompatible change still produces a non-empty plan instead of a plan error.
+				{
+					Config:             testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+				},
+				{
+					Config:      testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+					ExpectError: regexp.MustCompile("Incompatible schema, compatibility_mode=BACKWARD. Incompatibilities: reader type: string not compatible with writer type: int"),
+				},
 			},
-			{
-				Config: testAccKafkaSchemaAVROReferencesResource(projectName, serviceName, avroRefSubject, avroDepSubject),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(avroResourceName, "project", projectName),
-					resource.TestCheckResourceAttr(avroResourceName, "service_name", serviceName),
-					resource.TestCheckResourceAttr(avroResourceName, "subject_name", avroDepSubject),
-					resource.TestCheckResourceAttr(avroResourceName, "version", "1"),
-					resource.TestCheckResourceAttr(avroResourceName, "schema_type", "AVRO"),
-				),
-			},
-			{
-				Config:             testAccKafkaSchemaAVROReferencesCompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-			},
-			{
-				Config:      testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
-			},
-		},
+		})
 	})
-}
 
-func TestAccAivenKafkaSchema_historicalReferencesDestroy(t *testing.T) {
-	projectName := acc.ProjectName()
-	serviceName := acc.RandName("kafka")
-	serviceIsReady := acc.CreateTestService(
-		t,
-		projectName,
-		serviceName,
-		acc.WithServiceType("kafka"),
-		acc.WithPlan("startup-4"),
-		acc.WithCloud("google-europe-west1"),
-		acc.WithUserConfig(map[string]any{"schema_registry": true}),
-	)
+	t.Run("historical_references_destroy", func(t *testing.T) {
+		resourceName := "aiven_kafka_schema.dep"
+		refSubject := acc.RandName("ref") + ".proto"
+		depSubject := acc.RandName("dep")
 
-	resourceName := "aiven_kafka_schema.dep"
-	refSubject := fmt.Sprintf("ref-%s.proto", acc.RandStr())
-	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			acc.TestAccPreCheck(t)
-			require.NoError(t, <-serviceIsReady)
-		},
-		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenKafkaSchemaReferencesDestroy(projectName, serviceName, refSubject),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "version", "1"),
-					resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
-					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
-						"name":    refSubject,
-						"subject": refSubject,
-						"version": "1",
-					}),
-				),
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck: func() {
+				acc.TestAccPreCheck(t)
+				require.NoError(t, <-serviceIsReady)
 			},
-			{
-				Config: testAccKafkaSchemaReferencesRemovedResource(projectName, serviceName, refSubject, depSubject),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "version", "2"),
-					resource.TestCheckResourceAttr(resourceName, "references.#", "0"),
-				),
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaSchemaReferencesDestroy(projectName, serviceName, refSubject),
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "version", "1"),
+						resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
+						resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
+							"name":    refSubject,
+							"subject": refSubject,
+							"version": "1",
+						}),
+					),
+				},
+				{
+					Config: testAccKafkaSchemaReferencesRemovedResource(projectName, serviceName, refSubject, depSubject),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "version", "2"),
+						resource.TestCheckResourceAttr(resourceName, "references.#", "0"),
+					),
+				},
 			},
-		},
+		})
 	})
 }
 
