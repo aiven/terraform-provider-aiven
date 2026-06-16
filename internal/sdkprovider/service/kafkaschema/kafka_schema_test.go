@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -246,6 +247,23 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 	})
 }
 
+func TestAccAivenKafkaSchema_avroReferencesPlan(t *testing.T) {
+	refSubject := fmt.Sprintf("ref-%s", acc.RandStr())
+	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccKafkaSchemaAVROReferencesPlan(refSubject, depSubject),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestAccAivenKafkaSchema_references(t *testing.T) {
 	projectName := acc.ProjectName()
 	serviceName := acc.RandName("kafka")
@@ -260,9 +278,12 @@ func TestAccAivenKafkaSchema_references(t *testing.T) {
 	)
 
 	resourceName := "aiven_kafka_schema.dep"
+	avroResourceName := "aiven_kafka_schema.avro_dep"
 	dataSourceName := "data.aiven_kafka_schema.dep"
 	refSubject := fmt.Sprintf("ref-%s.proto", acc.RandStr())
 	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+	avroRefSubject := fmt.Sprintf("ref-%s", acc.RandStr())
+	avroDepSubject := fmt.Sprintf("dep-%s", acc.RandStr())
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -296,8 +317,298 @@ func TestAccAivenKafkaSchema_references(t *testing.T) {
 				Config:             testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
 				ExpectNonEmptyPlan: false,
 			},
+			{
+				Config: testAccKafkaSchemaAVROReferencesResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(avroResourceName, "project", projectName),
+					resource.TestCheckResourceAttr(avroResourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(avroResourceName, "subject_name", avroDepSubject),
+					resource.TestCheckResourceAttr(avroResourceName, "version", "1"),
+					resource.TestCheckResourceAttr(avroResourceName, "schema_type", "AVRO"),
+				),
+			},
+			{
+				Config:             testAccKafkaSchemaAVROReferencesCompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config:      testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
+			},
 		},
 	})
+}
+
+func TestAccAivenKafkaSchema_historicalReferencesDestroy(t *testing.T) {
+	projectName := acc.ProjectName()
+	serviceName := acc.RandName("kafka")
+	serviceIsReady := acc.CreateTestService(
+		t,
+		projectName,
+		serviceName,
+		acc.WithServiceType("kafka"),
+		acc.WithPlan("startup-4"),
+		acc.WithCloud("google-europe-west1"),
+		acc.WithUserConfig(map[string]any{"schema_registry": true}),
+	)
+
+	resourceName := "aiven_kafka_schema.dep"
+	refSubject := fmt.Sprintf("ref-%s.proto", acc.RandStr())
+	depSubject := fmt.Sprintf("dep-%s", acc.RandStr())
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			acc.TestAccPreCheck(t)
+			require.NoError(t, <-serviceIsReady)
+		},
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaReferencesDestroy(projectName, serviceName, refSubject),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "PROTOBUF"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "references.*", map[string]string{
+						"name":    refSubject,
+						"subject": refSubject,
+						"version": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccKafkaSchemaReferencesRemovedResource(projectName, serviceName, refSubject, depSubject),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "version", "2"),
+					resource.TestCheckResourceAttr(resourceName, "references.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccKafkaSchemaAVROReferencesPlan(refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema" "dep" {
+  project      = %[1]q
+  service_name = "kafka-schema-references-plan"
+  subject_name = %[3]q
+  schema_type  = "AVRO"
+
+  references {
+    name    = "io.aiven.RefRecord"
+    subject = %[2]q
+    version = 1
+  }
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "DepRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "ref",
+          "type": "io.aiven.RefRecord"
+        }
+      ]
+    }
+  EOT
+}
+`, acc.ProjectName(), refSubject, depSubject)
+}
+
+func testAccKafkaSchemaAVROReferencesResource(projectName, serviceName, refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "BACKWARD"
+}
+
+resource "aiven_kafka_schema" "avro_ref" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[3]q
+  schema_type  = "AVRO"
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "RefRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        }
+      ]
+    }
+  EOT
+}
+
+resource "aiven_kafka_schema" "avro_dep" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[4]q
+  schema_type  = "AVRO"
+
+  references {
+    name    = "io.aiven.RefRecord"
+    subject = aiven_kafka_schema.avro_ref.subject_name
+    version = aiven_kafka_schema.avro_ref.version
+  }
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "DepRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "value",
+          "type": "int",
+          "default": 0
+        },
+        {
+          "name": "ref",
+          "type": "io.aiven.RefRecord"
+        }
+      ]
+    }
+  EOT
+}`, projectName, serviceName, refSubject, depSubject)
+}
+
+func testAccKafkaSchemaAVROReferencesCompatibleResource(projectName, serviceName, refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "BACKWARD"
+}
+
+resource "aiven_kafka_schema" "avro_ref" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[3]q
+  schema_type  = "AVRO"
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "RefRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        }
+      ]
+    }
+  EOT
+}
+
+resource "aiven_kafka_schema" "avro_dep" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[4]q
+  schema_type  = "AVRO"
+
+  references {
+    name    = "io.aiven.RefRecord"
+    subject = aiven_kafka_schema.avro_ref.subject_name
+    version = aiven_kafka_schema.avro_ref.version
+  }
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "DepRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "value",
+          "type": "int",
+          "default": 0
+        },
+        {
+          "name": "ref",
+          "type": "io.aiven.RefRecord"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "default": "ok"
+        }
+      ]
+    }
+  EOT
+}`, projectName, serviceName, refSubject, depSubject)
+}
+
+func testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "BACKWARD"
+}
+
+resource "aiven_kafka_schema" "avro_ref" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[3]q
+  schema_type  = "AVRO"
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "RefRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        }
+      ]
+    }
+  EOT
+}
+
+resource "aiven_kafka_schema" "avro_dep" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[4]q
+  schema_type  = "AVRO"
+
+  references {
+    name    = "io.aiven.RefRecord"
+    subject = aiven_kafka_schema.avro_ref.subject_name
+    version = aiven_kafka_schema.avro_ref.version
+  }
+
+  schema = <<EOT
+    {
+      "type": "record",
+      "name": "DepRecord",
+      "namespace": "io.aiven",
+      "fields": [
+        {
+          "name": "value",
+          "type": "string",
+          "default": "not-compatible"
+        },
+        {
+          "name": "ref",
+          "type": "io.aiven.RefRecord"
+        }
+      ]
+    }
+  EOT
+}`, projectName, serviceName, refSubject, depSubject)
 }
 
 func testAccKafkaSchemaReferencesResource(projectName, serviceName, refSubject, depSubject string) string {
@@ -351,6 +662,76 @@ data "aiven_kafka_schema" "dep" {
   service_name = aiven_kafka_schema.dep.service_name
   subject_name = aiven_kafka_schema.dep.subject_name
 }`, projectName, serviceName, refSubject, depSubject)
+}
+
+func testAccKafkaSchemaReferencesRemovedResource(projectName, serviceName, refSubject, depSubject string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "NONE"
+}
+
+resource "aiven_kafka_schema" "ref" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[3]q
+  schema_type  = "PROTOBUF"
+
+  schema = <<EOT
+syntax = "proto3";
+
+message OtherRecord {
+  int32 other_id = 1;
+}
+EOT
+}
+
+resource "aiven_kafka_schema" "dep" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = %[4]q
+  schema_type  = "PROTOBUF"
+
+  schema = <<EOT
+syntax = "proto3";
+
+message MyRecord {
+  string f1 = 1;
+  string f2 = 2;
+}
+EOT
+
+  depends_on = [aiven_kafka_schema.ref]
+}
+
+data "aiven_kafka_schema" "dep" {
+  project      = aiven_kafka_schema.dep.project
+  service_name = aiven_kafka_schema.dep.service_name
+  subject_name = aiven_kafka_schema.dep.subject_name
+}`, projectName, serviceName, refSubject, depSubject)
+}
+
+func testAccCheckAivenKafkaSchemaReferencesDestroy(projectName, serviceName, refSubject string) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		c, err := acc.GetTestGenAivenClient()
+		if err != nil {
+			return err
+		}
+
+		err = c.ServiceSchemaRegistrySubjectDelete(
+			context.Background(),
+			projectName,
+			serviceName,
+			refSubject,
+			kafkaschemaregistry.ServiceSchemaRegistrySubjectDeletePermanent(true),
+		)
+		if avngen.IsNotFound(err) {
+			return nil
+		}
+
+		return err
+	}
 }
 
 func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
