@@ -442,6 +442,13 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 
 	schemaType := kafkaschemaregistry.SchemaType(d.Get("schema_type").(string))
 	schemaPayload := d.Get("schema").(string)
+
+	// 1. If the schema has references, the API is unable to validate schema compatibility.
+	// 2. Referenced types are resolved by Schema Registry; local parsing (avro.Parse) cannot validate them.
+	if expandKafkaSchemaReferences(d) != nil {
+		return nil
+	}
+
 	if schemaType == kafkaschemaregistry.SchemaTypeAvro {
 		_, err = avro.Parse(schemaPayload)
 		if err != nil {
@@ -451,11 +458,6 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 
 	// no previous version: allow the diff, nothing to check compatibility against
 	if _, ok := d.GetOk("version"); !ok {
-		return nil
-	}
-
-	// If the schema has references, the API is unable to validate schema compatibility.
-	if expandKafkaSchemaReferences(d) != nil {
 		return nil
 	}
 
