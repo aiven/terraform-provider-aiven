@@ -41,6 +41,29 @@ nav_order: 1
   member failures
 - Add `aiven_mysql` field `mysql_user_config.mysql.relay_log_space_limit`: The maximum amount of space in bytes
   to use for all relay logs while replicating from an external migration source
+- Change `aiven_account_team_project` field `team_type` (enum): add `organization:sustainability:read`
+- Add `aiven_kafka` field `kafka_user_config.kafka.audit_log`: Enable Kafka audit logging by providing this object.
+  Removing it disables the feature
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `4.2`
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_adaptive_hash_index`: Whether InnoDB adaptive hash indexing is enabled
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_io_capacity`: The number of I/O operations per second (IOPS)
+  available to InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer
+- Add `aiven_opensearch` field `opensearch_user_config.azure_migration.max_restore_bytes_per_sec`: Throttles the restore
+  rate per node
+- Add `aiven_opensearch` field `opensearch_user_config.azure_migration.max_snapshot_bytes_per_sec`: Throttles the snapshot
+  rate per node
+- Add `aiven_opensearch` field `opensearch_user_config.gcs_migration.max_restore_bytes_per_sec`: Throttles the restore
+  rate per node
+- Add `aiven_opensearch` field `opensearch_user_config.gcs_migration.max_snapshot_bytes_per_sec`: Throttles the snapshot
+  rate per node
+- Add `aiven_opensearch` field `opensearch_user_config.s3_migration.max_restore_bytes_per_sec`: Throttles the restore rate per node
+- Add `aiven_opensearch` field `opensearch_user_config.s3_migration.max_snapshot_bytes_per_sec`: Throttles the snapshot
+  rate per node
+- Change `aiven_project_user` field `member_type` (enum): add `organization:sustainability:read`
+- Add `aiven_service_integration` field `rsyslog_user_config`: Rsyslog user configurable settings. **Warning:**
+  There's no way to reset advanced configuration options to default
+- Add `aiven_service_integration_endpoint` field `rsyslog_user_config.escape_newlines`: When true, embedded newlines
+  in a log message are escaped so a multi-line record (e.g
 
 ## [4.58.0] - 2026-06-11
 

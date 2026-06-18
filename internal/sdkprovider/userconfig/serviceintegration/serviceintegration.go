@@ -38,6 +38,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return metricsUserConfig()
 	case "prometheus":
 		return prometheusUserConfig()
+	case "rsyslog":
+		return rsyslogUserConfig()
 	default:
 		return nil
 	}
@@ -48,5 +50,5 @@ func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"autoscaler_service", "clickhouse_credentials", "clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "flink_external_postgresql", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
+	return []string{"autoscaler_service", "clickhouse_credentials", "clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "flink_external_postgresql", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus", "rsyslog"}
 }

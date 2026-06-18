@@ -130,7 +130,7 @@ Optional:
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (Block List, Max: 1) Kafka SASL mechanisms (see [below for nested schema](#nestedblock--kafka_user_config--kafka_sasl_mechanisms))
-- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, and newer. Kafka major version.
+- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, `4.2`, and newer. Kafka major version.
 - `letsencrypt_sasl` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication. (Default: False).
 - `letsencrypt_sasl_privatelink` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication via Privatelink. (Default: False).
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
@@ -177,6 +177,7 @@ Optional:
 
 Optional:
 
+- `audit_log` (Block List, Max: 1) Enable Kafka audit logging by providing this object. Removing it disables the feature. Enabling, updating, or disabling audit logging causes a rolling restart of all Kafka brokers (see [below for nested schema](#nestedblock--kafka_user_config--kafka--audit_log))
 - `auto_create_topics_enable` (Boolean) Enable auto-creation of topics. (Default: false).
 - `compression_type` (String) Enum: `gzip`, `lz4`, `producer`, `snappy`, `uncompressed`, `zstd`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.
@@ -239,6 +240,17 @@ Optional:
 - `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: true).
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)).
 - `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)).
+
+<a id="nestedblock--kafka_user_config--kafka--audit_log"></a>
+### Nested Schema for `kafka_user_config.kafka.audit_log`
+
+Optional:
+
+- `aggregation_period_sec` (Number) Aggregation period in seconds over which audit log entries are batched before being emitted. Default: `300`.
+- `group_by` (String) Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when record_type is user_operations. Default: `user_and_ip`.
+- `include_denials` (Boolean) Whether to include denied authorization attempts in the audit log. Default: `false`.
+- `record_type` (String) Enum: `user_activity`, `user_operations`. user_operations records individual Kafka API calls (produce, fetch, etc.). user_activity records higher-level user actions. Default: `user_operations`.
+
 
 
 <a id="nestedblock--kafka_user_config--kafka_authentication_methods"></a>

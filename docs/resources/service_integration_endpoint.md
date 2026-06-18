@@ -398,6 +398,7 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
+- `escape_newlines` (Boolean) When true, embedded newlines in a log message are escaped so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Useful for newline-delimited cloud log intakes that drop continuation lines. Default: `false`.
 - `key` (String, Sensitive) PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----

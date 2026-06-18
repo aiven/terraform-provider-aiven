@@ -24,6 +24,11 @@ func rsyslogUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"escape_newlines": {
+				Description: "When true, embedded newlines in a log message are escaped so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Useful for newline-delimited cloud log intakes that drop continuation lines. Default: `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"format": {
 				Description:  "Enum: `custom`, `rfc3164`, `rfc5424`. Message format. Default: `rfc5424`.",
 				Required:     true,
