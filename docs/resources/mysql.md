@@ -177,10 +177,13 @@ Optional:
 - `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default. Example: `+03:00`.
 - `group_concat_max_len` (Number) The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.
 - `information_schema_stats_expiry` (Number) The time, in seconds, before cached statistics expire. Example: `86400`.
+- `innodb_adaptive_hash_index` (Boolean) Whether InnoDB adaptive hash indexing is enabled. The optimal setting is workload-dependent: it speeds up lookups for some workloads but its internal latch can become a contention point under high concurrency, in which case disabling it can improve throughput.
 - `innodb_change_buffer_max_size` (Number) Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25. Example: `30`.
 - `innodb_flush_neighbors` (Number) Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent. Example: `0`.
 - `innodb_ft_min_token_size` (Number) Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `3`.
 - `innodb_ft_server_stopword_table` (String) This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.
+- `innodb_io_capacity` (Number) The number of I/O operations per second (IOPS) available to InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer. Set this to a value appropriate for the underlying storage; it must not exceed innodb_io_capacity_max. Example: `2000`.
+- `innodb_io_capacity_max` (Number) The maximum number of I/O operations per second (IOPS) that InnoDB background tasks may perform when flushing falls behind. Defaults to twice innodb_io_capacity (minimum 2000). This must be greater than or equal to innodb_io_capacity.
 - `innodb_lock_wait_timeout` (Number) The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.
 - `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk.
 - `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.
