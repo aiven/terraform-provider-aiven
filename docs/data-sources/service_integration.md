@@ -52,6 +52,7 @@ data "aiven_service_integration" "example_integration" {
 - `logs_user_config` (List of Object) Logs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--logs_user_config))
 - `metrics_user_config` (List of Object) Metrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--metrics_user_config))
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
+- `rsyslog_user_config` (List of Object) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--rsyslog_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_project` (String) Source service project name
 
@@ -410,3 +411,13 @@ Read-Only:
 - `perf_events_statements_digest_text_limit` (Number)
 - `perf_events_statements_limit` (Number)
 - `perf_events_statements_time_limit` (Number)
+
+
+
+
+<a id="nestedatt--rsyslog_user_config"></a>
+### Nested Schema for `rsyslog_user_config`
+
+Read-Only:
+
+- `escape_newlines` (Boolean)

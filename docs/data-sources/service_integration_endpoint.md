@@ -300,6 +300,7 @@ Read-Only:
 
 - `ca` (String)
 - `cert` (String)
+- `escape_newlines` (Boolean)
 - `format` (String)
 - `key` (String)
 - `logline` (String)

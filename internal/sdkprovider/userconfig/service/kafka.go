@@ -122,6 +122,36 @@ func kafkaUserConfig() *schema.Schema {
 			"kafka": {
 				Description: "Kafka broker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"audit_log": {
+						Description: "Enable Kafka audit logging by providing this object. Removing it disables the feature. Enabling, updating, or disabling audit logging causes a rolling restart of all Kafka brokers",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"aggregation_period_sec": {
+								Description: "Aggregation period in seconds over which audit log entries are batched before being emitted. Default: `300`.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"group_by": {
+								Description:  "Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when record_type is user_operations. Default: `user_and_ip`.",
+								Optional:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"user", "user_and_ip"}, false),
+							},
+							"include_denials": {
+								Description: "Whether to include denied authorization attempts in the audit log. Default: `false`.",
+								Optional:    true,
+								Type:        schema.TypeBool,
+							},
+							"record_type": {
+								Description:  "Enum: `user_activity`, `user_operations`. user_operations records individual Kafka API calls (produce, fetch, etc.). user_activity records higher-level user actions. Default: `user_operations`.",
+								Optional:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"user_activity", "user_operations"}, false),
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"auto_create_topics_enable": {
 						Description: "Enable auto-creation of topics. (Default: false).",
 						Optional:    true,
@@ -784,7 +814,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, and newer. Kafka major version.",
+				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, `4.2`, and newer. Kafka major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

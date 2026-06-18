@@ -180,6 +180,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"innodb_adaptive_hash_index": {
+						Description: "Whether InnoDB adaptive hash indexing is enabled. The optimal setting is workload-dependent: it speeds up lookups for some workloads but its internal latch can become a contention point under high concurrency, in which case disabling it can improve throughput.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"innodb_change_buffer_max_size": {
 						Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25. Example: `30`.",
 						Optional:    true,
@@ -199,6 +204,16 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"innodb_io_capacity": {
+						Description: "The number of I/O operations per second (IOPS) available to InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer. Set this to a value appropriate for the underlying storage; it must not exceed innodb_io_capacity_max. Example: `2000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"innodb_io_capacity_max": {
+						Description: "The maximum number of I/O operations per second (IOPS) that InnoDB background tasks may perform when flushing falls behind. Defaults to twice innodb_io_capacity (minimum 2000). This must be greater than or equal to innodb_io_capacity.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 					"innodb_lock_wait_timeout": {
 						Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.",

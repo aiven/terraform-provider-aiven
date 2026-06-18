@@ -73,6 +73,16 @@ func opensearchUserConfig() *schema.Schema {
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
+					"max_restore_bytes_per_sec": {
+						Description: "Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"max_snapshot_bytes_per_sec": {
+						Description: "Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"readonly": {
 						Description: "Whether the repository is read-only. Default: `true`.",
 						Optional:    true,
@@ -146,6 +156,16 @@ func opensearchUserConfig() *schema.Schema {
 					"indices": {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
 						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"max_restore_bytes_per_sec": {
+						Description: "Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"max_snapshot_bytes_per_sec": {
+						Description: "Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"readonly": {
@@ -1383,6 +1403,16 @@ func opensearchUserConfig() *schema.Schema {
 					"indices": {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
 						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"max_restore_bytes_per_sec": {
+						Description: "Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"max_snapshot_bytes_per_sec": {
+						Description: "Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"readonly": {
