@@ -43,7 +43,7 @@ func New(client topicsClient) Repository {
 	return singleRep
 }
 
-// Repository CRUD interface for topics
+// Repository CRUD interface for topics.
 type Repository interface {
 	Create(ctx context.Context, project, service string, req *kafkatopic.ServiceKafkaTopicCreateIn) error
 	Read(ctx context.Context, project, service, topic string) (*kafkatopic.ServiceKafkaTopicGetOut, error)

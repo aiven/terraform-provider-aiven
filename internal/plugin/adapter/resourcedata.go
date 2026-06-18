@@ -281,21 +281,8 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		return err
 	}
 
-	// The Plugin Framework does not support computed blocks:
-	// https://discuss.hashicorp.com/t/provider-plugin-framework-computed-blocks-block-count-changed-from-x-to-y/72955/2
-	// Remove computed blocks from resources (data sources are essentially computed) when values are not set.
-	// Currently, this is applied only at the top level.
-	// todo: remove in v5.0.0, this is a legacy.
-	if d.IsResource() && d.config != nil {
-		for k, v := range d.schema.Properties {
-			if v.IsObject && v.Computed && isEmpty(d.config[k]) {
-				delete(norm, k)
-			}
-		}
-	}
-
-	// todo: remove stale data
 	state := d.currentState()
+	d.pruneResourceComputedObjectBlocks(state, norm)
 	maps.Copy(state, norm)
 
 	id := make([]string, len(d.idFields))
@@ -308,6 +295,53 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 	}
 
 	return d.SetID(id...)
+}
+
+func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]any) {
+	if !d.IsResource() {
+		return
+	}
+
+	for name, sch := range d.schema.Properties {
+		if !sch.IsObject || !sch.Computed {
+			continue
+		}
+
+		if isMapValueUnsetOrEmpty(norm, name) {
+			delete(norm, name)
+			delete(state, name)
+			continue
+		}
+
+		if d.config != nil {
+			if isMapValueUnsetOrEmpty(d.config, name) {
+				delete(norm, name)
+				delete(state, name)
+			}
+			continue
+		}
+
+		// During resource Read the framework doesn't provide raw config. Avoid introducing a computed block that was absent from prior state.
+		// Plugin Framework cannot add resource blocks that are absent from configuration.
+		if isMapValueUnsetOrEmpty(state, name) {
+			delete(norm, name)
+		}
+	}
+}
+
+func isMapValueUnsetOrEmpty(m map[string]any, key string) bool {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return rv.Len() == 0
+	default:
+		return false
+	}
 }
 
 // tfValue converts the current state to tftypes.Value to write it to the user's state.
@@ -632,6 +666,9 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 				return nil, fmt.Errorf("expected set or list, got %T", value)
 			}
 		}
+		if sch.IsObject && len(list) > 1 {
+			return nil, fmt.Errorf("expected at most one object, got %d", len(list))
+		}
 		norm := make([]any, 0, len(list))
 		for _, elem := range list {
 			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
@@ -716,19 +753,4 @@ func remarshal(in, out any) error {
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.UseNumber()
 	return d.Decode(out)
-}
-
-// isEmpty checks if the value is empty — has length zero.
-func isEmpty(v any) bool {
-	if v == nil {
-		return true
-	}
-
-	rv := reflect.ValueOf(v)
-	switch rv.Kind() {
-	case reflect.String, reflect.Array, reflect.Slice, reflect.Map:
-		return rv.Len() == 0
-	}
-
-	return false
 }

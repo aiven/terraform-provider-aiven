@@ -290,11 +290,26 @@ func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
 
 	t.Run("resource omits unconfigured computed block", func(t *testing.T) {
 		rd, err := NewResourceData(sch, []string{"name"},
-			WithTestPlan(map[string]any{"name": "my-resource"}),
+			WithTestState(map[string]any{"name": "my-resource"}),
 			WithTestConfig(map[string]any{"name": "my-resource"}),
 		)
 		require.NoError(t, err)
 		require.NoError(t, rd.Flatten(flattenIn))
+
+		_, ok := rd.GetOk("metadata")
+		require.False(t, ok)
+	})
+
+	t.Run("resource removes stale unconfigured computed block", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestState(map[string]any{
+				"name":     "my-resource",
+				"metadata": []any{map[string]any{"key": "stale"}},
+			}),
+			WithTestConfig(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{"name": "my-resource"}))
 
 		_, ok := rd.GetOk("metadata")
 		require.False(t, ok)
@@ -337,5 +352,74 @@ func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
 		got, ok := rd.GetOk("metadata")
 		require.True(t, ok)
 		require.Equal(t, flattenIn["metadata"], got)
+	})
+}
+
+func TestResourceDataSingletonObjectBlocks(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"name": {Type: SchemaTypeString},
+			"config": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"retention_ms": {Type: SchemaTypeString},
+					},
+				},
+			},
+		},
+	}
+
+	expand := func(t *testing.T, plan map[string]any) (map[string]any, error) {
+		t.Helper()
+
+		rd, err := NewResourceData(sch, []string{"name"}, WithTestPlan(plan))
+		require.NoError(t, err)
+
+		var out map[string]any
+		err = rd.Expand(&out)
+		return out, err
+	}
+
+	t.Run("allows missing object block", func(t *testing.T) {
+		got, err := expand(t, map[string]any{"name": "topic"})
+
+		require.NoError(t, err)
+		require.Equal(t, map[string]any{"name": "topic"}, got)
+	})
+
+	t.Run("allows one object block", func(t *testing.T) {
+		got, err := expand(t, map[string]any{
+			"name": "topic",
+			"config": []any{
+				map[string]any{"retention_ms": "1000"},
+			},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, map[string]any{
+			"name": "topic",
+			"config": map[string]any{
+				"retention_ms": "1000",
+			},
+		}, got)
+	})
+
+	t.Run("rejects multiple object blocks", func(t *testing.T) {
+		_, err := expand(t, map[string]any{
+			"name": "topic",
+			"config": []any{
+				map[string]any{"retention_ms": "1000"},
+				map[string]any{"retention_ms": "2000"},
+			},
+		})
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "expected at most one object, got 2")
 	})
 }
