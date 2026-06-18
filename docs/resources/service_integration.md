@@ -79,6 +79,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 - `logs_user_config` (Block List, Max: 1) Logs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--logs_user_config))
 - `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--metrics_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
+- `rsyslog_user_config` (Block List, Max: 1) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--rsyslog_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_name` (String) Source service for the integration (if any)
 - `source_service_project` (String) Source service project name
@@ -458,6 +459,14 @@ Optional:
 - `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.
 
 
+
+
+<a id="nestedblock--rsyslog_user_config"></a>
+### Nested Schema for `rsyslog_user_config`
+
+Optional:
+
+- `escape_newlines` (Boolean) Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.
 
 
 <a id="nestedblock--timeouts"></a>

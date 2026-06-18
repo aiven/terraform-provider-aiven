@@ -163,6 +163,7 @@ Read-Only:
 
 Read-Only:
 
+- `audit_log` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka--audit_log))
 - `auto_create_topics_enable` (Boolean)
 - `compression_type` (String)
 - `connections_max_idle_ms` (Number)
@@ -225,6 +226,17 @@ Read-Only:
 - `transaction_partition_verification_enable` (Boolean)
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number)
 - `transaction_state_log_segment_bytes` (Number)
+
+<a id="nestedobjatt--kafka_user_config--kafka--audit_log"></a>
+### Nested Schema for `kafka_user_config.kafka.audit_log`
+
+Read-Only:
+
+- `aggregation_period_sec` (Number)
+- `group_by` (String)
+- `include_denials` (Boolean)
+- `record_type` (String)
+
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_authentication_methods"></a>
