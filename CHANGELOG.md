@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.59.0] - 2026-06-22
+
 - Add `aiven_kafka_schema` field `references`: Schema references to other registered subjects.
 - Change `aiven_kafka_topic`: migrated to Terraform Plugin Framework. Recommended: upgrade state via v4.58.0 or re-import
   if coming from v3.
