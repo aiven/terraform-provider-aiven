@@ -38,7 +38,7 @@ jobs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -68,7 +68,7 @@ jobs:
       has_slow_tests: ${{ steps.get_matrix.outputs.has_slow_tests }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
       - uses: actions/setup-go@v6
@@ -105,7 +105,7 @@ jobs:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).normal }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -149,7 +149,7 @@ jobs:
         pkg: ${{ fromJson(needs.find_tests.outputs.matrix).slow }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -201,7 +201,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
