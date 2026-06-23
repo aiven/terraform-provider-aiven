@@ -355,19 +355,19 @@ Optional:
 Optional:
 
 - `consumer_auto_offset_reset` (String) Enum: `earliest`, `latest`. Set where consumer starts to consume data. Value `earliest`: Start replication from the earliest offset. Value `latest`: Start replication from the latest offset. Default is `earliest`.
-- `consumer_fetch_max_bytes` (Number) The maximum amount of data the server should return for a fetch request.
-- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Example: `1024`.
-- `consumer_max_partition_fetch_bytes` (Number) The maximum amount of data per partition the server will return.
-- `consumer_max_poll_records` (Number) Set consumer max.poll.records. The default is 500. Example: `500`.
-- `consumer_receive_buffer_bytes` (Number) The size of the TCP receive buffer (SO_RCVBUF) to use when reading data. -1 uses the OS default. Example: `65536`.
-- `consumer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Example: `30000`.
-- `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.
-- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
+- `consumer_fetch_max_bytes` (Number) The maximum amount of data the server should return for a fetch request. Default is `52428800` (50MiB).
+- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Default is `1`. Example: `1024`.
+- `consumer_max_partition_fetch_bytes` (Number) The maximum amount of data per partition the server will return. Default is `1048576` (1MiB).
+- `consumer_max_poll_records` (Number) Set consumer max.poll.records. Default is `500`.
+- `consumer_receive_buffer_bytes` (Number) The size of the TCP receive buffer (SO_RCVBUF) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default.
+- `consumer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Default is `30000` (30s).
+- `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Default is `16384` (16KiB).
+- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Default is `33554432` (32MiB).
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
-- `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.
-- `producer_max_request_size` (Number) The maximum request size in bytes.
-- `producer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Example: `30000`.
-- `producer_send_buffer_bytes` (Number) The size of the TCP send buffer (SO_SNDBUF) to use when sending data. -1 uses the OS default. Example: `131072`.
+- `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Default is `0`. Example: `100`.
+- `producer_max_request_size` (Number) The maximum request size in bytes. Default is `1048576` (1MiB).
+- `producer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Default is `30000` (30s).
+- `producer_send_buffer_bytes` (Number) The size of the TCP send buffer (SO_SNDBUF) to use when sending data. Default is `131072` (128KiB). `-1` uses the OS default.
 
 
 
