@@ -45,7 +45,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"permissions": schema.SetNestedBlock{
-				MarkdownDescription: "Required property. List of roles to set.",
+				MarkdownDescription: "List of roles to set.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"create_time": schema.StringAttribute{
 						Computed:            true,

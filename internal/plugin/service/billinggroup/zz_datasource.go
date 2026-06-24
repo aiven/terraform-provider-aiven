@@ -98,7 +98,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
 		DeprecationMessage:  "Use `aiven_organization_billing_group` instead. This data source will be removed in the next major release.",
-		MarkdownDescription: "Gets information about a billing group.\n\n~> **This data source is deprecated**\nUse `aiven_organization_billing_group` instead. This data source will be removed in the next major release.",
+		MarkdownDescription: "Gets information about a billing group.",
 	}
 }
 func datasourceSchemaInternal() *adapter.Schema {

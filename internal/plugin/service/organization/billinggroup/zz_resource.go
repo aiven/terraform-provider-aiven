@@ -67,7 +67,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"billing_contact_emails": schema.SetNestedBlock{
-				MarkdownDescription: "Required property. List of billing contact emails.",
+				MarkdownDescription: "List of billing contact emails.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
 					MarkdownDescription: "Email. Maximum length: `254`.",
 					Required:            true,
@@ -76,7 +76,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Set{setvalidator.IsRequired()},
 			},
 			"billing_emails": schema.SetNestedBlock{
-				MarkdownDescription: "Required property. List of billing contact emails.",
+				MarkdownDescription: "List of billing contact emails.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"email": schema.StringAttribute{
 					MarkdownDescription: "Email. Maximum length: `254`.",
 					Required:            true,
@@ -85,7 +85,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Set{setvalidator.IsRequired()},
 			},
 			"payment_method": schema.ListNestedBlock{
-				MarkdownDescription: "Required property. Payment method.",
+				MarkdownDescription: "Payment method.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"payment_method_id": schema.StringAttribute{
 						MarkdownDescription: "Payment method ID. Maximum length: `36`.",

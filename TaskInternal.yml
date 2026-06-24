@@ -156,11 +156,22 @@ tasks:
       - "{{.GO_CMD}} run ./generators/pluginreport/..."
 
   gen-docs:
-    desc: "Generate Terraform provider documentation"
+    desc: "Generate Terraform provider documentation (tfplugindocs; SDK resources and guides)"
     cmds:
-      - rm -f docs/.DS_Store
-      - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven"
-      - find docs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
+      - rm -f docs-tfplugindocs/.DS_Store
+      - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven --rendered-website-dir docs-tfplugindocs"
+      - find docs-tfplugindocs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
+
+  docs:
+    desc: "Generate all provider documentation (tfplugindocs, gen-plugin, merge into docs/)"
+    vars:
+      no_spec: '{{.no_spec | default "false"}}'
+    cmds:
+      - task: gen-docs
+      - task: gen-plugin
+        vars:
+          no_spec: '{{.no_spec}}'
+      - ./tools/scripts/docs-merge.sh
 
   generate:
     desc: "Run all code generation tasks"
@@ -168,11 +179,10 @@ tasks:
       no_spec: '{{.no_spec | default "false"}}'
     cmds:
       - task: gen-go
-      - task: gen-plugin
+      - task: docs
         vars:
           no_spec: '{{.no_spec}}'
       - task: gen-plugin-report
-      - task: gen-docs
       - task: mockery
 
   #-------------------------------------

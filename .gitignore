@@ -62,6 +62,8 @@ Gemfile.lock
 # Temp files from build steps
 tmp/
 temp/
+docs-plugin/
+docs-tfplugindocs/
 dist/
 opa/dist/
 
