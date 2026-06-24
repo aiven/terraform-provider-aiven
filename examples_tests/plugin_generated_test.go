@@ -1,3 +1,5 @@
+//go:build all || examples
+
 package examples
 
 import (

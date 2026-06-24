@@ -13,8 +13,13 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
+	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
 )
+
+func init() {
+	imports.LocalPrefix = projectPackagePrefix
+}
 
 const (
 	openAPIPath      = "openapi.json"
@@ -79,7 +84,7 @@ func exec() error {
 	}
 
 	providerPath := genFilePath(providerFilePath, providerFileName)
-	err = provider.Save(providerPath)
+	err = saveGoFile(provider, providerPath)
 	if err != nil {
 		return fmt.Errorf("could not save file %s: %w", providerPath, err)
 	}
@@ -189,7 +194,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			}
 
 			viewFilePath := genFilePath(def.Location, viewFileName)
-			err = viewFile.Save(viewFilePath)
+			err = saveGoFile(viewFile, viewFilePath)
 			if err != nil {
 				return fmt.Errorf("could not save file %s: %w", viewFilePath, err)
 			}
@@ -205,7 +210,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		)
 		file.Add(schema)
 		file.Add(schemaSimple)
-		err = file.Save(filePath)
+		err = saveGoFile(file, filePath)
 		if err != nil {
 			return fmt.Errorf("could not save file %s: %w", filePath, err)
 		}
@@ -218,15 +223,10 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			idPath := def.IDAttributeComposed
-			if len(idPath) == 0 {
-				idPath = append(idPath, root.Name+"_id")
-			}
-
 			importData := fmt.Sprintf(
 				"terraform import %s.example %s\n",
 				def.typeName,
-				strings.ToUpper(filepath.Join(idPath...)),
+				importID(def, root),
 			)
 
 			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
@@ -256,6 +256,21 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not write file %s: %w", filePath, err)
 			}
 		}
+
+		docBytes, err := genDoc(def, entity, renderRoot, resDat)
+		if err != nil {
+			return fmt.Errorf("could not generate documentation for %q: %w", def.typeName, err)
+		}
+		if docBytes != nil {
+			docDir := docOutputDir(entity)
+			if err := os.MkdirAll(docDir, os.ModePerm); err != nil {
+				return fmt.Errorf("could not create directory %s: %w", docDir, err)
+			}
+			docPath := filepath.Join(docDir, docFileName(def))
+			if err := os.WriteFile(docPath, docBytes, 0o644); err != nil {
+				return fmt.Errorf("could not write file %s: %w", docPath, err)
+			}
+		}
 	}
 	return nil
 }
@@ -273,6 +288,16 @@ var reNonAlphaNum = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 func goPkgName(s string) string {
 	return reNonAlphaNum.ReplaceAllString(strings.ToLower(filepath.Base(s)), "")
+}
+
+// saveGoFile renders a jennifer file, formats imports with goimports, and writes it.
+func saveGoFile(file *jen.File, path string) error {
+	src, err := imports.Process("", []byte(file.GoString()), nil)
+	if err != nil {
+		return fmt.Errorf("format imports: %w", err)
+	}
+
+	return os.WriteFile(path, src, 0o644)
 }
 
 // newFile creates a new file with the given package name, imports, and copyrights.

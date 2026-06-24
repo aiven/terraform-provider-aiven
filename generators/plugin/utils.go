@@ -96,16 +96,10 @@ func isValidRegex(pattern string) bool {
 
 func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	description := strings.TrimSpace(reNewline.ReplaceAllString(item.Description, " "))
-	if entity.isResource() && !item.IsRoot() && item.Required && item.IsNested() {
-		// The documentation generator renders required nested blocks as optional.
-		// https://github.com/hashicorp/terraform-plugin-docs/issues/363
-		// fixme: remove this once the we render the docs on our own
-		description = "Required property. " + description
-	}
 
 	b := userconfig.Desc(description)
-	if len(item.Enum) > 0 {
-		b.PossibleValuesString(schemautil.FlattenToString(item.Enum)...)
+	if enum := itemEnumValues(item); len(enum) > 0 {
+		b.PossibleValuesString(schemautil.FlattenToString(enum)...)
 	}
 
 	isResource := entity.isResource()
@@ -153,7 +147,9 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 		b.DefaultValue(item.Default)
 	}
 
-	if item.DeprecationMessage != "" {
+	// Root deprecation is rendered in doc.go (~> callout); attributes keep the
+	// inline **Deprecated**: suffix from DescriptionBuilder.
+	if item.DeprecationMessage != "" && !item.IsRoot() {
 		b.Deprecated(item.DeprecationMessage)
 	}
 
@@ -178,8 +174,6 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	}
 
 	if item.IsRoot() {
-		b.IsRoot()
-
 		if lo.FromPtr(def.Beta) {
 			b.Beta()
 		}
@@ -192,6 +186,16 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 	}
 
 	return b.Build()
+}
+
+func itemEnumValues(item *Item) []any {
+	if len(item.Enum) > 0 {
+		return item.Enum
+	}
+	if item.Items != nil && len(item.Items.Enum) > 0 {
+		return item.Items.Enum
+	}
+	return nil
 }
 
 func firstUpper[T ~string](s T) string {

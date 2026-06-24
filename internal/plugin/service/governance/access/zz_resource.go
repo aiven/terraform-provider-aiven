@@ -55,7 +55,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"access_data": schema.ListNestedBlock{
-				MarkdownDescription: "Required property. access type specific data. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "access type specific data. Changing this property forces recreation of the resource.",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						"project_name": schema.StringAttribute{
@@ -76,7 +76,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 					Blocks: map[string]schema.Block{"acls": schema.SetNestedBlock{
-						MarkdownDescription: "Required property. Acls. Changing this property forces recreation of the resource.",
+						MarkdownDescription: "Acls. Changing this property forces recreation of the resource.",
 						NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 							"host": schema.StringAttribute{
 								Computed:            true,

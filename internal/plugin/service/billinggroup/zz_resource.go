@@ -123,7 +123,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
 		DeprecationMessage:  "Use `aiven_organization_billing_group` instead. This resource will be removed in the next major release.",
-		MarkdownDescription: "Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.\n\n~> **This resource is deprecated**\nUse `aiven_organization_billing_group` instead. This resource will be removed in the next major release.",
+		MarkdownDescription: "Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {

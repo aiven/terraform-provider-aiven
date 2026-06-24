@@ -65,7 +65,6 @@ type DescriptionBuilder struct {
 	withRemoveMissing bool
 
 	deprecationMessage string
-	isRoot             bool
 }
 
 // Desc is a function that creates a new DescriptionBuilder.
@@ -180,11 +179,6 @@ func (db *DescriptionBuilder) Deprecated(msg string) *DescriptionBuilder {
 
 func (db *DescriptionBuilder) RemoveMissing() *DescriptionBuilder {
 	db.withRemoveMissing = true
-	return db
-}
-
-func (db *DescriptionBuilder) IsRoot() *DescriptionBuilder {
-	db.isRoot = true
 	return db
 }
 
@@ -338,11 +332,7 @@ func (db *DescriptionBuilder) Build() string {
 	}
 
 	if db.deprecationMessage != "" {
-		if db.isRoot {
-			s = fmt.Sprintf("%s\n\n~> **This %s is deprecated**\n%s", s, db.entityType, db.deprecationMessage)
-		} else {
-			s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
-		}
+		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
 	}
 	return s
 }
