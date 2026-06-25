@@ -44,6 +44,19 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
+            
+            // Refuse /test on fork PRs (head.repo is null when the fork was deleted)
+            const isFork = pr.data.head.repo?.full_name !== pr.data.base.repo.full_name;
+            if (isFork) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '⛔ `/test` is not allowed on fork PRs'
+              });
+              core.setFailed('Refusing to run /test on a fork PR (untrusted head ref).');
+              return;
+            }
 
             // Parse command
             const comment = context.payload.comment.body;
