@@ -354,6 +354,10 @@ Required:
 
 - `enabled` (Boolean) Whether to enable the Diskless functionality.
 
+Optional:
+
+- `auto_diskless_topic_regexes` (List of String) The regexes of topics to auto enable diskless. Topics matching any of the regexes will be created as diskless topics.
+
 
 <a id="nestedblock--kafka_user_config--kafka_rest_config"></a>
 ### Nested Schema for `kafka_user_config.kafka_rest_config`
