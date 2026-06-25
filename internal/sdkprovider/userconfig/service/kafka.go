@@ -704,11 +704,23 @@ func kafkaUserConfig() *schema.Schema {
 			},
 			"kafka_diskless": {
 				Description: "Kafka Diskless configuration values",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
-					Description: "Whether to enable the Diskless functionality.",
-					Required:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"auto_diskless_topic_regexes": {
+						Description: "The regexes of topics to auto enable diskless. Topics matching any of the regexes will be created as diskless topics.",
+						Elem: &schema.Schema{
+							Description: "The regex to match topics to auto enable diskless. It follows `java.util.regex.Pattern` syntax, but only a subset of characters is allowed.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 32,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"enabled": {
+						Description: "Whether to enable the Diskless functionality.",
+						Required:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,

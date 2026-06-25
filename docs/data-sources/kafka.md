@@ -329,6 +329,7 @@ Read-Only:
 
 Read-Only:
 
+- `auto_diskless_topic_regexes` (List of String)
 - `enabled` (Boolean)
 
 
