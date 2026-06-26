@@ -171,7 +171,7 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 						func(state *terraform.State) error {
 							list, err := client.ServiceDatabaseList(t.Context(), projectName, serviceName)
 							require.NoError(t, err)
-							for _, db := range list {
+							for _, db := range list.Databases {
 								if db.DatabaseName == dbName {
 									return nil
 								}
@@ -209,7 +209,7 @@ func testAccCheckAivenMySQLDatabaseResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		for _, d := range list {
+		for _, d := range list.Databases {
 			if d.DatabaseName == databaseName {
 				return fmt.Errorf("mysql database %q still exists", databaseName)
 			}

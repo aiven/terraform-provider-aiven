@@ -15,6 +15,8 @@ nav_order: 1
 - Add `aiven_kafka` field `kafka_user_config.kafka_diskless.auto_diskless_topic_regexes`: The regexes of topics to auto
   enable diskless
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.6`
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.azure`: Azure KeyVault secret provider configuration
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.secret_providers.azure`: Azure KeyVault secret provider configuration
 
 ## [4.59.0] - 2026-06-22
 

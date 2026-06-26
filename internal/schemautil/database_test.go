@@ -61,7 +61,7 @@ func TestCheckDbConflict(t *testing.T) {
 				Once()
 			mockClient.EXPECT().
 				ServiceDatabaseList(ctx, projectName, serviceName).
-				Return(tt.remoteDBs, nil).
+				Return(&service.ServiceDatabaseListOut{Databases: tt.remoteDBs}, nil).
 				Once()
 
 			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, tt.dbName)
@@ -88,7 +88,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 
 	mockClient.EXPECT().
 		ServiceDatabaseList(ctx, projectName, serviceName).
-		Return(make([]service.DatabaseOut, 0), nil).
+		Return(&service.ServiceDatabaseListOut{Databases: make([]service.DatabaseOut, 0)}, nil).
 		Once()
 
 	done := make(chan error, 3)

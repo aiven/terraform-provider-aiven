@@ -171,6 +171,7 @@ Read-Only:
 Read-Only:
 
 - `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--aws))
+- `azure` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--azure))
 - `env` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--env))
 - `name` (String)
 - `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--vault))
@@ -184,6 +185,17 @@ Read-Only:
 - `auth_method` (String)
 - `region` (String)
 - `secret_key` (String)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers--azure"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.azure`
+
+Read-Only:
+
+- `auth_method` (String)
+- `client_id` (String)
+- `secret` (String)
+- `tenant_id` (String)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--secret_providers--env"></a>
