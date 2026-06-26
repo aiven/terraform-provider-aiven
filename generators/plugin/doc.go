@@ -365,6 +365,14 @@ func docTypeLabel(def *Definition, entity entityType, item *Item, name string) (
 		} else {
 			b.WriteString("Block List")
 		}
+		if entity.isResource() && (item.IsObject() || item.MaxItems > 0) {
+			if item.IsObject() && item.MaxItems > 0 {
+				return "", fmt.Errorf("object with maxItems > 0")
+			}
+
+			// Objects have maxItems=1
+			b.WriteString(fmt.Sprintf(", Max: %d", max(1, item.MaxItems)))
+		}
 	case item.Items != nil && item.IsArray():
 		if item.IsSet() {
 			b.WriteString("Set of ")

@@ -48,7 +48,7 @@ resource "aiven_organization_billing_group" "example" {
 - `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_emails))
 - `billing_group_name` (String) Billing Group Name. Length must be between `1` and `128`.
 - `organization_id` (String) ID of an organization. Maximum length: `36`. Changing this property forces recreation of the resource.
-- `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--payment_method))
+- `payment_method` (Block List, Max: 1) Payment method. (see [below for nested schema](#nestedblock--payment_method))
 - `shipping_address_id` (String) Shipping address ID. Maximum length: `36`.
 
 ### Optional
