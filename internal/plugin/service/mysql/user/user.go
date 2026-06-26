@@ -67,6 +67,14 @@ func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModif
 			dto["authentication"] = v
 		}
 
+		// password: use plan value if known, otherwise let the API value through.
+		// This is an exceptional case: password updates on the Aiven API are
+		// async, so the freshly read API response may still empty
+		// password until the change is fully propagated.
+		if v := d.Get("password").(string); v != "" {
+			dto["password"] = v
+		}
+
 		// Clear password from state when using write-only password.
 		_, ok := d.Schema().Properties["password_wo_version"]
 		if ok && d.Get("password_wo_version").(int) != 0 {
