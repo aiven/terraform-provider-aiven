@@ -44,7 +44,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            
+
             // Refuse /test on fork PRs (head.repo is null when the fork was deleted)
             const isFork = pr.data.head.repo?.full_name !== pr.data.base.repo.full_name;
             if (isFork) {

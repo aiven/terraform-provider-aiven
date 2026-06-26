@@ -213,6 +213,7 @@ Required:
 Optional:
 
 - `aws` (Block List, Max: 1) AWS secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--aws))
+- `azure` (Block List, Max: 1) Azure KeyVault secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--azure))
 - `env` (Block List, Max: 1) ENV secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--env))
 - `vault` (Block List, Max: 1) Vault secret provider configuration (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--vault))
 
@@ -228,6 +229,20 @@ Optional:
 
 - `access_key` (String) Access key used to authenticate with aws.
 - `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
+
+
+<a id="nestedblock--kafka_connect_user_config--secret_providers--azure"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.azure`
+
+Required:
+
+- `auth_method` (String) Enum: `credentials`. Auth method of the Azure KeyVault secret provider.
+
+Optional:
+
+- `client_id` (String) Azure client ID for the service principal.
+- `secret` (String, Sensitive) Azure client secret for the service principal.
+- `tenant_id` (String) Azure tenant ID for the service principal.
 
 
 <a id="nestedblock--kafka_connect_user_config--secret_providers--env"></a>

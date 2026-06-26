@@ -75,7 +75,7 @@ func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, ser
 		if err != nil {
 			return false, err
 		}
-		for _, db := range list {
+		for _, db := range list.Databases {
 			k := filepath.Join(serviceKey, db.DatabaseName)
 			seenDatabases.Store(k, true)
 		}

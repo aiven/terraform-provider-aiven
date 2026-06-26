@@ -88,7 +88,7 @@ func findDatabaseByName(ctx context.Context, client avngen.Client, project, serv
 		return nil, err
 	}
 
-	for _, db := range list {
+	for _, db := range list.Databases {
 		if db.DatabaseName == dbName {
 			return &db, nil
 		}

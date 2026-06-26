@@ -56,8 +56,8 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	match, err := adapter.FindOne(rsp, func(i int) bool {
-		return adapter.Equal(rsp[i].DatabaseName, d.Get("database_name"))
+	match, err := adapter.FindOne(rsp.Databases, func(i int) bool {
+		return adapter.Equal(rsp.Databases[i].DatabaseName, d.Get("database_name"))
 	})
 	if err != nil {
 		return fmt.Errorf("lookup `aiven_pg_database` by `database_name`: %w", err)

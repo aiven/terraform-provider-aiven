@@ -641,6 +641,36 @@ func kafkaUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"azure": {
+						Description: "Azure KeyVault secret provider configuration",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"auth_method": {
+								Description:  "Enum: `credentials`. Auth method of the Azure KeyVault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"credentials"}, false),
+							},
+							"client_id": {
+								Description: "Azure client ID for the service principal.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"secret": {
+								Description: "Azure client secret for the service principal.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+							"tenant_id": {
+								Description: "Azure tenant ID for the service principal.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"env": {
 						Description: "ENV secret provider configuration",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"secrets": {
