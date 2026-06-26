@@ -77,9 +77,9 @@ resource "aiven_kafka_topic" "example" {
 
 ### Optional
 
-- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration. (see [below for nested schema](#nestedblock--config))
+- `config` (Block List, Max: 1) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration. (see [below for nested schema](#nestedblock--config))
 - `owner_user_group_id` (String) The user group that owns this topic. Length must be between `1` and `36`.
-- `tag` (Block Set) Topic tags. (see [below for nested schema](#nestedblock--tag))
+- `tag` (Block Set, Max: 25) Topic tags. (see [below for nested schema](#nestedblock--tag))
 - `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `topic_description` (String) Topic description. Length must be between `1` and `256`.

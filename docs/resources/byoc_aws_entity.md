@@ -76,7 +76,7 @@ resource "aiven_byoc_aws_entity" "example" {
 
 ### Optional
 
-- `contact_emails` (Block Set) Email addresses for notifications and alerts for this BYOC cloud. (see [below for nested schema](#nestedblock--contact_emails))
+- `contact_emails` (Block Set, Max: 10) Email addresses for notifications and alerts for this BYOC cloud. (see [below for nested schema](#nestedblock--contact_emails))
 - `tags` (Map of String) Set of resource tags.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
