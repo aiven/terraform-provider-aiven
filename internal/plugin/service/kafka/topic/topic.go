@@ -189,6 +189,12 @@ func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 // flattenConfig keeps only user-set overrides (SourceTypeTopicConfig) to avoid
 // polluting state with service defaults, and omits the block when empty since
 // the framework has no computed blocks.
+//
+// Values already tracked in prior state are preserved regardless of the API's
+// reported source type. Without this, a user-set value that happens to match
+// the Kafka default is reported as DEFAULT_CONFIG by the API, dropped from
+// state, and then perpetually re-planned.
+//
 // todo: remove in v5.0.0, use attribute.Computed instead.
 func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier {
 	return func(d adapter.ResourceData, dto map[string]any) error {
@@ -197,9 +203,13 @@ func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier 
 			return err
 		}
 
+		// Collect config keys already present in the prior state so they are
+		// not dropped when the API returns a non-TopicConfig source type.
+		priorKeys := priorConfigKeys(d)
+
 		userConfig := make(map[string]any, len(rspConfig.Config))
 		for k, v := range rspConfig.Config {
-			if d.IsResource() && v.Source != kafkatopic.SourceTypeTopicConfig {
+			if d.IsResource() && v.Source != kafkatopic.SourceTypeTopicConfig && !priorKeys[k] {
 				// Keeps user config values for resources only
 				continue
 			}
@@ -218,6 +228,32 @@ func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier 
 		}
 		return nil
 	}
+}
+
+// priorConfigKeys returns the set of config attribute names that are present
+// in the prior state's config block. During Read operations the adapter only
+// has state (no plan/config), so d.Get falls through to state.
+func priorConfigKeys(d adapter.ResourceData) map[string]bool {
+	raw, ok := d.GetOk("config.0")
+	if !ok {
+		return nil
+	}
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return nil
+	}
+	keys := make(map[string]bool, len(m))
+	for k, v := range m {
+		if v == nil {
+			continue
+		}
+		// Skip zero-value strings — they indicate unset optional attributes.
+		if s, ok := v.(string); ok && s == "" {
+			continue
+		}
+		keys[k] = true
+	}
+	return keys
 }
 
 // flattenPartitions collapses the API's partition list into a count, as the schema expects.
