@@ -310,6 +310,7 @@ Read-Only:
 
 - `consumer_auto_offset_reset` (String)
 - `consumer_fetch_max_bytes` (Number)
+- `consumer_fetch_max_wait_ms` (Number)
 - `consumer_fetch_min_bytes` (Number)
 - `consumer_max_partition_fetch_bytes` (Number)
 - `consumer_max_poll_records` (Number)

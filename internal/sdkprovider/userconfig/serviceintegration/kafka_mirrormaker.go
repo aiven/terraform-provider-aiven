@@ -33,6 +33,11 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"consumer_fetch_max_wait_ms": {
+						Description: "The maximum amount of time the server will block before answering the fetch request if there isn't sufficient data to immediately satisfy `consumer_fetch_min_bytes`. Default is `500`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"consumer_fetch_min_bytes": {
 						Description: "The minimum amount of data the server should return for a fetch request. Default is `1`. Example: `1024`.",
 						Optional:    true,
