@@ -4,9 +4,38 @@ page_title: "Import existing Aiven infrastructure"
 
 # Import existing Aiven infrastructure
 
-You can import resources that you created using the Console or another tool and start managing them with Terraform.
+You can import resources that you created using the Aiven Console or another tool, and start managing them with Terraform.
 
-To import a resource:
+There are 2 ways to import resources: using `import` blocks in your Terraform configuration, or using the `terraform import` command.
+
+Import blocks are the recommended approach for Terraform 1.5 and later because you can:
+
+* Version and review imports in pull requests like other Terraform changes.
+* Generate many `import` blocks from a script instead of manually running import commands.
+* Preview all pending imports in a single `terraform plan` before applying.
+
+If you are using Terraform 1.4 or earlier, you can use the `terraform import` command.
+
+## Use import blocks
+
+1. Back up your Terraform state file, `terraform.tfstate`, so you can restore the previous state if needed.
+
+2. Add the import block in your configuration:
+
+      ```hcl
+      import {
+        to = TYPE.LABEL
+        id = "RESOURCE_ID"
+      }
+      ```
+
+3. Add the resource to your configuration.
+
+4. To preview the import, run `terraform plan`.
+5. To apply the import, run `terraform apply`.
+
+
+## Use the import command
 
 1. Add the resource block to your Terraform file.
 2. Import the resource using [the `terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import).
@@ -20,6 +49,8 @@ For example, the following command imports an Aiven for PostgreSQL® service nam
 ```bash
 terraform import aiven_pg.example_postgres example-project/example-pg
 ```
+
+## Get resource IDs
 
 You can [get some resource IDs from the Aiven Console](https://aiven.io/docs/platform/reference/get-resource-IDs). For cases where the internal identifiers are not shown in the Aiven Console,
 the easiest way to get them is typically to check network requests and responses with your browser's debugging tools.
