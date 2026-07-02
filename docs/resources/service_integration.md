@@ -356,6 +356,7 @@ Optional:
 
 - `consumer_auto_offset_reset` (String) Enum: `earliest`, `latest`. Set where consumer starts to consume data. Value `earliest`: Start replication from the earliest offset. Value `latest`: Start replication from the latest offset. Default is `earliest`.
 - `consumer_fetch_max_bytes` (Number) The maximum amount of data the server should return for a fetch request. Default is `52428800` (50MiB).
+- `consumer_fetch_max_wait_ms` (Number) The maximum amount of time the server will block before answering the fetch request if there isn't sufficient data to immediately satisfy `consumer_fetch_min_bytes`. Default is `500`.
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Default is `1`. Example: `1024`.
 - `consumer_max_partition_fetch_bytes` (Number) The maximum amount of data per partition the server will return. Default is `1048576` (1MiB).
 - `consumer_max_poll_records` (Number) Set consumer max.poll.records. Default is `500`.
