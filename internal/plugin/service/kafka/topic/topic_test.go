@@ -124,6 +124,73 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 		})
 	})
 
+	t.Run("config_matching_default", func(t *testing.T) {
+		resourceName := "aiven_kafka_topic.foo"
+		topicName := acc.RandName("topic")
+		config := testAccKafkaTopicConfigMatchingDefaultResource(projectName, kafkaName, topicName)
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check:  resource.TestCheckResourceAttr(resourceName, "config.0.retention_ms", "604800000"),
+				},
+				{
+					// Re-planning the unchanged config must yield no diff.
+					Config:   config,
+					PlanOnly: true,
+				},
+			},
+		})
+	})
+
+	// Verifies how import handles a config value equal to the Kafka default.
+	// The API reports such values as default_config, and the provider only keeps
+	// them when prior state marks them as user-set.
+	// Import has no prior state, so it cannot distinguish a default-matching override from an unset field and drops it.
+	//
+	// This test pins the current behaviour.
+	t.Run("import_config_matching_default", func(t *testing.T) {
+		resourceName := "aiven_kafka_topic.foo"
+		topicName := acc.RandName("topic")
+		config := testAccKafkaTopicConfigMatchingDefaultResource(projectName, kafkaName, topicName)
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check:  resource.TestCheckResourceAttr(resourceName, "config.0.retention_ms", "604800000"),
+				},
+				{
+					ResourceName: resourceName,
+					ImportState:  true,
+					// Known limitation: with no prior state on import, a
+					// default_config value is dropped, so retention_ms is empty.
+					ImportStateCheck: func(states []*terraform.InstanceState) error {
+						if len(states) != 1 {
+							return fmt.Errorf("expected 1 imported state, got %d", len(states))
+						}
+
+						got := states[0].Attributes["config.0.retention_ms"]
+						if got != "" {
+							return fmt.Errorf(
+								"imported config.0.retention_ms = %q, want %q (known limitation: default_config dropped on import)",
+								got,
+								"",
+							)
+						}
+
+						return nil
+					},
+				},
+			},
+		})
+	})
+
 	// Proves that TF can create hundreds of topics without hitting any server issues.
 	t.Run("many_topics", func(t *testing.T) {
 		topicName := acc.RandName("topic")
@@ -558,6 +625,24 @@ data "aiven_kafka_topic" "topic2" {
 
   depends_on = [aiven_kafka_topic.topic2]
 }`, orgName, projectName, kafkaName, topicName, topicStringsName, topic2Name, topic2Desc, userGroupName)
+}
+
+// testAccKafkaTopicConfigMatchingDefaultResource sets retention_ms to the Kafka
+// default (7 days). The API reports default-matching values as default_config,
+// so this guards against the #2954 perpetual diff.
+func testAccKafkaTopicConfigMatchingDefaultResource(projectName, kafkaName, topicName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_topic" "foo" {
+  project      = %[1]q
+  service_name = %[2]q
+  topic_name   = %[3]q
+  partitions   = 3
+  replication  = 2
+
+  config {
+    retention_ms = "604800000"
+  }
+}`, projectName, kafkaName, topicName)
 }
 
 func testAccKafkaTopicTerminationProtectionResource(projectName, kafkaName, topicName string) string {
