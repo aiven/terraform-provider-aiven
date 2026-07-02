@@ -17,6 +17,11 @@ nav_order: 1
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.6`
 - Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.azure`: Azure KeyVault secret provider configuration
 - Add `aiven_kafka_connect` field `kafka_connect_user_config.secret_providers.azure`: Azure KeyVault secret provider configuration
+- Add `aiven_kafka` field `kafka_user_config.preferred_zones`: List of preferred zone IDs for service node placement.
+  Nodes will be placed in these zones when available
+- Add `aiven_service_integration` field `kafka_mirrormaker_user_config.kafka_mirrormaker.consumer_fetch_max_wait_ms`:
+  The maximum amount of time the server will block before answering the fetch request if there isn't sufficient data
+  to immediately satisfy `consumer_fetch_min_bytes`
 
 ## [4.59.0] - 2026-06-22
 
