@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.60.0] - 2026-07-02
+
 - Add `aiven_kafka` field `kafka_user_config.kafka_diskless.auto_diskless_topic_regexes`: The regexes of topics to auto
   enable diskless
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.6`
