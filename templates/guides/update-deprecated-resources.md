@@ -34,7 +34,7 @@ Import blocks are the recommended approach because you can:
         id = "RESOURCE_ID"
       }
       ```
- 
+
 3. Add the new resource to your configuration with the required fields. For example:
 
       ```hcl
@@ -89,7 +89,7 @@ address for a billing group. You can get the IDs of your organization's addresse
 
 ### Migrate your billing groups
 
-1. To add the new billing group to Terraform, declare the import in your configuration using an 
+1. To add the new billing group to Terraform, declare the import in your configuration using an
   [`import` block](https://developer.hashicorp.com/terraform/language/import).
   The ID is in the format `ORG_ID/BILLING_GROUP_ID`. For example:
 
@@ -99,7 +99,7 @@ address for a billing group. You can get the IDs of your organization's addresse
         id = "org1a23f456789/00ab1234-5678-9cd0-1ef2-345678g9012a"
       }
       ```
- 
+
 1. For each billing group, add an `aiven_organization_billing_group` resource to your configuration. For example:
 
       ```hcl
@@ -134,7 +134,7 @@ address for a billing group. You can get the IDs of your organization's addresse
       ```bash
       terraform state rm $(terraform state list | grep '^aiven_billing_group\.')
       ```
-  
+
    You can use the `-dry-run` flag to preview the changes before removing the deprecated resources.
 
 5. Remove the deprecated `aiven_billing_group` resources from your configuration.
