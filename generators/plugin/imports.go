@@ -51,19 +51,20 @@ func boolEntity(isResource bool) entityType {
 
 // Generic untyped imports
 const (
-	avnGenHandlerPackage  = "github.com/aiven/go-client-codegen/handler/"
-	projectPackagePrefix  = "github.com/aiven/terraform-provider-aiven"
-	attrPackage           = "github.com/hashicorp/terraform-plugin-framework/attr"
-	diagPackage           = "github.com/hashicorp/terraform-plugin-framework/diag"
-	typesPackage          = "github.com/hashicorp/terraform-plugin-framework/types"
-	pathPackage           = "github.com/hashicorp/terraform-plugin-framework/path"
-	validatorPackage      = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	utilPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
-	adapterPackage        = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	legacyTimeoutsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
-	avnGenPackage         = "github.com/aiven/go-client-codegen"
-	errMsgPackage         = "github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
-	datasourcePkg         = "github.com/hashicorp/terraform-plugin-framework/datasource"
+	avnGenHandlerPackage    = "github.com/aiven/go-client-codegen/handler/"
+	projectPackagePrefix    = "github.com/aiven/terraform-provider-aiven"
+	attrPackage             = "github.com/hashicorp/terraform-plugin-framework/attr"
+	diagPackage             = "github.com/hashicorp/terraform-plugin-framework/diag"
+	typesPackage            = "github.com/hashicorp/terraform-plugin-framework/types"
+	pathPackage             = "github.com/hashicorp/terraform-plugin-framework/path"
+	validatorPackage        = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	utilPackage             = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	adapterPackage          = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	customValidatorsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
+	legacyTimeoutsPackage   = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	avnGenPackage           = "github.com/aiven/go-client-codegen"
+	errMsgPackage           = "github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	datasourcePkg           = "github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 func getUntypedImports() []string {
@@ -75,6 +76,7 @@ func getUntypedImports() []string {
 		validatorPackage,
 		utilPackage,
 		adapterPackage,
+		customValidatorsPackage,
 		legacyTimeoutsPackage,
 		errMsgPackage,
 		datasourcePkg,

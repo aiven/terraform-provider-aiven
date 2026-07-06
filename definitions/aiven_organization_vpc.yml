@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/organizationvpc
+resource:
+  refreshState: true
+  refreshStateDesired:
+    state: ACTIVE
+  removeMissing: true
+  description: Creates and manages a VPC for an Aiven organization.
+datasource:
+  description: Gets information about an existing VPC in an Aiven organization.
+clientHandler: organizationvpc
+idAttributeComposed: [organization_id, organization_vpc_id]
+legacyTimeouts: true
+expandModifier: true
+flattenModifier: true
+operations:
+  - id: OrganizationVpcCreate
+    type: create
+    disableView: true
+  - id: OrganizationVpcGet
+    type: read
+  - id: OrganizationVpcUpdate
+    type: update
+  - id: OrganizationVpcDelete
+    type: delete
+    disableView: true
+remove:
+  - clouds
+  - peering_connections
+  - pending_build_only_peering_connections
+schema:
+  cloud_name:
+    type: string
+    required: true
+    forceNew: true
+    example: aws-eu-west-1
+    description: The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
+  network_cidr:
+    type: string
+    format: cidr
+    required: true
+    forceNew: true
+    description: Network address range used by the VPC. For example, `192.168.0.0/24`.
+  organization_vpc_id:
+    useStateForUnknown: true
+    description: The ID of the Aiven Organization VPC.
+  state:
+    description: State of the VPC.
+  display_name:
+    optional: true
+    computed: true

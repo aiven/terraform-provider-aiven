@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
+
 ## [4.60.0] - 2026-07-02
 
 - Add `aiven_kafka` field `kafka_user_config.kafka_diskless.auto_diskless_topic_regexes`: The regexes of topics to auto

@@ -84,7 +84,7 @@
 |  78 | aiven_organization_user_group_member        | yes    |     1 |
 |  79 | aiven_organization_user_group_member_list   | yes    |     1 |
 |  80 | aiven_organization_user_list                | yes    |     1 |
-|  81 | aiven_organization_vpc                      |        |     2 |
+|  81 | aiven_organization_vpc                      | yes    |     2 |
 |  82 | aiven_organizational_unit                   | yes    |     2 |
 |  83 | aiven_pg                                    |        |     2 |
 |  84 | aiven_pg_database                           | yes    |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 40%                          | 66     |   164 |
+|     | TOTAL MIGRATED 41%                          | 68     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```

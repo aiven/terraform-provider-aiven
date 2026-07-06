@@ -124,6 +124,7 @@ type OASchema struct {
 	MaxLength            int                  `json:"maxLength"`
 	Minimum              int                  `json:"minimum"`
 	Maximum              int                  `json:"maximum"`
+	Format               string               `json:"format"`
 	Pattern              string               `json:"pattern"`
 	Ref                  string               `json:"$ref"`
 	Description          string               `json:"description"`

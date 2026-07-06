@@ -49,6 +49,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
 )
 
@@ -77,6 +78,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organization_billing_group":          adapter.NewLazyResource(billinggroup1.ResourceOptions),
 		"aiven_organization_project":                adapter.NewLazyResource(project.ResourceOptions),
 		"aiven_organization_user_group_member":      adapter.NewLazyResource(usergroupmember.ResourceOptions),
+		"aiven_organization_vpc":                    adapter.NewLazyResource(organizationvpc.ResourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyResource(unit.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(database2.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(user3.ResourceOptions),
@@ -113,6 +115,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_user_group_list":        adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
 		"aiven_organization_user_group_member_list": adapter.NewLazyDataSource(usergroupmemberlist.DataSourceOptions),
 		"aiven_organization_user_list":              adapter.NewLazyDataSource(userlist.DataSourceOptions),
+		"aiven_organization_vpc":                    adapter.NewLazyDataSource(organizationvpc.DataSourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyDataSource(unit.DataSourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyDataSource(database2.DataSourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyDataSource(user3.DataSourceOptions),

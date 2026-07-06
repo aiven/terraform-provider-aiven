@@ -9,6 +9,12 @@ import (
 	"github.com/samber/lo"
 )
 
+var stringFormatValidators = map[string]func() jen.Code{
+	"cidr": func() jen.Code {
+		return jen.Qual(customValidatorsPackage, "CIDR").Call()
+	},
+}
+
 func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, error) {
 	pkg := getTypedImport(item.Type, validatorTypedImport)
 	codes := make([]jen.Code, 0)
@@ -40,6 +46,12 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 			jen.Qual("regexp", "MustCompile").Call(jen.Lit(item.Pattern)),
 			jen.Lit(fmt.Sprintf("must match pattern %q", item.Pattern)),
 		))
+	}
+
+	if item.Type == SchemaTypeString {
+		if validator, ok := stringFormatValidators[item.Format]; ok {
+			codes = append(codes, validator())
+		}
 	}
 
 	// Slices
