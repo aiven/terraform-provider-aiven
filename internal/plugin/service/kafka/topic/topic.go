@@ -234,20 +234,27 @@ func flattenConfig(rsp *kafkatopic.ServiceKafkaTopicGetOut) adapter.MapModifier 
 // in the prior state's config block. During Read operations the adapter only
 // has state (no plan/config), so d.Get falls through to state.
 func priorConfigKeys(d adapter.ResourceData) map[string]bool {
-	raw, ok := d.GetOk("config.0")
+	raw, ok := d.GetOk("config")
 	if !ok {
 		return nil
 	}
-	m, ok := raw.(map[string]any)
+
+	list, ok := raw.([]any)
+	if !ok || len(list) == 0 {
+		return nil
+	}
+
+	m, ok := list[0].(map[string]any)
 	if !ok {
 		return nil
 	}
+
 	keys := make(map[string]bool, len(m))
 	for k, v := range m {
 		if v == nil {
 			continue
 		}
-		// Skip zero-value strings — they indicate unset optional attributes.
+
 		if s, ok := v.(string); ok && s == "" {
 			continue
 		}
