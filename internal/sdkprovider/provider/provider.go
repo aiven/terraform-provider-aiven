@@ -83,7 +83,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_vpc_peering_connection":       vpc.DatasourceGCPVPCPeeringConnection(),
 			"aiven_gcp_org_vpc_peering_connection":   vpc.DatasourceGCPOrgVPCPeeringConnection(),
 			"aiven_transit_gateway_vpc_attachment":   vpc.DatasourceTransitGatewayVPCAttachment(),
-			"aiven_organization_vpc":                 vpc.DataSourceOrganizationVPC(),
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
@@ -161,7 +160,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_gcp_org_vpc_peering_connection":        vpc.ResourceGCPOrgVPCPeeringConnection(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
-			"aiven_organization_vpc":                      vpc.ResourceOrganizationVPC(),
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
@@ -214,14 +212,12 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_flink_jar_application",
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
-		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",
 		"aiven_azure_org_vpc_peering_connection",
 	}
 
 	betaDataSources := []string{
-		"aiven_organization_vpc",
 		"aiven_aws_org_vpc_peering_connection",
 		"aiven_gcp_org_vpc_peering_connection",
 		"aiven_azure_org_vpc_peering_connection",

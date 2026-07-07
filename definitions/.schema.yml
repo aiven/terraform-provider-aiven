@@ -352,6 +352,13 @@ definitions:
           Compiled with Go's `regexp` package (RE2 syntax) and enforced via `stringvalidator.RegexMatches`.
           Patterns that use extended Perl features (e.g. lookarounds, backreferences) are not supported by RE2
           and are silently ignored by the generator; no validator is emitted for them.
+      format:
+        type: string
+        enum:
+          - cidr
+        $comment: |
+          Known semantic format for string attributes. Currently supports `cidr`,
+          enforced via the reusable Plugin Framework CIDR validator.
       nullable:
         type: boolean
         $comment: Set to true if this attribute can be null. It can't be both nullable and optional.

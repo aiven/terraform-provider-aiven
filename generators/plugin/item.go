@@ -282,6 +282,7 @@ type Item struct {
 	Type               SchemaType `yaml:"type,omitempty"`
 	Description        string     `yaml:"description,omitempty"`
 	DeprecationMessage string     `yaml:"deprecationMessage,omitempty"`
+	Format             string     `yaml:"format,omitempty"`
 	Pattern            string     `yaml:"pattern,omitempty"`
 	Required           bool       `yaml:"_required,omitempty"`
 	Computed           bool       `yaml:"_computed,omitempty"`

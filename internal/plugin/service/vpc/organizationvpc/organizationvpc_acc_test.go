@@ -1,4 +1,4 @@
-package vpc_test
+package organizationvpc_test
 
 import (
 	"context"
@@ -48,7 +48,7 @@ resource "aiven_organization_vpc" "test_validation" {
   cloud_name      = "aws-eu-west-1"
   network_cidr    = "256.256.256.256/24"
 }`,
-				ExpectError: regexp.MustCompile(`expected "network_cidr" to be a valid CIDR Value`),
+				ExpectError: regexp.MustCompile(`must be a valid CIDR Value`),
 			},
 			{
 				// basic VPC creation
@@ -62,7 +62,31 @@ resource "aiven_organization_vpc" "test_validation" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "aws-eu-west-1"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "10.0.0.0/24"),
-					resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.VpcStateTypeActive)),
+					resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.OrganizationVpcStateTypeActive)),
+					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "create_time"),
+				),
+			},
+			{
+				// test display_name update
+				Config: templBuilder().
+					AddResource(organizationVPCResource, map[string]any{
+						"resource_name":   "test_org_vpc",
+						"organization_id": template.Reference("data.aiven_organization.foo.id"),
+						"cloud_name":      "aws-eu-west-1",
+						"network_cidr":    "10.0.0.0/24",
+						"display_name":    "updated organization VPC",
+					}).MustRender(t),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "aws-eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "network_cidr", "10.0.0.0/24"),
+					resource.TestCheckResourceAttr(resourceName, "display_name", "updated organization VPC"),
+					resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.OrganizationVpcStateTypeActive)),
 					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "create_time"),
 				),
@@ -84,7 +108,7 @@ resource "aiven_organization_vpc" "test_validation" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "aws-eu-west-1"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "10.1.0.0/24"),
-					resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.VpcStateTypeActive)),
+					resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.OrganizationVpcStateTypeActive)),
 					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "create_time"),
 				),
@@ -115,13 +139,49 @@ resource "aiven_organization_vpc" "test_validation" {
 					resource.TestCheckResourceAttrPair(dataSourceName, "network_cidr", resourceName, "network_cidr"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "state", resourceName, "state"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "create_time", resourceName, "create_time"),
-					resource.TestCheckResourceAttr(dataSourceName, "state", string(organizationvpc.VpcStateTypeActive)),
+					resource.TestCheckResourceAttr(dataSourceName, "state", string(organizationvpc.OrganizationVpcStateTypeActive)),
 					resource.TestCheckResourceAttrSet(dataSourceName, "organization_vpc_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "organization_vpc_id", resourceName, "organization_vpc_id"),
 				),
 			},
 		},
 	})
+}
+
+func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
+	resourceName := "aiven_organization_vpc.test_org_vpc"
+	config := testAccOrganizationVPCResourceOnly(acc.OrganizationName(), "aws-eu-west-1", "10.2.0.0/24")
+	checks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(resourceName, "cloud_name", "aws-eu-west-1"),
+		resource.TestCheckResourceAttr(resourceName, "network_cidr", "10.2.0.0/24"),
+		resource.TestCheckResourceAttr(resourceName, "state", string(organizationvpc.OrganizationVpcStateTypeActive)),
+		resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "organization_vpc_id"),
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: testAccCheckOrganizationVPCResourceDestroy,
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			TFConfig:           config,
+			OldProviderVersion: "4.56.0",
+			Checks:             checks,
+		}),
+	})
+}
+
+func testAccOrganizationVPCResourceOnly(orgName, cloud, cidr string) string {
+	return fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = %[1]q
+}
+
+resource "aiven_organization_vpc" "test_org_vpc" {
+  organization_id = data.aiven_organization.foo.id
+  cloud_name      = %[2]q
+  network_cidr    = %[3]q
+}
+`, orgName, cloud, cidr)
 }
 
 func testAccCheckOrganizationVPCResourceDestroy(s *terraform.State) error {
