@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
 
 ## [4.60.0] - 2026-07-02
