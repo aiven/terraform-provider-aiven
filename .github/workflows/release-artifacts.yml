@@ -24,7 +24,7 @@ jobs:
         go-version-file: go.mod
 
     - name: Setup Task
-      uses: arduino/setup-task@v2
+      uses: arduino/setup-task@v3
       with:
         version: '3.x'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
