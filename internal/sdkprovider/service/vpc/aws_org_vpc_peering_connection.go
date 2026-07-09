@@ -152,7 +152,7 @@ func resourceAWSOrgVPCPeeringConnectionRead(ctx context.Context, d *schema.Resou
 	if err = d.Set("aws_vpc_region", *pc.PeerRegion); err != nil {
 		return diag.FromErr(err)
 	}
-	if err = d.Set("aws_vpc_peering_connection_id", pc.StateInfo.AwsVpcPeeringConnectionId); err != nil {
+	if err = d.Set("aws_vpc_peering_connection_id", pc.StateInfo.AWSVpcPeeringConnectionId); err != nil {
 		return diag.FromErr(err)
 	}
 	if err = d.Set("state", string(pc.State)); err != nil {

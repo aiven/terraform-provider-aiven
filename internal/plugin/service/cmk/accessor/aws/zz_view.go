@@ -32,5 +32,5 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 	if err != nil {
 		return err
 	}
-	return d.Flatten(rsp.Aws)
+	return d.Flatten(rsp.AWS)
 }
