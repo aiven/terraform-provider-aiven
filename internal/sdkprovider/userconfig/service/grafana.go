@@ -465,6 +465,11 @@ func grafanaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"grafana_version": {
+				Description: "Enum: `11`, and newer. Grafana major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",

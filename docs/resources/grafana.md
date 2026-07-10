@@ -113,6 +113,7 @@ Optional:
 - `editors_can_admin` (Boolean) Editors can manage folders, teams and dashboards created by them.
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID. Example: `UA-123456-4`.
+- `grafana_version` (String) Enum: `11`, and newer. Grafana major version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
