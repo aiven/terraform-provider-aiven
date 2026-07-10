@@ -14,6 +14,7 @@ nav_order: 1
 
 - Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
+- Migrate `aiven_aws_privatelink` resource and data source to the Plugin Framework.
 - Add `aiven_grafana` field `grafana_user_config.grafana_version` (enum): , and newer. Grafana major version.
 - Add `aiven_kafka_connect` field `kafka_connect_user_config.preferred_zones`: List of preferred zone IDs for service node placement
 - Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.preferred_zones`: List of preferred zone
