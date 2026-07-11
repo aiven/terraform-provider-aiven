@@ -37,13 +37,28 @@ func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 	return err
 }
 
+// read the database list is fetched with cursor pagination.
 func read(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := schemautil.CheckServiceIsPowered(ctx, client, d.Get("project").(string), d.Get("service_name").(string))
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+
+	err := schemautil.CheckServiceIsPowered(ctx, client, project, serviceName)
 	if err != nil {
 		return fmt.Errorf("service is powered off: %w", err)
 	}
 
-	return readView(ctx, client, d)
+	databases, err := schemautil.ListServiceDatabases(ctx, client, project, serviceName)
+	if err != nil {
+		return err
+	}
+
+	match, err := adapter.FindOne(databases, func(i int) bool {
+		return adapter.Equal(databases[i].DatabaseName, d.Get("database_name"))
+	})
+	if err != nil {
+		return fmt.Errorf("lookup `%s` by `database_name`: %w", typeName, err)
+	}
+	return d.Flatten(&match)
 }
 
 func delete(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
@@ -83,14 +98,14 @@ func findDatabaseByName(ctx context.Context, client avngen.Client, project, serv
 		return nil, err
 	}
 
-	list, err := client.ServiceDatabaseList(ctx, project, serviceName)
+	databases, err := schemautil.ListServiceDatabases(ctx, client, project, serviceName)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, db := range list.Databases {
-		if db.DatabaseName == dbName {
-			return &db, nil
+	for i := range databases {
+		if databases[i].DatabaseName == dbName {
+			return &databases[i], nil
 		}
 	}
 
