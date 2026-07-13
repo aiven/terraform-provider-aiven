@@ -173,8 +173,10 @@ Optional:
 
 Optional:
 
+- `automatic_sp_privileges` (Boolean) When enabled, the server automatically grants the EXECUTE and ALTER ROUTINE privileges to the creator of a stored routine and drops them when the routine is dropped.
 - `connect_timeout` (Number) The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.
 - `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default. Example: `+03:00`.
+- `end_markers_in_json` (Boolean) Whether optimizer JSON output such as EXPLAIN FORMAT=JSON adds end markers that repeat a structure's key near its closing bracket, making large JSON structures easier to read.
 - `group_concat_max_len` (Number) The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.
 - `information_schema_stats_expiry` (Number) The time, in seconds, before cached statistics expire. Example: `86400`.
 - `innodb_adaptive_hash_index` (Boolean) Whether InnoDB adaptive hash indexing is enabled. The optimal setting is workload-dependent: it speeds up lookups for some workloads but its internal latch can become a contention point under high concurrency, in which case disabling it can improve throughput.
@@ -187,6 +189,7 @@ Optional:
 - `innodb_lock_wait_timeout` (Number) The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.
 - `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk.
 - `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.
+- `innodb_optimize_fulltext_only` (Boolean) When enabled, OPTIMIZE TABLE on InnoDB tables only updates the FULLTEXT index instead of rebuilding the table. Intended to be enabled temporarily during FULLTEXT index maintenance and disabled afterwards; while enabled, OPTIMIZE TABLE does not reclaim table space.
 - `innodb_print_all_deadlocks` (Boolean) When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.
 - `innodb_read_io_threads` (Number) The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.
 - `innodb_rollback_on_timeout` (Boolean) When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.
@@ -210,6 +213,7 @@ Optional:
 - `sql_require_primary_key` (Boolean) Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.
 - `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).
 - `wait_timeout` (Number) The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.
+- `windowing_use_high_precision` (Boolean) Whether window functions are computed to high precision. Disabling this trades exactness for speed in window function evaluation.
 
 
 <a id="nestedblock--mysql_user_config--mysql_incremental_backup"></a>

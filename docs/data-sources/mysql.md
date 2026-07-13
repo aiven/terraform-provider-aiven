@@ -160,8 +160,10 @@ Read-Only:
 
 Read-Only:
 
+- `automatic_sp_privileges` (Boolean)
 - `connect_timeout` (Number)
 - `default_time_zone` (String)
+- `end_markers_in_json` (Boolean)
 - `group_concat_max_len` (Number)
 - `information_schema_stats_expiry` (Number)
 - `innodb_adaptive_hash_index` (Boolean)
@@ -174,6 +176,7 @@ Read-Only:
 - `innodb_lock_wait_timeout` (Number)
 - `innodb_log_buffer_size` (Number)
 - `innodb_online_alter_log_max_size` (Number)
+- `innodb_optimize_fulltext_only` (Boolean)
 - `innodb_print_all_deadlocks` (Boolean)
 - `innodb_read_io_threads` (Number)
 - `innodb_rollback_on_timeout` (Boolean)
@@ -197,6 +200,7 @@ Read-Only:
 - `sql_require_primary_key` (Boolean)
 - `tmp_table_size` (Number)
 - `wait_timeout` (Number)
+- `windowing_use_high_precision` (Boolean)
 
 
 <a id="nestedobjatt--mysql_user_config--mysql_incremental_backup"></a>

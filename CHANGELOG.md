@@ -14,6 +14,18 @@ nav_order: 1
 
 - Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
+- Add `aiven_grafana` field `grafana_user_config.grafana_version` (enum): , and newer. Grafana major version.
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.preferred_zones`: List of preferred zone IDs for service node placement
+- Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.preferred_zones`: List of preferred zone
+  IDs for service node placement
+- Add `aiven_mysql` field `mysql_user_config.mysql.automatic_sp_privileges`: When enabled, the server automatically grants
+  the EXECUTE and ALTER ROUTINE privileges to the creator of a stored routine and drops them when the routine is dropped.
+- Add `aiven_mysql` field `mysql_user_config.mysql.end_markers_in_json`: Whether optimizer JSON output such as EXPLAIN
+  FORMAT=JSON adds end markers that repeat a structure's key near its closing bracket, making large JSON structures easier to read.
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_optimize_fulltext_only`: When enabled, OPTIMIZE TABLE on InnoDB
+  tables only updates the FULLTEXT index instead of rebuilding the table
+- Add `aiven_mysql` field `mysql_user_config.mysql.windowing_use_high_precision`: Whether window functions are computed
+  to high precision
 
 ## [4.60.0] - 2026-07-02
 
