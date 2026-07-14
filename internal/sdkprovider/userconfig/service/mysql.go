@@ -205,13 +205,38 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"innodb_ft_enable_stopword": {
+						Description: "Whether stopword processing is applied when creating or rebuilding an InnoDB FULLTEXT index. Enabled by default.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"innodb_ft_max_token_size": {
+						Description: "Maximum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `60`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"innodb_ft_min_token_size": {
 						Description: "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `3`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"innodb_ft_num_word_optimize": {
+						Description: "Number of words processed during each OPTIMIZE TABLE operation on an InnoDB FULLTEXT index. Default is 2000. Example: `4000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"innodb_ft_result_cache_limit": {
+						Description: "Maximum memory in bytes used per query for the InnoDB FULLTEXT search query result cache. Aiven sizes this automatically based on the service plan's memory; setting a value overrides the calculated default.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"innodb_ft_server_stopword_table": {
 						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"innodb_ft_user_stopword_table": {
+						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for specific InnoDB tables. Example: `db_name/table_name`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},

@@ -26,6 +26,16 @@ nav_order: 1
   tables only updates the FULLTEXT index instead of rebuilding the table
 - Add `aiven_mysql` field `mysql_user_config.mysql.windowing_use_high_precision`: Whether window functions are computed
   to high precision
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_enable_stopword`: Whether stopword processing is applied when
+  creating or rebuilding an InnoDB FULLTEXT index
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_max_token_size`: Maximum length of words that are stored
+  in an InnoDB FULLTEXT index
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_num_word_optimize`: Number of words processed during each
+  OPTIMIZE TABLE operation on an InnoDB FULLTEXT index
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_result_cache_limit`: Maximum memory in bytes used per query
+  for the InnoDB FULLTEXT search query result cache
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_user_stopword_table`: This option is used to specify your
+  own InnoDB FULLTEXT index stopword list for specific InnoDB tables
 
 ## [4.60.0] - 2026-07-02
 
