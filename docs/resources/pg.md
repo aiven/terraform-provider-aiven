@@ -229,7 +229,7 @@ Optional:
 - `io_max_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.
 - `io_max_concurrency` (Number) EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `-1`.
 - `io_method` (String) Enum: `io_uring`, `sync`, `worker`. EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `worker`.
-- `io_workers` (Number) EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Changing this parameter causes a service restart. Default: `3`.
+- `io_workers` (Number) EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Default: `3`.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one disables logging autovacuum actions. The default is `1000`.
 - `log_error_verbosity` (String) Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
@@ -255,7 +255,7 @@ Optional:
 - `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords.
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval in seconds to run pg_partman's scheduled tasks. The default is `3600`. Example: `3600`.
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
-- `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring. Changing this parameter causes a service restart. Only available for PostgreSQL 13+.
+- `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring. Only available for PostgreSQL 13+.
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets. Changing this parameter causes a service restart. Only available for PostgreSQL 13+. Example: `10`.
 - `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default is `top`.
 - `synchronous_commit` (String) Enum: `local`, `off`, `on`, `remote_apply`, `remote_write`. Sets the current transaction's synchronization level. The default is `off`. This setting takes precedence over `synchronous_replication`.

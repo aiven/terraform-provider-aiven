@@ -114,6 +114,7 @@ Read-Only:
 - `editors_can_admin` (Boolean)
 - `external_image_storage` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String)
+- `grafana_version` (String)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)

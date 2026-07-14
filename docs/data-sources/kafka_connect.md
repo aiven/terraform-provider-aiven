@@ -87,6 +87,7 @@ Read-Only:
 - `ip_filter_string` (Set of String)
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 - `plugin_versions` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--plugin_versions))
+- `preferred_zones` (List of String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))

@@ -273,7 +273,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"io_uring", "sync", "worker"}, false),
 					},
 					"io_workers": {
-						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Changing this parameter causes a service restart. Default: `3`.",
+						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Default: `3`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -406,7 +406,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"pg_stat_monitor__dot__pgsm_enable_query_plan": {
-						Description: "Enables or disables query plan monitoring. Changing this parameter causes a service restart. Only available for PostgreSQL 13+.",
+						Description: "Enables or disables query plan monitoring. Only available for PostgreSQL 13+.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

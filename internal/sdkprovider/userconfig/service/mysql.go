@@ -160,6 +160,11 @@ func mysqlUserConfig() *schema.Schema {
 			"mysql": {
 				Description: "mysql.conf configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"automatic_sp_privileges": {
+						Description: "When enabled, the server automatically grants the EXECUTE and ALTER ROUTINE privileges to the creator of a stored routine and drops them when the routine is dropped.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"connect_timeout": {
 						Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.",
 						Optional:    true,
@@ -169,6 +174,11 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default. Example: `+03:00`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"end_markers_in_json": {
+						Description: "Whether optimizer JSON output such as EXPLAIN FORMAT=JSON adds end markers that repeat a structure's key near its closing bracket, making large JSON structures easier to read.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"group_concat_max_len": {
 						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.",
@@ -229,6 +239,11 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
 						Optional:    true,
 						Type:        schema.TypeInt,
+					},
+					"innodb_optimize_fulltext_only": {
+						Description: "When enabled, OPTIMIZE TABLE on InnoDB tables only updates the FULLTEXT index instead of rebuilding the table. Intended to be enabled temporarily during FULLTEXT index maintenance and disabled afterwards; while enabled, OPTIMIZE TABLE does not reclaim table space.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"innodb_print_all_deadlocks": {
 						Description: "When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.",
@@ -348,6 +363,11 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
+					},
+					"windowing_use_high_precision": {
+						Description: "Whether window functions are computed to high precision. Disabling this trades exactness for speed in window function evaluation.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 				}},
 				MaxItems: 1,
