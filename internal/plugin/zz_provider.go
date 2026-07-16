@@ -50,6 +50,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsprivatelink"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
 )
@@ -57,6 +58,7 @@ import (
 func Resources() map[string]func() resource.Resource {
 	return map[string]func() resource.Resource{
 		"aiven_aws_privatelink":                     adapter.NewLazyResource(awsprivatelink.ResourceOptions),
+		"aiven_azure_privatelink":                   adapter.NewLazyResource(azureprivatelink.ResourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
 		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(awsentity.ResourceOptions),
 		"aiven_byoc_aws_provision":                  adapter.NewLazyResource(awsprovision.ResourceOptions),
@@ -93,6 +95,7 @@ func Resources() map[string]func() resource.Resource {
 func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
 		"aiven_aws_privatelink":                     adapter.NewLazyDataSource(awsprivatelink.DataSourceOptions),
+		"aiven_azure_privatelink":                   adapter.NewLazyDataSource(azureprivatelink.DataSourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(user.DataSourceOptions),

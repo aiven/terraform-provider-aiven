@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/azureprivatelink
+resource:
+  refreshState: true
+  refreshStateDesired:
+    state: active
+  removeMissing: true
+  description: Creates and manages an Azure Private Link for [selected Aiven services](https://aiven.io/docs/platform/howto/use-azure-privatelink) in a VPC.
+datasource:
+  description: Gets information about an Azure Private Link connection for an Aiven service.
+clientHandler: privatelink
+idAttributeComposed: [project, service_name]
+legacyTimeouts: true
+operations:
+  - id: ServicePrivatelinkAzureCreate
+    type: create
+  - id: ServicePrivatelinkAzureGet
+    type: read
+  - id: ServicePrivatelinkAzureUpdate
+    type: update
+  - id: ServicePrivatelinkAzureDelete
+    type: delete
+    disableView: true
+schema:
+  message:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    deprecationMessage: This attribute is retained only for compatibility with state created by older provider versions and is no longer populated.
+    description: Legacy response message retained for backward compatibility.
