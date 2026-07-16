@@ -37,6 +37,7 @@ nav_order: 1
   for the InnoDB FULLTEXT search query result cache
 - Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_user_stopword_table`: This option is used to specify your
   own InnoDB FULLTEXT index stopword list for specific InnoDB tables
+- Fix `aiven_pg_database`: paginate the service database list so services with more than one page of databases are read and looked up correctly.
 
 ## [4.60.0] - 2026-07-02
 
