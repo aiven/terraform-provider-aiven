@@ -38,6 +38,20 @@ nav_order: 1
 - Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_user_stopword_table`: This option is used to specify your
   own InnoDB FULLTEXT index stopword list for specific InnoDB tables
 - Fix `aiven_pg_database`: paginate the service database list so services with more than one page of databases are read and looked up correctly.
+- Add `aiven_mysql` field `mysql_user_config.mysql.div_precision_increment`: Number of digits by which to increase
+  the scale of the result of division operations performed with the / operator
+- Add `aiven_mysql` field `mysql_user_config.mysql.eq_range_index_dive_limit`: The number of equality ranges in a query
+  at or above which the optimizer switches from index dives to index statistics when estimating the number of qualifying rows
+- Add `aiven_mysql` field `mysql_user_config.mysql.max_execution_time`: Execution timeout in milliseconds for read-only
+  top-level SELECT statements
+- Add `aiven_mysql` field `mysql_user_config.mysql.max_seeks_for_key`: Limit on the assumed maximum number of index seeks
+  when looking up rows based on a key
+- Add `aiven_mysql` field `mysql_user_config.mysql.optimizer_prune_level`: Controls the heuristics applied during query
+  optimization to prune less-promising partial plans from the optimizer search space
+- Add `aiven_mysql` field `mysql_user_config.mysql.optimizer_search_depth`: Maximum depth of search performed by the query
+  optimizer when choosing a join order
+- Add `aiven_mysql` field `mysql_user_config.mysql.optimizer_switch`: Comma-separated list of optimizer flag assignments
+  in the form flag=on|off|default, or the single value `default` to reset all flags
 
 ## [4.60.0] - 2026-07-02
 
