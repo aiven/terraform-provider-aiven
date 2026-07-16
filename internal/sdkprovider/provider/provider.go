@@ -73,7 +73,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_project_user": project.DatasourceProjectUser(),
 
 			// vpc
-			"aiven_aws_privatelink":                  vpc.DatasourceAWSPrivatelink(),
 			"aiven_aws_vpc_peering_connection":       vpc.DatasourceAWSVPCPeeringConnection(),
 			"aiven_aws_org_vpc_peering_connection":   vpc.DatasourceAWSOrgVPCPeeringConnection(),
 			"aiven_azure_privatelink":                vpc.DatasourceAzurePrivatelink(),
@@ -148,7 +147,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_project_user": project.ResourceProjectUser(),
 
 			// vpc
-			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
 			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_aws_org_vpc_peering_connection":        vpc.ResourceAWSOrgVPCPeeringConnection(),
 			"aiven_azure_privatelink":                     vpc.ResourceAzurePrivatelink(),

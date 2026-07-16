@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/awsprivatelink
+resource:
+  refreshState: true
+  refreshStateDesired:
+    state: active
+  removeMissing: true
+  description: Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC.
+datasource:
+  description: Gets information about an AWS PrivateLink connection for an Aiven service.
+clientHandler: privatelink
+idAttributeComposed: [project, service_name]
+legacyTimeouts: true
+operations:
+  - id: ServicePrivatelinkAWSCreate
+    type: create
+  - id: ServicePrivatelinkAWSGet
+    type: read
+  - id: ServicePrivatelinkAWSUpdate
+    type: update
+  - id: ServicePrivatelinkAWSDelete
+    type: delete
+schema:
+  aws_service_name:
+    example: my-aws-service-name
