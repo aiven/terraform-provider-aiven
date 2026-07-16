@@ -175,10 +175,20 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"div_precision_increment": {
+						Description: "Number of digits by which to increase the scale of the result of division operations performed with the / operator. Default is 4. Example: `6`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"end_markers_in_json": {
 						Description: "Whether optimizer JSON output such as EXPLAIN FORMAT=JSON adds end markers that repeat a structure's key near its closing bracket, making large JSON structures easier to read.",
 						Optional:    true,
 						Type:        schema.TypeBool,
+					},
+					"eq_range_index_dive_limit": {
+						Description: "The number of equality ranges in a query at or above which the optimizer switches from index dives to index statistics when estimating the number of qualifying rows. 0 means always use index dives. Default is 200. Example: `100`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 					"group_concat_max_len": {
 						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.",
@@ -329,8 +339,18 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"max_execution_time": {
+						Description: "Execution timeout in milliseconds for read-only top-level SELECT statements. 0 (the default) means no timeout. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"max_heap_table_size": {
 						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"max_seeks_for_key": {
+						Description: "Limit on the assumed maximum number of index seeks when looking up rows based on a key. Lowering this value causes the optimizer to prefer index lookups over table scans. Example: `100`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -348,6 +368,21 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "The number of seconds to wait for a block to be written to a connection before aborting the write. Example: `30`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
+					},
+					"optimizer_prune_level": {
+						Description: "Controls the heuristics applied during query optimization to prune less-promising partial plans from the optimizer search space. 0 disables heuristics (exhaustive search); 1 prunes plans based on the number of rows retrieved. Example: `1`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"optimizer_search_depth": {
+						Description: "Maximum depth of search performed by the query optimizer when choosing a join order. Larger values produce better plans for joins over many tables but take longer to compile; 0 lets the optimizer choose the depth automatically. Example: `62`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"optimizer_switch": {
+						Description: "Comma-separated list of optimizer flag assignments in the form flag=on|off|default, or the single value `default` to reset all flags. Flags not listed keep their current values. Controls query optimizer behaviors such as index merge, hash join and semijoin strategies. Example: `batched_key_access=on,mrr_cost_based=off`.",
+						Optional:    true,
+						Type:        schema.TypeString,
 					},
 					"performance_schema_events_statements_history_size": {
 						Description: "The number of rows per thread in the events_statements_history table. Changing this parameter will lead to a restart of the MySQL service.",
