@@ -75,7 +75,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// vpc
 			"aiven_aws_vpc_peering_connection":       vpc.DatasourceAWSVPCPeeringConnection(),
 			"aiven_aws_org_vpc_peering_connection":   vpc.DatasourceAWSOrgVPCPeeringConnection(),
-			"aiven_azure_privatelink":                vpc.DatasourceAzurePrivatelink(),
 			"aiven_azure_vpc_peering_connection":     vpc.DatasourceAzureVPCPeeringConnection(),
 			"aiven_azure_org_vpc_peering_connection": vpc.DatasourceAzureOrgVPCPeeringConnection(),
 			"aiven_gcp_privatelink":                  vpc.DatasourceGCPPrivatelink(),
@@ -149,7 +148,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// vpc
 			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_aws_org_vpc_peering_connection":        vpc.ResourceAWSOrgVPCPeeringConnection(),
-			"aiven_azure_privatelink":                     vpc.ResourceAzurePrivatelink(),
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
 			"aiven_azure_org_vpc_peering_connection":      vpc.ResourceAzureOrgVPCPeeringConnection(),
