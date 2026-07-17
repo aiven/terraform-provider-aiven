@@ -13,6 +13,8 @@ resource:
   refreshState: true
   refreshStateDesired:
     state: active
+  deleteStateDesired:
+    state: deleted
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]
 operations:
@@ -24,7 +26,6 @@ operations:
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentDelete
     type: delete
-    disableView: true
 remove:
   - aiven_aws_object_storage_credentials_creator_arn
   - aiven_aws_object_storage_user_arn

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -8,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/hashicorp/go-multierror"
 	"github.com/samber/lo"
 )
 
@@ -122,6 +122,28 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			}
 		}
 
+		// A non-nil deleteStateDesired (even an empty map) enables the delete poller.
+		if dsd := def.Resource.DeleteStateDesired; dsd != nil {
+			desired := make(jen.Dict, len(dsd))
+			for _, k := range sortedKeys(dsd) {
+				want := dsd[k]
+				prop, ok := item.Properties[k]
+				if !ok {
+					return nil, fmt.Errorf("deleteStateDesired: unknown field %q (not present in schema)", k)
+				}
+				if prop.IsEnum() && !enumContainsString(prop.Enum, want) {
+					return nil, fmt.Errorf("deleteStateDesired: field %q has enum %v but desired value %q is not allowed", k, prop.Enum, want)
+				}
+				desired[jen.Lit(k)] = jen.Lit(want)
+			}
+
+			fields := jen.Dict{}
+			if len(desired) > 0 {
+				fields[jen.Id("Desired")] = jen.Map(jen.String()).String().Values(desired)
+			}
+			values["DeleteState"] = jen.Op("&").Qual(adapterPackage, "DeleteStateOptions").Values(fields)
+		}
+
 		if def.Resource.RemoveMissing {
 			values["RemoveMissing"] = jen.True()
 		}
@@ -190,7 +212,7 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	view.Error()
 
 	// The function block
-	errM := new(multierror.Error)
+	var errs []error
 	view.BlockFunc(func(g *jen.Group) {
 		if operation == OperationRead {
 			emitPlanModifier(g, def)
@@ -204,19 +226,19 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 				lookupErr = genGenericViewOperation(g, 0, 1, def, item, lookupOp)
 			})
 			if lookupErr != nil {
-				errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", lookupOp.ID, lookupErr))
+				errs = append(errs, fmt.Errorf("%s view error: %w", lookupOp.ID, lookupErr))
 			}
 		}
 
 		for i, op := range operations {
 			err := genGenericViewOperation(g, i, len(operations), def, item, op)
 			if err != nil {
-				errM = multierror.Append(errM, fmt.Errorf("%s view error: %w", op.ID, err))
+				errs = append(errs, fmt.Errorf("%s view error: %w", op.ID, err))
 			}
 		}
 	})
 
-	return view, errM.ErrorOrNil()
+	return view, errors.Join(errs...)
 }
 
 // emitPlanModifier prepends the planModifier call to a Read-style view body.

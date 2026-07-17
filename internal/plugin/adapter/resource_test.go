@@ -15,20 +15,16 @@ import (
 
 func TestResourceAdapter_refreshState(t *testing.T) {
 	// Use short retry delays so retry-go's exponential backoff stays in the microsecond range.
-	const (
-		fastRetryDelay = time.Microsecond
-		fastAttempts   = uint(5)
-	)
+	const fastRetryDelay = time.Microsecond
 
-	// fastAdapter builds a *resourceAdapter wired for fast tests: short retry delay and a low
-	// attempt cap. Per-test config (RefreshStateDelay, RefreshStateDesired, etc.) is layered on
-	// top of the returned adapter's resource by the caller.
+	// fastAdapter builds a *resourceAdapter wired for fast tests: short retry delay. Per-test config
+	// (RefreshStateDelay, RefreshStateDesired, etc.) is layered on top of the returned adapter's
+	// resource by the caller.
 	fastAdapter := func(read func(ctx context.Context, client avngen.Client, rd ResourceData) error) *resourceAdapter {
 		return &resourceAdapter{
 			resource: ResourceOptions{
-				Read:                    read,
-				refreshStateRetryDelay:  fastRetryDelay,
-				refreshStateMaxAttempts: fastAttempts,
+				Read:                   read,
+				refreshStateRetryDelay: fastRetryDelay,
 			},
 		}
 	}
@@ -203,7 +199,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.Equal(t, "ACTIVE", rd.Get("status"))
 	})
 
-	t.Run("returns ErrRefreshStateDesired after exhausting retries", func(t *testing.T) {
+	t.Run("retries until the context deadline when the desired state is never reached", func(t *testing.T) {
 		t.Parallel()
 
 		rd, err := NewResourceData(
@@ -216,15 +212,19 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		attempts := 0
 		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
 			attempts++
-			return nil
+			return nil // Never transitions to ACTIVE, so the poll runs until ctx is cancelled.
 		})
 		a.resource.RefreshStateDesired = map[string]string{"status": "ACTIVE"}
-		a.resource.refreshStateMaxAttempts = 3
 
-		err = a.refreshState(t.Context(), rd)
+		// The fixed retry delay is fastRetryDelay (1µs), so a 300ms window comfortably allows many
+		// attempts before the deadline.
+		ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
+		defer cancel()
 
-		require.ErrorIs(t, err, ErrRefreshStateDesired)
-		require.Equal(t, 3, attempts)
+		err = a.refreshState(ctx, rd)
+
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		require.Greater(t, attempts, 1, "must keep polling until the deadline rather than giving up early")
 	})
 
 	t.Run("returns ctx error when RefreshStateDelay is interrupted by ctx cancellation", func(t *testing.T) {
@@ -265,6 +265,331 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, attempts)
 		require.GreaterOrEqual(t, elapsed, refreshStateDelay)
+	})
+}
+
+func TestResourceAdapter_deleteState(t *testing.T) {
+	const fastRetryDelay = time.Microsecond
+
+	// fastAdapter builds a *resourceAdapter wired for fast tests, with the delete poller enabled.
+	// Callers layer Desired on top via a.resource.DeleteState and provide the per-test delete/read
+	// closures.
+	fastAdapter := func(
+		del func(ctx context.Context, client avngen.Client, rd ResourceData) error,
+		read func(ctx context.Context, client avngen.Client, rd ResourceData) error,
+	) *resourceAdapter {
+		return &resourceAdapter{
+			resource: ResourceOptions{
+				Delete: del,
+				Read:   read,
+				DeleteState: &DeleteStateOptions{
+					retryDelay: fastRetryDelay,
+				},
+			},
+		}
+	}
+
+	statusSchema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"status": {Type: SchemaTypeString},
+		},
+	}
+
+	warning := func(summary string) diag.Diagnostic {
+		return diag.NewWarningDiagnostic(summary, "detail")
+	}
+
+	t.Run("deletes once then surfaces the 404 when read reports the resource gone", func(t *testing.T) {
+		t.Parallel()
+
+		deletes, reads := 0, 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return nil
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return avngen.Error{Status: http.StatusNotFound}
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		// A 404 bubbles up; Delete's outer guard ignores it as a successful deletion.
+		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
+		require.Equal(t, 1, deletes)
+		require.Equal(t, 1, reads)
+	})
+
+	t.Run("polls read until the desired state is reached", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		deletes, reads := 0, 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return nil
+			},
+			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
+				reads++
+				if reads >= 3 {
+					require.NoError(t, rd.Set("status", "DELETED"))
+				}
+				return nil
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		require.NoError(t, a.deleteState(t.Context(), rd))
+		require.Equal(t, 3, reads)
+		require.Equal(t, 1, deletes, "delete must be issued once after it succeeds; only read polls after")
+	})
+
+	t.Run("not-found-only polls read until the resource is gone", func(t *testing.T) {
+		t.Parallel()
+
+		reads := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				if reads >= 3 {
+					return avngen.Error{Status: http.StatusNotFound}
+				}
+				return nil // Still present; no attribute conditions, so keep polling until 404.
+			},
+		)
+		// fastAdapter has no Desired conditions, so a 404 is the only terminal.
+
+		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
+		require.Equal(t, 3, reads)
+	})
+
+	t.Run("re-issues delete every attempt, ignoring its error, until the desired state", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		deletes := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				// Delete keeps failing with a conflict; the error is ignored and Delete is re-issued.
+				return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
+			},
+			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
+				if deletes >= 3 {
+					return rd.Set("status", "DELETED")
+				}
+				return nil
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		require.NoError(t, a.deleteState(t.Context(), rd))
+		require.Equal(t, 3, deletes, "delete must be re-issued on every attempt, its error ignored")
+	})
+
+	t.Run("ignores delete errors and completes once read reports the resource gone", func(t *testing.T) {
+		t.Parallel()
+
+		deletes, reads := 0, 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return avngen.Error{Status: http.StatusForbidden, Message: "forbidden"}
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				if reads >= 2 {
+					return avngen.Error{Status: http.StatusNotFound}
+				}
+				return nil
+			},
+		)
+		// No Desired conditions, so a 404 is the only terminal.
+
+		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
+		require.Equal(t, 2, deletes, "delete errors are ignored and delete is re-issued each attempt")
+	})
+
+	t.Run("stops re-issuing delete once it succeeds after earlier conflicts", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		deletes := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				if deletes < 3 {
+					// Conflicts while dependents detach; retried until it goes through.
+					return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
+				}
+				return nil // Third call succeeds; Delete must not be issued again.
+			},
+			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
+				// Terminal state is reached only after Delete has succeeded.
+				if deletes >= 3 {
+					return rd.Set("status", "DELETED")
+				}
+				return nil
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		require.NoError(t, a.deleteState(t.Context(), rd))
+		require.Equal(t, 3, deletes, "delete is re-issued only until it succeeds, then read polls alone")
+	})
+
+	t.Run("clears the delete error once delete succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		deletes := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				if deletes == 1 {
+					return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
+				}
+				return nil // Succeeds from the second call onward.
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				return nil // Resource never disappears, so the poll runs until the deadline.
+			},
+		)
+		// No Desired conditions, so the only terminal is a 404 that never comes.
+
+		ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
+		defer cancel()
+
+		err := a.deleteState(ctx, nil)
+
+		// Delete succeeded after the first conflict, so the stale conflict must not be surfaced:
+		// only the context deadline remains.
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		var apiErr avngen.Error
+		require.NotErrorAs(t, err, &apiErr, "delete error must be cleared once delete succeeds")
+	})
+
+	t.Run("retries until the context deadline when the desired state is never reached", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		reads := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return nil // Never transitions to DELETED, so the poll runs until ctx is cancelled.
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		// The fixed retry delay is fastRetryDelay (1µs), so a 300ms window comfortably allows many
+		// polls before the deadline.
+		ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
+		defer cancel()
+
+		err = a.deleteState(ctx, rd)
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		require.Greater(t, reads, 1, "must keep polling until the deadline rather than giving up early")
+	})
+
+	t.Run("surfaces the last delete error when the poll times out", func(t *testing.T) {
+		t.Parallel()
+
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				return nil // Resource stays present, so the delete conflict keeps recurring until timeout.
+			},
+		)
+		// No Desired conditions, so the only terminal is a 404 that never comes.
+
+		ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
+		defer cancel()
+
+		err := a.deleteState(ctx, nil)
+
+		// Both the context deadline and the underlying delete conflict must be inspectable, so the
+		// user sees why the delete never completed rather than only a bare context deadline.
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		var apiErr avngen.Error
+		require.ErrorAs(t, err, &apiErr)
+		require.Equal(t, http.StatusConflict, apiErr.Status)
+	})
+
+	t.Run("does not retry on a non-retryable read error", func(t *testing.T) {
+		t.Parallel()
+
+		boom := errors.New("boom")
+		reads := 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return boom
+			},
+		)
+		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+
+		err := a.deleteState(t.Context(), nil)
+		require.ErrorIs(t, err, boom)
+		require.Equal(t, 1, reads, "non-retryable errors must not trigger retries")
+	})
+
+	t.Run("keeps outer warnings and merges only last try warnings", func(t *testing.T) {
+		var target diag.Diagnostics
+
+		outerCtx, drainWarnings := withWarnings(t.Context(), &target)
+		AddWarnings(outerCtx, warning("outer-1"))
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		warningsByTry := [][]diag.Diagnostic{
+			{warning("try-1")},
+			{warning("try-2")},
+		}
+
+		reads := 0
+		a := &resourceAdapter{
+			resource: ResourceOptions{
+				Delete: func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
+				Read: func(ctx context.Context, _ avngen.Client, rd ResourceData) error {
+					reads++
+					AddWarnings(ctx, warningsByTry[reads-1]...)
+					if reads >= 2 {
+						return rd.Set("status", "DELETED")
+					}
+					return nil
+				},
+				DeleteState: &DeleteStateOptions{
+					Desired:    map[string]string{"status": "DELETED"},
+					retryDelay: fastRetryDelay,
+				},
+			},
+		}
+
+		err = a.deleteState(outerCtx, rd)
+		drainWarnings()
+
+		require.NoError(t, err)
+		require.Equal(t, 2, reads)
+		require.True(t, target.Contains(warning("outer-1")))
+		require.True(t, target.Contains(warning("try-2")))
+		require.False(t, target.Contains(warning("try-1")))
 	})
 }
 
