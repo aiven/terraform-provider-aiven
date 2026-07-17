@@ -122,6 +122,28 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			}
 		}
 
+		// A non-nil deleteStateDesired (even an empty map) enables the delete poller.
+		if dsd := def.Resource.DeleteStateDesired; dsd != nil {
+			desired := make(jen.Dict, len(dsd))
+			for _, k := range sortedKeys(dsd) {
+				want := dsd[k]
+				prop, ok := item.Properties[k]
+				if !ok {
+					return nil, fmt.Errorf("deleteStateDesired: unknown field %q (not present in schema)", k)
+				}
+				if prop.IsEnum() && !enumContainsString(prop.Enum, want) {
+					return nil, fmt.Errorf("deleteStateDesired: field %q has enum %v but desired value %q is not allowed", k, prop.Enum, want)
+				}
+				desired[jen.Lit(k)] = jen.Lit(want)
+			}
+
+			fields := jen.Dict{}
+			if len(desired) > 0 {
+				fields[jen.Id("Desired")] = jen.Map(jen.String()).String().Values(desired)
+			}
+			values["DeleteState"] = jen.Op("&").Qual(adapterPackage, "DeleteStateOptions").Values(fields)
+		}
+
 		if def.Resource.RemoveMissing {
 			values["RemoveMissing"] = jen.True()
 		}

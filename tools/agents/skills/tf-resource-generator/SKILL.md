@@ -178,9 +178,31 @@ resource:
   refreshStateDesired: # Retry Read until fields match desired values
     state: ACTIVE
   removeMissing: true # Remove from state on 404
+  deleteStateDesired: # Poll Read after Delete until the resource reaches its terminal state
+    state: DELETED
 ```
 
 `refreshStateDesired` replaces ad-hoc refresh waiters for simple state transitions. Use it when the resource should settle into a known value after create/update (for example, `state: ACTIVE`).
+
+`deleteStateDesired` replaces custom delete waiters. It is a map, and its presence (even as an empty map, `{}`) enables the delete poller: on every attempt the adapter re-issues `Delete` (ignoring its error) and polls `Read` until the resource is gone (404) or reaches its terminal state, then returns. A 404 always completes the delete. Because `Delete` is re-issued each attempt and its error is ignored, a 409 Conflict from dependents still detaching resolves on its own — no extra configuration is needed.
+
+The map's entries are attribute names mapped to the terminal value the poller must observe (e.g. `state: DELETED`). The poll finishes when every entry matches or the API 404s, whichever comes first. Values are validated against the field's enum when one is declared, as for `refreshStateDesired`. Use an empty map for APIs whose Read never surfaces a terminal state (it just 404s).
+
+Examples:
+
+```yaml
+# Wait until the API 404s; no observable terminal state (e.g. aiven_azure_privatelink).
+deleteStateDesired: {}
+```
+
+```yaml
+# Soft-delete API reports state: DELETED, and dependents may still be detaching
+# (e.g. aiven_project_vpc, aiven_organization_vpc). Delete is re-issued each attempt.
+deleteStateDesired:
+  state: DELETED
+```
+
+Prefer `deleteStateDesired` over a hand-written delete `disableView` + custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value. Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state machine).
 
 ### Datasource Configuration
 

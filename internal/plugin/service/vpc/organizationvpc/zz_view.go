@@ -23,6 +23,7 @@ func idFields() []string {
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
+	DeleteState:         &adapter.DeleteStateOptions{Desired: map[string]string{"state": "DELETED"}},
 	IDFields:            idFields(),
 	Read:                readView,
 	RefreshState:        true,
@@ -61,4 +62,9 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		return err
 	}
 	return d.Flatten(rsp, flattenModifier(ctx, client))
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	_, err := client.OrganizationVpcDelete(ctx, d.Get("organization_id").(string), d.Get("organization_vpc_id").(string))
+	return err
 }

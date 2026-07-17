@@ -24,6 +24,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Beta:                true,
 	Create:              createView,
 	Delete:              deleteView,
+	DeleteState:         &adapter.DeleteStateOptions{Desired: map[string]string{"state": "deleted"}},
 	IDFields:            idFields(),
 	IgnoreAlreadyExists: true,
 	Read:                readView,
@@ -53,4 +54,8 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		return err
 	}
 	return d.Flatten(rsp)
+}
+
+func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return client.CustomCloudEnvironmentDelete(ctx, d.Get("organization_id").(string), d.Get("custom_cloud_environment_id").(string))
 }
