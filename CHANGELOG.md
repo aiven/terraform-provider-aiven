@@ -54,6 +54,7 @@ nav_order: 1
   optimizer when choosing a join order
 - Add `aiven_mysql` field `mysql_user_config.mysql.optimizer_switch`: Comma-separated list of optimizer flag assignments
   in the form flag=on|off|default, or the single value `default` to reset all flags
+- Change `aiven_valkey` field `valkey_user_config.valkey_version` (enum): add `9.1`
 
 ## [4.60.0] - 2026-07-02
 
