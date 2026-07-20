@@ -38,7 +38,8 @@ nav_order: 1
   for the InnoDB FULLTEXT search query result cache
 - Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_user_stopword_table`: This option is used to specify your
   own InnoDB FULLTEXT index stopword list for specific InnoDB tables
-- Fix `aiven_pg_database`: paginate the service database list so services with more than one page of databases are read and looked up correctly.
+- Fix `aiven_pg_database`: paginate the service database list so services with more than one page of databases are read
+  and looked up correctly.
 - Add `aiven_mysql` field `mysql_user_config.mysql.div_precision_increment`: Number of digits by which to increase
   the scale of the result of division operations performed with the / operator
 - Add `aiven_mysql` field `mysql_user_config.mysql.eq_range_index_dive_limit`: The number of equality ranges in a query
@@ -53,6 +54,7 @@ nav_order: 1
   optimizer when choosing a join order
 - Add `aiven_mysql` field `mysql_user_config.mysql.optimizer_switch`: Comma-separated list of optimizer flag assignments
   in the form flag=on|off|default, or the single value `default` to reset all flags
+- Change `aiven_valkey` field `valkey_user_config.valkey_version` (enum): add `9.1`
 
 ## [4.60.0] - 2026-07-02
 
