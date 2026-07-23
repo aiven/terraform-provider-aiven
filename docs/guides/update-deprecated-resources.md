@@ -50,16 +50,20 @@ Import blocks are the recommended approach because you can:
 
 4. To preview the import, run `terraform plan`.
 5. To apply the import, run `terraform apply`.
-6. To remove the deprecated resource from Terraform's control, run:
+6. To remove the deprecated resource from Terraform's control, use `terraform state rm`. Preview the changes first using the `-dry-run` flag:
+
+      ```bash
+      terraform state rm -dry-run $(terraform state list | grep '^TYPE\.')
+      ```
+
+7. After verifying the previewed changes, apply the changes by removing the `-dry-run` flag:
 
       ```bash
       terraform state rm $(terraform state list | grep '^TYPE\.')
       ```
 
-   You can use the `-dry-run` flag to preview the changes before removing the deprecated resources.
-
-7. Remove the deprecated resource blocks from your configuration.
-8. To confirm that the resources were migrated and that there is no drift between the configuration and the state, run `terraform plan` again.
+8. Remove the deprecated resource blocks from your configuration.
+9. To confirm that the resources were migrated and that there is no drift between the configuration and the state, run `terraform plan` again.
 
 ## Migrate to `aiven_organization_billing_group`
 
@@ -100,7 +104,7 @@ address for a billing group. You can get the IDs of your organization's addresse
       }
       ```
 
-1. For each billing group, add an `aiven_organization_billing_group` resource to your configuration. For example:
+2. For each billing group, add an `aiven_organization_billing_group` resource to your configuration. For example:
 
       ```hcl
       resource "aiven_organization_billing_group" "example" {
@@ -127,18 +131,22 @@ address for a billing group. You can get the IDs of your organization's addresse
      To list payment method IDs and types for an organization, use the
      [`aiven_organization_payment_method_list` data source](https://registry.terraform.io/providers/aiven/aiven/latest/docs/data-sources/organization_payment_method_list).
 
-2. To preview the import, run `terraform plan`.
-3. To apply the import, run `terraform apply`.
-4. To remove the deprecated resource from Terraform's control, run:
+3. To preview the import, run `terraform plan`.
+4. To apply the import, run `terraform apply`.
+5. To remove the deprecated resource from Terraform's control, use `terraform state rm`. Preview the changes first using the `-dry-run` flag:
+
+      ```bash
+      terraform state rm -dry-run $(terraform state list | grep '^aiven_billing_group\.')
+      ```
+
+6. After verifying the previewed changes, apply the changes by removing the `-dry-run` flag:
 
       ```bash
       terraform state rm $(terraform state list | grep '^aiven_billing_group\.')
       ```
 
-   You can use the `-dry-run` flag to preview the changes before removing the deprecated resources.
-
-5. Remove the deprecated `aiven_billing_group` resources from your configuration.
-6. To confirm that the billing groups were migrated and that there is no drift between the configuration and the state, run `terraform plan` again.
+7. Remove the deprecated `aiven_billing_group` resources from your configuration.
+8. To confirm that the billing groups were migrated and that there is no drift between the configuration and the state, run `terraform plan` again.
 
 -> **Tip**
  Import blocks let you version and review imports in pull requests. Alternatively,
@@ -245,6 +253,70 @@ resource "aiven_organization_group_project" "example" {
       terraform apply --auto-approve
       ```
 
+## Migrate to `aiven_organization_project`
+
+The `aiven_project` resource has been replaced by
+[the `aiven_organization_project` resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/organization_project).
+
+This example shows you how to migrate a project to the new resource using the following `aiven_project` resource:
+
+```hcl
+resource "aiven_project" "example" {
+  project          = "example-project"
+  parent_id        = "org1a23f456789"
+  billing_group    = "00ab1234-5678-9cd0-1ef2-345678g9012a"
+  technical_emails = ["ops@example.com"]
+}
+```
+
+1. To add the new `aiven_organization_project` resource to Terraform, declare the import in your configuration using an
+  [`import` block](https://developer.hashicorp.com/terraform/language/import).
+  The ID is in the format `ORGANIZATION_ID/PROJECT_ID`. For example:
+
+      ```hcl
+      import {
+        to = aiven_organization_project.example
+        id = "org1a23f456789/example-project"
+      }
+      ```
+
+2. For each project, add an `aiven_organization_project` resource to your configuration. For example:
+
+      ```hcl
+      resource "aiven_organization_project" "example" {
+        organization_id  = "org1a23f456789"
+        project_id       = "example-project"
+        parent_id        = "org1a23f456789"
+        billing_group_id = "00ab1234-5678-9cd0-1ef2-345678g9012a"
+        technical_emails = ["ops@example.com"]
+      }
+      ```
+
+      Where:
+       - `parent_id` is the ID of the organization or organizational unit that the project is in.
+          You can get the IDs using the [`aiven_organization` data source](https://registry.terraform.io/providers/aiven/aiven/latest/docs/data-sources/organization)
+          or the [`aiven_organizational_unit` data source](https://registry.terraform.io/providers/aiven/aiven/latest/docs/data-sources/organizational_unit).
+          You can also get these IDs [using the Aiven Console](https://aiven.io/docs/platform/reference/get-resource-IDs).
+       - `billing_group_id` is the same as `billing_group` in the `aiven_project` resource.
+       - `project_id` is the same as `project` in the `aiven_project` resource.
+
+3. To preview the import, run `terraform plan`.
+4. To apply the import, run `terraform apply`.
+5. To remove the deprecated resource from Terraform's control, use `terraform state rm`. Preview the changes first using the `-dry-run` flag:
+
+      ```bash
+      terraform state rm -dry-run $(terraform state list | grep '^aiven_project\.')
+      ```
+
+6. After verifying the previewed changes, apply the changes by removing the `-dry-run` flag:
+
+      ```bash
+      terraform state rm $(terraform state list | grep '^aiven_project\.')
+      ```
+
+6. Remove the `aiven_project` resources from your configuration.
+7. To confirm that the projects were migrated and that there is no drift between the configuration and the state, run `terraform plan` again.
+
 ## Migrate teams to `aiven_organization_user_group`
 
 Teams have been replaced by groups. Groups are an easier way to
@@ -266,8 +338,8 @@ To migrate from teams to groups:
       ```hcl
       resource "aiven_organization_user_group" "admin" {
         organization_id = data.aiven_organization.main.id
-        name       = "Admin user group"
-        description = "Administrators"
+        name            = "Admin user group"
+        description     = "Administrators"
       }
       ```
 
@@ -342,7 +414,7 @@ resource "aiven_pg" "example" {
   service_name = "my-postgres"
 
   timeouts {
-    default = "20m"  # This is deprecated
+    default = "20m" # This is deprecated
   }
 }
 ```
