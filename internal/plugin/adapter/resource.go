@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"slices"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/avast/retry-go/v4"
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -54,8 +54,9 @@ type ResourceOptions struct {
 	// inside the adapter package only; not wired through the YAML schema or the generator.
 	refreshStateRetryDelay time.Duration
 
-	// DeleteState, when non-nil, enables the delete poller: after issuing Delete, the adapter polls
-	// Read until the resource reaches its terminal state. See DeleteStateOptions and deleteState.
+	// DeleteState, when non-nil, enables the delete poller: it retries Delete conflicts
+	// until Delete is accepted, then observes completion without mutating Terraform state.
+	// See DeleteStateOptions and deleteState.
 	DeleteState *DeleteStateOptions
 
 	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an IsNotFound error).
@@ -422,8 +423,7 @@ func (a *resourceAdapter) Delete(
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
 	//
-	// When the delete poller is enabled (DeleteState is set), deleteState owns the Delete call and polls
-	// Read until the resource is gone or reaches its terminal state.
+	// When DeleteState is set, deleteState owns both the Delete call and polling.
 	if a.resource.DeleteState != nil {
 		err = a.deleteState(ctx, d)
 	} else {
@@ -434,85 +434,99 @@ func (a *resourceAdapter) Delete(
 	}
 }
 
-// DeleteStateOptions configures the delete poller. When set (non-nil) on ResourceOptions, Delete
-// re-issues Delete on every attempt (ignoring its error) and polls Read until the resource reaches
-// its terminal state. See deleteState.
+// DeleteStateObserver reads just enough API state to determine whether deletion has completed.
+// Unlike a resource Read, it must not flatten the response into Terraform state.
+type DeleteStateObserver func(context.Context, avngen.Client, ResourceData) (any, error)
+
+// DeleteStateOptions configures the delete poller. See deleteState.
 type DeleteStateOptions struct {
-	// Desired maps attribute names to the terminal value the poller must observe after Delete. Empty
-	// means there are no attribute conditions, so the poll completes only once the resource is gone (404).
-	Desired map[string]string
+	// Desired is the terminal value the poller must observe. Empty means
+	// the poll completes only once the resource is gone (404).
+	Desired string
+
+	// FailureStates are values that stop polling with an error. Other non-terminal values,
+	// including unknown states, remain pending and continue to be observed.
+	FailureStates []string
+
+	// Observe reads the resource directly after Delete is accepted. A 404 means deletion completed;
+	// otherwise its returned value is compared with FailureStates and Desired.
+	Observe DeleteStateObserver
 
 	// retryDelay is the fixed delay between attempts. Zero falls back to defaultDeleteStateRetryDelay.
 	// Unexported: intended for tests inside the adapter package only.
 	retryDelay time.Duration
 }
 
-// ErrDeleteStateDesired indicates the delete poller's terminal state was not yet reached after a Read.
-var ErrDeleteStateDesired = errors.New("resource has not reached the desired deleted state")
-
 // defaultDeleteStateRetryDelay is the fixed delay between attempts when DeleteStateOptions.retryDelay
 // is zero.
 const defaultDeleteStateRetryDelay = time.Second * 5
 
-// deleteState deletes the resource and polls until it reaches its terminal state: the API reports it
-// gone (404), or every DeleteStateOptions.Desired entry matches (with no Desired, a 404 is the only
-// terminal).
-//
-// Each attempt re-issues Delete then reads. Delete's error is not fatal on its own (404 = already
-// gone, 409 = dependents still detaching), so the Read decides the outcome:
-//   - a 404 ends the poll and Delete's outer guard treats it as a successful deletion;
-//   - any other Read error fails the delete;
-//   - a successful Read means the resource is still present, so the poll continues.
+// deleteState retries Delete on 409 until the API accepts it, then observes completion without
+// issuing Delete again. A value matching Desired completes the poll, a value matching FailureStates
+// fails immediately, and every other value keeps observing. A 404 bubbles up to Delete, which treats
+// it as success; other API errors fail immediately.
 //
 // The delay is fixed and there is no attempt cap: the poll runs until it succeeds or ctx (the delete
-// timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the last attempt's error,
-// including the most recent Delete error, so a stuck delete reports why.
+// timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the last pending reason.
 //
-// Each Read's warnings are buffered so only the last attempt's are merged into the outer collector.
+// Warnings from retried attempts are discarded; warnings from the final attempt are kept.
 func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) error {
 	opts := a.resource.DeleteState
+	if opts.Observe == nil {
+		return errors.New("delete state observer is not configured")
+	}
+
 	retryDelay := opts.retryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultDeleteStateRetryDelay
 	}
 
-	var lastAttemptWarnings diag.Diagnostics
+	var (
+		deleteAccepted      bool
+		lastAttemptWarnings diag.Diagnostics
+	)
+	errDeleteStatePending := errors.New("resource deletion is still pending")
 	err := retry.Do(
 		func() error {
-			// Delete is re-issued each attempt; its error isn't fatal on its own (404 = gone,
-			// 409 = dependents still detaching), so the Read below drives the outcome. Remember it,
-			// though: it's attached to the not-terminal error so a timeout surfaces why.
-			var deleteErr error
-			if err := a.resource.Delete(ctx, a.client, rd); err != nil {
-				deleteErr = err
-				tflog.Debug(ctx, fmt.Sprintf("Delete of %q returned an error (will poll): %s", a.resource.TypeName, err))
-			}
-
 			var attemptWarnings diag.Diagnostics
 			ctx, drainWarnings := withWarnings(ctx, &attemptWarnings)
-			err := a.resource.Read(ctx, a.client, rd)
-			drainWarnings()
-			lastAttemptWarnings = attemptWarnings
+			defer func() {
+				drainWarnings()
+				lastAttemptWarnings = attemptWarnings
+			}()
 
-			// A 404 (gone) bubbles up; Delete's outer guard treats it as success.
+			if !deleteAccepted {
+				err := a.resource.Delete(ctx, a.client, rd)
+				switch {
+				case err == nil:
+					deleteAccepted = true
+				case isAivenError(err, http.StatusConflict):
+					tflog.Debug(ctx, fmt.Sprintf("Delete of %q returned a conflict (will retry): %s", a.resource.TypeName, err))
+					return fmt.Errorf("%w: Delete returned 409 Conflict", errDeleteStatePending)
+				default:
+					return err
+				}
+			}
+
+			value, err := opts.Observe(ctx, a.client, rd)
 			if err != nil {
 				return err
 			}
 
-			// Still present: with no Desired the only terminal is a 404, so keep polling; otherwise
-			// every entry must match. Append the last Delete error (Append ignores a nil deleteErr)
-			// so it surfaces on timeout.
-			if len(opts.Desired) == 0 {
-				reason := fmt.Errorf("%w: waiting for the resource to be gone", ErrDeleteStateDesired)
-				return multierror.Append(reason, deleteErr).ErrorOrNil()
+			if slices.ContainsFunc(opts.FailureStates, func(failureState string) bool {
+				return Equal(value, failureState)
+			}) {
+				return fmt.Errorf("resource deletion failed: observed failure value `%v`", deref(value))
 			}
-			for key, want := range opts.Desired {
-				if state := rd.Get(key); !Equal(state, want) {
-					reason := fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrDeleteStateDesired, key, want, state)
-					return multierror.Append(reason, deleteErr).ErrorOrNil()
-				}
+
+			if opts.Desired == "" {
+				return fmt.Errorf("%w: waiting for the resource to be gone", errDeleteStatePending)
 			}
-			return nil
+			if Equal(value, opts.Desired) {
+				return nil
+			}
+
+			return fmt.Errorf("%w: expected value to be `%v`, got `%v`", errDeleteStatePending, opts.Desired, value)
 		},
 		retry.Delay(retryDelay),
 		retry.DelayType(retry.FixedDelay),
@@ -523,13 +537,10 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 		// On timeout, wrap ctx.Err() with the last attempt's error so a stuck delete reports why.
 		retry.WrapContextErrorWithLastError(true),
 		retry.RetryIf(func(err error) bool {
-			// Keep polling only while not-terminal; a 404 or any other Read error ends the poll.
-			return errors.Is(err, ErrDeleteStateDesired)
+			return errors.Is(err, errDeleteStatePending)
 		}),
 	)
-
 	AddWarnings(ctx, lastAttemptWarnings...)
-
 	return err
 }
 

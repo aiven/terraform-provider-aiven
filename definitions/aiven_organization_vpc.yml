@@ -4,8 +4,9 @@ resource:
   refreshState: true
   refreshStateDesired:
     state: ACTIVE
-  deleteStateDesired:
-    state: DELETED
+  deleteState:
+    field: state
+    desired: DELETED
   removeMissing: true
   description: Creates and manages a VPC for an Aiven organization.
 datasource:

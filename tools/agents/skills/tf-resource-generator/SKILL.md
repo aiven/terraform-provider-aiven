@@ -178,31 +178,37 @@ resource:
   refreshStateDesired: # Retry Read until fields match desired values
     state: ACTIVE
   removeMissing: true # Remove from state on 404
-  deleteStateDesired: # Poll Read after Delete until the resource reaches its terminal state
-    state: DELETED
+  deleteState: # Issue Delete, then poll until the resource reaches its terminal state
+    field: state
+    desired: DELETED
+    failureStates: [DELETION_FAILED]
 ```
 
 `refreshStateDesired` replaces ad-hoc refresh waiters for simple state transitions. Use it when the resource should settle into a known value after create/update (for example, `state: ACTIVE`).
 
-`deleteStateDesired` replaces custom delete waiters. It is a map, and its presence (even as an empty map, `{}`) enables the delete poller: on every attempt the adapter re-issues `Delete` (ignoring its error) and polls `Read` until the resource is gone (404) or reaches its terminal state, then returns. A 404 always completes the delete. Because `Delete` is re-issued each attempt and its error is ignored, a 409 Conflict from dependents still detaching resolves on its own — no extra configuration is needed.
+`deleteState` replaces simple asynchronous delete waiters. The adapter retries Delete on 409 until it is accepted, then stops issuing Delete and polls through a generated direct API observer. Other Delete errors fail immediately. The observer bypasses the resource's normal `Read`, `Flatten`, and modifiers, so partial terminal responses do not have to satisfy the ordinary refresh contract. A 404 from Delete or the observer completes deletion.
 
-The map's entries are attribute names mapped to the terminal value the poller must observe (e.g. `state: DELETED`). The poll finishes when every entry matches or the API 404s, whichever comes first. Values are validated against the field's enum when one is declared, as for `refreshStateDesired`. Use an empty map for APIs whose Read never surfaces a terminal state (it just 404s).
+`field` names the top-level Terraform attribute backed by the canonical read response, for example `state` or `status`. It is required with `desired` or `failureStates`. Configured values are validated against the field's enum when one is declared. A value that matches neither condition, including a newly introduced value, keeps polling without another Delete.
+
+`desired` is optional and completes deletion when observed. `failureStates` is optional and returns an error immediately when observed, leaving the resource in Terraform state so a later destroy can retry. With no field, only a 404 completes deletion.
 
 Examples:
 
 ```yaml
 # Wait until the API 404s; no observable terminal state (e.g. aiven_azure_privatelink).
-deleteStateDesired: {}
+deleteState: {}
 ```
 
 ```yaml
 # Soft-delete API reports state: DELETED, and dependents may still be detaching
-# (e.g. aiven_project_vpc, aiven_organization_vpc). Delete is re-issued each attempt.
-deleteStateDesired:
-  state: DELETED
+# (e.g. aiven_project_vpc, aiven_organization_vpc).
+deleteState:
+  field: state
+  desired: DELETED
+  failureStates: [DELETION_FAILED]
 ```
 
-Prefer `deleteStateDesired` over a hand-written delete `disableView` + custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value. Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state machine).
+Prefer `deleteState` over a hand-written delete `disableView` + custom poller when Delete is issued once after any initial conflicts and only needs to be observed until success, an explicit failure state, or 404. Keep a custom delete view when the next API action depends on the observed state, such as retrying Delete automatically after a failure or running a cancel-then-delete state machine.
 
 ### Datasource Configuration
 

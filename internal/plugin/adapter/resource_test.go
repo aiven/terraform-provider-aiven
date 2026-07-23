@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -269,263 +270,236 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 }
 
 func TestResourceAdapter_deleteState(t *testing.T) {
-	const fastRetryDelay = time.Microsecond
+	const (
+		fastRetryDelay     = time.Microsecond
+		synctestRetryDelay = time.Second
+		synctestTimeout    = 2500 * time.Millisecond
+	)
 
-	// fastAdapter builds a *resourceAdapter wired for fast tests, with the delete poller enabled.
-	// Callers layer Desired on top via a.resource.DeleteState and provide the per-test delete/read
-	// closures.
 	fastAdapter := func(
-		del func(ctx context.Context, client avngen.Client, rd ResourceData) error,
-		read func(ctx context.Context, client avngen.Client, rd ResourceData) error,
+		del func(context.Context, avngen.Client, ResourceData) error,
+		observe DeleteStateObserver,
 	) *resourceAdapter {
 		return &resourceAdapter{
 			resource: ResourceOptions{
 				Delete: del,
-				Read:   read,
+				Read: func(context.Context, avngen.Client, ResourceData) error {
+					panic("delete poller must not call the resource Read")
+				},
 				DeleteState: &DeleteStateOptions{
+					Observe:    observe,
 					retryDelay: fastRetryDelay,
 				},
 			},
 		}
-	}
-
-	statusSchema := &Schema{
-		Type: SchemaTypeObject,
-		Properties: map[string]*Schema{
-			"status": {Type: SchemaTypeString},
-		},
 	}
 
 	warning := func(summary string) diag.Diagnostic {
 		return diag.NewWarningDiagnostic(summary, "detail")
 	}
 
-	t.Run("deletes once then surfaces the 404 when read reports the resource gone", func(t *testing.T) {
-		t.Parallel()
-
-		deletes, reads := 0, 0
+	t.Run("retries conflicts then deletes once and only observes", func(t *testing.T) {
+		states := []any{"DELETING", "NEW_BACKEND_STATE", "DELETED"}
+		deletes, observations := 0, 0
 		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			func(context.Context, avngen.Client, ResourceData) error {
+				deletes++
+				if deletes == 1 {
+					return avngen.Error{Status: http.StatusConflict, Message: "VPC in use"}
+				}
+				return nil
+			},
+			func(context.Context, avngen.Client, ResourceData) (any, error) {
+				require.Less(t, observations, len(states))
+				state := states[observations]
+				observations++
+				return state, nil
+			},
+		)
+		a.resource.DeleteState.Desired = "DELETED"
+
+		require.NoError(t, a.deleteState(t.Context(), nil))
+		require.Equal(t, 2, deletes)
+		require.Equal(t, 3, observations)
+	})
+
+	t.Run("propagates delete errors without observing", func(t *testing.T) {
+		for _, status := range []int{http.StatusForbidden, http.StatusNotFound} {
+			t.Run(http.StatusText(status), func(t *testing.T) {
+				deletes, observations := 0, 0
+				a := fastAdapter(
+					func(context.Context, avngen.Client, ResourceData) error {
+						deletes++
+						return avngen.Error{Status: status}
+					},
+					func(context.Context, avngen.Client, ResourceData) (any, error) {
+						observations++
+						return nil, nil
+					},
+				)
+
+				err := a.deleteState(t.Context(), nil)
+				var apiErr avngen.Error
+				require.ErrorAs(t, err, &apiErr)
+				require.Equal(t, status, apiErr.Status)
+				require.Equal(t, 1, deletes)
+				require.Zero(t, observations)
+			})
+		}
+	})
+
+	t.Run("empty desired observes until the resource is gone", func(t *testing.T) {
+		deletes, observations := 0, 0
+		a := fastAdapter(
+			func(context.Context, avngen.Client, ResourceData) error {
 				deletes++
 				return nil
 			},
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				return avngen.Error{Status: http.StatusNotFound}
-			},
-		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
-
-		// A 404 bubbles up; Delete's outer guard ignores it as a successful deletion.
-		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
-		require.Equal(t, 1, deletes)
-		require.Equal(t, 1, reads)
-	})
-
-	t.Run("polls read until the desired state is reached", func(t *testing.T) {
-		t.Parallel()
-
-		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
-		require.NoError(t, err)
-
-		reads := 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
-			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
-				reads++
-				if reads >= 3 {
-					require.NoError(t, rd.Set("status", "DELETED"))
+			func(context.Context, avngen.Client, ResourceData) (any, error) {
+				observations++
+				if observations == 3 {
+					return nil, avngen.Error{Status: http.StatusNotFound}
 				}
-				return nil
+				return nil, nil
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
-
-		require.NoError(t, a.deleteState(t.Context(), rd))
-		require.Equal(t, 3, reads)
-	})
-
-	t.Run("not-found-only polls read until the resource is gone", func(t *testing.T) {
-		t.Parallel()
-
-		reads := 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				if reads >= 3 {
-					return avngen.Error{Status: http.StatusNotFound}
-				}
-				return nil // Still present; no attribute conditions, so keep polling until 404.
-			},
-		)
-		// fastAdapter has no Desired conditions, so a 404 is the only terminal.
-
-		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
-		require.Equal(t, 3, reads)
-	})
-
-	t.Run("re-issues delete every attempt, ignoring its error, until the desired state", func(t *testing.T) {
-		t.Parallel()
-
-		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
-		require.NoError(t, err)
-
-		deletes := 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				deletes++
-				// Delete keeps failing with a conflict; the error is ignored and Delete is re-issued.
-				return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
-			},
-			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
-				if deletes >= 3 {
-					return rd.Set("status", "DELETED")
-				}
-				return nil
-			},
-		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
-
-		require.NoError(t, a.deleteState(t.Context(), rd))
-		require.Equal(t, 3, deletes, "delete must be re-issued on every attempt, its error ignored")
-	})
-
-	t.Run("ignores delete errors and completes once read reports the resource gone", func(t *testing.T) {
-		t.Parallel()
-
-		deletes, reads := 0, 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				deletes++
-				return avngen.Error{Status: http.StatusForbidden, Message: "forbidden"}
-			},
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				if reads >= 2 {
-					return avngen.Error{Status: http.StatusNotFound}
-				}
-				return nil
-			},
-		)
-		// No Desired conditions, so a 404 is the only terminal.
-
-		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
-		require.Equal(t, 2, deletes, "delete errors are ignored and delete is re-issued each attempt")
-	})
-
-	t.Run("retries until the context deadline when the desired state is never reached", func(t *testing.T) {
-		t.Parallel()
-
-		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
-		require.NoError(t, err)
-
-		reads := 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				return nil // Never transitions to DELETED, so the poll runs until ctx is cancelled.
-			},
-		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
-
-		// The fixed retry delay is fastRetryDelay (1µs), so a 300ms window comfortably allows many
-		// polls before the deadline.
-		ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
-		defer cancel()
-
-		err = a.deleteState(ctx, rd)
-		require.ErrorIs(t, err, context.DeadlineExceeded)
-		require.Greater(t, reads, 1, "must keep polling until the deadline rather than giving up early")
-	})
-
-	t.Run("surfaces the last delete error when the poll times out", func(t *testing.T) {
-		t.Parallel()
-
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				return avngen.Error{Status: http.StatusConflict, Message: "still in use"}
-			},
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				return nil // Resource stays present, so the delete conflict keeps recurring until timeout.
-			},
-		)
-		// No Desired conditions, so the only terminal is a 404 that never comes.
-
-		ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
-		defer cancel()
-
-		err := a.deleteState(ctx, nil)
-
-		// Both the context deadline and the underlying delete conflict must be inspectable, so the
-		// user sees why the delete never completed rather than only a bare context deadline.
-		require.ErrorIs(t, err, context.DeadlineExceeded)
-		var apiErr avngen.Error
-		require.ErrorAs(t, err, &apiErr)
-		require.Equal(t, http.StatusConflict, apiErr.Status)
-	})
-
-	t.Run("does not retry on a non-retryable read error", func(t *testing.T) {
-		t.Parallel()
-
-		boom := errors.New("boom")
-		reads := 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				return boom
-			},
-		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
 
 		err := a.deleteState(t.Context(), nil)
-		require.ErrorIs(t, err, boom)
-		require.Equal(t, 1, reads, "non-retryable errors must not trigger retries")
+		require.True(t, IsNotFound(err))
+		require.Equal(t, 1, deletes)
+		require.Equal(t, 3, observations)
 	})
 
-	t.Run("keeps outer warnings and merges only last try warnings", func(t *testing.T) {
-		var target diag.Diagnostics
+	t.Run("uses one timeout for conflict and observation retries", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			deletes, observations := 0, 0
+			ctx, cancel := context.WithTimeout(t.Context(), synctestTimeout)
+			defer cancel()
 
-		outerCtx, drainWarnings := withWarnings(t.Context(), &target)
-		AddWarnings(outerCtx, warning("outer-1"))
-
-		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
-		require.NoError(t, err)
-
-		warningsByTry := [][]diag.Diagnostic{
-			{warning("try-1")},
-			{warning("try-2")},
-		}
-
-		reads := 0
-		a := &resourceAdapter{
-			resource: ResourceOptions{
-				Delete: func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
-				Read: func(ctx context.Context, _ avngen.Client, rd ResourceData) error {
-					reads++
-					AddWarnings(ctx, warningsByTry[reads-1]...)
-					if reads >= 2 {
-						return rd.Set("status", "DELETED")
+			a := fastAdapter(
+				func(context.Context, avngen.Client, ResourceData) error {
+					deletes++
+					if deletes < 3 {
+						return avngen.Error{Status: http.StatusConflict}
 					}
 					return nil
 				},
-				DeleteState: &DeleteStateOptions{
-					Desired:    map[string]string{"status": "DELETED"},
-					retryDelay: fastRetryDelay,
+				func(context.Context, avngen.Client, ResourceData) (any, error) {
+					observations++
+					return "DELETING", nil
 				},
+			)
+			a.resource.DeleteState.Desired = "DELETED"
+			a.resource.DeleteState.retryDelay = synctestRetryDelay
+
+			err := a.deleteState(ctx, nil)
+
+			require.ErrorIs(t, err, context.DeadlineExceeded)
+			require.ErrorContains(t, err, "got `DELETING`")
+			require.Equal(t, 3, deletes)
+			require.Equal(t, 1, observations)
+		})
+	})
+
+	t.Run("propagates observer errors", func(t *testing.T) {
+		boom := errors.New("boom")
+		for _, observeErr := range []error{boom, avngen.Error{Status: http.StatusNotFound}} {
+			t.Run(observeErr.Error(), func(t *testing.T) {
+				deletes, observations := 0, 0
+				a := fastAdapter(
+					func(context.Context, avngen.Client, ResourceData) error {
+						deletes++
+						return nil
+					},
+					func(context.Context, avngen.Client, ResourceData) (any, error) {
+						observations++
+						return nil, observeErr
+					},
+				)
+
+				err := a.deleteState(t.Context(), nil)
+				if IsNotFound(observeErr) {
+					require.True(t, IsNotFound(err))
+				} else {
+					require.ErrorIs(t, err, observeErr)
+				}
+				require.Equal(t, 1, deletes)
+				require.Equal(t, 1, observations)
+			})
+		}
+	})
+
+	t.Run("fails fast when observation reaches a configured failure state", func(t *testing.T) {
+		deletes, observations := 0, 0
+		failureState := "deletion_failed"
+		a := fastAdapter(
+			func(context.Context, avngen.Client, ResourceData) error {
+				deletes++
+				return nil
+			},
+			func(context.Context, avngen.Client, ResourceData) (any, error) {
+				observations++
+				return &failureState, nil
+			},
+		)
+		a.resource.DeleteState.Desired = "deleted"
+		a.resource.DeleteState.FailureStates = []string{"deletion_failed"}
+
+		err := a.deleteState(t.Context(), nil)
+
+		require.EqualError(t, err, "resource deletion failed: observed failure value `deletion_failed`")
+		require.Equal(t, 1, deletes)
+		require.Equal(t, 1, observations)
+	})
+
+	t.Run("requires an observer", func(t *testing.T) {
+		a := &resourceAdapter{
+			resource: ResourceOptions{
+				Delete:      func(context.Context, avngen.Client, ResourceData) error { return nil },
+				DeleteState: &DeleteStateOptions{},
 			},
 		}
 
-		err = a.deleteState(outerCtx, rd)
+		require.EqualError(t, a.deleteState(t.Context(), nil), "delete state observer is not configured")
+	})
+
+	t.Run("keeps outer warnings and merges only final observation warnings", func(t *testing.T) {
+		var target diag.Diagnostics
+		outerCtx, drainWarnings := withWarnings(t.Context(), &target)
+		AddWarnings(outerCtx, warning("outer-1"))
+
+		deletes, observations := 0, 0
+		a := fastAdapter(
+			func(ctx context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				AddWarnings(ctx, warning(fmt.Sprintf("delete-%d", deletes)))
+				if deletes == 1 {
+					return avngen.Error{Status: http.StatusConflict}
+				}
+				return nil
+			},
+			func(ctx context.Context, _ avngen.Client, _ ResourceData) (any, error) {
+				observations++
+				AddWarnings(ctx, warning(fmt.Sprintf("observe-%d", observations)))
+				if observations == 2 {
+					return "DELETED", nil
+				}
+				return "DELETING", nil
+			},
+		)
+		a.resource.DeleteState.Desired = "DELETED"
+
+		err := a.deleteState(outerCtx, nil)
 		drainWarnings()
 
 		require.NoError(t, err)
-		require.Equal(t, 2, reads)
+		require.Equal(t, 2, deletes)
+		require.Equal(t, 2, observations)
 		require.True(t, target.Contains(warning("outer-1")))
-		require.True(t, target.Contains(warning("try-2")))
-		require.False(t, target.Contains(warning("try-1")))
+		require.True(t, target.Contains(warning("observe-2")))
+		require.False(t, target.Contains(warning("delete-1")))
+		require.False(t, target.Contains(warning("delete-2")))
+		require.False(t, target.Contains(warning("observe-1")))
 	})
 }
 

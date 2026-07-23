@@ -99,59 +99,220 @@ func TestGenNewResourceRefreshStateDesiredValidation(t *testing.T) {
 }
 
 func TestGenNewResourceDeleteStateValidation(t *testing.T) {
-	stringItem := func() *Item {
-		return &Item{Properties: map[string]*Item{"state": {Name: "state", Type: SchemaTypeString}}}
-	}
-	enumItem := func(vals ...any) *Item {
+	enumItem := func(field string, vals ...any) *Item {
 		return &Item{Properties: map[string]*Item{
-			"state": {Name: "state", Type: SchemaTypeString, Enum: vals},
+			field: {Name: field, Type: SchemaTypeString, Enum: vals},
 		}}
 	}
-	newDef := func(dsd map[string]string) *Definition {
-		return &Definition{Resource: &SchemaMeta{DeleteStateDesired: dsd}}
+	newDef := func(ds *DeleteStateMeta) *Definition {
+		return &Definition{Resource: &SchemaMeta{DeleteState: ds}}
 	}
 
-	t.Run("desired conditions generate the poller", func(t *testing.T) {
-		code, err := genNewResource(resourceType, newDef(map[string]string{"state": "DELETED"}), stringItem(), false)
+	t.Run("generates the full poller for a configured field", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(&DeleteStateMeta{
+			Field:         "status",
+			Desired:       "DELETED",
+			FailureStates: []string{"FAILED", "CANCELLED"},
+		}), enumItem("status", "ACTIVE", "DELETED", "FAILED", "CANCELLED"), false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
 		require.Contains(t, got, "DeleteStateOptions{")
-		require.Contains(t, got, `map[string]string{"state": "DELETED"}`)
+		require.Regexp(t, `Desired:\s+"DELETED"`, got)
+		require.Contains(t, got, `FailureStates: []string{"FAILED", "CANCELLED"}`)
+		require.Regexp(t, `Observe:\s+deleteStateObserve`, got)
 	})
 
-	t.Run("an empty map enables the poller (404-only)", func(t *testing.T) {
-		code, err := genNewResource(resourceType, newDef(map[string]string{}), stringItem(), false)
+	t.Run("configuration without a field waits for 404", func(t *testing.T) {
+		code, err := genNewResource(
+			resourceType,
+			newDef(&DeleteStateMeta{}),
+			&Item{Properties: map[string]*Item{}},
+			false,
+		)
 		require.NoError(t, err)
 		got := renderCode(t, code)
-		require.Contains(t, got, "&adapter.DeleteStateOptions{}")
+		require.Contains(t, got, "DeleteStateOptions{")
+		require.Contains(t, got, `Observe: deleteStateObserve`)
 		require.NotContains(t, got, "Desired:")
 	})
 
 	t.Run("an absent config disables the poller", func(t *testing.T) {
-		code, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{}}, stringItem(), false)
+		code, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{}}, enumItem("state"), false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
 		require.NotContains(t, got, "DeleteStateOptions")
 	})
 
-	t.Run("accepts a desired value that is in the field's enum", func(t *testing.T) {
-		code, err := genNewResource(resourceType, newDef(map[string]string{"state": "DELETED"}), enumItem("ACTIVE", "DELETING", "DELETED"), false)
+	t.Run("rejects invalid state configuration", func(t *testing.T) {
+		tests := []struct {
+			name string
+			meta *DeleteStateMeta
+			item *Item
+			want string
+		}{
+			{
+				name: "missing field option",
+				meta: &DeleteStateMeta{Desired: "DELETED"},
+				item: enumItem("state", "DELETED"),
+				want: "field is required",
+			},
+			{
+				name: "field absent from schema",
+				meta: &DeleteStateMeta{Field: "status", Desired: "DELETED"},
+				item: enumItem("state", "DELETED"),
+				want: `field "status" is not present in schema`,
+			},
+			{
+				name: "desired outside enum",
+				meta: &DeleteStateMeta{Field: "state", Desired: "deleted"},
+				item: enumItem("state", "active", "deleting"),
+				want: `desired value "deleted" is not allowed`,
+			},
+			{
+				name: "failure outside enum",
+				meta: &DeleteStateMeta{Field: "state", FailureStates: []string{"FAILED"}},
+				item: enumItem("state", "ACTIVE", "DELETED"),
+				want: `failure state "FAILED" is not allowed`,
+			},
+			{
+				name: "desired is also a failure",
+				meta: &DeleteStateMeta{Field: "state", Desired: "DELETED", FailureStates: []string{"DELETED"}},
+				item: enumItem("state", "DELETED"),
+				want: `failure state "DELETED" must not also be desired`,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				_, err := genNewResource(resourceType, newDef(tt.meta), tt.item, false)
+				require.ErrorContains(t, err, tt.want)
+			})
+		}
+	})
+}
+
+func TestGenDeleteStateObserve(t *testing.T) {
+	newDefinition := func(deleteState *DeleteStateMeta, operations ...*Operation) (*Definition, *Item) {
+		def := &Definition{
+			ClientHandler: "widget",
+			Resource:      &SchemaMeta{DeleteState: deleteState},
+			Operations:    operations,
+		}
+		item := &Item{Properties: map[string]*Item{}}
+		if len(operations) > 0 {
+			read := operations[0]
+			item.Properties["project"] = &Item{
+				Parent:              item,
+				Name:                "project",
+				JSONName:            "project",
+				Type:                SchemaTypeString,
+				IDAttributePosition: 0,
+				AppearsIn:           def.Operations.AppearsInID(read.ID, read.Type, PathParameter),
+			}
+			if deleteState.Field != "" {
+				item.Properties[deleteState.Field] = &Item{
+					Parent:    item,
+					Name:      deleteState.Field,
+					JSONName:  deleteState.Field,
+					Type:      SchemaTypeString,
+					AppearsIn: def.Operations.AppearsInID(read.ID, read.Type, ResponseBody),
+				}
+			}
+		}
+		return def, item
+	}
+
+	t.Run("reads a renamed field through the response wrapper", func(t *testing.T) {
+		read := &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}, ResultKeyField: "Wrapper"}
+		def, item := newDefinition(&DeleteStateMeta{Field: "status", Desired: "DELETED"}, read)
+		item.Properties["status"].JSONName = "backend_status"
+
+		code, err := genDeleteStateObserve(def, item)
 		require.NoError(t, err)
 		got := renderCode(t, code)
-		require.Contains(t, got, `map[string]string{"state": "DELETED"}`)
+		require.Contains(t, got, `client.WidgetGet(ctx, d.Get("project").(string))`)
+		require.Contains(t, got, `return rsp.Wrapper.BackendStatus, nil`)
+		require.NotContains(t, got, "Flatten")
+		require.NotContains(t, got, "readView")
 	})
 
-	t.Run("rejects a desired value outside the field's enum", func(t *testing.T) {
-		_, err := genNewResource(resourceType, newDef(map[string]string{"state": "deleted"}), enumItem("active", "creating", "deleting"), false)
-		require.Error(t, err)
-		require.Contains(t, err.Error(), `deleteStateDesired: field "state"`)
-		require.Contains(t, err.Error(), `desired value "deleted" is not allowed`)
+	t.Run("empty desired observes existence without requiring state", func(t *testing.T) {
+		read := &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}}
+		def, item := newDefinition(&DeleteStateMeta{}, read)
+
+		code, err := genDeleteStateObserve(def, item)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, `_, err := client.WidgetGet(ctx, d.Get("project").(string))`)
+		require.Contains(t, got, `return nil, err`)
+		require.NotContains(t, got, ".Status")
 	})
 
-	t.Run("rejects a desired key that does not exist in the schema", func(t *testing.T) {
-		_, err := genNewResource(resourceType, newDef(map[string]string{"missing": "DELETED"}), stringItem(), false)
-		require.Error(t, err)
-		require.Contains(t, err.Error(), `deleteStateDesired: unknown field "missing"`)
+	t.Run("requires the canonical get to return the configured field", func(t *testing.T) {
+		read := &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}}
+		def, item := newDefinition(&DeleteStateMeta{Field: "status", FailureStates: []string{"FAILED"}}, read)
+
+		item.Properties["status"].AppearsIn = 0
+		_, err := genDeleteStateObserve(def, item)
+		require.EqualError(t, err, `canonical read operation "WidgetGet" does not return field "status"`)
+	})
+
+	t.Run("ignores datasource lookup reads", func(t *testing.T) {
+		read := &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}}
+		lookup := &Operation{
+			ID:               "WidgetList",
+			Type:             OperationRead,
+			DatasourceLookup: true,
+			Response:         &OASchema{},
+		}
+		disabled := &Operation{ID: "WidgetReadWithRequest", Type: OperationRead, DisableView: true, Response: &OASchema{}}
+		def, item := newDefinition(&DeleteStateMeta{Field: "state", Desired: "DELETED"}, read, lookup, disabled)
+
+		code, err := genDeleteStateObserve(def, item)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, "client.WidgetGet")
+		require.NotContains(t, got, "client.WidgetList")
+		require.NotContains(t, got, "client.WidgetReadWithRequest")
+	})
+
+	t.Run("rejects unsupported canonical read shapes", func(t *testing.T) {
+		tests := []struct {
+			name string
+			read *Operation
+			want string
+		}{
+			{
+				name: "request body",
+				read: &Operation{ID: "WidgetGet", Type: OperationRead, Request: &OASchema{}, Response: &OASchema{}},
+				want: "has a request body",
+			},
+			{
+				name: "resultToKey",
+				read: &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}, ResultToKey: "widget"},
+				want: "wraps its response with resultToKey",
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				def, item := newDefinition(&DeleteStateMeta{Field: "state", Desired: "DELETED"}, tt.read)
+				_, err := genDeleteStateObserve(def, item)
+				require.ErrorContains(t, err, tt.want)
+			})
+		}
+	})
+
+	t.Run("requires one canonical read", func(t *testing.T) {
+		def, item := newDefinition(&DeleteStateMeta{Field: "state", Desired: "DELETED"})
+		_, err := genDeleteStateObserve(def, item)
+		require.EqualError(t, err, "deleteState requires exactly one canonical read operation, got 0")
+
+		first := &Operation{ID: "WidgetGet", Type: OperationRead, Response: &OASchema{}}
+		second := &Operation{ID: "WidgetGetAgain", Type: OperationRead, Response: &OASchema{}}
+		def, item = newDefinition(&DeleteStateMeta{Field: "state", Desired: "DELETED"}, first, second)
+		_, err = genDeleteStateObserve(def, item)
+		require.EqualError(t, err, "deleteState requires exactly one canonical read operation, got 2")
 	})
 }
 

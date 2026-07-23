@@ -6,7 +6,7 @@ resource:
     state: active
   # ServicePrivatelinkAzureGet never returns state=deleted (the backend filters deleted rows and 404s
   # instead, see privatelink_get), so there is no terminal state to match on: wait until gone (404).
-  deleteStateDesired: {}
+  deleteState: {}
   removeMissing: true
   description: Creates and manages an Azure Private Link for [selected Aiven services](https://aiven.io/docs/platform/howto/use-azure-privatelink) in a VPC.
 datasource:

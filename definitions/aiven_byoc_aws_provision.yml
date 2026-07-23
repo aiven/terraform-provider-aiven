@@ -13,8 +13,10 @@ resource:
   refreshState: true
   refreshStateDesired:
     state: active
-  deleteStateDesired:
-    state: deleted
+  deleteState:
+    field: state
+    desired: deleted
+    failureStates: [deletion_failed]
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]
 operations:

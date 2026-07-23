@@ -25,9 +25,12 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:              createView,
-	Delete:              deleteView,
-	DeleteState:         &adapter.DeleteStateOptions{Desired: map[string]string{"state": "DELETED"}},
+	Create: createView,
+	Delete: deleteView,
+	DeleteState: &adapter.DeleteStateOptions{
+		Desired: "DELETED",
+		Observe: deleteStateObserve,
+	},
 	IDFields:            idFields(),
 	Read:                readView,
 	RefreshState:        true,
@@ -86,6 +89,14 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	_, err := client.VpcDelete(ctx, d.Get("project").(string), d.Get("project_vpc_id").(string))
 	return err
+}
+
+func deleteStateObserve(ctx context.Context, client avngen.Client, d adapter.ResourceData) (any, error) {
+	rsp, err := client.VpcGet(ctx, d.Get("project").(string), d.Get("project_vpc_id").(string))
+	if err != nil {
+		return nil, err
+	}
+	return rsp.State, nil
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {

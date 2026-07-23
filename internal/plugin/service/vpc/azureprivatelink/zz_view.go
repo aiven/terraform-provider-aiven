@@ -23,7 +23,7 @@ func idFields() []string {
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
-	DeleteState:         &adapter.DeleteStateOptions{},
+	DeleteState:         &adapter.DeleteStateOptions{Observe: deleteStateObserve},
 	IDFields:            idFields(),
 	Read:                readView,
 	RefreshState:        true,
@@ -80,4 +80,9 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	_, err := client.ServicePrivatelinkAzureDelete(ctx, d.Get("project").(string), d.Get("service_name").(string))
 	return err
+}
+
+func deleteStateObserve(ctx context.Context, client avngen.Client, d adapter.ResourceData) (any, error) {
+	_, err := client.ServicePrivatelinkAzureGet(ctx, d.Get("project").(string), d.Get("service_name").(string))
+	return nil, err
 }

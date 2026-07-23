@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/ettle/strcase"
 	"github.com/hashicorp/go-multierror"
 	"github.com/samber/lo"
 )
@@ -23,6 +24,7 @@ const (
 	renameFieldsModifier       = "RenameFields"
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
+	deleteStateObserve         = "deleteStateObserve"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -36,6 +38,13 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 		if v != nil {
 			codes = append(codes, v)
 		}
+	}
+	if def.Resource != nil && def.Resource.DeleteState != nil {
+		v, err := genDeleteStateObserve(def, item)
+		if err != nil {
+			return nil, fmt.Errorf("delete state observer error: %w", err)
+		}
+		codes = append(codes, v)
 	}
 
 	builders := make([]jen.Code, 0)
@@ -122,24 +131,39 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			}
 		}
 
-		// A non-nil deleteStateDesired (even an empty map) enables the delete poller.
-		if dsd := def.Resource.DeleteStateDesired; dsd != nil {
-			desired := make(jen.Dict, len(dsd))
-			for _, k := range sortedKeys(dsd) {
-				want := dsd[k]
-				prop, ok := item.Properties[k]
-				if !ok {
-					return nil, fmt.Errorf("deleteStateDesired: unknown field %q (not present in schema)", k)
-				}
-				if prop.IsEnum() && !enumContainsString(prop.Enum, want) {
-					return nil, fmt.Errorf("deleteStateDesired: field %q has enum %v but desired value %q is not allowed", k, prop.Enum, want)
-				}
-				desired[jen.Lit(k)] = jen.Lit(want)
+		if ds := def.Resource.DeleteState; ds != nil {
+			fields := jen.Dict{
+				jen.Id("Observe"): jen.Id(deleteStateObserve),
 			}
-
-			fields := jen.Dict{}
-			if len(desired) > 0 {
-				fields[jen.Id("Desired")] = jen.Map(jen.String()).String().Values(desired)
+			if ds.Desired != "" || len(ds.FailureStates) > 0 {
+				if ds.Field == "" {
+					return nil, fmt.Errorf("deleteState: field is required with desired or failureStates")
+				}
+				state, ok := item.Properties[ds.Field]
+				if !ok {
+					return nil, fmt.Errorf("deleteState: field %q is not present in schema", ds.Field)
+				}
+				if ds.Desired != "" && state.IsEnum() && !enumContainsString(state.Enum, ds.Desired) {
+					return nil, fmt.Errorf("deleteState: field %q has enum %v but desired value %q is not allowed", ds.Field, state.Enum, ds.Desired)
+				}
+				for _, failureState := range ds.FailureStates {
+					if failureState == ds.Desired {
+						return nil, fmt.Errorf("deleteState: failure state %q must not also be desired", failureState)
+					}
+					if state.IsEnum() && !enumContainsString(state.Enum, failureState) {
+						return nil, fmt.Errorf("deleteState: field %q has enum %v but failure state %q is not allowed", ds.Field, state.Enum, failureState)
+					}
+				}
+			}
+			if ds.Desired != "" {
+				fields[jen.Id("Desired")] = jen.Lit(ds.Desired)
+			}
+			if len(ds.FailureStates) > 0 {
+				failureStateValues := make([]jen.Code, 0, len(ds.FailureStates))
+				for _, state := range ds.FailureStates {
+					failureStateValues = append(failureStateValues, jen.Lit(state))
+				}
+				fields[jen.Id("FailureStates")] = jen.Index().String().Values(failureStateValues...)
 			}
 			values["DeleteState"] = jen.Op("&").Qual(adapterPackage, "DeleteStateOptions").Values(fields)
 		}
@@ -172,6 +196,92 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 	title := entity.Title() + optionsSuffix
 	returnValue := jen.Qual(adapterPackage, title).Values(dictFromMap(values, false))
 	return jen.Var().Id(title).Op("=").Add(returnValue), nil
+}
+
+// genDeleteStateObserve generates a direct API read used only by the delete poller. It deliberately
+// bypasses readView, Flatten, and modifiers so a partial terminal response can still be observed.
+func genDeleteStateObserve(def *Definition, item *Item) (jen.Code, error) {
+	readOperations := make([]*Operation, 0, 1)
+	for _, op := range def.Operations {
+		if op.Type == OperationRead && !op.DisableView && !op.DatasourceLookup {
+			readOperations = append(readOperations, op)
+		}
+	}
+	if len(readOperations) != 1 {
+		return nil, fmt.Errorf("deleteState requires exactly one canonical read operation, got %d", len(readOperations))
+	}
+
+	operation := readOperations[0]
+	if operation.Response == nil {
+		return nil, fmt.Errorf("canonical read operation %q has no response", operation.ID)
+	}
+	if len(operation.ResultListLookupKeys) > 0 {
+		return nil, fmt.Errorf("canonical read operation %q returns a lookup list", operation.ID)
+	}
+	if operation.Request != nil {
+		return nil, fmt.Errorf("canonical read operation %q has a request body", operation.ID)
+	}
+
+	inPath := def.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
+	inResponse := def.Operations.AppearsInID(operation.ID, operation.Type, ResponseBody)
+	properties := slices.Collect(maps.Values(item.Properties))
+	sort.Slice(properties, func(i, j int) bool {
+		return properties[i].Name < properties[j].Name
+	})
+
+	fieldName := def.Resource.DeleteState.Field
+	var observedField *Item
+	if fieldName != "" {
+		if operation.ResultToKey != "" {
+			return nil, fmt.Errorf("canonical read operation %q wraps its response with resultToKey", operation.ID)
+		}
+		var ok bool
+		observedField, ok = item.Properties[fieldName]
+		if !ok || !observedField.AppearsIn.Contains(inResponse) {
+			return nil, fmt.Errorf("canonical read operation %q does not return field %q", operation.ID, fieldName)
+		}
+	}
+
+	view := jen.Func().Id(deleteStateObserve).Params(
+		jen.Id("ctx").Qual("context", "Context"),
+		jen.Id("client").Qual(avnGenPackage, "Client"),
+		jen.Id("d").Qual(adapterPackage, resourceData),
+	).Params(jen.Any(), jen.Error())
+
+	view.BlockFunc(func(g *jen.Group) {
+		response := jen.Id("rsp")
+		if observedField == nil {
+			response = jen.Id("_")
+		}
+
+		g.List(response, jen.Err()).Op(":=").
+			Id("client").Dot(string(operation.ID)).
+			CallFunc(func(params *jen.Group) {
+				idFields := filterAppearsIn(properties, inPath)
+				sort.Slice(idFields, func(i, j int) bool {
+					return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
+				})
+
+				params.Id("ctx")
+				for _, field := range idFields {
+					params.Id("d").Dot("Get").Call(jen.Lit(field.Name)).Op(".").Parens(jen.Id(field.GoType()))
+				}
+			})
+
+		if observedField == nil {
+			g.Return(jen.Nil(), jen.Err())
+			return
+		}
+
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+		value := jen.Id("rsp")
+		if operation.ResultKeyField != "" {
+			value.Dot(operation.ResultKeyField)
+		}
+		g.Return(value.Dot(firstUpper(strcase.ToGoCamel(observedField.JSONName))), jen.Nil())
+	})
+
+	return view, nil
 }
 
 // enumContainsString reports whether enum contains want under fmt.Sprint comparison.

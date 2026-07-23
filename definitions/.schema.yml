@@ -66,18 +66,43 @@ properties:
           (e.g. `state: ACTIVE`) without custom waiter logic.
         dependencies:
           - refreshState
-      deleteStateDesired:
+      deleteState:
         type: object
-        additionalProperties:
-          type: string
+        additionalProperties: false
+        properties:
+          field:
+            type: string
+            minLength: 1
+            $comment: |
+              Top-level Terraform attribute backed by the canonical read response and observed while
+              deletion is in progress, for example `state` or `status`. Required when desired or
+              failureStates is configured.
+          desired:
+            type: string
+            minLength: 1
+            $comment: |
+              Terminal value of field. The delete poller completes once it matches this value, or
+              when the API reports 404.
+          failureStates:
+            type: array
+            minItems: 1
+            uniqueItems: true
+            items:
+              type: string
+              minLength: 1
+            $comment: |
+              Values that make the delete poller fail immediately instead of waiting for the
+              delete timeout. The resource remains in Terraform state, so a later destroy can retry
+              Delete. Values must not include desired.
+        dependentRequired:
+          desired: [field]
+          failureStates: [field]
         $comment: |
-          Enables the delete poller. Its presence (even as an empty map, `{}`) makes the adapter
-          re-issue Delete on every attempt (ignoring the delete error, so a 409 Conflict from
-          detaching dependents resolves on its own) and poll Read until the resource is gone (404) or
-          every entry here matches. Each entry maps a Terraform attribute name to the terminal value
-          the adapter must observe before treating a Delete as complete; with an empty map a 404 is
-          the only terminal. Values are validated against the field's enum (when declared), as for
-          refreshStateDesired. Omit it entirely to delete without polling.
+          Enables the delete poller. It retries Delete on 409 until accepted, then uses a generated
+          direct API read without calling the resource's normal Read or Flatten path or issuing
+          Delete again. A 404 completes deletion. When field is configured, desired and
+          failureStates are validated against its enum. Every other value keeps waiting. With no
+          field, only a 404 completes deletion. Omit deleteState entirely to delete without polling.
       removeMissing:
         type: boolean
         $comment: |
