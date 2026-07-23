@@ -165,7 +165,8 @@ idAttributeComposed: [project, service_name, database_name]
 | Flatten/Expand functions | `expandModifier: true` / `flattenModifier: true` |
 | `DiffSuppressFunc` | `planModifier: true` |
 | Multiple API calls in Update | Custom `updateView` via `init()` override |
-| Complex delete (cancel + delete) | Custom `deleteView` via `init()` override |
+| Delete waiter (poll until gone/terminal state; conflicts clear as Delete is re-issued) | `deleteStateDesired` (see tf-resource-generator); avoid a custom `deleteView` |
+| Complex delete (cancel + delete state machine) | Custom `deleteView` via `init()` override |
 | Data source looks up by alt key (e.g. name) | A second `read` op with `datasourceLookup: true` + `resultListLookupKeys`; add `resultIDField: <GoField>` when the lookup endpoint differs in shape from the canonical read and should only resolve the id |
 | Sensitive field not stored in state | `writeOnly: true` |
 

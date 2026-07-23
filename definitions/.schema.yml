@@ -66,6 +66,18 @@ properties:
           (e.g. `state: ACTIVE`) without custom waiter logic.
         dependencies:
           - refreshState
+      deleteStateDesired:
+        type: object
+        additionalProperties:
+          type: string
+        $comment: |
+          Enables the delete poller. Its presence (even as an empty map, `{}`) makes the adapter
+          re-issue Delete on every attempt (ignoring the delete error, so a 409 Conflict from
+          detaching dependents resolves on its own) and poll Read until the resource is gone (404) or
+          every entry here matches. Each entry maps a Terraform attribute name to the terminal value
+          the adapter must observe before treating a Delete as complete; with an empty map a 404 is
+          the only terminal. Values are validated against the field's enum (when declared), as for
+          refreshStateDesired. Omit it entirely to delete without polling.
       removeMissing:
         type: boolean
         $comment: |

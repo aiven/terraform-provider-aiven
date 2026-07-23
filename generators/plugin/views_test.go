@@ -98,6 +98,63 @@ func TestGenNewResourceRefreshStateDesiredValidation(t *testing.T) {
 	})
 }
 
+func TestGenNewResourceDeleteStateValidation(t *testing.T) {
+	stringItem := func() *Item {
+		return &Item{Properties: map[string]*Item{"state": {Name: "state", Type: SchemaTypeString}}}
+	}
+	enumItem := func(vals ...any) *Item {
+		return &Item{Properties: map[string]*Item{
+			"state": {Name: "state", Type: SchemaTypeString, Enum: vals},
+		}}
+	}
+	newDef := func(dsd map[string]string) *Definition {
+		return &Definition{Resource: &SchemaMeta{DeleteStateDesired: dsd}}
+	}
+
+	t.Run("desired conditions generate the poller", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(map[string]string{"state": "DELETED"}), stringItem(), false)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, "DeleteStateOptions{")
+		require.Contains(t, got, `map[string]string{"state": "DELETED"}`)
+	})
+
+	t.Run("an empty map enables the poller (404-only)", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(map[string]string{}), stringItem(), false)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, "&adapter.DeleteStateOptions{}")
+		require.NotContains(t, got, "Desired:")
+	})
+
+	t.Run("an absent config disables the poller", func(t *testing.T) {
+		code, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{}}, stringItem(), false)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.NotContains(t, got, "DeleteStateOptions")
+	})
+
+	t.Run("accepts a desired value that is in the field's enum", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(map[string]string{"state": "DELETED"}), enumItem("ACTIVE", "DELETING", "DELETED"), false)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, `map[string]string{"state": "DELETED"}`)
+	})
+
+	t.Run("rejects a desired value outside the field's enum", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(map[string]string{"state": "deleted"}), enumItem("active", "creating", "deleting"), false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), `deleteStateDesired: field "state"`)
+		require.Contains(t, err.Error(), `desired value "deleted" is not allowed`)
+	})
+
+	t.Run("rejects a desired key that does not exist in the schema", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(map[string]string{"missing": "DELETED"}), stringItem(), false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), `deleteStateDesired: unknown field "missing"`)
+	})
+}
+
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 

@@ -4,6 +4,8 @@ resource:
   refreshState: true
   refreshStateDesired:
     state: ACTIVE
+  deleteStateDesired:
+    state: DELETED
   removeMissing: true
   description: Creates and manages a VPC for an Aiven organization.
 datasource:
@@ -23,7 +25,6 @@ operations:
     type: update
   - id: OrganizationVpcDelete
     type: delete
-    disableView: true
 remove:
   - clouds
   - peering_connections

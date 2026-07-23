@@ -9,11 +9,12 @@ import (
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/avast/retry-go"
+	"github.com/avast/retry-go/v4"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
@@ -52,10 +53,9 @@ type ResourceOptions struct {
 	// inside the adapter package only; not wired through the YAML schema or the generator.
 	refreshStateRetryDelay time.Duration
 
-	// refreshStateMaxAttempts caps the number of Read attempts in refreshState.
-	// Zero falls back to the package default (defaultRefreshStateMaxAttempts). Unexported: intended for tests
-	// inside the adapter package only; not wired through the YAML schema or the generator.
-	refreshStateMaxAttempts uint
+	// DeleteState, when non-nil, enables the delete poller: after issuing Delete, the adapter polls
+	// Read until the resource reaches its terminal state. See DeleteStateOptions and deleteState.
+	DeleteState *DeleteStateOptions
 
 	// RemoveMissing removes the resource from the state if it's missing (i.e., if Read() returns an IsNotFound error).
 	// This is useful for resources that Aiven may automatically delete,
@@ -257,33 +257,22 @@ func (a *resourceAdapter) Read(
 // ErrRefreshStateDesired indicates a RefreshStateDesired attribute did not match after Read.
 var ErrRefreshStateDesired = errors.New("resource is not in the desired state")
 
-const (
-	// defaultRefreshStateRetryDelay is the fallback base delay used by retry-go's BackOff between Read
-	// attempts in refreshState when ResourceOptions.refreshStateRetryDelay is zero.
-	defaultRefreshStateRetryDelay = time.Second * 5
-	// defaultRefreshStateMaxAttempts is the fallback cap on the number of Read attempts in
-	// refreshState when ResourceOptions.refreshStateMaxAttempts is zero.
-	defaultRefreshStateMaxAttempts uint = 10
-)
+// defaultRefreshStateRetryDelay is the fixed delay between Read attempts when
+// ResourceOptions.refreshStateRetryDelay is zero.
+const defaultRefreshStateRetryDelay = time.Second * 5
 
-// refreshState reads the resource state after Create or Update with retries, then validates the
-// resulting state against ResourceOptions.RefreshStateDesired.
+// refreshState reads the resource after Create or Update with retries, then validates the state
+// against ResourceOptions.RefreshStateDesired.
 //
-// When ResourceOptions.RefreshStateDelay is non-zero, it waits that duration before the first
-// attempt (honoring ctx). Each attempt installs a child warning collector so attempt warnings are
-// buffered separately; only the last attempt's warnings are merged into the outer warning
-// collector in ctx. retry-go's BackOff uses ResourceOptions.refreshStateRetryDelay as the base
-// delay between attempts and ResourceOptions.refreshStateMaxAttempts as the total attempt cap;
-// zero values fall back to defaultRefreshStateRetryDelay / defaultRefreshStateMaxAttempts
-// respectively. Retries are limited to the errors accepted by isRefreshStateRetryable.
+// A non-zero ResourceOptions.RefreshStateDelay is waited out before the first attempt (honoring
+// ctx). The delay is fixed (refreshStateRetryDelay, default defaultRefreshStateRetryDelay) and there
+// is no attempt cap: the poll retries the errors isRefreshStateRetryable accepts until it succeeds
+// or ctx (the create/update timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the
+// last attempt's error, so the user sees why the state never settled rather than a bare deadline.
 func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) error {
 	retryDelay := a.resource.refreshStateRetryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultRefreshStateRetryDelay
-	}
-	attempts := a.resource.refreshStateMaxAttempts
-	if attempts == 0 {
-		attempts = defaultRefreshStateMaxAttempts
 	}
 
 	if a.resource.RefreshStateDelay != 0 {
@@ -296,9 +285,9 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		}
 	}
 
-	// Create/Update already install the outer warning collector in ctx.
-	// Each retry attempt wraps that ctx in a child ctx with its own collector, so attempt warnings are buffered separately and don't mutate the outer collector directly.
-	// Only the last attempt's warnings are merged back into the outer collector below.
+	// The outer warning collector is installed by Create/Update. Each attempt uses a child collector
+	// so its warnings are buffered separately; only the last attempt's are merged into the outer one
+	// below.
 	var lastAttemptWarnings diag.Diagnostics
 	err := retry.Do(
 		func() error {
@@ -321,9 +310,15 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 			return nil
 		},
 		retry.Delay(retryDelay),
-		retry.Attempts(attempts),
+		retry.DelayType(retry.FixedDelay),
+		// No attempt cap: Attempts(0) retries until success or ctx (the create/update timeout) is
+		// cancelled.
+		retry.Attempts(0),
 		retry.LastErrorOnly(true),
 		retry.Context(ctx),
+		// On timeout, wrap ctx.Err() with the last attempt's error so the user sees why the state
+		// never settled (e.g. the unmet RefreshStateDesired).
+		retry.WrapContextErrorWithLastError(true),
 		retry.RetryIf(isRefreshStateRetryable),
 	)
 
@@ -425,10 +420,129 @@ func (a *resourceAdapter) Delete(
 
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
-	err = a.resource.Delete(ctx, a.client, d)
+	//
+	// When the delete poller is enabled (DeleteState is set), deleteState owns the Delete call and polls
+	// Read until the resource is gone or reaches its terminal state.
+	if a.resource.DeleteState != nil {
+		err = a.deleteState(ctx, d)
+	} else {
+		err = a.resource.Delete(ctx, a.client, d)
+	}
 	if err != nil && !IsNotFound(err) {
 		diags.AddError("failed to delete resource", err.Error())
 	}
+}
+
+// DeleteStateOptions configures the delete poller. When set (non-nil) on ResourceOptions, Delete
+// re-issues Delete on every attempt (ignoring its error) and polls Read until the resource reaches
+// its terminal state. See deleteState.
+type DeleteStateOptions struct {
+	// Desired maps attribute names to the terminal value the poller must observe after Delete. Empty
+	// means there are no attribute conditions, so the poll completes only once the resource is gone (404).
+	Desired map[string]string
+
+	// retryDelay is the fixed delay between attempts. Zero falls back to defaultDeleteStateRetryDelay.
+	// Unexported: intended for tests inside the adapter package only.
+	retryDelay time.Duration
+}
+
+// ErrDeleteStateDesired indicates the delete poller's terminal state was not yet reached after a Read.
+var ErrDeleteStateDesired = errors.New("resource has not reached the desired deleted state")
+
+// defaultDeleteStateRetryDelay is the fixed delay between attempts when DeleteStateOptions.retryDelay
+// is zero.
+const defaultDeleteStateRetryDelay = time.Second * 5
+
+// deleteState deletes the resource and polls until it reaches its terminal state: the API reports it
+// gone (404), or every DeleteStateOptions.Desired entry matches (with no Desired, a 404 is the only
+// terminal).
+//
+// Delete is issued until it succeeds once, then each attempt only reads. While Delete errors
+// (404 = already gone, 409 = dependents still detaching) it is re-issued, but its error is not fatal
+// on its own, so the Read decides the outcome:
+//   - a 404 ends the poll and Delete's outer guard treats it as a successful deletion;
+//   - any other Read error fails the delete;
+//   - a successful Read means the resource is still present, so the poll continues.
+//
+// The delay is fixed and there is no attempt cap: the poll runs until it succeeds or ctx (the delete
+// timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the last attempt's error,
+// including the most recent Delete error, so a stuck delete reports why.
+//
+// Each Read's warnings are buffered so only the last attempt's are merged into the outer collector.
+func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) error {
+	opts := a.resource.DeleteState
+	retryDelay := opts.retryDelay
+	if retryDelay == 0 {
+		retryDelay = defaultDeleteStateRetryDelay
+	}
+
+	var lastAttemptWarnings diag.Diagnostics
+	var deleteSucceeded bool
+	var deleteErr error
+	err := retry.Do(
+		func() error {
+			// Delete is issued until it succeeds once, then only Read polls. While it errors (e.g.
+			// 409 = dependents still detaching) it is re-issued next attempt and the error is
+			// remembered; it isn't fatal on its own, so the Read below drives the outcome. The
+			// remembered error is attached to the not-terminal error so a timeout surfaces why, and
+			// is cleared once Delete finally succeeds.
+			if !deleteSucceeded {
+				deleteErr = a.resource.Delete(ctx, a.client, rd)
+				deleteSucceeded = deleteErr == nil
+				if !deleteSucceeded {
+					tflog.Debug(ctx, fmt.Sprintf("Delete of %q returned an error (will poll): %s", a.resource.TypeName, deleteErr))
+				}
+			}
+
+			var attemptWarnings diag.Diagnostics
+			ctx, drainWarnings := withWarnings(ctx, &attemptWarnings)
+			err := a.resource.Read(ctx, a.client, rd)
+			drainWarnings()
+			lastAttemptWarnings = attemptWarnings
+
+			// A 404 (gone) bubbles up; Delete's outer guard treats it as success.
+			if err != nil {
+				return err
+			}
+
+			// Still present: with no Desired the only terminal is a 404, so keep polling; otherwise
+			// every entry must match. The last Delete error is attached after the loop.
+			if len(opts.Desired) == 0 {
+				return fmt.Errorf("%w: waiting for the resource to be gone", ErrDeleteStateDesired)
+			}
+			for key, want := range opts.Desired {
+				if state := rd.Get(key); !Equal(state, want) {
+					return fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrDeleteStateDesired, key, want, state)
+				}
+			}
+			return nil
+		},
+		retry.Delay(retryDelay),
+		retry.DelayType(retry.FixedDelay),
+		// No attempt cap: Attempts(0) retries until success or ctx (the delete timeout) is cancelled.
+		retry.Attempts(0),
+		retry.LastErrorOnly(true),
+		retry.Context(ctx),
+		// On timeout, wrap ctx.Err() with the last attempt's error so a stuck delete reports why.
+		retry.WrapContextErrorWithLastError(true),
+		retry.RetryIf(func(err error) bool {
+			// Keep polling only while not-terminal; a 404 or any other Read error ends the poll.
+			return errors.Is(err, ErrDeleteStateDesired)
+		}),
+	)
+
+	AddWarnings(ctx, lastAttemptWarnings...)
+
+	// With no attempt cap, the loop only stops on success (nil), a terminal Read error (404 or any
+	// other), or context cancellation. So an ErrDeleteStateDesired here can only be the last attempt's
+	// error wrapped into the context deadline (retry.WrapContextErrorWithLastError): the poll timed
+	// out. Join the last unresolved Delete error (nil once Delete succeeded) so the deadline also
+	// reports why the delete never finished. All other outcomes pass through untouched.
+	if errors.Is(err, ErrDeleteStateDesired) {
+		err = errors.Join(err, deleteErr)
+	}
+
+	return err
 }
 
 func (a *resourceAdapter) ImportState(
