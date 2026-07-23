@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_organization_user_group` resource and data source to the Plugin Framework.
+- Change `aiven_organization_user_group`: `name` and `description` can now be updated in place instead of forcing resource recreation.
 - Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
 - Migrate `aiven_aws_privatelink` resource and data source to the Plugin Framework.

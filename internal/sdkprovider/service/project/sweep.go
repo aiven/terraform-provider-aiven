@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -52,8 +54,16 @@ func init() {
 			projectName := sweep.ProjectName()
 
 			result, err := client.ProjectUserList(ctx, projectName)
-			if common.IsCritical(err) {
-				return fmt.Errorf("error retrieving project users for %s: %w", projectName, err)
+			if err != nil {
+				// ProjectUserList was deprecated and now returns 410 Gone.
+				// Nothing to sweep via this endpoint anymore, so skip gracefully.
+				if e, ok := errors.AsType[avngen.Error](err); ok && e.Status == http.StatusGone {
+					return nil
+				}
+
+				if common.IsCritical(err) {
+					return fmt.Errorf("error retrieving project users for %s: %w", projectName, err)
+				}
 			}
 
 			if result == nil {

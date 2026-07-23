@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/organization/usergroup
+resource:
+  description: Creates and manages a [user group](https://aiven.io/docs/platform/howto/list-groups) in an organization.
+datasource:
+  description: Gets information about an existing user group in an organization.
+clientHandler: usergroup
+idAttributeComposed: [organization_id, group_id]
+legacyTimeouts: true
+rename:
+  user_group_name: name
+  user_group_id: group_id
+remove:
+  - member_count
+operations:
+  - id: UserGroupCreate
+    type: create
+  - id: UserGroupGet
+    type: read
+  - id: UserGroupsList
+    type: read
+    datasourceLookup: true
+    resultKey: user_groups
+    resultListLookupKeys:
+      UserGroupName: name
+  - id: UserGroupUpdate
+    type: update
+  - id: UserGroupDelete
+    type: delete

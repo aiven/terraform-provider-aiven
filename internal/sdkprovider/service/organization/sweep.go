@@ -46,14 +46,6 @@ func init() {
 			"aiven_organization",
 		},
 	})
-
-	sweep.AddTestSweepers("aiven_organization_user_group", &resource.Sweeper{
-		Name: "aiven_organization_user_group",
-		F:    sweepOrganizationUserGroups(ctx),
-		Dependencies: []string{
-			"aiven_organization",
-		},
-	})
 }
 
 func sweepOrganizations(ctx context.Context) func(string) error {
@@ -152,37 +144,6 @@ func sweepOrganizationApplicationUsers(ctx context.Context) func(string) error {
 			err = client.OrganizationApplicationUserHandler.Delete(ctx, id, organizationApplicationUser.UserID)
 			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization application user %s: %w", organizationApplicationUser.Name, err)
-			}
-		}
-
-		return nil
-	}
-}
-
-func sweepOrganizationUserGroups(ctx context.Context) func(string) error {
-	return func(id string) error {
-		client, err := sweep.SharedClient()
-		if err != nil {
-			return err
-		}
-
-		organizationUserGroups, err := client.OrganizationUserGroups.List(ctx, id)
-		if common.IsCritical(err) {
-			return fmt.Errorf("error retrieving a list of organization user groups: %w", err)
-		}
-
-		if organizationUserGroups == nil {
-			return nil
-		}
-
-		for _, organizationUserGroup := range organizationUserGroups.UserGroups {
-			if !strings.HasPrefix(organizationUserGroup.UserGroupName, defaultPrefix) {
-				continue
-			}
-
-			err = client.OrganizationUserGroups.Delete(ctx, id, organizationUserGroup.UserGroupID)
-			if common.IsCritical(err) {
-				return fmt.Errorf("error deleting organization user group %s: %w", organizationUserGroup.UserGroupName, err)
 			}
 		}
 

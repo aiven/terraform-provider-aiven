@@ -79,7 +79,7 @@
 |  73 | aiven_organization_permission               | yes    |     1 |
 |  74 | aiven_organization_project                  | yes    |     2 |
 |  75 | aiven_organization_user                     |        |     2 |
-|  76 | aiven_organization_user_group               |        |     2 |
+|  76 | aiven_organization_user_group               | yes    |     2 |
 |  77 | aiven_organization_user_group_list          | yes    |     1 |
 |  78 | aiven_organization_user_group_member        | yes    |     1 |
 |  79 | aiven_organization_user_group_member_list   | yes    |     1 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 44%                          | 72     |   164 |
+|     | TOTAL MIGRATED 45%                          | 74     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```
