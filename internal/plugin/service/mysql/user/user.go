@@ -7,32 +7,25 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/serviceuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 func init() {
-	ResourceOptions.Create = createView
-	ResourceOptions.Update = updateView
+	ResourceOptions.Update = resetPassword
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	var req service.ServiceUserCreateIn
-	err := d.Expand(&req)
-	if err != nil {
+	if err := serviceuser.CreateUser(ctx, client, d); err != nil {
 		return err
 	}
 
-	_, err = client.ServiceUserCreate(ctx, d.Get("project").(string), d.Get("service_name").(string), &req)
-	if err != nil {
-		return err
-	}
 	return resetPassword(ctx, client, d)
 }
 
-func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	return resetPassword(ctx, client, d)
-}
-
+// resetPassword resets the MySQL service user credentials. Unlike the shared
+// serviceuser.ResetPassword, MySQL also manages the authentication mechanism, so
+// it is sent alongside the password (and a change to it triggers a reset).
 func resetPassword(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	authentication := d.Get("authentication").(string)
 	password := util.NilIfZero(d.Get("password").(string), d.Get("password_wo").(string))
@@ -57,29 +50,16 @@ func resetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 	return err
 }
 
-// flattenModifier adjusts the API response before it is unmarshalled into the state.
-// On import or auto-generated passwords, the plan value is null/unknown,
-// so the API response passes through unchanged.
-func flattenModifier(ctx context.Context, client avngen.Client) adapter.MapModifier {
-	return func(d adapter.ResourceData, dto map[string]any) error {
-		// authentication: use plan value if known, otherwise let the API value through.
-		if v := d.Get("authentication").(string); v != "" {
-			dto["authentication"] = v
-		}
+// flattenModifier keeps the planned authentication value, then runs the shared
+// password reconciliation.
+func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
+	return adapter.ComposeMapModifiers(flattenAuthentication, serviceuser.PasswordFlatten)
+}
 
-		// password: use plan value if known, otherwise let the API value through.
-		// This is an exceptional case: password updates on the Aiven API are
-		// async, so the freshly read API response may still empty
-		// password until the change is fully propagated.
-		if v := d.Get("password").(string); v != "" {
-			dto["password"] = v
-		}
-
-		// Clear password from state when using write-only password.
-		_, ok := d.Schema().Properties["password_wo_version"]
-		if ok && d.Get("password_wo_version").(int) != 0 {
-			delete(dto, "password")
-		}
-		return nil
+func flattenAuthentication(d adapter.ResourceData, dto map[string]any) error {
+	// authentication: use plan value if known, otherwise let the API value through.
+	if v := d.Get("authentication").(string); v != "" {
+		dto["authentication"] = v
 	}
+	return nil
 }

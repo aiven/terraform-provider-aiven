@@ -1,5 +1,12 @@
-data "aiven_kafka_user" "example_service_user" {
-  service_name = aiven_kafka.example_kafka.service_name
-  project      = data.aiven_project.example_project.project
-  username     = "example-kafka-user"
+data "aiven_kafka_user" "example" {
+  project      = "my-project"
+  service_name = "my-kafka"
+  username     = "testuser"
+
+  /* COMPUTED FIELDS
+  access_cert = "foo"
+  access_key  = "foo"
+  password    = "password123"
+  type        = "foo"
+  */
 }

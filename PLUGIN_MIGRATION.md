@@ -58,7 +58,7 @@
 |  52 | aiven_kafka_schema_registry_acl             | yes    |     2 |
 |  53 | aiven_kafka_topic                           | yes    |     2 |
 |  54 | aiven_kafka_topic_list                      | yes    |     1 |
-|  55 | aiven_kafka_user                            |        |     2 |
+|  55 | aiven_kafka_user                            | yes    |     2 |
 |  56 | aiven_mirrormaker_replication_flow          |        |     2 |
 |  57 | aiven_mysql                                 |        |     2 |
 |  58 | aiven_mysql_database                        | yes    |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           |        |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 47%                          | 77     |   164 |
+|     | TOTAL MIGRATED 48%                          | 79     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```
