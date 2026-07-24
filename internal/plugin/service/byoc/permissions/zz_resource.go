@@ -49,7 +49,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
-		MarkdownDescription: "Manages permissions for a BYOC custom cloud environment, which accounts and projects can use the cloud to deploy services. Note! The \\`accounts\\` and \\`projects\\` lists are authoritative. This differs from the \\`avn byoc cloud permissions add\\`, which merges into the existing set. Create this resource after \\`aiven_byoc_aws_entity\\` and \\`aiven_byoc_aws_provision\\` so the custom cloud environment is active before permissions are granted. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Manages permissions for a BYOC custom cloud environment, which accounts and projects can use the cloud to deploy services.\n\nNote! The \\`accounts\\` and \\`projects\\` lists are authoritative. This differs from the \\`avn byoc cloud permissions add\\`, which merges into the existing set.\n\nCreate this resource after \\`aiven_byoc_aws_entity\\` and \\`aiven_byoc_aws_provision\\` so the custom cloud environment is active before permissions are granted. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {

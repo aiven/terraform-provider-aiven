@@ -962,6 +962,15 @@ func recalcDeep(def *Definition, item *Item) error {
 	item.Computed = ptrOrDefault(item.OverrideComputed, item.Computed)
 	item.ForceNew = ptrOrDefault(item.OverrideForceNew, item.ForceNew)
 
+	// The Plugin Framework rejects a default on a non-computed attribute, and an
+	// attribute cannot be both required and computed. Some OpenAPI schemas mark a
+	// field as required while also giving it a default (e.g. Kafka-native ACL
+	// pattern_type/permission_type). Honor the "required" contract and drop the
+	// unusable default rather than silently downgrading the field to optional.
+	if item.Required && !item.Computed {
+		item.Default = nil
+	}
+
 	for k, v := range item.Properties {
 		// If parent is computed, child must be computed too
 		v.Computed = v.Computed || item.Computed

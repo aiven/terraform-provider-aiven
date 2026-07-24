@@ -17,6 +17,7 @@ nav_order: 1
 - Migrate `aiven_gcp_privatelink` resource and data source to the Plugin Framework.
 - Deprecate the `message` attribute of the `aiven_gcp_privatelink` resource and data source. Existing state values
   are retained, but the attribute is no longer populated.
+- Migrate `aiven_kafka_native_acl` resource to the Plugin Framework.
 - Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
 - Migrate `aiven_aws_privatelink` resource and data source to the Plugin Framework.

@@ -22,6 +22,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/nativeacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema/registryacl"
@@ -73,6 +74,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
+		"aiven_kafka_native_acl":                    adapter.NewLazyResource(nativeacl.ResourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(registryacl.ResourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyResource(topic.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
