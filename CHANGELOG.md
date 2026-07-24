@@ -14,6 +14,9 @@ nav_order: 1
 
 - Migrate `aiven_organization_user_group` resource and data source to the Plugin Framework.
 - Change `aiven_organization_user_group`: `name` and `description` can now be updated in place instead of forcing resource recreation.
+- Migrate `aiven_gcp_privatelink` resource and data source to the Plugin Framework.
+- Deprecate the `message` attribute of the `aiven_gcp_privatelink` resource and data source. Existing state values
+  are retained, but the attribute is no longer populated.
 - Fix `aiven_kafka_topic` showing persistent configuration changes when `config` values match the API defaults.
 - Migrate `aiven_organization_vpc` resource and data source to the Plugin Framework and mark them as no longer beta.
 - Migrate `aiven_aws_privatelink` resource and data source to the Plugin Framework.

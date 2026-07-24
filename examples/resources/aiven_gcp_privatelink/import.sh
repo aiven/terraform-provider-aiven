@@ -1,1 +1,1 @@
-terraform import aiven_gcp_privatelink.main PROJECT/SERVICE_NAME
+terraform import aiven_gcp_privatelink.example PROJECT/SERVICE_NAME

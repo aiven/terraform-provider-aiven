@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/gcpprivatelink
+resource:
+  refreshState: true
+  refreshStateDesired:
+    state: active
+  deleteStateDesired: {}
+  removeMissing: true
+  description: Creates and manages a Google Private Service Connect for an Aiven service in a VPC.
+datasource:
+  description: Gets information about a Google Private Service Connect connection for an Aiven service.
+clientHandler: privatelink
+idAttributeComposed: [project, service_name]
+legacyTimeouts: true
+operations:
+  - id: ServicePrivatelinkGoogleCreate
+    type: create
+  - id: ServicePrivatelinkGoogleGet
+    type: read
+  - id: ServicePrivatelinkGoogleDelete
+    type: delete
+schema:
+  google_service_attachment:
+    computed: true
+    description: Google Private Service Connect service attachment.
+  message:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    deprecationMessage: This attribute is retained only for compatibility with state created by older provider versions and is no longer populated.
+    description: Legacy response message retained for backward compatibility.
+  state:
+    computed: true
+    description: The state of the Private Service Connect resource.
