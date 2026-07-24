@@ -173,7 +173,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka":                        kafka.ResourceKafka(),
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
-			"aiven_kafka_native_acl":             kafka.ResourceKafkaNativeACL(),
 			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),

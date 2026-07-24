@@ -37,6 +37,46 @@ func TestItemPath(t *testing.T) {
 	assert.Equal(t, "array", items.Path())
 }
 
+// TestWildcardAsteriskBacktick pins the description post-processing that wraps a
+// standalone "*" (e.g. the wildcard meaning "all hosts") in backticks while
+// leaving Markdown emphasis and already-wrapped asterisks untouched.
+func TestWildcardAsteriskBacktick(t *testing.T) {
+	cases := map[string]string{
+		"the host or * for all hosts": "the host or `*` for all hosts",
+		"foo * bar * baz":             "foo `*` bar `*` baz",
+		"(*)":                         "(*)",                 // no surrounding whitespace
+		"ends with *":                 "ends with *",         // no trailing whitespace
+		"* leads":                     "* leads",             // no leading whitespace
+		"**bold** text":               "**bold** text",       // emphasis left intact
+		"a*b":                         "a*b",                 // not whitespace-delimited
+		"already `*` wrapped":         "already `*` wrapped", // no double-wrapping
+	}
+
+	for in, want := range cases {
+		got := reWildcardAsterisk.ReplaceAllString(in, "${1}`*`${2}")
+		assert.Equal(t, want, got, "input: %q", in)
+	}
+}
+
+// TestNormalizeDescription pins the newline handling: root descriptions keep
+// author-intended blank lines as paragraph breaks while hard-wrapped lines are
+// unwrapped, and non-root descriptions collapse to a single line.
+func TestNormalizeDescription(t *testing.T) {
+	const src = "First paragraph line one\nline two.\n\nSecond paragraph with a * wildcard."
+
+	assert.Equal(t,
+		"First paragraph line one line two.\n\nSecond paragraph with a `*` wildcard.",
+		normalizeDescription(src, true),
+		"root: blank line preserved, soft wrap collapsed, wildcard backticked",
+	)
+
+	assert.Equal(t,
+		"First paragraph line one line two. Second paragraph with a `*` wildcard.",
+		normalizeDescription(src, false),
+		"non-root: everything collapses to one line",
+	)
+}
+
 func TestLimitedAvailabilitySchemaDescription(t *testing.T) {
 	code, err := genSchema(
 		&Definition{

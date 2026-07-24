@@ -82,6 +82,42 @@ func sortedKeys[K ~string, V any](m map[K]V) []K {
 
 var reNewline = regexp.MustCompile(`\s*\n+\s*`)
 
+// reParagraph splits a description on blank lines (a newline followed by
+// optional whitespace and another newline), i.e. author-intended paragraph
+// breaks.
+var reParagraph = regexp.MustCompile(`\n\s*\n`)
+
+// reWildcardAsterisk matches a whitespace-delimited "*" (e.g. the "*" wildcard
+// meaning "all hosts") so it can be wrapped in backticks for correct Markdown
+// rendering. Requiring whitespace on both sides leaves Markdown emphasis
+// (*italic*, **bold**) and already-backticked asterisks untouched.
+var reWildcardAsterisk = regexp.MustCompile(`(\s+)\*(\s+)`)
+
+// normalizeDescription unwraps hard-wrapped lines into single spaces and wraps
+// bare "*" wildcards in backticks. When preserveParagraphs is true (root
+// entity descriptions), blank lines in the source are kept as Markdown
+// paragraph breaks; otherwise every newline collapses to a space so attribute
+// descriptions stay on one line (docs render them as list/table entries).
+func normalizeDescription(s string, preserveParagraphs bool) string {
+	collapse := func(p string) string {
+		p = strings.TrimSpace(reNewline.ReplaceAllString(p, " "))
+		return reWildcardAsterisk.ReplaceAllString(p, "${1}`*`${2}")
+	}
+
+	if !preserveParagraphs {
+		return collapse(s)
+	}
+
+	paragraphs := reParagraph.Split(s, -1)
+	out := make([]string, 0, len(paragraphs))
+	for _, p := range paragraphs {
+		if c := collapse(p); c != "" {
+			out = append(out, c)
+		}
+	}
+	return strings.Join(out, "\n\n")
+}
+
 // isValidRegex reports whether pattern is a non-empty regular expression
 // compilable by Go's RE2-based `regexp` package.
 // OpenAPI specs may use extended Perl features (lookarounds, backreferences,
@@ -95,7 +131,7 @@ func isValidRegex(pattern string) bool {
 }
 
 func fmtDescription(def *Definition, entity entityType, item *Item) string {
-	description := strings.TrimSpace(reNewline.ReplaceAllString(item.Description, " "))
+	description := normalizeDescription(item.Description, item.IsRoot())
 
 	b := userconfig.Desc(description)
 	if enum := itemEnumValues(item); len(enum) > 0 {
