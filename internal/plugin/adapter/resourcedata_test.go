@@ -355,6 +355,115 @@ func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
 	})
 }
 
+// TestResourceDataEmptyCollections verifies that Flatten keeps an empty collection apart
+// from a null one: the API reports both as "no values", but Terraform requires the state
+// to keep the shape the configuration asked for.
+func TestResourceDataEmptyCollections(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":   {Type: SchemaTypeString, Computed: true},
+			"name": {Type: SchemaTypeString},
+			"keys": {Type: SchemaTypeList, Items: &Schema{Type: SchemaTypeString}},
+			"tags": {Type: SchemaTypeMap, Items: &Schema{Type: SchemaTypeString}},
+		},
+	}
+
+	// The API has no values for "keys" and "tags".
+	flattenIn := map[string]any{
+		"name": "my-resource",
+		"keys": []any{},
+		"tags": map[string]any{},
+	}
+
+	// stateValue returns the value written to the Terraform state.
+	stateValue := func(t *testing.T, rd ResourceData, name string) tftypes.Value {
+		t.Helper()
+
+		var attrs map[string]tftypes.Value
+		require.NoError(t, rd.tfValue().As(&attrs))
+		return attrs[name]
+	}
+
+	// flatten applies the API values on top of a plan that mirrors the configuration.
+	flatten := func(t *testing.T, plan map[string]any) ResourceData {
+		t.Helper()
+
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestPlan(plan),
+			WithTestConfig(plan),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(flattenIn))
+		return rd
+	}
+
+	t.Run("configured empty list stays empty", func(t *testing.T) {
+		rd := flatten(t, map[string]any{"name": "my-resource", "keys": []any{}})
+
+		got, ok := rd.GetOk("keys")
+		require.True(t, ok)
+		require.Equal(t, []any{}, got)
+		require.False(t, stateValue(t, rd, "keys").IsNull(), "a configured empty list must not become null")
+	})
+
+	t.Run("configured empty map stays empty", func(t *testing.T) {
+		rd := flatten(t, map[string]any{"name": "my-resource", "tags": map[string]any{}})
+
+		got, ok := rd.GetOk("tags")
+		require.True(t, ok)
+		require.Equal(t, map[string]any{}, got)
+		require.False(t, stateValue(t, rd, "tags").IsNull(), "a configured empty map must not become null")
+	})
+
+	t.Run("unset collections stay null", func(t *testing.T) {
+		rd := flatten(t, map[string]any{"name": "my-resource"})
+
+		_, ok := rd.GetOk("keys")
+		require.False(t, ok)
+		require.True(t, stateValue(t, rd, "keys").IsNull(), "an unset list must not become an empty list")
+
+		_, ok = rd.GetOk("tags")
+		require.False(t, ok)
+		require.True(t, stateValue(t, rd, "tags").IsNull(), "an unset map must not become an empty map")
+	})
+
+	t.Run("empty collections survive a refresh", func(t *testing.T) {
+		// Read gets no config, so the prior state is the only sign that the empty
+		// collections were configured. Dropping them here would plan a null to "[]" change
+		// on the next run.
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestState(map[string]any{
+				"name": "my-resource",
+				"keys": []any{},
+				"tags": map[string]any{},
+			}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(flattenIn))
+
+		require.False(t, stateValue(t, rd, "keys").IsNull(), "an empty list in state must not become null")
+		require.False(t, stateValue(t, rd, "tags").IsNull(), "an empty map in state must not become null")
+	})
+
+	t.Run("values dropped by the API are reported as empty", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestState(map[string]any{
+				"name": "my-resource",
+				"keys": []any{"stale"},
+				"tags": map[string]any{"stale": "value"},
+			}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(flattenIn))
+
+		require.Equal(t, []any{}, rd.Get("keys"))
+		require.Equal(t, map[string]any{}, rd.Get("tags"))
+	})
+}
+
 func TestResourceDataSingletonObjectBlocks(t *testing.T) {
 	t.Parallel()
 

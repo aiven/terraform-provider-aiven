@@ -283,6 +283,7 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 
 	state := d.currentState()
 	d.pruneResourceComputedObjectBlocks(state, norm)
+	d.pruneUnsetEmptyCollections(state, norm)
 	maps.Copy(state, norm)
 
 	id := make([]string, len(d.idFields))
@@ -324,6 +325,32 @@ func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]
 		// During resource Read the framework doesn't provide raw config. Avoid introducing a computed block that was absent from prior state.
 		// Plugin Framework cannot add resource blocks that are absent from configuration.
 		if isMapValueUnsetOrEmpty(state, name) {
+			delete(norm, name)
+		}
+	}
+}
+
+// pruneUnsetEmptyCollections drops empty lists, sets and maps that the API reports for
+// attributes the user never set. Both a null and an empty collection mean "no value" to the
+// API, but Terraform tells them apart and requires the value written back to keep the
+// configured shape. So an empty collection is stored only when it's already known to
+// Terraform, otherwise it would show up as a new "[]" or "{}" where the configuration has
+// nothing at all. Object blocks are lists here, see Schema.IsObject.
+func (d *resourceData) pruneUnsetEmptyCollections(state, norm map[string]any) {
+	for name, sch := range d.schema.Properties {
+		switch sch.Type {
+		case SchemaTypeList, SchemaTypeSet, SchemaTypeMap:
+		default:
+			continue
+		}
+
+		if !isMapValueUnsetOrEmpty(norm, name) {
+			continue
+		}
+
+		_, inState := state[name]
+		_, inConfig := d.config[name]
+		if !inState && !inConfig {
 			delete(norm, name)
 		}
 	}

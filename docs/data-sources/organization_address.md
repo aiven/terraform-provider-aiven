@@ -17,7 +17,7 @@ data "aiven_organization_address" "example" {
   address_id      = "foo"
 
   /* COMPUTED FIELDS
-  address_lines = ["Street 1"]
+  address_lines = ["Street 1", "Street 2"]
   city          = "Helsinki"
   country_code  = "FI"
   create_time   = "2021-01-01T00:00:00Z"

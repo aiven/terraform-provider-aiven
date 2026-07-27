@@ -52,6 +52,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
+	user5 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey/user"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelink"
@@ -97,6 +98,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(step.ResourceOptions),
+		"aiven_valkey_user":                         adapter.NewLazyResource(user5.ResourceOptions),
 	}
 }
 
@@ -140,5 +142,6 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(plan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(planlist.DataSourceOptions),
+		"aiven_valkey_user":                         adapter.NewLazyDataSource(user5.DataSourceOptions),
 	}
 }
