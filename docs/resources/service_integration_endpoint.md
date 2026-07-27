@@ -70,6 +70,7 @@ resource "aiven_service_integration_endpoint" "autoscaler_endpoint" {
 - `external_prometheus_user_config` (Block List, Max: 1) ExternalPrometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_prometheus_user_config))
 - `external_schema_registry_user_config` (Block List, Max: 1) ExternalSchemaRegistry user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
 - `jolokia_user_config` (Block List, Max: 1) Jolokia user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--jolokia_user_config))
+- `opentelemetry_user_config` (Block List, Max: 1) Opentelemetry user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--opentelemetry_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `rsyslog_user_config` (Block List, Max: 1) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--rsyslog_user_config))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -367,6 +368,21 @@ Optional:
 
 - `basic_auth_password` (String, Sensitive) Jolokia basic authentication password. Example: `yhfBNFii4C`.
 - `basic_auth_username` (String) Jolokia basic authentication username. Example: `jol48k51`.
+
+
+<a id="nestedblock--opentelemetry_user_config"></a>
+### Nested Schema for `opentelemetry_user_config`
+
+Required:
+
+- `compression` (String) Enum: `gzip`, `none`. Payload compression.
+- `service_address` (String) GRPC target as `host:port`, no URL scheme (this output speaks OTLP/gRPC only, no plain HTTP/HTTPS transport). Example: `otel-collector.example.avns.net:4317`.
+- `timeout` (Number) Connection timeout in seconds. Example: `10`.
+
+Optional:
+
+- `attributes` (Map of String) Resource attributes to attach to every exported metric.
+- `headers` (Map of String) Additional gRPC metadata headers sent with every export request.
 
 
 <a id="nestedblock--prometheus_user_config"></a>
