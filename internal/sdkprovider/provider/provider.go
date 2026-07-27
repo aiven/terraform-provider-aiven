@@ -95,7 +95,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// kafka
 			"aiven_kafka":                        kafka.DatasourceKafka(),
-			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
 			"aiven_kafka_schema":                 kafkaschema.DatasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafkaschema.DatasourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.DatasourceKafkaConnector(),
@@ -169,7 +168,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// kafka
 			"aiven_kafka":                        kafka.ResourceKafka(),
-			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
 			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),

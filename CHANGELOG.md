@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_kafka_acl` resource and data source to the Plugin Framework.
 - Migrate `aiven_organization_user_group` resource and data source to the Plugin Framework.
 - Change `aiven_organization_user_group`: `name` and `description` can now be updated in place instead of forcing resource recreation.
 - Migrate `aiven_gcp_privatelink` resource and data source to the Plugin Framework.
