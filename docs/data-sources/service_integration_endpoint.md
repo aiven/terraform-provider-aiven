@@ -50,6 +50,7 @@ data "aiven_service_integration_endpoint" "example_datadog_endpoint" {
 - `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
 - `jolokia_user_config` (List of Object) Jolokia user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--jolokia_user_config))
+- `opentelemetry_user_config` (List of Object) Opentelemetry user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--opentelemetry_user_config))
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `rsyslog_user_config` (List of Object) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--rsyslog_user_config))
 
@@ -282,6 +283,18 @@ Read-Only:
 
 - `basic_auth_password` (String)
 - `basic_auth_username` (String)
+
+
+<a id="nestedatt--opentelemetry_user_config"></a>
+### Nested Schema for `opentelemetry_user_config`
+
+Read-Only:
+
+- `attributes` (Map of String)
+- `compression` (String)
+- `headers` (Map of String)
+- `service_address` (String)
+- `timeout` (Number)
 
 
 <a id="nestedatt--prometheus_user_config"></a>
