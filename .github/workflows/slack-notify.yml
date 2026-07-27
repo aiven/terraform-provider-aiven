@@ -34,6 +34,8 @@ jobs:
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: webhook-trigger
+          # Disable retries: the Workflow Builder trigger returns a response the action treats as a failure.
+          retries: "0"
           payload: |
             {
               "blocks": [
@@ -81,6 +83,8 @@ jobs:
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: webhook-trigger
+          # Disable retries: the Workflow Builder trigger returns a response the action treats as a failure.
+          retries: "0"
           payload: |
             {
               "blocks": [

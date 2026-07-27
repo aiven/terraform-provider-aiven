@@ -10,6 +10,7 @@ package serviceuser
 
 import (
 	"context"
+	"errors"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -68,6 +69,23 @@ func ResetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 
 	_, err := client.ServiceUserCredentialsModify(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string), req)
 	return err
+}
+
+// PasswordIsReady returns an error if the password is empty while not in write-only mode.
+// The backend resets credentials asynchronously, so a freshly read user may have
+// an empty password until the change is fully propagated.
+//
+// This must run against the same Read() whose result is written to state.
+// It cannot be a standalone pre-check.
+func PasswordIsReady(d adapter.ResourceData) error {
+	if _, ok := d.Schema().Properties["password_wo_version"]; ok && d.Get("password_wo_version").(int) != 0 {
+		// Write-only mode: PasswordFlatten removes the password from the state.
+		return nil
+	}
+	if d.Get("password").(string) == "" {
+		return errors.New("password is not available yet")
+	}
+	return nil
 }
 
 // PasswordFlatten is a MapModifier that reconciles the password in the API
