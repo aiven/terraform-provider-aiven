@@ -1,6 +1,15 @@
-resource "aiven_kafka_user" "example_service_user" {
-  service_name = aiven_kafka.example_kafka.service_name
-  project      = data.aiven_project.example_project.project
-  username     = "example-kafka-user"
-  password     = var.service_user_pw
+resource "aiven_kafka_user" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka" // Force new
+  username     = "testuser" // Force new
+
+  // OPTIONAL FIELDS
+  password_wo         = "password123"
+  password_wo_version = 1
+
+  /* COMPUTED FIELDS
+  access_cert = "foo"
+  access_key  = "foo"
+  type        = "foo"
+  */
 }
