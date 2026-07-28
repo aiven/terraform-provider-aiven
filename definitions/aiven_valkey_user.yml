@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/valkey/user
+resource:
+  refreshState: true
+  refreshStateDelay: 15s
+  removeMissing: true
+  description: Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user.
+datasource:
+  description: Gets information about an Aiven for Valkey™ service user.
+clientHandler: service
+idAttributeComposed: [project, service_name, username]
+legacyTimeouts: true
+flattenModifier: true
+expandModifier: true
+operations:
+  - id: ServiceUserCreate
+    type: create
+    resultKey: user
+    disableView: true
+  - id: ServiceUserDelete
+    type: delete
+  - id: ServiceUserGet
+    type: read
+    resultKey: user
+  - id: ServiceUserCredentialsModify
+    type: update
+    disableView: true
+rename:
+  service_username: username
+remove:
+  - access_cert
+  - access_cert_not_valid_after_time
+  - access_control
+  - access_key
+  - authentication
+  - expiring_cert_not_valid_after_time
+  - new_password
+  - operation
+  - password_updated_time
+  - service
+schema:
+  username:
+    pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
+  valkey_acl_categories:
+    type: arrayOrdered
+    optional: true
+    alsoRequires: [valkey_acl_commands, valkey_acl_keys]
+    example: ["+@write", "+@keyspace"]
+    items:
+      type: string
+    description: Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.
+  valkey_acl_commands:
+    type: arrayOrdered
+    optional: true
+    alsoRequires: [valkey_acl_categories, valkey_acl_keys]
+    example: ["+set", "+del", "+expire", "-flushall", "-flushdb"]
+    items:
+      type: string
+    description: Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.
+  valkey_acl_keys:
+    type: arrayOrdered
+    optional: true
+    alsoRequires: [valkey_acl_categories, valkey_acl_commands]
+    example: ["session:*"]
+    items:
+      type: string
+    description: Key access rules. Entries are defined as standard glob patterns.
+  valkey_acl_channels:
+    type: arrayOrdered
+    optional: true
+    items:
+      type: string
+      example: "some*chan"
+    description: Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.
+  password:
+    type: string
+    optional: true
+    sensitive: true
+    minLength: 8
+    maxLength: 256
+    conflictsWith: [password_wo]
+    description: The password of the service user (auto-generated if not provided).
+  password_wo:
+    type: string
+    optional: true
+    writeOnly: true
+    sensitive: true
+    description: The password of the service user (write-only, not stored in state).
+    minLength: 8
+    maxLength: 256
+    conflictsWith: [password]
+    alsoRequires: [password_wo_version]
+  password_wo_version:
+    type: integer
+    optional: true
+    description: Version number for `password_wo`. Increment this to rotate the password.
+    alsoRequires: [password_wo]
+    minimum: 1

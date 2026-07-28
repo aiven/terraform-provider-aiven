@@ -532,3 +532,46 @@ func TestDeepCopyItem(t *testing.T) {
 	cp.Properties["items"].Items.Description = "mutated"
 	assert.Equal(t, "leaf description", leaf.Description)
 }
+
+func TestExampleArrayElems(t *testing.T) {
+	def := &Definition{}
+	stringItems := &Item{Type: SchemaTypeString}
+
+	t.Run("list-valued example renders every element", func(t *testing.T) {
+		item := &Item{Type: SchemaTypeArrayOrdered, Items: stringItems, Example: []any{"+@write", "+@keyspace"}}
+		elems, err := exampleArrayElems(def, item)
+		require.NoError(t, err)
+		got := make([]string, len(elems))
+		for i, e := range elems {
+			got[i] = e.AsString()
+		}
+		assert.Equal(t, []string{"+@write", "+@keyspace"}, got)
+	})
+
+	t.Run("falls back to a single items example", func(t *testing.T) {
+		item := &Item{Type: SchemaTypeArrayOrdered, Items: &Item{Type: SchemaTypeString, Example: "some*chan"}}
+		elems, err := exampleArrayElems(def, item)
+		require.NoError(t, err)
+		require.Len(t, elems, 1)
+		assert.Equal(t, "some*chan", elems[0].AsString())
+	})
+
+	t.Run("ignores flattened-object items and uses items example", func(t *testing.T) {
+		// e.g. billing emails flatten an object list to a scalar list: the items schema
+		// is a scalar string that still carries the object's "email" property, and the
+		// spec example is a list of objects that doesn't fit a scalar element.
+		item := &Item{
+			Type:    SchemaTypeArrayOrdered,
+			Example: []any{map[string]any{"email": "jane@example.com"}},
+			Items: &Item{
+				Type:       SchemaTypeString,
+				Properties: map[string]*Item{"email": {Type: SchemaTypeString}},
+				Example:    "test@example.com",
+			},
+		}
+		elems, err := exampleArrayElems(def, item)
+		require.NoError(t, err)
+		require.Len(t, elems, 1)
+		assert.Equal(t, "test@example.com", elems[0].AsString())
+	})
+}

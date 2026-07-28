@@ -185,15 +185,15 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			val = value
 		case v.IsArray():
 			// An array with scalar elements
-			value, err := exampleScalarItem(def, v.Items)
+			elems, err := exampleArrayElems(def, v)
 			if err != nil {
 				return err
 			}
 
 			if v.IsSet() {
-				val = cty.SetVal([]cty.Value{value})
+				val = cty.SetVal(elems)
 			} else {
-				val = cty.ListVal([]cty.Value{value})
+				val = cty.ListVal(elems)
 			}
 		case v.IsMapNested():
 			// There is no Map Block thing, only Map Attribute.
@@ -260,6 +260,32 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 
 const uuidExample = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 
+// exampleArrayElems builds the element values for an array example. A list-valued
+// example set on the array itself (e.g. example: ["a", "b"]) renders every element,
+// but only when the items schema is a plain scalar. Some fields flatten an object
+// list to a scalar list (e.g. billing emails keep the object's "email" property on
+// the items), and their spec example is a list of objects that doesn't fit a scalar
+// element; those fall back to the items example.
+func exampleArrayElems(def *Definition, item *Item) ([]cty.Value, error) {
+	if list, ok := item.Example.([]any); ok && len(list) > 0 && item.Items.IsScalar() && len(item.Items.Properties) == 0 {
+		elems := make([]cty.Value, 0, len(list))
+		for _, e := range list {
+			value, err := exampleScalarValue(def, item.Items, e)
+			if err != nil {
+				return nil, err
+			}
+			elems = append(elems, value)
+		}
+		return elems, nil
+	}
+
+	value, err := exampleScalarItem(def, item.Items)
+	if err != nil {
+		return nil, err
+	}
+	return []cty.Value{value}, nil
+}
+
 func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 	var anyValue any
 	switch {
@@ -277,6 +303,13 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 		anyValue = item.Enum[0]
 	}
 
+	return exampleScalarValue(def, item, anyValue)
+}
+
+// exampleScalarValue renders anyValue as the item's scalar type. When anyValue is
+// nil it falls back to type-specific placeholders (used by callers that don't
+// pre-resolve a value, e.g. items without an example).
+func exampleScalarValue(def *Definition, item *Item, anyValue any) (cty.Value, error) {
 	switch item.Type {
 	case SchemaTypeString:
 		if anyValue == nil {

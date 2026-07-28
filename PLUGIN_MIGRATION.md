@@ -103,8 +103,8 @@
 |  97 | aiven_transit_gateway_vpc_attachment        |        |     2 |
 |  98 | aiven_upgrade_step                          | yes    |     1 |
 |  99 | aiven_valkey                                |        |     2 |
-| 100 | aiven_valkey_user                           |        |     2 |
+| 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 48%                          | 79     |   164 |
+|     | TOTAL MIGRATED 49%                          | 81     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```

@@ -187,10 +187,8 @@ func toTFValue(sch *Schema, value any) (tftypes.Value, error) {
 			return tftypes.Value{}, fmt.Errorf("expected %s, got %T", sch.Type, value)
 		}
 
-		if len(array) == 0 {
-			return tftypes.NewValue(arrayType, nil), nil
-		}
-
+		// An empty collection stays empty: Terraform tells a configured "[]" apart from a
+		// null, and the value written back must keep the shape the configuration asked for.
 		result := make([]tftypes.Value, len(array))
 		for i, item := range array {
 			converted, err := toTFValue(sch.Items, item)

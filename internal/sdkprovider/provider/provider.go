@@ -113,8 +113,7 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_thanos": thanos.DatasourceThanos(),
 
 			// valkey
-			"aiven_valkey":      valkey.DatasourceValkey(),
-			"aiven_valkey_user": valkey.DatasourceValkeyUser(),
+			"aiven_valkey": valkey.DatasourceValkey(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -191,8 +190,7 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_thanos": thanos.ResourceThanos(),
 
 			// valkey
-			"aiven_valkey":      valkey.ResourceValkey(),
-			"aiven_valkey_user": valkey.ResourceValkeyUser(),
+			"aiven_valkey": valkey.ResourceValkey(),
 		},
 	}
 

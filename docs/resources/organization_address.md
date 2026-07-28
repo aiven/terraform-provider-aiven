@@ -14,7 +14,7 @@ Creates and manages an organization address.
 ```terraform
 resource "aiven_organization_address" "example" {
   organization_id = "org1a23f456789" // Force new
-  address_lines   = ["Street 1"]
+  address_lines   = ["Street 1", "Street 2"]
   city            = "Helsinki"
   country_code    = "FI"
   name            = "Aiven Oy"

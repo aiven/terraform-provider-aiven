@@ -1,1 +1,1 @@
-terraform import aiven_valkey.example_valkey PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_valkey_user.example PROJECT/SERVICE_NAME/USERNAME
