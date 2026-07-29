@@ -72,8 +72,10 @@ func ResetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 }
 
 // PasswordIsReady returns an error if the password is empty while not in write-only mode.
-// The backend resets credentials asynchronously, so a freshly read user may have
-// an empty password until the change is fully propagated.
+// A freshly created service user can briefly be read back before the backend has populated
+// its password, so the first post-create read may observe an empty password. Retrying the
+// read until the password is present lets that settle.
+// Updates may see this as a blip but never a stale or old password.
 //
 // This must run against the same Read() whose result is written to state.
 // It cannot be a standalone pre-check.
