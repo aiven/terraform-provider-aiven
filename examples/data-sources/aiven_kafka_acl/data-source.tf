@@ -1,7 +1,10 @@
-data "aiven_kafka_acl" "example_acl" {
-  project      = data.aiven_project.example_project.project
-  service_name = aiven_kafka.example_kafka.service_name
-  topic        = "example-topic"
-  permission   = "admin"
-  username     = "example-user"
+data "aiven_kafka_acl" "example" {
+  project      = "my-project"
+  service_name = "my-kafka"
+
+  // LOOKUP — provide `acl_id`, or all of: `permission`, `topic` and `username`
+  acl_id        = "foo"
+  // permission = "readwrite"
+  // topic      = "top*"
+  // username   = "admin*"
 }

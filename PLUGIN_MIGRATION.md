@@ -47,7 +47,7 @@
 |  41 | aiven_governance_access                     | yes    |     1 |
 |  42 | aiven_grafana                               |        |     2 |
 |  43 | aiven_kafka                                 |        |     2 |
-|  44 | aiven_kafka_acl                             |        |     2 |
+|  44 | aiven_kafka_acl                             | yes    |     2 |
 |  45 | aiven_kafka_connect                         |        |     2 |
 |  46 | aiven_kafka_connector                       |        |     2 |
 |  47 | aiven_kafka_mirrormaker                     |        |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 49%                          | 81     |   164 |
+|     | TOTAL MIGRATED 51%                          | 83     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```
