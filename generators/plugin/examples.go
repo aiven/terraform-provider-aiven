@@ -190,11 +190,11 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 				return err
 			}
 
-			if v.IsSet() {
-				val = cty.SetVal(elems)
-			} else {
-				val = cty.ListVal(elems)
-			}
+			// Always render as a list literal so the example keeps the source
+			// order. Sets and lists share the same `[...]` HCL syntax, but
+			// cty.SetVal reorders elements lexicographically, which is confusing
+			// in docs and irrelevant to a Terraform set (unordered in state).
+			val = cty.ListVal(elems)
 		case v.IsMapNested():
 			// There is no Map Block thing, only Map Attribute.
 			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
@@ -227,7 +227,12 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			return fmt.Errorf("unknown property type %q for %s", v.Type, v.Path())
 		}
 
-		tokens := hclwrite.TokensForValue(val)
+		var tokens hclwrite.Tokens
+		if v.IsArray() {
+			tokens = exampleCollectionTokens(val)
+		} else {
+			tokens = hclwrite.TokensForValue(val)
+		}
 		if item.IsRoot() && entity.isResource() && v.ForceNew {
 			tokens = append(tokens, &hclwrite.Token{
 				Type:  hclsyntax.TokenComment,
@@ -259,6 +264,36 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 }
 
 const uuidExample = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+
+// exampleListWrapWidth is the single-line length above which a list/set example
+// is rendered one element per line. hclwrite.TokensForValue always emits
+// collections on a single line and terraform fmt preserves it, so long lists
+// (e.g. many regexes) otherwise overflow the rendered docs code block.
+const exampleListWrapWidth = 80
+
+// exampleCollectionTokens renders a list/set value on a single line when short,
+// or one element per line when the single-line form would be too long.
+func exampleCollectionTokens(val cty.Value) hclwrite.Tokens {
+	single := hclwrite.TokensForValue(val)
+	elems := val.AsValueSlice()
+	if len(elems) <= 1 || len(single.Bytes()) <= exampleListWrapWidth {
+		return single
+	}
+
+	tokens := hclwrite.Tokens{
+		{Type: hclsyntax.TokenOBrack, Bytes: []byte("[")},
+		{Type: hclsyntax.TokenNewline, Bytes: []byte("\n")},
+	}
+	for _, e := range elems {
+		tokens = append(tokens, hclwrite.TokensForValue(e)...)
+		tokens = append(tokens,
+			&hclwrite.Token{Type: hclsyntax.TokenComma, Bytes: []byte(",")},
+			&hclwrite.Token{Type: hclsyntax.TokenNewline, Bytes: []byte("\n")},
+		)
+	}
+	tokens = append(tokens, &hclwrite.Token{Type: hclsyntax.TokenCBrack, Bytes: []byte("]")})
+	return tokens
+}
 
 // exampleArrayElems builds the element values for an array example. A list-valued
 // example set on the array itself (e.g. example: ["a", "b"]) renders every element,

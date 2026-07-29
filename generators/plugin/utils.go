@@ -87,21 +87,51 @@ var reNewline = regexp.MustCompile(`\s*\n+\s*`)
 // breaks.
 var reParagraph = regexp.MustCompile(`\n\s*\n`)
 
-// reWildcardAsterisk matches a whitespace-delimited "*" (e.g. the "*" wildcard
-// meaning "all hosts") so it can be wrapped in backticks for correct Markdown
-// rendering. Requiring whitespace on both sides leaves Markdown emphasis
-// (*italic*, **bold**) and already-backticked asterisks untouched.
-var reWildcardAsterisk = regexp.MustCompile(`(\s+)\*(\s+)`)
+// descModifier rewrites part of a description so it renders correctly in
+// Markdown.
+type descModifier struct {
+	re   *regexp.Regexp
+	repl string
+}
 
-// normalizeDescription unwraps hard-wrapped lines into single spaces and wraps
-// bare "*" wildcards in backticks. When preserveParagraphs is true (root
+// symbolRun matches a run of symbol characters: no letters (\pL), digits (\pN),
+// whitespace or quotes. It is spelled out rather than using \W so that "_",
+// which \w counts as a word character, is treated as a symbol too. Excluding
+// whitespace is what keeps the gap between two quoted values from being
+// mistaken for a quoted symbol: a quoted token such as ".*" never contains
+// whitespace, while every such gap does (e.g. the ": " in {"a": "b"}).
+const symbolRun = `([^\pL\pN\s'"]+)`
+
+// descModifiers are applied in order by applyDescModifiers:
+//   - a whitespace-delimited "*" (the wildcard meaning "all hosts") is wrapped
+//     in backticks, keeping the surrounding whitespace.
+//   - a quoted symbol run (e.g. '.', "/", ".*") has its quotes replaced by
+//     backticks, for single quotes, double quotes and the &quot; entity that
+//     the OpenAPI spec ships.
+var descModifiers = []descModifier{
+	{regexp.MustCompile(`(\s+)\*(\s+)`), "${1}`*`${2}"},
+	{regexp.MustCompile(`'` + symbolRun + `'`), "`${1}`"},
+	{regexp.MustCompile(`"` + symbolRun + `"`), "`${1}`"},
+	{regexp.MustCompile(`&quot;` + symbolRun + `&quot;`), "`${1}`"},
+}
+
+// applyDescModifiers applies descModifiers in order.
+func applyDescModifiers(s string) string {
+	for _, m := range descModifiers {
+		s = m.re.ReplaceAllString(s, m.repl)
+	}
+	return s
+}
+
+// normalizeDescription unwraps hard-wrapped lines into single spaces and runs
+// descModifiers over the result. When preserveParagraphs is true (root
 // entity descriptions), blank lines in the source are kept as Markdown
 // paragraph breaks; otherwise every newline collapses to a space so attribute
 // descriptions stay on one line (docs render them as list/table entries).
 func normalizeDescription(s string, preserveParagraphs bool) string {
 	collapse := func(p string) string {
 		p = strings.TrimSpace(reNewline.ReplaceAllString(p, " "))
-		return reWildcardAsterisk.ReplaceAllString(p, "${1}`*`${2}")
+		return applyDescModifiers(p)
 	}
 
 	if !preserveParagraphs {
@@ -154,12 +184,16 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 			b.ForceNew()
 		}
 
-		if item.MinLength > 0 {
-			b.MinLen(item.MinLength)
-		}
+		// Length hints apply to strings only. Guard by type so a scalar field
+		// overridden to an array/set does not inherit a stray "length" hint.
+		if item.Type == SchemaTypeString {
+			if item.MinLength > 0 {
+				b.MinLen(item.MinLength)
+			}
 
-		if item.MaxLength > 0 {
-			b.MaxLen(item.MaxLength)
+			if item.MaxLength > 0 {
+				b.MaxLen(item.MaxLength)
+			}
 		}
 
 		if item.Minimum > 0 {

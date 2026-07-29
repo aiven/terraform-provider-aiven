@@ -23,6 +23,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/acl"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/mirrormakerreplicationflow"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/nativeacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
@@ -82,6 +83,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(registryacl.ResourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyResource(topic.ResourceOptions),
 		"aiven_kafka_user":                          adapter.NewLazyResource(user1.ResourceOptions),
+		"aiven_mirrormaker_replication_flow":        adapter.NewLazyResource(mirrormakerreplicationflow.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(user2.ResourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(securitypluginconfig.ResourceOptions),
@@ -123,6 +125,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_kafka_topic":                         adapter.NewLazyDataSource(topic.DataSourceOptions),
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(topiclist.DataSourceOptions),
 		"aiven_kafka_user":                          adapter.NewLazyDataSource(user1.DataSourceOptions),
+		"aiven_mirrormaker_replication_flow":        adapter.NewLazyDataSource(mirrormakerreplicationflow.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(user2.DataSourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyDataSource(securitypluginconfig.DataSourceOptions),
