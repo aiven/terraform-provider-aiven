@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.61.0] - 2026-07-30
+
 - Migrate `aiven_kafka_acl` resource and data source to the Plugin Framework.
 - Fix `aiven_kafka_user`, `aiven_mysql_user`, `aiven_pg_user` and `aiven_opensearch_user` intermittently storing an empty
   `password` in the state after a password reset.
