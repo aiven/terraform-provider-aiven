@@ -324,7 +324,7 @@ func docWritePropertyLine(b *strings.Builder, def *Definition, entity entityType
 
 	nestedTypes := make([]docNestedType, 0)
 	if docHasNestedSchema(item) {
-		anchorID := docAnchorID(path, item)
+		anchorID := docAnchorID(def, entity, path, item)
 		b.WriteString(" (see [below for nested schema](#")
 		b.WriteString(anchorID)
 		b.WriteString("))")
@@ -344,9 +344,9 @@ func docHasNestedSchema(item *Item) bool {
 	return item.IsNested() || item.IsMapNested()
 }
 
-func docAnchorID(path []string, item *Item) string {
+func docAnchorID(def *Definition, entity entityType, path []string, item *Item) string {
 	prefix := "nestedblock--"
-	if item.IsMapNested() {
+	if item.IsMapNested() || item.RendersAsAttribute(def, entity) {
 		prefix = "nestedatt--"
 	}
 	return prefix + strings.Join(path, "--")
@@ -359,6 +359,22 @@ func docTypeLabel(def *Definition, entity entityType, item *Item, name string) (
 	switch {
 	case item.IsMapNested():
 		b.WriteString("Attributes Map")
+	case item.RendersAsAttribute(def, entity):
+		maxItems := ""
+		switch {
+		case item.IsObject():
+			// Objects have maxItems=1
+			// todo: drop the object limit in v5.0.0, see Item.TFType.
+			maxItems = ", Max: 1"
+		case item.MaxItems > 0:
+			maxItems = fmt.Sprintf(", Max: %d", item.MaxItems)
+		}
+
+		if item.IsSet() {
+			b.WriteString("Attributes Set" + maxItems)
+		} else {
+			b.WriteString("Attributes List" + maxItems)
+		}
 	case item.IsNested():
 		if item.IsSet() {
 			b.WriteString("Block Set")
@@ -371,6 +387,7 @@ func docTypeLabel(def *Definition, entity entityType, item *Item, name string) (
 			}
 
 			// Objects have maxItems=1
+			// todo: drop the object limit in v5.0.0, see Item.TFType.
 			b.WriteString(fmt.Sprintf(", Max: %d", max(1, item.MaxItems)))
 		}
 	case item.Items != nil && item.IsArray():

@@ -73,6 +73,12 @@ func genAttributes(def *Definition, entity entityType, item *Item) (jen.Dict, er
 				return nil, err
 			}
 			attrs[key] = value
+		case v.RendersAsAttribute(def, entity):
+			value, err := genSetNestedAttribute(def, entity, v)
+			if err != nil {
+				return nil, err
+			}
+			attrs[key] = value
 		case v.IsNested():
 			value, err := genSetNestedBlock(def, entity, v)
 			if err != nil {
@@ -127,6 +133,37 @@ func genMapNestedAttribute(def *Definition, entity entityType, item *Item) (jen.
 	}
 	values["NestedObject"] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
 	return jen.Qual(pkg, "MapNestedAttribute").Values(dictFromMap(values, false)), nil
+}
+
+// genSetNestedAttribute renders a read-only collection as a computed attribute,
+// see Item.RendersAsAttribute.
+func genSetNestedAttribute(def *Definition, entity entityType, item *Item) (jen.Code, error) {
+	pkg := entity.Import(schemaPackageFmt)
+	values, err := genAttributeValues(def, entity, item)
+	if err != nil {
+		return nil, err
+	}
+
+	// Renders item or array item
+	elem := item.Items
+	if elem == nil {
+		elem = item
+	}
+
+	nested, err := genAttributes(def, entity, elem)
+	if err != nil {
+		return nil, err
+	}
+
+	t := "SetNestedAttribute"
+	if item.IsObject() || item.IsList() {
+		// todo: SingleNestedAttribute for objects in v5.0.0, see Item.TFType.
+		t = "ListNestedAttribute"
+	}
+
+	values["Computed"] = jen.True()
+	values["NestedObject"] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
+	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
 }
 
 func genSetNestedBlock(def *Definition, entity entityType, item *Item) (jen.Code, error) {
@@ -207,6 +244,11 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 		}
 	}
 
+	// Validation only sees the configuration, a computed attribute needs none.
+	if item.RendersAsAttribute(def, entity) {
+		return values, nil
+	}
+
 	// So far no validations for datasources. Resource object blocks are always
 	// singletons even when rendered as ListNestedBlock for SDKv2 compatibility.
 	if !item.IsReadOnly(def, entity) || (entity.isResource() && item.IsObject()) {
@@ -280,6 +322,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		params[jen.Id("Computed")] = jen.True()
 	}
 
+	if item.RendersAsAttribute(def, entity) {
+		params[jen.Id("IsAttribute")] = jen.True()
+	}
+
 	s := jen.Op("&").Qual(adapterPackage, "Schema")
 	p := jen.Map(jen.String()).Op("*").Qual(adapterPackage, "Schema")
 	if len(properties) > 0 {
@@ -317,6 +363,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 
 		if item.IsComputed(def, entity) {
 			params[jen.Id("Computed")] = jen.True()
+		}
+
+		if item.RendersAsAttribute(def, entity) {
+			params[jen.Id("IsAttribute")] = jen.True()
 		}
 	}
 

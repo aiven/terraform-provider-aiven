@@ -304,7 +304,8 @@ func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]
 	}
 
 	for name, sch := range d.schema.Properties {
-		if !sch.IsObject || !sch.Computed {
+		// Computed attributes are free to hold API values.
+		if !sch.IsObject || !sch.Computed || sch.IsAttribute {
 			continue
 		}
 
