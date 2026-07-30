@@ -22,7 +22,7 @@ func TestAccAivenConnectionPool(t *testing.T) {
 		projectName,
 		serviceName,
 		acc.WithServiceType("pg"),
-		acc.WithPlan("startup-4"),
+		acc.WithPlan("startup-8"),
 		acc.WithCloud("google-europe-west1"),
 	)
 

@@ -11,6 +11,7 @@ import (
 
 func init() {
 	ResourceOptions.Update = serviceuser.ResetPassword
+	ResourceOptions.RefreshStateCheck = serviceuser.PasswordIsReady
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

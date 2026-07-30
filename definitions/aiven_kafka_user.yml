@@ -2,7 +2,6 @@
 location: internal/plugin/service/kafka/user
 resource:
   refreshState: true
-  refreshStateDelay: 15s
   removeMissing: true
   description: Creates and manages an Aiven for Apache Kafka® service user.
 datasource:

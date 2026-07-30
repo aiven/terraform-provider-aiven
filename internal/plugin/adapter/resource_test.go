@@ -227,6 +227,49 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.Greater(t, attempts, 1, "must keep polling until the deadline rather than giving up early")
 	})
 
+	t.Run("retries when RefreshStateCheck fails, then succeeds", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshStateCheck = func(_ ResourceData) error {
+			if attempts < 3 {
+				return errors.New("not converged")
+			}
+			return nil
+		}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.NoError(t, err)
+		require.Equal(t, 3, attempts)
+	})
+
+	t.Run("retries until the context deadline when RefreshStateCheck never passes", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshStateCheck = func(_ ResourceData) error {
+			return errors.New("password is not available yet")
+		}
+
+		ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
+		defer cancel()
+
+		err := a.refreshState(ctx, nil)
+
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		require.ErrorContains(t, err, "password is not available yet")
+		require.Greater(t, attempts, 1, "must keep polling until the deadline rather than giving up early")
+	})
+
 	t.Run("returns ctx error when RefreshStateDelay is interrupted by ctx cancellation", func(t *testing.T) {
 		t.Parallel()
 

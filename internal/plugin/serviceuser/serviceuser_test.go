@@ -203,3 +203,64 @@ func TestResetPassword(t *testing.T) {
 		})
 	}
 }
+
+func TestPasswordIsReady(t *testing.T) {
+	t.Parallel()
+
+	// schemaWithoutWriteOnly mirrors schemaInternal but omits the password_wo_version property.
+	schemaWithoutWriteOnly := func() *adapter.Schema {
+		s := schemaInternal()
+		delete(s.Properties, "password_wo_version")
+		delete(s.Properties, "password_wo")
+		return s
+	}
+
+	tests := []struct {
+		name    string
+		schema  *adapter.Schema
+		state   map[string]any
+		wantErr string
+	}{
+		{
+			name:  "password present in state",
+			state: map[string]any{"password": "SomePass$1"},
+		},
+		{
+			name:    "password empty while backend regenerates",
+			state:   map[string]any{},
+			wantErr: "password is not available yet",
+		},
+		{
+			name:  "write-only mode keeps password out of state",
+			state: map[string]any{"password_wo_version": 1},
+		},
+		{
+			name:   "schema without password_wo_version still checks password",
+			schema: schemaWithoutWriteOnly(),
+			state:  map[string]any{"password": "SomePass$1"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			s := tt.schema
+			if s == nil {
+				s = schemaInternal()
+			}
+
+			d, err := adapter.NewResourceData(s, idFields(),
+				adapter.WithTestState(tt.state),
+			)
+			require.NoError(t, err)
+
+			err = serviceuser.PasswordIsReady(d)
+			if tt.wantErr != "" {
+				require.ErrorContains(t, err, tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}

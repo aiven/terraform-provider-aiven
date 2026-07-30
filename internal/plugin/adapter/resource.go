@@ -48,6 +48,15 @@ type ResourceOptions struct {
 	// Mismatches return ErrRefreshStateDesired and are retried with the same backoff as transient Read errors.
 	RefreshStateDesired map[string]string
 
+	// RefreshStateCheck validates the freshly read state after Read succeeds in refreshState,
+	// for conditions that RefreshStateDesired can't express.
+	// A non-nil error means the backend hasn't converged yet: it is wrapped in
+	// ErrRefreshStateDesired and retried with the same backoff as transient Read errors.
+	// Runs only during the post-Create/Update refresh, never during plain Read, import,
+	// or datasource reads.
+	// The check validates the same Read() that populates state.
+	RefreshStateCheck func(d ResourceData) error
+
 	// refreshStateRetryDelay is the base delay used by retry-go's BackOff between Read attempts in refreshState.
 	// Zero falls back to the package default (defaultRefreshStateRetryDelay). Unexported: intended for tests
 	// inside the adapter package only; not wired through the YAML schema or the generator.
@@ -262,7 +271,7 @@ var ErrRefreshStateDesired = errors.New("resource is not in the desired state")
 const defaultRefreshStateRetryDelay = time.Second * 5
 
 // refreshState reads the resource after Create or Update with retries, then validates the state
-// against ResourceOptions.RefreshStateDesired.
+// against ResourceOptions.RefreshStateDesired and ResourceOptions.RefreshStateCheck.
 //
 // A non-zero ResourceOptions.RefreshStateDelay is waited out before the first attempt (honoring
 // ctx). The delay is fixed (refreshStateRetryDelay, default defaultRefreshStateRetryDelay) and there
@@ -305,6 +314,12 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 				state := rd.Get(key)
 				if !Equal(state, want) {
 					return fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrRefreshStateDesired, key, want, state)
+				}
+			}
+
+			if a.resource.RefreshStateCheck != nil {
+				if err := a.resource.RefreshStateCheck(rd); err != nil {
+					return fmt.Errorf("%w: %w", ErrRefreshStateDesired, err)
 				}
 			}
 			return nil
