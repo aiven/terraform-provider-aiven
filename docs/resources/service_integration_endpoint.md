@@ -376,7 +376,7 @@ Optional:
 Required:
 
 - `compression` (String) Enum: `gzip`, `none`. Payload compression.
-- `service_address` (String) GRPC target as `host:port`, no URL scheme (this output speaks OTLP/gRPC only, no plain HTTP/HTTPS transport). Example: `otel-collector.example.avns.net:4317`.
+- `service_address` (String) Either a bare `host:port` (OTLP/gRPC, no URL scheme) or an `http://`/`https://` URL (OTLP/HTTP). Example: `otel-collector.example.avns.net:4317`.
 - `timeout` (Number) Connection timeout in seconds. Example: `10`.
 
 Optional:

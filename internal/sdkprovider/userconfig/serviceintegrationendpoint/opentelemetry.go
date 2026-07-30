@@ -31,7 +31,7 @@ func opentelemetryUserConfig() *schema.Schema {
 				Type:        schema.TypeMap,
 			},
 			"service_address": {
-				Description: "GRPC target as `host:port`, no URL scheme (this output speaks OTLP/gRPC only, no plain HTTP/HTTPS transport). Example: `otel-collector.example.avns.net:4317`.",
+				Description: "Either a bare `host:port` (OTLP/gRPC, no URL scheme) or an `http://`/`https://` URL (OTLP/HTTP). Example: `otel-collector.example.avns.net:4317`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
