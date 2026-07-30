@@ -70,6 +70,7 @@ nav_order: 1
 - Change `aiven_service_integration_endpoint` field `endpoint_type` (enum): add `opentelemetry`
 - Add `aiven_service_integration_endpoint` field `opentelemetry_user_config`: Opentelemetry user configurable settings.
   **Warning:** There's no way to reset advanced configuration options to default
+- Change `aiven_clickhouse` field `clickhouse_user_config.clickhouse_version` (enum): add `26.3`
 
 ## [4.60.0] - 2026-07-02
 
