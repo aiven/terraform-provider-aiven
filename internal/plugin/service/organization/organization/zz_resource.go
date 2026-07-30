@@ -22,6 +22,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Timestamp in ISO 8601 format, always in UTC.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -37,6 +38,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				DeprecationMessage:  "This field is deprecated and will be removed in the next major release.",
 				MarkdownDescription: "Tenant identifier. **Deprecated**: This field is deprecated and will be removed in the next major release.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"update_time": schema.StringAttribute{
 				Computed:            true,

@@ -13,6 +13,91 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestUsesStateForUnknown(t *testing.T) {
+	t.Parallel()
+
+	root := &Item{
+		Name: "root",
+		Type: SchemaTypeObject,
+		Properties: map[string]*Item{
+			// Server assigned, never sent back: inferred.
+			"application_id": {Computed: true},
+			"created_at":     {Computed: true},
+			"created_by":     {Computed: true},
+			"create_time":    {Computed: true},
+			"uuid":           {Computed: true},
+			// Configuration named after creation, not creation metadata.
+			"create_table":     {Computed: true},
+			"created_manually": {Computed: true},
+			// Configurable, so the new value is known from the plan.
+			"version_id":  {Required: true},
+			"instance_id": {Optional: true},
+			// Optional with a server side default: the plan can't assume the
+			// state value, the user may have just set it.
+			"parent_id": {Optional: true, Computed: true},
+			// Changes over the resource's lifetime, so the state value is stale.
+			"updated_at":     {Computed: true},
+			"updated_by":     {Computed: true},
+			"update_time":    {Computed: true},
+			"state":          {Computed: true},
+			"status":         {Computed: true},
+			"last_used_time": {Computed: true},
+			// Rotated by password resets and CA renewals.
+			"access_cert": {Computed: true},
+			"access_key":  {Computed: true},
+			// The definition wins over the inference, in both directions.
+			"opted_out_id": {Computed: true, OverrideUseStateForUnknown: new(false)},
+			"host":         {Computed: true, OverrideUseStateForUnknown: new(true)},
+			// A nested "*_id" belongs to a child entity that is replaced over
+			// the lifetime of its parent.
+			"current_deployment": {
+				Computed:   true,
+				Type:       SchemaTypeObject,
+				Properties: map[string]*Item{"deployment_id": {Computed: true}},
+			},
+		},
+	}
+
+	for name, item := range root.Properties {
+		item.Name = name
+		item.Parent = root
+		for nested, child := range item.Properties {
+			child.Name = nested
+			child.Parent = item
+		}
+	}
+
+	expect := map[string]bool{
+		"application_id":   true,
+		"created_at":       true,
+		"created_by":       true,
+		"create_time":      true,
+		"uuid":             true,
+		"host":             true,
+		"create_table":     false,
+		"created_manually": false,
+		"version_id":       false,
+		"instance_id":      false,
+		"parent_id":        false,
+		"updated_at":       false,
+		"updated_by":       false,
+		"update_time":      false,
+		"state":            false,
+		"status":           false,
+		"last_used_time":   false,
+		"access_cert":      false,
+		"access_key":       false,
+		"opted_out_id":     false,
+	}
+
+	for name, want := range expect {
+		assert.Equal(t, want, root.Properties[name].UsesStateForUnknown(), name)
+	}
+
+	nested := root.Properties["current_deployment"].Properties["deployment_id"]
+	assert.False(t, nested.UsesStateForUnknown(), "nested deployment_id")
+}
+
 func TestItemPath(t *testing.T) {
 	items := &Item{
 		Name: "array",
@@ -557,19 +642,19 @@ func TestDeepCopyItem(t *testing.T) {
 		Items:    leaf,
 	}
 	root := &Item{
-		Name:               "root",
-		JSONName:           "root",
-		Type:               SchemaTypeObject,
-		Description:        "root description",
-		DeprecationMessage: "deprecated",
-		OverrideOptional:   lo.ToPtr(true),
-		OverrideRequired:   lo.ToPtr(false),
-		ConflictsWith:      []string{"a", "b"},
-		FromSchemaOverride: true,
-		UseStateForUnknown: true,
-		MinLength:          3,
-		MaxLength:          64,
-		Enum:               []any{"x", "y"},
+		Name:                       "root",
+		JSONName:                   "root",
+		Type:                       SchemaTypeObject,
+		Description:                "root description",
+		DeprecationMessage:         "deprecated",
+		OverrideOptional:           lo.ToPtr(true),
+		OverrideRequired:           lo.ToPtr(false),
+		OverrideUseStateForUnknown: new(true),
+		ConflictsWith:              []string{"a", "b"},
+		FromSchemaOverride:         true,
+		MinLength:                  3,
+		MaxLength:                  64,
+		Enum:                       []any{"x", "y"},
 		Properties: map[string]*Item{
 			"items":     arr,
 			"id":        {Name: "id", JSONName: "id", Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 0},

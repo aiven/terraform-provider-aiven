@@ -22,6 +22,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "User group creation time.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Description. Maximum length: `4096`.",
@@ -31,6 +32,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"group_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "ID of the user group.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,

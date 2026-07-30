@@ -27,6 +27,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"aiven_aws_assume_role_external_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "External ID for assuming the IAM role for controlling the BYOC account.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"aws_iam_role_arn": schema.StringAttribute{
 				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.",

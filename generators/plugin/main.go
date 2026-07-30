@@ -423,9 +423,10 @@ func createRootItem(scope *Scope) (*Item, error) {
 		return nil, err
 	}
 
-	// Marks ID fields
+	// Marks ID fields.
+	// The virtual "id" is not inferred by UsesStateForUnknown, so it is set here.
 	isMutable := scope.Definition.Operations.AppearsInHandler(OperationUpdate, RequestBody)
-	idField.UseStateForUnknown = true
+	idField.OverrideUseStateForUnknown = or(idField.OverrideUseStateForUnknown, new(true))
 	for i, v := range pkg.IDAttributeComposed {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
@@ -440,7 +441,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 		// because custom id (e.g. "organization_id") has already been calculated
 		// or modified using "UseStateForUnknown" field.
 		if root.Properties[v].AppearsIn.Contains(isMutable) {
-			idField.UseStateForUnknown = false
+			idField.OverrideUseStateForUnknown = new(false)
 		}
 	}
 
@@ -906,7 +907,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.OverrideComputed = or(b.OverrideComputed, a.OverrideComputed)
 	a.OverrideOptional = or(b.OverrideOptional, a.OverrideOptional)
 	a.OverrideForceNew = or(b.OverrideForceNew, a.OverrideForceNew)
-	a.UseStateForUnknown = a.UseStateForUnknown || b.UseStateForUnknown
+	a.OverrideUseStateForUnknown = or(b.OverrideUseStateForUnknown, a.OverrideUseStateForUnknown)
 	a.WriteOnly = a.WriteOnly || b.WriteOnly
 	a.FromSchemaOverride = a.FromSchemaOverride || b.FromSchemaOverride
 
@@ -978,7 +979,7 @@ func recalcDeep(def *Definition, item *Item) error {
 	for k, v := range item.Properties {
 		// If parent is computed, child must be computed too
 		v.Computed = v.Computed || item.Computed
-		v.UseStateForUnknown = v.UseStateForUnknown || item.UseStateForUnknown
+		v.OverrideUseStateForUnknown = or(v.OverrideUseStateForUnknown, item.OverrideUseStateForUnknown)
 		err := recalcDeep(def, v)
 		if err != nil {
 			return fmt.Errorf("%s property: %w", k, err)
@@ -988,7 +989,7 @@ func recalcDeep(def *Definition, item *Item) error {
 	if item.Items != nil {
 		// If parent is computed, child must be computed too
 		item.Items.Computed = item.Items.Computed || item.Computed
-		item.Items.UseStateForUnknown = item.Items.UseStateForUnknown || item.UseStateForUnknown
+		item.Items.OverrideUseStateForUnknown = or(item.Items.OverrideUseStateForUnknown, item.OverrideUseStateForUnknown)
 		err := recalcDeep(def, item.Items)
 		if err != nil {
 			return fmt.Errorf("%s items: %w", item.Name, err)

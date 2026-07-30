@@ -183,7 +183,7 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
 			}
 
-			if item.UseStateForUnknown {
+			if item.UsesStateForUnknown() {
 				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "UseStateForUnknown").Call())
 			}
 

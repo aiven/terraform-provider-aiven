@@ -316,6 +316,8 @@ definitions:
         $comment: |
           During the planning phase Terraform shows "known after apply" for computed attributes.
           Set this to true if the attribute's value should be taken from the current state during planning.
+          Computed-only "*_id", "uuid", "created_at", "created_by" and "create_time" root attributes get
+          this automatically. Set it to false to opt them out.
       default:
         type: any
         $comment: Default value for this attribute

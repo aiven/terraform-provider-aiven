@@ -27,6 +27,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"azure_service_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Azure Privatelink service ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,

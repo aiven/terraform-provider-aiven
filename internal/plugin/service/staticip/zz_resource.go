@@ -51,6 +51,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"static_ip_address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Static IP address identifier.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"termination_protection": schema.BoolAttribute{
 				Computed:            true,

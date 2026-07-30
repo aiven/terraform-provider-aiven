@@ -22,6 +22,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"acl_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Kafka ACL ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"host": schema.StringAttribute{
 				Computed:            true,

@@ -277,13 +277,16 @@ type Item struct {
 	AdditionalProperties *Item `yaml:"additionalProperties,omitempty"`
 
 	// User-defined fields for YAML generation
-	OverrideRequired   *bool `yaml:"required,omitempty"`
-	OverrideComputed   *bool `yaml:"computed,omitempty"`
-	OverrideOptional   *bool `yaml:"optional,omitempty"`
-	OverrideSensitive  *bool `yaml:"sensitive,omitempty"`
-	OverrideForceNew   *bool `yaml:"forceNew,omitempty"`
-	UseStateForUnknown bool  `yaml:"useStateForUnknown,omitempty"`
-	WriteOnly          bool  `yaml:"writeOnly,omitempty"`
+	OverrideRequired  *bool `yaml:"required,omitempty"`
+	OverrideComputed  *bool `yaml:"computed,omitempty"`
+	OverrideOptional  *bool `yaml:"optional,omitempty"`
+	OverrideSensitive *bool `yaml:"sensitive,omitempty"`
+	OverrideForceNew  *bool `yaml:"forceNew,omitempty"`
+
+	// Overrides what UsesStateForUnknown infers.
+	OverrideUseStateForUnknown *bool `yaml:"useStateForUnknown,omitempty"`
+
+	WriteOnly bool `yaml:"writeOnly,omitempty"`
 
 	// FromSchemaOverride is an internal flag set during datasource.schemaOverride
 	// merging on every item the overlay touched. The datasource branch of
@@ -431,6 +434,28 @@ func (item *Item) IsComputed(def *Definition, entity entityType) bool {
 
 func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
 	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
+}
+
+// assignedOnceAttributes are values the API assigns at creation and never changes.
+// Matched exactly: the API also names configuration after creation, e.g. "create_table".
+var assignedOnceAttributes = []string{"uuid", "created_at", "created_by", "create_time"}
+
+// UsesStateForUnknown reports whether the attribute keeps its state value instead of
+// planning as "known after apply", which would cascade unknowns into everything
+// referencing it. The definition wins when set, otherwise root "*_id" and
+// assignedOnceAttributes qualify. Nested ones don't: a child entity (e.g. the current
+// deployment) is replaced over its parent's lifetime.
+// Unrelated to the spec's "createOnly", which means ForceNew.
+func (item *Item) UsesStateForUnknown() bool {
+	if item.OverrideUseStateForUnknown != nil {
+		return *item.OverrideUseStateForUnknown
+	}
+
+	if !item.IsRootProperty() || !item.Computed || item.Optional || item.Required {
+		return false
+	}
+
+	return strings.HasSuffix(item.Name, "_id") || slices.Contains(assignedOnceAttributes, item.Name)
 }
 
 func (item *Item) PropertiesByEntity(entity entityType) map[string]*Item {

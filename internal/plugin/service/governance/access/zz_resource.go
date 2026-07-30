@@ -24,6 +24,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"access_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The ID of the access.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"access_name": schema.StringAttribute{
 				MarkdownDescription: "Label to describe the access. Changing this property forces recreation of the resource.",

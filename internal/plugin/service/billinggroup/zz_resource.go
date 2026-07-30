@@ -60,6 +60,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"card_id": schema.StringAttribute{
 				MarkdownDescription: "Credit card ID. Maximum length: `64`.",

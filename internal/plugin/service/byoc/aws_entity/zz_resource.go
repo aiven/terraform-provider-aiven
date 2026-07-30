@@ -28,6 +28,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"aiven_aws_assume_role_external_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "External ID for assuming the IAM role for controlling the BYOC account.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"aiven_aws_object_storage_credentials_creator_arn": schema.StringAttribute{
 				Computed:            true,
@@ -85,6 +86,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"custom_cloud_environment_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "ID of a custom cloud environment.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"deployment_model": schema.StringAttribute{
 				MarkdownDescription: "Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.",

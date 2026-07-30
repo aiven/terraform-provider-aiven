@@ -34,9 +34,3 @@ schema:
     forceNew: true
   application_id:
     forceNew: true
-  created_at:
-    useStateForUnknown: true
-  created_by:
-    useStateForUnknown: true
-  deployment_id:
-    useStateForUnknown: true
