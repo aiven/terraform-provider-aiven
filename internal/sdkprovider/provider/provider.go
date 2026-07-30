@@ -156,7 +156,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// flink
 			"aiven_flink":                            flink.ResourceFlink(),
 			"aiven_flink_application_version":        flink.ResourceFlinkApplicationVersion(),
-			"aiven_flink_jar_application":            flink.ResourceFlinkJarApplication(),
 			"aiven_flink_jar_application_version":    flink.ResourceFlinkJarApplicationVersion(),
 			"aiven_flink_jar_application_deployment": flink.ResourceFlinkJarApplicationDeployment(),
 
@@ -192,7 +191,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 	// Adds "beta" warning to the description
 	betaResources := []string{
-		"aiven_flink_jar_application",
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
 		"aiven_aws_org_vpc_peering_connection",

@@ -1,18 +1,13 @@
 package flink_test
 
 import (
-	"archive/zip"
 	"context"
 	"fmt"
-	"io"
-	"os"
 	"testing"
-	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -23,14 +18,7 @@ import (
 func TestAccAivenFlinkJarApplicationVersion_basic(t *testing.T) {
 	acc.SkipIfNotBeta(t)
 
-	jarFile := os.Getenv("AIVEN_TEST_FLINK_JAR_FILE")
-	if jarFile == "" {
-		remove, tmpFile, err := createMinimalJar()
-		require.NoError(t, err)
-		jarFile = tmpFile
-		defer remove()
-	}
-
+	jarFile := acc.FlinkJarFile(t)
 	project := acc.ProjectName()
 	resourceNameApp := "aiven_flink_jar_application.app"
 	resourceNameVersion := "aiven_flink_jar_application_version.version"
@@ -136,53 +124,4 @@ resource "aiven_flink_jar_application_deployment" "deployment" {
   version_id     = aiven_flink_jar_application_version.version.application_version_id
 }
 `, project, serviceName, exampleJar)
-}
-
-// createMinimalJar creates a JAR file.
-// It doesn't work but should be okay for the test.
-func createMinimalJar() (func(), string, error) {
-	// Create the JAR file
-	file, err := os.CreateTemp("", "temp-*.jar")
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
-
-	// Create a new zip writer
-	zw := zip.NewWriter(file)
-	defer zw.Close()
-
-	// Add META-INF directory
-	dirHeader := &zip.FileHeader{
-		Name:     "META-INF/",
-		Method:   zip.Store, // entries should use STORE
-		Modified: time.Now(),
-	}
-	dirHeader.SetMode(0o755)
-	_, err = zw.CreateHeader(dirHeader)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create META-INF directory: %w", err)
-	}
-
-	// Add MANIFEST.MF file
-	manifestHeader := &zip.FileHeader{
-		Name:     "META-INF/MANIFEST.MF",
-		Method:   zip.Deflate, // use compression for files
-		Modified: time.Now(),
-	}
-	manifestHeader.SetMode(0o644)
-
-	mf, err := zw.CreateHeader(manifestHeader)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create manifest file: %w", err)
-	}
-
-	// Write minimal manifest content
-	manifest := "Manifest-Version: 1.0\r\nCreated-By: test-jar-go\r\n\r\n"
-	_, err = io.WriteString(mf, manifest)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to write manifest content: %w", err)
-	}
-
-	return func() { os.Remove(file.Name()) }, file.Name(), nil
 }
