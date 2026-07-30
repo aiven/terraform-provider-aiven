@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_valkey_user` intermittently storing an empty `password` in the state after a password reset.
+
 ## [4.61.0] - 2026-07-30
 
 - Migrate `aiven_kafka_acl` resource and data source to the Plugin Framework.

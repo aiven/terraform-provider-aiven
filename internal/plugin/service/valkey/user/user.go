@@ -12,6 +12,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
+func init() {
+	ResourceOptions.RefreshStateCheck = serviceuser.PasswordIsReady
+}
+
 // valkeyACLPrefix marks the ACL attributes that the API nests under
 // access_control but which the resource exposes as top-level list attributes.
 const valkeyACLPrefix = "valkey_acl_"
