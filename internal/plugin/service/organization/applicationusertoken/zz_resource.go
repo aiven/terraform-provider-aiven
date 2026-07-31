@@ -29,6 +29,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Create Time.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"created_manually": schema.BoolAttribute{
 				Computed:            true,

@@ -331,7 +331,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			// Some resources might change the ID fields during Update operation,
 			// so we need to use get values from the state instead of the plan.
 			method := "Get"
-			if operation.Type == OperationUpdate && !item.Properties["id"].UseStateForUnknown {
+			if operation.Type == OperationUpdate && !item.Properties["id"].UsesStateForUnknown() {
 				method = "GetState"
 			}
 

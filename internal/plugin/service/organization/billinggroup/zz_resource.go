@@ -29,6 +29,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Billing group ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"billing_group_name": schema.StringAttribute{
 				MarkdownDescription: "Billing Group Name. Length must be between `1` and `128`.",
@@ -38,6 +39,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The date when this billing group was created.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"custom_invoice_text": schema.StringAttribute{
 				MarkdownDescription: "Extra billing text. Maximum length: `256`.",

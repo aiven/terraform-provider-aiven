@@ -68,6 +68,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"uuid": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "User identifier.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},

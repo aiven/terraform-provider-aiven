@@ -22,6 +22,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"cmk_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Customer Managed Key identifier (CMK ID).",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cmk_provider": schema.StringAttribute{
 				MarkdownDescription: "The cloud provider hosting the key management service (KMS). The possible values are `aws`, `azure`, `gcp` and `oci`. Changing this property forces recreation of the resource.",
@@ -32,6 +33,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"created_at": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Created At.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"default_cmk": schema.BoolAttribute{
 				MarkdownDescription: "Mark the created CMK as default for all newly created services.",

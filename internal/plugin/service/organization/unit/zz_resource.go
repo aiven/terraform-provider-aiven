@@ -22,6 +22,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Timestamp in ISO 8601 format, always in UTC.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -41,6 +42,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"tenant_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Tenant identifier.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"update_time": schema.StringAttribute{
 				Computed:            true,

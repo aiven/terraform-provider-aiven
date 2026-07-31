@@ -23,6 +23,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"aws_service_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "AWS VPC endpoint service ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"aws_service_name": schema.StringAttribute{
 				Computed:            true,

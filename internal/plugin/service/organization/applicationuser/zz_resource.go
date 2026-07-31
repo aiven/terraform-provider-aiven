@@ -21,6 +21,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Time this application user was created.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"email": schema.StringAttribute{
 				Computed:            true,
@@ -50,6 +51,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"user_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "User ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},

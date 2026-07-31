@@ -22,14 +22,17 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"application_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Application ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"created_at": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The creation timestamp of this entity in ISO 8601 format, always in UTC.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"created_by": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The creator of this entity.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,

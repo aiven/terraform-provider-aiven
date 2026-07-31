@@ -40,7 +40,5 @@ operations:
     type: delete
     resultKey: acl
 schema:
-  acl_id:
-    useStateForUnknown: true
   username:
     pattern: ^[-._*?A-Za-z0-9]+$

@@ -53,6 +53,3 @@ remove:
   - peering_connections
   - pending_build_only_peering_connections
   - update_time
-schema:
-  project_vpc_id:
-    useStateForUnknown: true

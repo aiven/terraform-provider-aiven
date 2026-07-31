@@ -24,6 +24,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"address_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Address ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"address_lines": schema.ListAttribute{
 				ElementType:         types.StringType,
@@ -44,6 +45,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"create_time": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Create Time.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
