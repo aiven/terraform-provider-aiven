@@ -673,7 +673,12 @@ func getOperationPath(scope *Scope, operationID OperationID) (*OAPath, error) {
 }
 
 func addProperty(scope *Scope, parent, prop *Item) error {
-	if slices.Contains(scope.Definition.Remove, prop.JSONPath()) {
+	removed, err := scope.Definition.IsRemoved(prop.JSONPath())
+	if err != nil {
+		return err
+	}
+
+	if removed {
 		return nil
 	}
 
@@ -684,7 +689,6 @@ func addProperty(scope *Scope, parent, prop *Item) error {
 
 	// CRUD fields often intersect with each other
 	// Merges duplicated fields
-	var err error
 	parent.Properties[prop.Name], err = mergeItem(parent, parent.Properties[prop.Name], prop)
 	return err
 }

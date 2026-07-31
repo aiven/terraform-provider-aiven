@@ -27,9 +27,17 @@ operations:
   - id: CustomCloudEnvironmentDelete
     type: delete
 remove:
+  # The API serves every cloud provider from one schema. This resource is AWS
+  # only, so anything named after another provider is dropped, including fields
+  # the API may add later.
+  - "*azure*"
+  - "*gcp*"
+  - "*google*"
+  - "*oracle*"
+  # Environment attributes belong to aiven_byoc_aws_entity, which creates the
+  # environment. This resource only hands over the IAM role that activates it.
   - aiven_aws_object_storage_credentials_creator_arn
   - aiven_aws_object_storage_user_arn
-  - aiven_google_account_principal
   - aiven_management_cidr_blocks
   - aiven_object_storage_credentials_creator_user
   - aws_subnets_bastion
@@ -43,12 +51,6 @@ remove:
   - deployment_model
   - display_name
   - errors
-  - google_bastion_cidr
-  - google_privilege_bearing_service_account_id
-  - google_workload_cidr
-  - oracle_compartment_id
-  - oracle_subnet_bastion
-  - oracle_subnet_workload
   - reserved_cidr
   - tags
   - update_time

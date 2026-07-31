@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/ettle/strcase"
 )
 
@@ -179,6 +180,24 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+}
+
+// IsRemoved reports whether the given JSON path is excluded by the `remove` list.
+// Entries are glob patterns matched against the slash-separated JSON path:
+// `*` and `?` stay within a single segment, `**` spans segments, and a pattern
+// without wildcards is an exact match.
+func (d *Definition) IsRemoved(jsonPath string) (bool, error) {
+	for _, pattern := range d.Remove {
+		match, err := doublestar.Match(pattern, jsonPath)
+		if err != nil {
+			return false, fmt.Errorf("invalid remove pattern %q: %w", pattern, err)
+		}
+
+		if match {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // DatasourceLookupOp returns the single read op marked `datasourceLookup`, or nil. It

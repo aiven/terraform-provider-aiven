@@ -228,6 +228,71 @@ func TestItemRemoveElements(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "glob matches within a segment only",
+			schema: &OASchema{
+				Type: SchemaTypeObject,
+				Properties: map[string]*OASchema{
+					"azure_tenant_id":       {Type: SchemaTypeString},
+					"aiven_azure_principal": {Type: SchemaTypeString},
+					"aws_iam_role_arn":      {Type: SchemaTypeString},
+					"plans": {
+						Type: SchemaTypeArray,
+						Items: &OASchema{
+							Type: SchemaTypeObject,
+							Properties: map[string]*OASchema{
+								"azure_sku": {Type: SchemaTypeString},
+								"name":      {Type: SchemaTypeString},
+							},
+						},
+					},
+				},
+			},
+			remove: []string{"*azure*"},
+			want: map[string]*Item{
+				"aws_iam_role_arn": {Properties: map[string]*Item{}},
+				"plans": {
+					Properties: map[string]*Item{},
+					Items: &Item{
+						Properties: map[string]*Item{
+							// "*" does not cross "/", so the nested field survives
+							"azure_sku": {Properties: map[string]*Item{}},
+							"name":      {Properties: map[string]*Item{}},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "doublestar glob crosses segments",
+			schema: &OASchema{
+				Type: SchemaTypeObject,
+				Properties: map[string]*OASchema{
+					"errors": {Type: SchemaTypeString},
+					"plans": {
+						Type: SchemaTypeArray,
+						Items: &OASchema{
+							Type: SchemaTypeObject,
+							Properties: map[string]*OASchema{
+								"errors": {Type: SchemaTypeString},
+								"name":   {Type: SchemaTypeString},
+							},
+						},
+					},
+				},
+			},
+			remove: []string{"**/errors"},
+			want: map[string]*Item{
+				"plans": {
+					Properties: map[string]*Item{},
+					Items: &Item{
+						Properties: map[string]*Item{
+							"name": {Properties: map[string]*Item{}},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	transformer := cmp.Transformer("Item", func(i *Item) any {
