@@ -19,13 +19,13 @@ operations:
   - id: CustomCloudEnvironmentDelete
     type: delete
 remove:
-  - aiven_google_account_principal
-  - google_bastion_cidr
-  - google_privilege_bearing_service_account_id
-  - google_workload_cidr
-  - oracle_compartment_id
-  - oracle_subnet_bastion
-  - oracle_subnet_workload
+  # The API serves every cloud provider from one schema. This resource is AWS
+  # only, so anything named after another provider is dropped, including fields
+  # the API may add later.
+  - "*azure*"
+  - "*gcp*"
+  - "*google*"
+  - "*oracle*"
   - custom_cloud_names
   - errors
   - state

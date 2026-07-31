@@ -157,7 +157,7 @@ Common fields:
 - `resource` / `datasource` - Configuration metadata
 - `idAttributeComposed` - Fields that compose the ID (e.g., `[project, service_name]`)
 - `clientHandler` - API client type: `project`, `service`, `organization`, `organizationbilling`, etc.
-- `remove` - Fields to exclude from schema
+- `remove` - Fields to exclude from schema (exact paths or glob patterns)
 - `rename` - Field name mappings (API field -> Terraform field)
 - `schema` - Schema customizations (types, validation, behavior)
 - `expandModifier` / `flattenModifier` / `planModifier` - Enable custom Go modifiers
@@ -246,6 +246,38 @@ operations:
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
+
+### Removing Fields
+
+`remove` drops attributes the resource should not expose. Entries are matched against the
+attribute's OpenAPI path, where nested attributes are slash-separated:
+
+```yaml
+remove:
+  - update_time # top-level attribute
+  - plans/node_count # attribute nested under "plans"
+```
+
+Entries are glob patterns. `*` and `?` match within a single path segment, `**` matches across
+segments, and a pattern with no wildcards is an exact match:
+
+```yaml
+remove:
+  - "azure_*" # every top-level attribute with that prefix
+  - "*google*" # every top-level attribute containing "google"
+  - "**/errors" # "errors" at any depth
+```
+
+Quote glob patterns — an unquoted leading `*` is an alias reference in YAML and fails to parse.
+
+Reach for a glob when the removed attributes share an obvious naming pattern, most often a cloud
+provider that the resource does not support. Some Aiven endpoints serve every provider from one
+schema, so a provider-specific resource has to drop the rest. A glob keeps doing that when the API
+grows new fields, whereas an explicit list silently lets them into the schema on the next
+`task generate`. See `definitions/aiven_byoc_aws_entity.yml` for this pattern.
+
+Globs only match attribute names, not descriptions or enum values, so a `cloud_provider` attribute
+whose enum lists `azure` is unaffected by `"*azure*"`.
 
 ### Schema Customization
 

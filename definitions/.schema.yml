@@ -155,8 +155,20 @@ properties:
   remove:
     $ref: '#/definitions/Remove'
     $comment: |
-      List of attributes to remove from the resource/datasource.
-      Example: remove: ["openapi_name1", "openapi_name2"]
+      List of attributes to remove from the resource/datasource. Entries are matched against the
+      attribute's OpenAPI path, where nested attributes are slash-separated, e.g. "plans/node_count".
+      Example: remove: ["openapi_name1", "nested/openapi_name2"]
+
+      Entries are glob patterns:
+        "*"  matches any run of characters within a single path segment, e.g. "azure_*" drops
+             every top-level attribute with that prefix, and "*google*" drops every top-level
+             attribute containing "google".
+        "?"  matches exactly one character within a single path segment.
+        "**" matches across segments, e.g. "**/errors" drops "errors" at any depth.
+      A pattern without wildcards is an exact match, so plain attribute names keep working.
+
+      Prefer globs over long explicit lists when the removed attributes share an obvious prefix,
+      such as a cloud provider name that the resource does not support.
   idAttributeComposed:
     type: array
     minItems: 1
@@ -210,7 +222,7 @@ definitions:
     type: array
     items:
       type: string
-      $comment: The attribute to remove
+      $comment: The attribute to remove, either an exact path or a glob pattern
 
   Operation:
     type: object

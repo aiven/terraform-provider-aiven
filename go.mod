@@ -9,6 +9,7 @@ require (
 	github.com/aiven/go-client-codegen v0.207.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/avast/retry-go/v4 v4.7.0
+	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.2.0
@@ -68,7 +69,6 @@ require (
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
 	github.com/bombsimon/wsl/v4 v4.7.0 // indirect
 	github.com/breml/bidichk v0.3.3 // indirect
 	github.com/breml/errchkjson v0.4.1 // indirect
