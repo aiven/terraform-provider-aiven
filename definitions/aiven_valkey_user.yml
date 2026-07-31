@@ -2,7 +2,6 @@
 location: internal/plugin/service/valkey/user
 resource:
   refreshState: true
-  refreshStateDelay: 15s
   removeMissing: true
   description: Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user.
 datasource:
