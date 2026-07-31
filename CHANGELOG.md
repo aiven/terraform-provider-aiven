@@ -12,6 +12,19 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_account_team_project` field `team_type` (enum): add `organization:event_logs:read`
+- Add `aiven_byoc_aws_entity` resource field `azure_subscription_id`: UUID identifying the customer's Azure subscription
+  where BYOC infrastructure is deployed.
+- Add `aiven_byoc_aws_provision` resource field `azure_client_id`: Application (client) ID of the operator service
+  principal created by Terraform
+- Add `aiven_byoc_aws_provision` resource field `azure_client_secret`: Client secret of the operator service principal
+  created by Terraform
+- Add `aiven_byoc_aws_provision` resource field `azure_subscription_id`: UUID identifying the customer's Azure
+  subscription where BYOC infrastructure is deployed
+- Add `aiven_byoc_aws_provision` resource field `azure_tenant_id`: Azure tenant id in UUID4 form. Maximum length: `1024`.
+  Changing this property forces recreation of the resource.
+- Change `aiven_project_user` field `member_type` (enum): add `organization:event_logs:read`
+
 ## [4.61.0] - 2026-07-30
 
 - Migrate `aiven_kafka_acl` resource and data source to the Plugin Framework.

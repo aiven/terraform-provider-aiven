@@ -25,6 +25,12 @@ resource "aiven_byoc_aws_provision" "example" {
   custom_cloud_environment_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" // Force new
   aws_iam_role_arn            = "arn:aws:iam::012345678901:root" // Force new
 
+  // OPTIONAL FIELDS
+  azure_client_id       = "12345678-1234-1234-1234-123456789abc" // Force new
+  azure_subscription_id = "12345678-1234-1234-1234-123456789abc" // Force new
+  azure_tenant_id       = "adcf7194-d877-4505-a47a-91fefd96e3b8" // Force new
+  azure_client_secret   = "s3cr3t~EXAMPLE_client_secret_value" // Force new
+
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id = "admin"
   aiven_aws_account_principal       = "foo"
@@ -44,6 +50,10 @@ resource "aiven_byoc_aws_provision" "example" {
 
 ### Optional
 
+- `azure_client_id` (String) Application (client) ID of the operator service principal created by Terraform. Maximum length: `36`. Changing this property forces recreation of the resource.
+- `azure_client_secret` (String) Client secret of the operator service principal created by Terraform. Maximum length: `256`. Changing this property forces recreation of the resource.
+- `azure_subscription_id` (String) UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed. Maximum length: `36`. Changing this property forces recreation of the resource.
+- `azure_tenant_id` (String) Azure tenant id in UUID4 form. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

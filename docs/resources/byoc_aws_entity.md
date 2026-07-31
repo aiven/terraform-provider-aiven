@@ -39,6 +39,7 @@ resource "aiven_byoc_aws_entity" "example" {
 
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id                = "admin"
+  azure_subscription_id                            = "foo"
   custom_cloud_environment_id                      = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
   aiven_aws_account_principal                      = "foo"
   aiven_aws_object_storage_credentials_creator_arn = "foo"
@@ -90,6 +91,7 @@ resource "aiven_byoc_aws_entity" "example" {
 - `aiven_object_storage_credentials_creator_user` (String) Google account identifier.
 - `aws_subnets_bastion` (Map of String) Subnets to build in the bastion VPC.
 - `aws_subnets_workload` (Map of String) Subnets to build in the workload VPC.
+- `azure_subscription_id` (String) UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed.
 - `bucket_names` (Map of String) Names and usages of buckets required for workloads.
 - `byoc_resource_tags` (Map of String) Set of tags for the resources provisioned on the BYOC account.
 - `byoc_unique_name` (String) Name for all the resources created for the custom cloud environment.

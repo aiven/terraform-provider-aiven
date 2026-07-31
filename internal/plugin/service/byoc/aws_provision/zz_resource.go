@@ -34,6 +34,30 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
 			},
+			"azure_client_id": schema.StringAttribute{
+				MarkdownDescription: "Application (client) ID of the operator service principal created by Terraform. Maximum length: `36`. Changing this property forces recreation of the resource.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
+			},
+			"azure_client_secret": schema.StringAttribute{
+				MarkdownDescription: "Client secret of the operator service principal created by Terraform. Maximum length: `256`. Changing this property forces recreation of the resource.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
+			},
+			"azure_subscription_id": schema.StringAttribute{
+				MarkdownDescription: "UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed. Maximum length: `36`. Changing this property forces recreation of the resource.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(36)},
+			},
+			"azure_tenant_id": schema.StringAttribute{
+				MarkdownDescription: "Azure tenant id in UUID4 form. Maximum length: `1024`. Changing this property forces recreation of the resource.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(1024)},
+			},
 			"custom_cloud_environment_id": schema.StringAttribute{
 				MarkdownDescription: "ID of a custom cloud environment. Length must be exactly `36`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
@@ -76,7 +100,11 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
 			},
-			"aws_iam_role_arn": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"aws_iam_role_arn":      &adapter.Schema{Type: adapter.SchemaTypeString},
+			"azure_client_id":       &adapter.Schema{Type: adapter.SchemaTypeString},
+			"azure_client_secret":   &adapter.Schema{Type: adapter.SchemaTypeString},
+			"azure_subscription_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"azure_tenant_id":       &adapter.Schema{Type: adapter.SchemaTypeString},
 			"custom_cloud_environment_id": &adapter.Schema{
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,

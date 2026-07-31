@@ -56,6 +56,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "Subnets to build in the workload VPC.",
 			},
+			"azure_subscription_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed.",
+			},
 			"bucket_names": schema.MapAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -197,6 +201,10 @@ func resourceSchemaInternal() *adapter.Schema {
 					Type:     adapter.SchemaTypeString,
 				},
 				Type: adapter.SchemaTypeMap,
+			},
+			"azure_subscription_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
 			},
 			"bucket_names": &adapter.Schema{
 				Computed: true,
