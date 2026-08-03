@@ -273,7 +273,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"io_uring", "sync", "worker"}, false),
 					},
 					"io_workers": {
-						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only. Default: `3`.",
+						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
