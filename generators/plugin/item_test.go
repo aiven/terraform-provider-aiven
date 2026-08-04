@@ -122,13 +122,36 @@ func TestItemPath(t *testing.T) {
 	assert.Equal(t, "array", items.Path())
 }
 
-// TestWildcardAsteriskBacktick pins the description post-processing that wraps a
-// standalone "*" (e.g. the wildcard meaning "all hosts") in backticks while
-// leaving Markdown emphasis and already-wrapped asterisks untouched.
-func TestWildcardAsteriskBacktick(t *testing.T) {
+// TestApplyDescModifiers pins the description post-processing that wraps a lone
+// symbol in backticks: whitespace-delimited (e.g. the "*" wildcard) or
+// single-quoted (e.g. '.', '-'), while leaving Markdown emphasis, quoted
+// words/values and apostrophes inside words untouched.
+func TestApplyDescModifiers(t *testing.T) {
 	cases := map[string]string{
+		// whitespace-delimited symbols
 		"the host or * for all hosts": "the host or `*` for all hosts",
 		"foo * bar * baz":             "foo `*` bar `*` baz",
+		// single-quoted symbols (quotes dropped), "_" included
+		"symbols: '.', '_', and '-'.": "symbols: `.`, `_`, and `-`.",
+		"an '_id' suffix stays":       "an '_id' suffix stays",
+		// double-quoted symbols, single or a run, literal or &quot; entity
+		`use "/" as a separator`:       "use `/` as a separator",
+		`defaults to [".*"]`:           "defaults to [`.*`]",
+		`defaults to [&quot;.*&quot;]`: "defaults to [`.*`]",
+		// a lazy run stops at the closing quote instead of spanning two of them
+		`either ".*" or "-" works`: "either `.*` or `-` works",
+		// a quoted token never contains whitespace, so the gap between two
+		// quoted values must not be mistaken for one (JSON snippets in
+		// descriptions rely on this)
+		`{"key": "value"}`:                     `{"key": "value"}`,
+		`{&quot;key&quot;: &quot;value&quot;}`: `{&quot;key&quot;: &quot;value&quot;}`,
+		`values include 'delete', 'compact'`:   `values include 'delete', 'compact'`,
+		// left untouched
+		`matched by "topics.exclude"`: `matched by "topics.exclude"`,
+		"the value 'all' is allowed":  "the value 'all' is allowed",
+		"a digit like '5' stays":      "a digit like '5' stays",
+		"don't touch apostrophes":     "don't touch apostrophes",
+		"**bold** and *italic*":       "**bold** and *italic*",
 		"(*)":                         "(*)",                 // no surrounding whitespace
 		"ends with *":                 "ends with *",         // no trailing whitespace
 		"* leads":                     "* leads",             // no leading whitespace
@@ -138,8 +161,7 @@ func TestWildcardAsteriskBacktick(t *testing.T) {
 	}
 
 	for in, want := range cases {
-		got := reWildcardAsterisk.ReplaceAllString(in, "${1}`*`${2}")
-		assert.Equal(t, want, got, "input: %q", in)
+		assert.Equal(t, want, applyDescModifiers(in), "input: %q", in)
 	}
 }
 

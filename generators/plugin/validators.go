@@ -32,13 +32,18 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	}
 
 	// Strings
-	switch {
-	case item.MinLength > 0 && item.MaxLength > 0:
-		codes = append(codes, jen.Qual(pkg, "LengthBetween").Call(jen.Lit(item.MinLength), jen.Lit(item.MaxLength)))
-	case item.MinLength > 0:
-		codes = append(codes, jen.Qual(pkg, "LengthAtLeast").Call(jen.Lit(item.MinLength)))
-	case item.MaxLength > 0:
-		codes = append(codes, jen.Qual(pkg, "LengthAtMost").Call(jen.Lit(item.MaxLength)))
+	// Length constraints only exist on stringvalidator; guard by type so that a
+	// scalar field overridden to an array/set (which may carry a stray maxLength)
+	// does not emit a non-existent setvalidator.Length* call.
+	if item.Type == SchemaTypeString {
+		switch {
+		case item.MinLength > 0 && item.MaxLength > 0:
+			codes = append(codes, jen.Qual(pkg, "LengthBetween").Call(jen.Lit(item.MinLength), jen.Lit(item.MaxLength)))
+		case item.MinLength > 0:
+			codes = append(codes, jen.Qual(pkg, "LengthAtLeast").Call(jen.Lit(item.MinLength)))
+		case item.MaxLength > 0:
+			codes = append(codes, jen.Qual(pkg, "LengthAtMost").Call(jen.Lit(item.MaxLength)))
+		}
 	}
 
 	if item.Type == SchemaTypeString && isValidRegex(item.Pattern) {

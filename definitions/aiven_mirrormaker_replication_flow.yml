@@ -1,0 +1,121 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafka/mirrormakerreplicationflow
+resource:
+  refreshState: true
+  removeMissing: true
+  description: Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.
+datasource:
+  description: Gets information about an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.
+clientHandler: kafkamirrormaker
+idAttributeComposed: [project, service_name, source_cluster, target_cluster]
+legacyTimeouts: true
+expandModifier: true
+flattenModifier: true
+rename:
+  enabled: enable
+  topics.blacklist: topics_blacklist
+operations:
+  - id: ServiceKafkaMirrorMakerCreateReplicationFlow
+    type: create
+  - id: ServiceKafkaMirrorMakerGetReplicationFlow
+    type: read
+    resultKey: replication_flow
+  - id: ServiceKafkaMirrorMakerPatchReplicationFlow
+    type: update
+    resultKey: replication_flow
+  - id: ServiceKafkaMirrorMakerDeleteReplicationFlow
+    type: delete
+remove:
+  # Not exposed by the legacy SDK resource; kept out for state compatibility.
+  - replication_progress
+  # "topics.exclude" and "topics_exclude" both sanitize to "topics_exclude" and
+  # duplicate the legacy "topics_blacklist" field, so drop them.
+  - topics.exclude
+  - topics_exclude
+schema:
+  # SDK exposed these as ordered lists (TypeList), keep the same representation.
+  # They stay plain optional, like in the SDK, because they are the only fields
+  # here that can be cleared: their request fields are `*[]string`, so dropping
+  # them from the configuration sends `[]` and the backend forgets them. Making
+  # them computed would silently keep the removed value instead. The API returns
+  # only what was set on the flow, so an omitted one reads back as absent and
+  # stays null, which is what the SDK left in state as well.
+  topics:
+    type: arrayOrdered
+    description: >-
+      Topic names and regular expressions that match topic names that should be
+      replicated. MirrorMaker will replicate these topics if they are not matched
+      by `topics_blacklist`. The topics to include are defined by a
+      [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).
+  topics_blacklist:
+    type: arrayOrdered
+    example:
+      - ".*[\\-\\.]internal"
+      - ".*\\.replica"
+      - "__.*"
+    description: >-
+      Topic names and regular expressions that match topic names that should not
+      be replicated. MirrorMaker will not replicate these topics even if they are
+      matched by `topics`. The topics to exclude are defined by a
+      [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).
+  # The SDK required these, but the API marks them optional. Every configuration
+  # and state written by the SDK has them set, so relaxing them cannot introduce a
+  # diff. Unlike topics they cannot be cleared: their request fields are bare
+  # `omitempty` enums, so an empty value is dropped before it reaches the API and
+  # the backend keeps the previous one. computed + useStateForUnknown plans that
+  # value instead of failing the apply with an inconsistent result.
+  replication_policy_class:
+    computed: true
+    useStateForUnknown: true
+  offset_syncs_topic_location:
+    computed: true
+    useStateForUnknown: true
+  # Numbers cannot be cleared either: the adapter only sends an empty value for
+  # strings and arrays that leave the configuration, so the backend keeps the last
+  # number it was given. Computed for the same reason as the two fields above.
+  replication_factor:
+    computed: true
+    useStateForUnknown: true
+  # SDK defaults, preserved so omitting the field does not drift existing state.
+  sync_group_offsets_enabled:
+    default: false
+  # The spec's description says the default is 60, but the SDK resource shipped a
+  # default of 1. Keep 1 so migrated state does not drift.
+  sync_group_offsets_interval_seconds:
+    default: 1
+  emit_heartbeats_enabled:
+    default: false
+  emit_backward_heartbeats_enabled:
+    default: false
+  exactly_once_delivery_enabled:
+    default: false
+  follower_fetching_enabled:
+    computed: true
+    useStateForUnknown: true
+  # New field, not exposed by the SDK. Computed for the same reason as
+  # replication_factor: a number that leaves the configuration is not cleared.
+  offset_lag_max:
+    computed: true
+    useStateForUnknown: true
+  # The API models this as a comma-separated string, but the SDK exposed it as a
+  # set of strings. The expand/flatten modifiers convert between the two.
+  config_properties_exclude:
+    type: array
+    items:
+      type: string
+    # These are plain property names. The field also accepts regular expressions,
+    # in which case a literal dot must be escaped as `\\.` in HCL.
+    example:
+      - follower.replication.throttled.replicas
+      - leader.replication.throttled.replicas
+      - message.timestamp.difference.max.ms
+      - message.timestamp.type
+      - unclean.leader.election.enable
+      - min.insync.replicas
+    description: >-
+      List of topic configuration properties and/or regexes that should not be
+      replicated. If omitted, MirrorMaker will use default list of exclusions.
+      For stability reasons, we always include the
+      `unclean.leader.election.enable` field in the excluded parameters. If you
+      have specific requirements for this configuration, please reach out to our
+      support team for assistance.

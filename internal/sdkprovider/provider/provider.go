@@ -94,13 +94,12 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpenSearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                        kafka.DatasourceKafka(),
-			"aiven_kafka_schema":                 kafkaschema.DatasourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafkaschema.DatasourceKafkaSchemaConfiguration(),
-			"aiven_kafka_connector":              kafka.DatasourceKafkaConnector(),
-			"aiven_mirrormaker_replication_flow": kafka.DatasourceMirrorMakerReplicationFlowTopic(),
-			"aiven_kafka_connect":                kafka.DatasourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":            kafka.DatasourceKafkaMirrormaker(),
+			"aiven_kafka":                      kafka.DatasourceKafka(),
+			"aiven_kafka_schema":               kafkaschema.DatasourceKafkaSchema(),
+			"aiven_kafka_schema_configuration": kafkaschema.DatasourceKafkaSchemaConfiguration(),
+			"aiven_kafka_connector":            kafka.DatasourceKafkaConnector(),
+			"aiven_kafka_connect":              kafka.DatasourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":          kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
 			"aiven_clickhouse": clickhouse.DatasourceClickhouse(),
@@ -167,14 +166,13 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_opensearch_acl_rule":   opensearch.ResourceOpenSearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                        kafka.ResourceKafka(),
-			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafkaschema.ResourceKafkaSchemaConfiguration(),
-			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),
-			"aiven_mirrormaker_replication_flow": kafka.ResourceMirrorMakerReplicationFlow(),
-			"aiven_kafka_connect":                kafka.ResourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":            kafka.ResourceKafkaMirrormaker(),
-			"aiven_kafka_quota":                  kafka.ResourceKafkaQuota(),
+			"aiven_kafka":                      kafka.ResourceKafka(),
+			"aiven_kafka_schema":               kafkaschema.ResourceKafkaSchema(),
+			"aiven_kafka_schema_configuration": kafkaschema.ResourceKafkaSchemaConfiguration(),
+			"aiven_kafka_connector":            kafka.ResourceKafkaConnector(),
+			"aiven_kafka_connect":              kafka.ResourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":          kafka.ResourceKafkaMirrormaker(),
+			"aiven_kafka_quota":                kafka.ResourceKafkaQuota(),
 
 			// clickhouse
 			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),

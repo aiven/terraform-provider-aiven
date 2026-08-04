@@ -15,6 +15,9 @@ nav_order: 1
 - Fix `aiven_valkey_user` intermittently storing an empty `password` in the state after a password reset.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:event_logs:read`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:event_logs:read`
+- Migrate `aiven_mirrormaker_replication_flow` resource and data source to the Plugin Framework.
+- Change `aiven_mirrormaker_replication_flow`: set the default value of `sync_group_offsets_interval_seconds` to `1`
+  to match the previous SDK resource and avoid state drift.
 
 ## [4.61.0] - 2026-07-30
 
