@@ -304,8 +304,17 @@ func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]
 	}
 
 	for name, sch := range d.schema.Properties {
-		// Computed attributes are free to hold API values.
-		if !sch.IsObject || !sch.Computed || sch.IsAttribute {
+		if !sch.IsObject || !sch.Computed {
+			continue
+		}
+
+		// Unlike a block, a computed attribute is owned entirely by the API. Preserve
+		// values it explicitly returns, including an empty collection, but remove a
+		// prior value when the response omits the attribute.
+		if sch.IsAttribute {
+			if _, ok := norm[name]; !ok {
+				delete(state, name)
+			}
 			continue
 		}
 
@@ -332,7 +341,7 @@ func (d *resourceData) pruneResourceComputedObjectBlocks(state, norm map[string]
 }
 
 // pruneUnsetEmptyCollections drops empty lists, sets and maps that the API reports for
-// attributes the user never set. Both a null and an empty collection mean "no value" to the
+// configurable attributes the user never set. Both a null and an empty collection mean "no value" to the
 // API, but Terraform tells them apart and requires the value written back to keep the
 // configured shape. So an empty collection is stored only when it's already known to
 // Terraform, otherwise it would show up as a new "[]" or "{}" where the configuration has
@@ -342,6 +351,12 @@ func (d *resourceData) pruneUnsetEmptyCollections(state, norm map[string]any) {
 		switch sch.Type {
 		case SchemaTypeList, SchemaTypeSet, SchemaTypeMap:
 		default:
+			continue
+		}
+
+		// A computed attribute has no configured shape to preserve. Its explicit API
+		// value is authoritative, even when that value is an empty collection.
+		if sch.Computed && sch.IsAttribute {
 			continue
 		}
 
