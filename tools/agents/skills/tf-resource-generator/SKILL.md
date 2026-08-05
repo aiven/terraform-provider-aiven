@@ -173,20 +173,26 @@ resource:
   description: "..."
   deprecationMessage: "..."
   terminationProtection: true # Check field before delete
-  refreshState: true # Call Read after Create/Update
+  refreshState: # Call Read after Create/Update and wait for state convergence
+    attribute: state # Optional; defaults to state
+    desired: [ACTIVE, PENDING_PEER]
+    failed: [ERROR, DELETED]
   refreshStateDelay: "15s" # Wait before Read
-  refreshStateDesired: # Retry Read until fields match desired values
-    state: ACTIVE
   removeMissing: true # Remove from state on 404
   deleteStateDesired: # Poll Read after Delete until the resource reaches its terminal state
     state: DELETED
 ```
 
-`refreshStateDesired` replaces ad-hoc refresh waiters for simple state transitions. Use it when the resource should settle into a known value after create/update (for example, `state: ACTIVE`).
+`refreshState` enables a post-Create/Update Read. Use `refreshState: {}` when the first successful
+Read is sufficient. To wait for state convergence, configure `desired` values and optional `failed`
+values for a computed-only Terraform attribute. The optional `attribute` setting defaults to `state`.
+Values within each list use OR semantics. A desired value completes the refresh, and any failed value
+stops it immediately. Values in neither list are treated as pending and retried, which safely
+accommodates new intermediate backend states.
 
 `deleteStateDesired` replaces custom delete waiters. It is a map, and its presence (even as an empty map, `{}`) enables the delete poller: on every attempt the adapter re-issues `Delete` (ignoring its error) and polls `Read` until the resource is gone (404) or reaches its terminal state, then returns. A 404 always completes the delete. Because `Delete` is re-issued each attempt and its error is ignored, a 409 Conflict from dependents still detaching resolves on its own — no extra configuration is needed.
 
-The map's entries are attribute names mapped to the terminal value the poller must observe (e.g. `state: DELETED`). The poll finishes when every entry matches or the API 404s, whichever comes first. Values are validated against the field's enum when one is declared, as for `refreshStateDesired`. Use an empty map for APIs whose Read never surfaces a terminal state (it just 404s).
+The map's entries are attribute names mapped to the terminal value the poller must observe (e.g. `state: DELETED`). The poll finishes when every entry matches or the API 404s, whichever comes first. Values are validated against the field's enum when one is declared. Use an empty map for APIs whose Read never surfaces a terminal state (it just 404s).
 
 Examples:
 
@@ -321,13 +327,16 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-    Create:            createView,
-    Delete:            deleteView,
-    IDFields:          idFields(),
-    Read:              readView,
-    RefreshState:      true,
+    Create:   createView,
+    Delete:   deleteView,
+    IDFields: idFields(),
+    Read:     readView,
+    RefreshState: &adapter.RefreshStateCondition{
+        Attribute: "state",
+        Desired: []string{"ACTIVE", "PENDING_PEER"},
+        Failed:  []string{"ERROR", "DELETED"},
+    },
     RefreshStateDelay: adapter.MustParseDuration("15s"),
-    RefreshStateDesired: map[string]string{"state": "ACTIVE"},
     RemoveMissing:     true,
     Schema:            resourceSchema,
     SchemaInternal:    resourceSchemaInternal(),

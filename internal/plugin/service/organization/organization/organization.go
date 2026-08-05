@@ -24,7 +24,7 @@ func NewResource() resource.Resource {
 		IDFields:       idFields(),
 		Schema:         resourceSchema,
 		SchemaInternal: resourceSchemaInternal(),
-		RefreshState:   true,
+		RefreshState:   &adapter.RefreshStateCondition{},
 		Read:           readOrganization,
 		Create:         createOrganization,
 		Update:         updateOrganization,

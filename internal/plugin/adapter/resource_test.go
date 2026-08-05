@@ -10,30 +10,186 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
 
+func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
+	schema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":        {Type: SchemaTypeString, Computed: true},
+			"name":      {Type: SchemaTypeString},
+			"project":   {Type: SchemaTypeString},
+			"server_id": {Type: SchemaTypeString, Computed: true},
+			"state":     {Type: SchemaTypeString, Computed: true},
+			"timeouts": {
+				Type: SchemaTypeObject,
+				Properties: map[string]*Schema{
+					"create": {Type: SchemaTypeString},
+				},
+			},
+		},
+	}
+
+	refreshError := errors.New("refresh failed")
+	alreadyExistsError := avngen.Error{Status: http.StatusConflict, Message: "resource already exists"}
+	tests := []struct {
+		name                string
+		idFields            []string
+		plan                map[string]any
+		createID            string
+		createError         error
+		readID              []string
+		readState           string
+		readError           error
+		refreshState        *RefreshStateCondition
+		ignoreAlreadyExists bool
+		wantError           bool
+		wantID              string
+	}{
+		{
+			name:      "keeps an ID set by Create",
+			idFields:  []string{"server_id"},
+			plan:      map[string]any{"name": "example"},
+			createID:  "created-id",
+			readError: refreshError,
+			wantError: true,
+			wantID:    "created-id",
+		},
+		{
+			name:      "builds a composite ID from known plan fields",
+			idFields:  []string{"project", "name"},
+			plan:      map[string]any{"project": "project", "name": "example"},
+			readError: refreshError,
+			wantError: true,
+			wantID:    "project/example",
+		},
+		{
+			name:      "does not save state without a complete ID",
+			idFields:  []string{"project", "server_id"},
+			plan:      map[string]any{"project": "project"},
+			readError: refreshError,
+			wantError: true,
+		},
+		{
+			name:      "keeps an ID learned by Read before refresh fails",
+			idFields:  []string{"project", "server_id"},
+			plan:      map[string]any{"project": "project"},
+			readID:    []string{"project", "server-id"},
+			readState: "ERROR",
+			wantError: true,
+			wantID:    "project/server-id",
+			refreshState: &RefreshStateCondition{
+				Attribute: "state",
+				Desired:   []string{"ACTIVE"},
+				Failed:    []string{"ERROR"},
+			},
+		},
+		{
+			name:                "does not save state when AlreadyExists adoption fails",
+			idFields:            []string{"project", "name"},
+			plan:                map[string]any{"project": "project", "name": "example"},
+			createError:         alreadyExistsError,
+			readError:           refreshError,
+			ignoreAlreadyExists: true,
+			wantError:           true,
+		},
+		{
+			name:                "saves state when AlreadyExists adoption succeeds",
+			idFields:            []string{"project", "name"},
+			plan:                map[string]any{"project": "project", "name": "example"},
+			createError:         alreadyExistsError,
+			readID:              []string{"project", "example"},
+			ignoreAlreadyExists: true,
+			wantID:              "project/example",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			raw, err := toTFValue(schema, tt.plan)
+			require.NoError(t, err)
+			refreshState := tt.refreshState
+			if refreshState == nil {
+				refreshState = &RefreshStateCondition{}
+			}
+
+			a := &resourceAdapter{
+				resource: ResourceOptions{
+					SchemaInternal:      schema,
+					IDFields:            tt.idFields,
+					RefreshState:        refreshState,
+					IgnoreAlreadyExists: tt.ignoreAlreadyExists,
+					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						if tt.createID != "" {
+							return d.SetID(tt.createID)
+						}
+						return tt.createError
+					},
+					Read: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						if tt.readID != nil {
+							if err := d.SetID(tt.readID...); err != nil {
+								return err
+							}
+						}
+						if tt.readState != "" {
+							if err := d.Set("state", tt.readState); err != nil {
+								return err
+							}
+						}
+						return tt.readError
+					},
+				},
+			}
+			req := resource.CreateRequest{
+				Plan:   tfsdk.Plan{Raw: raw},
+				Config: tfsdk.Config{Raw: raw},
+			}
+			rsp := resource.CreateResponse{
+				State: tfsdk.State{Raw: tftypes.NewValue(raw.Type(), nil)},
+			}
+
+			a.Create(t.Context(), req, &rsp)
+
+			require.Equal(t, tt.wantError, rsp.Diagnostics.HasError())
+			if tt.wantID == "" {
+				require.True(t, rsp.State.Raw.IsNull())
+				return
+			}
+
+			require.False(t, rsp.State.Raw.IsNull())
+			state, err := fromTFValue(schema, rsp.State.Raw, false)
+			require.NoError(t, err)
+			require.Equal(t, tt.wantID, state["id"])
+		})
+	}
+}
+
 func TestResourceAdapter_refreshState(t *testing.T) {
-	// Use short retry delays so retry-go's exponential backoff stays in the microsecond range.
+	// Use short retry delays so retry-go's fixed delay stays in the microsecond range.
 	const fastRetryDelay = time.Microsecond
 
 	// fastAdapter builds a *resourceAdapter wired for fast tests: short retry delay. Per-test config
-	// (RefreshStateDelay, RefreshStateDesired, etc.) is layered on top of the returned adapter's
+	// (RefreshState, RefreshStateDelay, etc.) is layered on top of the returned adapter's
 	// resource by the caller.
 	fastAdapter := func(read func(ctx context.Context, client avngen.Client, rd ResourceData) error) *resourceAdapter {
 		return &resourceAdapter{
 			resource: ResourceOptions{
 				Read:                   read,
+				RefreshState:           &RefreshStateCondition{},
 				refreshStateRetryDelay: fastRetryDelay,
 			},
 		}
 	}
 
-	// statusSchema is a minimal schema used by tests that exercise RefreshStateDesired.
-	statusSchema := &Schema{
+	// stateSchema is a minimal schema used by tests that exercise RefreshState conditions.
+	stateSchema := &Schema{
 		Type: SchemaTypeObject,
 		Properties: map[string]*Schema{
-			"status": {Type: SchemaTypeString},
+			"state": {Type: SchemaTypeString},
 		},
 	}
 
@@ -59,6 +215,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		attempts := 0
 		a := &resourceAdapter{
 			resource: ResourceOptions{
+				RefreshState: &RefreshStateCondition{},
 				Read: func(ctx context.Context, _ avngen.Client, _ ResourceData) error {
 					attempts++
 					AddWarnings(ctx, warningsByTry[attempts-1]...)
@@ -171,14 +328,14 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.Equal(t, 2, attempts)
 	})
 
-	t.Run("retries when desired attribute does not match, then succeeds", func(t *testing.T) {
+	t.Run("retries an unknown value until a desired value is reached", func(t *testing.T) {
 		t.Parallel()
 
-		// rd starts with status "PENDING" and flips to "ACTIVE" after the first Read.
+		// An unlisted backend state is pending rather than an implicit failure.
 		rd, err := NewResourceData(
-			statusSchema,
+			stateSchema,
 			nil,
-			WithTestState(map[string]any{"status": "PENDING"}),
+			WithTestState(map[string]any{"state": "FUTURE_STATE"}),
 		)
 		require.NoError(t, err)
 
@@ -186,26 +343,214 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		a := fastAdapter(func(_ context.Context, _ avngen.Client, rd ResourceData) error {
 			attempts++
 			if attempts >= 2 {
-				require.NoError(t, rd.Set("status", "ACTIVE"))
+				require.NoError(t, rd.Set("state", "ACTIVE"))
 			}
 			return nil
 		})
-		a.resource.RefreshStateDesired = map[string]string{"status": "ACTIVE"}
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{"ACTIVE"}}
 
 		err = a.refreshState(t.Context(), rd)
 
 		require.NoError(t, err)
 		require.Equal(t, 2, attempts)
-		require.Equal(t, "ACTIVE", rd.Get("status"))
+		require.Equal(t, "ACTIVE", rd.Get("state"))
+	})
+
+	t.Run("accepts any desired value", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(
+			stateSchema,
+			nil,
+			WithTestState(map[string]any{"state": "PENDING_PEER"}),
+		)
+		require.NoError(t, err)
+
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{"ACTIVE", "PENDING_PEER"}}
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.NoError(t, err)
+	})
+
+	t.Run("checks the configured attribute", func(t *testing.T) {
+		t.Parallel()
+
+		statusSchema := &Schema{
+			Type: SchemaTypeObject,
+			Properties: map[string]*Schema{
+				"status": {Type: SchemaTypeString},
+			},
+		}
+		rd, err := NewResourceData(
+			statusSchema,
+			nil,
+			WithTestState(map[string]any{"status": "ACTIVE"}),
+		)
+		require.NoError(t, err)
+
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "status", Desired: []string{"ACTIVE"}}
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.NoError(t, err)
+	})
+
+	t.Run("keeps a missing attribute pending even when desired contains its zero value", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(
+			stateSchema,
+			nil,
+			WithTestState(map[string]any{}),
+		)
+		require.NoError(t, err)
+
+		ctx, cancel := context.WithCancel(t.Context())
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			cancel()
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{""}}
+
+		err = a.refreshState(ctx, rd)
+
+		require.ErrorIs(t, err, context.Canceled)
+		require.GreaterOrEqual(t, attempts, 1)
+	})
+
+	t.Run("fails immediately on a configured failed value", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(
+			stateSchema,
+			nil,
+			WithTestState(map[string]any{"state": "ERROR"}),
+		)
+		require.NoError(t, err)
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{
+			Attribute: "state",
+			Desired:   []string{"ACTIVE"},
+			Failed:    []string{"ERROR"},
+		}
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.ErrorIs(t, err, ErrRefreshStateFailed)
+		require.Equal(t, 1, attempts)
+		require.Contains(t, err.Error(), "\"state\" is `ERROR`")
+	})
+
+	t.Run("failed values take precedence over desired values", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(
+			stateSchema,
+			nil,
+			WithTestState(map[string]any{"state": "ERROR"}),
+		)
+		require.NoError(t, err)
+
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{
+			Attribute: "state",
+			Desired:   []string{"ACTIVE", "ERROR"},
+			Failed:    []string{"ERROR"},
+		}
+
+		err = a.refreshState(t.Context(), rd)
+
+		require.ErrorIs(t, err, ErrRefreshStateFailed)
+		require.Contains(t, err.Error(), `"state"`)
+	})
+
+	t.Run("rejects failed values without desired values before reading", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Failed: []string{"ERROR"}}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
+		require.Zero(t, attempts)
+	})
+
+	t.Run("rejects an explicitly empty desired list before reading", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{}}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
+		require.Zero(t, attempts)
+	})
+
+	t.Run("rejects an attribute without desired values before reading", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state"}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
+		require.Zero(t, attempts)
+	})
+
+	t.Run("rejects a condition without an attribute before reading", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			return nil
+		})
+		a.resource.RefreshState = &RefreshStateCondition{Desired: []string{"ACTIVE"}}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.EqualError(t, err, "refresh state condition has no attribute")
+		require.Zero(t, attempts)
 	})
 
 	t.Run("retries until the context deadline when the desired state is never reached", func(t *testing.T) {
 		t.Parallel()
 
 		rd, err := NewResourceData(
-			statusSchema,
+			stateSchema,
 			nil,
-			WithTestState(map[string]any{"status": "PENDING"}),
+			WithTestState(map[string]any{"state": "PENDING"}),
 		)
 		require.NoError(t, err)
 
@@ -214,7 +559,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 			attempts++
 			return nil // Never transitions to ACTIVE, so the poll runs until ctx is cancelled.
 		})
-		a.resource.RefreshStateDesired = map[string]string{"status": "ACTIVE"}
+		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{"ACTIVE"}}
 
 		// The fixed retry delay is fastRetryDelay (1µs), so a 300ms window comfortably allows many
 		// attempts before the deadline.
@@ -246,6 +591,30 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 3, attempts)
+	})
+
+	t.Run("stops when RefreshStateCheck reports a failed state", func(t *testing.T) {
+		t.Parallel()
+
+		unexpectedRetry := errors.New("unexpected retry")
+		attempts := 0
+		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+			attempts++
+			if attempts > 1 {
+				return unexpectedRetry
+			}
+			return nil
+		})
+		a.resource.RefreshStateCheck = func(_ ResourceData) error {
+			return fmt.Errorf("custom check: %w", ErrRefreshStateFailed)
+		}
+
+		err := a.refreshState(t.Context(), nil)
+
+		require.ErrorIs(t, err, ErrRefreshStateFailed)
+		require.NotErrorIs(t, err, ErrRefreshStateDesired)
+		require.NotErrorIs(t, err, unexpectedRetry)
+		require.Equal(t, 1, attempts)
 	})
 
 	t.Run("retries until the context deadline when RefreshStateCheck never passes", func(t *testing.T) {
@@ -653,6 +1022,8 @@ func TestIsRefreshStateRetryable(t *testing.T) {
 		{name: "wrapped avngen 403", err: fmt.Errorf("api: %w", avngen.Error{Status: http.StatusForbidden}), want: true},
 		{name: "ErrRefreshStateDesired sentinel", err: ErrRefreshStateDesired, want: true},
 		{name: "wrapped ErrRefreshStateDesired", err: fmt.Errorf("mismatch: %w", ErrRefreshStateDesired), want: true},
+		{name: "ErrRefreshStateFailed sentinel", err: ErrRefreshStateFailed, want: false},
+		{name: "wrapped ErrRefreshStateFailed", err: fmt.Errorf("failed: %w", ErrRefreshStateFailed), want: false},
 		{name: "avngen 500", err: avngen.Error{Status: http.StatusInternalServerError}, want: false},
 		{name: "avngen 400", err: avngen.Error{Status: http.StatusBadRequest}, want: false},
 		{name: "unrelated error", err: errors.New("boom"), want: false},

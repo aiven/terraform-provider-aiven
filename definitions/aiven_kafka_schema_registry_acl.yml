@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/kafkaschema/registryacl
 resource:
-  refreshState: true
+  refreshState: {}
   removeMissing: true
   description: Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry.
 datasource:

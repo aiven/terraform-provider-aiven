@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/pg/user
 resource:
-  refreshState: true
+  refreshState: {}
   removeMissing: true
   description: Creates and manages an Aiven for PostgreSQL® service user. The built-in admin user belongs to the service itself. Write-only password management is not supported.
 datasource:

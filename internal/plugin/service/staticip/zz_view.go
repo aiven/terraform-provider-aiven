@@ -22,12 +22,14 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:                createView,
-	Delete:                deleteView,
-	IDFields:              idFields(),
-	Read:                  readView,
-	RefreshState:          true,
-	RefreshStateDesired:   map[string]string{"state": "created"},
+	Create:   createView,
+	Delete:   deleteView,
+	IDFields: idFields(),
+	Read:     readView,
+	RefreshState: &adapter.RefreshStateCondition{
+		Attribute: "state",
+		Desired:   []string{"created"},
+	},
 	Schema:                resourceSchema,
 	SchemaInternal:        resourceSchemaInternal(),
 	TerminationProtection: true,

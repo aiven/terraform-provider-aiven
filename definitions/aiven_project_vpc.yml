@@ -1,9 +1,8 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/vpc/projectvpc
 resource:
-  refreshState: true
-  refreshStateDesired:
-    state: ACTIVE
+  refreshState:
+    desired: [ACTIVE]
   deleteStateDesired:
     state: DELETED
   removeMissing: true
