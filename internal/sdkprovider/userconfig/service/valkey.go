@@ -230,6 +230,11 @@ func valkeyUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"valkey_activedefrag": {
+				Description: "Enable active memory defragmentation. When enabled, Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system. Defragmentation runs on the main thread and consumes CPU, so it may increase latency under load. Default: `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"valkey_io_threads": {
 				Description: "Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.",
 				Optional:    true,
