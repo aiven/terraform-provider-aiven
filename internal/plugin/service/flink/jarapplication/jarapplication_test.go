@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -99,6 +103,16 @@ func TestAccAivenFlinkJarApplication(t *testing.T) {
 		})
 	})
 
+	t.Run("current deployment cleared", func(t *testing.T) {
+		testAccAivenFlinkJarApplicationCurrentDeploymentCleared(
+			t,
+			projectName,
+			serviceName,
+			jarFile,
+			serviceIsReady,
+		)
+	})
+
 	t.Run("base test", func(t *testing.T) {
 		appName := acc.RandName("basic")
 		config := testAccFlinkJarApplication(projectName, serviceName, appName)
@@ -121,10 +135,17 @@ func TestAccAivenFlinkJarApplication(t *testing.T) {
 						resource.TestCheckResourceAttrSet(resourceName, "created_by"),
 						resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 						resource.TestCheckResourceAttrSet(resourceName, "updated_by"),
-						// No version has been uploaded and no deployment exists yet.
-						resource.TestCheckResourceAttr(resourceName, "application_versions.#", "0"),
+						// No deployment exists yet.
 						resource.TestCheckResourceAttr(resourceName, "current_deployment.#", "0"),
 					),
+					// No version has been uploaded, so the API reports an empty list.
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectKnownValue(
+							resourceName,
+							tfjsonpath.New("application_versions"),
+							knownvalue.ListExact([]knownvalue.Check{}),
+						),
+					},
 				},
 				{
 					// Test update: application name can be changed in-place
@@ -200,6 +221,114 @@ func TestAccAivenFlinkJarApplication(t *testing.T) {
 	})
 }
 
+func testAccAivenFlinkJarApplicationCurrentDeploymentCleared(
+	t *testing.T,
+	projectName, serviceName, jarFile string,
+	serviceIsReady <-chan error,
+) {
+	const (
+		applicationResourceName = "aiven_flink_jar_application.stale_deployment"
+		deploymentResourceName  = "aiven_flink_jar_application_deployment.stale_deployment"
+	)
+
+	applicationName := acc.RandName("current-deployment")
+
+	client, err := acc.GetTestGenAivenClient()
+	require.NoError(t, err)
+
+	var applicationID, deploymentID string
+	waitForCurrentDeployment := func(expectedDeploymentID string) {
+		t.Helper()
+
+		message := "current deployment did not disappear from the jar application"
+		if expectedDeploymentID != "" {
+			message = fmt.Sprintf("deployment %q did not appear on the jar application", expectedDeploymentID)
+		}
+
+		require.Eventually(t, func() bool {
+			application, err := client.ServiceFlinkGetJarApplication(
+				t.Context(), projectName, serviceName, applicationID,
+			)
+			if err != nil {
+				return false
+			}
+
+			if expectedDeploymentID == "" {
+				return application.CurrentDeployment == nil
+			}
+
+			return application.CurrentDeployment != nil && application.CurrentDeployment.Id == expectedDeploymentID
+		}, 3*time.Minute, 2*time.Second, message)
+	}
+
+	withDeployment := testAccFlinkJarApplicationStaleCurrentDeploymentConfig(
+		projectName, serviceName, applicationName, jarFile, true,
+	)
+	withoutDeployment := testAccFlinkJarApplicationStaleCurrentDeploymentConfig(
+		projectName, serviceName, applicationName, jarFile, false,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenFlinkJarApplicationDestroy,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() { require.NoError(t, <-serviceIsReady) },
+				Config:    withDeployment,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(applicationResourceName, "application_id"),
+					resource.TestCheckResourceAttrSet(deploymentResourceName, "deployment_id"),
+					func(state *terraform.State) error {
+						application, ok := state.RootModule().Resources[applicationResourceName]
+						if !ok {
+							return fmt.Errorf("resource %q not found in state", applicationResourceName)
+						}
+
+						deployment, ok := state.RootModule().Resources[deploymentResourceName]
+						if !ok {
+							return fmt.Errorf("resource %q not found in state", deploymentResourceName)
+						}
+
+						applicationID = application.Primary.Attributes["application_id"]
+						deploymentID = deployment.Primary.Attributes["deployment_id"]
+						if applicationID == "" || deploymentID == "" {
+							return fmt.Errorf("application or deployment ID is empty")
+						}
+
+						return nil
+					},
+				),
+			},
+			{
+				// The application was read before its dependent deployment was created.
+				// Wait for the API to expose the deployment, then refresh the parent state.
+				PreConfig: func() { waitForCurrentDeployment(deploymentID) },
+				Config:    withDeployment,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(applicationResourceName, "current_deployment.#", "1"),
+					resource.TestCheckResourceAttrPair(
+						applicationResourceName, "current_deployment.0.id",
+						deploymentResourceName, "deployment_id",
+					),
+				),
+			},
+			{
+				// Removing the deployment drives its cancel/delete state machine to completion.
+				Config: withoutDeployment,
+			},
+			{
+				// Prove that the API has cleared current_deployment before refreshing Terraform state.
+				PreConfig: func() { waitForCurrentDeployment("") },
+				Config:    withoutDeployment,
+				Check: resource.TestCheckResourceAttr(
+					applicationResourceName, "current_deployment.#", "0",
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAivenFlinkJarApplicationDestroy(s *terraform.State) error {
 	c, err := acc.GetTestGenAivenClient()
 	if err != nil {
@@ -253,4 +382,37 @@ resource "aiven_flink_jar_application_version" "foo" {
   source         = %[4]q
 }
 `, project, serviceName, appName, jarFile)
+}
+
+func testAccFlinkJarApplicationStaleCurrentDeploymentConfig(
+	projectName, serviceName, applicationName, jarFile string,
+	withDeployment bool,
+) string {
+	config := fmt.Sprintf(`
+resource "aiven_flink_jar_application" "stale_deployment" {
+  project      = %[1]q
+  service_name = %[2]q
+  name         = %[3]q
+}
+
+resource "aiven_flink_jar_application_version" "stale_deployment" {
+  project        = %[1]q
+  service_name   = %[2]q
+  application_id = aiven_flink_jar_application.stale_deployment.application_id
+  source         = %[4]q
+}
+`, projectName, serviceName, applicationName, jarFile)
+
+	if !withDeployment {
+		return config
+	}
+
+	return config + `
+resource "aiven_flink_jar_application_deployment" "stale_deployment" {
+  project        = aiven_flink_jar_application.stale_deployment.project
+  service_name   = aiven_flink_jar_application.stale_deployment.service_name
+  application_id = aiven_flink_jar_application.stale_deployment.application_id
+  version_id     = aiven_flink_jar_application_version.stale_deployment.application_version_id
+}
+`
 }

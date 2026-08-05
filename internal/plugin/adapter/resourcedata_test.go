@@ -355,6 +355,82 @@ func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {
 	})
 }
 
+// TestResourceDataFlattenComputedAttributes verifies that API-owned nested attributes
+// preserve explicit empty collections and remove prior state only when omitted.
+func TestResourceDataFlattenComputedAttributes(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":   {Type: SchemaTypeString, Computed: true},
+			"name": {Type: SchemaTypeString},
+			"versions": {
+				Type:        SchemaTypeList,
+				Computed:    true,
+				IsAttribute: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"id": {Type: SchemaTypeString, Computed: true},
+					},
+				},
+			},
+			"deployment": {
+				Type:        SchemaTypeList,
+				Computed:    true,
+				IsAttribute: true,
+				IsObject:    true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"id": {Type: SchemaTypeString, Computed: true},
+					},
+				},
+			},
+		},
+	}
+
+	stateValue := func(t *testing.T, rd ResourceData, name string) tftypes.Value {
+		t.Helper()
+
+		var attrs map[string]tftypes.Value
+		require.NoError(t, rd.tfValue().As(&attrs))
+		return attrs[name]
+	}
+
+	t.Run("explicit empty list stays empty", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestState(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{
+			"name":     "my-resource",
+			"versions": []any{},
+		}))
+
+		got, ok := rd.GetOk("versions")
+		require.True(t, ok)
+		require.Equal(t, []any{}, got)
+		require.False(t, stateValue(t, rd, "versions").IsNull())
+	})
+
+	t.Run("omitted object removes stale state", func(t *testing.T) {
+		rd, err := NewResourceData(sch, []string{"name"},
+			WithTestState(map[string]any{
+				"name":       "my-resource",
+				"deployment": []any{map[string]any{"id": "stale"}},
+			}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{"name": "my-resource"}))
+
+		_, ok := rd.GetOk("deployment")
+		require.False(t, ok)
+		require.True(t, stateValue(t, rd, "deployment").IsNull())
+	})
+}
+
 // TestResourceDataEmptyCollections verifies that Flatten keeps an empty collection apart
 // from a null one: the API reports both as "no values", but Terraform requires the state
 // to keep the shape the configuration asked for.
