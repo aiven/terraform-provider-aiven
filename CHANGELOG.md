@@ -18,6 +18,8 @@ nav_order: 1
 - Migrate `aiven_mirrormaker_replication_flow` resource and data source to the Plugin Framework.
 - Change `aiven_mirrormaker_replication_flow`: set the default value of `sync_group_offsets_interval_seconds` to `1`
   to match the previous SDK resource and avoid state drift.
+- Add `aiven_valkey` field `valkey_user_config.valkey_activedefrag`: Enable active memory defragmentation. When enabled,
+  Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system
 
 ## [4.61.0] - 2026-07-30
 

@@ -137,6 +137,7 @@ Read-Only:
 - `static_ips` (Boolean)
 - `valkey_acl_channels_default` (String)
 - `valkey_active_expire_effort` (Number)
+- `valkey_activedefrag` (Boolean)
 - `valkey_io_threads` (Number)
 - `valkey_lfu_decay_time` (Number)
 - `valkey_lfu_log_factor` (Number)

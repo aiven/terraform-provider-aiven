@@ -145,6 +145,7 @@ Optional:
 - `static_ips` (Boolean) Use static public IP addresses.
 - `valkey_acl_channels_default` (String) Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Valkey configuration acl-pubsub-default.
 - `valkey_active_expire_effort` (Number) Valkey reclaims expired keys both when accessed and in the background. The background process scans for expired keys to free memory. Increasing the active-expire-effort setting (default 1, max 10) uses more CPU to reclaim expired keys faster, reducing memory usage but potentially increasing latency. Default: `1`.
+- `valkey_activedefrag` (Boolean) Enable active memory defragmentation. When enabled, Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system. Defragmentation runs on the main thread and consumes CPU, so it may increase latency under load. Default: `false`.
 - `valkey_io_threads` (Number) Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.
 - `valkey_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. Default: `1`.
 - `valkey_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.
