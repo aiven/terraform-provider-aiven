@@ -2,7 +2,7 @@ name: Acceptance Tests
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "15 0 * * *"
   workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
