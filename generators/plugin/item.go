@@ -342,8 +342,9 @@ func (item *Item) UniqueName() string {
 func (item *Item) TFType() string {
 	switch {
 	case item.IsObject():
-		// List type is compatible with SDKv2
-		// todo: replace with object in v5.0.0.
+		// List type is compatible with SDKv2. Costs a size validator, "Max: 1" in the docs
+		// and .0 indexing wherever it is read.
+		// todo: replace with object in v5.0.0, dropping every site marked with that version.
 		return "List"
 	case item.IsList():
 		return "List"
@@ -439,6 +440,37 @@ func (item *Item) IsComputed(def *Definition, entity entityType) bool {
 
 func (item *Item) IsReadOnly(def *Definition, entity entityType) bool {
 	return !item.IsRequired(def, entity) && !item.IsOptional(def, entity)
+}
+
+// RendersAsAttribute reports whether a nested collection renders as a computed attribute
+// instead of a block. Blocks cannot be computed: Terraform plans them from the configuration,
+// so a block holding API values diffs forever. The state type is the same either way.
+// Only read-only all the way down qualifies: an optional+computed block, like the kafka topic
+// "config", keeps the syntax users write. Data source blocks are not planned, so they are fine.
+func (item *Item) RendersAsAttribute(def *Definition, entity entityType) bool {
+	return entity.isResource() &&
+		item.IsNested() &&
+		item.IsComputed(def, entity) &&
+		item.isReadOnlyDeep(def, entity)
+}
+
+// isReadOnlyDeep reports whether the item and everything nested in it is read-only.
+func (item *Item) isReadOnlyDeep(def *Definition, entity entityType) bool {
+	if !item.IsReadOnly(def, entity) {
+		return false
+	}
+
+	if item.Items != nil && !item.Items.isReadOnlyDeep(def, entity) {
+		return false
+	}
+
+	for _, v := range item.PropertiesByEntity(entity) {
+		if !v.isReadOnlyDeep(def, entity) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // assignedOnceAttributes are values the API assigns at creation and never changes.

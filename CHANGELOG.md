@@ -20,6 +20,7 @@ nav_order: 1
   to match the previous SDK resource and avoid state drift.
 - Add `aiven_valkey` field `valkey_user_config.valkey_activedefrag`: Enable active memory defragmentation. When enabled,
   Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system
+- Migrate `aiven_flink_jar_application` resource to the Plugin Framework.
 
 ## [4.61.0] - 2026-07-30
 

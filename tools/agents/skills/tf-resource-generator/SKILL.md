@@ -313,6 +313,18 @@ schema:
 
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
 
+**Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
+read-only all the way down — then it renders as a **computed nested attribute**
+(`Item.RendersAsAttribute`). Blocks cannot be computed, so a read-only block could never hold
+the values the API returns without diffing forever. Making a single nested field `optional`
+flips the whole collection back to a block, which changes the syntax users must write, so do
+that deliberately. Data sources always use blocks.
+
+An `object` is a one-element list in either form (`Item.TFType`), which is the SDKv2 state
+shape. **Due for removal in v5.0.0**: an object becomes a single nested value, dropping the
+`SizeAtMost(1)` validator, the `Max: 1` label and `.0` indexing. The sites carrying it are
+marked `todo: ... v5.0.0`.
+
 **Find examples**: `grep -A 10 "schema:" definitions/aiven_*.yml`
 
 ## Generated View Structure

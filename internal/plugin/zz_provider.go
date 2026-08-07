@@ -21,6 +21,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/oci"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/acl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/mirrormakerreplicationflow"
@@ -76,6 +77,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_connection_pool":                     adapter.NewLazyResource(connectionpool.ResourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
+		"aiven_flink_jar_application":               adapter.NewLazyResource(jarapplication.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(acl.ResourceOptions),
