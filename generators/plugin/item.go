@@ -131,15 +131,20 @@ type Scope struct {
 	CurrentMeta *SchemaMeta
 }
 
+type RefreshStateCondition struct {
+	Attribute *string  `yaml:"attribute,omitempty"`
+	Desired   []string `yaml:"desired,omitempty"`
+	Failed    []string `yaml:"failed,omitempty"`
+}
+
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description           string            `yaml:"description"`
-	DeprecationMessage    string            `yaml:"deprecationMessage,omitempty"`
-	TerminationProtection bool              `yaml:"terminationProtection,omitempty"`
-	RefreshState          bool              `yaml:"refreshState,omitempty"`
-	RefreshStateDelay     time.Duration     `yaml:"refreshStateDelay,omitempty"`
-	RefreshStateDesired   map[string]string `yaml:"refreshStateDesired,omitempty"`
+	Description           string                 `yaml:"description"`
+	DeprecationMessage    string                 `yaml:"deprecationMessage,omitempty"`
+	TerminationProtection bool                   `yaml:"terminationProtection,omitempty"`
+	RefreshState          *RefreshStateCondition `yaml:"refreshState,omitempty"`
+	RefreshStateDelay     time.Duration          `yaml:"refreshStateDelay,omitempty"`
 	// DeleteStateDesired, when non-nil (even as an empty map), enables the delete poller. It maps
 	// Terraform attribute names to the terminal value the poller must observe. See
 	// adapter.DeleteStateOptions.

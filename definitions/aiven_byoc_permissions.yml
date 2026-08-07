@@ -11,7 +11,7 @@ resource:
 
     Create this resource after \`aiven_byoc_aws_entity\` and \`aiven_byoc_aws_provision\` so the custom cloud environment
     is active before permissions are granted.
-  refreshState: true
+  refreshState: {}
   removeMissing: true
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]

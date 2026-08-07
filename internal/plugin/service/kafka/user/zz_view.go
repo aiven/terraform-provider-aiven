@@ -24,7 +24,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Delete:         deleteView,
 	IDFields:       idFields(),
 	Read:           readView,
-	RefreshState:   true,
+	RefreshState:   &adapter.RefreshStateCondition{},
 	RemoveMissing:  true,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),

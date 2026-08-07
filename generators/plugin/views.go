@@ -13,16 +13,17 @@ import (
 )
 
 const (
-	viewSuffix                 = "View"
-	optionsSuffix              = "Options"
-	configValidatorsFuncSuffix = "ConfigValidators"
-	planModifier               = "planModifier"
-	validateConfig             = "validateConfig"
-	modifyPlan                 = "modifyPlan"
-	resourceData               = "ResourceData"
-	renameFieldsModifier       = "RenameFields"
-	flattenModifier            = "flattenModifier"
-	expandModifier             = "expandModifier"
+	viewSuffix                   = "View"
+	optionsSuffix                = "Options"
+	configValidatorsFuncSuffix   = "ConfigValidators"
+	planModifier                 = "planModifier"
+	validateConfig               = "validateConfig"
+	modifyPlan                   = "modifyPlan"
+	resourceData                 = "ResourceData"
+	renameFieldsModifier         = "RenameFields"
+	flattenModifier              = "flattenModifier"
+	expandModifier               = "expandModifier"
+	defaultRefreshStateAttribute = "state"
 )
 
 // genViews generates CRUD views for the resource, skips disabled or undefined operations.
@@ -98,27 +99,72 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 	}
 
 	if entity.isResource() {
-		if def.Resource.RefreshState {
-			values["RefreshState"] = jen.True()
+		if refreshState := def.Resource.RefreshState; refreshState != nil {
+			fields := jen.Dict{}
+			hasCondition := refreshState.Desired != nil || refreshState.Failed != nil
+			if refreshState.Attribute != nil && *refreshState.Attribute == "" {
+				return nil, errors.New("refreshState: attribute cannot be empty")
+			}
+			if refreshState.Attribute != nil && !hasCondition {
+				return nil, errors.New("refreshState: attribute requires desired")
+			}
+			if hasCondition {
+				attribute := defaultRefreshStateAttribute
+				if refreshState.Attribute != nil {
+					attribute = *refreshState.Attribute
+				}
+
+				prop, ok := item.Properties[attribute]
+				if !ok {
+					return nil, fmt.Errorf("refreshState: unknown attribute %q (not present in schema)", attribute)
+				}
+				if !prop.IsComputed(def, entity) || !prop.IsReadOnly(def, entity) {
+					return nil, fmt.Errorf("refreshState: attribute %q must be computed-only", attribute)
+				}
+				if len(refreshState.Desired) == 0 {
+					return nil, fmt.Errorf("refreshState: attribute %q must define at least one desired value", attribute)
+				}
+				if refreshState.Failed != nil && len(refreshState.Failed) == 0 {
+					return nil, fmt.Errorf("refreshState: attribute %q has an empty failed list", attribute)
+				}
+				if err := validateRefreshStateValues(attribute, "desired", refreshState.Desired, prop); err != nil {
+					return nil, err
+				}
+				if err := validateRefreshStateValues(attribute, "failed", refreshState.Failed, prop); err != nil {
+					return nil, err
+				}
+				for _, failed := range refreshState.Failed {
+					if slices.Contains(refreshState.Desired, failed) {
+						return nil, fmt.Errorf(
+							"refreshState: attribute %q value %q cannot be both desired and failed",
+							attribute,
+							failed,
+						)
+					}
+				}
+
+				fields = jen.Dict{
+					jen.Id("Attribute"): jen.Lit(attribute),
+					jen.Id("Desired"):   stringSliceLiteral(refreshState.Desired),
+				}
+				if len(refreshState.Failed) > 0 {
+					fields[jen.Id("Failed")] = stringSliceLiteral(refreshState.Failed)
+				}
+			}
+
+			values["RefreshState"] = jen.Op("&").
+				Qual(adapterPackage, "RefreshStateCondition").
+				Values(fields)
 
 			if def.Resource.RefreshStateDelay != 0 {
 				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(def.Resource.RefreshStateDelay.String()))
 			}
-
-			if len(def.Resource.RefreshStateDesired) > 0 {
-				dict := make(jen.Dict, len(def.Resource.RefreshStateDesired))
-				for _, k := range sortedKeys(def.Resource.RefreshStateDesired) {
-					want := def.Resource.RefreshStateDesired[k]
-					prop, ok := item.Properties[k]
-					if !ok {
-						return nil, fmt.Errorf("refreshStateDesired: unknown field %q (not present in schema)", k)
-					}
-					if prop.IsEnum() && !enumContainsString(prop.Enum, want) {
-						return nil, fmt.Errorf("refreshStateDesired: field %q has enum %v but desired value %q is not allowed", k, prop.Enum, want)
-					}
-					dict[jen.Lit(k)] = jen.Lit(want)
-				}
-				values["RefreshStateDesired"] = jen.Map(jen.String()).String().Values(dict)
+		} else {
+			if def.Resource.RefreshStateDelay != 0 {
+				return nil, errors.New("refreshStateDelay requires refreshState")
+			}
+			if def.Resource.IgnoreAlreadyExists {
+				return nil, errors.New("ignoreAlreadyExists requires refreshState")
 			}
 		}
 
@@ -174,9 +220,37 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 	return jen.Var().Id(title).Op("=").Add(returnValue), nil
 }
 
-// enumContainsString reports whether enum contains want under fmt.Sprint comparison.
-// Matches the runtime semantics of adapter.Equal so generator-time validation and
-// the runtime RefreshStateDesired check agree on equality.
+func validateRefreshStateValues(attribute, kind string, values []string, prop *Item) error {
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		if _, ok := seen[value]; ok {
+			return fmt.Errorf("refreshState: attribute %q has duplicate %s value %q", attribute, kind, value)
+		}
+		seen[value] = struct{}{}
+
+		if prop.IsEnum() && !enumContainsString(prop.Enum, value) {
+			return fmt.Errorf(
+				"refreshState: attribute %q has enum %v but %s value %q is not allowed",
+				attribute,
+				prop.Enum,
+				kind,
+				value,
+			)
+		}
+	}
+	return nil
+}
+
+func stringSliceLiteral(values []string) *jen.Statement {
+	items := make([]jen.Code, len(values))
+	for i, value := range values {
+		items[i] = jen.Lit(value)
+	}
+	return jen.Index().String().Values(items...)
+}
+
+// enumContainsString reports whether enum contains want under fmt.Sprint comparison. Matches the
+// runtime semantics of adapter.Equal so generator-time validation and runtime state checks agree.
 func enumContainsString(enum []any, want string) bool {
 	return slices.ContainsFunc(enum, func(v any) bool { return fmt.Sprint(v) == want })
 }

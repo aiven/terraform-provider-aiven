@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"slices"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -22,6 +23,16 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
+// RefreshStateCondition describes the terminal values for a Terraform attribute.
+type RefreshStateCondition struct {
+	// Attribute is the Terraform attribute to check after Read.
+	Attribute string
+	// Desired contains successful attribute values. A match against any value succeeds.
+	Desired []string
+	// Failed contains terminal failure attribute values. A match against any value fails refresh immediately.
+	Failed []string
+}
+
 type ResourceOptions struct {
 	// TypeName is the name of resource,
 	// for instance, "aiven_organization_address"
@@ -37,21 +48,19 @@ type ResourceOptions struct {
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
 	IDFields []string
 
-	// Whether to call Read after Create and Update operations.
-	// Implemented by refreshState; see that function for retry behavior.
-	RefreshState bool
+	// RefreshState enables Read after Create and Update when non-nil. An empty condition performs a
+	// post-operation Read without checking an attribute. Otherwise, Attribute must reach one of its
+	// Desired values; any Failed value terminates refresh with an error.
+	RefreshState *RefreshStateCondition
 
 	// Time to wait after creating or updating the resource to let the backend catch up.
 	RefreshStateDelay time.Duration
 
-	// Attribute names and values that must match after Read before refreshState succeeds.
-	// Mismatches return ErrRefreshStateDesired and are retried with the same backoff as transient Read errors.
-	RefreshStateDesired map[string]string
-
 	// RefreshStateCheck validates the freshly read state after Read succeeds in refreshState,
-	// for conditions that RefreshStateDesired can't express.
-	// A non-nil error means the backend hasn't converged yet: it is wrapped in
-	// ErrRefreshStateDesired and retried with the same backoff as transient Read errors.
+	// for conditions that declarative RefreshState conditions can't express.
+	// ErrRefreshStateFailed terminates refresh immediately. Any other non-nil error means the
+	// backend hasn't converged yet: it is wrapped in ErrRefreshStateDesired and retried with the
+	// same backoff as transient Read errors.
 	// Runs only during the post-Create/Update refresh, never during plain Read, import,
 	// or datasource reads.
 	// The check validates the same Read() that populates state.
@@ -75,7 +84,7 @@ type ResourceOptions struct {
 	// IgnoreAlreadyExists treats a 409 Conflict ("already exists") response from Create as success.
 	// This is useful when the resource being managed is a one-shot provisioning action whose effect is
 	// idempotent from Terraform's perspective — re-running it should adopt the existing entity rather
-	// than fail. Requires RefreshState=true so that the full state is populated by the subsequent Read.
+	// than fail. Requires non-nil RefreshState so the full state is populated by the subsequent Read.
 	// NOTE: This does NOT work for resources whose ID is returned only in the Create response
 	// (e.g. server-assigned IDs), because on conflict there is no response to read the ID from and
 	// the subsequent Read has nothing to look up.
@@ -94,7 +103,7 @@ type ResourceOptions struct {
 	// CRUD operations.
 	// Each CRUD operation should return diag.Diagnostics (rather than taking it as an argument)
 	// This design allows internal retry logic for operations that can fail transiently.
-	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState=true to trigger a post-operation Read.
+	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState to trigger a post-operation Read.
 	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
 
 	Create func(ctx context.Context, client avngen.Client, d ResourceData) error
@@ -205,20 +214,62 @@ func (a *resourceAdapter) Create(
 	defer drainWarnings()
 
 	err = a.resource.Create(ctx, a.client, d)
+	createSucceeded := err == nil
 	if err != nil && !(a.resource.IgnoreAlreadyExists && avngen.IsAlreadyExists(err)) {
 		diags.AddError("failed to create resource", err.Error())
 		return
 	}
 
-	if a.resource.RefreshState {
+	if a.resource.RefreshState != nil {
+		// Terraform persists state returned with an error diagnostic and marks the resource as
+		// tainted. Checkpoint a successfully created resource before polling so it remains
+		// manageable when the post-Create refresh fails. Do not checkpoint a failed
+		// AlreadyExists adoption.
+		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IDFields)
+		if stateCheckpointed {
+			rsp.State.Raw = d.tfValue()
+		}
+
 		err = a.refreshState(ctx, d)
 		if err != nil {
+			// A successful Read may populate a server-assigned ID that was unavailable before
+			// polling. Preserve it without replacing an earlier, known-good checkpoint.
+			if createSucceeded && !stateCheckpointed && ensurePostCreateID(d, a.resource.IDFields) {
+				rsp.State.Raw = d.tfValue()
+			}
 			diags.AddError("failed to refresh state", err.Error())
 			return
 		}
 	}
 
 	rsp.State.Raw = d.tfValue()
+}
+
+// ensurePostCreateID reports whether d has a complete ID that is safe to checkpoint. Generated
+// Create operations without a response rely on the subsequent Read to set the ID, even when every
+// component is already known from configuration. Build that ID here so a refresh failure does not
+// lose an otherwise successful Create.
+func ensurePostCreateID(d ResourceData, idFields []string) bool {
+	if d.ID() != "" {
+		return true
+	}
+	if len(idFields) == 0 {
+		return false
+	}
+
+	parts := make([]string, len(idFields))
+	for i, field := range idFields {
+		value, ok := d.GetOk(field)
+		if !ok {
+			return false
+		}
+		parts[i], ok = value.(string)
+		if !ok || parts[i] == "" {
+			return false
+		}
+	}
+
+	return d.SetID(parts...) == nil
 }
 
 func (a *resourceAdapter) Read(
@@ -263,15 +314,18 @@ func (a *resourceAdapter) Read(
 	rsp.State.Raw = d.tfValue()
 }
 
-// ErrRefreshStateDesired indicates a RefreshStateDesired attribute did not match after Read.
+// ErrRefreshStateDesired indicates a refresh attribute did not match any configured desired value.
 var ErrRefreshStateDesired = errors.New("resource is not in the desired state")
+
+// ErrRefreshStateFailed indicates a refresh attribute reached a configured terminal failure value.
+var ErrRefreshStateFailed = errors.New("resource reached a failed state")
 
 // defaultRefreshStateRetryDelay is the fixed delay between Read attempts when
 // ResourceOptions.refreshStateRetryDelay is zero.
 const defaultRefreshStateRetryDelay = time.Second * 5
 
 // refreshState reads the resource after Create or Update with retries, then validates the state
-// against ResourceOptions.RefreshStateDesired and ResourceOptions.RefreshStateCheck.
+// against ResourceOptions.RefreshState and ResourceOptions.RefreshStateCheck.
 //
 // A non-zero ResourceOptions.RefreshStateDelay is waited out before the first attempt (honoring
 // ctx). The delay is fixed (refreshStateRetryDelay, default defaultRefreshStateRetryDelay) and there
@@ -279,6 +333,15 @@ const defaultRefreshStateRetryDelay = time.Second * 5
 // or ctx (the create/update timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the
 // last attempt's error, so the user sees why the state never settled rather than a bare deadline.
 func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) error {
+	condition := a.resource.RefreshState
+	hasAttributeCondition := condition.Attribute != "" || condition.Desired != nil || condition.Failed != nil
+	if hasAttributeCondition && len(condition.Desired) == 0 {
+		return fmt.Errorf("refresh state condition for %q has no desired values", condition.Attribute)
+	}
+	if hasAttributeCondition && condition.Attribute == "" {
+		return errors.New("refresh state condition has no attribute")
+	}
+
 	retryDelay := a.resource.refreshStateRetryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultRefreshStateRetryDelay
@@ -310,15 +373,32 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 				return err
 			}
 
-			for key, want := range a.resource.RefreshStateDesired {
-				state := rd.Get(key)
-				if !Equal(state, want) {
-					return fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrRefreshStateDesired, key, want, state)
+			if hasAttributeCondition {
+				attributeValue, ok := rd.GetOk(condition.Attribute)
+				if ok && slices.ContainsFunc(condition.Failed, func(failed string) bool {
+					return Equal(attributeValue, failed)
+				}) {
+					return fmt.Errorf("%w: %q is `%v`", ErrRefreshStateFailed, condition.Attribute, attributeValue)
+				}
+
+				if !ok || !slices.ContainsFunc(condition.Desired, func(desired string) bool {
+					return Equal(attributeValue, desired)
+				}) {
+					return fmt.Errorf(
+						"%w: expected %q to be one of `%v`, got `%v`",
+						ErrRefreshStateDesired,
+						condition.Attribute,
+						condition.Desired,
+						attributeValue,
+					)
 				}
 			}
 
 			if a.resource.RefreshStateCheck != nil {
 				if err := a.resource.RefreshStateCheck(rd); err != nil {
+					if errors.Is(err, ErrRefreshStateFailed) {
+						return err
+					}
 					return fmt.Errorf("%w: %w", ErrRefreshStateDesired, err)
 				}
 			}
@@ -331,8 +411,8 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 		retry.Attempts(0),
 		retry.LastErrorOnly(true),
 		retry.Context(ctx),
-		// On timeout, wrap ctx.Err() with the last attempt's error so the user sees why the state
-		// never settled (e.g. the unmet RefreshStateDesired).
+		// On timeout, wrap ctx.Err() with the last attempt's error so the user sees why refresh
+		// did not converge.
 		retry.WrapContextErrorWithLastError(true),
 		retry.RetryIf(isRefreshStateRetryable),
 	)
@@ -349,7 +429,9 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 //     resource might not be present in list or direct GET call.
 //   - 403 Forbidden: Temporary permission issues can occur due to eventual consistency
 //     (e.g., "organization_project").
-//   - ErrRefreshStateDesired: A RefreshStateDesired attribute did not match after Read.
+//   - ErrRefreshStateDesired: A refresh attribute did not match any desired value after Read.
+//
+// ErrRefreshStateFailed is terminal and intentionally non-retryable.
 func isRefreshStateRetryable(err error) bool {
 	return IsNotFound(err) || isAivenError(err, http.StatusForbidden) || errors.Is(err, ErrRefreshStateDesired)
 }
@@ -392,7 +474,7 @@ func (a *resourceAdapter) Update(
 		}
 	}
 
-	if a.resource.RefreshState {
+	if a.resource.RefreshState != nil {
 		err = a.refreshState(ctx, d)
 		if err != nil {
 			diags.AddError("failed to refresh state", err.Error())

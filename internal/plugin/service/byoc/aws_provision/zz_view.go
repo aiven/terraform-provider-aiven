@@ -28,11 +28,13 @@ var ResourceOptions = adapter.ResourceOptions{
 	IDFields:            idFields(),
 	IgnoreAlreadyExists: true,
 	Read:                readView,
-	RefreshState:        true,
-	RefreshStateDesired: map[string]string{"state": "active"},
-	Schema:              resourceSchema,
-	SchemaInternal:      resourceSchemaInternal(),
-	TypeName:            typeName,
+	RefreshState: &adapter.RefreshStateCondition{
+		Attribute: "state",
+		Desired:   []string{"active"},
+	},
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

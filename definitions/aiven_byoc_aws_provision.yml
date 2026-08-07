@@ -10,9 +10,8 @@ resource:
 
     Create this resource after the customer-side AWS infrastructure
     (IAM role, VPC, subnets, security groups, buckets) has been defined.
-  refreshState: true
-  refreshStateDesired:
-    state: active
+  refreshState:
+    desired: [active]
   deleteStateDesired:
     state: deleted
 clientHandler: byoc

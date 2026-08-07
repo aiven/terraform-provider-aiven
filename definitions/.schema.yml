@@ -40,10 +40,36 @@ properties:
           Set to true to enable termination protection validation for this resource.
           The `termination_protection` attribute generated automatically.
       refreshState:
-        type: boolean
+        type: object
+        additionalProperties: false
+        properties:
+          attribute:
+            type: string
+            minLength: 1
+            default: state
+          desired:
+            type: array
+            minItems: 1
+            uniqueItems: true
+            items:
+              type: string
+          failed:
+            type: array
+            minItems: 1
+            uniqueItems: true
+            items:
+              type: string
+        dependentRequired:
+          attribute:
+            - desired
+          failed:
+            - desired
         $comment: |
-          Set to true to refresh the state after the resource is created/updated/deleted.
-          Example: refreshState: true
+          Refreshes state after Create and Update. An empty object performs one successful Read,
+          retrying transient 404/403 errors. When conditions are configured, `attribute` selects
+          the computed-only Terraform attribute to check and defaults to `state`. The attribute must
+          reach one of the `desired` values. A match against any `failed` value fails immediately.
+          Values outside both lists are treated as pending and retried until the operation timeout.
       refreshStateDelay:
         type: string
         example: 10s
@@ -52,20 +78,6 @@ properties:
           This is useful to avoid race conditions with the backend.
           For instance, when a new user is created, the backend might hit a read-replica.
           So we sleep for a few seconds to give the backend time to catch up.
-        dependencies:
-          - refreshState
-      refreshStateDesired:
-        type: object
-        additionalProperties:
-          type: string
-        $comment: |
-          Map of Terraform attribute names to the desired value the adapter must observe before
-          treating the post-Create/Update Read as successful. Each entry is checked after a Read
-          attempt during refreshState; mismatches retry under the same backoff as the standard
-          404/403 cases. Use this for resources whose API reports a transient state
-          (e.g. `state: ACTIVE`) without custom waiter logic.
-        dependencies:
-          - refreshState
       deleteStateDesired:
         type: object
         additionalProperties:
@@ -76,8 +88,8 @@ properties:
           detaching dependents resolves on its own) and poll Read until the resource is gone (404) or
           every entry here matches. Each entry maps a Terraform attribute name to the terminal value
           the adapter must observe before treating a Delete as complete; with an empty map a 404 is
-          the only terminal. Values are validated against the field's enum (when declared), as for
-          refreshStateDesired. Omit it entirely to delete without polling.
+          the only terminal. Values are validated against the field's enum when one is declared.
+          Omit it entirely to delete without polling.
       removeMissing:
         type: boolean
         $comment: |
@@ -88,11 +100,9 @@ properties:
         $comment: |
           Set to true to treat a 409 Conflict ("already exists") response from Create as success.
           Useful for one-shot provisioning actions that should adopt an existing entity rather than fail on re-run.
-          Requires `refreshState: true` so the state is populated by the subsequent Read.
+          Requires `refreshState` so the state is populated by the subsequent Read.
           Does NOT work for resources whose ID is returned only in the Create response (e.g. server-assigned IDs):
           on conflict there is no response to read the ID from and the subsequent Read has nothing to look up.
-        dependencies:
-          - refreshState
       disableExample:
         type: boolean
         $comment: |
@@ -113,6 +123,11 @@ properties:
           adapter.ResourceOptions.ModifyPlan signature. Use this for plan-time checks that
           need access to prior state (e.g. forbidding a decrease in a numeric attribute).
           https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
+    dependentRequired:
+      refreshStateDelay:
+        - refreshState
+      ignoreAlreadyExists:
+        - refreshState
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
