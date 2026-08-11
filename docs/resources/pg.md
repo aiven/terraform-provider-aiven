@@ -314,8 +314,10 @@ Optional:
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
 - `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.
 - `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. Default: `0`.
+- `server_connect_timeout` (Number) If connection and login don’t finish in this amount of time, the connection will be closed. (seconds).
 - `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). Default: `600`.
 - `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds). Default: `3600`.
+- `server_login_retry` (Number) If login to the server failed, because of failure to connect or from authentication, the pooler waits this much before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt. (seconds).
 - `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes. Default: `false`.
 
 

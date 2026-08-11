@@ -9,8 +9,9 @@ resource "aiven_pg_user" "example" {
   pg_allow_replication = true
 
   /* COMPUTED FIELDS
-  access_cert = "foo"
-  access_key  = "foo"
-  type        = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }

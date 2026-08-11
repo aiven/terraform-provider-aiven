@@ -4,7 +4,8 @@ data "aiven_opensearch_user" "example" {
   username     = "testuser"
 
   /* COMPUTED FIELDS
-  password = "password123"
-  type     = "foo"
+  password                 = "password123"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }

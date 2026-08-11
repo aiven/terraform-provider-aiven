@@ -8,8 +8,9 @@ resource "aiven_kafka_user" "example" {
   password_wo_version = 1
 
   /* COMPUTED FIELDS
-  access_cert = "foo"
-  access_key  = "foo"
-  type        = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }
