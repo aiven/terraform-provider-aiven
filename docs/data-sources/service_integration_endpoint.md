@@ -292,6 +292,7 @@ Read-Only:
 
 - `attributes` (Map of String)
 - `compression` (String)
+- `encoding_type` (String)
 - `headers` (Map of String)
 - `service_address` (String)
 - `timeout` (Number)
