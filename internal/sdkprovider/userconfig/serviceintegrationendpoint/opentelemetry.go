@@ -25,6 +25,12 @@ func opentelemetryUserConfig() *schema.Schema {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"gzip", "none"}, false),
 			},
+			"encoding_type": {
+				Description:  "Enum: `json`, `protobuf`. Encoding used for exported metrics. Leave unset to use telegraf's default.",
+				Optional:     true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"json", "protobuf"}, false),
+			},
 			"headers": {
 				Description: "Additional gRPC metadata headers sent with every export request.",
 				Optional:    true,
