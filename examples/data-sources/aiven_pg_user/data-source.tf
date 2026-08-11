@@ -4,10 +4,11 @@ data "aiven_pg_user" "example" {
   username     = "testuser"
 
   /* COMPUTED FIELDS
-  access_cert          = "foo"
-  access_key           = "foo"
-  password             = "password123"
-  pg_allow_replication = true
-  type                 = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  password                 = "password123"
+  password_encryption_type = "md5"
+  pg_allow_replication     = true
+  type                     = "foo"
   */
 }
