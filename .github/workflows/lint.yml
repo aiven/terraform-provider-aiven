@@ -59,6 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
       - uses: actions/setup-go@v7
         with:
@@ -78,6 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
           fetch-depth: 0
       - uses: actions/setup-go@v7
         with:
@@ -97,6 +99,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
+        ref: ${{ github.event.pull_request.head.sha || inputs.ref }}
         fetch-depth: 0
     - uses: actions/setup-go@v7
       with:
