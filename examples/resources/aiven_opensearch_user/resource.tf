@@ -8,6 +8,7 @@ resource "aiven_opensearch_user" "example" {
   password_wo_version = 1
 
   /* COMPUTED FIELDS
-  type = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }

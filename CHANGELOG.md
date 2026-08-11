@@ -20,6 +20,18 @@ nav_order: 1
   to match the previous SDK resource and avoid state drift.
 - Add `aiven_valkey` field `valkey_user_config.valkey_activedefrag`: Enable active memory defragmentation. When enabled,
   Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system
+- Change `aiven_account_team_project` field `team_type` (enum): add `project:ai_gateway_keys:read`, `project:ai_gateway_keys:write`
+- Add `aiven_kafka_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
+  user, derived from the stored password hash
+- Add `aiven_mysql_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
+  user, derived from the stored password hash
+- Add `aiven_opensearch_user` field `password_encryption_type` (enum): The password hashing algorithm used for this
+  PostgreSQL user, derived from the stored password hash
+- Add `aiven_pg_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
+  user, derived from the stored password hash
+- Change `aiven_project_user` field `member_type` (enum): add `project:ai_gateway_keys:read`, `project:ai_gateway_keys:write`
+- Add `aiven_valkey_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
+  user, derived from the stored password hash
 
 ## [4.61.0] - 2026-07-30
 

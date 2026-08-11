@@ -18,12 +18,13 @@ data "aiven_valkey_user" "example" {
   username     = "testuser"
 
   /* COMPUTED FIELDS
-  password              = "password123"
-  type                  = "foo"
-  valkey_acl_categories = ["+@write", "+@keyspace"]
-  valkey_acl_channels   = ["some*chan"]
-  valkey_acl_commands   = ["+set", "+del", "+expire", "-flushall", "-flushdb"]
-  valkey_acl_keys       = ["session:*"]
+  password                 = "password123"
+  password_encryption_type = "md5"
+  type                     = "foo"
+  valkey_acl_categories    = ["+@write", "+@keyspace"]
+  valkey_acl_channels      = ["some*chan"]
+  valkey_acl_commands      = ["+set", "+del", "+expire", "-flushall", "-flushdb"]
+  valkey_acl_keys          = ["session:*"]
   */
 }
 ```
@@ -44,6 +45,7 @@ data "aiven_valkey_user" "example" {
 
 - `id` (String) Resource ID composed as: `project/service_name/username`.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
+- `password_encryption_type` (String) The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.
 - `type` (String) Account type.
 - `valkey_acl_categories` (List of String) Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature. The field is required with `valkey_acl_commands` and `valkey_acl_keys`.
 - `valkey_acl_channels` (List of String) Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.
