@@ -12,6 +12,7 @@ resource "aiven_valkey_user" "example" {
   valkey_acl_keys       = ["session:*"]
 
   /* COMPUTED FIELDS
-  type = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }
