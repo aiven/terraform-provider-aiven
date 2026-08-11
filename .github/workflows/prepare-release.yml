@@ -99,7 +99,7 @@ jobs:
   # Run all linting-related checks
   run_lint_checks:
     needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created
+    if: needs.create_release_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/lint.yml
     with:
       ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
@@ -107,7 +107,7 @@ jobs:
   # Run unit tests
   run_unit_tests:
     needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created
+    if: needs.create_release_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/unit-tests.yml
     with:
       ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
@@ -115,7 +115,7 @@ jobs:
   # Run dependency review
   run_dependency_review:
     needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created
+    if: needs.create_release_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/dependency-review.yml
     with:
       head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
@@ -124,7 +124,7 @@ jobs:
   # Run acceptance tests
   run_acceptance_tests:
     needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created && inputs.run_acceptance_tests
+    if: needs.create_release_pr.outputs.pr_created == 'true' && inputs.run_acceptance_tests
     uses: ./.github/workflows/reusable-acceptance-tests.yml
     with:
       ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}

@@ -60,7 +60,7 @@ jobs:
   # Run all linting-related checks
   run_lint_checks:
     needs: create_update_pr
-    if: needs.create_update_pr.outputs.pr_created
+    if: needs.create_update_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/lint.yml
     with:
       ref: ${{ needs.create_update_pr.outputs.pr_head_sha }}
@@ -68,7 +68,7 @@ jobs:
   # Run unit tests
   run_unit_tests:
     needs: create_update_pr
-    if: needs.create_update_pr.outputs.pr_created
+    if: needs.create_update_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/unit-tests.yml
     with:
       ref: ${{ needs.create_update_pr.outputs.pr_head_sha }}
@@ -76,7 +76,7 @@ jobs:
   # Run dependency review
   run_dependency_review:
     needs: create_update_pr
-    if: needs.create_update_pr.outputs.pr_created
+    if: needs.create_update_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/dependency-review.yml
     with:
       head_ref: ${{ needs.create_update_pr.outputs.pr_head_sha }}
