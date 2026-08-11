@@ -382,6 +382,7 @@ Required:
 Optional:
 
 - `attributes` (Map of String) Resource attributes to attach to every exported metric.
+- `encoding_type` (String) Enum: `json`, `protobuf`. Encoding used for exported metrics. Leave unset to use telegraf's default.
 - `headers` (Map of String) Additional gRPC metadata headers sent with every export request.
 
 

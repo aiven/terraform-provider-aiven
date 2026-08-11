@@ -288,8 +288,10 @@ Read-Only:
 - `ignore_startup_parameters` (List of String)
 - `max_prepared_statements` (Number)
 - `min_pool_size` (Number)
+- `server_connect_timeout` (Number)
 - `server_idle_timeout` (Number)
 - `server_lifetime` (Number)
+- `server_login_retry` (Number)
 - `server_reset_query_always` (Boolean)
 
 

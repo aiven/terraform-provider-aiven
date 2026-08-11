@@ -4,10 +4,11 @@ data "aiven_mysql_user" "example" {
   username     = "testuser"
 
   /* COMPUTED FIELDS
-  access_cert    = "foo"
-  access_key     = "foo"
-  authentication = "caching_sha2_password"
-  password       = "password123"
-  type           = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  authentication           = "caching_sha2_password"
+  password                 = "password123"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }
