@@ -23,9 +23,10 @@ resource "aiven_pg_user" "example" {
   pg_allow_replication = true
 
   /* COMPUTED FIELDS
-  access_cert = "foo"
-  access_key  = "foo"
-  type        = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }
 ```
@@ -53,6 +54,7 @@ resource "aiven_pg_user" "example" {
 - `access_cert` (String, Sensitive) Access certificate for TLS client authentication.
 - `access_key` (String, Sensitive) Access key for TLS client authentication.
 - `id` (String) Resource ID composed as: `project/service_name/username`.
+- `password_encryption_type` (String) The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.
 - `type` (String) The service user account type, either primary or regular.
 
 <a id="nestedblock--timeouts"></a>

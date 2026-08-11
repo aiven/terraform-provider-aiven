@@ -9,8 +9,9 @@ resource "aiven_mysql_user" "example" {
   authentication      = "caching_sha2_password"
 
   /* COMPUTED FIELDS
-  access_cert = "foo"
-  access_key  = "foo"
-  type        = "foo"
+  access_cert              = "foo"
+  access_key               = "foo"
+  password_encryption_type = "md5"
+  type                     = "foo"
   */
 }
