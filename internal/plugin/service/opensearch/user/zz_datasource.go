@@ -26,6 +26,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.",
 				Sensitive:           true,
 			},
+			"password_encryption_type": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
+			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",
 				Required:            true,
@@ -56,6 +60,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"password": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"password_encryption_type": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
