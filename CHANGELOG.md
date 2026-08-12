@@ -40,6 +40,7 @@ nav_order: 1
   for exported metrics
 - Add `aiven_valkey_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
   user, derived from the stored password hash
+- Migrate `aiven_flink_jar_application` resource to the Plugin Framework.
 
 ## [4.61.0] - 2026-07-30
 

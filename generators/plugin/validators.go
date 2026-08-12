@@ -88,6 +88,7 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 		}
 
 		if entity.isResource() && item.IsObject() {
+			// todo: drop for objects in v5.0.0, see Item.TFType.
 			codes = append(codes, jen.Qual(pkg, "SizeAtMost").Call(jen.Lit(1)))
 		}
 	}

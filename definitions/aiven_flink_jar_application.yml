@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/flink/jarapplication
+beta: true
+resource:
+  refreshState: {}
+  removeMissing: true
+  description: |
+    Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).
+    Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled, which allows uploading and
+    deploying custom JARs.
+clientHandler: flinkjarapplication
+idAttributeComposed: [project, service_name, application_id]
+legacyTimeouts: true
+rename:
+  id: application_id
+# Response envelope fields, not part of the resource.
+remove:
+  - message
+  - errors
+operations:
+  - id: ServiceFlinkCreateJarApplication
+    type: create
+  - id: ServiceFlinkGetJarApplication
+    type: read
+  - id: ServiceFlinkUpdateJarApplication
+    type: update
+  - id: ServiceFlinkDeleteJarApplication
+    type: delete
+schema:
+  # A list in the SDK schema: keep the ordering so existing state stays valid.
+  application_versions:
+    type: arrayOrdered

@@ -132,6 +132,40 @@ schema:
           type: string
 ```
 
+#### Read-Only Nested Collections
+
+**Do not reshape a field to fix a diff.** A list stays a list and a set stays a set, which is
+what keeps an existing state readable.
+
+Nested collections are the one exception, and the generator decides it: a collection that is
+read-only all the way down becomes a **computed nested attribute**, everything else a **block**.
+No YAML key asks for this — `Item.RendersAsAttribute` derives it.
+
+The Plugin Framework has no computed blocks: Terraform plans a block from the configuration, so
+a value stored for a block the configuration doesn't declare either shows up as a permanent
+diff or fails the apply with an inconsistent result. An attribute can be computed, and a
+read-only collection gives up nothing by losing the block body — it has no field to write in
+it. The two are interchangeable for readers: same `list(object({...}))` in the state, same
+expressions (`app.application_versions[0].id`), so no state upgrade is involved.
+
+An `object` stays a one-element collection in both forms, as the SDKv2 state holds it. That is
+**due for removal in v5.0.0**, when `current_deployment.0.status` becomes
+`current_deployment.status`. Never anticipate it in a migration: it breaks every reader.
+
+**Caveat — this holds only when nothing inside is settable.** An `optional: true` +
+`computed: true` collection such as the kafka topic `config` stays a block, because real
+configurations write it in block syntax. Marking one nested field `optional: true` is enough to
+turn the whole collection back into a block. Data sources keep blocks too: their result is not
+planned against a configuration, so a block holding API values causes no diff there.
+
+For an optional+computed block, drop the values the user did not set instead — see
+`flattenConfig` in `internal/plugin/service/kafka/topic/topic.go`. `Flatten` writes back only
+the keys the response carries, so `delete(dto, name)` leaves whatever prior state holds;
+`d.Set(name, nil)` removes it.
+
+Generated example: `application_versions` in
+`internal/plugin/service/flink/jarapplication/zz_resource.go`.
+
 ### 4. Preserve ID Structure
 
 **CRITICAL**: The ID format MUST stay the same for state compatibility.
@@ -265,7 +299,7 @@ Before marking migration complete:
 
 - [ ] Resource ID format is identical
 - [ ] All schema fields are present (no removals)
-- [ ] Field types match exactly
+- [ ] Field types match exactly, and no optional field turned from a block into an attribute
 - [ ] Computed fields work the same way
 - [ ] Default values match
 - [ ] Required/Optional flags match
@@ -285,6 +319,7 @@ Before marking migration complete:
 | Sensitive field no longer marked sensitive | Set `sensitive: true` on the attribute (and nested fields if applicable); match SDK `Sensitive: true` exactly |
 | ID format changed accidentally | Verify `idAttributeComposed` matches SDK's ID builder |
 | Set ordering causes diffs | Use `arrayOrdered` instead of `array` |
+| Read-only list of objects diffs on every plan | It must render as a computed attribute; check nothing inside it is `optional` (see Read-Only Nested Collections) |
 | Computed field becomes required | Keep as `computed: true` if API provides it |
 | Custom validation lost | Implement in custom modifier or use schema validation |
 | State upgrade needed | Implement state upgrader in Plugin Framework |

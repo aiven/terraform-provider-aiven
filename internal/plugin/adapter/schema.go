@@ -38,6 +38,10 @@ type Schema struct {
 	// This flag distinguishes between a direct object and a list containing one object, which is important for marshaling.
 	IsObject bool
 
+	// IsAttribute marks a collection rendered as a computed attribute instead of a block.
+	// Unlike a block, it may hold values the configuration doesn't declare.
+	IsAttribute bool
+
 	// If true, the field value cannot be zero (i.e., it has a minimum, minLength, or minItems > 0).
 	// In SDKv2, the state may contain empty values that should not be sent to the API.
 	// Because we can't distinguish between zero values and missing values in the SDKv2 state,
