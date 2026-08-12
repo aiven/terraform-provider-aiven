@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,44 @@ func TestGenSchemaRendersReadOnlyObjectAsAttribute(t *testing.T) {
 	require.Contains(t, got, `"current_deployment": schema.ListNestedAttribute{`)
 	// Validators only see the configuration.
 	require.NotContains(t, got, "listvalidator")
+}
+
+// Objects and ordered lists take different paths through the internal schema generator.
+func TestGenSchemaInternalMarksReadOnlyCollectionsAsAttributes(t *testing.T) {
+	root := &Item{
+		Name: "root",
+		Type: SchemaTypeObject,
+		Properties: map[string]*Item{
+			"current_deployment": {
+				Name:     "current_deployment",
+				Type:     SchemaTypeObject,
+				Computed: true,
+				Properties: map[string]*Item{
+					"status": {Name: "status", Type: SchemaTypeString, Computed: true},
+				},
+			},
+			"application_versions": {
+				Name:     "application_versions",
+				Type:     SchemaTypeArrayOrdered,
+				Computed: true,
+				Items: &Item{
+					Name:     "application_versions",
+					Type:     SchemaTypeObject,
+					Computed: true,
+					Properties: map[string]*Item{
+						"version": {Name: "version", Type: SchemaTypeInteger, Computed: true},
+					},
+				},
+			},
+		},
+	}
+	setParents(root, nil)
+
+	code, err := genSchemaInternal(&Definition{Resource: &SchemaMeta{}}, resourceType, root)
+	require.NoError(t, err)
+	got := strings.Join(strings.Fields(renderCode(t, code)), " ")
+	require.Contains(t, got, `"current_deployment": &adapter.Schema{ Computed: true, IsAttribute: true,`)
+	require.Contains(t, got, `"application_versions": &adapter.Schema{ Computed: true, IsAttribute: true,`)
 }
 
 // A configurable object stays a block, and keeps the singleton validator.
