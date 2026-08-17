@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/flink/jarversion
+beta: true
+limitedAvailability: true
+resource:
+  # Create returns the version before the jar file is uploaded, so the read waits for the upload.
+  refreshStateExists: true
+  removeMissing: true
+  modifyPlan: true
+  description: |
+    Creates and manages a version of an
+    [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).
+    The jar file is uploaded to the pre-signed URL the API returns, and editing the file creates a
+    new version. Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled,
+    which allows uploading and deploying custom JARs.
+clientHandler: flinkjarapplicationversion
+idAttributeComposed: [project, service_name, application_id, application_version_id]
+legacyTimeouts: true
+rename:
+  id: application_version_id
+operations:
+  # The generated view creates the version, the custom one uploads the jar file afterwards.
+  - id: ServiceFlinkCreateJarApplicationVersion
+    type: create
+  - id: ServiceFlinkGetJarApplicationVersion
+    type: read
+  - id: ServiceFlinkDeleteJarApplicationVersion
+    type: delete
+schema:
+  # Neither field exists in the API: the jar file is uploaded out of band.
+  source:
+    type: string
+    required: true
+    # A path change alone uploads nothing, so it doesn't replace the version. There is no update
+    # operation either: the adapter skips a nil Update and just refreshes the state.
+    forceNew: false
+    description: The path to the jar file to upload.
+    example: ./example.jar
+  source_checksum:
+    type: string
+    computed: true
+    description: The sha256 checksum of the jar file to upload.

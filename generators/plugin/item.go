@@ -297,6 +297,13 @@ type Item struct {
 	// Overrides what UsesStateForUnknown infers.
 	OverrideUseStateForUnknown *bool `yaml:"useStateForUnknown,omitempty"`
 
+	// DropDefault removes an OpenAPI default from the generated schema.
+	// A workaround for migrated resources: SDKv2 stored the Terraform zero value for an
+	// omitted optional field, and a generated default would plan a change against it. The
+	// resource then applies the API default itself, in its create view.
+	// todo: drop in v5.0.0, when the state written by SDKv2 is no longer supported.
+	DropDefault bool `yaml:"dropDefault,omitempty"`
+
 	WriteOnly bool `yaml:"writeOnly,omitempty"`
 
 	// FromSchemaOverride is an internal flag set during datasource.schemaOverride

@@ -188,6 +188,43 @@ already includes that exists retry. Values within each list use OR semantics. A 
 completes the refresh, and any failed value stops it immediately. Values in neither list are
 treated as pending and retried until the operation timeout.
 
+`stateAttribute` names a **top-level** computed-only attribute; the generator rejects anything else.
+When the value to wait for lives elsewhere — nested in a collection, spread over several attributes,
+or derived — keep `refreshStateExists: true` and set `ResourceOptions.RefreshStateCheck` in
+`init()`. It runs after each Read of the post-Create/Update refresh only (never during plain Read,
+import, or a data source read), and its error decides what happens next:
+`adapter.ErrRefreshStateFailed` stops the refresh, and any other error means "not converged yet" and
+is retried with the same backoff as a transient Read error.
+
+```go
+// The status lives inside a nested collection, out of reach of the declarative condition.
+// Do not index with Get("file_info.0.file_status"): Get panics when the list is still empty.
+func init() {
+    ResourceOptions.RefreshStateCheck = fileIsReady
+}
+
+func fileIsReady(d adapter.ResourceData) error {
+    list, _ := d.Get("file_info").([]any)
+    if len(list) == 0 {
+        return fmt.Errorf("jar file status is not ready: %q", "")
+    }
+    info, _ := list[0].(map[string]any)
+    status, _ := info["file_status"].(string)
+    switch status {
+    case "READY":
+        return nil
+    case "FAILED":
+        return fmt.Errorf("%w: jar file verification failed", adapter.ErrRefreshStateFailed)
+    }
+    return fmt.Errorf("jar file status is not ready: %q", status)
+}
+```
+
+Prefer the declarative form: reach for `RefreshStateCheck` only when the condition cannot be
+expressed as desired/failed values of one top-level attribute. See
+`internal/plugin/service/flink/jarversion/jarversion.go` and `internal/plugin/serviceuser` for
+reference implementations.
+
 `deleteStateGone: true` enables the delete poller and completes when Read returns 404.
 `deleteStateDesired` waits until `stateAttribute` matches any listed value; a 404 also
 completes (gone is implied). Delete is re-issued while it errors (for example 409 from
@@ -311,6 +348,7 @@ schema:
     atLeastOneOf: [field_a, field_b]
     alsoRequires: [other_field]
     default: value
+    dropDefault: true              # Migration workaround, see tf-resource-migration. Drops the OpenAPI default
     deprecationMessage: "..."
 ```
 
@@ -326,7 +364,8 @@ that deliberately. Data sources always use blocks.
 An `object` is a one-element list in either form (`Item.TFType`), which is the SDKv2 state
 shape. **Due for removal in v5.0.0**: an object becomes a single nested value, dropping the
 `SizeAtMost(1)` validator, the `Max: 1` label and `.0` indexing. The sites carrying it are
-marked `todo: ... v5.0.0`.
+marked `todo: ... v5.0.0`. Generated examples use attribute assignment
+(`file_info = [{ ... }]`) for computed nested attributes, not block syntax.
 
 **Find examples**: `grep -A 10 "schema:" definitions/aiven_*.yml`
 
@@ -381,6 +420,7 @@ Beyond basic CRUD, `ResourceOptions` supports:
 - `ModifyPlan` — implements `resource.ResourceWithModifyPlan` (separate from `planModifier` in YAML)
 - `ValidateConfig` — implements `resource.ResourceWithValidateConfig`
 - `ConfigValidators` — implements `resource.ResourceWithConfigValidators`
+- `RefreshStateCheck` — post-Create/Update convergence check that `refreshState` can't express (see [Resource Configuration](#resource-configuration))
 
 ## ResourceData Interface
 
@@ -395,6 +435,7 @@ type ResourceData interface {
     SetID(parts ...string) error     // Set composite ID
     ID() string                      // Get the "id" field
     IsNewResource() bool             // True if ID is empty
+    RequiresReplace(keys ...string)  // Force replacement over attributes (ModifyPlan only)
     Schema() *Schema                 // Access internal schema
     Expand(out any, modifiers ...MapModifier) error   // Plan -> API request
     Flatten(in any, modifiers ...MapModifier) error    // API response -> state
@@ -511,6 +552,43 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 - `internal/plugin/service/flink/deployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
 
 For name -> ID resolution in data sources, use the generated `datasourceLookup` pattern instead of a hand-written `planModifier`. See [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key).
+
+### modifyPlan
+
+Despite the similar name, `resource.modifyPlan: true` has nothing to do with `planModifier`: it wires the package's `modifyPlan` function as the resource's `ResourceWithModifyPlan` handler, which the framework calls on **every** plan (except a destroy plan).
+
+**Signature:**
+```go
+func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceData) error
+```
+
+**When to use:**
+- Plan-time checks that need prior state, e.g. forbidding a decrease in a numeric attribute (`d.GetState` vs `d.Get`)
+- Computing a plan value the configuration cannot express, e.g. hashing a file the resource uploads
+
+Whatever `modifyPlan` writes with `d.Set` becomes the planned value, which is the equivalent of SDKv2's `CustomizeDiff` + `SetNew`. Only computed attributes may be written: Terraform rejects a plan whose value for a configured attribute differs from the configuration.
+
+`d.RequiresReplace("attr")` marks attributes whose planned value forces the resource to be replaced. Schema plan modifiers (`forceNew: true` -> `RequiresReplace()`) run **before** `modifyPlan`, so they compare a value it has not written yet: a computed value produced here needs `d.RequiresReplace` to have any effect. Marking an unknown attribute panics.
+
+```go
+// A version is immutable, so edited file content can only go into a new one.
+func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+    checksum, err := fileChecksum(d.Get("source").(string))
+    if err != nil {
+        return err
+    }
+
+    if !d.IsNewResource() && checksum != d.GetState(sourceChecksumField) {
+        d.RequiresReplace(sourceChecksumField)
+    }
+
+    return d.Set(sourceChecksumField, checksum)
+}
+```
+
+**Reference implementations:**
+- `internal/plugin/service/kafka/topic/topic.go` — plan-time checks against prior state
+- `internal/plugin/service/flink/jarversion/jarversion.go` — computed checksum that drives replacement
 
 ## Custom View Overrides
 
@@ -784,6 +862,7 @@ Search the codebase for similar patterns:
 | `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
 | `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
 | `organization/unit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
+| `flink/jarversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements
 

@@ -161,7 +161,7 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			body.AppendNewline()
 		}
 
-		if v.IsNested() {
+		if v.IsNested() && !v.RendersAsAttribute(def, entity) {
 			if v.IsArray() {
 				v = v.Items
 			}
@@ -175,63 +175,14 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			continue
 		}
 
-		var val cty.Value
-		switch {
-		case v.IsScalar():
-			value, err := exampleScalarItem(def, v)
-			if err != nil {
-				return err
-			}
-			val = value
-		case v.IsArray():
-			// An array with scalar elements
-			elems, err := exampleArrayElems(def, v)
-			if err != nil {
-				return err
-			}
-
-			// Always render as a list literal so the example keeps the source
-			// order. Sets and lists share the same `[...]` HCL syntax, but
-			// cty.SetVal reorders elements lexicographically, which is confusing
-			// in docs and irrelevant to a Terraform set (unordered in state).
-			val = cty.ListVal(elems)
-		case v.IsMapNested():
-			// There is no Map Block thing, only Map Attribute.
-			// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
-			// Currently we support scalars only in map's objects,
-			// because otherwise we need to learn to generate nested attributes.
-			attrs := make(map[string]cty.Value)
-			for kk, vv := range v.Items.Properties {
-				if !vv.IsScalar() {
-					return fmt.Errorf("unsupported type %s for map %s", vv.Type, v.Path())
-				}
-				value, err := exampleScalarItem(def, vv)
-				if err != nil {
-					return err
-				}
-				attrs[kk] = value
-			}
-			val = cty.ObjectVal(map[string]cty.Value{
-				"foo": cty.ObjectVal(attrs),
-			})
-		case v.IsMap():
-			value, err := exampleScalarItem(def, v.Items)
-			if err != nil {
-				return err
-			}
-
-			val = cty.ObjectVal(map[string]cty.Value{
-				"foo": value,
-			})
-		default:
-			return fmt.Errorf("unknown property type %q for %s", v.Type, v.Path())
+		val, err := exampleItemValue(def, entity, v)
+		if err != nil {
+			return err
 		}
 
-		var tokens hclwrite.Tokens
-		if v.IsArray() {
+		tokens := hclwrite.TokensForValue(val)
+		if val.Type().IsListType() {
 			tokens = exampleCollectionTokens(val)
-		} else {
-			tokens = hclwrite.TokensForValue(val)
 		}
 		if item.IsRoot() && entity.isResource() && v.ForceNew {
 			tokens = append(tokens, &hclwrite.Token{
@@ -261,6 +212,66 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 	}
 
 	return nil
+}
+
+// exampleItemValue builds the cty example for an attribute: scalars, collections,
+// maps, and computed nested objects (as a one-element list, matching Item.TFType).
+func exampleItemValue(def *Definition, entity entityType, item *Item) (cty.Value, error) {
+	switch {
+	case item.IsNested():
+		obj := item
+		if item.IsArray() {
+			obj = item.Items
+		}
+		attrs := make(map[string]cty.Value, len(obj.Properties))
+		for _, k := range sortedKeysPriority(def, entity, obj) {
+			v := obj.Properties[k]
+			if v.Virtual || v.DeprecationMessage != "" {
+				continue
+			}
+			val, err := exampleItemValue(def, entity, v)
+			if err != nil {
+				return cty.NilVal, err
+			}
+			attrs[k] = val
+		}
+		return cty.ListVal([]cty.Value{cty.ObjectVal(attrs)}), nil
+	case item.IsScalar():
+		return exampleScalarItem(def, item)
+	case item.IsArray():
+		// Always a list literal so the example keeps source order. Sets and lists
+		// share `[...]` HCL syntax, but cty.SetVal reorders lexicographically.
+		elems, err := exampleArrayElems(def, item)
+		if err != nil {
+			return cty.NilVal, err
+		}
+		return cty.ListVal(elems), nil
+	case item.IsMapNested():
+		// There is no Map Block thing, only Map Attribute.
+		// https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes/map-nested
+		// Currently we support scalars only in map's objects,
+		// because otherwise we need to learn to generate nested attributes.
+		attrs := make(map[string]cty.Value)
+		for k, v := range item.Items.Properties {
+			if !v.IsScalar() {
+				return cty.NilVal, fmt.Errorf("unsupported type %s for map %s", v.Type, item.Path())
+			}
+			value, err := exampleScalarItem(def, v)
+			if err != nil {
+				return cty.NilVal, err
+			}
+			attrs[k] = value
+		}
+		return cty.ObjectVal(map[string]cty.Value{"foo": cty.ObjectVal(attrs)}), nil
+	case item.IsMap():
+		value, err := exampleScalarItem(def, item.Items)
+		if err != nil {
+			return cty.NilVal, err
+		}
+		return cty.ObjectVal(map[string]cty.Value{"foo": value}), nil
+	default:
+		return cty.NilVal, fmt.Errorf("unknown property type %q for %s", item.Type, item.Path())
+	}
 }
 
 const uuidExample = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"

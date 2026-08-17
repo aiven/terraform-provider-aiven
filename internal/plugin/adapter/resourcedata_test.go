@@ -9,6 +9,74 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestResourceDataRequiresReplace(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":       {Type: SchemaTypeString, Computed: true},
+			"checksum": {Type: SchemaTypeString, Computed: true},
+		},
+	}
+
+	d, err := NewResourceData(sch, []string{"id"})
+	require.NoError(t, err)
+
+	d.RequiresReplace("checksum", "checksum")
+	require.Equal(t, []string{"checksum"}, d.requiresReplaceKeys())
+
+	// A typo in the attribute name is a bug in the resource, not a user error.
+	require.Panics(t, func() { d.RequiresReplace("nope") })
+}
+
+// TestGetOkFalseIsAValue pins down that a stored false is a value, not a missing one.
+// Read overrides that fill in a field the API never returns (jardeployment's
+// restart_enabled) use GetOk to tell "the user set this" from "nothing is stored",
+// and would overwrite an explicit false if the two looked the same.
+func TestGetOkFalseIsAValue(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":              {Type: SchemaTypeString, Computed: true},
+			"restart_enabled": {Type: SchemaTypeBool, Computed: true},
+		},
+	}
+	objType := tftypes.Object{AttributeTypes: map[string]tftypes.Type{
+		"id":              tftypes.String,
+		"restart_enabled": tftypes.Bool,
+	}}
+
+	// Decodes through the same path as WithState, where a null attribute drops out
+	// of the map while false stays in it.
+	newData := func(t *testing.T, restartEnabled any) ResourceData {
+		t.Helper()
+
+		state, err := fromTFValue(sch, tftypes.NewValue(objType, map[string]tftypes.Value{
+			"id":              tftypes.NewValue(tftypes.String, "project/service"),
+			"restart_enabled": tftypes.NewValue(tftypes.Bool, restartEnabled),
+		}), false)
+		require.NoError(t, err)
+
+		d, err := NewResourceData(sch, []string{"id"}, WithTestState(state))
+		require.NoError(t, err)
+		return d
+	}
+
+	t.Run("false is stored", func(t *testing.T) {
+		got, ok := newData(t, false).GetOk("restart_enabled")
+		require.True(t, ok)
+		require.Equal(t, false, got)
+	})
+
+	t.Run("null is missing", func(t *testing.T) {
+		_, ok := newData(t, nil).GetOk("restart_enabled")
+		require.False(t, ok)
+	})
+}
+
 func TestDereference(t *testing.T) {
 	t.Parallel()
 

@@ -22,6 +22,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jardeployment"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarversion"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/acl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/mirrormakerreplicationflow"
@@ -83,6 +85,8 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_flink_jar_application":               adapter.NewLazyResource(jarapplication.ResourceOptions),
+		"aiven_flink_jar_application_deployment":    adapter.NewLazyResource(jardeployment.ResourceOptions),
+		"aiven_flink_jar_application_version":       adapter.NewLazyResource(jarversion.ResourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyResource(gcporgvpcpeeringconnection.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),

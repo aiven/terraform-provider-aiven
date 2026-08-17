@@ -61,7 +61,7 @@ func TestAccAivenFlinkJarApplication(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "created_by"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_by"),
-					// The version resource is not migrated, its state must not change either.
+					// The version resource shares the state file, its attributes must survive too.
 					resource.TestCheckResourceAttr(versionResourceName, "file_info.0.file_status", "READY"),
 					resource.TestCheckResourceAttrSet(versionResourceName, "source_checksum"),
 				),

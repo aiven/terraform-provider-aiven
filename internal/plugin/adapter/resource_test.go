@@ -10,6 +10,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -1050,6 +1051,69 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 		require.True(t, target.Contains(warning("try-2")))
 		require.False(t, target.Contains(warning("try-1")))
 	})
+}
+
+func TestResourceAdapterModifyPlanRequiresReplace(t *testing.T) {
+	schema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":       {Type: SchemaTypeString, Computed: true},
+			"source":   {Type: SchemaTypeString},
+			"checksum": {Type: SchemaTypeString, Computed: true},
+			"timeouts": {
+				Type:       SchemaTypeObject,
+				Properties: map[string]*Schema{"read": {Type: SchemaTypeString}},
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		replace []string
+		want    []string
+	}{
+		{name: "marks a known attribute", replace: []string{"checksum"}, want: []string{"checksum"}},
+		{name: "marks an attribute once", replace: []string{"checksum", "checksum"}, want: []string{"checksum"}},
+		{name: "marks nothing"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			raw, err := toTFValue(schema, map[string]any{"id": "foo", "source": "app.jar", "checksum": "old"})
+			require.NoError(t, err)
+
+			a := &resourceAdapter{
+				resource: ResourceOptions{
+					SchemaInternal: schema,
+					IDFields:       []string{"id"},
+					ModifyPlan: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						d.RequiresReplace(tt.replace...)
+						return d.Set("checksum", "new")
+					},
+				},
+			}
+
+			req := resource.ModifyPlanRequest{
+				Plan:   tfsdk.Plan{Raw: raw},
+				State:  tfsdk.State{Raw: raw},
+				Config: tfsdk.Config{Raw: raw},
+			}
+			rsp := resource.ModifyPlanResponse{Plan: tfsdk.Plan{Raw: raw}}
+
+			a.ModifyPlan(t.Context(), req, &rsp)
+
+			require.False(t, rsp.Diagnostics.HasError())
+
+			plan, err := fromTFValue(schema, rsp.Plan.Raw, false)
+			require.NoError(t, err)
+			require.Equal(t, "new", plan["checksum"])
+
+			require.Len(t, rsp.RequiresReplace, len(tt.want))
+			for i, key := range tt.want {
+				require.Equal(t, path.Root(key), rsp.RequiresReplace[i])
+			}
+		})
+	}
 }
 
 func TestIsRefreshStateRetryable(t *testing.T) {

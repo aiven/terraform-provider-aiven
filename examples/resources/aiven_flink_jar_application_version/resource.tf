@@ -1,26 +1,22 @@
-resource "aiven_flink" "example" {
-  project                 = data.aiven_project.example.project
-  service_name            = "example-flink-service"
-  cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "04:00:00"
-
-  flink_user_config {
-    // Enables upload and deployment of Custom JARs
-    custom_code = true
-  }
-}
-
-resource "aiven_flink_jar_application" "example" {
-  project      = aiven_flink.example.project
-  service_name = aiven_flink.example.service_name
-  name         = "example-app-jar"
-}
-
 resource "aiven_flink_jar_application_version" "example" {
-  project        = aiven_flink.example.project
-  service_name   = aiven_flink.example.service_name
-  application_id = aiven_flink_jar_application.example.application_id
+  project        = "my-project" // Force new
+  service_name   = "my-application" // Force new
+  application_id = "foo" // Force new
   source         = "./example.jar"
+
+  /* COMPUTED FIELDS
+  application_version_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  created_at             = "2021-01-01T00:00:00Z"
+  created_by             = "foo"
+  file_info = [{
+    file_sha256          = "foo"
+    file_size            = 42
+    file_status          = "FAILED"
+    url                  = "foo"
+    verify_error_code    = 1
+    verify_error_message = "foo"
+  }]
+  source_checksum = "foo"
+  version         = 42
+  */
 }

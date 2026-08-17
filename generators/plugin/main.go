@@ -891,6 +891,13 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 		a.Default = b.Default
 	}
 
+	// The merged item must not carry a default the generator is about to drop.
+	// todo: drop in v5.0.0 with Item.DropDefault.
+	a.DropDefault = a.DropDefault || b.DropDefault
+	if a.DropDefault {
+		a.Default = nil
+	}
+
 	if !isEmpty(b.Example) {
 		a.Example = b.Example
 	}
@@ -973,6 +980,11 @@ func recalcDeep(def *Definition, item *Item) error {
 	// pattern_type/permission_type). Honor the "required" contract and drop the
 	// unusable default rather than silently downgrading the field to optional.
 	if item.Required && !item.Computed {
+		item.Default = nil
+	}
+
+	// todo: drop in v5.0.0 with Item.DropDefault.
+	if item.DropDefault {
 		item.Default = nil
 	}
 

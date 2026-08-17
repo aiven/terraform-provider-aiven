@@ -797,6 +797,10 @@ func (a *resourceAdapter) ModifyPlan(
 		return
 	}
 
+	for _, key := range d.requiresReplaceKeys() {
+		rsp.RequiresReplace = append(rsp.RequiresReplace, path.Root(key))
+	}
+
 	rsp.Plan.Raw = d.tfValue()
 }
 

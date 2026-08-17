@@ -28,6 +28,8 @@ import (
 	// Plugin framework sweepers
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jardeployment"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"

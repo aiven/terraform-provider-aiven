@@ -195,9 +195,10 @@ idAttributeComposed: [project, service_name, database_name]
 | SDK Pattern | Generator Feature |
 |-------------|------------------|
 | `StateUpgraders` | May need `version` in YAML + state upgrader |
-| `CustomizeDiff` | `planModifier: true` or `ModifyPlan` |
+| `CustomizeDiff` | `modifyPlan: true` (writes plan values, `d.RequiresReplace` for replacement) — not `planModifier`, which runs inside Read |
 | Flatten/Expand functions | `expandModifier: true` / `flattenModifier: true` |
-| `DiffSuppressFunc` | `planModifier: true` |
+| `DiffSuppressFunc` | No equivalent, see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
+| Post-Create/Update waiter (poll Read until the resource converges) | `refreshStateExists`, or `stateAttribute` with `refreshStateDesired`/`refreshStateFailed`, or `ResourceOptions.RefreshStateCheck` when the value is nested (see tf-resource-generator) |
 | Multiple API calls in Update | Custom `updateView` via `init()` override |
 | Delete waiter (poll until gone/terminal state; conflicts clear as Delete is re-issued) | `deleteStateDesired` (see tf-resource-generator); avoid a custom `deleteView` |
 | Complex delete (cancel + delete state machine) | Custom `deleteView` via `init()` override |
@@ -205,6 +206,25 @@ idAttributeComposed: [project, service_name, database_name]
 | Sensitive field not stored in state | `writeOnly: true` |
 
 For implementation details of each, see **tf-resource-generator** skill.
+
+#### Diff Suppression Has No Equivalent
+
+`DiffSuppressFunc` cannot be ported. Terraform rejects a plan whose value for a configured attribute
+differs from the configuration, which is why the Plugin Framework offers no such hook: SDKv2 only got
+away with it through its legacy type-system shims. Decide what the suppression was buying:
+
+- **It hid a change that needs no API call** (e.g. a local file path the API never sees). Set
+  `forceNew: false` on the attribute and let the change apply in place. No update view is needed:
+  the adapter skips a nil `Update` and refreshes the state, so the new value is simply stored.
+- **It hid a formatting difference** the API normalizes (casing, trailing slash). Normalize the same
+  way in `modifyPlan` — but only for computed attributes, since a configured one must keep the
+  configured value.
+- **It paired with a computed attribute that drove replacement** (`CustomizeDiff` + `SetNew` on a
+  `ForceNew` computed field). Compute the value in `modifyPlan` and call `d.RequiresReplace` on it.
+
+Whichever applies, the behavior changes for at least some configurations, so call it out in
+`CHANGELOG.md`. `internal/plugin/service/flink/jarversion` migrated a resource that used both a
+`DiffSuppressFunc` and `CustomizeDiff`.
 
 ### 6. Create YAML Definition
 
@@ -323,7 +343,11 @@ Before marking migration complete:
 | Computed field becomes required | Keep as `computed: true` if API provides it |
 | Custom validation lost | Implement in custom modifier or use schema validation |
 | State upgrade needed | Implement state upgrader in Plugin Framework |
-| DiffSuppressFunc behavior | Use `planModifier: true` for custom diff logic |
+| DiffSuppressFunc behavior | Not portable — see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
+| Field the API accepts but never returns | Fill it in a `readView` override only when the state has no value, so imports don't keep a null and existing state stays untouched |
+| OpenAPI default would plan a change against SDKv2 state | Workaround: `dropDefault: true` plus `useStateForUnknown: true`, and send the API default from the create view. Goes away in v5.0.0 with SDKv2 state support |
+| Computed value must force replacement | Compute it in `modifyPlan` and call `d.RequiresReplace(name)`; schema `forceNew` runs too early to see it |
+| Post-create waiter polls a nested attribute | `refreshStateExists: true` plus `ResourceOptions.RefreshStateCheck`; `stateAttribute` only accepts top-level attributes |
 | Renamed ID field missing in old state | Use `planModifier: true` to extract from composite ID |
 | Read fails with 404 after migration | Likely a renamed ID field is empty — use `planModifier` |
 | "was null, but now cty.X" error | Add `computed: true` + `useStateForUnknown: true` (see generator skill) |

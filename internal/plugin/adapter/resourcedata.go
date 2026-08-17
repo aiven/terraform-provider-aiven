@@ -31,10 +31,12 @@ type ResourceData interface {
 	IsNewResource() bool
 	IsDataSource() bool
 	IsResource() bool
+	RequiresReplace(keys ...string)
 	Schema() *Schema
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
+	requiresReplaceKeys() []string
 }
 
 type resourceData struct {
@@ -43,6 +45,7 @@ type resourceData struct {
 	idFields            []string
 	isDataSource        bool
 	preservePlanValues  bool
+	requiresReplace     []string
 }
 
 var _ ResourceData = (*resourceData)(nil)
@@ -71,6 +74,26 @@ func (d *resourceData) IsResource() bool {
 // SetID sets the value of the "id" field in path-like format.
 func (d *resourceData) SetID(parts ...string) error {
 	return d.Set(idField, strings.Join(parts, "/"))
+}
+
+// RequiresReplace marks top-level attributes whose planned value forces the resource to be
+// replaced. Only ModifyPlan applies it: the schema plan modifiers that usually decide replacement
+// have already run by the time a value is computed there, so a value ModifyPlan writes itself
+// (for instance a file checksum) needs this to trigger a replacement.
+func (d *resourceData) RequiresReplace(keys ...string) {
+	for _, key := range keys {
+		if _, ok := d.schema.Properties[key]; !ok {
+			panic(fmt.Errorf("failed to mark %q for replacement: unknown attribute", key))
+		}
+
+		if !slices.Contains(d.requiresReplace, key) {
+			d.requiresReplace = append(d.requiresReplace, key)
+		}
+	}
+}
+
+func (d *resourceData) requiresReplaceKeys() []string {
+	return d.requiresReplace
 }
 
 // Schema returns the schema of the resource.

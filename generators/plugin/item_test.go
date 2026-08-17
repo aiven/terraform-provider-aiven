@@ -747,3 +747,60 @@ func TestExampleArrayElems(t *testing.T) {
 		assert.Equal(t, "test@example.com", elems[0].AsString())
 	})
 }
+
+// todo: drop in v5.0.0 with Item.DropDefault.
+func TestMergeItemDropDefault(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{
+		Name:    "restart_enabled",
+		Type:    SchemaTypeBoolean,
+		Default: true,
+	}, &Item{
+		Name:        "restart_enabled",
+		Type:        SchemaTypeBoolean,
+		DropDefault: true,
+	})
+	require.NoError(t, err)
+	require.True(t, got.DropDefault)
+	require.Nil(t, got.Default)
+}
+
+func TestExampleNestedAttributeUsesAssignment(t *testing.T) {
+	t.Parallel()
+
+	root := &Item{
+		Name: "root",
+		Type: SchemaTypeObject,
+	}
+	fileInfo := &Item{
+		Name:     "file_info",
+		JSONName: "file_info",
+		Type:     SchemaTypeObject,
+		Computed: true,
+		Parent:   root,
+		Properties: map[string]*Item{
+			"file_sha256": {Name: "file_sha256", JSONName: "file_sha256", Type: SchemaTypeString, Computed: true, Example: "abc"},
+			"file_status": {Name: "file_status", JSONName: "file_status", Type: SchemaTypeString, Computed: true, Example: "READY"},
+		},
+	}
+	for _, p := range fileInfo.Properties {
+		p.Parent = fileInfo
+	}
+	source := &Item{
+		Name:     "source",
+		JSONName: "source",
+		Type:     SchemaTypeString,
+		Required: true,
+		Example:  "./app.jar",
+		Parent:   root,
+	}
+	root.Properties = map[string]*Item{"file_info": fileInfo, "source": source}
+
+	got, err := exampleRoot(&Definition{typeName: "aiven_test"}, resourceType, root)
+	require.NoError(t, err)
+	s := string(got)
+	require.Contains(t, s, "file_info = [{")
+	require.NotRegexp(t, `(?m)^\s*file_info \{`, s)
+}
