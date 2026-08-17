@@ -1,6 +1,10 @@
 package main
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+)
 
 // plainText converts the small subset of Markdown that the description builder
 // emits into plain text for the Terraform registry front matter `description:`
@@ -14,23 +18,27 @@ import "strings"
 //   - emphasis (*, **) and strong/strikethrough markers are removed, text kept
 //   - links render as "text URL" for absolute targets and "text" for fragment or
 //     path-relative targets; images are dropped entirely
-//   - blank lines are collapsed so paragraphs are joined by a single newline
+//   - callout sigils are removed, the text they introduce is kept
+//   - line breaks are collapsed, so the whole description becomes a single line
 func plainText(markdown string) string {
 	lines := strings.Split(markdown, "\n")
 	kept := make([]string, 0, len(lines))
 	for _, line := range lines {
-		stripped := strings.TrimRight(stripInlineMarkdown(line), " \t")
-		if strings.TrimSpace(stripped) == "" {
+		stripped := strings.TrimSpace(stripInlineMarkdown(line))
+		if stripped == "" {
 			continue
 		}
 		kept = append(kept, stripped)
 	}
-	return strings.Join(kept, "\n")
+	return strings.Join(kept, " ")
 }
 
 // stripInlineMarkdown rewrites a single line, removing inline Markdown markers.
 func stripInlineMarkdown(line string) string {
-	src := []rune(line)
+	// A callout box is a page element the metadata can't render, its text remains.
+	// Without the box, the line it opens becomes a sentence and needs a full stop.
+	isCallout := userconfig.HasCallout(line)
+	src := []rune(userconfig.TrimCallout(line))
 	var out strings.Builder
 	for i := 0; i < len(src); {
 		switch src[i] {
@@ -88,6 +96,10 @@ func stripInlineMarkdown(line string) string {
 			out.WriteRune(src[i])
 			i++
 		}
+	}
+
+	if isCallout {
+		return strings.TrimSuffix(strings.TrimSpace(out.String()), ".") + "."
 	}
 	return out.String()
 }

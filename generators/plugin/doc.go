@@ -126,19 +126,23 @@ func docEntityType(entity entityType) userconfig.EntityType {
 	return userconfig.Resource
 }
 
-// docRootDescription is the resource/data-source page description: schema text
-// from fmtDescription plus, for deprecated root entities, the ~> callout that
-// tfplugindocs renders from DeprecationMessage (not inlined in MarkdownDescription).
+// docRootDescription is the resource/data-source page description. Unlike the schema
+// text, it renders the warnings that are page elements as ~> callouts: the limited
+// availability one, and the deprecation that tfplugindocs renders from
+// DeprecationMessage (not inlined in MarkdownDescription).
 func docRootDescription(def *Definition, entity entityType, renderRoot *Item) string {
-	description := strings.TrimSpace(fmtDescription(def, entity, renderRoot))
+	description := strings.TrimSpace(descriptionBuilder(def, entity, renderRoot).BuildPage())
 	if renderRoot.DeprecationMessage == "" {
 		return description
 	}
 	et := docEntityType(entity)
+	callout := userconfig.CalloutYellow.Wrap(
+		fmt.Sprintf("This %s is deprecated", et), renderRoot.DeprecationMessage,
+	)
 	if description == "" {
-		return fmt.Sprintf("~> **This %s is deprecated**\n%s", et, renderRoot.DeprecationMessage)
+		return callout
 	}
-	return fmt.Sprintf("%s\n\n~> **This %s is deprecated**\n%s", description, et, renderRoot.DeprecationMessage)
+	return description + "\n\n" + callout
 }
 
 func docWriteFrontMatter(b *strings.Builder, def *Definition, entity entityType, description string) {
@@ -156,7 +160,7 @@ func docWriteFrontMatter(b *strings.Builder, def *Definition, entity entityType,
 	b.WriteString("description: |-\n")
 	if plain != "" {
 		b.WriteString("  ")
-		b.WriteString(strings.ReplaceAll(plain, "\n", "\n  "))
+		b.WriteString(plain)
 		b.WriteByte('\n')
 	}
 	b.WriteString("---\n\n")

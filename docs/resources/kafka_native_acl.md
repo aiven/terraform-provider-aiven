@@ -2,8 +2,7 @@
 page_title: "aiven_kafka_native_acl Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages Kafka-native access control lists https://aiven.io/docs/products/kafka/concepts/acl (ACLs) for an Aiven for Apache Kafka® service. ACLs control access to Kafka topics, consumer groups, clusters, and Schema Registry.
-  Kafka-native ACLs provide advanced resource-level access control with fine-grained permissions, including ALLOW and DENY rules. For simplified topic-level control you can use Aiven ACLs https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_acl. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages Kafka-native access control lists https://aiven.io/docs/products/kafka/concepts/acl (ACLs) for an Aiven for Apache Kafka® service. ACLs control access to Kafka topics, consumer groups, clusters, and Schema Registry. Kafka-native ACLs provide advanced resource-level access control with fine-grained permissions, including ALLOW and DENY rules. For simplified topic-level control you can use Aiven ACLs https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_acl. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_kafka_native_acl (Resource)
