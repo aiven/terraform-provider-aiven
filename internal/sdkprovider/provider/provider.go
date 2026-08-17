@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -204,9 +205,15 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_azure_org_vpc_peering_connection",
 	}
 
+	// Adds "limited availability" warning to the description
+	limitedAvailabilityResources := []string{
+		"aiven_flink_jar_application_version",
+		"aiven_flink_jar_application_deployment",
+	}
+
 	missing := append(
-		addBeta(p.ResourcesMap, betaResources...),
-		addBeta(p.DataSourcesMap, betaDataSources...)...,
+		addBeta(p.ResourcesMap, betaResources, limitedAvailabilityResources...),
+		addBeta(p.DataSourcesMap, betaDataSources)...,
 	)
 
 	// Deprecates datasources along with their resources
@@ -271,8 +278,10 @@ func Provider(version string) (*schema.Provider, error) {
 	return p, nil
 }
 
-// addBeta adds resources as beta or removes them
-func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
+// addBeta adds resources as beta or removes them.
+// The ones listed in limitedAvailability are additionally marked as such,
+// which tells the reader the feature must be enabled by the sales team.
+func addBeta(m map[string]*schema.Resource, keys []string, limitedAvailability ...string) (missing []string) {
 	isBeta := util.IsBeta()
 	for _, k := range keys {
 		v, ok := m[k]
@@ -281,11 +290,17 @@ func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
 			continue
 		}
 
-		if isBeta {
-			v.Description = userconfig.Desc(v.Description).Beta().Build()
-		} else {
+		if !isBeta {
 			delete(m, k)
+			continue
 		}
+
+		d := userconfig.Desc(v.Description).Beta()
+		if slices.Contains(limitedAvailability, k) {
+			d = d.LimitedAvailability()
+		}
+
+		v.Description = d.Build()
 	}
 	return missing
 }
@@ -326,19 +341,15 @@ func validateSensitiveResource(r *schema.Resource, sensitive bool) error {
 	return nil
 }
 
-var (
-	// reCallouts https://developer.hashicorp.com/terraform/registry/providers/docs#callouts
-	reCallouts = regexp.MustCompile(`^([~>!-]>)`)
-	// reAivenResourceName finds `aiven_*` resources
-	reAivenResourceName = regexp.MustCompile(`(aiven_[a-z_0-9]+)`)
-)
+// reAivenResourceName finds `aiven_*` resources
+var reAivenResourceName = regexp.MustCompile(`(aiven_[a-z_0-9]+)`)
 
 // formatDeprecation Adds a deprecation callout to the description
 func formatDeprecation(s string) string {
 	msg := strings.TrimSpace(reAivenResourceName.ReplaceAllString(s, "`$1`"))
-	if reCallouts.MatchString(msg) {
+	if userconfig.HasCallout(msg) {
 		// Doesn't turn the deprecation into a callout if it already is one
 		return msg
 	}
-	return "~> **This resource is deprecated**\n" + msg
+	return userconfig.CalloutYellow.Wrap("This resource is deprecated", msg)
 }

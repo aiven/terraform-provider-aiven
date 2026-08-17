@@ -161,6 +161,10 @@ func isValidRegex(pattern string) bool {
 }
 
 func fmtDescription(def *Definition, entity entityType, item *Item) string {
+	return descriptionBuilder(def, entity, item).Build()
+}
+
+func descriptionBuilder(def *Definition, entity entityType, item *Item) *userconfig.DescriptionBuilder {
 	description := normalizeDescription(item.Description, item.IsRoot())
 
 	b := userconfig.Desc(description)
@@ -255,7 +259,7 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 		}
 	}
 
-	return b.Build()
+	return b
 }
 
 func itemEnumValues(item *Item) []any {

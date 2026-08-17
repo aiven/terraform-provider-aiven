@@ -2,17 +2,15 @@
 page_title: "aiven_governance_access Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. Governance https://aiven.io/docs/products/kafka/howto/governance helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can manage approval workflows using Terraform and GitHub Actions https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+  Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. Governance https://aiven.io/docs/products/kafka/howto/governance helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can manage approval workflows using Terraform and GitHub Actions https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals. Beta resource. This resource is in the beta stage and may change without notice. Set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_governance_access (Resource)
 
 Request access to an Apache Kafka topic in Aiven for Apache Kafka® Governance. [Governance](https://aiven.io/docs/products/kafka/howto/governance) helps you manage your Kafka clusters securely and efficiently through structured policies, roles, and processes. You can [manage approval workflows using Terraform and GitHub Actions](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
 
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+~> **Beta resource**
+This resource is in the beta stage and may change without notice. Set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

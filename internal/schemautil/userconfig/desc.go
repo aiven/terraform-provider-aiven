@@ -16,7 +16,14 @@ const (
 	PossibleValuesPrefix        = "The possible value"
 	LimitedAvailabilityMarker   = "limited availability stage and may change without notice"
 	LimitedAvailabilityMessage  = "To enable this feature, contact the [sales team](http://aiven.io/contact)."
+	LimitedAvailabilityText     = "This %[1]s is in the " + LimitedAvailabilityMarker + ". " + LimitedAvailabilityMessage
 	BetaLimitedAvailabilityText = "This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %[1]s."
+	BetaText                    = "This %[1]s is in the beta stage and may change without notice. Set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the %[1]s."
+
+	// The titles open a callout box, see Callout.Wrap. Each takes the entity type.
+	BetaTitle                    = "Beta %[1]s"
+	LimitedAvailabilityTitle     = "Limited availability %[1]s"
+	BetaLimitedAvailabilityTitle = "Beta %[1]s in limited availability"
 )
 
 // String is a function that returns the string representation of the entity type.
@@ -183,7 +190,19 @@ func (db *DescriptionBuilder) RemoveMissing() *DescriptionBuilder {
 }
 
 // Build is a function that builds the description.
+// The limited availability warning is an inline sentence: a callout is a page
+// element, which a schema description can't render. See BuildPage.
 func (db *DescriptionBuilder) Build() string {
+	return db.build(false)
+}
+
+// BuildPage builds the description for a documentation page, where the limited
+// availability warning renders as a callout box.
+func (db *DescriptionBuilder) BuildPage() string {
+	return db.build(true)
+}
+
+func (db *DescriptionBuilder) build(page bool) string {
 	builder := new(strings.Builder)
 
 	builder.WriteString(db.base)
@@ -197,7 +216,9 @@ func (db *DescriptionBuilder) Build() string {
 
 **This %[1]s is in the %[2]s stage and may change without notice.** %[3]s`
 
+	// A page closes with the availability callout, see the end of this function.
 	switch {
+	case page:
 	case db.withBeta && db.withLimitedAvailability:
 		builder.WriteRune(' ')
 		fmt.Fprintf(builder, BetaLimitedAvailabilityText, db.entityType.String())
@@ -334,7 +355,31 @@ func (db *DescriptionBuilder) Build() string {
 	if db.deprecationMessage != "" {
 		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
 	}
+
+	// A callout is a single paragraph, so the warning goes last:
+	// anything appended after it would be pulled into the box.
+	if page {
+		if title, text := db.availabilityCallout(); title != "" {
+			s += "\n\n" + CalloutYellow.Wrap(title, text)
+		}
+	}
+
 	return s
+}
+
+// availabilityCallout titles and words the warning for a documentation page.
+// Beta and limited availability share a box: a callout can't span paragraphs.
+func (db *DescriptionBuilder) availabilityCallout() (title, text string) {
+	entity := db.entityType.String()
+	switch {
+	case db.withBeta && db.withLimitedAvailability:
+		return fmt.Sprintf(BetaLimitedAvailabilityTitle, entity), fmt.Sprintf(BetaLimitedAvailabilityText, entity)
+	case db.withLimitedAvailability:
+		return fmt.Sprintf(LimitedAvailabilityTitle, entity), fmt.Sprintf(LimitedAvailabilityText, entity)
+	case db.withBeta:
+		return fmt.Sprintf(BetaTitle, entity), fmt.Sprintf(BetaText, entity)
+	}
+	return "", ""
 }
 
 // listOfCodes turns ["a", "b", "c"] into "`a`, `b` and `c`"

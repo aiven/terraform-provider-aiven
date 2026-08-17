@@ -2,17 +2,15 @@
 page_title: "aiven_byoc_aws_entity Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a BYOC custom cloud environment on AWS.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+  Creates and manages a BYOC custom cloud environment on AWS. Beta resource. This resource is in the beta stage and may change without notice. Set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_byoc_aws_entity (Resource)
 
 Creates and manages a BYOC custom cloud environment on AWS.
 
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+~> **Beta resource**
+This resource is in the beta stage and may change without notice. Set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

@@ -2,17 +2,15 @@
 page_title: "aiven_flink_jar_application Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Apache Flink® jar application https://aiven.io/docs/products/flink/howto/create-jar-application. Requires the aiven_flink service to have flink_user_config.custom_code enabled, which allows uploading and deploying custom JARs.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven for Apache Flink® jar application https://aiven.io/docs/products/flink/howto/create-jar-application. Requires the aiven_flink service to have flink_user_config.custom_code enabled, which allows uploading and deploying custom JARs. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated. Beta resource in limited availability. This feature is in the limited availability stage and may change without notice. To enable this feature, contact the sales team http://aiven.io/contact. Once it's enabled, set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_flink_jar_application (Resource)
 
-Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled, which allows uploading and deploying custom JARs.
+Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled, which allows uploading and deploying custom JARs. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+~> **Beta resource in limited availability**
+This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 
