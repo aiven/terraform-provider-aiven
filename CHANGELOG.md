@@ -41,6 +41,16 @@ nav_order: 1
 - Add `aiven_valkey_user` field `password_encryption_type` (enum): The password hashing algorithm used for this PostgreSQL
   user, derived from the stored password hash
 - Migrate `aiven_flink_jar_application` resource to the Plugin Framework.
+- Change `aiven_account_team_project` field `team_type` (enum): add `project:event_logs:read`, `role:project:read`
+- Add `aiven_mysql` field `mysql_user_config.mysql.max_connections`: The maximum permitted number of simultaneous client connections
+- Add `aiven_mysql` field `mysql_user_config.mysql.max_user_connections`: The maximum number of simultaneous connections
+  permitted to any single user account
+- Add `aiven_pg` field `pg_user_config.pg.pg_stat_plans__dot__track` (enum): Controls which statements' plans are tracked.
+  Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such
+  as statements invoked within functions), or none to disable plan tracking
+- Add `aiven_pg` field `pg_user_config.pg_stat_plans_enable`: Enable the pg_stat_plans extension. Changing this parameter
+  causes a service restart
+- Change `aiven_project_user` field `member_type` (enum): add `project:event_logs:read`, `role:project:read`
 
 ## [4.61.0] - 2026-07-30
 

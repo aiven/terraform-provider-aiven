@@ -339,6 +339,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"max_connections": {
+						Description: "The maximum permitted number of simultaneous client connections. Lower this to reserve memory for other work. The value cannot exceed the limit provided by your service plan. Upgrading the plan does not raise a value you have set explicitly, so increase it yourself after an upgrade. Example: `200`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"max_execution_time": {
 						Description: "Execution timeout in milliseconds for read-only top-level SELECT statements. 0 (the default) means no timeout. Example: `15000`.",
 						Optional:    true,
@@ -351,6 +356,11 @@ func mysqlUserConfig() *schema.Schema {
 					},
 					"max_seeks_for_key": {
 						Description: "Limit on the assumed maximum number of index seeks when looking up rows based on a key. Lowering this value causes the optimizer to prefer index lookups over table scans. Example: `100`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"max_user_connections": {
+						Description: "The maximum number of simultaneous connections permitted to any single user account. 0, the default, means no per-account limit. Any other value must be at least 10 below max_connections, so that monitoring and your own admin sessions can still connect when an application saturates its own limit. Aiven's replication and management connections are unaffected however low you set this. Example: `50`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

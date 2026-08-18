@@ -154,6 +154,7 @@ Optional:
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.
 - `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Changing this parameter causes a service restart. When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.
+- `pg_stat_plans_enable` (Boolean) Enable the pg_stat_plans extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.
 - `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, `18`, and newer. PostgreSQL major version.
 - `pgaudit` (Block List, Max: 1) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--pg_user_config--pgaudit))
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
@@ -257,6 +258,7 @@ Optional:
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring. Only available for PostgreSQL 13+.
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets. Changing this parameter causes a service restart. Only available for PostgreSQL 13+. Example: `10`.
+- `pg_stat_plans__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements' plans are tracked. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable plan tracking. The default is `top`.
 - `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default is `top`.
 - `synchronous_commit` (String) Enum: `local`, `off`, `on`, `remote_apply`, `remote_write`. Sets the current transaction's synchronization level. The default is `off`. This setting takes precedence over `synchronous_replication`.
 - `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
