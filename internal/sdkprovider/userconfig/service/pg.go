@@ -415,6 +415,12 @@ func pgUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"pg_stat_plans__dot__track": {
+						Description:  "Enum: `all`, `none`, `top`. Controls which statements' plans are tracked. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable plan tracking. The default is `top`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"all", "none", "top"}, false),
+					},
 					"pg_stat_statements__dot__track": {
 						Description:  "Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default is `top`.",
 						Optional:     true,
@@ -527,6 +533,11 @@ func pgUserConfig() *schema.Schema {
 			},
 			"pg_stat_monitor_enable": {
 				Description: "Enable the pg_stat_monitor extension. Changing this parameter causes a service restart. When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
+			"pg_stat_plans_enable": {
+				Description: "Enable the pg_stat_plans extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},

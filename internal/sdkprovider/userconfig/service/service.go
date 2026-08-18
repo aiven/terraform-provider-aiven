@@ -99,6 +99,7 @@ func GetFieldMapping(kind string) map[string]string {
 			"pg/pg_partman_bgw__dot__role":                    "pg/pg_partman_bgw.role",
 			"pg/pg_stat_monitor__dot__pgsm_enable_query_plan": "pg/pg_stat_monitor.pgsm_enable_query_plan",
 			"pg/pg_stat_monitor__dot__pgsm_max_buckets":       "pg/pg_stat_monitor.pgsm_max_buckets",
+			"pg/pg_stat_plans__dot__track":                    "pg/pg_stat_plans.track",
 			"pg/pg_stat_statements__dot__track":               "pg/pg_stat_statements.track",
 		},
 		"thanos": {
