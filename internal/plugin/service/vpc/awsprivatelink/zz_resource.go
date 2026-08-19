@@ -54,6 +54,12 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Privatelink resource state. The possible values are `active`, `creating` and `deleting`.",
 			},
+			"supported_regions": schema.SetAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "List of AWS regions to allow cross-region privatelink connections from.",
+				Optional:            true,
+				Validators:          []validator.Set{setvalidator.SizeAtMost(16)},
+			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
 		MarkdownDescription: "Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
@@ -84,6 +90,10 @@ func resourceSchemaInternal() *adapter.Schema {
 			"state": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"supported_regions": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
 			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{
