@@ -45,6 +45,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Privatelink resource state. The possible values are `active`, `creating` and `deleting`.",
 			},
+			"supported_regions": schema.SetAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "List of AWS regions to allow cross-region privatelink connections from.",
+			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
 		MarkdownDescription: "Gets information about an AWS PrivateLink connection for an Aiven service.",
@@ -78,6 +83,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 			"state": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"supported_regions": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},

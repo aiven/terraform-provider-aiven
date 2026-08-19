@@ -51,6 +51,7 @@ nav_order: 1
 - Add `aiven_pg` field `pg_user_config.pg_stat_plans_enable`: Enable the pg_stat_plans extension. Changing this parameter
   causes a service restart
 - Change `aiven_project_user` field `member_type` (enum): add `project:event_logs:read`, `role:project:read`
+- Add `aiven_aws_privatelink` field `supported_regions`: List of AWS regions to allow cross-region privatelink connections from.
 
 ## [4.61.0] - 2026-07-30
 

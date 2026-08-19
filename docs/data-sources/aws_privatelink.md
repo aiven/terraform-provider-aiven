@@ -17,10 +17,11 @@ data "aiven_aws_privatelink" "example" {
   service_name = "foo"
 
   /* COMPUTED FIELDS
-  aws_service_id   = "foo"
-  aws_service_name = "my-aws-service-name"
-  principals       = ["arn:aws:iam::012345678901:root"]
-  state            = "active"
+  aws_service_id    = "foo"
+  aws_service_name  = "my-aws-service-name"
+  principals        = ["arn:aws:iam::012345678901:root"]
+  state             = "active"
+  supported_regions = ["eu-west-1"]
   */
 }
 ```
@@ -43,6 +44,7 @@ data "aiven_aws_privatelink" "example" {
 - `id` (String) Resource ID composed as: `project/service_name`.
 - `principals` (Set of String) ARNs of principals allowed connecting to the service.
 - `state` (String) Privatelink resource state. The possible values are `active`, `creating` and `deleting`.
+- `supported_regions` (Set of String) List of AWS regions to allow cross-region privatelink connections from.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

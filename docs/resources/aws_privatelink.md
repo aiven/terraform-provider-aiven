@@ -17,6 +17,9 @@ resource "aiven_aws_privatelink" "example" {
   service_name = "foo" // Force new
   principals   = ["arn:aws:iam::012345678901:root"]
 
+  // OPTIONAL FIELDS
+  supported_regions = ["eu-west-1"]
+
   /* COMPUTED FIELDS
   aws_service_id   = "foo"
   aws_service_name = "my-aws-service-name"
@@ -35,6 +38,7 @@ resource "aiven_aws_privatelink" "example" {
 
 ### Optional
 
+- `supported_regions` (Set of String) List of AWS regions to allow cross-region privatelink connections from.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
