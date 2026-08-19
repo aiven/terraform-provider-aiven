@@ -90,24 +90,3 @@ func (w *aivenVPCPeeringWrapper) GetState() string {
 func (w *aivenVPCPeeringWrapper) GetStateInfo() *map[string]any {
 	return w.StateInfo
 }
-
-type organizationVPCPeeringWrapper struct {
-	*organizationvpc.OrganizationVpcGetPeeringConnectionOut
-}
-
-func newOrganizationVPCPeeringState(pc *organizationvpc.OrganizationVpcGetPeeringConnectionOut) *organizationVPCPeeringWrapper {
-	return &organizationVPCPeeringWrapper{pc}
-}
-
-func (w *organizationVPCPeeringWrapper) GetState() string {
-	return string(w.State)
-}
-
-func (w *organizationVPCPeeringWrapper) GetStateInfo() *map[string]any {
-	stateInfo := make(map[string]any)
-
-	stateInfo["message"] = w.StateInfo.Message
-	stateInfo["type"] = w.StateInfo.Type
-
-	return &stateInfo
-}

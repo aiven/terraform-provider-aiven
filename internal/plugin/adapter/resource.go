@@ -210,7 +210,7 @@ func (a *resourceAdapter) Create(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	err = a.resource.Create(ctx, a.client, d)
@@ -294,7 +294,7 @@ func (a *resourceAdapter) Read(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	// When RemoveMissing is enabled, we remove the resource from the state if it's missing.
@@ -364,7 +364,7 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 	err := retry.Do(
 		func() error {
 			var attemptWarnings diag.Diagnostics
-			ctx, drainWarnings := withWarnings(ctx, &attemptWarnings)
+			ctx, drainWarnings := WithWarnings(ctx, &attemptWarnings)
 			err := a.resource.Read(ctx, a.client, rd)
 			drainWarnings()
 			lastAttemptWarnings = attemptWarnings
@@ -460,7 +460,7 @@ func (a *resourceAdapter) Update(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	// Some resources might have "virtual" fields, like "termination_protection".
@@ -512,7 +512,7 @@ func (a *resourceAdapter) Delete(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
@@ -599,7 +599,7 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 			}
 
 			var attemptWarnings diag.Diagnostics
-			ctx, drainWarnings := withWarnings(ctx, &attemptWarnings)
+			ctx, drainWarnings := WithWarnings(ctx, &attemptWarnings)
 			err := a.resource.Read(ctx, a.client, rd)
 			drainWarnings()
 			lastAttemptWarnings = attemptWarnings
@@ -725,7 +725,7 @@ func (a *resourceAdapter) ValidateConfig(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	err = a.resource.ValidateConfig(ctx, a.client, d)
@@ -788,7 +788,7 @@ func (a *resourceAdapter) ModifyPlan(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	err = a.resource.ModifyPlan(ctx, a.client, d)

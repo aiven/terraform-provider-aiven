@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-const organizationVPCResource = "aiven_organization_vpc"
-
 func importStateByName(name string) resource.TestStep {
 	return resource.TestStep{
 		ResourceName: name,

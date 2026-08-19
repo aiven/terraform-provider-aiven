@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/gcporgvpcpeeringconnection
+resource:
+  stateAttribute: state
+  refreshStateDesired:
+    - ACTIVE
+    - PENDING_PEER
+  refreshStateFailed:
+    - DELETED
+    - DELETED_BY_PEER
+    - DELETING
+    - ERROR
+    - INVALID_SPECIFICATION
+    - REJECTED_BY_PEER
+  refreshStateDelay: 1s
+  deleteStateDesired:
+    - DELETED
+  removeMissing: true
+  description: Creates and manages a Google Cloud VPC peering connection.
+datasource:
+  description: The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
+clientHandler: organizationvpc
+idAttributeComposed: [organization_id, organization_vpc_id, gcp_project_id, peer_vpc]
+legacyTimeouts: true
+flattenModifier: true
+rename:
+  peer_cloud_account: gcp_project_id
+operations:
+  - id: OrganizationVpcPeeringConnectionCreate
+    type: create
+  - id: OrganizationVpcGet
+    type: read
+    resultKey: peering_connections
+    resultKeyField: PeeringConnections
+    resultListLookupKeys:
+      PeerCloudAccount: gcp_project_id
+      PeerVpc: peer_vpc
+  - id: OrganizationVpcPeeringConnectionDeleteById
+    type: delete
+    disableView: true
+remove:
+  - create_time
+  - "*_aws_*"
+  - "*_azure_*"
+  - peer_region
+  - peer_resource_group
+  - peering_connection_id
+  - state_info
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  organization_vpc_id:
+    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+  gcp_project_id:
+    example: my-gcp-project
+    description: Google Cloud project ID.
+  peer_vpc:
+    example: my-vpc
+    description: Google Cloud VPC network name.
+  state:
+    description: State of the peering connection.
+  self_link:
+    type: string
+    computed: true
+    example: https://www.googleapis.com/compute/v1/projects/my-gcp-project/global/networks/my-vpc
+    description: Computed Google Cloud network peering link.

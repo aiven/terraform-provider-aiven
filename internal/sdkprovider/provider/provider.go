@@ -73,13 +73,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_project_user": project.DatasourceProjectUser(),
 
 			// vpc
-			"aiven_aws_vpc_peering_connection":       vpc.DatasourceAWSVPCPeeringConnection(),
-			"aiven_aws_org_vpc_peering_connection":   vpc.DatasourceAWSOrgVPCPeeringConnection(),
-			"aiven_azure_vpc_peering_connection":     vpc.DatasourceAzureVPCPeeringConnection(),
-			"aiven_azure_org_vpc_peering_connection": vpc.DatasourceAzureOrgVPCPeeringConnection(),
-			"aiven_gcp_vpc_peering_connection":       vpc.DatasourceGCPVPCPeeringConnection(),
-			"aiven_gcp_org_vpc_peering_connection":   vpc.DatasourceGCPOrgVPCPeeringConnection(),
-			"aiven_transit_gateway_vpc_attachment":   vpc.DatasourceTransitGatewayVPCAttachment(),
+			"aiven_aws_vpc_peering_connection":     vpc.DatasourceAWSVPCPeeringConnection(),
+			"aiven_azure_vpc_peering_connection":   vpc.DatasourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
+			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
@@ -141,13 +138,10 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// vpc
 			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
-			"aiven_aws_org_vpc_peering_connection":        vpc.ResourceAWSOrgVPCPeeringConnection(),
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
-			"aiven_azure_org_vpc_peering_connection":      vpc.ResourceAzureOrgVPCPeeringConnection(),
 			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
-			"aiven_gcp_org_vpc_peering_connection":        vpc.ResourceGCPOrgVPCPeeringConnection(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
 
 			// service integrations
@@ -194,16 +188,9 @@ func Provider(version string) (*schema.Provider, error) {
 	betaResources := []string{
 		"aiven_flink_jar_application_version",
 		"aiven_flink_jar_application_deployment",
-		"aiven_aws_org_vpc_peering_connection",
-		"aiven_gcp_org_vpc_peering_connection",
-		"aiven_azure_org_vpc_peering_connection",
 	}
 
-	betaDataSources := []string{
-		"aiven_aws_org_vpc_peering_connection",
-		"aiven_gcp_org_vpc_peering_connection",
-		"aiven_azure_org_vpc_peering_connection",
-	}
+	betaDataSources := []string{}
 
 	// Adds "limited availability" warning to the description
 	limitedAvailabilityResources := []string{

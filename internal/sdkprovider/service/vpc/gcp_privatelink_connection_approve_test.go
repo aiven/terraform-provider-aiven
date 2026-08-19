@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 	"unsafe"
@@ -13,6 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
 )
+
+var testMu = &sync.RWMutex{}
 
 const (
 	testProject = "test-project"

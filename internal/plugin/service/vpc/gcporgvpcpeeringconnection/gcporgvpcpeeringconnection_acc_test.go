@@ -1,4 +1,4 @@
-package vpc_test
+package gcporgvpcpeeringconnection_test
 
 import (
 	"context"
@@ -19,6 +19,7 @@ import (
 
 const (
 	gcpOrgVPCPeeringResource = "aiven_gcp_org_vpc_peering_connection"
+	organizationVPCResource  = "aiven_organization_vpc"
 )
 
 // TestAccAivenGCPOrgVPCPeeringConnection tests the GCP VPC peering connection resource functionality.
@@ -56,7 +57,7 @@ func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 						"gcp_project_id":      template.Literal("wrong_project_id"),
 						"peer_vpc":            template.Literal("wrong_peer_vpc"),
 					}).MustRender(t),
-				ExpectError: regexp.MustCompile(`peer_cloud_account must be a valid GCP project ID`), // Expected error due to invalid GCP arguments
+				ExpectError: regexp.MustCompile(`peer_cloud_account must be a\s+valid GCP project ID`), // Expected error due to invalid GCP arguments
 			},
 		},
 	})
@@ -150,6 +151,53 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 	})
 }
 
+func TestAccAivenGCPOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
+	acc.SkipIfNotBeta(t)
+
+	gcpProject := acc.RequireEnvVars(t, "GOOGLE_PROJECT")["GOOGLE_PROJECT"]
+	resourceName := gcpOrgVPCPeeringResource + ".test_peering"
+	config := testAccGCPOrgVPCPeeringBackwardCompatConfig(acc.OrganizationName(), gcpProject)
+	checks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "organization_vpc_id"),
+		resource.TestCheckResourceAttr(resourceName, "gcp_project_id", gcpProject),
+		resource.TestCheckResourceAttr(resourceName, "peer_vpc", "default"),
+		resource.TestCheckResourceAttrSet(resourceName, "state"),
+		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: testAccCheckGCPOrgVPCPeeringResourceDestroy,
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			TFConfig:           config,
+			OldProviderVersion: "4.60.0",
+			Checks:             checks,
+		}),
+	})
+}
+
+func testAccGCPOrgVPCPeeringBackwardCompatConfig(orgName, gcpProject string) string {
+	return fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = %[1]q
+}
+
+resource "aiven_organization_vpc" "example" {
+  organization_id = data.aiven_organization.foo.id
+  cloud_name      = "google-europe-west10"
+  network_cidr    = "10.0.0.0/24"
+}
+
+resource "aiven_gcp_org_vpc_peering_connection" "test_peering" {
+  organization_id     = data.aiven_organization.foo.id
+  organization_vpc_id = aiven_organization_vpc.example.organization_vpc_id
+  gcp_project_id      = %[2]q
+  peer_vpc            = "default"
+}
+`, orgName, gcpProject)
+}
+
 func testAccCheckGCPOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 	ctx := context.Background()
 
@@ -178,15 +226,20 @@ func testAccCheckGCPOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 		}
 
 		var pc *organizationvpc.OrganizationVpcGetPeeringConnectionOut
-		for _, p := range orgVPC.PeeringConnections {
-			if p.PeerCloudAccount == cloudAcc && p.PeerVpc == peerVPC && p.PeeringConnectionId != nil {
-				pc = &p
+		for i := range orgVPC.PeeringConnections {
+			p := &orgVPC.PeeringConnections[i]
+			if p.PeerCloudAccount == cloudAcc && p.PeerVpc == peerVPC {
+				pc = p
 				break
 			}
 		}
 
 		if pc != nil {
-			return fmt.Errorf("peering connection %q still exists", *pc.PeeringConnectionId)
+			connectionID := "<missing>"
+			if pc.PeeringConnectionId != nil {
+				connectionID = *pc.PeeringConnectionId
+			}
+			return fmt.Errorf("peering connection %q still exists", connectionID)
 		}
 	}
 

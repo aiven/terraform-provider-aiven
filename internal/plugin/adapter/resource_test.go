@@ -200,7 +200,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 	t.Run("keeps outer warnings and merges only last try warnings", func(t *testing.T) {
 		var target diag.Diagnostics
 
-		outerCtx, drainWarnings := withWarnings(t.Context(), &target)
+		outerCtx, drainWarnings := WithWarnings(t.Context(), &target)
 		AddWarnings(outerCtx, warning("outer-1"), warning("outer-2"))
 
 		outerCollector, ok := outerCtx.Value(warningCollectorKey{}).(*warningCollector)
@@ -1010,7 +1010,7 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 	t.Run("keeps outer warnings and merges only last try warnings", func(t *testing.T) {
 		var target diag.Diagnostics
 
-		outerCtx, drainWarnings := withWarnings(t.Context(), &target)
+		outerCtx, drainWarnings := WithWarnings(t.Context(), &target)
 		AddWarnings(outerCtx, warning("outer-1"))
 
 		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))

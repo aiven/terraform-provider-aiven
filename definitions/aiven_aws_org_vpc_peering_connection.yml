@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/awsorgvpcpeeringconnection
+resource:
+  stateAttribute: state
+  refreshStateDesired:
+    - ACTIVE
+    - PENDING_PEER
+  refreshStateFailed:
+    - DELETED
+    - DELETED_BY_PEER
+    - DELETING
+    - ERROR
+    - INVALID_SPECIFICATION
+    - REJECTED_BY_PEER
+  refreshStateDelay: 1s
+  deleteStateDesired:
+    - DELETED
+  removeMissing: true
+  description: Creates and manages an AWS VPC peering connection with an Aiven Organization VPC.
+datasource:
+  description: Gets information about an AWS VPC peering connection.
+clientHandler: organizationvpc
+idAttributeComposed: [organization_id, organization_vpc_id, aws_account_id, aws_vpc_id, aws_vpc_region]
+legacyTimeouts: true
+flattenModifier: true
+rename:
+  peer_cloud_account: aws_account_id
+  peer_region: aws_vpc_region
+  peer_vpc: aws_vpc_id
+operations:
+  - id: OrganizationVpcPeeringConnectionCreate
+    type: create
+  - id: OrganizationVpcGet
+    type: read
+    resultKey: peering_connections
+    resultKeyField: PeeringConnections
+    resultListLookupKeys:
+      PeerCloudAccount: aws_account_id
+      PeerRegion: aws_vpc_region
+      PeerVpc: aws_vpc_id
+  - id: OrganizationVpcPeeringConnectionDeleteById
+    type: delete
+    # The generator cannot yet order path fields that are not part of the composite Terraform ID.
+    disableView: true
+remove:
+  - create_time
+  - "*_azure_*"
+  - "*_gcp_*"
+  - peer_resource_group
+  - state_info
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  organization_vpc_id:
+    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+  aws_account_id:
+    description: AWS account ID.
+  aws_vpc_id:
+    description: AWS VPC ID.
+  aws_vpc_region:
+    required: true
+    description: The AWS region of the peered VPC. For example, `eu-central-1`.
+  aws_vpc_peering_connection_id:
+    type: string
+    computed: true
+    example: pcx-1234567890abcdef0
+    description: The ID of the AWS VPC peering connection.
+  state:
+    description: State of the peering connection.
