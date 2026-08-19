@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/kafka/mirrormakerreplicationflow
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.
 datasource:

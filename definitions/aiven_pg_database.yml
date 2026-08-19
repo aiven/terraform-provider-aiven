@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/pg/database
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   terminationProtection: true
   description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.

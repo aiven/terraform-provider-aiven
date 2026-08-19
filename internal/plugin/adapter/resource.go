@@ -48,9 +48,9 @@ type ResourceOptions struct {
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
 	IDFields []string
 
-	// RefreshState enables Read after Create and Update when non-nil. An empty condition performs a
-	// post-operation Read without checking an attribute. Otherwise, Attribute must reach one of its
-	// Desired values; any Failed value terminates refresh with an error.
+	// RefreshState enables Read after Create and Update when non-nil. 404/403 are retried until
+	// the resource exists. An empty condition then completes; otherwise Attribute must reach one
+	// of its Desired values, and any Failed value terminates refresh with an error.
 	RefreshState *RefreshStateCondition
 
 	// Time to wait after creating or updating the resource to let the backend catch up.
@@ -530,13 +530,16 @@ func (a *resourceAdapter) Delete(
 	}
 }
 
-// DeleteStateOptions configures the delete poller. When set (non-nil) on ResourceOptions, Delete
-// re-issues Delete on every attempt (ignoring its error) and polls Read until the resource reaches
-// its terminal state. See deleteState.
+// DeleteStateOptions configures the delete poller. When non-nil, Delete runs deleteState:
+// Delete is issued until it succeeds once, then Read is polled until 404 or a Desired value.
+// See deleteState.
 type DeleteStateOptions struct {
-	// Desired maps attribute names to the terminal value the poller must observe after Delete. Empty
-	// means there are no attribute conditions, so the poll completes only once the resource is gone (404).
-	Desired map[string]string
+	// Attribute is the Terraform attribute to check after Delete. Required when Desired is non-empty.
+	Attribute string
+	// Desired contains successful terminal attribute values. A match against any value completes
+	// the delete. Empty means there are no attribute conditions, so the poll completes only once
+	// the resource is gone (404).
+	Desired []string
 
 	// retryDelay is the fixed delay between attempts. Zero falls back to defaultDeleteStateRetryDelay.
 	// Unexported: intended for tests inside the adapter package only.
@@ -551,8 +554,8 @@ var ErrDeleteStateDesired = errors.New("resource has not reached the desired del
 const defaultDeleteStateRetryDelay = time.Second * 5
 
 // deleteState deletes the resource and polls until it reaches its terminal state: the API reports it
-// gone (404), or every DeleteStateOptions.Desired entry matches (with no Desired, a 404 is the only
-// terminal).
+// gone (404), or Attribute matches any DeleteStateOptions.Desired value (with no Desired, a 404 is
+// the only terminal).
 //
 // Delete is issued until it succeeds once, then each attempt only reads. While Delete errors
 // (404 = already gone, 409 = dependents still detaching) it is re-issued, but its error is not fatal
@@ -568,6 +571,10 @@ const defaultDeleteStateRetryDelay = time.Second * 5
 // Each Read's warnings are buffered so only the last attempt's are merged into the outer collector.
 func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) error {
 	opts := a.resource.DeleteState
+	if len(opts.Desired) > 0 && opts.Attribute == "" {
+		return errors.New("delete state condition has no attribute")
+	}
+
 	retryDelay := opts.retryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultDeleteStateRetryDelay
@@ -603,14 +610,21 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 			}
 
 			// Still present: with no Desired the only terminal is a 404, so keep polling; otherwise
-			// every entry must match. The last Delete error is attached after the loop.
+			// Attribute must match any Desired value. The last Delete error is attached after the loop.
 			if len(opts.Desired) == 0 {
 				return fmt.Errorf("%w: waiting for the resource to be gone", ErrDeleteStateDesired)
 			}
-			for key, want := range opts.Desired {
-				if state := rd.Get(key); !Equal(state, want) {
-					return fmt.Errorf("%w: expected %q to be `%v`, got `%v`", ErrDeleteStateDesired, key, want, state)
-				}
+			attributeValue, ok := rd.GetOk(opts.Attribute)
+			if !ok || !slices.ContainsFunc(opts.Desired, func(desired string) bool {
+				return Equal(attributeValue, desired)
+			}) {
+				return fmt.Errorf(
+					"%w: expected %q to be one of `%v`, got `%v`",
+					ErrDeleteStateDesired,
+					opts.Attribute,
+					opts.Desired,
+					attributeValue,
+				)
 			}
 			return nil
 		},

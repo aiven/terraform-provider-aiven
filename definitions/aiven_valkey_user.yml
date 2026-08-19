@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/valkey/user
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user.
 datasource:

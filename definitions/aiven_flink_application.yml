@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/flink/application
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: |
     Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).

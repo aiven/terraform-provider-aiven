@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/vpc/gcpprivatelink
 resource:
-  refreshState:
-    desired: [active]
-  deleteStateDesired: {}
+  stateAttribute: state
+  refreshStateDesired: [active]
+  deleteStateGone: true
   removeMissing: true
   description: Creates and manages a Google Private Service Connect for an Aiven service in a VPC.
 datasource:

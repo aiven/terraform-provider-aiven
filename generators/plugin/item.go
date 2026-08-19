@@ -131,29 +131,35 @@ type Scope struct {
 	CurrentMeta *SchemaMeta
 }
 
-type RefreshStateCondition struct {
-	Attribute *string  `yaml:"attribute,omitempty"`
-	Desired   []string `yaml:"desired,omitempty"`
-	Failed    []string `yaml:"failed,omitempty"`
-}
-
 // SchemaMeta contains fields to override.
 // Extend this struct if you need to override more fields and update the usage.
 type SchemaMeta struct {
-	Description           string                 `yaml:"description"`
-	DeprecationMessage    string                 `yaml:"deprecationMessage,omitempty"`
-	TerminationProtection bool                   `yaml:"terminationProtection,omitempty"`
-	RefreshState          *RefreshStateCondition `yaml:"refreshState,omitempty"`
-	RefreshStateDelay     time.Duration          `yaml:"refreshStateDelay,omitempty"`
-	// DeleteStateDesired, when non-nil (even as an empty map), enables the delete poller. It maps
-	// Terraform attribute names to the terminal value the poller must observe. See
-	// adapter.DeleteStateOptions.
-	DeleteStateDesired  map[string]string `yaml:"deleteStateDesired,omitempty"`
-	RemoveMissing       bool              `yaml:"removeMissing,omitempty"`
-	IgnoreAlreadyExists bool              `yaml:"ignoreAlreadyExists,omitempty"`
-	DisableExample      bool              `yaml:"disableExample,omitempty"`
-	ValidateConfig      bool              `yaml:"validateConfig,omitempty"`
-	ModifyPlan          bool              `yaml:"modifyPlan,omitempty"`
+	Description           string `yaml:"description"`
+	DeprecationMessage    string `yaml:"deprecationMessage,omitempty"`
+	TerminationProtection bool   `yaml:"terminationProtection,omitempty"`
+	// StateAttribute is the Terraform attribute polled by refreshStateDesired and
+	// deleteStateDesired. Required when either list is set.
+	StateAttribute string `yaml:"stateAttribute,omitempty"`
+	// RefreshStateExists enables a post-Create/Update Read that completes on the first
+	// successful Read. Implied by RefreshStateDesired; omit this when waiting for an attribute value.
+	RefreshStateExists bool `yaml:"refreshStateExists,omitempty"`
+	// RefreshStateDesired enables a post-Create/Update Read that waits until StateAttribute
+	// matches any value. Transient 404/403 errors are retried until the resource exists.
+	// See adapter.RefreshStateCondition.
+	RefreshStateDesired []string      `yaml:"refreshStateDesired,omitempty"`
+	RefreshStateFailed  []string      `yaml:"refreshStateFailed,omitempty"`
+	RefreshStateDelay   time.Duration `yaml:"refreshStateDelay,omitempty"`
+	// DeleteStateGone enables the delete poller and completes when Read returns 404.
+	// Implied by DeleteStateDesired (a 404 also completes); omit this when waiting for an attribute value.
+	DeleteStateGone bool `yaml:"deleteStateGone,omitempty"`
+	// DeleteStateDesired enables the delete poller and waits until StateAttribute matches any
+	// value. A 404 also completes. See adapter.DeleteStateOptions.
+	DeleteStateDesired  []string `yaml:"deleteStateDesired,omitempty"`
+	RemoveMissing       bool     `yaml:"removeMissing,omitempty"`
+	IgnoreAlreadyExists bool     `yaml:"ignoreAlreadyExists,omitempty"`
+	DisableExample      bool     `yaml:"disableExample,omitempty"`
+	ValidateConfig      bool     `yaml:"validateConfig,omitempty"`
+	ModifyPlan          bool     `yaml:"modifyPlan,omitempty"`
 
 	// SchemaOverride is a datasource-only schema overlay merged on top of the
 	// base Definition.Schema when generating the datasource. Resource
