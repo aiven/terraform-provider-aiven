@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/opensearch/securitypluginconfig
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: |
     Enables and manages [OpenSearch Security for an Aiven for OpenSearch® service](https://aiven.io/docs/products/opensearch/concepts/os-security).

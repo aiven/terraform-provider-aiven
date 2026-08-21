@@ -3,7 +3,7 @@ location: internal/plugin/service/flink/jarapplication
 beta: true
 limitedAvailability: true
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: |
     Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).

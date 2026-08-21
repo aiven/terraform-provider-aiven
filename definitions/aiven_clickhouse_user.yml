@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 location: internal/plugin/service/clickhouse/user
 resource:
-  refreshState: {}
+  refreshStateExists: true
   removeMissing: true
   description: Creates and manages an Aiven for ClickHouse user.
 datasource:

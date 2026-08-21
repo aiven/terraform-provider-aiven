@@ -173,42 +173,45 @@ resource:
   description: "..."
   deprecationMessage: "..."
   terminationProtection: true # Check field before delete
-  refreshState: # Call Read after Create/Update and wait for state convergence
-    attribute: state # Optional; defaults to state
-    desired: [ACTIVE, PENDING_PEER]
-    failed: [ERROR, DELETED]
+  stateAttribute: state # Terraform attribute polled after Create/Update/Delete
+  refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
+  refreshStateFailed: [ERROR, DELETED]
   refreshStateDelay: "15s" # Wait before Read
   removeMissing: true # Remove from state on 404
-  deleteStateDesired: # Poll Read after Delete until the resource reaches its terminal state
-    state: DELETED
+  deleteStateDesired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
 ```
 
-`refreshState` enables a post-Create/Update Read. Use `refreshState: {}` when the first successful
-Read is sufficient. To wait for state convergence, configure `desired` values and optional `failed`
-values for a computed-only Terraform attribute. The optional `attribute` setting defaults to `state`.
-Values within each list use OR semantics. A desired value completes the refresh, and any failed value
-stops it immediately. Values in neither list are treated as pending and retried, which safely
-accommodates new intermediate backend states.
+`refreshStateExists: true` enables a post-Create/Update Read that completes on the first
+successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
+`stateAttribute` plus `refreshStateDesired` and optional `refreshStateFailed` instead — desired
+already includes that exists retry. Values within each list use OR semantics. A desired value
+completes the refresh, and any failed value stops it immediately. Values in neither list are
+treated as pending and retried until the operation timeout.
 
-`deleteStateDesired` replaces custom delete waiters. It is a map, and its presence (even as an empty map, `{}`) enables the delete poller: on every attempt the adapter re-issues `Delete` (ignoring its error) and polls `Read` until the resource is gone (404) or reaches its terminal state, then returns. A 404 always completes the delete. Because `Delete` is re-issued each attempt and its error is ignored, a 409 Conflict from dependents still detaching resolves on its own — no extra configuration is needed.
+`deleteStateGone: true` enables the delete poller and completes when Read returns 404.
+`deleteStateDesired` waits until `stateAttribute` matches any listed value; a 404 also
+completes (gone is implied). Delete is re-issued while it errors (for example 409 from
+dependents still detaching); once Delete succeeds, only Read is polled. Omit both to delete
+without polling.
 
-The map's entries are attribute names mapped to the terminal value the poller must observe (e.g. `state: DELETED`). The poll finishes when every entry matches or the API 404s, whichever comes first. Values are validated against the field's enum when one is declared. Use an empty map for APIs whose Read never surfaces a terminal state (it just 404s).
+Values are validated against the field's enum when one is declared. `stateAttribute` is required
+when `refreshStateDesired` or `deleteStateDesired` is set.
 
 Examples:
 
 ```yaml
 # Wait until the API 404s; no observable terminal state (e.g. aiven_azure_privatelink).
-deleteStateDesired: {}
+deleteStateGone: true
 ```
 
 ```yaml
 # Soft-delete API reports state: DELETED, and dependents may still be detaching
-# (e.g. aiven_project_vpc, aiven_organization_vpc). Delete is re-issued each attempt.
-deleteStateDesired:
-  state: DELETED
+# (e.g. aiven_project_vpc, aiven_organization_vpc).
+stateAttribute: state
+deleteStateDesired: [DELETED]
 ```
 
-Prefer `deleteStateDesired` over a hand-written delete `disableView` + custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value. Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state machine).
+Prefer `deleteStateGone` or `deleteStateDesired` over a hand-written delete `disableView` + custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value. Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state machine).
 
 ### Datasource Configuration
 

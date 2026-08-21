@@ -21,10 +21,13 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:                true,
-	Create:              createView,
-	Delete:              deleteView,
-	DeleteState:         &adapter.DeleteStateOptions{Desired: map[string]string{"state": "deleted"}},
+	Beta:   true,
+	Create: createView,
+	Delete: deleteView,
+	DeleteState: &adapter.DeleteStateOptions{
+		Attribute: "state",
+		Desired:   []string{"deleted"},
+	},
 	IDFields:            idFields(),
 	IgnoreAlreadyExists: true,
 	Read:                readView,

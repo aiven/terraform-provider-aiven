@@ -712,6 +712,28 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 		return diag.NewWarningDiagnostic(summary, "detail")
 	}
 
+	t.Run("rejects desired values without an attribute before deleting", func(t *testing.T) {
+		t.Parallel()
+
+		deletes, reads := 0, 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return nil
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return nil
+			},
+		)
+		a.resource.DeleteState.Desired = []string{"DELETED"}
+
+		err := a.deleteState(t.Context(), nil)
+		require.EqualError(t, err, "delete state condition has no attribute")
+		require.Zero(t, deletes)
+		require.Zero(t, reads)
+	})
+
 	t.Run("deletes once then surfaces the 404 when read reports the resource gone", func(t *testing.T) {
 		t.Parallel()
 
@@ -726,7 +748,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return avngen.Error{Status: http.StatusNotFound}
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		// A 404 bubbles up; Delete's outer guard ignores it as a successful deletion.
 		require.True(t, IsNotFound(a.deleteState(t.Context(), nil)))
@@ -754,11 +777,30 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return nil
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		require.NoError(t, a.deleteState(t.Context(), rd))
 		require.Equal(t, 3, reads)
 		require.Equal(t, 1, deletes, "delete must be issued once after it succeeds; only read polls after")
+	})
+
+	t.Run("completes when the attribute matches any desired value", func(t *testing.T) {
+		t.Parallel()
+
+		rd, err := NewResourceData(statusSchema, nil, WithTestState(map[string]any{"status": "DELETING"}))
+		require.NoError(t, err)
+
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error { return nil },
+			func(_ context.Context, _ avngen.Client, rd ResourceData) error {
+				return rd.Set("status", "DELETED_BY_PEER")
+			},
+		)
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED", "DELETED_BY_PEER"}
+
+		require.NoError(t, a.deleteState(t.Context(), rd))
 	})
 
 	t.Run("not-found-only polls read until the resource is gone", func(t *testing.T) {
@@ -801,7 +843,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return nil
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		require.NoError(t, a.deleteState(t.Context(), rd))
 		require.Equal(t, 3, deletes, "delete must be re-issued on every attempt, its error ignored")
@@ -854,7 +897,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return nil
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		require.NoError(t, a.deleteState(t.Context(), rd))
 		require.Equal(t, 3, deletes, "delete is re-issued only until it succeeds, then read polls alone")
@@ -904,7 +948,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return nil // Never transitions to DELETED, so the poll runs until ctx is cancelled.
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		// The fixed retry delay is fastRetryDelay (1µs), so a 300ms window comfortably allows many
 		// polls before the deadline.
@@ -954,7 +999,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 				return boom
 			},
 		)
-		a.resource.DeleteState.Desired = map[string]string{"status": "DELETED"}
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
 
 		err := a.deleteState(t.Context(), nil)
 		require.ErrorIs(t, err, boom)
@@ -988,7 +1034,8 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 					return nil
 				},
 				DeleteState: &DeleteStateOptions{
-					Desired:    map[string]string{"status": "DELETED"},
+					Attribute:  "status",
+					Desired:    []string{"DELETED"},
 					retryDelay: fastRetryDelay,
 				},
 			},
