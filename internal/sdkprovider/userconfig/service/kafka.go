@@ -860,6 +860,11 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"karapace_version": {
+				Description: "Pin a specific installed Karapace version on this service. Leave null/unset to auto-follow the newest installed version.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"letsencrypt_sasl": {
 				Description: "Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication. (Default: False).",
 				Optional:    true,
@@ -1007,6 +1012,26 @@ func kafkaUserConfig() *schema.Schema {
 						Description: "If enabled, kafka errors which can be retried or custom errors specified for the service will not be raised, instead, a warning log is emitted. This will denoise issue tracking systems, i.e. sentry. Defaults to `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_authentication_enabled": {
+						Description: "If enabled, the Schema Registry validates OAuth2/OIDC JWT bearer tokens on incoming requests. Requires the OIDC provider settings under the `kafka` configuration (`sasl_oauthbearer_jwks_endpoint_url` and related). Defaults to `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_authorization_enabled": {
+						Description: "If enabled, the Schema Registry enforces role-based authorization derived from the JWT roles claim. Requires `sasl_oauthbearer_authentication_enabled` to be enabled. Defaults to `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_method_roles": {
+						Description: "Mapping of HTTP methods to the list of roles allowed to perform them on the Schema Registry. Role names use the `karapace.` prefix, e.g. `karapace.schema:read`.",
+						Optional:    true,
+						Type:        schema.TypeMap,
+					},
+					"sasl_oauthbearer_roles_claim_path": {
+						Description: "JSON path used to extract the roles claim from the JWT for Schema Registry authorization. Defaults to `resource_access.karapace.roles`.",
+						Optional:    true,
+						Type:        schema.TypeString,
 					},
 					"schema_reader_strict_mode": {
 						Description: "If enabled, causes the Karapace schema-registry service to shutdown when there are invalid schema records in the `_schemas` topic. Defaults to `false`.",

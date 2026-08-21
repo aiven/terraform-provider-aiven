@@ -120,6 +120,7 @@ Read-Only:
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_sasl_mechanisms))
 - `kafka_version` (String)
+- `karapace_version` (String)
 - `letsencrypt_sasl` (Boolean)
 - `letsencrypt_sasl_privatelink` (Boolean)
 - `preferred_zones` (List of String)
@@ -418,6 +419,10 @@ Read-Only:
 
 - `leader_eligibility` (Boolean)
 - `retriable_errors_silenced` (Boolean)
+- `sasl_oauthbearer_authentication_enabled` (Boolean)
+- `sasl_oauthbearer_authorization_enabled` (Boolean)
+- `sasl_oauthbearer_method_roles` (Map of String)
+- `sasl_oauthbearer_roles_claim_path` (String)
 - `schema_reader_strict_mode` (Boolean)
 - `topic_name` (String)
 
