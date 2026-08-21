@@ -52,6 +52,16 @@ nav_order: 1
   causes a service restart
 - Change `aiven_project_user` field `member_type` (enum): add `project:event_logs:read`, `role:project:read`
 - Add `aiven_aws_privatelink` field `supported_regions`: List of AWS regions to allow cross-region privatelink connections from.
+- Add `aiven_kafka` field `kafka_user_config.karapace_version`: Pin a specific installed Karapace version on this service.
+  Leave null/unset to auto-follow the newest installed version.
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_authentication_enabled`: If enabled,
+  the Schema Registry validates OAuth2/OIDC JWT bearer tokens on incoming requests
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_authorization_enabled`: If enabled,
+  the Schema Registry enforces role-based authorization derived from the JWT roles claim
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_method_roles`: Mapping of HTTP
+  methods to the list of roles allowed to perform them on the Schema Registry
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_roles_claim_path`: JSON path used
+  to extract the roles claim from the JWT for Schema Registry authorization
 
 ## [4.61.0] - 2026-07-30
 
