@@ -1,7 +1,6 @@
 package azureorgvpcpeeringconnection
 
 import (
-	"errors"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -18,39 +17,51 @@ const (
 	testVNetName            = "example-vnet"
 	testResourceGroup       = "example-resource-group"
 	testConnectionID        = "example-connection-id"
+	testStaleConnectionID   = "stale-connection-id"
 )
 
 func TestDeleteView(t *testing.T) {
-	t.Run("deletes by API ID from state", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
-			Once()
-		require.NoError(t, deleteView(t.Context(), client, d))
-	})
+	client := avngen.NewMockClient(t)
+	d := newTestResourceData(t)
+	require.NoError(t, d.Set("peering_connection_id", testStaleConnectionID))
 
-	t.Run("requires API ID in state", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		require.NoError(t, d.Set("peering_connection_id", nil))
+	client.EXPECT().
+		OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
+		Return(&organizationvpc.OrganizationVpcGetOut{
+			PeeringConnections: []organizationvpc.OrganizationVpcGetPeeringConnectionOut{
+				{
+					PeerCloudAccount:    "another-subscription-id",
+					PeerVpc:             testVNetName,
+					PeerResourceGroup:   testResourceGroup,
+					PeeringConnectionId: new("another-subscription-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAzureSubscriptionID,
+					PeerVpc:             "another-vnet",
+					PeerResourceGroup:   testResourceGroup,
+					PeeringConnectionId: new("another-vnet-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAzureSubscriptionID,
+					PeerVpc:             testVNetName,
+					PeerResourceGroup:   "another-resource-group",
+					PeeringConnectionId: new("another-resource-group-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAzureSubscriptionID,
+					PeerVpc:             testVNetName,
+					PeerResourceGroup:   testResourceGroup,
+					PeeringConnectionId: new(testConnectionID),
+				},
+			},
+		}, nil).
+		Once()
+	client.EXPECT().
+		OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
+		Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
+		Once()
 
-		require.EqualError(t, deleteView(t.Context(), client, d), "Azure organization VPC peering connection state has no API peering connection ID")
-	})
-
-	t.Run("propagates client error", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		deleteErr := errors.New("delete failed")
-
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(nil, deleteErr).
-			Once()
-
-		require.ErrorIs(t, deleteView(t.Context(), client, d), deleteErr)
-	})
+	require.NoError(t, deleteView(t.Context(), client, d))
 }
 
 func newTestResourceData(t *testing.T) adapter.ResourceData {

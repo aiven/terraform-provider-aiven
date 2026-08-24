@@ -1,7 +1,6 @@
 package gcporgvpcpeeringconnection
 
 import (
-	"net/http"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -34,98 +33,37 @@ func TestFlattenModifierBuildsSelfLink(t *testing.T) {
 }
 
 func TestDeleteView(t *testing.T) {
-	orgVPC := func() *organizationvpc.OrganizationVpcGetOut {
-		return &organizationvpc.OrganizationVpcGetOut{
-			PeeringConnections: []organizationvpc.OrganizationVpcGetPeeringConnectionOut{{
-				PeerCloudAccount:    testGCPProjectID,
-				PeerVpc:             testPeerVPC,
-				PeeringConnectionId: new(testConnectionID),
-				State:               organizationvpc.VpcPeeringConnectionStateTypeActive,
-				StateInfo: organizationvpc.PeeringConnectionStateInfoOut{
-					Message:      "example state information",
-					Type:         "example",
-					ToProjectId:  new("peer-project"),
-					ToVpcNetwork: new("peer-network"),
+	client := avngen.NewMockClient(t)
+	d := newTestResourceData(t)
+
+	client.EXPECT().
+		OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
+		Return(&organizationvpc.OrganizationVpcGetOut{
+			PeeringConnections: []organizationvpc.OrganizationVpcGetPeeringConnectionOut{
+				{
+					PeerCloudAccount:    "another-gcp-project",
+					PeerVpc:             testPeerVPC,
+					PeeringConnectionId: new("another-project-connection-id"),
 				},
-			}},
-		}
-	}
+				{
+					PeerCloudAccount:    testGCPProjectID,
+					PeerVpc:             "another-peer-vpc",
+					PeeringConnectionId: new("another-vpc-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testGCPProjectID,
+					PeerVpc:             testPeerVPC,
+					PeeringConnectionId: new(testConnectionID),
+				},
+			},
+		}, nil).
+		Once()
+	client.EXPECT().
+		OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
+		Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
+		Once()
 
-	t.Run("finds API ID and deletes connection", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-
-		client.EXPECT().
-			OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
-			Return(orgVPC(), nil).
-			Once()
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
-			Once()
-		require.NoError(t, deleteView(t.Context(), client, d))
-	})
-
-	t.Run("returns missing parent", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-
-		client.EXPECT().
-			OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
-			Return(nil, avngen.Error{Status: http.StatusNotFound}).
-			Once()
-
-		err := deleteView(t.Context(), client, d)
-		require.True(t, adapter.IsNotFound(err))
-	})
-
-	t.Run("returns missing connection", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-
-		client.EXPECT().
-			OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
-			Return(&organizationvpc.OrganizationVpcGetOut{}, nil).
-			Once()
-
-		require.ErrorIs(t, deleteView(t.Context(), client, d), adapter.ErrNotFound)
-	})
-
-	t.Run("rejects connection without API ID", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		orgVPC := orgVPC()
-		orgVPC.PeeringConnections[0].PeeringConnectionId = nil
-
-		client.EXPECT().
-			OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
-			Return(orgVPC, nil).
-			Once()
-
-		err := deleteView(t.Context(), client, d)
-		require.EqualError(t, err, "GCP organization VPC peering connection API response has no peering connection ID")
-		require.NotErrorIs(t, err, adapter.ErrNotFound)
-	})
-
-	t.Run("propagates delete error", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-
-		client.EXPECT().
-			OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
-			Return(orgVPC(), nil).
-			Once()
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(nil, avngen.Error{Status: http.StatusForbidden, Message: "forbidden"}).
-			Once()
-
-		err := deleteView(t.Context(), client, d)
-		require.Error(t, err)
-		var apiErr avngen.Error
-		require.ErrorAs(t, err, &apiErr)
-		require.Equal(t, http.StatusForbidden, apiErr.Status)
-	})
+	require.NoError(t, deleteView(t.Context(), client, d))
 }
 
 func newTestResourceData(t *testing.T) adapter.ResourceData {

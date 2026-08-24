@@ -2,9 +2,9 @@ package azureorgvpcpeeringconnection
 
 import (
 	"context"
-	"errors"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
@@ -15,16 +15,22 @@ func flattenModifier(ctx context.Context, _ avngen.Client) adapter.MapModifier {
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	connectionID := d.Get("peering_connection_id").(string)
-	if connectionID == "" {
-		return errors.New("Azure organization VPC peering connection state has no API peering connection ID") // nolint:staticcheck
-	}
+	organizationID := d.Get("organization_id").(string)
+	organizationVPCID := d.Get("organization_vpc_id").(string)
+	azureSubscriptionID := d.Get("azure_subscription_id").(string)
+	vnetName := d.Get("vnet_name").(string)
+	resourceGroup := d.Get("peer_resource_group").(string)
 
-	_, err := client.OrganizationVpcPeeringConnectionDeleteById(
+	return pluginvpc.DeleteOrgVPCPeeringConnection(
 		ctx,
-		d.Get("organization_id").(string),
-		d.Get("organization_vpc_id").(string),
-		connectionID,
+		client,
+		organizationID,
+		organizationVPCID,
+		"Azure",
+		func(connection *organizationvpc.OrganizationVpcGetPeeringConnectionOut) bool {
+			return connection.PeerCloudAccount == azureSubscriptionID &&
+				connection.PeerVpc == vnetName &&
+				connection.PeerResourceGroup == resourceGroup
+		},
 	)
-	return err
 }

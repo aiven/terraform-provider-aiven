@@ -1,7 +1,6 @@
 package awsorgvpcpeeringconnection
 
 import (
-	"errors"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -18,6 +17,7 @@ const (
 	testAWSVPCID                = "vpc-1234567890abcdef0"
 	testAWSRegion               = "eu-central-1"
 	testConnectionID            = "example-connection-id"
+	testStaleConnectionID       = "stale-connection-id"
 	testAWSVPCPeeringConnection = "pcx-1234567890abcdef0"
 )
 
@@ -50,37 +50,52 @@ func TestFlattenModifier(t *testing.T) {
 }
 
 func TestDeleteView(t *testing.T) {
-	t.Run("deletes by API ID from state", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
+	client := avngen.NewMockClient(t)
+	d := newTestResourceData(t)
+	require.NoError(t, d.Set("peering_connection_id", testStaleConnectionID))
 
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
-			Once()
-		require.NoError(t, deleteView(t.Context(), client, d))
-	})
+	client.EXPECT().
+		OrganizationVpcGet(t.Context(), testOrganizationID, testOrganizationVPCID).
+		Return(&organizationvpc.OrganizationVpcGetOut{
+			PeeringConnections: []organizationvpc.OrganizationVpcGetPeeringConnectionOut{
+				{
+					PeerCloudAccount:    "another-account-id",
+					PeerVpc:             testAWSVPCID,
+					PeerRegion:          new(testAWSRegion),
+					PeeringConnectionId: new("another-account-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAWSAccountID,
+					PeerVpc:             "another-vpc-id",
+					PeerRegion:          new(testAWSRegion),
+					PeeringConnectionId: new("another-vpc-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAWSAccountID,
+					PeerVpc:             testAWSVPCID,
+					PeerRegion:          new("another-region"),
+					PeeringConnectionId: new("another-region-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAWSAccountID,
+					PeerVpc:             testAWSVPCID,
+					PeeringConnectionId: new("missing-region-connection-id"),
+				},
+				{
+					PeerCloudAccount:    testAWSAccountID,
+					PeerVpc:             testAWSVPCID,
+					PeerRegion:          new(testAWSRegion),
+					PeeringConnectionId: new(testConnectionID),
+				},
+			},
+		}, nil).
+		Once()
+	client.EXPECT().
+		OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
+		Return(&organizationvpc.OrganizationVpcPeeringConnectionDeleteByIdOut{}, nil).
+		Once()
 
-	t.Run("requires API ID in state", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		require.NoError(t, d.Set("peering_connection_id", nil))
-
-		require.EqualError(t, deleteView(t.Context(), client, d), "AWS organization VPC peering connection state has no API peering connection ID")
-	})
-
-	t.Run("propagates client error", func(t *testing.T) {
-		client := avngen.NewMockClient(t)
-		d := newTestResourceData(t)
-		deleteErr := errors.New("delete failed")
-
-		client.EXPECT().
-			OrganizationVpcPeeringConnectionDeleteById(t.Context(), testOrganizationID, testOrganizationVPCID, testConnectionID).
-			Return(nil, deleteErr).
-			Once()
-
-		require.ErrorIs(t, deleteView(t.Context(), client, d), deleteErr)
-	})
+	require.NoError(t, deleteView(t.Context(), client, d))
 }
 
 func newTestResourceData(t *testing.T) adapter.ResourceData {

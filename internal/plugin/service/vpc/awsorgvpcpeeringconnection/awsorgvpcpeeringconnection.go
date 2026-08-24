@@ -2,9 +2,9 @@ package awsorgvpcpeeringconnection
 
 import (
 	"context"
-	"errors"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
@@ -29,16 +29,23 @@ func flattenModifier(ctx context.Context, _ avngen.Client) adapter.MapModifier {
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	connectionID := d.Get("peering_connection_id").(string)
-	if connectionID == "" {
-		return errors.New("AWS organization VPC peering connection state has no API peering connection ID")
-	}
+	organizationID := d.Get("organization_id").(string)
+	organizationVPCID := d.Get("organization_vpc_id").(string)
+	awsAccountID := d.Get("aws_account_id").(string)
+	awsVPCID := d.Get("aws_vpc_id").(string)
+	awsRegion := d.Get("aws_vpc_region").(string)
 
-	_, err := client.OrganizationVpcPeeringConnectionDeleteById(
+	return pluginvpc.DeleteOrgVPCPeeringConnection(
 		ctx,
-		d.Get("organization_id").(string),
-		d.Get("organization_vpc_id").(string),
-		connectionID,
+		client,
+		organizationID,
+		organizationVPCID,
+		"AWS",
+		func(connection *organizationvpc.OrganizationVpcGetPeeringConnectionOut) bool {
+			return connection.PeerCloudAccount == awsAccountID &&
+				connection.PeerVpc == awsVPCID &&
+				connection.PeerRegion != nil &&
+				*connection.PeerRegion == awsRegion
+		},
 	)
-	return err
 }

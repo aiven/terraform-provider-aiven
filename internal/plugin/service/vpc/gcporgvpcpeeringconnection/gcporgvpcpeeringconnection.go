@@ -2,7 +2,6 @@ package gcporgvpcpeeringconnection
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -36,38 +35,18 @@ func flattenModifier(ctx context.Context, _ avngen.Client) adapter.MapModifier {
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	organizationID := d.Get("organization_id").(string)
 	organizationVPCID := d.Get("organization_vpc_id").(string)
-
-	vpc, err := client.OrganizationVpcGet(ctx, organizationID, organizationVPCID)
-	if adapter.IsNotFound(err) {
-		return err
-	}
-	if err != nil {
-		return fmt.Errorf("getting organization VPC %q: %w", organizationVPCID, err)
-	}
-
-	var connection *organizationvpc.OrganizationVpcGetPeeringConnectionOut
 	gcpProjectID := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
-	for i := range vpc.PeeringConnections {
-		candidate := &vpc.PeeringConnections[i]
-		if candidate.PeerCloudAccount == gcpProjectID &&
-			candidate.PeerVpc == peerVPC {
-			connection = candidate
-			break
-		}
-	}
-	if connection == nil {
-		return adapter.ErrNotFound
-	}
-	if connection.PeeringConnectionId == nil {
-		return errors.New("GCP organization VPC peering connection API response has no peering connection ID")
-	}
 
-	_, err = client.OrganizationVpcPeeringConnectionDeleteById(
+	return pluginvpc.DeleteOrgVPCPeeringConnection(
 		ctx,
+		client,
 		organizationID,
 		organizationVPCID,
-		*connection.PeeringConnectionId,
+		"GCP",
+		func(connection *organizationvpc.OrganizationVpcGetPeeringConnectionOut) bool {
+			return connection.PeerCloudAccount == gcpProjectID &&
+				connection.PeerVpc == peerVPC
+		},
 	)
-	return err
 }
