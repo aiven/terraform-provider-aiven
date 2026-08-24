@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/azureorgvpcpeeringconnection
+resource:
+  stateAttribute: state
+  refreshStateDesired:
+    - ACTIVE
+    - PENDING_PEER
+  refreshStateFailed:
+    - DELETED
+    - DELETED_BY_PEER
+    - DELETING
+    - ERROR
+    - INVALID_SPECIFICATION
+    - REJECTED_BY_PEER
+  refreshStateDelay: 1s
+  deleteStateDesired:
+    - DELETED
+  removeMissing: true
+  description: Creates and manages an Azure VPC peering connection with an Aiven VPC.
+datasource:
+  description: Gets information about an Azure VPC peering connection.
+clientHandler: organizationvpc
+idAttributeComposed: [organization_id, organization_vpc_id, azure_subscription_id, vnet_name, peer_resource_group]
+legacyTimeouts: true
+flattenModifier: true
+rename:
+  peer_cloud_account: azure_subscription_id
+  peer_vpc: vnet_name
+operations:
+  - id: OrganizationVpcPeeringConnectionCreate
+    type: create
+  - id: OrganizationVpcGet
+    type: read
+    resultKey: peering_connections
+    resultKeyField: PeeringConnections
+    resultListLookupKeys:
+      PeerCloudAccount: azure_subscription_id
+      PeerVpc: vnet_name
+      PeerResourceGroup: peer_resource_group
+  - id: OrganizationVpcPeeringConnectionDeleteById
+    type: delete
+    # The generator cannot yet order path fields that are not part of the composite Terraform ID.
+    disableView: true
+remove:
+  - create_time
+  - "*_aws_*"
+  - "*_gcp_*"
+  - peer_region
+  - state_info
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  organization_vpc_id:
+    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+  azure_subscription_id:
+    example: 12345678-1234-1234-1234-123456789012
+    description: The ID of the Azure subscription in UUID4 format.
+  vnet_name:
+    example: my-vnet
+    description: The name of the Azure VNet.
+  peer_resource_group:
+    required: true
+    example: my-resource-group
+    description: The name of the Azure resource group associated with the VNet.
+  peer_azure_app_id:
+    required: true
+    example: 87654321-4321-4321-4321-210987654321
+    description: The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.
+  peer_azure_tenant_id:
+    required: true
+    example: 11111111-2222-3333-4444-555555555555
+    description: The Azure tenant ID in UUID4 format.
+  state:
+    description: State of the peering connection.

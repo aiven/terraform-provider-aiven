@@ -56,8 +56,11 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
 	user5 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey/user"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsorgvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsprivatelink"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureorgvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcporgvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
@@ -65,7 +68,9 @@ import (
 
 func Resources() map[string]func() resource.Resource {
 	return map[string]func() resource.Resource{
+		"aiven_aws_org_vpc_peering_connection":      adapter.NewLazyResource(awsorgvpcpeeringconnection.ResourceOptions),
 		"aiven_aws_privatelink":                     adapter.NewLazyResource(awsprivatelink.ResourceOptions),
+		"aiven_azure_org_vpc_peering_connection":    adapter.NewLazyResource(azureorgvpcpeeringconnection.ResourceOptions),
 		"aiven_azure_privatelink":                   adapter.NewLazyResource(azureprivatelink.ResourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
 		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(awsentity.ResourceOptions),
@@ -78,6 +83,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
 		"aiven_flink_jar_application":               adapter.NewLazyResource(jarapplication.ResourceOptions),
+		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyResource(gcporgvpcpeeringconnection.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(acl.ResourceOptions),
@@ -110,7 +116,9 @@ func Resources() map[string]func() resource.Resource {
 
 func DataSources() map[string]func() datasource.DataSource {
 	return map[string]func() datasource.DataSource{
+		"aiven_aws_org_vpc_peering_connection":      adapter.NewLazyDataSource(awsorgvpcpeeringconnection.DataSourceOptions),
 		"aiven_aws_privatelink":                     adapter.NewLazyDataSource(awsprivatelink.DataSourceOptions),
+		"aiven_azure_org_vpc_peering_connection":    adapter.NewLazyDataSource(azureorgvpcpeeringconnection.DataSourceOptions),
 		"aiven_azure_privatelink":                   adapter.NewLazyDataSource(azureprivatelink.DataSourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
@@ -121,6 +129,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(oci.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
+		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyDataSource(gcporgvpcpeeringconnection.DataSourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyDataSource(gcpprivatelink.DataSourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyDataSource(acl.DataSourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(registryacl.DataSourceOptions),

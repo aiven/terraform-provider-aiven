@@ -1,4 +1,4 @@
-package vpc_test
+package azureorgvpcpeeringconnection_test
 
 import (
 	"context"
@@ -18,11 +18,10 @@ import (
 
 const (
 	azureOrgVPCPeeringResource = "aiven_azure_org_vpc_peering_connection"
+	organizationVPCResource    = "aiven_organization_vpc"
 )
 
 func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
-	t.Skip("Skipping due to Azure SDK dependency")
-
 	var (
 		orgName      = acc.OrganizationName()
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
@@ -60,10 +59,78 @@ func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 						"peer_azure_app_id":     template.Literal(appID),
 						"peer_azure_tenant_id":  template.Literal(tenantID),
 					}).MustRender(t),
-				ExpectError: regexp.MustCompile(`peer_azure_app_id '.*' does not refer to a valid application object`), // Azure app ID is invalid
+				ExpectError: regexp.MustCompile(`REJECTED_BY_PEER`), // Azure app ID is invalid
 			},
 		},
 	})
+}
+
+func TestAccAivenAzureOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
+	acc.SkipIfNotBeta(t)
+	t.Skip("Skipping due to Azure SDK dependency")
+
+	env := acc.RequireEnvVars(
+		t,
+		"AZURE_SUBSCRIPTION_ID",
+		"AZURE_VNET_NAME",
+		"AZURE_RESOURCE_GROUP",
+		"AZURE_APP_ID",
+		"AZURE_TENANT_ID",
+	)
+	resourceName := azureOrgVPCPeeringResource + ".test_peering"
+	config := testAccAzureOrgVPCPeeringBackwardCompatConfig(acc.OrganizationName(), env)
+	checks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "organization_vpc_id"),
+		resource.TestCheckResourceAttr(resourceName, "azure_subscription_id", env["AZURE_SUBSCRIPTION_ID"]),
+		resource.TestCheckResourceAttr(resourceName, "vnet_name", env["AZURE_VNET_NAME"]),
+		resource.TestCheckResourceAttr(resourceName, "peer_resource_group", env["AZURE_RESOURCE_GROUP"]),
+		resource.TestCheckResourceAttr(resourceName, "peer_azure_app_id", env["AZURE_APP_ID"]),
+		resource.TestCheckResourceAttr(resourceName, "peer_azure_tenant_id", env["AZURE_TENANT_ID"]),
+		resource.TestCheckResourceAttrSet(resourceName, "peering_connection_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "state"),
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: testAccCheckAzureOrgVPCPeeringResourceDestroy,
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			TFConfig:           config,
+			OldProviderVersion: "4.60.0",
+			Checks:             checks,
+		}),
+	})
+}
+
+func testAccAzureOrgVPCPeeringBackwardCompatConfig(orgName string, env map[string]string) string {
+	return fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = %[1]q
+}
+
+resource "aiven_organization_vpc" "example" {
+  organization_id = data.aiven_organization.foo.id
+  cloud_name      = "azure-germany-westcentral"
+  network_cidr    = "10.0.0.0/24"
+}
+
+resource "aiven_azure_org_vpc_peering_connection" "test_peering" {
+  organization_id       = data.aiven_organization.foo.id
+  organization_vpc_id   = aiven_organization_vpc.example.organization_vpc_id
+  azure_subscription_id = %[2]q
+  vnet_name             = %[3]q
+  peer_resource_group   = %[4]q
+  peer_azure_app_id     = %[5]q
+  peer_azure_tenant_id  = %[6]q
+}
+`,
+		orgName,
+		env["AZURE_SUBSCRIPTION_ID"],
+		env["AZURE_VNET_NAME"],
+		env["AZURE_RESOURCE_GROUP"],
+		env["AZURE_APP_ID"],
+		env["AZURE_TENANT_ID"],
+	)
 }
 
 func testAccCheckAzureOrgVPCPeeringResourceDestroy(s *terraform.State) error {
@@ -75,7 +142,7 @@ func testAccCheckAzureOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != awsOrgVPCPeeringResource {
+		if rs.Type != azureOrgVPCPeeringResource {
 			continue
 		}
 
@@ -94,15 +161,22 @@ func testAccCheckAzureOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 		}
 
 		var pc *organizationvpc.OrganizationVpcGetPeeringConnectionOut
-		for _, pCon := range orgVPC.PeeringConnections {
-			if pCon.PeerCloudAccount == cloudAccount && pCon.PeerVpc == vnetName && pCon.PeerResourceGroup == resourceGroup {
-				pc = &pCon
+		for i := range orgVPC.PeeringConnections {
+			pCon := &orgVPC.PeeringConnections[i]
+			if pCon.PeerCloudAccount == cloudAccount &&
+				pCon.PeerVpc == vnetName &&
+				pCon.PeerResourceGroup == resourceGroup {
+				pc = pCon
 				break
 			}
 		}
 
 		if pc != nil {
-			return fmt.Errorf("peering connection %q still exists", *pc.PeeringConnectionId)
+			connectionID := "<missing>"
+			if pc.PeeringConnectionId != nil {
+				connectionID = *pc.PeeringConnectionId
+			}
+			return fmt.Errorf("peering connection %q still exists", connectionID)
 		}
 	}
 

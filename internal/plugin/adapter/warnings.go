@@ -15,7 +15,10 @@ type warningCollector struct {
 
 type warningCollectorKey struct{}
 
-func withWarnings(ctx context.Context, target *diag.Diagnostics) (context.Context, func()) {
+// WithWarnings installs a request-scoped warning collector and returns a function that appends
+// the collected warnings to target. The returned function must be called after the operation.
+// If target is nil, the context is returned unchanged and the function is a no-op.
+func WithWarnings(ctx context.Context, target *diag.Diagnostics) (context.Context, func()) {
 	if target == nil {
 		return ctx, func() {}
 	}

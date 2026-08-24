@@ -16,6 +16,10 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:event_logs:read`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:event_logs:read`
 - Migrate `aiven_mirrormaker_replication_flow` resource and data source to the Plugin Framework.
+- Migrate `aiven_aws_org_vpc_peering_connection` resource and data source to the Plugin Framework.
+- Migrate `aiven_azure_org_vpc_peering_connection` resource and data source to the Plugin Framework.
+- Migrate `aiven_gcp_org_vpc_peering_connection` resource and data source to the Plugin Framework.
+- Promote the AWS, Azure, and GCP organization VPC peering connection resources and data sources from beta.
 - Change `aiven_mirrormaker_replication_flow`: set the default value of `sync_group_offsets_interval_seconds` to `1`
   to match the previous SDK resource and avoid state drift.
 - Add `aiven_valkey` field `valkey_user_config.valkey_activedefrag`: Enable active memory defragmentation. When enabled,

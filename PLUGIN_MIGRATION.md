@@ -9,10 +9,10 @@
 |   3 | aiven_account_team                          |        |     2 |
 |   4 | aiven_account_team_member                   |        |     2 |
 |   5 | aiven_account_team_project                  |        |     2 |
-|   6 | aiven_aws_org_vpc_peering_connection        |        |     2 |
+|   6 | aiven_aws_org_vpc_peering_connection        | yes    |     2 |
 |   7 | aiven_aws_privatelink                       | yes    |     2 |
 |   8 | aiven_aws_vpc_peering_connection            |        |     2 |
-|   9 | aiven_azure_org_vpc_peering_connection      |        |     2 |
+|   9 | aiven_azure_org_vpc_peering_connection      | yes    |     2 |
 |  10 | aiven_azure_privatelink                     | yes    |     2 |
 |  11 | aiven_azure_privatelink_connection_approval |        |     1 |
 |  12 | aiven_azure_vpc_peering_connection          |        |     2 |
@@ -40,7 +40,7 @@
 |  34 | aiven_flink_jar_application                 | yes    |     1 |
 |  35 | aiven_flink_jar_application_deployment      |        |     1 |
 |  36 | aiven_flink_jar_application_version         |        |     1 |
-|  37 | aiven_gcp_org_vpc_peering_connection        |        |     2 |
+|  37 | aiven_gcp_org_vpc_peering_connection        | yes    |     2 |
 |  38 | aiven_gcp_privatelink                       | yes    |     2 |
 |  39 | aiven_gcp_privatelink_connection_approval   |        |     1 |
 |  40 | aiven_gcp_vpc_peering_connection            |        |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 52%                          | 86     |   164 |
+|     | TOTAL MIGRATED 56%                          | 92     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```

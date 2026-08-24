@@ -34,6 +34,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroup"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 

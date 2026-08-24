@@ -123,7 +123,7 @@ func (a *datasourceAdapter) Read(
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	err = a.datasource.Read(ctx, a.client, d)
@@ -167,7 +167,7 @@ func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.V
 	}
 	defer cancel()
 
-	ctx, drainWarnings := withWarnings(ctx, diags)
+	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
 	err = a.datasource.ValidateConfig(ctx, a.client, d)

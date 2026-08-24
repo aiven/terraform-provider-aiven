@@ -1,8 +1,9 @@
-package vpc_test
+package awsorgvpcpeeringconnection_test
 
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -19,6 +20,7 @@ import (
 
 const (
 	awsOrgVPCPeeringResource = "aiven_aws_org_vpc_peering_connection"
+	organizationVPCResource  = "aiven_organization_vpc"
 )
 
 // TestAccAivenAWSOrgVPCPeeringConnection tests the AWS VPC peering connection resource functionality.
@@ -62,7 +64,7 @@ func TestAccAivenAWSOrgVPCPeeringConnection(t *testing.T) {
 						"aws_vpc_id":          template.Literal(awsVpcID),
 						"aws_vpc_region":      awsRegion,
 					}).MustRender(t),
-				ExpectError: regexp.MustCompile(`VPC peering connection cannot be created`), // Expected error due to invalid AWS account ID
+				ExpectError: regexp.MustCompile(`INVALID_SPECIFICATION`), // Expected error due to invalid AWS account ID
 			},
 		},
 	})
@@ -80,100 +82,37 @@ func TestAccAivenAWSOrgVPCPeeringConnection(t *testing.T) {
 // and resources. This test is meant for local development and verification for now.
 // Prerequisites:
 // - Valid AWS credentials with permissions to create/delete VPC resources
-// - Proper AWS profile configuration (can be set via AWS_PROFILE env var)
+// - AWS_PROFILE or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+// - AWS_DEFAULT_REGION for both the AWS resources and the Aiven VPC
 // - Required permissions: VPC creation/deletion, VPC peering, route table management
 func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 	var (
 		orgName   = acc.OrganizationName()
-		awsRegion = "eu-central-1"
-	)
-
-	acc.RequireEnvVars(t,
-		"AWS_ACCESS_KEY_ID",
-		"AWS_SECRET_ACCESS_KEY",
-		"AWS_SESSION_TOKEN",
+		awsRegion = requireAWSConfig(t)
 	)
 
 	var (
-		templBuilder = template.InitializeTemplateStore(t).NewBuilder().
-				AddDataSource("aiven_organization", map[string]any{
-				"resource_name": "foo",
-				"name":          orgName,
-			})
-
 		resourceName = fmt.Sprintf("%s.%s", awsOrgVPCPeeringResource, "test_peering")
-
-		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		serviceName = fmt.Sprintf("test-acc-%s", randName)
+		config       = testAccAWSOrgVPCPeeringConnectionConfig(t, orgName, awsRegion)
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		CheckDestroy:             testAccCheckAWSOrgVPCPeeringResourceDestroy,
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"aws": {
-				Source:            "hashicorp/aws",
-				VersionConstraint: "=5.84.0",
-			},
-		},
+		ExternalProviders:        awsExternalProvider(),
 		Steps: []resource.TestStep{
 			{
-				Config: templBuilder.
-					AddResource("aws_vpc", map[string]any{
-						"resource_name": "example",
-						"cidr_block":    "172.16.0.0/16",
-						"vpc_name":      fmt.Sprintf("%s-vpc", serviceName),
-					}).
-					AddResource("aws_route_table", map[string]any{
-						"resource_name":    "example",
-						"vpc_id":           "aws_vpc.example.id",
-						"route_table_name": fmt.Sprintf("%s-route-table", serviceName),
-					}).
-					AddResource(organizationVPCResource, map[string]any{
-						"resource_name":   "example",
-						"organization_id": template.Reference("data.aiven_organization.foo.id"),
-						"cloud_name":      fmt.Sprintf("aws-%s", awsRegion),
-						"network_cidr":    "10.0.0.0/24",
-					}).
-					AddResource(awsOrgVPCPeeringResource, map[string]any{
-						"resource_name":       "test_peering",
-						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
-						"organization_vpc_id": template.Reference("aiven_organization_vpc.example.organization_vpc_id"),
-						"aws_account_id":      template.Reference("aws_vpc.example.owner_id"),
-						"aws_vpc_id":          template.Reference("aws_vpc.example.id"),
-						"aws_vpc_region":      awsRegion,
-					}).
-					AddDataSource(awsOrgVPCPeeringResource, map[string]any{
-						"resource_name":       "test_peering",
-						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
-						"organization_vpc_id": template.Reference("aiven_organization_vpc.example.organization_vpc_id"),
-						"aws_account_id":      template.Reference("aws_vpc.example.owner_id"),
-						"aws_vpc_id":          template.Reference("aws_vpc.example.id"),
-						"aws_vpc_region":      awsRegion,
-					}).
-					AddResource("aws_vpc_peering_accepter", map[string]any{
-						"resource_name":         "example",
-						"peering_connection_id": "aiven_aws_org_vpc_peering_connection.test_peering.aws_vpc_peering_connection_id",
-						"peering_name":          fmt.Sprintf("%s-peering-accepter", serviceName),
-					}).
-					AddResource("aws_route", map[string]any{
-						"resource_name":         "aiven_vpc_route",
-						"route_table_id":        "aws_route_table.example.id",
-						"destination_cidr":      "aiven_organization_vpc.example.network_cidr",
-						"peering_connection_id": "aws_vpc_peering_connection_accepter.example.vpc_peering_connection_id",
-					}).MustRender(t),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "data.aiven_organization.foo", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "organization_vpc_id", "aiven_organization_vpc.example", "organization_vpc_id"),
 					resource.TestCheckResourceAttrPair(resourceName, "aws_account_id", "aws_vpc.example", "owner_id"),
 					resource.TestCheckResourceAttrPair(resourceName, "aws_vpc_id", "aws_vpc.example", "id"),
-					resource.TestCheckResourceAttrPair(resourceName, "organization_id", "data.aiven_organization.foo", "id"),
 					resource.TestCheckResourceAttr(resourceName, "aws_vpc_region", awsRegion),
 					resource.TestCheckResourceAttrSet(resourceName, "peering_connection_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "aws_vpc_peering_connection_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
-
 					resource.TestCheckResourceAttrPair(fmt.Sprintf("data.%s.%s", awsOrgVPCPeeringResource, "test_peering"), "organization_id", "data.aiven_organization.foo", "id"),
 					resource.TestCheckResourceAttrPair(fmt.Sprintf("data.%s.%s", awsOrgVPCPeeringResource, "test_peering"), "organization_vpc_id", "aiven_organization_vpc.example", "organization_vpc_id"),
 				),
@@ -186,6 +125,114 @@ func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccAivenAWSOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
+	acc.SkipIfNotBeta(t)
+
+	awsRegion := requireAWSConfig(t)
+	resourceName := awsOrgVPCPeeringResource + ".test_peering"
+	config := testAccAWSOrgVPCPeeringConnectionConfig(t, acc.OrganizationName(), awsRegion)
+	checks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "organization_vpc_id"),
+		resource.TestCheckResourceAttrPair(resourceName, "aws_account_id", "aws_vpc.example", "owner_id"),
+		resource.TestCheckResourceAttrPair(resourceName, "aws_vpc_id", "aws_vpc.example", "id"),
+		resource.TestCheckResourceAttr(resourceName, "aws_vpc_region", awsRegion),
+		resource.TestCheckResourceAttrSet(resourceName, "peering_connection_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "aws_vpc_peering_connection_id"),
+		resource.TestCheckResourceAttrSet(resourceName, "state"),
+	)
+	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+		TFConfig:           config,
+		OldProviderVersion: "4.60.0",
+		Checks:             checks,
+	})
+	for i := range steps {
+		if steps[i].ExternalProviders == nil {
+			steps[i].ExternalProviders = make(map[string]resource.ExternalProvider)
+		}
+		steps[i].ExternalProviders["aws"] = awsExternalProvider()["aws"]
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: testAccCheckAWSOrgVPCPeeringResourceDestroy,
+		Steps:        steps,
+	})
+}
+
+func testAccAWSOrgVPCPeeringConnectionConfig(t *testing.T, orgName, awsRegion string) string {
+	t.Helper()
+
+	serviceName := fmt.Sprintf("test-acc-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	return template.InitializeTemplateStore(t).NewBuilder().
+		AddDataSource("aiven_organization", map[string]any{
+			"resource_name": "foo",
+			"name":          orgName,
+		}).
+		AddResource("aws_vpc", map[string]any{
+			"resource_name": "example",
+			"cidr_block":    "172.16.0.0/16",
+			"vpc_name":      fmt.Sprintf("%s-vpc", serviceName),
+		}).
+		AddResource("aws_route_table", map[string]any{
+			"resource_name":    "example",
+			"vpc_id":           "aws_vpc.example.id",
+			"route_table_name": fmt.Sprintf("%s-route-table", serviceName),
+		}).
+		AddResource(organizationVPCResource, map[string]any{
+			"resource_name":   "example",
+			"organization_id": template.Reference("data.aiven_organization.foo.id"),
+			"cloud_name":      fmt.Sprintf("aws-%s", awsRegion),
+			"network_cidr":    "10.0.0.0/24",
+		}).
+		AddResource(awsOrgVPCPeeringResource, map[string]any{
+			"resource_name":       "test_peering",
+			"organization_id":     template.Reference("data.aiven_organization.foo.id"),
+			"organization_vpc_id": template.Reference("aiven_organization_vpc.example.organization_vpc_id"),
+			"aws_account_id":      template.Reference("aws_vpc.example.owner_id"),
+			"aws_vpc_id":          template.Reference("aws_vpc.example.id"),
+			"aws_vpc_region":      awsRegion,
+		}).
+		AddDataSource(awsOrgVPCPeeringResource, map[string]any{
+			"resource_name":       "test_peering",
+			"organization_id":     template.Reference("aiven_aws_org_vpc_peering_connection.test_peering.organization_id"),
+			"organization_vpc_id": template.Reference("aiven_aws_org_vpc_peering_connection.test_peering.organization_vpc_id"),
+			"aws_account_id":      template.Reference("aiven_aws_org_vpc_peering_connection.test_peering.aws_account_id"),
+			"aws_vpc_id":          template.Reference("aiven_aws_org_vpc_peering_connection.test_peering.aws_vpc_id"),
+			"aws_vpc_region":      template.Reference("aiven_aws_org_vpc_peering_connection.test_peering.aws_vpc_region"),
+		}).
+		AddResource("aws_vpc_peering_accepter", map[string]any{
+			"resource_name":         "example",
+			"peering_connection_id": "aiven_aws_org_vpc_peering_connection.test_peering.aws_vpc_peering_connection_id",
+			"peering_name":          fmt.Sprintf("%s-peering-accepter", serviceName),
+		}).
+		AddResource("aws_route", map[string]any{
+			"resource_name":         "aiven_vpc_route",
+			"route_table_id":        "aws_route_table.example.id",
+			"destination_cidr":      "aiven_organization_vpc.example.network_cidr",
+			"peering_connection_id": "aws_vpc_peering_connection_accepter.example.vpc_peering_connection_id",
+		}).MustRender(t)
+}
+
+func awsExternalProvider() map[string]resource.ExternalProvider {
+	return map[string]resource.ExternalProvider{
+		"aws": {
+			Source:            "hashicorp/aws",
+			VersionConstraint: "=5.84.0",
+		},
+	}
+}
+
+func requireAWSConfig(t *testing.T) string {
+	t.Helper()
+
+	if os.Getenv("AWS_PROFILE") == "" {
+		acc.RequireEnvVars(t, "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")
+	}
+
+	return acc.RequireEnvVars(t, "AWS_DEFAULT_REGION")["AWS_DEFAULT_REGION"]
 }
 
 func testAccCheckAWSOrgVPCPeeringResourceDestroy(s *terraform.State) error {
@@ -216,20 +263,23 @@ func testAccCheckAWSOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 		}
 
 		var pc *organizationvpc.OrganizationVpcGetPeeringConnectionOut
-		for _, pCon := range orgVPC.PeeringConnections {
+		for i := range orgVPC.PeeringConnections {
+			pCon := &orgVPC.PeeringConnections[i]
 			if pCon.PeerCloudAccount == awsAccountID &&
 				pCon.PeerVpc == awsVpcID &&
 				pCon.PeerRegion != nil &&
-				*pCon.PeerRegion == awsRegion &&
-				pCon.PeeringConnectionId != nil {
-				pc = &pCon
-
+				*pCon.PeerRegion == awsRegion {
+				pc = pCon
 				break
 			}
 		}
 
 		if pc != nil {
-			return fmt.Errorf("peering connection %q still exists", *pc.PeeringConnectionId)
+			connectionID := "<missing>"
+			if pc.PeeringConnectionId != nil {
+				connectionID = *pc.PeeringConnectionId
+			}
+			return fmt.Errorf("peering connection %q still exists", connectionID)
 		}
 	}
 
