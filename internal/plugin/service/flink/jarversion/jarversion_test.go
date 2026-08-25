@@ -72,8 +72,14 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 
 		config := testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarCopy)
 		configRenamed := testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarRenamed)
+		configTrackedSource := testAccFlinkJarApplicationVersionTrackedSource(
+			projectName, serviceName, appName, jarRenamed,
+		)
+		configUnknownSource := testAccFlinkJarApplicationVersionUnknownSource(
+			projectName, serviceName, appName, jarRenamed,
+		)
 
-		var versionID string
+		var versionID, checksum string
 		resource.ParallelTest(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
 			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -97,6 +103,7 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 						resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 						resource.TestCheckResourceAttrSet(resourceName, "created_by"),
 						storeAttr(resourceName, "application_version_id", &versionID),
+						storeAttr(resourceName, "source_checksum", &checksum),
 					),
 				},
 				{
@@ -113,15 +120,42 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
 						resource.TestCheckResourceAttrPtr(resourceName, "application_version_id", &versionID),
+						resource.TestCheckResourceAttrPtr(resourceName, "source_checksum", &checksum),
 					),
 				},
 				{
-					// Edited content can only be uploaded to a new version.
+					// Edited content at a known path can only be uploaded to a new version.
+					// terraform_data starts tracking the file here, but source remains a literal.
 					PreConfig: func() { appendToFile(t, jarRenamed) },
-					Config:    configRenamed,
+					Config:    configTrackedSource,
 					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
 						resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
+						resource.TestCheckResourceAttrPair(
+							resourceName, "source_checksum",
+							resourceName, "file_info.0.file_sha256",
+						),
 						checkAttrDiffers(resourceName, "application_version_id", &versionID),
+						checkAttrDiffers(resourceName, "source_checksum", &checksum),
+						storeAttr(resourceName, "application_version_id", &versionID),
+						storeAttr(resourceName, "source_checksum", &checksum),
+					),
+				},
+				{
+					// Editing the file now replaces terraform_data, so its output and therefore
+					// source are unknown in the initial plan. Replacement must be planned before
+					// the path resolves during apply.
+					PreConfig: func() { appendToFile(t, jarRenamed) },
+					Config:    configUnknownSource,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
+						resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
+						resource.TestCheckResourceAttrPair(
+							resourceName, "source_checksum",
+							resourceName, "file_info.0.file_sha256",
+						),
+						checkAttrDiffers(resourceName, "application_version_id", &versionID),
+						checkAttrDiffers(resourceName, "source_checksum", &checksum),
 					),
 				},
 			},
@@ -242,4 +276,48 @@ resource "aiven_flink_jar_application_version" "foo" {
   source         = %[4]q
 }
 `, projectName, serviceName, appName, jarFile)
+}
+
+func testAccFlinkJarApplicationVersionUnknownSource(projectName, serviceName, appName, jarFile string) string {
+	return testAccFlinkJarApplicationVersionTerraformDataSource(
+		projectName,
+		serviceName,
+		appName,
+		jarFile,
+		"terraform_data.jar_source.output",
+	)
+}
+
+func testAccFlinkJarApplicationVersionTrackedSource(projectName, serviceName, appName, jarFile string) string {
+	return testAccFlinkJarApplicationVersionTerraformDataSource(
+		projectName,
+		serviceName,
+		appName,
+		jarFile,
+		fmt.Sprintf("%q", jarFile),
+	)
+}
+
+func testAccFlinkJarApplicationVersionTerraformDataSource(
+	projectName, serviceName, appName, jarFile, source string,
+) string {
+	return fmt.Sprintf(`
+resource "terraform_data" "jar_source" {
+  input            = %[4]q
+  triggers_replace = filesha256(%[4]q)
+}
+
+resource "aiven_flink_jar_application" "foo" {
+  project      = %[1]q
+  service_name = %[2]q
+  name         = %[3]q
+}
+
+resource "aiven_flink_jar_application_version" "foo" {
+  project        = %[1]q
+  service_name   = %[2]q
+  application_id = aiven_flink_jar_application.foo.application_id
+  source         = %[5]s
+}
+`, projectName, serviceName, appName, jarFile, source)
 }

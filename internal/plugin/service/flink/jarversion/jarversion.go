@@ -30,7 +30,12 @@ func init() {
 func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
 	source, ok := d.GetOk("source")
 	if !ok {
-		// The path comes from another resource and isn't known yet.
+		// The path comes from another resource and isn't known yet. An existing version
+		// must already be replacement-sensitive: changing Update to Replace after the path
+		// resolves during apply would produce an inconsistent final plan.
+		if !d.IsNewResource() {
+			d.RequiresReplace(sourceChecksumField)
+		}
 		return nil
 	}
 
