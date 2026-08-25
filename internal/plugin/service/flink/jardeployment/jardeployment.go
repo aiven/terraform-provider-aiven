@@ -16,10 +16,11 @@ func init() {
 	ResourceOptions.Read = readViewRestartEnabled
 }
 
-// createViewRestartEnabled sends the API default when the configuration omits restart_enabled.
-// The schema carries no default (see dropDefault in the definition): SDKv2 stored false for an
-// omitted optional bool, and a generated true would replace those deployments.
-// todo: drop in v5.0.0 along with dropDefault, and let the schema hold the default.
+// createViewRestartEnabled materializes the API default when the configuration omits restart_enabled.
+// The schema carries no default so a refreshless migration plan can preserve the legacy null or
+// an explicit false instead of forcing replacement. A new deployment has no value to preserve.
+// todo: remove this create override in v5.0.0 together with dropDefault and useStateForUnknown,
+// and let the schema apply the default.
 func createViewRestartEnabled(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	if _, ok := d.GetOk("restart_enabled"); !ok {
 		if err := d.Set("restart_enabled", true); err != nil {
@@ -31,8 +32,9 @@ func createViewRestartEnabled(ctx context.Context, client avngen.Client, d adapt
 }
 
 // readViewRestartEnabled fills restart_enabled, which the API accepts on create but never returns.
-// An imported deployment would otherwise hold a null. Existing state is left as it is:
-// the stored value is the one the deployment was created with.
+// SDKv2 left the attribute absent when the configuration omitted it, and an imported deployment
+// has no value either. Existing state is left as it is: a stored value is the one the deployment
+// was created with.
 //
 // An import can only assume the API default, so importing a deployment created with
 // restart_enabled = false and declaring that value plans a replacement. Storing a null instead

@@ -34,10 +34,10 @@ func TestAccAivenFlinkJarApplicationDeployment(t *testing.T) {
 		acc.WithUserConfig(map[string]any{"custom_code": true}),
 	)
 
-	// The new provider must read the SDKv2 state as is, which the second step's empty plan proves.
-	// restart_enabled is the field to watch: the SDK schema had no default and the API never
-	// returns the field, so its value only ever comes from the configuration. Both cases run, an
-	// omitted field and an explicit one, and neither may end up replacing the deployment.
+	// The new provider must accept the SDKv2 state without replacing the deployment, which the
+	// second step's empty plan proves.
+	// restart_enabled is the field to watch: the API never returns it, SDKv2 left it absent when
+	// omitted, and retained an explicit false. Neither case may replace the deployment on migration.
 	compatCases := []struct {
 		name           string
 		deploymentAttr string
@@ -45,8 +45,7 @@ func TestAccAivenFlinkJarApplicationDeployment(t *testing.T) {
 	}{
 		{
 			name: "restart_enabled omitted",
-			// Whatever the old provider stored is what the new one has to keep, so the
-			// value itself is asserted in the base test below, on the new provider alone.
+			// SDKv2 leaves this attribute absent; the PF read path materializes the API default.
 		},
 		{
 			name:           "restart_enabled set",

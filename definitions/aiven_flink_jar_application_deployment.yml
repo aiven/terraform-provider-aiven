@@ -38,9 +38,10 @@ schema:
     computed: true
     dropDefault: true
     useStateForUnknown: true
-  # The API never returns this one. SDKv2 stored false for an omitted optional bool, and a
-  # schema default of true would plan a replacement for those deployments. The create view
-  # sends the API default when the configuration has none.
+  # The API defaults this field to true but never returns it. SDKv2 left it absent when omitted
+  # and retained an explicit false. Drop the schema default so a refreshless migration plan can
+  # preserve the legacy null or false instead of forcing replacement. The create and read views
+  # materialize true only when no configured or stored value is available.
   restart_enabled:
     computed: true
     dropDefault: true
