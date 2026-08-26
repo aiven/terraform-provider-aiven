@@ -207,6 +207,8 @@ Optional:
 Optional:
 
 - `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring.
+- `datadog_function_metrics_enabled` (Boolean) Enable collection of PL/pgSQL function metrics from pg_stat_user_functions. Requires `track_functions` to be set to `pl` or `all` in the service configuration.
+- `datadog_pg_relations` (Block List, Max: 32) Relations to collect PostgreSQL relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks. No relation metrics are collected when unset (see [below for nested schema](#nestedblock--datadog_user_config--datadog_pg_relations))
 - `datadog_pgbouncer_enabled` (Boolean) Enable Datadog PgBouncer Metric Tracking.
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `exclude_consumer_groups` (List of String) List of custom metrics.
@@ -218,6 +220,17 @@ Optional:
 - `mirrormaker_custom_metrics` (List of String) List of custom metrics.
 - `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 - `redis` (Block List, Max: 1) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))
+
+<a id="nestedblock--datadog_user_config--datadog_pg_relations"></a>
+### Nested Schema for `datadog_user_config.datadog_pg_relations`
+
+Optional:
+
+- `relation_name` (String) Name of a single relation to collect metrics for. Example: `orders`.
+- `relation_regex` (String) Regular expression matching the names of the relations to collect metrics for. Example: `^orders_.*`.
+- `relkind` (List of String) Only collect lock metrics for these relation kinds. Applies to ordinary tables when unset. Accepted values are the `relkind` values of `pg_class`: `r` (ordinary table), `i` (index), `S` (sequence), `t` (TOAST table), `m` (materialized view), `c` (composite type), `f` (foreign table), `p` (partitioned table).
+- `schemas` (List of String) Only collect metrics for relations in these schemas. Applies to all schemas when unset.
+
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`

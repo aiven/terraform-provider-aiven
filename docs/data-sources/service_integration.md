@@ -167,6 +167,8 @@ Read-Only:
 Read-Only:
 
 - `datadog_dbm_enabled` (Boolean)
+- `datadog_function_metrics_enabled` (Boolean)
+- `datadog_pg_relations` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_pg_relations))
 - `datadog_pgbouncer_enabled` (Boolean)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
 - `exclude_consumer_groups` (List of String)
@@ -178,6 +180,17 @@ Read-Only:
 - `mirrormaker_custom_metrics` (List of String)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
 - `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
+
+<a id="nestedobjatt--datadog_user_config--datadog_pg_relations"></a>
+### Nested Schema for `datadog_user_config.datadog_pg_relations`
+
+Read-Only:
+
+- `relation_name` (String)
+- `relation_regex` (String)
+- `relkind` (List of String)
+- `schemas` (List of String)
+
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`

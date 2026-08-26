@@ -19,6 +19,50 @@ func datadogUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"datadog_function_metrics_enabled": {
+				Description: "Enable collection of PL/pgSQL function metrics from pg_stat_user_functions. Requires `track_functions` to be set to `pl` or `all` in the service configuration.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
+			"datadog_pg_relations": {
+				Description: "Relations to collect PostgreSQL relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks. No relation metrics are collected when unset",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"relation_name": {
+						Description: "Name of a single relation to collect metrics for. Example: `orders`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"relation_regex": {
+						Description: "Regular expression matching the names of the relations to collect metrics for. Example: `^orders_.*`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"relkind": {
+						Description: "Only collect lock metrics for these relation kinds. Applies to ordinary tables when unset. Accepted values are the `relkind` values of `pg_class`: `r` (ordinary table), `i` (index), `S` (sequence), `t` (TOAST table), `m` (materialized view), `c` (composite type), `f` (foreign table), `p` (partitioned table).",
+						Elem: &schema.Schema{
+							Description:  "Enum: `S`, `c`, `f`, `i`, `m`, `p`, `r`, `t`. Relation kind.",
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{"S", "c", "f", "i", "m", "p", "r", "t"}, false),
+						},
+						MaxItems: 8,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"schemas": {
+						Description: "Only collect metrics for relations in these schemas. Applies to all schemas when unset.",
+						Elem: &schema.Schema{
+							Description: "Schema name. Example: `public`.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 8,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				}},
+				MaxItems: 32,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"datadog_pgbouncer_enabled": {
 				Description: "Enable Datadog PgBouncer Metric Tracking.",
 				Optional:    true,
