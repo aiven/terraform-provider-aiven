@@ -786,6 +786,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"ml_commons_connector_access_control_enabled": {
+						Description: "When set to true, the setting allows admins to control access and permissions to the connector API using backend_roles. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"ml_commons_model_access_control_enabled": {
 						Description: "Enable or disable model access control for ML Commons. When enabled, access to ML models is controlled by security permissions. Defaults to false.",
 						Optional:    true,
@@ -800,6 +805,16 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "Enable or disable running ML Commons tasks only on ML nodes. When enabled, ML tasks will only execute on nodes designated as ML nodes. Defaults to true.",
 						Optional:    true,
 						Type:        schema.TypeBool,
+					},
+					"ml_commons_trusted_connector_endpoints_regex": {
+						Description: "Adds the trusted endpoints to the cluster settings. Supports Java regex expressions.",
+						Elem: &schema.Schema{
+							Description: "An URL endpoint pattern. Example: `^https://api\\.example\\.com/.*$`.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 50,
+						Optional: true,
+						Type:     schema.TypeList,
 					},
 					"node_search_cache_size": {
 						Description: "Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 5gb. Requires restarting all OpenSearch nodes.",

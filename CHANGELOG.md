@@ -66,6 +66,14 @@ nav_order: 1
   methods to the list of roles allowed to perform them on the Schema Registry
 - Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_roles_claim_path`: JSON path used
   to extract the roles claim from the JWT for Schema Registry authorization
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_connector_access_control_enabled`: When
+  set to true, the setting allows admins to control access and permissions to the connector API using backend_roles
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_trusted_connector_endpoints_regex`: Adds
+  the trusted endpoints to the cluster settings
+- Add `aiven_service_integration` field `datadog_user_config.datadog_function_metrics_enabled`: Enable collection
+  of PL/pgSQL function metrics from pg_stat_user_functions
+- Add `aiven_service_integration` field `datadog_user_config.datadog_pg_relations`: Relations to collect PostgreSQL
+  relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks
 
 ## [4.61.0] - 2026-07-30
 
