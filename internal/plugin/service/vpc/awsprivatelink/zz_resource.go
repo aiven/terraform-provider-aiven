@@ -58,7 +58,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "List of AWS regions to allow cross-region privatelink connections from.",
 				Optional:            true,
-				Validators:          []validator.Set{setvalidator.SizeAtMost(16)},
+				Validators:          []validator.Set{setvalidator.SizeAtMost(64)},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
