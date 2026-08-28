@@ -31,7 +31,7 @@ resource "aiven_kafka_acl" "example" {
 
 ### Required
 
-- `permission` (String) Kafka permission. The possible values are `admin`, `read`, `readwrite` and `write`. Changing this property forces recreation of the resource.
+- `permission` (String) Permission of an Aiven Kafka ACL entry, as opposed to a Kafka-native one. The possible values are `admin`, `read`, `readwrite` and `write`. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 - `service_name` (String) Service name. Changing this property forces recreation of the resource.
 - `topic` (String) Topic name pattern. Length must be between `1` and `249`. Changing this property forces recreation of the resource.

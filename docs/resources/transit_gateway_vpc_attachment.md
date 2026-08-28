@@ -3,23 +3,34 @@
 page_title: "aiven_transit_gateway_vpc_attachment Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.
+  Attach an Aiven virtual private cloud (VPC) to external networks from cloud providers. Supported peer cloud accounts include AWS, Google Cloud, Azure, and UpCloud. The Aiven documentation has more information on VPC peering in Aiven https://aiven.io/docs/platform/howto/list-vpc-peering.
 ---
 
 # aiven_transit_gateway_vpc_attachment (Resource)
 
-The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.
+Attach an Aiven virtual private cloud (VPC) to external networks from cloud providers. Supported peer cloud accounts include AWS, Google Cloud, Azure, and UpCloud. The Aiven documentation has more information on [VPC peering in Aiven](https://aiven.io/docs/platform/howto/list-vpc-peering).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_transit_gateway_vpc_attachment" "attachment" {
-  vpc_id             = aiven_project_vpc.bar.id
-  peer_cloud_account = "<PEER_ACCOUNT_ID>"
-  peer_vpc           = "google-project1"
-  peer_region        = "aws-eu-west-1"
+# AWS Transit Gateway attachment
+resource "aiven_transit_gateway_vpc_attachment" "aws_tgw" {
+  vpc_id             = aiven_project_vpc.example.id
+  peer_cloud_account = "123456789012"          # AWS account ID
+  peer_vpc           = "tgw-0123456789abcdef0" # AWS Transit Gateway ID
+  peer_region        = "eu-west-1"
   user_peer_network_cidrs = [
     "10.0.0.0/24"
+  ]
+}
+
+# UpCloud VPC peering attachment
+resource "aiven_transit_gateway_vpc_attachment" "upcloud_peer" {
+  vpc_id             = aiven_project_vpc.example.id
+  peer_cloud_account = "upcloud"
+  peer_vpc           = "03126dc1-a69f-4bc2-8b24-e31c22d64712" # UpCloud network UUID
+  user_peer_network_cidrs = [
+    "192.168.0.0/24"
   ]
 }
 ```
@@ -29,14 +40,14 @@ resource "aiven_transit_gateway_vpc_attachment" "attachment" {
 
 ### Required
 
-- `peer_cloud_account` (String) AWS account ID or GCP project ID of the peered VPC. Changing this property forces recreation of the resource.
-- `peer_vpc` (String) Transit gateway ID. Changing this property forces recreation of the resource.
+- `peer_cloud_account` (String) AWS account ID, Google Cloud project ID, Azure subscription ID of the peered VPC, or string "upcloud" for UpCloud peering connections. Changing this property forces recreation of the resource.
+- `peer_vpc` (String) Peer network identifier. For AWS, the Transit Gateway ID; for Google Cloud, the VPC network name; for Azure, the resource group name; or for UpCloud, the network UUID). Changing this property forces recreation of the resource.
 - `user_peer_network_cidrs` (Set of String) List of private IPv4 ranges to route through the peering connection
 - `vpc_id` (String) The VPC the peering connection belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.
+- `peer_region` (String) Region of the peered cloud provider resource, if not in the same region as Aiven VPC. This value can't be changed.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -26,7 +27,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"host": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "the host or `*` for all hosts. Maximum length: `256`. Changing this property forces recreation of the resource.",
+				Default:             stringdefault.StaticString("*"),
+				MarkdownDescription: "the host or `*` for all hosts. Maximum length: `256`. The default value is `*`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
@@ -43,13 +45,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.OneOf("All", "Alter", "AlterConfigs", "ClusterAction", "Create", "CreateTokens", "Delete", "Describe", "DescribeConfigs", "DescribeTokens", "IdempotentWrite", "Read", "Write")},
 			},
 			"pattern_type": schema.StringAttribute{
-				MarkdownDescription: "Kafka ACL pattern type of resource name. The possible values are `LITERAL` and `PREFIXED`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "How a Kafka-native ACL matches its resource name. The possible values are `LITERAL` and `PREFIXED`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("LITERAL", "PREFIXED")},
 			},
 			"permission_type": schema.StringAttribute{
-				MarkdownDescription: "Kafka ACL permission type. The possible values are `ALLOW` and `DENY`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Whether a Kafka-native ACL allows or denies its operation. The possible values are `ALLOW` and `DENY`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("ALLOW", "DENY")},

@@ -44,7 +44,7 @@ data "aiven_aws_privatelink" "example" {
 - `id` (String) Resource ID composed as: `project/service_name`.
 - `principals` (Set of String) ARNs of principals allowed connecting to the service.
 - `state` (String) Privatelink resource state. The possible values are `active`, `creating` and `deleting`.
-- `supported_regions` (Set of String) List of AWS regions to allow cross-region privatelink connections from.
+- `supported_regions` (Set of String) Allow new connections to the endpoint from these regions, in addition to the region the endpoint is in.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

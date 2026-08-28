@@ -3,20 +3,28 @@
 page_title: "aiven_transit_gateway_vpc_attachment Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.
+  Gets information about an Aiven VPC attachment to external cloud provider networks.
 ---
 
 # aiven_transit_gateway_vpc_attachment (Data Source)
 
-The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.
+Gets information about an Aiven VPC attachment to external cloud provider networks.
 
 ## Example Usage
 
 ```terraform
-data "aiven_transit_gateway_vpc_attachment" "attachment" {
-  vpc_id             = aiven_project_vpc.bar.id
-  peer_cloud_account = "<PEER_ACCOUNT_ID>"
-  peer_vpc           = "google-project1"
+# AWS Transit Gateway
+data "aiven_transit_gateway_vpc_attachment" "aws_tgw" {
+  vpc_id             = aiven_project_vpc.example.id
+  peer_cloud_account = "123456789012"  # AWS account ID
+  peer_vpc           = "tgw-0123456789abcdef0"  # AWS Transit Gateway ID
+}
+
+# UpCloud VPC peering
+data "aiven_transit_gateway_vpc_attachment" "upcloud_peer" {
+  vpc_id             = aiven_project_vpc.example.id
+  peer_cloud_account = "upcloud"
+  peer_vpc           = "03126dc1-a69f-4bc2-8b24-e31c22d64712"  # UpCloud network UUID
 }
 ```
 
@@ -25,14 +33,14 @@ data "aiven_transit_gateway_vpc_attachment" "attachment" {
 
 ### Required
 
-- `peer_cloud_account` (String) AWS account ID or GCP project ID of the peered VPC. Changing this property forces recreation of the resource.
-- `peer_vpc` (String) Transit gateway ID. Changing this property forces recreation of the resource.
+- `peer_cloud_account` (String) AWS account ID, Google Cloud project ID, Azure subscription ID of the peered VPC, or string "upcloud" for UpCloud peering connections. Changing this property forces recreation of the resource.
+- `peer_vpc` (String) Peer network identifier. For AWS, the Transit Gateway ID; for Google Cloud, the VPC network name; for Azure, the resource group name; or for UpCloud, the network UUID). Changing this property forces recreation of the resource.
 - `vpc_id` (String) The VPC the peering connection belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.
+- `peer_region` (String) Region of the peered cloud provider resource, if not in the same region as Aiven VPC. This value can't be changed.
 - `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
