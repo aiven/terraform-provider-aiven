@@ -168,6 +168,93 @@ func TestResourceDataAcceptsTypedContainers(t *testing.T) {
 	require.NoError(t, rd.Set("labels", map[string]string{"k": "v2"}))
 }
 
+func TestNormalizeAnyPreservesEmptyMapStringValues(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"message": {Type: SchemaTypeString},
+			"labels": {
+				Type:  SchemaTypeMap,
+				Items: &Schema{Type: SchemaTypeString},
+			},
+			"list": {
+				Type:  SchemaTypeList,
+				Items: &Schema{Type: SchemaTypeString},
+			},
+			"set": {
+				Type:  SchemaTypeSet,
+				Items: &Schema{Type: SchemaTypeString},
+			},
+		},
+	}
+
+	got, err := normalizeAny(sch, map[string]any{
+		"message": "",
+		"labels":  map[string]string{"empty": "", "value": "present"},
+		"list":    []string{""},
+		"set":     []string{""},
+	}, false, true)
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{
+		"message": nil,
+		"labels":  map[string]any{"empty": "", "value": "present"},
+		"list":    []any{nil},
+		"set":     []any{nil},
+	}, got)
+}
+
+func TestResourceDataGetConfigOkDoesNotFallBack(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":    {Type: SchemaTypeString, Computed: true},
+			"value": {Type: SchemaTypeString},
+			"items": {Type: SchemaTypeSet, Items: &Schema{Type: SchemaTypeString}},
+		},
+	}
+	rd, err := NewResourceData(
+		sch,
+		[]string{"id"},
+		WithTestConfig(map[string]any{"value": "configured", "items": []string{}}),
+		WithTestPlan(map[string]any{"value": "planned"}),
+		WithTestState(map[string]any{"id": "example", "value": "stored"}),
+	)
+	require.NoError(t, err)
+
+	value, ok := rd.GetConfigOk("value")
+	require.True(t, ok)
+	require.Equal(t, "configured", value)
+	items, ok := rd.GetConfigOk("items")
+	require.True(t, ok, "an explicitly configured empty collection must remain distinguishable from omission")
+	require.Empty(t, items)
+	_, ok = rd.GetConfigOk("id")
+	require.False(t, ok)
+}
+
+func TestResourceDataGetConfigOkWithoutConfig(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"value": {Type: SchemaTypeString},
+		},
+	}
+	rd, err := NewResourceData(
+		sch,
+		nil,
+		WithTestState(map[string]any{"value": "stored"}),
+	)
+	require.NoError(t, err)
+
+	_, ok := rd.GetConfigOk("value")
+	require.False(t, ok, "state-only reads must not treat state as configuration")
+}
+
 // TestResourceDataPreservedUnknownAndNullPlan verifies that preserved
 // tftypes.Value entries (produced by fromTFValue with preservePlanValues=true
 // for the ModifyPlan flow) are coerced to zero values by normalizeAny, so

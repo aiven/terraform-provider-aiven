@@ -23,6 +23,7 @@ const idField = "id"
 type ResourceData interface {
 	Get(key string) any
 	GetOk(key string) (any, bool)
+	GetConfigOk(key string) (any, bool)
 	GetState(key string) any
 	HasChange(key string) bool
 	Set(key string, value any) error
@@ -49,6 +50,20 @@ type resourceData struct {
 }
 
 var _ ResourceData = (*resourceData)(nil)
+
+// GetConfigOk looks up a value in the original Terraform configuration. Unlike GetOk,
+// it never falls back to plan or state. This is useful during a post-operation Read when
+// the provider must compare the backend result with the user's configured intent.
+func (d *resourceData) GetConfigOk(key string) (any, bool) {
+	if d.config == nil {
+		return nil, false
+	}
+	v, _, ok, err := getOk(d.schema, d.config, key)
+	if err != nil {
+		panic(fmt.Errorf("failed to get value for %q from config: %w", key, err))
+	}
+	return v, ok
+}
 
 // ID returns the value of the "id" field
 // which is mandatory for all resources and datasources.
@@ -756,7 +771,13 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 		}
 		norm := make(map[string]any, len(dict))
 		for key, elem := range dict {
-			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
+			itemSetFlow := setFlow
+			if sch.Items.Type == SchemaTypeString {
+				// Empty strings are valid map values. In particular, open API maps may
+				// use them to distinguish a present key from an absent one.
+				itemSetFlow = false
+			}
+			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, itemSetFlow)
 			if err != nil {
 				return nil, err
 			}

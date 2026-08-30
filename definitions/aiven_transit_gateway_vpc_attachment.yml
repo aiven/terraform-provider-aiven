@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/transitgatewayvpcattachment
+resource:
+  description: Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC.
+  refreshStateExists: true
+  deleteStateGone: true
+  removeMissing: true
+  importIDFormats:
+    - PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC
+    - PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC/PEER_REGION
+datasource:
+  description: Gets information about an AWS Transit Gateway VPC attachment for an Aiven project VPC.
+  schemaOverride:
+    id:
+      computed: true
+    vpc_id:
+      required: true
+    peer_cloud_account:
+      required: true
+    peer_vpc:
+      required: true
+    peer_region:
+      computed: true
+      description: AWS region of the Transit Gateway. When omitted, the data source searches all regions and requires a single matching attachment.
+clientHandler: vpc
+legacyTimeouts: true
+operations:
+  - id: VpcPeeringConnectionCreate
+    type: create
+    disableView: true
+  - id: VpcGet
+    type: read
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionUpdate
+    type: update
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionDelete
+    type: delete
+    disableView: true
+remove:
+  - add
+  - create_time
+  - delete
+  - "peer_azure_*"
+  - peer_resource_group
+  - project
+  - project_vpc_id
+  - "state_info/*"
+  - update_time
+  - vpc_peering_connection_type
+schema:
+  id:
+    type: string
+    computed: true
+    example: example-project/example-vpc/123456789012/tgw-0123456789abcdef0/us-east-1
+    description: Terraform identifier for the VPC peering connection.
+  vpc_id:
+    type: string
+    required: true
+    forceNew: true
+    example: example-project/example-vpc
+    description: Aiven project VPC ID in the `PROJECT/VPC_ID` format.
+  peer_cloud_account:
+    description: AWS account ID that owns the Transit Gateway.
+  peer_region:
+    description: AWS region of the Transit Gateway. When omitted, the Aiven project VPC region is used.
+  peer_vpc:
+    example: tgw-0123456789abcdef0
+    description: AWS Transit Gateway ID.
+  user_peer_network_cidrs:
+    computed: true
+    useStateForUnknown: true
+    forceNew: false
+  state_info:
+    additionalProperties:
+      type: string
+  peering_connection_id:
+    example: pcx-0123456789abcdef0
+    description: Legacy AWS VPC peering connection ID (`pcx-*`) for ordinary AWS VPC peering connections, if available. This is not the AWS Transit Gateway attachment ID; TGW attachment details are exposed in `state_info`.

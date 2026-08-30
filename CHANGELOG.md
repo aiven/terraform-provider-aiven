@@ -17,6 +17,10 @@ nav_order: 1
 
 ## [4.62.0] - 2026-09-02
 
+- Migrate `aiven_transit_gateway_vpc_attachment` resource and data source to the Plugin Framework. The
+  `user_peer_network_cidrs` field is now optional, and `peer_region` can be set in the data source to choose between
+  matching connections in different regions. Existing state and both region-less and region-qualified import IDs remain supported. End-to-end acceptance coverage
+  currently covers AWS and GCP.
 - Fix `aiven_valkey_user` intermittently storing an empty `password` in the state after a password reset.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:event_logs:read`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:event_logs:read`
