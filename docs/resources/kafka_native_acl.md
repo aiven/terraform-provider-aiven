@@ -38,8 +38,8 @@ resource "aiven_kafka_native_acl" "example" {
 ### Required
 
 - `operation` (String) Kafka ACL operation represents an operation which an ACL grants or denies permission to perform. The possible values are `All`, `Alter`, `AlterConfigs`, `ClusterAction`, `Create`, `CreateTokens`, `Delete`, `Describe`, `DescribeConfigs`, `DescribeTokens`, `IdempotentWrite`, `Read` and `Write`. Changing this property forces recreation of the resource.
-- `pattern_type` (String) Kafka ACL pattern type of resource name. The possible values are `LITERAL` and `PREFIXED`. Changing this property forces recreation of the resource.
-- `permission_type` (String) Kafka ACL permission type. The possible values are `ALLOW` and `DENY`. Changing this property forces recreation of the resource.
+- `pattern_type` (String) How a Kafka-native ACL matches its resource name. The possible values are `LITERAL` and `PREFIXED`. Changing this property forces recreation of the resource.
+- `permission_type` (String) Whether a Kafka-native ACL allows or denies its operation. The possible values are `ALLOW` and `DENY`. Changing this property forces recreation of the resource.
 - `principal` (String) principal is in 'principalType:name' format. Maximum length: `256`. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 - `resource_name` (String) Resource pattern used to match specified resources. Maximum length: `256`. Changing this property forces recreation of the resource.
@@ -48,7 +48,7 @@ resource "aiven_kafka_native_acl" "example" {
 
 ### Optional
 
-- `host` (String) the host or `*` for all hosts. Maximum length: `256`. Changing this property forces recreation of the resource.
+- `host` (String) the host or `*` for all hosts. Maximum length: `256`. The default value is `*`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
