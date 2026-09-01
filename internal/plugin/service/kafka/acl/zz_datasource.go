@@ -30,7 +30,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"permission": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Kafka permission. The possible values are `admin`, `read`, `readwrite` and `write`. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.",
+				MarkdownDescription: "Permission of an Aiven Kafka ACL entry, as opposed to a Kafka-native one. The possible values are `admin`, `read`, `readwrite` and `write`. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.",
 				Optional:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("admin", "read", "readwrite", "write")},
 			},

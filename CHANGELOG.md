@@ -74,6 +74,7 @@ nav_order: 1
   of PL/pgSQL function metrics from pg_stat_user_functions
 - Add `aiven_service_integration` field `datadog_user_config.datadog_pg_relations`: Relations to collect PostgreSQL
   relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks
+- Change `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_method_roles`: type ~~`map`~~ → `string`
 
 ## [4.61.0] - 2026-07-30
 

@@ -56,7 +56,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"supported_regions": schema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of AWS regions to allow cross-region privatelink connections from.",
+				MarkdownDescription: "Allow new connections to the endpoint from these regions, in addition to the region the endpoint is in.",
 				Optional:            true,
 				Validators:          []validator.Set{setvalidator.SizeAtMost(64)},
 			},
