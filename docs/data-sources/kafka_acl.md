@@ -34,7 +34,7 @@ data "aiven_kafka_acl" "example" {
 ### Optional
 
 - `acl_id` (String) Kafka ACL ID. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.
-- `permission` (String) Kafka permission. The possible values are `admin`, `read`, `readwrite` and `write`. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.
+- `permission` (String) Permission of an Aiven Kafka ACL entry, as opposed to a Kafka-native one. The possible values are `admin`, `read`, `readwrite` and `write`. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `topic` (String) Topic name pattern. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.
 - `username` (String) Username. Provide either `acl_id`, or all of `permission`, `topic` and `username` together.

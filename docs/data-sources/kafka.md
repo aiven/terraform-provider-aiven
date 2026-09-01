@@ -421,7 +421,7 @@ Read-Only:
 - `retriable_errors_silenced` (Boolean)
 - `sasl_oauthbearer_authentication_enabled` (Boolean)
 - `sasl_oauthbearer_authorization_enabled` (Boolean)
-- `sasl_oauthbearer_method_roles` (Map of String)
+- `sasl_oauthbearer_method_roles` (String)
 - `sasl_oauthbearer_roles_claim_path` (String)
 - `schema_reader_strict_mode` (Boolean)
 - `topic_name` (String)

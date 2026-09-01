@@ -48,7 +48,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"supported_regions": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of AWS regions to allow cross-region privatelink connections from.",
+				MarkdownDescription: "Allow new connections to the endpoint from these regions, in addition to the region the endpoint is in.",
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
