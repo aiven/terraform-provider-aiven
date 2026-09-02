@@ -94,6 +94,7 @@ jobs:
             *This PR was created automatically by the release preparation workflow.*
           labels: |
             release
+            ${{ !inputs.run_acceptance_tests && 'skip-acc-tests' || '' }}
           draft: false
 
   # Run all linting-related checks
