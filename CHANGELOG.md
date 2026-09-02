@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.62.0] - 2026-09-02
+
 - Fix `aiven_valkey_user` intermittently storing an empty `password` in the state after a password reset.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:event_logs:read`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:event_logs:read`
