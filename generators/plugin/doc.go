@@ -78,6 +78,21 @@ func importID(def *Definition, root *Item) string {
 	return strings.ToUpper(filepath.Join(importIDPath(def, root)...))
 }
 
+func importIDFormats(def *Definition, root *Item) []string {
+	if def.Resource != nil && len(def.Resource.ImportIDFormats) > 0 {
+		return def.Resource.ImportIDFormats
+	}
+	return []string{importID(def, root)}
+}
+
+func importCommands(def *Definition, formats []string) string {
+	var b strings.Builder
+	for _, format := range formats {
+		fmt.Fprintf(&b, "terraform import %s.example %s\n", def.typeName, format)
+	}
+	return b.String()
+}
+
 func genDoc(def *Definition, entity entityType, renderRoot *Item, resDat *SchemaMeta) ([]byte, error) {
 	if hasDocTemplateOverride(def, entity) {
 		return nil, nil
@@ -199,8 +214,14 @@ func docImport(def *Definition, entity entityType, root *Item) (string, bool) {
 	if !entity.isResource() {
 		return "", false
 	}
-	return fmt.Sprintf("## Import\n\nImport is supported using the following syntax:\n\n```shell\nterraform import %s.example %s\n```",
-		def.typeName, importID(def, root)), true
+
+	formats := importIDFormats(def, root)
+	description := "Import is supported using the following syntax:"
+	if len(formats) > 1 {
+		description = "Import is supported using one of the following formats:"
+	}
+	return fmt.Sprintf("## Import\n\n%s\n\n```shell\n%s```",
+		description, importCommands(def, formats)), true
 }
 
 func docSchema(def *Definition, entity entityType, root *Item) (string, error) {

@@ -72,10 +72,9 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_project_user": project.DatasourceProjectUser(),
 
 			// vpc
-			"aiven_aws_vpc_peering_connection":     vpc.DatasourceAWSVPCPeeringConnection(),
-			"aiven_azure_vpc_peering_connection":   vpc.DatasourceAzureVPCPeeringConnection(),
-			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
-			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
+			"aiven_aws_vpc_peering_connection":   vpc.DatasourceAWSVPCPeeringConnection(),
+			"aiven_azure_vpc_peering_connection": vpc.DatasourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":   vpc.DatasourceGCPVPCPeeringConnection(),
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
@@ -141,7 +140,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
 			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
-			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),

@@ -1,9 +1,18 @@
-resource "aiven_transit_gateway_vpc_attachment" "attachment" {
-  vpc_id             = aiven_project_vpc.bar.id
-  peer_cloud_account = "<PEER_ACCOUNT_ID>"
-  peer_vpc           = "google-project1"
-  peer_region        = "aws-eu-west-1"
-  user_peer_network_cidrs = [
-    "10.0.0.0/24"
-  ]
+resource "aiven_transit_gateway_vpc_attachment" "example" {
+  vpc_id             = "example-project/example-vpc" // Force new
+  peer_cloud_account = "123456789012" // Force new
+  peer_vpc           = "tgw-0123456789abcdef0" // Force new
+
+  // OPTIONAL FIELDS
+  peer_region             = "us-east-1" // Force new
+  user_peer_network_cidrs = ["192.168.6.0/24"]
+
+  /* COMPUTED FIELDS
+  id                    = "example-project/example-vpc/123456789012/tgw-0123456789abcdef0/us-east-1"
+  peering_connection_id = "pcx-0123456789abcdef0"
+  state                 = "ACTIVE"
+  state_info = {
+    foo = "foo"
+  }
+  */
 }

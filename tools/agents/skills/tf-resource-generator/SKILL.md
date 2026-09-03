@@ -172,6 +172,9 @@ Common fields:
 resource:
   description: "..."
   deprecationMessage: "..."
+  importIDFormats:                 # Optional docs-only override for resources with multiple import forms
+    - PROJECT/RESOURCE_ID
+    - PROJECT/RESOURCE_ID/REGION
   terminationProtection: true # Check field before delete
   stateAttribute: state # Terraform attribute polled after Create/Update/Delete
   refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
@@ -180,6 +183,10 @@ resource:
   removeMissing: true # Remove from state on 404
   deleteStateDesired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
 ```
+
+`importIDFormats` generates every listed form in both the resource's `Import` documentation and
+`examples/resources/<resource>/import.sh`. It does not change `IDFields` or runtime import parsing.
+Omit it when the single import form can be derived from `idAttributeComposed`.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
 successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set

@@ -158,8 +158,10 @@ type SchemaMeta struct {
 	RemoveMissing       bool     `yaml:"removeMissing,omitempty"`
 	IgnoreAlreadyExists bool     `yaml:"ignoreAlreadyExists,omitempty"`
 	DisableExample      bool     `yaml:"disableExample,omitempty"`
-	ValidateConfig      bool     `yaml:"validateConfig,omitempty"`
-	ModifyPlan          bool     `yaml:"modifyPlan,omitempty"`
+	// ImportIDFormats overrides the generated import examples without changing runtime ID fields.
+	ImportIDFormats []string `yaml:"importIDFormats,omitempty"`
+	ValidateConfig  bool     `yaml:"validateConfig,omitempty"`
+	ModifyPlan      bool     `yaml:"modifyPlan,omitempty"`
 
 	// SchemaOverride is a datasource-only schema overlay merged on top of the
 	// base Definition.Schema when generating the datasource. Resource

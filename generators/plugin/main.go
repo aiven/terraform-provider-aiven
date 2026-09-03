@@ -223,11 +223,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			importData := fmt.Sprintf(
-				"terraform import %s.example %s\n",
-				def.typeName,
-				importID(def, root),
-			)
+			importData := importCommands(def, importIDFormats(def, root))
 
 			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
 			if err != nil {
