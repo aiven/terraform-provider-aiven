@@ -23,13 +23,13 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("AWS account ID or GCP project ID of the peered VPC").ForceNew().Build(),
+		Description: userconfig.Desc("AWS account ID, Google Cloud project ID, Azure subscription ID of the peered VPC, or string \"upcloud\" for UpCloud peering connections").ForceNew().Build(),
 	},
 	"peer_vpc": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Transit gateway ID").ForceNew().Build(),
+		Description: userconfig.Desc("Peer network identifier. For AWS, the Transit Gateway ID; for Google Cloud, the VPC network name; for Azure, the resource group name; or for UpCloud, the network UUID)").ForceNew().Build(),
 	},
 	"user_peer_network_cidrs": {
 		Required:    true,
@@ -45,7 +45,7 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Type:        schema.TypeString,
 		ForceNew:    true,
-		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.",
+		Description: "Region of the peered cloud provider resource, if not in the same region as Aiven VPC. This value can't be changed.",
 	},
 	"state": {
 		Computed:    true,
@@ -66,7 +66,7 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 
 func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.",
+		Description:   "Attach an Aiven virtual private cloud (VPC) to external networks from cloud providers. Supported peer cloud accounts include AWS, Google Cloud, Azure, and UpCloud. The Aiven documentation has more information on [VPC peering in Aiven](https://aiven.io/docs/platform/howto/list-vpc-peering).",
 		CreateContext: resourceVPCPeeringConnectionCreate,
 		ReadContext:   resourceVPCPeeringConnectionRead,
 		UpdateContext: resourceTransitGatewayVPCAttachmentUpdate,
