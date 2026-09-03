@@ -131,6 +131,8 @@ properties:
           The package must declare a function named `modifyPlan` with the
           adapter.ResourceOptions.ModifyPlan signature. Use this for plan-time checks that
           need access to prior state (e.g. forbidding a decrease in a numeric attribute).
+          `modifyPlan` may also write plan values, and `d.RequiresReplace(name)` marks the
+          attributes whose computed value forces a replacement.
           https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
     dependentRequired:
       refreshStateFailed:
@@ -369,6 +371,14 @@ definitions:
       default:
         type: any
         $comment: Default value for this attribute
+      dropDefault:
+        type: boolean
+        $comment: |
+          Drops the OpenAPI default from the generated schema.
+          A migration workaround: the SDKv2 resource had no default and stored the Terraform
+          zero value for an omitted optional field, so a generated default would plan a change
+          against existing state. The resource sends the API default from its create view instead.
+          todo: drop in v5.0.0, when the state written by SDKv2 is no longer supported.
       deprecationMessage:
         type: string
         $comment: |

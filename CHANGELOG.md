@@ -77,6 +77,12 @@ nav_order: 1
 - Add `aiven_service_integration` field `datadog_user_config.datadog_pg_relations`: Relations to collect PostgreSQL
   relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks
 - Change `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_method_roles`: type ~~`map`~~ → `string`
+- Migrate `aiven_flink_jar_application_deployment` resource to the Plugin Framework.
+- Change `aiven_flink_jar_application_deployment`: omitting `restart_enabled` uses the API default (`true`) on create.
+  Existing state is preserved, including SDKv2 resources that stored `false` when the field was omitted.
+- Migrate `aiven_flink_jar_application_version` resource to the Plugin Framework.
+- Change `aiven_flink_jar_application_version`: pointing `source` at a different path with the same file contents
+  no longer hides the diff; it updates state in place without replacing the version.
 
 ## [4.61.0] - 2026-07-30
 

@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/flink/jardeployment
+beta: true
+limitedAvailability: true
+resource:
+  refreshStateExists: true
+  removeMissing: true
+  description: |
+    Creates and manages the deployment of an
+    [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).
+clientHandler: flinkjarapplicationdeployment
+idAttributeComposed: [project, service_name, application_id, deployment_id]
+legacyTimeouts: true
+rename:
+  id: deployment_id
+# Response envelope fields, not part of the resource.
+remove:
+  - message
+  - errors
+# The deployment must be canceled before it can be deleted, which the delete view does.
+operations:
+  - id: ServiceFlinkCreateJarApplicationDeployment
+    type: create
+  - id: ServiceFlinkGetJarApplicationDeployment
+    type: read
+# The read response carries these, so the API value wins when the configuration has none.
+schema:
+  entry_class:
+    computed: true
+  program_args:
+    computed: true
+  starting_savepoint:
+    computed: true
+  # The API returns this one, and a schema default would win over the stored value whenever the
+  # configuration omits it, replacing every deployment that runs with another parallelism.
+  # SDKv2 had no default either, so the state may hold any value the API reported.
+  parallelism:
+    computed: true
+    dropDefault: true
+    useStateForUnknown: true
+  # The API defaults this field to true but never returns it. SDKv2 left it absent when omitted
+  # and retained an explicit false. Drop the schema default so a refreshless migration plan can
+  # preserve the legacy null or false instead of forcing replacement. The create and read views
+  # materialize true only when no configured or stored value is available.
+  restart_enabled:
+    computed: true
+    dropDefault: true
+    useStateForUnknown: true

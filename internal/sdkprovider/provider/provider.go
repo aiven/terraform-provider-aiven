@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -149,10 +148,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
 
 			// flink
-			"aiven_flink":                            flink.ResourceFlink(),
-			"aiven_flink_application_version":        flink.ResourceFlinkApplicationVersion(),
-			"aiven_flink_jar_application_version":    flink.ResourceFlinkJarApplicationVersion(),
-			"aiven_flink_jar_application_deployment": flink.ResourceFlinkJarApplicationDeployment(),
+			"aiven_flink":                     flink.ResourceFlink(),
+			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
 			"aiven_opensearch":            opensearch.ResourceOpenSearch(),
@@ -185,21 +182,12 @@ func Provider(version string) (*schema.Provider, error) {
 	}
 
 	// Adds "beta" warning to the description
-	betaResources := []string{
-		"aiven_flink_jar_application_version",
-		"aiven_flink_jar_application_deployment",
-	}
+	betaResources := []string{}
 
 	betaDataSources := []string{}
 
-	// Adds "limited availability" warning to the description
-	limitedAvailabilityResources := []string{
-		"aiven_flink_jar_application_version",
-		"aiven_flink_jar_application_deployment",
-	}
-
 	missing := append(
-		addBeta(p.ResourcesMap, betaResources, limitedAvailabilityResources...),
+		addBeta(p.ResourcesMap, betaResources),
 		addBeta(p.DataSourcesMap, betaDataSources)...,
 	)
 
@@ -266,9 +254,7 @@ func Provider(version string) (*schema.Provider, error) {
 }
 
 // addBeta adds resources as beta or removes them.
-// The ones listed in limitedAvailability are additionally marked as such,
-// which tells the reader the feature must be enabled by the sales team.
-func addBeta(m map[string]*schema.Resource, keys []string, limitedAvailability ...string) (missing []string) {
+func addBeta(m map[string]*schema.Resource, keys []string) (missing []string) {
 	isBeta := util.IsBeta()
 	for _, k := range keys {
 		v, ok := m[k]
@@ -282,12 +268,7 @@ func addBeta(m map[string]*schema.Resource, keys []string, limitedAvailability .
 			continue
 		}
 
-		d := userconfig.Desc(v.Description).Beta()
-		if slices.Contains(limitedAvailability, k) {
-			d = d.LimitedAvailability()
-		}
-
-		v.Description = d.Build()
+		v.Description = userconfig.Desc(v.Description).Beta().Build()
 	}
 	return missing
 }

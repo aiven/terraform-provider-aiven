@@ -38,8 +38,8 @@
 |  32 | aiven_flink_application_deployment          | yes    |     1 |
 |  33 | aiven_flink_application_version             |        |     2 |
 |  34 | aiven_flink_jar_application                 | yes    |     1 |
-|  35 | aiven_flink_jar_application_deployment      |        |     1 |
-|  36 | aiven_flink_jar_application_version         |        |     1 |
+|  35 | aiven_flink_jar_application_deployment      | yes    |     1 |
+|  36 | aiven_flink_jar_application_version         | yes    |     1 |
 |  37 | aiven_gcp_org_vpc_peering_connection        | yes    |     2 |
 |  38 | aiven_gcp_privatelink                       | yes    |     2 |
 |  39 | aiven_gcp_privatelink_connection_approval   |        |     1 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 56%                          | 92     |   164 |
+|     | TOTAL MIGRATED 57%                          | 94     |   164 |
 +-----+---------------------------------------------+--------+-------+
 ```
