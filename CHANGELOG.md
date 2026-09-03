@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource
+  of the same name.
+
 ## [4.62.0] - 2026-09-02
 
 - Fix `aiven_valkey_user` intermittently storing an empty `password` in the state after a password reset.

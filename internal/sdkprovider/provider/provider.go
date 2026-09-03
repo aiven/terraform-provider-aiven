@@ -191,9 +191,14 @@ func Provider(version string) (*schema.Provider, error) {
 		addBeta(p.DataSourcesMap, betaDataSources)...,
 	)
 
+	// Datasources that stay supported even though the resource with the same name is deprecated.
+	deprecationExemptDataSources := map[string]bool{
+		"aiven_organization_user": true,
+	}
+
 	// Deprecates datasources along with their resources
 	for k, d := range p.DataSourcesMap {
-		if d.DeprecationMessage == "" {
+		if d.DeprecationMessage == "" && !deprecationExemptDataSources[k] {
 			r, ok := p.ResourcesMap[k]
 			if ok && r.DeprecationMessage != "" {
 				d.DeprecationMessage = r.DeprecationMessage
