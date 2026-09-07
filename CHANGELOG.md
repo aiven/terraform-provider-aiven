@@ -14,6 +14,10 @@ nav_order: 1
 
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource
   of the same name.
+- Change `aiven_account_team_project` field `team_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`
+- Change `aiven_kafka` field `kafka_user_config.karapace_version` (enum): add `6.2.1`, `6.2.2`
+- Change `aiven_project_user` field `member_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`
+- Change `aiven_service_integration` field `integration_type` (enum): add `alert_triage_kafka`
 
 ## [4.62.0] - 2026-09-02
 
