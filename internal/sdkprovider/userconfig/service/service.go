@@ -6,6 +6,8 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 func GetUserConfig(kind string) *schema.Schema {
 	switch kind {
+	case "application":
+		return applicationUserConfig()
 	case "clickhouse":
 		return clickhouseUserConfig()
 	case "dragonfly":
@@ -22,6 +24,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return kafkaMirrormakerUserConfig()
 	case "mysql":
 		return mysqlUserConfig()
+	case "nomadclient":
+		return nomadclientUserConfig()
 	case "opensearch":
 		return opensearchUserConfig()
 	case "pg":
@@ -38,6 +42,10 @@ func GetUserConfig(kind string) *schema.Schema {
 // GetFieldMapping returns TF fields to Json fields mapping (in unix-path way)
 func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{
+		"application": {
+			"ip_filter_object": "ip_filter",
+			"ip_filter_string": "ip_filter",
+		},
 		"clickhouse": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
@@ -67,6 +75,10 @@ func GetFieldMapping(kind string) map[string]string {
 			"ip_filter_string": "ip_filter",
 		},
 		"mysql": {
+			"ip_filter_object": "ip_filter",
+			"ip_filter_string": "ip_filter",
+		},
+		"nomadclient": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
 		},
@@ -124,5 +136,5 @@ func GetFieldMapping(kind string) map[string]string {
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "opensearch", "pg", "thanos", "valkey"}
+	return []string{"application", "clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "nomadclient", "opensearch", "pg", "thanos", "valkey"}
 }

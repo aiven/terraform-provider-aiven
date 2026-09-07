@@ -861,7 +861,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"karapace_version": {
-				Description: "Pin a specific installed Karapace version on this service. Leave null/unset to auto-follow the newest installed version.",
+				Description: "Enum: `6.2.1`, `6.2.2`, and newer. Select a Karapace version for this service, or select Latest to use the latest available version automatically. New versions become available after installation during a maintenance update.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -1019,7 +1019,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"sasl_oauthbearer_authorization_enabled": {
-						Description: "If enabled, the Schema Registry enforces role-based authorization derived from the JWT roles claim. Requires `sasl_oauthbearer_authentication_enabled` to be enabled. Defaults to `false`.",
+						Description: "If enabled, the Schema Registry enforces role-based authorization derived from the JWT roles claim. Enabling this automatically enables `sasl_oauthbearer_authentication_enabled` when it is not already enabled, since authorization requires authentication. Defaults to `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
