@@ -7,6 +7,7 @@ resource "aiven_mysql_user" "example" {
   password_wo         = "password123"
   password_wo_version = 1
   authentication      = "caching_sha2_password"
+  mysql_grants        = ["SELECT", "DELETE"] // Force new
 
   /* COMPUTED FIELDS
   access_cert              = "foo"

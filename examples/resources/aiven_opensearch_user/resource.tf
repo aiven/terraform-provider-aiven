@@ -6,6 +6,7 @@ resource "aiven_opensearch_user" "example" {
   // OPTIONAL FIELDS
   password_wo         = "password123"
   password_wo_version = 1
+  mysql_grants        = ["SELECT", "DELETE"] // Force new
 
   /* COMPUTED FIELDS
   password_encryption_type = "md5"

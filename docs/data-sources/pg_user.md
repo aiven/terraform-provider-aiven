@@ -20,6 +20,7 @@ data "aiven_pg_user" "example" {
   /* COMPUTED FIELDS
   access_cert              = "foo"
   access_key               = "foo"
+  mysql_grants             = ["SELECT", "DELETE"]
   password                 = "password123"
   password_encryption_type = "md5"
   pg_allow_replication     = true
@@ -45,6 +46,7 @@ data "aiven_pg_user" "example" {
 - `access_cert` (String, Sensitive) Access certificate for TLS client authentication.
 - `access_key` (String, Sensitive) Access key for TLS client authentication.
 - `id` (String) Resource ID composed as: `project/service_name/username`.
+- `mysql_grants` (Set of String) MySQL grants for the service user.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.
 - `password_encryption_type` (String) The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.
 - `pg_allow_replication` (Boolean) Allows replication. For the default avnadmin user this attribute is required and is always `true`.

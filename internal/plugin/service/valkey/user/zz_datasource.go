@@ -23,6 +23,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Resource ID composed as: `project/service_name/username`.",
 			},
+			"mysql_grants": schema.SetAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "MySQL grants for the service user.",
+			},
 			"password": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.",
@@ -80,6 +85,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"mysql_grants": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"password": &adapter.Schema{
 				Computed: true,

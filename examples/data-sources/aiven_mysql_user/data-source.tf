@@ -7,6 +7,7 @@ data "aiven_mysql_user" "example" {
   access_cert              = "foo"
   access_key               = "foo"
   authentication           = "caching_sha2_password"
+  mysql_grants             = ["SELECT", "DELETE"]
   password                 = "password123"
   password_encryption_type = "md5"
   type                     = "foo"
