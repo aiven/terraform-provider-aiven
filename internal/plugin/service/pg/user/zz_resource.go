@@ -7,13 +7,16 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
@@ -36,6 +39,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Resource ID composed as: `project/service_name/username`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"mysql_grants": schema.SetAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "MySQL grants for the service user. Changing this property forces recreation of the resource.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.Set{setplanmodifier.RequiresReplace()},
+				Validators:          []validator.Set{setvalidator.SizeAtMost(28)},
 			},
 			"password": schema.StringAttribute{
 				Computed:            true,
@@ -105,6 +115,10 @@ func resourceSchemaInternal() *adapter.Schema {
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"mysql_grants": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeSet,
 			},
 			"password": &adapter.Schema{
 				Computed:       true,

@@ -4,6 +4,7 @@ data "aiven_valkey_user" "example" {
   username     = "testuser"
 
   /* COMPUTED FIELDS
+  mysql_grants             = ["SELECT", "DELETE"]
   password                 = "password123"
   password_encryption_type = "md5"
   type                     = "foo"

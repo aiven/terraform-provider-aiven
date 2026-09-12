@@ -86,7 +86,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								},
 								"payment_method_type": schema.StringAttribute{
 									Computed:            true,
-									MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom` and `gcp_subscription`.",
+									MarkdownDescription: "An enumeration. The possible values are `aws_subscription`, `aws_subscription_v1`, `azure_subscription`, `bank_transfer`, `credit_card`, `custom`, `gcp_subscription` and `gcp_subscription_v1`.",
 								},
 							}},
 						},

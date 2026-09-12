@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -30,6 +31,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource ID composed as: `project/service_name/username`.",
+			},
+			"mysql_grants": schema.SetAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "MySQL grants for the service user.",
 			},
 			"password": schema.StringAttribute{
 				Computed:            true,
@@ -80,6 +86,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
+			},
+			"mysql_grants": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"password": &adapter.Schema{
 				Computed: true,
