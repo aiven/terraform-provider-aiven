@@ -31,8 +31,23 @@ func opentelemetryUserConfig() *schema.Schema {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"json", "protobuf"}, false),
 			},
+			"filter_measurements": {
+				Description: "If set, only these measurements are sent to this endpoint; everything else is dropped for this destination only, leaving every other destination (other integrations, Prometheus, etc.) unaffected. Matched after bucketing and any override_measurements rename, i.e. against the final measurement name as it will appear at the destination (e.g. `kafka`, or `do.databases.kafka` if renamed). Leave unset to export every measurement, same as today. Telegraf's underlying namepass filter treats an empty list the same as unset (both export everything), so an empty list isn't accepted here -- it wouldn't do what it looks like it does.",
+				Elem: &schema.Schema{
+					Description: "Measurement name. Example: `do.databases.valkey`.",
+					Type:        schema.TypeString,
+				},
+				MaxItems: 1024,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"headers": {
 				Description: "Additional gRPC metadata headers sent with every export request.",
+				Optional:    true,
+				Type:        schema.TypeMap,
+			},
+			"override_measurements": {
+				Description: "Every metric belonging to a known service (mysql, postgresql, valkey -- which also covers redis, Valkey's predecessor -- opensearch, kafka) is exported here under a single bucket measurement per service -- e.g. every Kafka JMX metric, however deep its raw name, becomes measurement `kafka` (its specific identity moves into the field name instead). This map renames that bucket as a whole -- key on the bucket name (e.g. `kafka`, `postgresql`), not the metric's original raw name; it cannot target one specific metric within a bucket. Metrics outside these known services (e.g. cpu, mem, disk) are exported unchanged and can't be renamed here. The original metric name is left untouched for every other destination (other integrations, Prometheus, etc.) -- only the copy sent here is bucketed and, if listed, renamed.",
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},

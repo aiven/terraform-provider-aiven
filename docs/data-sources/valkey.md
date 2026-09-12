@@ -136,6 +136,8 @@ Read-Only:
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
 - `valkey_acl_channels_default` (String)
+- `valkey_active_defrag_ignore_bytes` (Number)
+- `valkey_active_defrag_threshold_lower` (Number)
 - `valkey_active_expire_effort` (Number)
 - `valkey_activedefrag` (Boolean)
 - `valkey_io_threads` (Number)

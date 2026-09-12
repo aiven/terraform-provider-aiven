@@ -293,7 +293,9 @@ Read-Only:
 - `attributes` (Map of String)
 - `compression` (String)
 - `encoding_type` (String)
+- `filter_measurements` (List of String)
 - `headers` (Map of String)
+- `override_measurements` (Map of String)
 - `service_address` (String)
 - `timeout` (Number)
 

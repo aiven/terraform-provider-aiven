@@ -18,6 +18,32 @@ nav_order: 1
 - Change `aiven_kafka` field `kafka_user_config.karapace_version` (enum): add `6.2.1`, `6.2.2`
 - Change `aiven_project_user` field `member_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`
 - Change `aiven_service_integration` field `integration_type` (enum): add `alert_triage_kafka`
+- Change `aiven_kafka` field `kafka_user_config.karapace_version` (enum): add `6.2.3`
+- Add `aiven_kafka_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property forces
+  recreation of the resource.
+- Add `aiven_kafka_user` datasource field `mysql_grants`: MySQL grants for the service user.
+- Add `aiven_mysql_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property forces
+  recreation of the resource.
+- Add `aiven_mysql_user` datasource field `mysql_grants`: MySQL grants for the service user.
+- Add `aiven_opensearch_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property
+  forces recreation of the resource.
+- Add `aiven_opensearch_user` datasource field `mysql_grants`: MySQL grants for the service user.
+- Add `aiven_pg_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property forces
+  recreation of the resource.
+- Add `aiven_pg_user` datasource field `mysql_grants`: MySQL grants for the service user.
+- Add `aiven_service_integration_endpoint` field `opentelemetry_user_config.filter_measurements`: If set, only these
+  measurements are sent to this endpoint; everything else is dropped for this destination only, leaving every other
+  destination (other integrations, Prometheus, etc.) unaffected
+- Add `aiven_service_integration_endpoint` field `opentelemetry_user_config.override_measurements`: Every metric belonging
+  to a known service (mysql, postgresql, valkey -- which also covers redis, Valkey's predecessor -- opensearch, kafka)
+  is exported here under a single bucket measurement per service -- e.g
+- Add `aiven_valkey` field `valkey_user_config.valkey_active_defrag_ignore_bytes`: Minimum amount of fragmentation waste,
+  in bytes, before active defragmentation starts
+- Add `aiven_valkey` field `valkey_user_config.valkey_active_defrag_threshold_lower`: Minimum percentage of fragmentation
+  before active defragmentation starts
+- Add `aiven_valkey_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property forces
+  recreation of the resource.
+- Add `aiven_valkey_user` datasource field `mysql_grants`: MySQL grants for the service user.
 
 ## [4.62.0] - 2026-09-02
 

@@ -225,6 +225,16 @@ func valkeyUserConfig() *schema.Schema {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"allchannels", "resetchannels"}, false),
 			},
+			"valkey_active_defrag_ignore_bytes": {
+				Description: "Minimum amount of fragmentation waste, in bytes, before active defragmentation starts. Only takes effect when `valkey_activedefrag` is enabled.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"valkey_active_defrag_threshold_lower": {
+				Description: "Minimum percentage of fragmentation before active defragmentation starts. Only takes effect when `valkey_activedefrag` is enabled. Default: `10`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"valkey_active_expire_effort": {
 				Description: "Valkey reclaims expired keys both when accessed and in the background. The background process scans for expired keys to free memory. Increasing the active-expire-effort setting (default 1, max 10) uses more CPU to reclaim expired keys faster, reducing memory usage but potentially increasing latency. Default: `1`.",
 				Optional:    true,

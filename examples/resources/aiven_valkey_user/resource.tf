@@ -6,6 +6,7 @@ resource "aiven_valkey_user" "example" {
   // OPTIONAL FIELDS
   password_wo           = "password123"
   password_wo_version   = 1
+  mysql_grants          = ["SELECT", "DELETE"] // Force new
   valkey_acl_categories = ["+@write", "+@keyspace"]
   valkey_acl_channels   = ["some*chan"]
   valkey_acl_commands   = ["+set", "+del", "+expire", "-flushall", "-flushdb"]

@@ -861,7 +861,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"karapace_version": {
-				Description: "Enum: `6.2.1`, `6.2.2`, and newer. Select a Karapace version for this service, or select Latest to use the latest available version automatically. New versions become available after installation during a maintenance update.",
+				Description: "Enum: `6.2.1`, `6.2.2`, `6.2.3`, and newer. Select a Karapace version for this service, or select Latest to use the latest available version automatically. New versions become available after installation during a maintenance update.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -1014,22 +1014,22 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"sasl_oauthbearer_authentication_enabled": {
-						Description: "If enabled, the Schema Registry validates OAuth2/OIDC JWT bearer tokens on incoming requests. Requires the OIDC provider settings under the `kafka` configuration (`sasl_oauthbearer_jwks_endpoint_url` and related). Defaults to `false`.",
+						Description: "If enabled, the Schema Registry validates OAuth 2.0/OIDC JWT bearer tokens. Requires `sasl_oauthbearer_jwks_endpoint_url`, `sasl_oauthbearer_expected_issuer`, and `sasl_oauthbearer_expected_audience` under `kafka`. Defaults to `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"sasl_oauthbearer_authorization_enabled": {
-						Description: "If enabled, the Schema Registry enforces role-based authorization derived from the JWT roles claim. Enabling this automatically enables `sasl_oauthbearer_authentication_enabled` when it is not already enabled, since authorization requires authentication. Defaults to `false`.",
+						Description: "If enabled, the Schema Registry enforces role-based authorization using the JWT roles claim. It also enables `sasl_oauthbearer_authentication_enabled` if it isn't already enabled. Authorization requires authentication. Defaults to `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"sasl_oauthbearer_method_roles": {
-						Description: "JSON object mapping HTTP methods to the list of roles allowed to perform them on the Schema Registry, provided as a JSON-encoded string. Role names use the `karapace.` prefix, e.g. `karapace.schema:read`. Defaults to `{\"GET\": [\"karapace.schema:read\", \"karapace.subject:read\"], \"POST\": [], \"PUT\": [], \"DELETE\": []}`.",
+						Description: "Maps HTTP methods to allowed roles. Use a JSON object with `GET`, `POST`, `PUT`, and `DELETE` keys mapped to arrays of roles. Role names use the `karapace.` prefix. Example: `{\"GET\": [\"karapace.schema:read\"], \"POST\": [], \"PUT\": [], \"DELETE\": []}`. Example: `{\"GET\":[\"karapace.schema:read\"],\"POST\":[],\"PUT\":[],\"DELETE\":[]}`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"sasl_oauthbearer_roles_claim_path": {
-						Description: "JSON path used to extract the roles claim from the JWT for Schema Registry authorization. Defaults to `resource_access.karapace.roles`.",
+						Description: "The JSON path the Schema Registry uses to find the roles claim in the JWT. Defaults to `resource_access.karapace.roles`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
