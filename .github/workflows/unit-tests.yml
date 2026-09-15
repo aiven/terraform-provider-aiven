@@ -41,7 +41,15 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+      - id: get_tf_path
+        name: Get Terraform Path
+        run: echo "terraform_path=$(which terraform)" >> $GITHUB_OUTPUT
       - run: task test-unit
+        env:
+          TF_ACC_TERRAFORM_PATH: ${{ steps.get_tf_path.outputs.terraform_path }}
 
   opa_validate:
     needs: gatekeeper
