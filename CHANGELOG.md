@@ -44,6 +44,7 @@ nav_order: 1
 - Add `aiven_valkey_user` resource field `mysql_grants`: MySQL grants for the service user. Changing this property forces
   recreation of the resource.
 - Add `aiven_valkey_user` datasource field `mysql_grants`: MySQL grants for the service user.
+- Change `aiven_service_integration` field `integration_type` (enum): add `postgresql_clickhouse_cdc`
 
 ## [4.62.0] - 2026-09-02
 
