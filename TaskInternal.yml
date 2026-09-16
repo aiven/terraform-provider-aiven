@@ -21,6 +21,7 @@ vars:
 
   # --- Go Tools ---
   GOLANGCILINT: "{{.GOTOOL_CMD}} golangci-lint"
+  GOIMPORTS: "{{.GOTOOL_CMD}} goimports"
   TFPLUGINDOCS: "{{.GOTOOL_CMD}} tfplugindocs"
   TERRAFMT: "{{.GOTOOL_CMD}} terrafmt"
   SELPROJ: "{{.GOTOOL_CMD}} selproj"
@@ -90,7 +91,7 @@ tasks:
     desc: "Remove blank lines in Go import blocks and run goimports"
     cmds:
       - find . -type f -name '*.go' -exec sed -i'' -e '/^import ($/,/^)$/{/^[[:space:]]*$/d;}' {} +
-      - goimports -local "github.com/aiven/terraform-provider-aiven" -w .
+      - '{{.GOIMPORTS}} -local "github.com/aiven/terraform-provider-aiven" -w .'
 
   fmt-precommit:
     desc: "Run pre-commit hooks using Docker"
