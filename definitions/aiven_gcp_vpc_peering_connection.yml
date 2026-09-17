@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/gcpvpcpeeringconnection
+resource:
+  description: Creates and manages a Google Cloud VPC peering connection.
+  refreshStateExists: true
+  deleteStateGone: true
+  removeMissing: true
+  importIDFormats:
+    - PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC
+datasource:
+  description: The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
+  schemaOverride:
+    id:
+      computed: true
+    vpc_id:
+      required: true
+    gcp_project_id:
+      required: true
+    peer_vpc:
+      required: true
+clientHandler: vpc
+legacyTimeouts: true
+rename:
+  peer_cloud_account: gcp_project_id
+operations:
+  - id: VpcPeeringConnectionCreate
+    type: create
+    disableView: true
+  - id: VpcGet
+    type: read
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionDelete
+    type: delete
+    disableView: true
+remove:
+  - create_time
+  - "peer_azure_*"
+  - peer_region
+  - peer_resource_group
+  - peering_connection_id
+  - project
+  - project_vpc_id
+  - "state_info/*"
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  id:
+    type: string
+    computed: true
+    example: example-project/example-vpc/my-gcp-project/my-vpc
+    description: Resource ID in the `PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC` format.
+  vpc_id:
+    type: string
+    required: true
+    forceNew: true
+    pattern: '^[^/]*/[^/]*$'
+    example: example-project/example-vpc
+    description: The VPC the peering connection belongs to, in the `PROJECT/VPC_ID` format.
+  gcp_project_id:
+    description: Google Cloud project ID.
+    example: my-gcp-project
+  peer_vpc:
+    description: Google Cloud VPC network name.
+    example: my-vpc
+  state_info:
+    additionalProperties:
+      type: string
+  self_link:
+    type: string
+    computed: true
+    description: Computed Google Cloud network peering link.
+    example: https://www.googleapis.com/compute/v1/projects/my-gcp-project/global/networks/my-vpc
