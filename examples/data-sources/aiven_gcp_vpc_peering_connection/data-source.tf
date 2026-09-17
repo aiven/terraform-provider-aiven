@@ -1,5 +1,15 @@
-data "aiven_gcp_vpc_peering_connection" "main" {
-  vpc_id         = data.aiven_project_vpc.vpc.id
-  gcp_project_id = "example-project"
-  peer_vpc       = "example-network"
+data "aiven_gcp_vpc_peering_connection" "example" {
+  gcp_project_id = "my-gcp-project"
+  vpc_id         = "example-project/example-vpc"
+  peer_vpc       = "my-vpc"
+
+  /* COMPUTED FIELDS
+  id          = "example-project/example-vpc/my-gcp-project/my-vpc"
+  create_time = "2021-01-01T00:00:00Z"
+  self_link   = "https://www.googleapis.com/compute/v1/projects/my-gcp-project/global/networks/my-vpc"
+  state       = "ACTIVE"
+  state_info = {
+    foo = "foo"
+  }
+  */
 }
