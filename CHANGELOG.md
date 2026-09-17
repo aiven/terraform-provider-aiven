@@ -17,6 +17,16 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): add `application:access:connect`
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `application:access:connect`
 - Change `aiven_project_user` field `member_type` (enum): add `application:access:connect`
+- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, and `aiven_gcp_vpc_peering_connection`
+  resources and data sources to the Plugin Framework.
+- Add `create_time` to AWS, Azure and GCP VPC peering resources and data sources.
+- Preserve these peering resources in Terraform state when creation succeeds but the subsequent readiness check fails.
+  Terraform plans their replacement on the next run; the provider no longer deletes them during the failed create operation.
+- Reject creating AWS, Azure, GCP and transit gateway VPC peering connections when a matching connection already exists.
+  This prevents `create_before_destroy` replacements from deleting the existing connection.
+- Report ambiguous VPC peering lookups instead of selecting the first connection.
+- Change `aiven_aws_vpc_peering_connection`: retain an explicitly empty `aws_vpc_region` in state. Upgrading an existing
+  resource configured with an empty region can show a state-only update; the peering connection is preserved.
 
 ## [4.64.0] - 2026-10-12
 
