@@ -18,7 +18,10 @@ import (
 	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
 )
 
-const peeringResource = "aiven_aws_vpc_peering_connection.peering_connection"
+const (
+	peeringResource      = "aiven_aws_vpc_peering_connection.peering_connection"
+	awsVPCPeeringTestEnv = "AWS_VPC_PEERING_TEST"
+)
 
 var awsProvider = resource.ExternalProvider{Source: "hashicorp/aws", VersionConstraint: "=4.40.0"}
 
@@ -30,6 +33,10 @@ type awsConfig struct {
 
 func getAWSConfig(t *testing.T) awsConfig {
 	t.Helper()
+	if os.Getenv(awsVPCPeeringTestEnv) == "" {
+		t.Skipf("environment variable %s must be set to run this test", awsVPCPeeringTestEnv)
+	}
+
 	region := os.Getenv("AWS_DEFAULT_REGION")
 	if region == "" {
 		region = "us-east-1"
