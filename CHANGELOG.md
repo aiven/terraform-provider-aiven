@@ -45,6 +45,7 @@ nav_order: 1
   recreation of the resource.
 - Add `aiven_valkey_user` datasource field `mysql_grants`: MySQL grants for the service user.
 - Change `aiven_service_integration` field `integration_type` (enum): add `postgresql_clickhouse_cdc`
+- Change `aiven_valkey` field `valkey_user_config.valkey_persistence` (enum): add `backup_hour`, `backup_minute`, `frequent_snapshots`
 
 ## [4.62.0] - 2026-09-02
 
