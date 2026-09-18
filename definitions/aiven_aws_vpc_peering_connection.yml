@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/awsvpcpeeringconnection
+resource:
+  description: Creates and manages an AWS VPC peering connection with an Aiven VPC.
+  refreshStateExists: true
+  deleteStateGone: true
+  removeMissing: true
+  modifyPlan: true
+  importIDFormats:
+    - PROJECT/VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION
+datasource:
+  description: Gets information about an AWS VPC peering connection.
+  schemaOverride:
+    id:
+      computed: true
+    vpc_id:
+      required: true
+    aws_account_id:
+      required: true
+    aws_vpc_id:
+      required: true
+    aws_vpc_region:
+      required: true
+clientHandler: vpc
+legacyTimeouts: true
+rename:
+  peer_cloud_account: aws_account_id
+  peer_vpc: aws_vpc_id
+  peer_region: aws_vpc_region
+operations:
+  - id: VpcPeeringConnectionCreate
+    type: create
+    disableView: true
+  - id: VpcGet
+    type: read
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionDelete
+    type: delete
+    disableView: true
+remove:
+  - create_time
+  - "peer_azure_*"
+  - peer_resource_group
+  - peering_connection_id
+  - project
+  - project_vpc_id
+  - "state_info/*"
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  id:
+    type: string
+    computed: true
+    description: Resource ID in the `PROJECT/VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format.
+    example: example-project/example-vpc/123456789012/vpc-0123456789abcdef0/eu-west-1
+  vpc_id:
+    type: string
+    required: true
+    forceNew: true
+    pattern: '^[^/]*/[^/]*$'
+    description: The ID of the Aiven VPC, in the `PROJECT/VPC_ID` format.
+    example: example-project/example-vpc
+  aws_account_id:
+    description: AWS account ID.
+    example: "123456789012"
+  aws_vpc_id:
+    description: AWS VPC ID.
+    example: vpc-0123456789abcdef0
+  aws_vpc_region:
+    required: true
+    forceNew: false
+    description: The AWS region of the peered VPC. An empty string uses the Aiven VPC region on creation and retains the existing connection on subsequent changes. Changing to a different non-empty region forces recreation. The configured empty string is retained in state.
+    example: eu-west-1
+  state_info:
+    additionalProperties:
+      type: string
+  aws_vpc_peering_connection_id:
+    type: string
+    computed: true
+    description: The ID of the AWS VPC peering connection.
+    example: pcx-0123456789abcdef0

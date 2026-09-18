@@ -3,7 +3,6 @@
 package transitgatewayvpcattachment
 
 import (
-	"errors"
 	"maps"
 	"testing"
 
@@ -41,11 +40,11 @@ func TestParsePeeringID(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, testProject, id.project)
-		require.Equal(t, testProjectVpcID, id.projectVpcID)
-		require.Equal(t, testPeerCloudAccount, id.peerCloudAccount)
-		require.Equal(t, testPeerVpc, id.peerVpc)
-		require.Equal(t, wantRegion, id.peerRegion)
+		require.Equal(t, testProject, id.Project)
+		require.Equal(t, testProjectVpcID, id.ProjectVPCID)
+		require.Equal(t, testPeerCloudAccount, id.PeerCloudAccount)
+		require.Equal(t, testPeerVpc, id.PeerVPC)
+		require.Equal(t, wantRegion, id.PeerRegion)
 	}
 
 	f(testFourPartID, nil, "")
@@ -269,29 +268,6 @@ func TestReadViewAddsPendingPeerWarning(t *testing.T) {
 	)))
 }
 
-func TestStateInfoMap(t *testing.T) {
-	f := func(info map[string]any, want map[string]string) {
-		t.Helper()
-
-		require.Equal(t, want, stateInfoMap(info))
-	}
-
-	f(nil, nil)
-	f(map[string]any{
-		"aws_transit_gateway_attachment_id": "tgw-attach-123",
-		"empty":                             "",
-		"future_nested":                     map[string]any{"details": []any{"alpha", 42}},
-		"message":                           "attachment available",
-		"type":                              "attachment-ready",
-	}, map[string]string{
-		"aws_transit_gateway_attachment_id": "tgw-attach-123",
-		"empty":                             "",
-		"future_nested":                     "map[details:[alpha 42]]",
-		"message":                           "attachment available",
-		"type":                              "attachment-ready",
-	})
-}
-
 func TestSetConnectionStateStateInfo(t *testing.T) {
 	f := func(
 		connectionType vpc.VpcPeeringConnectionType,
@@ -382,7 +358,7 @@ func TestSetConnectionStateStateInfo(t *testing.T) {
 	f(vpc.VpcPeeringConnectionTypeAWSTgwVpcAttachment, nil, nil, "")
 }
 
-func TestFindPeeringConnection(t *testing.T) {
+func TestReadViewSelectsConnection(t *testing.T) {
 	f := func(
 		idValue string,
 		connections []vpc.PeeringConnectionOut,
@@ -391,18 +367,18 @@ func TestFindPeeringConnection(t *testing.T) {
 	) {
 		t.Helper()
 
-		id, err := parsePeeringID(idValue)
-		require.NoError(t, err)
+		d := newReadResourceData(t, map[string]any{"id": idValue})
 		client := avngen.NewMockClient(t)
 		expectVpcGet(t, client, connections...)
-		connection, err := findPeeringConnection(t.Context(), client, id)
+		err := readView(t.Context(), client, d)
 		if wantErr != nil {
 			require.ErrorIs(t, err, wantErr)
 			return
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, []string{wantCIDR}, connection.UserPeerNetworkCidrs)
+		require.Equal(t, []any{wantCIDR}, d.Get("user_peer_network_cidrs"))
+		require.Equal(t, idValue, d.ID())
 	}
 
 	wrong := newConnection("us-east-1", vpc.VpcPeeringConnectionStateTypeActive, []string{"10.1.0.0/24"}, nil)
@@ -642,42 +618,6 @@ func TestUpdateViewCIDRGuards(t *testing.T) {
 		[]string{},
 		"",
 	)
-}
-
-func TestRefreshStateCheck(t *testing.T) {
-	f := func(state string, stateInfo map[string]any, wantErr, wantFailed bool, wantContains string) {
-		t.Helper()
-
-		values := map[string]any{"state": state}
-		if stateInfo != nil {
-			values["state_info"] = stateInfo
-		}
-		d := newReadResourceData(t, values)
-		err := refreshStateCheck(d)
-		if !wantErr {
-			require.NoError(t, err)
-			return
-		}
-
-		require.Error(t, err)
-		require.Equal(t, wantFailed, errors.Is(err, adapter.ErrRefreshStateFailed))
-		require.ErrorContains(t, err, wantContains)
-	}
-
-	f("ACTIVE", nil, false, false, "")
-	f("PENDING_PEER", nil, false, false, "")
-	f("APPROVED", map[string]any{
-		"type":    "action-required",
-		"message": "backend detail",
-	}, true, false, `state_info: message="backend detail", type="action-required"`)
-	f("APPROVED_PEER_REQUESTED", nil, true, false, "transient state")
-	f("DELETED", nil, true, true, "was deleted")
-	f("DELETING", nil, true, true, "was deleted")
-	f("DELETED_BY_PEER", nil, true, true, "peer cloud resource was deleted")
-	f("REJECTED_BY_PEER", nil, true, true, "rejected by the peer")
-	f("INVALID_SPECIFICATION", nil, true, true, "specification is invalid")
-	f("ERROR", nil, true, true, "reached ERROR")
-	f("FUTURE_STATE", nil, true, false, `unknown VPC peering connection state "FUTURE_STATE"`)
 }
 
 func TestDeleteViewSelectsEndpointFromID(t *testing.T) {

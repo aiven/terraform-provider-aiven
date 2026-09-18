@@ -1,13 +1,15 @@
-resource "aiven_project_vpc" "example_vpc" {
-  project      = data.aiven_project.example_project.project
-  cloud_name   = "aws-us-east-2"
-  network_cidr = "192.168.1.0/24"
-}
+resource "aiven_aws_vpc_peering_connection" "example" {
+  aws_account_id = "123456789012" // Force new
+  aws_vpc_id     = "vpc-0123456789abcdef0" // Force new
+  vpc_id         = "example-project/example-vpc" // Force new
+  aws_vpc_region = "eu-west-1"
 
-
-resource "aiven_aws_vpc_peering_connection" "aws_to_aiven_peering" {
-  vpc_id         = aiven_project_vpc.example_vpc.id
-  aws_account_id = var.aws_id
-  aws_vpc_id     = "vpc-1a2b3c4d5e6f7g8h9"
-  aws_vpc_region = "aws-us-east-2"
+  /* COMPUTED FIELDS
+  aws_vpc_peering_connection_id = "pcx-0123456789abcdef0"
+  id                            = "example-project/example-vpc/123456789012/vpc-0123456789abcdef0/eu-west-1"
+  state                         = "ACTIVE"
+  state_info = {
+    foo = "foo"
+  }
+  */
 }
