@@ -277,7 +277,7 @@ func valkeyUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"valkey_persistence": {
-				Description:  "Enum: `off`, `rdb`. When persistence is `rdb`, Valkey does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is `off`, no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
+				Description:  "Enum: `off`, `rdb`. Controls whether Valkey writes RDB dumps to disk. With `rdb`, RDB dumps are written for backups on the backup schedule and, if `frequent_snapshots` is enabled, every 10 minutes so the service can recover recent data after a restart. With `off`, no RDB dumps are written at all: backups and forking are unavailable, `frequent_snapshots` and `backup_hour`/`backup_minute` have no effect, and all data is lost if the service restarts or is powered off.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"off", "rdb"}, false),
