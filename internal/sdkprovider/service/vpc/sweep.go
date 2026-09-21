@@ -43,30 +43,6 @@ func init() {
 		},
 	})
 
-	sweep.AddTestSweepers("aiven_aws_vpc_peering_connection", &resource.Sweeper{
-		Name: "aiven_aws_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx),
-		Dependencies: []string{
-			"aiven_project_vpc",
-		},
-	})
-
-	sweep.AddTestSweepers("aiven_azure_vpc_peering_connection", &resource.Sweeper{
-		Name: "aiven_azure_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx),
-		Dependencies: []string{
-			"aiven_project_vpc",
-		},
-	})
-
-	sweep.AddTestSweepers("aiven_gcp_vpc_peering_connection", &resource.Sweeper{
-		Name: "aiven_gcp_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx),
-		Dependencies: []string{
-			"aiven_project_vpc",
-		},
-	})
-
 	sweep.AddTestSweepers("aiven_transit_gateway_vpc_attachment", &resource.Sweeper{
 		Name: "aiven_transit_gateway_vpc_attachment",
 		F:    sweepVPCPeeringCons(ctx),

@@ -12,6 +12,14 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, and `aiven_gcp_vpc_peering_connection`
+  resources and data sources to the Plugin Framework.
+- Preserve these peering resources in Terraform state when creation succeeds but the subsequent readiness check fails.
+  Terraform plans their replacement on the next run; the provider no longer deletes them during the failed create operation.
+- Use the Project VPC peering API's idempotent creation and re-request behavior for these resources. Ambiguous lookups
+  now report an error instead of selecting the first connection.
+- Change `aiven_aws_vpc_peering_connection`: retain an explicitly empty `aws_vpc_region` in state. Upgrading an existing
+  resource configured with an empty region can show a state-only update; the peering connection is preserved.
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource
   of the same name.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`

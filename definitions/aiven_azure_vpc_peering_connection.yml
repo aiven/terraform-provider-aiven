@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/azurevpcpeeringconnection
+resource:
+  description: Creates and manages an Azure VPC peering connection with an Aiven VPC.
+  refreshStateExists: true
+  deleteStateGone: true
+  removeMissing: true
+  importIDFormats:
+    - PROJECT/VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME
+datasource:
+  description: Gets information about an Azure VPC peering connection.
+  schemaOverride:
+    id:
+      computed: true
+    vpc_id:
+      required: true
+    azure_subscription_id:
+      required: true
+    vnet_name:
+      required: true
+    peer_resource_group:
+      required: true
+    peer_azure_app_id:
+      required: true
+    peer_azure_tenant_id:
+      required: true
+clientHandler: vpc
+legacyTimeouts: true
+rename:
+  peer_cloud_account: azure_subscription_id
+  peer_vpc: vnet_name
+operations:
+  - id: VpcPeeringConnectionCreate
+    type: create
+    disableView: true
+  - id: VpcGet
+    type: read
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionWithResourceGroupDelete
+    type: delete
+    disableView: true
+remove:
+  - create_time
+  - peer_region
+  - project
+  - project_vpc_id
+  - "state_info/*"
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+schema:
+  id:
+    type: string
+    computed: true
+    description: Resource ID in the `PROJECT/VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME` format.
+    example: example-project/example-vpc/12345678-1234-1234-1234-123456789012/my-vnet
+  vpc_id:
+    type: string
+    required: true
+    forceNew: true
+    pattern: '^[^/]*/[^/]*$'
+    description: The ID of the Aiven VPC, in the `PROJECT/VPC_ID` format.
+    example: example-project/example-vpc
+  azure_subscription_id:
+    description: The ID of the Azure subscription in UUID4 format.
+    example: 12345678-1234-1234-1234-123456789012
+  vnet_name:
+    description: The name of the Azure VNet.
+    example: my-vnet
+  peer_resource_group:
+    required: true
+    example: my-resource-group
+  peer_azure_app_id:
+    required: true
+    example: 87654321-4321-4321-4321-210987654321
+  peer_azure_tenant_id:
+    required: true
+    example: 11111111-2222-3333-4444-555555555555
+  peering_connection_id:
+    description: Legacy attribute retained for state compatibility. It is not populated by the Project VPC API.
+  state_info:
+    additionalProperties:
+      type: string
