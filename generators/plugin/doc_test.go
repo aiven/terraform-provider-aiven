@@ -29,25 +29,53 @@ func TestImportCommandsUsesComposedIDByDefault(t *testing.T) {
 func TestDocImportRendersConfiguredIDFormats(t *testing.T) {
 	t.Parallel()
 
-	def := &Definition{
-		typeName: "aiven_example",
-		Resource: &SchemaMeta{ImportIDFormats: []string{
-			"PROJECT/EXAMPLE_ID",
-			"PROJECT/EXAMPLE_ID/REGION",
-		}},
-	}
+	t.Run("one alternative", func(t *testing.T) {
+		def := &Definition{
+			typeName: "aiven_example",
+			Resource: &SchemaMeta{ImportIDFormats: []string{
+				"PROJECT/EXAMPLE_ID",
+				"PROJECT/EXAMPLE_ID/REGION",
+			}},
+		}
 
-	got, ok := docImport(def, resourceType, &Item{Name: "example"})
-	require.True(t, ok)
-	require.Equal(t,
-		"## Import\n\n"+
-			"Import is supported using one of the following formats:\n\n"+
-			"```shell\n"+
-			"terraform import aiven_example.example PROJECT/EXAMPLE_ID\n"+
-			"terraform import aiven_example.example PROJECT/EXAMPLE_ID/REGION\n"+
-			"```",
-		got,
-	)
+		got, ok := docImport(def, resourceType, &Item{Name: "example"})
+		require.True(t, ok)
+		require.Equal(t,
+			"## Import\n\n"+
+				"Import is supported using one of the following formats:\n\n"+
+				"```shell\n"+
+				"terraform import aiven_example.example PROJECT/EXAMPLE_ID\n"+
+				"\n# Or run one of these commands instead:\n"+
+				"# terraform import aiven_example.example PROJECT/EXAMPLE_ID/REGION\n"+
+				"```",
+			got,
+		)
+	})
+
+	t.Run("multiple alternatives", func(t *testing.T) {
+		def := &Definition{
+			typeName: "aiven_example",
+			Resource: &SchemaMeta{ImportIDFormats: []string{
+				"PROJECT/EXAMPLE_ID",
+				"PROJECT/EXAMPLE_ID/REGION",
+				"PROJECT/EXAMPLE_ID/REGION/ZONE",
+			}},
+		}
+
+		got, ok := docImport(def, resourceType, &Item{Name: "example"})
+		require.True(t, ok)
+		require.Equal(t,
+			"## Import\n\n"+
+				"Import is supported using one of the following formats:\n\n"+
+				"```shell\n"+
+				"terraform import aiven_example.example PROJECT/EXAMPLE_ID\n"+
+				"\n# Or run one of these commands instead:\n"+
+				"# terraform import aiven_example.example PROJECT/EXAMPLE_ID/REGION\n"+
+				"# terraform import aiven_example.example PROJECT/EXAMPLE_ID/REGION/ZONE\n"+
+				"```",
+			got,
+		)
+	})
 }
 
 func TestSchemaMetaImportIDFormatsYAML(t *testing.T) {
