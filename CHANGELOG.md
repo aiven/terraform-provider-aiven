@@ -46,6 +46,15 @@ nav_order: 1
 - Add `aiven_valkey_user` datasource field `mysql_grants`: MySQL grants for the service user.
 - Change `aiven_service_integration` field `integration_type` (enum): add `postgresql_clickhouse_cdc`
 - Change `aiven_valkey` field `valkey_user_config.valkey_persistence` (enum): add `backup_hour`, `backup_minute`, `frequent_snapshots`
+- Change `aiven_kafka_topic` field `config.message_format_version` (enum): add `4.3-IV0`, `4.3`
+- Change `aiven_organization_billing_group` field `payment_method.payment_method_type` (enum): remove
+  `aws_subscription_v1`, `gcp_subscription_v1`
+- Change `aiven_organization_billing_group_list` datasource field `billing_groups.payment_method.payment_method_type`
+  (enum): remove `aws_subscription_v1`, `gcp_subscription_v1`
+- Change `aiven_organization_payment_method_list` datasource field `payment_methods.payment_method_type` (enum): remove
+  `aws_subscription_v1`, `gcp_subscription_v1`
+- Add `aiven_service_plan_list` datasource field `service_plans.managed_cluster_plan`: True when the plan's topology
+  is set via user config and its region price is per node.
 
 ## [4.62.0] - 2026-09-02
 

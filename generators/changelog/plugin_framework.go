@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -83,41 +85,40 @@ func fromPluginFrameworkProvider(p *plugin.AivenProvider) (ItemMap, error) {
 
 // walkPluginSchema walks a schema (resource or data source) and returns a list of discovered items
 func walkPluginSchema(s any, parent *Item) []*Item {
-	var items []*Item
+	members := make(map[string]any)
 
 	switch sc := s.(type) {
 	case resourceschema.Schema:
-		for name, attr := range sc.GetAttributes() {
-			items = append(items, walkAttribute(name, attr, parent)...)
-		}
-
-		for name, block := range sc.GetBlocks() {
-			items = append(items, walkBlock(name, block, parent)...)
-		}
+		collectMembers(members, sc.Attributes)
+		collectMembers(members, sc.Blocks)
 	case datasourceschema.Schema:
-		for name, attr := range sc.GetAttributes() {
-			items = append(items, walkAttribute(name, attr, parent)...)
-		}
-
-		for name, block := range sc.GetBlocks() {
-			items = append(items, walkBlock(name, block, parent)...)
-		}
+		collectMembers(members, sc.Attributes)
+		collectMembers(members, sc.Blocks)
 	default:
 		log.Panicf("unsupported schema type: %T", sc)
 	}
 
+	return walkMembers(members, parent)
+}
+
+// walkMembers walks the given attributes and blocks and returns a list of discovered items
+func walkMembers(members map[string]any, parent *Item) []*Item {
+	var items []*Item
+	for name, member := range members {
+		items = append(items, walkMember(name, member, parent)...)
+	}
 	return items
 }
 
-// walkAttribute walks an attribute and its nested elements
-func walkAttribute(name string, attr any, parent *Item) []*Item {
+// walkMember walks an attribute or a block and its nested elements
+func walkMember(name string, member any, parent *Item) []*Item {
 	var description, deprecated string
 
-	if d, ok := attr.(interface{ GetMarkdownDescription() string }); ok {
+	if d, ok := member.(interface{ GetMarkdownDescription() string }); ok {
 		description = d.GetMarkdownDescription()
 	}
 
-	if d, ok := attr.(interface{ GetDeprecationMessage() string }); ok {
+	if d, ok := member.(interface{ GetDeprecationMessage() string }); ok {
 		deprecated = d.GetDeprecationMessage()
 	}
 
@@ -128,90 +129,114 @@ func walkAttribute(name string, attr any, parent *Item) []*Item {
 		Kind:        parent.Kind,
 		Description: description,
 		Deprecated:  deprecated,
-		Type:        pluginFrameworkTypeToSDKType(attr),
+		Type:        pluginFrameworkTypeToSDKType(member),
+		ForceNew:    requiresReplace(member),
 	}
 
-	if o, ok := attr.(interface{ IsOptional() bool }); ok {
+	// Blocks implement neither of these, so they stay at their zero value.
+	if o, ok := member.(interface{ IsOptional() bool }); ok {
 		item.Optional = o.IsOptional()
 	}
-	if s, ok := attr.(interface{ IsSensitive() bool }); ok {
+	if s, ok := member.(interface{ IsSensitive() bool }); ok {
 		item.Sensitive = s.IsSensitive()
 	}
-	if f, ok := attr.(interface{ RequiresReplace() bool }); ok {
-		item.ForceNew = f.RequiresReplace()
+
+	return append([]*Item{item}, walkMembers(nestedMembers(member), item)...)
+}
+
+// collectMembers adds the given attributes or blocks to members.
+// Attribute and block maps are typed per schema package, so they are collapsed into a single
+// map to let walkMember handle both without caring where they came from.
+func collectMembers[T any](members map[string]any, src map[string]T) {
+	for name, member := range src {
+		members[name] = member
 	}
-	if m, ok := attr.(interface{ GetMaxItems() int64 }); ok {
-		item.MaxItems = int(m.GetMaxItems())
+}
+
+// nestedMembers returns the attributes and blocks nested in the given attribute or block.
+//
+// Nesting is exposed by the framework through its internal fwschema package, which cannot be
+// imported here, so the exported concrete types are matched instead. Every nesting type the
+// plugin generator can emit must be listed, otherwise its children are skipped and their
+// changes never reach the changelog.
+func nestedMembers(member any) map[string]any {
+	members := make(map[string]any)
+
+	switch m := member.(type) {
+	case resourceschema.ListNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case resourceschema.SetNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case resourceschema.MapNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case resourceschema.SingleNestedAttribute:
+		collectMembers(members, m.Attributes)
+	case resourceschema.ListNestedBlock:
+		collectMembers(members, m.NestedObject.Attributes)
+		collectMembers(members, m.NestedObject.Blocks)
+	case resourceschema.SetNestedBlock:
+		collectMembers(members, m.NestedObject.Attributes)
+		collectMembers(members, m.NestedObject.Blocks)
+	case resourceschema.SingleNestedBlock:
+		collectMembers(members, m.Attributes)
+		collectMembers(members, m.Blocks)
+
+	case datasourceschema.ListNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case datasourceschema.SetNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case datasourceschema.MapNestedAttribute:
+		collectMembers(members, m.NestedObject.Attributes)
+	case datasourceschema.SingleNestedAttribute:
+		collectMembers(members, m.Attributes)
+	case datasourceschema.ListNestedBlock:
+		collectMembers(members, m.NestedObject.Attributes)
+		collectMembers(members, m.NestedObject.Blocks)
+	case datasourceschema.SetNestedBlock:
+		collectMembers(members, m.NestedObject.Attributes)
+		collectMembers(members, m.NestedObject.Blocks)
+	case datasourceschema.SingleNestedBlock:
+		collectMembers(members, m.Attributes)
+		collectMembers(members, m.Blocks)
 	}
 
-	items := []*Item{item}
+	return members
+}
 
-	// walk nested object
-	if n, ok := attr.(interface{ GetNestedObject() any }); ok {
-		nestedObj := n.GetNestedObject()
-		if a, ok := nestedObj.(interface{ GetAttributes() any }); ok {
-			attrs := a.GetAttributes()
-			switch typedAttrs := attrs.(type) {
-			case map[string]resourceschema.Attribute:
-				for nestedName, nestedAttr := range typedAttrs {
-					items = append(items, walkAttribute(nestedName, nestedAttr, item)...)
-				}
-			case map[string]datasourceschema.Attribute:
-				for nestedName, nestedAttr := range typedAttrs {
-					items = append(items, walkAttribute(nestedName, nestedAttr, item)...)
-				}
-			}
+// requiresReplaceDescription is the description stringplanmodifier.RequiresReplace and its
+// siblings report. It is the only public marker distinguishing them from other plan modifiers.
+const requiresReplaceDescription = "Terraform will destroy and recreate the resource"
+
+// requiresReplace reports whether the attribute or block forces recreation on change.
+// PlanModifiers is typed per value kind ([]planmodifier.String, []planmodifier.Bool, ...),
+// so the field is read reflectively rather than through a case per attribute type.
+func requiresReplace(member any) bool {
+	v := reflect.ValueOf(member)
+	if v.Kind() != reflect.Struct {
+		return false
+	}
+
+	modifiers := v.FieldByName("PlanModifiers")
+	if !modifiers.IsValid() || modifiers.Kind() != reflect.Slice {
+		return false
+	}
+
+	ctx := context.Background()
+	for i := range modifiers.Len() {
+		d, ok := modifiers.Index(i).Interface().(interface {
+			Description(context.Context) string
+		})
+		if ok && strings.Contains(d.Description(ctx), requiresReplaceDescription) {
+			return true
 		}
 	}
 
-	return items
+	return false
 }
 
-// walkBlock walks a block and its nested elements
-func walkBlock(name string, block any, parent *Item) []*Item {
-	var description, deprecated string
-	if d, ok := block.(interface{ GetMarkdownDescription() string }); ok {
-		description = d.GetMarkdownDescription()
-	}
-	if d, ok := block.(interface{ GetDeprecationMessage() string }); ok {
-		deprecated = d.GetDeprecationMessage()
-	}
-
-	item := &Item{
-		Name:        name,
-		Root:        parent.Root,
-		Path:        fmt.Sprintf("%s.%s", parent.Path, name),
-		Kind:        parent.Kind,
-		Description: description,
-		Deprecated:  deprecated,
-		Type:        schema.TypeList, // treat blocks as lists
-	}
-
-	items := []*Item{item}
-
-	if n, ok := block.(interface{ GetNestedObject() any }); ok {
-		nestedObj := n.GetNestedObject()
-		if a, ok := nestedObj.(interface{ GetAttributes() any }); ok {
-			attrs := a.GetAttributes()
-			switch typedAttrs := attrs.(type) {
-			case map[string]resourceschema.Attribute:
-				for nestedName, nestedAttr := range typedAttrs {
-					items = append(items, walkAttribute(nestedName, nestedAttr, item)...)
-				}
-			case map[string]datasourceschema.Attribute:
-				for nestedName, nestedAttr := range typedAttrs {
-					items = append(items, walkAttribute(nestedName, nestedAttr, item)...)
-				}
-			}
-		}
-	}
-
-	return items
-}
-
-// pluginFrameworkTypeToSDKType converts a plugin framework attribute type to its SDKv2 equivalent
-func pluginFrameworkTypeToSDKType(attr any) schema.ValueType {
-	switch attr.(type) {
+// pluginFrameworkTypeToSDKType converts a plugin framework attribute or block type to its SDKv2 equivalent
+func pluginFrameworkTypeToSDKType(member any) schema.ValueType {
+	switch member.(type) {
 	case resourceschema.StringAttribute, datasourceschema.StringAttribute:
 		return schema.TypeString
 	case resourceschema.BoolAttribute, datasourceschema.BoolAttribute:
@@ -224,15 +249,18 @@ func pluginFrameworkTypeToSDKType(attr any) schema.ValueType {
 		resourceschema.MapNestedAttribute, datasourceschema.MapNestedAttribute:
 		return schema.TypeMap
 	case resourceschema.SetAttribute, datasourceschema.SetAttribute,
-		resourceschema.SetNestedAttribute, datasourceschema.SetNestedAttribute:
+		resourceschema.SetNestedAttribute, datasourceschema.SetNestedAttribute,
+		resourceschema.SetNestedBlock, datasourceschema.SetNestedBlock:
 		return schema.TypeSet
 	// treated as TypeList
 	case resourceschema.ListAttribute, datasourceschema.ListAttribute,
 		resourceschema.ListNestedAttribute, datasourceschema.ListNestedAttribute,
-		resourceschema.SingleNestedAttribute, datasourceschema.SingleNestedAttribute:
+		resourceschema.SingleNestedAttribute, datasourceschema.SingleNestedAttribute,
+		resourceschema.ListNestedBlock, datasourceschema.ListNestedBlock,
+		resourceschema.SingleNestedBlock, datasourceschema.SingleNestedBlock:
 		return schema.TypeList
 	default:
-		log.Panicf("unsupported attribute type: %T", attr) // should not happen
+		log.Panicf("unsupported attribute type: %T", member) // should not happen
 
 		return schema.TypeString
 	}
