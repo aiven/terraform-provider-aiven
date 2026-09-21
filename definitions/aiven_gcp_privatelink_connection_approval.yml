@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/vpc/gcpprivatelinkconnectionapproval
+resource:
+  stateAttribute: state
+  refreshStateDesired: [active]
+  removeMissing: true
+  modifyPlan: true
+  importIDFormats:
+    - PROJECT/SERVICE_NAME
+    - PROJECT/SERVICE_NAME/PSC_CONNECTION_ID
+  description: |
+    Approves a Google Private Service Connect connection to an Aiven service with an associated endpoint IP.
+    The Google endpoint must already exist. Creation waits until the Aiven connection state is `active`.
+    To change the IP of an approved connection, recreate the endpoint in Google Cloud and use its new
+    `psc_connection_id`. Destroying this resource does not revoke the approval or delete the endpoint.
+    Reads return the connection state stored by Aiven. After changing or deleting an endpoint in Google
+    Cloud, trigger a Google Private Service Connect refresh in Aiven and allow it to complete before
+    refreshing Terraform state.
+clientHandler: privatelink
+legacyTimeouts: true
+operations:
+  - id: ServicePrivatelinkGoogleConnectionCreate
+    type: create
+    disableView: true
+  - id: ServicePrivatelinkGoogleConnectionList
+    type: read
+    resultKey: connections
+    disableView: true
+schema:
+  id:
+    type: string
+    computed: true
+  service_name:
+    example: my-service
+  user_ip_address:
+    forceNew: false
+  privatelink_connection_id:
+    required: false
+    computed: true
+    forceNew: false
+  psc_connection_id:
+    optional: true
+    forceNew: true
+    useStateForUnknown: true

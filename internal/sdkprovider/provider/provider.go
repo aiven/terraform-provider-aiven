@@ -138,7 +138,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
-			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 
 			// service integrations

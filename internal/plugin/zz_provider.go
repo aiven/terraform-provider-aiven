@@ -64,6 +64,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcporgvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelink"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelinkconnectionapproval"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/transitgatewayvpcattachment"
@@ -90,6 +91,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_flink_jar_application_version":       adapter.NewLazyResource(jarversion.ResourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyResource(gcporgvpcpeeringconnection.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
+		"aiven_gcp_privatelink_connection_approval": adapter.NewLazyResource(gcpprivatelinkconnectionapproval.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(acl.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(nativeacl.ResourceOptions),
