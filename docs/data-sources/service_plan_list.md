@@ -78,6 +78,7 @@ Optional:
 Read-Only:
 
 - `is_cluster_plan` (Boolean) True when the plan is a cluster plan with dedicated node groups.
+- `managed_cluster_plan` (Boolean) True when the plan's topology is set via user config and its region price is per node.
 - `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
 - `node_count` (Number) Number of nodes in this service plan.
 - `primary_count` (Number) Number of primary nodes in this Valkey cluster service plan.
