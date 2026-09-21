@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Migrate `aiven_gcp_privatelink_connection_approval` to the Plugin Framework. Creation now waits for `active`,
+  and changing the IP of an approved connection reports an error because the Aiven API doesn't support updating it.
+  Existing state and both import ID formats remain supported.
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource
   of the same name.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`
