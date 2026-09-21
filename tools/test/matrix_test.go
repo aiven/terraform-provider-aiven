@@ -128,6 +128,91 @@ func TestPathToUniqueName(t *testing.T) {
 	}
 }
 
+func TestPathToLabel(t *testing.T) {
+	t.Parallel()
+	root := filepath.Join(".", "internal")
+	testCases := []struct {
+		name     string
+		path     string
+		expected string
+	}{
+		{
+			name:     "plugin service under a parent service",
+			path:     filepath.Join(root, "plugin", "service", "pg", "user"),
+			expected: "pg/user",
+		},
+		{
+			name:     "plugin service sibling with the same base name",
+			path:     filepath.Join(root, "plugin", "service", "mysql", "user"),
+			expected: "mysql/user",
+		},
+		{
+			name:     "plugin top-level service",
+			path:     filepath.Join(root, "plugin", "service", "billinggroup"),
+			expected: "billinggroup",
+		},
+		{
+			name:     "plugin nested service with the same base name as a top-level one",
+			path:     filepath.Join(root, "plugin", "service", "organization", "billinggroup"),
+			expected: "organization/billinggroup",
+		},
+		{
+			name:     "plugin package outside service",
+			path:     filepath.Join(root, "plugin", "kafkatopicrepository"),
+			expected: "kafkatopicrepository",
+		},
+		{
+			name:     "sdk service",
+			path:     filepath.Join(root, "sdkprovider", "service", "kafka"),
+			expected: "kafka",
+		},
+		{
+			name:     "sdk package outside service",
+			path:     filepath.Join(root, "sdkprovider", "userconfig", "converters"),
+			expected: "userconfig/converters",
+		},
+		{
+			name:     "generic package keeps its full relative path",
+			path:     filepath.Join(root, "schemautil", "userconfig"),
+			expected: "schemautil/userconfig",
+		},
+		{
+			name:     "generic single component",
+			path:     filepath.Join(root, "sweep"),
+			expected: "sweep",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.expected, pathToLabel(root, tc.path))
+		})
+	}
+}
+
+// TestGenerateMatrixLabelsAreUnique runs against the real ./internal tree: every CI job title
+// (label + type) must be unique, otherwise failures are impossible to tell apart in the UI.
+func TestGenerateMatrixLabelsAreUnique(t *testing.T) {
+	t.Parallel()
+	root := filepath.Join("..", "..", "internal")
+	matrix, err := GenerateMatrix(root, "", "")
+	require.NoError(t, err)
+
+	all := append(append([]Test{}, matrix.Normal...), matrix.Slow...)
+	require.NotEmpty(t, all)
+
+	seen := make(map[string]string, len(all))
+	for _, test := range all {
+		require.NotEmpty(t, test.Label, "label missing for %s", test.Path)
+		key := test.Label + " (" + test.Type + ")"
+		if prev, dup := seen[key]; dup {
+			t.Errorf("duplicate job title %q for %s and %s", key, prev, test.Path)
+		}
+		seen[key] = test.Path
+	}
+}
+
 func TestGenerateMatrix(t *testing.T) {
 	t.Parallel()
 

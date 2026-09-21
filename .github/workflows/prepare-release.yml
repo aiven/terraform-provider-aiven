@@ -122,7 +122,7 @@ jobs:
       head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
       base_ref: main
 
-  # Run acceptance tests
+  # Run acceptance tests.
   run_acceptance_tests:
     needs: create_release_pr
     if: needs.create_release_pr.outputs.pr_created == 'true' && inputs.run_acceptance_tests

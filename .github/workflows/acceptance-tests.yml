@@ -43,6 +43,9 @@ jobs:
             if ${{ contains(github.event.pull_request.labels.*.name, 'skip-acc-tests') }}; then
               echo "Pull request has 'skip-acc-tests' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
+            elif ${{ contains(github.event.pull_request.labels.*.name, 'release') && github.event.sender.login == 'github-actions[bot]' }}; then
+              echo "Release PR event caused by the Prepare Release workflow, which runs the acceptance tests itself. Skipping."
+              echo "should_run=false" >> $GITHUB_OUTPUT
             elif ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
               echo "Pull request has 'release' label. Testing PR commit."
               echo "should_run=true" >> $GITHUB_OUTPUT
