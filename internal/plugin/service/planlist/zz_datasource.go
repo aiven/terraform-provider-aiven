@@ -36,6 +36,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "True when the plan is a cluster plan with dedicated node groups.",
 					},
+					"managed_cluster_plan": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "True when the plan's topology is set via user config and its region price is per node.",
+					},
 					"max_memory_percent": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: "Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.",
@@ -119,6 +123,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
 						"is_cluster_plan": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"managed_cluster_plan": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeBool,
 						},
