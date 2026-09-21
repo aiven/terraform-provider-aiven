@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.63.0] - 2026-09-21
+
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource
   of the same name.
 - Change `aiven_account_team_project` field `team_type` (enum): add `organization:groups:read`, `organization:users:read`, `role:project:manager`
