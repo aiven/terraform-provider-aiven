@@ -25,6 +25,7 @@ nav_order: 1
   to cluster plans
 - Add `aiven_valkey` field `valkey_user_config.shard_count`: Number of shards (primaries) in the Valkey cluster. Required
   for cluster plans
+- Add `aiven_kafka_connect_custom_plugin_file` resource.
 
 ## [4.63.0] - 2026-09-21
 
