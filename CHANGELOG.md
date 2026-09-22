@@ -66,6 +66,7 @@ nav_order: 1
 - Change `aiven_service_integration` field `integration_type` (enum): add `pg_for_analytics_credentials`
 - Remove `mysql_grants` field from the `aiven_kafka_user`, `aiven_opensearch_user`, `aiven_pg_user`,
   and `aiven_valkey_user` resources and data sources: it was added accidentally and had no effect.
+- Add `aiven_kafka_connect_custom_plugin_file` resource.
 
 ## [4.63.0] - 2026-09-21
 
