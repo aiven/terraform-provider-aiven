@@ -27,6 +27,7 @@ nav_order: 1
   for cluster plans
 - Document `aiven_clickhouse_grant` behaviour on ClickHouse 25.7 and later: source privileges such as `S3` are deprecated
   aliases stored as `READ` and `WRITE`, so grant those directly to avoid a permanent destroy/recreate plan.
+- Add `aiven_kafka_connect_custom_plugin_file` resource.
 
 ## [4.63.0] - 2026-09-21
 
