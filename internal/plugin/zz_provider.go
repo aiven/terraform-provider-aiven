@@ -31,6 +31,7 @@ import (
 	kafkatopic "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
 	kafkatopiclist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
 	kafkauser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/user"
+	kafkaconnectcustompluginfile "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnect/custompluginfile"
 	kafkaschemaregistryacl "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema/registryacl"
 	mysqldatabase "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
 	mysqluser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
@@ -92,6 +93,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(governanceaccess.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(kafkaacl.ResourceOptions),
+		"aiven_kafka_connect_custom_plugin_file":    adapter.NewLazyResource(kafkaconnectcustompluginfile.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(kafkaschemaregistryacl.ResourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyResource(kafkatopic.ResourceOptions),
