@@ -791,8 +791,23 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"ml_commons_max_model_on_node": {
+						Description: "Maximum number of ML models that can be deployed on a single ML node. Defaults to 10.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"ml_commons_model_access_control_enabled": {
 						Description: "Enable or disable model access control for ML Commons. When enabled, access to ML models is controlled by security permissions. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"ml_commons_model_auto_deploy_enable": {
+						Description: "For externally hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy call first. Defaults to true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"ml_commons_model_auto_redeploy_enable": {
+						Description: "Automatically redeploy deployed or partially deployed models after ML nodes rejoin the cluster, e.g. after a node replacement. Defaults to true.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

@@ -12,6 +12,20 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_max_model_on_node`: Maximum number
+  of ML models that can be deployed on a single ML node
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_auto_deploy_enable`: For externally
+  hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy
+  call first
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_auto_redeploy_enable`: Automatically
+  redeploy deployed or partially deployed models after ML nodes rejoin the cluster, e.g
+- Add `aiven_service_integration` field `datadog_user_config.datadog_pg_dbname`: Database the Datadog PostgreSQL check
+  connects to
+- Add `aiven_valkey` field `valkey_user_config.replicas`: Number of replicas per shard in the Valkey cluster. Only applies
+  to cluster plans
+- Add `aiven_valkey` field `valkey_user_config.shard_count`: Number of shards (primaries) in the Valkey cluster. Required
+  for cluster plans
+
 ## [4.63.0] - 2026-09-21
 
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource

@@ -140,8 +140,10 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--valkey_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
+- `replicas` (Number) Number of replicas per shard in the Valkey cluster. Only applies to cluster plans. Example: `1`.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
+- `shard_count` (Number) Number of shards (primaries) in the Valkey cluster. Required for cluster plans. Example: `3`.
 - `static_ips` (Boolean) Use static public IP addresses.
 - `valkey_acl_channels_default` (String) Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Valkey configuration acl-pubsub-default.
 - `valkey_active_defrag_ignore_bytes` (Number) Minimum amount of fragmentation waste, in bytes, before active defragmentation starts. Only takes effect when `valkey_activedefrag` is enabled.
