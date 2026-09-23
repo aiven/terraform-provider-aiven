@@ -208,6 +208,7 @@ Optional:
 
 - `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring.
 - `datadog_function_metrics_enabled` (Boolean) Enable collection of PL/pgSQL function metrics from pg_stat_user_functions. Requires `track_functions` to be set to `pl` or `all` in the service configuration.
+- `datadog_pg_dbname` (String) Database the Datadog PostgreSQL check connects to. Relation metrics are collected only from this database. The main service database is used when unset. Database Monitoring collects query statistics from every database regardless of this option. Example: `defaultdb`.
 - `datadog_pg_relations` (Block List, Max: 32) Relations to collect PostgreSQL relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks. No relation metrics are collected when unset (see [below for nested schema](#nestedblock--datadog_user_config--datadog_pg_relations))
 - `datadog_pgbouncer_enabled` (Boolean) Enable Datadog PgBouncer Metric Tracking.
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))

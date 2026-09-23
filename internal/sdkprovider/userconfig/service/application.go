@@ -60,6 +60,49 @@ func applicationUserConfig() *schema.Schema {
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"HTTP"}, false),
 							},
+							"security": {
+								Description: "Access control for this port. Omit to leave the port reachable by anyone who can reach its address",
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"authentication_method": {
+										Description:  "Enum: `oidc`. Which of the authentication configurations below applies to this port.",
+										Required:     true,
+										Type:         schema.TypeString,
+										ValidateFunc: validation.StringInSlice([]string{"oidc"}, false),
+									},
+									"oidc": {
+										Description: "Generic OpenID Connect provider that callers of this port must authenticate against",
+										Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+											"client_id": {
+												Description: "OAuth2 client ID registered with the issuer. Example: `0oa1b2c3d4e5f6g7h8i9`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"client_secret": {
+												Description: "OAuth2 client secret registered with the issuer. Redacted when read back. Example: `example-client-secret`.",
+												Required:    true,
+												Sensitive:   true,
+												Type:        schema.TypeString,
+											},
+											"issuer_url": {
+												Description: "OIDC issuer base URL. Must serve /.well-known/openid-configuration over HTTPS. Example: `https://login.example.com`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"name": {
+												Description: "Label for this authentication configuration, shown to the user. Example: `Corporate Okta`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+										}},
+										MaxItems: 1,
+										Required: true,
+										Type:     schema.TypeList,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
 						}},
 						Optional: true,
 						Type:     schema.TypeList,
