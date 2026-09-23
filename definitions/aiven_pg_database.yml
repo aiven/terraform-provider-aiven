@@ -10,6 +10,7 @@ datasource:
 clientHandler: service
 idAttributeComposed: [project, service_name, database_name]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   dbname: database_name
   database: database_name

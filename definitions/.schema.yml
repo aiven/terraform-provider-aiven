@@ -272,6 +272,11 @@ properties:
     type: boolean
   flattenModifier:
     type: boolean
+  requireServicePoweredOn:
+    type: boolean
+    $comment: |
+      Set to true to fail Create/Read/Update when the target service is powered off.
+      Requires top-level `project` and `service_name` string attributes. Delete is not gated.
 required:
   - location
   - operations

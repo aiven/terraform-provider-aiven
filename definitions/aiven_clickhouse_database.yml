@@ -11,6 +11,7 @@ datasource:
 clientHandler: clickhouse
 idAttributeComposed: [project, service_name, name]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   database: name
 remove: [engine, required, state] # These fields from API are not useful for users

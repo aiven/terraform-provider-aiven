@@ -193,6 +193,9 @@ type Definition struct {
 	PlanModifier        bool              `yaml:"planModifier,omitempty"`
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+	// RequireServicePoweredOn gates Create/Read/Update via schemautil.CheckServiceIsPowered.
+	// Requires `project` and `service_name` in the schema. Delete is not gated.
+	RequireServicePoweredOn bool `yaml:"requireServicePoweredOn,omitempty"`
 }
 
 // IsRemoved reports whether the given JSON path is excluded by the `remove` list.

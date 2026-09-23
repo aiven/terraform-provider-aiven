@@ -37,15 +37,11 @@ func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 	return err
 }
 
-// read the database list is fetched with cursor pagination.
+// read the database list is fetched with cursor pagination. The powered-on precheck
+// runs in the adapter via the `requireServicePoweredOn` schema flag.
 func read(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-
-	err := schemautil.CheckServiceIsPowered(ctx, client, project, serviceName)
-	if err != nil {
-		return fmt.Errorf("service is powered off: %w", err)
-	}
 
 	databases, err := schemautil.ListServiceDatabases(ctx, client, project, serviceName)
 	if err != nil {

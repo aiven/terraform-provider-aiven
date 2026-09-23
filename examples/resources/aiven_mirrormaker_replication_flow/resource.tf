@@ -14,6 +14,7 @@ resource "aiven_mirrormaker_replication_flow" "example" {
     "unclean.leader.election.enable",
     "min.insync.replicas",
   ]
+  diskless_az_enabled                 = true
   emit_backward_heartbeats_enabled    = false
   emit_heartbeats_enabled             = false
   exactly_once_delivery_enabled       = false

@@ -28,6 +28,7 @@ resource "aiven_mirrormaker_replication_flow" "example" {
     "unclean.leader.election.enable",
     "min.insync.replicas",
   ]
+  diskless_az_enabled                 = true
   emit_backward_heartbeats_enabled    = false
   emit_heartbeats_enabled             = false
   exactly_once_delivery_enabled       = false
@@ -56,6 +57,7 @@ resource "aiven_mirrormaker_replication_flow" "example" {
 ### Optional
 
 - `config_properties_exclude` (Set of String) List of topic configuration properties and/or regexes that should not be replicated. If omitted, MirrorMaker will use default list of exclusions. For stability reasons, we always include the `unclean.leader.election.enable` field in the excluded parameters. If you have specific requirements for this configuration, please reach out to our support team for assistance.
+- `diskless_az_enabled` (Boolean) Adds a diskless_az= hint to the replication flow's Kafka client.id so that diskless Kafka clusters serve the flow from brokers in the same availability zone.
 - `emit_backward_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.
 - `emit_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the target cluster. The default value is `false`.
 - `exactly_once_delivery_enabled` (Boolean) Whether to enable exactly-once message delivery. We recommend you set this to enabled for new replications. The default value is `false`.

@@ -122,6 +122,10 @@ type ResourceOptions struct {
 	// ConfigValidators implements resource.ResourceWithConfigValidators.
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []resource.ConfigValidator
+
+	// RequireServicePoweredOn calls schemautil.CheckServiceIsPowered before
+	// Create/Read/Update. Delete is not gated. Requires `project` and `service_name`.
+	RequireServicePoweredOn bool
 }
 
 func NewResource(options ResourceOptions) resource.Resource {
@@ -213,6 +217,13 @@ func (a *resourceAdapter) Create(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
+	if a.resource.RequireServicePoweredOn {
+		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+			diags.AddError("failed to create resource", err.Error())
+			return
+		}
+	}
+
 	err = a.resource.Create(ctx, a.client, d)
 	createSucceeded := err == nil
 	if err != nil && !(a.resource.IgnoreAlreadyExists && avngen.IsAlreadyExists(err)) {
@@ -296,6 +307,13 @@ func (a *resourceAdapter) Read(
 
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
+
+	if a.resource.RequireServicePoweredOn {
+		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+			diags.AddError("failed to read resource", err.Error())
+			return
+		}
+	}
 
 	// When RemoveMissing is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
@@ -462,6 +480,13 @@ func (a *resourceAdapter) Update(
 
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
+
+	if a.resource.RequireServicePoweredOn {
+		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+			diags.AddError("failed to update resource", err.Error())
+			return
+		}
+	}
 
 	// Some resources might have "virtual" fields, like "termination_protection".
 	// Those fields can be technically updated, but they don't require an API call.
