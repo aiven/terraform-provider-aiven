@@ -30,7 +30,7 @@ resource "aiven_clickhouse" "bar" {
   maintenance_window_time = "10:00:00"
 
   clickhouse_user_config {
-    clickhouse_version = "25.3"
+    clickhouse_version = "25.8"
   }
 }
 
@@ -151,8 +151,14 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     database  = "*"
   }
 
+  # Since ClickHouse 25.7 the S3 privilege is a deprecated alias stored as READ and WRITE.
   privilege_grant {
-    privilege = "S3"
+    privilege = "READ"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "WRITE"
     database  = "*"
   }
 
@@ -183,7 +189,15 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
 						"aiven_clickhouse_grant.foo-role-grant",
 						"privilege_grant.*",
 						map[string]string{
-							"privilege": "S3",
+							"privilege": "READ",
+							"database":  "*",
+						},
+					),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"aiven_clickhouse_grant.foo-role-grant",
+						"privilege_grant.*",
+						map[string]string{
+							"privilege": "WRITE",
 							"database":  "*",
 						},
 					),

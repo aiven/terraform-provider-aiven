@@ -27,5 +27,5 @@ Grant Management
 The example demonstrates proper grant management for ClickHouse users using the ``aiven_clickhouse_grant`` resource (see `ClickHouse Grant documentation <https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/clickhouse_grant>`_):
 
 - **Named collection access**: Controlled by the service integration grants block
-- **S3 privilege**: Allows users to access S3 functions and named collections
+- **READ and WRITE privileges**: Allow users to access S3 functions and named collections. Since ClickHouse 25.7 the ``S3`` privilege is a deprecated alias that ClickHouse stores as ``READ`` and ``WRITE``, so grant those directly to keep the Terraform plan stable
 - **CREATE TEMPORARY TABLE**: Enables users to create temporary tables for data processing
