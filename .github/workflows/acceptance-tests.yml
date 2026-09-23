@@ -43,8 +43,10 @@ jobs:
             if ${{ contains(github.event.pull_request.labels.*.name, 'skip-acc-tests') }}; then
               echo "Pull request has 'skip-acc-tests' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
-            elif ${{ contains(github.event.pull_request.labels.*.name, 'release') && github.event.sender.login == 'github-actions[bot]' }}; then
-              echo "Release PR event caused by the Prepare Release workflow, which runs the acceptance tests itself. Skipping."
+            # We check pull_request.user.login (PR author) rather than sender.login so the check
+            # stays correct across labeled/synchronize/reopened events triggered by humans.
+            elif ${{ contains(github.event.pull_request.labels.*.name, 'release') && github.event.pull_request.user.login == 'github-actions[bot]' }}; then
+              echo "Release PR authored by the Prepare Release workflow, which runs the acceptance tests itself. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
             elif ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
               echo "Pull request has 'release' label. Testing PR commit."
