@@ -168,6 +168,7 @@ Read-Only:
 
 - `datadog_dbm_enabled` (Boolean)
 - `datadog_function_metrics_enabled` (Boolean)
+- `datadog_pg_dbname` (String)
 - `datadog_pg_relations` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_pg_relations))
 - `datadog_pgbouncer_enabled` (Boolean)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
