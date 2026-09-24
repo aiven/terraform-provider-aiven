@@ -12,9 +12,10 @@ import (
 
 // Test represents a single test suite found in a directory
 type Test struct {
-	Path string `json:"path"`
-	Name string `json:"name"` // simple name, e.g., "kafka"
-	Type string `json:"type"` // "plugin", "sdk", "generic"
+	Path  string `json:"path"`
+	Name  string `json:"name"`  // simple name, e.g., "kafka"; used for --filter matching
+	Label string `json:"label"` // unambiguous name for CI job titles, e.g., "pg/user"
+	Type  string `json:"type"`  // "plugin", "sdk", "generic"
 }
 
 // Matrix holds the partitioned lists of normal and slow tests
@@ -60,6 +61,7 @@ func GenerateMatrix(root string, slowTestsCSV string, filterServicesCSV string) 
 	}
 	for dir := range testDirs {
 		test := newTest(dir)
+		test.Label = pathToLabel(root, dir)
 
 		// apply filters if any
 		if len(serviceFilters) > 0 && !matchesAnyService(test.Path, serviceFilters) {
@@ -155,6 +157,24 @@ func pathToUniqueName(root, path string) string {
 	default:
 		return strings.ReplaceAll(relPath, "/", "-")
 	}
+}
+
+// pathToLabel converts a directory path to a short, unambiguous label for CI job names.
+func pathToLabel(root, path string) string {
+	relPath, err := filepath.Rel(root, path)
+	if err != nil {
+		return filepath.Base(path)
+	}
+
+	relPath = filepath.ToSlash(relPath)
+	for _, prefix := range []string{"plugin/", "sdkprovider/"} {
+		if strings.HasPrefix(relPath, prefix) {
+			relPath = strings.TrimPrefix(relPath, prefix)
+			break
+		}
+	}
+
+	return strings.TrimPrefix(relPath, "service/")
 }
 
 // parseFilters parses filterCSV and returns corrected (if any typos) filters with fuzzy matching.
