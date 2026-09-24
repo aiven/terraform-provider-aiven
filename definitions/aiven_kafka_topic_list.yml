@@ -3,6 +3,7 @@ location: internal/plugin/service/kafka/topiclist
 datasource:
   description: >
     Lists Kafka topics for a service.
+requireServicePoweredOn: true
 idAttributeComposed: [project, service_name]
 clientHandler: kafkatopic
 operations:

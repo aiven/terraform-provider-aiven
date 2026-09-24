@@ -31,6 +31,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of topic configuration properties and/or regexes that should not be replicated. If omitted, MirrorMaker will use default list of exclusions. For stability reasons, we always include the `unclean.leader.election.enable` field in the excluded parameters. If you have specific requirements for this configuration, please reach out to our support team for assistance.",
 				Optional:            true,
 			},
+			"diskless_az_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Adds a diskless_az= hint to the replication flow's Kafka client.id so that diskless Kafka clusters serve the flow from brokers in the same availability zone.",
+				Optional:            true,
+			},
 			"emit_backward_heartbeats_enabled": schema.BoolAttribute{
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
@@ -150,6 +154,7 @@ func resourceSchemaInternal() *adapter.Schema {
 				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
 				Type:  adapter.SchemaTypeSet,
 			},
+			"diskless_az_enabled": &adapter.Schema{Type: adapter.SchemaTypeBool},
 			"emit_backward_heartbeats_enabled": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,

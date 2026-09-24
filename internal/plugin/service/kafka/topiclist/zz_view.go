@@ -20,11 +20,12 @@ func idFields() []string {
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
-	Read:           readView,
-	Schema:         datasourceSchema,
-	SchemaInternal: datasourceSchemaInternal(),
-	TypeName:       typeName,
+	IDFields:                idFields(),
+	Read:                    readView,
+	RequireServicePoweredOn: true,
+	Schema:                  datasourceSchema,
+	SchemaInternal:          datasourceSchemaInternal(),
+	TypeName:                typeName,
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

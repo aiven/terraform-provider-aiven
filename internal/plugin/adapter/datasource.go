@@ -10,6 +10,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 type DataSourceOptions struct {
@@ -37,6 +38,9 @@ type DataSourceOptions struct {
 	// ConfigValidators implements datasource.DataSourceWithConfigValidators.
 	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []datasource.ConfigValidator
+
+	// RequireServicePoweredOn gates Read. See ResourceOptions.RequireServicePoweredOn.
+	RequireServicePoweredOn bool
 }
 
 func NewDataSource(options DataSourceOptions) datasource.DataSource {
@@ -125,6 +129,13 @@ func (a *datasourceAdapter) Read(
 
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
+
+	if a.datasource.RequireServicePoweredOn {
+		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+			diags.AddError("failed to read datasource", err.Error())
+			return
+		}
+	}
 
 	err = a.datasource.Read(ctx, a.client, d)
 	if err != nil {

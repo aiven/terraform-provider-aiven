@@ -219,6 +219,19 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 		}
 	}
 
+	if def.RequireServicePoweredOn {
+		for _, name := range []string{"project", "service_name"} {
+			prop, ok := item.Properties[name]
+			if !ok {
+				return nil, fmt.Errorf("requireServicePoweredOn requires %q attribute in schema", name)
+			}
+			if prop.Type != SchemaTypeString {
+				return nil, fmt.Errorf("requireServicePoweredOn requires %q to be a string attribute, got %q", name, prop.Type)
+			}
+		}
+		values["RequireServicePoweredOn"] = jen.True()
+	}
+
 	if hasConfigValidators {
 		values["ConfigValidators"] = jen.Id(entity.String() + configValidatorsFuncSuffix)
 	}

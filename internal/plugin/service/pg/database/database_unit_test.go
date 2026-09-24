@@ -42,7 +42,6 @@ func TestRead_Pagination(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := avngen.NewMockClient(t)
-	expectPoweredCheck(ctx, mockClient, project, serviceName)
 
 	nextCursor := "page-1-db"
 	lcCollate := "en_US.UTF-8"
@@ -93,7 +92,6 @@ func TestRead_SinglePage(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := avngen.NewMockClient(t)
-	expectPoweredCheck(ctx, mockClient, project, serviceName)
 
 	// A single call with no After cursor and Next == nil terminates the loop immediately.
 	mockClient.EXPECT().
@@ -122,7 +120,6 @@ func TestRead_ErrorOnSecondPage(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := avngen.NewMockClient(t)
-	expectPoweredCheck(ctx, mockClient, project, serviceName)
 
 	nextCursor := "cursor-2"
 	mockClient.EXPECT().
@@ -162,7 +159,6 @@ func TestRead_NotFoundAfterPagination(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := avngen.NewMockClient(t)
-	expectPoweredCheck(ctx, mockClient, project, serviceName)
 
 	nextCursor := "page-1-db"
 	mockClient.EXPECT().
@@ -206,7 +202,6 @@ func TestRead_EmptyFirstPage(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := avngen.NewMockClient(t)
-	expectPoweredCheck(ctx, mockClient, project, serviceName)
 
 	nextCursor := "cursor-1"
 	mockClient.EXPECT().
@@ -235,11 +230,4 @@ func TestRead_EmptyFirstPage(t *testing.T) {
 	err := read(ctx, mockClient, d)
 	require.NoError(t, err)
 	require.Equal(t, fmt.Sprintf("%s/%s/%s", project, serviceName, target), d.ID())
-}
-
-func expectPoweredCheck(ctx context.Context, mockClient *avngen.MockClient, project, serviceName string) {
-	mockClient.EXPECT().
-		ServiceGet(ctx, project, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
-		Once()
 }

@@ -397,6 +397,79 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 	})
 }
 
+func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
+	// serviceItem returns an item with the two attributes the runtime check
+	// consumes (project, service_name). Anything else the individual test
+	// case wants to add is merged in on top.
+	serviceItem := func(extra map[string]*Item) *Item {
+		props := map[string]*Item{
+			"project":      {Name: "project", Type: SchemaTypeString, Required: true},
+			"service_name": {Name: "service_name", Type: SchemaTypeString, Required: true},
+		}
+		for k, v := range extra {
+			props[k] = v
+		}
+		item := &Item{Properties: props}
+		setParents(item, nil)
+		return item
+	}
+
+	t.Run("resource emits the option when both service fields are present", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		code, err := genNewResource(resourceType, def, serviceItem(nil), false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), "RequireServicePoweredOn: true")
+	})
+
+	t.Run("datasource emits the option when both service fields are present", func(t *testing.T) {
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		code, err := genNewResource(datasourceType, def, serviceItem(nil), false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), "RequireServicePoweredOn: true")
+	})
+
+	t.Run("omitted when the flag is false", func(t *testing.T) {
+		def := &Definition{Datasource: &SchemaMeta{}}
+		code, err := genNewResource(datasourceType, def, serviceItem(nil), false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "RequireServicePoweredOn")
+	})
+
+	t.Run("rejects missing project", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{
+			"service_name": {Name: "service_name", Type: SchemaTypeString, Required: true},
+		}}
+		setParents(item, nil)
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		_, err := genNewResource(datasourceType, def, item, false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), `requireServicePoweredOn requires "project" attribute in schema`)
+	})
+
+	t.Run("rejects missing service_name", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{
+			"project": {Name: "project", Type: SchemaTypeString, Required: true},
+		}}
+		setParents(item, nil)
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		_, err := genNewResource(datasourceType, def, item, false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), `requireServicePoweredOn requires "service_name" attribute in schema`)
+	})
+
+	t.Run("rejects a non-string service_name", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{
+			"project":      {Name: "project", Type: SchemaTypeString, Required: true},
+			"service_name": {Name: "service_name", Type: SchemaTypeInteger, Required: true},
+		}}
+		setParents(item, nil)
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		_, err := genNewResource(datasourceType, def, item, false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), `requireServicePoweredOn requires "service_name" to be a string attribute`)
+	})
+}
+
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 
