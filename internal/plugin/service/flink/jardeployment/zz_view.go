@@ -21,15 +21,16 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:           true,
-	Create:         createView,
-	IDFields:       idFields(),
-	Read:           readView,
-	RefreshState:   &adapter.RefreshStateCondition{},
-	RemoveMissing:  true,
-	Schema:         resourceSchema,
-	SchemaInternal: resourceSchemaInternal(),
-	TypeName:       typeName,
+	Beta:                    true,
+	Create:                  createView,
+	IDFields:                idFields(),
+	Read:                    readView,
+	RefreshState:            &adapter.RefreshStateCondition{},
+	RemoveMissing:           true,
+	RequireServicePoweredOn: true,
+	Schema:                  resourceSchema,
+	SchemaInternal:          resourceSchemaInternal(),
+	TypeName:                typeName,
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

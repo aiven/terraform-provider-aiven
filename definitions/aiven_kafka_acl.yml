@@ -12,6 +12,7 @@ datasource:
 clientHandler: kafka
 idAttributeComposed: [project, service_name, acl_id]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   id: acl_id
   kafka_acl_id: acl_id

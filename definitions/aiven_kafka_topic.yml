@@ -12,6 +12,7 @@ datasource:
 clientHandler: kafkatopic
 idAttributeComposed: [project, service_name, topic_name]
 legacyTimeouts: true
+requireServicePoweredOn: true
 # All CRUD views are hand-written and delegate to the shared
 # kafkatopicrepository, which provides batching, caching, the special V2-list
 # read shape and (on Delete) cache invalidation. Skipping the repository for

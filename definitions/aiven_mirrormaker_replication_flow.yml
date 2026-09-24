@@ -9,6 +9,7 @@ datasource:
 clientHandler: kafkamirrormaker
 idAttributeComposed: [project, service_name, source_cluster, target_cluster]
 legacyTimeouts: true
+requireServicePoweredOn: true
 expandModifier: true
 flattenModifier: true
 rename:

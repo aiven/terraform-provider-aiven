@@ -9,6 +9,7 @@ datasource:
 clientHandler: kafkaschemaregistry
 idAttributeComposed: [project, service_name, acl_id]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   id: acl_id
   schema_registry_acl_id: acl_id

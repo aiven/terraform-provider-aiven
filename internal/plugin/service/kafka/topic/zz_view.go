@@ -14,24 +14,26 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:                createView,
-	Delete:                deleteView,
-	IDFields:              idFields(),
-	ModifyPlan:            modifyPlan,
-	Read:                  readView,
-	RemoveMissing:         true,
-	Schema:                resourceSchema,
-	SchemaInternal:        resourceSchemaInternal(),
-	TerminationProtection: true,
-	TypeName:              typeName,
-	Update:                updateView,
-	ValidateConfig:        validateConfig,
+	Create:                  createView,
+	Delete:                  deleteView,
+	IDFields:                idFields(),
+	ModifyPlan:              modifyPlan,
+	Read:                    readView,
+	RemoveMissing:           true,
+	RequireServicePoweredOn: true,
+	Schema:                  resourceSchema,
+	SchemaInternal:          resourceSchemaInternal(),
+	TerminationProtection:   true,
+	TypeName:                typeName,
+	Update:                  updateView,
+	ValidateConfig:          validateConfig,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
-	Read:           readView,
-	Schema:         datasourceSchema,
-	SchemaInternal: datasourceSchemaInternal(),
-	TypeName:       typeName,
+	IDFields:                idFields(),
+	Read:                    readView,
+	RequireServicePoweredOn: true,
+	Schema:                  datasourceSchema,
+	SchemaInternal:          datasourceSchemaInternal(),
+	TypeName:                typeName,
 }
