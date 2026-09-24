@@ -25,6 +25,8 @@ nav_order: 1
   to cluster plans
 - Add `aiven_valkey` field `valkey_user_config.shard_count`: Number of shards (primaries) in the Valkey cluster. Required
   for cluster plans
+- Document `aiven_clickhouse_grant` behaviour on ClickHouse 25.7 and later: source privileges such as `S3` are deprecated
+  aliases stored as `READ` and `WRITE`, so grant those directly to avoid a permanent destroy/recreate plan.
 
 ## [4.63.0] - 2026-09-21
 

@@ -91,8 +91,15 @@ resource "aiven_clickhouse_grant" "user_grants" {
     database  = "*"
   }
 
+  # Since ClickHouse 25.7 the S3 privilege is a deprecated alias for READ and WRITE on sources.
+  # Grant READ and WRITE directly so the plan stays stable.
   privilege_grant {
-    privilege = "S3"
+    privilege = "READ"
+    database  = "*"
+  }
+
+  privilege_grant {
+    privilege = "WRITE"
     database  = "*"
   }
 
