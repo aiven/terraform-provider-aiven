@@ -128,7 +128,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// organization
-			"aiven_organization_user": organization.ResourceOrganizationUser(),
+			"aiven_organization_user":                organization.ResourceOrganizationUser(),
+			"aiven_kafka_connect_custom_plugin_file": organization.ResourceKafkaConnectCustomPluginFile(),
 
 			// project
 			"aiven_project":      project.ResourceProject(),
