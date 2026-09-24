@@ -8,65 +8,65 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/billinggroup"
-	awsentity "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_entity"
-	awsprovision "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_provision"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/permissions"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/aws"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/azure"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/gcp"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/oci"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jardeployment"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarversion"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/acl"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/mirrormakerreplicationflow"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/nativeacl"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
-	user1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema/registryacl"
-	database1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
-	user2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/securitypluginconfig"
-	user3 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
-	billinggroup1 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/paymentmethodlist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/unit"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroup"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmemberlist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/connectionpool"
-	database2 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/database"
-	user4 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
-	user5 "github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey/user"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsorgvpcpeeringconnection"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsprivatelink"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureorgvpcpeeringconnection"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcporgvpcpeeringconnection"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelink"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/transitgatewayvpcattachment"
+	billinggroup "github.com/aiven/terraform-provider-aiven/internal/plugin/service/billinggroup"
+	byocawsentity "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_entity"
+	byocawsprovision "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/aws_provision"
+	byocpermissions "github.com/aiven/terraform-provider-aiven/internal/plugin/service/byoc/permissions"
+	clickhousedatabase "github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/database"
+	clickhouseuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse/user"
+	cmk "github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
+	cmkaccessoraws "github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/aws"
+	cmkaccessorazure "github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/azure"
+	cmkaccessorgcp "github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/gcp"
+	cmkaccessoroci "github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk/accessor/oci"
+	flinkapplication "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
+	flinkapplicationdeployment "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
+	flinkjarapplication "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
+	flinkjarapplicationdeployment "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jardeployment"
+	flinkjarapplicationversion "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarversion"
+	governanceaccess "github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
+	kafkaacl "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/acl"
+	mirrormakerreplicationflow "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/mirrormakerreplicationflow"
+	kafkanativeacl "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/nativeacl"
+	kafkatopic "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topic"
+	kafkatopiclist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/topiclist"
+	kafkauser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka/user"
+	kafkaschemaregistryacl "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema/registryacl"
+	mysqldatabase "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/database"
+	mysqluser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql/user"
+	opensearchsecuritypluginconfig "github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/securitypluginconfig"
+	opensearchuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch/user"
+	organizationaddress "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
+	organizationapplicationuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationuser"
+	organizationapplicationusertoken "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
+	organizationbillinggroup "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggroup"
+	organizationbillinggrouplist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/billinggrouplist"
+	organizationpaymentmethodlist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/paymentmethodlist"
+	organizationproject "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/project"
+	organizationalunit "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/unit"
+	organizationusergroup "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroup"
+	organizationusergrouplist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergrouplist"
+	organizationusergroupmember "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmember"
+	organizationusergroupmemberlist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/usergroupmemberlist"
+	organizationuserlist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/userlist"
+	connectionpool "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/connectionpool"
+	pgdatabase "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/database"
+	pguser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg/user"
+	serviceplan "github.com/aiven/terraform-provider-aiven/internal/plugin/service/plan"
+	serviceplanlist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/planlist"
+	servicelist "github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
+	staticip "github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
+	upgradestep "github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradepipeline/step"
+	valkeyuser "github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey/user"
+	awsorgvpcpeeringconnection "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsorgvpcpeeringconnection"
+	awsprivatelink "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/awsprivatelink"
+	azureorgvpcpeeringconnection "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureorgvpcpeeringconnection"
+	azureprivatelink "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/azureprivatelink"
+	gcporgvpcpeeringconnection "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcporgvpcpeeringconnection"
+	gcpprivatelink "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/gcpprivatelink"
+	organizationvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/organizationvpc"
+	projectvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/projectvpc"
+	transitgatewayvpcattachment "github.com/aiven/terraform-provider-aiven/internal/plugin/service/vpc/transitgatewayvpcattachment"
 )
 
 func Resources() map[string]func() resource.Resource {
@@ -76,47 +76,47 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_azure_org_vpc_peering_connection":    adapter.NewLazyResource(azureorgvpcpeeringconnection.ResourceOptions),
 		"aiven_azure_privatelink":                   adapter.NewLazyResource(azureprivatelink.ResourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyResource(billinggroup.ResourceOptions),
-		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(awsentity.ResourceOptions),
-		"aiven_byoc_aws_provision":                  adapter.NewLazyResource(awsprovision.ResourceOptions),
-		"aiven_byoc_permissions":                    adapter.NewLazyResource(permissions.ResourceOptions),
-		"aiven_clickhouse_database":                 adapter.NewLazyResource(database.ResourceOptions),
-		"aiven_clickhouse_user":                     adapter.NewLazyResource(user.ResourceOptions),
+		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(byocawsentity.ResourceOptions),
+		"aiven_byoc_aws_provision":                  adapter.NewLazyResource(byocawsprovision.ResourceOptions),
+		"aiven_byoc_permissions":                    adapter.NewLazyResource(byocpermissions.ResourceOptions),
+		"aiven_clickhouse_database":                 adapter.NewLazyResource(clickhousedatabase.ResourceOptions),
+		"aiven_clickhouse_user":                     adapter.NewLazyResource(clickhouseuser.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyResource(connectionpool.ResourceOptions),
-		"aiven_flink_application":                   adapter.NewLazyResource(application.ResourceOptions),
-		"aiven_flink_application_deployment":        adapter.NewLazyResource(deployment.ResourceOptions),
-		"aiven_flink_jar_application":               adapter.NewLazyResource(jarapplication.ResourceOptions),
-		"aiven_flink_jar_application_deployment":    adapter.NewLazyResource(jardeployment.ResourceOptions),
-		"aiven_flink_jar_application_version":       adapter.NewLazyResource(jarversion.ResourceOptions),
+		"aiven_flink_application":                   adapter.NewLazyResource(flinkapplication.ResourceOptions),
+		"aiven_flink_application_deployment":        adapter.NewLazyResource(flinkapplicationdeployment.ResourceOptions),
+		"aiven_flink_jar_application":               adapter.NewLazyResource(flinkjarapplication.ResourceOptions),
+		"aiven_flink_jar_application_deployment":    adapter.NewLazyResource(flinkjarapplicationdeployment.ResourceOptions),
+		"aiven_flink_jar_application_version":       adapter.NewLazyResource(flinkjarapplicationversion.ResourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyResource(gcporgvpcpeeringconnection.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
-		"aiven_governance_access":                   adapter.NewLazyResource(access.ResourceOptions),
-		"aiven_kafka_acl":                           adapter.NewLazyResource(acl.ResourceOptions),
-		"aiven_kafka_native_acl":                    adapter.NewLazyResource(nativeacl.ResourceOptions),
-		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(registryacl.ResourceOptions),
-		"aiven_kafka_topic":                         adapter.NewLazyResource(topic.ResourceOptions),
-		"aiven_kafka_user":                          adapter.NewLazyResource(user1.ResourceOptions),
+		"aiven_governance_access":                   adapter.NewLazyResource(governanceaccess.ResourceOptions),
+		"aiven_kafka_acl":                           adapter.NewLazyResource(kafkaacl.ResourceOptions),
+		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
+		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(kafkaschemaregistryacl.ResourceOptions),
+		"aiven_kafka_topic":                         adapter.NewLazyResource(kafkatopic.ResourceOptions),
+		"aiven_kafka_user":                          adapter.NewLazyResource(kafkauser.ResourceOptions),
 		"aiven_mirrormaker_replication_flow":        adapter.NewLazyResource(mirrormakerreplicationflow.ResourceOptions),
-		"aiven_mysql_database":                      adapter.NewLazyResource(database1.ResourceOptions),
-		"aiven_mysql_user":                          adapter.NewLazyResource(user2.ResourceOptions),
-		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(securitypluginconfig.ResourceOptions),
-		"aiven_opensearch_user":                     adapter.NewLazyResource(user3.ResourceOptions),
-		"aiven_organization_address":                adapter.NewLazyResource(address.ResourceOptions),
-		"aiven_organization_application_user":       adapter.NewLazyResource(applicationuser.ResourceOptions),
-		"aiven_organization_application_user_token": adapter.NewLazyResource(applicationusertoken.ResourceOptions),
-		"aiven_organization_billing_group":          adapter.NewLazyResource(billinggroup1.ResourceOptions),
-		"aiven_organization_project":                adapter.NewLazyResource(project.ResourceOptions),
-		"aiven_organization_user_group":             adapter.NewLazyResource(usergroup.ResourceOptions),
-		"aiven_organization_user_group_member":      adapter.NewLazyResource(usergroupmember.ResourceOptions),
+		"aiven_mysql_database":                      adapter.NewLazyResource(mysqldatabase.ResourceOptions),
+		"aiven_mysql_user":                          adapter.NewLazyResource(mysqluser.ResourceOptions),
+		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(opensearchsecuritypluginconfig.ResourceOptions),
+		"aiven_opensearch_user":                     adapter.NewLazyResource(opensearchuser.ResourceOptions),
+		"aiven_organization_address":                adapter.NewLazyResource(organizationaddress.ResourceOptions),
+		"aiven_organization_application_user":       adapter.NewLazyResource(organizationapplicationuser.ResourceOptions),
+		"aiven_organization_application_user_token": adapter.NewLazyResource(organizationapplicationusertoken.ResourceOptions),
+		"aiven_organization_billing_group":          adapter.NewLazyResource(organizationbillinggroup.ResourceOptions),
+		"aiven_organization_project":                adapter.NewLazyResource(organizationproject.ResourceOptions),
+		"aiven_organization_user_group":             adapter.NewLazyResource(organizationusergroup.ResourceOptions),
+		"aiven_organization_user_group_member":      adapter.NewLazyResource(organizationusergroupmember.ResourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyResource(organizationvpc.ResourceOptions),
-		"aiven_organizational_unit":                 adapter.NewLazyResource(unit.ResourceOptions),
-		"aiven_pg_database":                         adapter.NewLazyResource(database2.ResourceOptions),
-		"aiven_pg_user":                             adapter.NewLazyResource(user4.ResourceOptions),
+		"aiven_organizational_unit":                 adapter.NewLazyResource(organizationalunit.ResourceOptions),
+		"aiven_pg_database":                         adapter.NewLazyResource(pgdatabase.ResourceOptions),
+		"aiven_pg_user":                             adapter.NewLazyResource(pguser.ResourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyResource(transitgatewayvpcattachment.ResourceOptions),
-		"aiven_upgrade_step":                        adapter.NewLazyResource(step.ResourceOptions),
-		"aiven_valkey_user":                         adapter.NewLazyResource(user5.ResourceOptions),
+		"aiven_upgrade_step":                        adapter.NewLazyResource(upgradestep.ResourceOptions),
+		"aiven_valkey_user":                         adapter.NewLazyResource(valkeyuser.ResourceOptions),
 	}
 }
 
@@ -127,45 +127,45 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_azure_org_vpc_peering_connection":    adapter.NewLazyDataSource(azureorgvpcpeeringconnection.DataSourceOptions),
 		"aiven_azure_privatelink":                   adapter.NewLazyDataSource(azureprivatelink.DataSourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
-		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(database.DataSourceOptions),
-		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(user.DataSourceOptions),
-		"aiven_cmk_accessor_aws":                    adapter.NewLazyDataSource(aws.DataSourceOptions),
-		"aiven_cmk_accessor_azure":                  adapter.NewLazyDataSource(azure.DataSourceOptions),
-		"aiven_cmk_accessor_gcp":                    adapter.NewLazyDataSource(gcp.DataSourceOptions),
-		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(oci.DataSourceOptions),
+		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(clickhousedatabase.DataSourceOptions),
+		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(clickhouseuser.DataSourceOptions),
+		"aiven_cmk_accessor_aws":                    adapter.NewLazyDataSource(cmkaccessoraws.DataSourceOptions),
+		"aiven_cmk_accessor_azure":                  adapter.NewLazyDataSource(cmkaccessorazure.DataSourceOptions),
+		"aiven_cmk_accessor_gcp":                    adapter.NewLazyDataSource(cmkaccessorgcp.DataSourceOptions),
+		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(cmkaccessoroci.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
-		"aiven_flink_application":                   adapter.NewLazyDataSource(application.DataSourceOptions),
+		"aiven_flink_application":                   adapter.NewLazyDataSource(flinkapplication.DataSourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyDataSource(gcporgvpcpeeringconnection.DataSourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyDataSource(gcpprivatelink.DataSourceOptions),
-		"aiven_kafka_acl":                           adapter.NewLazyDataSource(acl.DataSourceOptions),
-		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(registryacl.DataSourceOptions),
-		"aiven_kafka_topic":                         adapter.NewLazyDataSource(topic.DataSourceOptions),
-		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(topiclist.DataSourceOptions),
-		"aiven_kafka_user":                          adapter.NewLazyDataSource(user1.DataSourceOptions),
+		"aiven_kafka_acl":                           adapter.NewLazyDataSource(kafkaacl.DataSourceOptions),
+		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(kafkaschemaregistryacl.DataSourceOptions),
+		"aiven_kafka_topic":                         adapter.NewLazyDataSource(kafkatopic.DataSourceOptions),
+		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(kafkatopiclist.DataSourceOptions),
+		"aiven_kafka_user":                          adapter.NewLazyDataSource(kafkauser.DataSourceOptions),
 		"aiven_mirrormaker_replication_flow":        adapter.NewLazyDataSource(mirrormakerreplicationflow.DataSourceOptions),
-		"aiven_mysql_database":                      adapter.NewLazyDataSource(database1.DataSourceOptions),
-		"aiven_mysql_user":                          adapter.NewLazyDataSource(user2.DataSourceOptions),
-		"aiven_opensearch_security_plugin_config":   adapter.NewLazyDataSource(securitypluginconfig.DataSourceOptions),
-		"aiven_opensearch_user":                     adapter.NewLazyDataSource(user3.DataSourceOptions),
-		"aiven_organization_address":                adapter.NewLazyDataSource(address.DataSourceOptions),
-		"aiven_organization_application_user":       adapter.NewLazyDataSource(applicationuser.DataSourceOptions),
-		"aiven_organization_billing_group":          adapter.NewLazyDataSource(billinggroup1.DataSourceOptions),
-		"aiven_organization_billing_group_list":     adapter.NewLazyDataSource(billinggrouplist.DataSourceOptions),
-		"aiven_organization_payment_method_list":    adapter.NewLazyDataSource(paymentmethodlist.DataSourceOptions),
-		"aiven_organization_project":                adapter.NewLazyDataSource(project.DataSourceOptions),
-		"aiven_organization_user_group":             adapter.NewLazyDataSource(usergroup.DataSourceOptions),
-		"aiven_organization_user_group_list":        adapter.NewLazyDataSource(usergrouplist.DataSourceOptions),
-		"aiven_organization_user_group_member_list": adapter.NewLazyDataSource(usergroupmemberlist.DataSourceOptions),
-		"aiven_organization_user_list":              adapter.NewLazyDataSource(userlist.DataSourceOptions),
+		"aiven_mysql_database":                      adapter.NewLazyDataSource(mysqldatabase.DataSourceOptions),
+		"aiven_mysql_user":                          adapter.NewLazyDataSource(mysqluser.DataSourceOptions),
+		"aiven_opensearch_security_plugin_config":   adapter.NewLazyDataSource(opensearchsecuritypluginconfig.DataSourceOptions),
+		"aiven_opensearch_user":                     adapter.NewLazyDataSource(opensearchuser.DataSourceOptions),
+		"aiven_organization_address":                adapter.NewLazyDataSource(organizationaddress.DataSourceOptions),
+		"aiven_organization_application_user":       adapter.NewLazyDataSource(organizationapplicationuser.DataSourceOptions),
+		"aiven_organization_billing_group":          adapter.NewLazyDataSource(organizationbillinggroup.DataSourceOptions),
+		"aiven_organization_billing_group_list":     adapter.NewLazyDataSource(organizationbillinggrouplist.DataSourceOptions),
+		"aiven_organization_payment_method_list":    adapter.NewLazyDataSource(organizationpaymentmethodlist.DataSourceOptions),
+		"aiven_organization_project":                adapter.NewLazyDataSource(organizationproject.DataSourceOptions),
+		"aiven_organization_user_group":             adapter.NewLazyDataSource(organizationusergroup.DataSourceOptions),
+		"aiven_organization_user_group_list":        adapter.NewLazyDataSource(organizationusergrouplist.DataSourceOptions),
+		"aiven_organization_user_group_member_list": adapter.NewLazyDataSource(organizationusergroupmemberlist.DataSourceOptions),
+		"aiven_organization_user_list":              adapter.NewLazyDataSource(organizationuserlist.DataSourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyDataSource(organizationvpc.DataSourceOptions),
-		"aiven_organizational_unit":                 adapter.NewLazyDataSource(unit.DataSourceOptions),
-		"aiven_pg_database":                         adapter.NewLazyDataSource(database2.DataSourceOptions),
-		"aiven_pg_user":                             adapter.NewLazyDataSource(user4.DataSourceOptions),
+		"aiven_organizational_unit":                 adapter.NewLazyDataSource(organizationalunit.DataSourceOptions),
+		"aiven_pg_database":                         adapter.NewLazyDataSource(pgdatabase.DataSourceOptions),
+		"aiven_pg_user":                             adapter.NewLazyDataSource(pguser.DataSourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyDataSource(projectvpc.DataSourceOptions),
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
-		"aiven_service_plan":                        adapter.NewLazyDataSource(plan.DataSourceOptions),
-		"aiven_service_plan_list":                   adapter.NewLazyDataSource(planlist.DataSourceOptions),
+		"aiven_service_plan":                        adapter.NewLazyDataSource(serviceplan.DataSourceOptions),
+		"aiven_service_plan_list":                   adapter.NewLazyDataSource(serviceplanlist.DataSourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyDataSource(transitgatewayvpcattachment.DataSourceOptions),
-		"aiven_valkey_user":                         adapter.NewLazyDataSource(user5.DataSourceOptions),
+		"aiven_valkey_user":                         adapter.NewLazyDataSource(valkeyuser.DataSourceOptions),
 	}
 }
