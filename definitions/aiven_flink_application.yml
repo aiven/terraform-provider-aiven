@@ -10,6 +10,7 @@ datasource:
 clientHandler: flinkapplication
 idAttributeComposed: [project, service_name, application_id]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   id: application_id
 remove:

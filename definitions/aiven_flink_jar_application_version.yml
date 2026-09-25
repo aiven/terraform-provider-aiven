@@ -16,6 +16,7 @@ resource:
 clientHandler: flinkjarapplicationversion
 idAttributeComposed: [project, service_name, application_id, application_version_id]
 legacyTimeouts: true
+requireServicePoweredOn: true
 rename:
   id: application_version_id
 operations:

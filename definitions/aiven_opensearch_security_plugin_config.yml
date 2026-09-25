@@ -18,6 +18,7 @@ datasource:
 clientHandler: opensearch
 idAttributeComposed: [project, service_name]
 legacyTimeouts: true
+requireServicePoweredOn: true
 operations:
   - id: ServiceOpenSearchSecuritySet
     type: create

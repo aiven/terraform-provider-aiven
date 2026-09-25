@@ -9,6 +9,7 @@ datasource:
 clientHandler: service
 idAttributeComposed: [project, service_name, username]
 legacyTimeouts: true
+requireServicePoweredOn: true
 flattenModifier: true
 expandModifier: true
 operations:
