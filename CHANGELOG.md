@@ -27,6 +27,23 @@ nav_order: 1
   for cluster plans
 - Document `aiven_clickhouse_grant` behaviour on ClickHouse 25.7 and later: source privileges such as `S3` are deprecated
   aliases stored as `READ` and `WRITE`, so grant those directly to avoid a permanent destroy/recreate plan.
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_heartbeat_interval_ms`: The heartbeat interval given
+  to the members of a consumer group using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_heartbeat_interval_ms`: The maximum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_session_timeout_ms`: The maximum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_heartbeat_interval_ms`: The minimum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_session_timeout_ms`: The minimum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_session_timeout_ms`: The timeout used to detect consumer
+  group member failures when using the consumer rebalance protocol
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_max_dirty_pages_pct`: Percentage of dirty pages in the InnoDB
+  buffer pool at which InnoDB starts flushing aggressively
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_max_purge_lag`: Number of outstanding transactions the InnoDB
+  purge operation may fall behind by before INSERT, UPDATE and DELETE are delayed to let it catch up
+- Change `aiven_pg` field `pg_user_config.variant` (enum): add `pg_lake`
 
 ## [4.63.0] - 2026-09-21
 
