@@ -173,6 +173,36 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"group_consumer_heartbeat_interval_ms": {
+						Description: "The heartbeat interval given to the members of a consumer group using the consumer rebalance protocol. Must be between group.consumer.min.heartbeat.interval.ms and group.consumer.max.heartbeat.interval.ms, and lower than group.consumer.session.timeout.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_max_heartbeat_interval_ms": {
+						Description: "The maximum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.heartbeat.interval.ms. (Default: 15000 ms (15 seconds)) Requires Kafka 4.0 or later. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_max_session_timeout_ms": {
+						Description: "The maximum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.session.timeout.ms. (Default: 60000 ms (60 seconds)) Requires Kafka 4.0 or later. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_min_heartbeat_interval_ms": {
+						Description: "The minimum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.heartbeat.interval.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_min_session_timeout_ms": {
+						Description: "The minimum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_session_timeout_ms": {
+						Description: "The timeout used to detect consumer group member failures when using the consumer rebalance protocol. Must be between group.consumer.min.session.timeout.ms and group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"group_coordinator_rebalance_protocols": {
 						Description:  "Enum: `classic`, `classic,consumer`, `classic,consumer,share`, `classic,consumer,share,streams`, `classic,consumer,streams`, `classic,share`, `classic,streams`. The enabled consumer group rebalance protocols. Use consumer, classic, share, streams to enable Kafka share groups.",
 						Optional:     true,
