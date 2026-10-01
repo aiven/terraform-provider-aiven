@@ -10,8 +10,6 @@ import (
 )
 
 func TestAccAivenOrganizationPaymentMethodListDataSource(t *testing.T) {
-	acc.SkipIfNotBeta(t)
-
 	var (
 		organizationName = acc.OrganizationName()
 		dataSourceName   = "data.aiven_organization_payment_method_list.ds"

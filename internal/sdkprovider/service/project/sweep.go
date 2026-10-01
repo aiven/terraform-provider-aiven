@@ -144,6 +144,14 @@ func sweepBillingGroups(ctx context.Context) func(region string) error {
 
 		billingGroups, err := client.BillingGroup.ListAll(ctx)
 		if err != nil {
+			// BillingGroup.ListAll was deprecated on 22 Jun 2026 and now returns 410 Gone.
+			// Nothing to sweep via this endpoint anymore, so skip gracefully. New billing
+			// groups live under /organization/{id}/billing-groups; add a dedicated
+			// aiven_organization_billing_group sweeper when one is needed.
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status == http.StatusGone {
+				return nil
+			}
 			return fmt.Errorf("error retrieving a list of billing groups : %w", err)
 		}
 
