@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -18,9 +17,12 @@ import (
 // TestAccAivenBillingGroup_basic creates a dedicated organization to avoid hitting
 // the backend limit of 5 billing groups per organization when running in parallel CI.
 func TestAccAivenBillingGroup_basic(t *testing.T) {
+	t.Skip("BillingGroupCreate API endpoint was deprecated on Mon, 22 Jun 2026 and is no longer available. " +
+		"Use aiven_organization_billing_group instead.")
+
 	resourceName := "aiven_billing_group.foo"
 	datasourceName := "data.aiven_billing_group.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName := acc.RandStr()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -52,7 +54,10 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func TestAccAivenBillingGroup_clone(t *testing.T) {
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	t.Skip("BillingGroupCreate API endpoint was deprecated on Mon, 22 Jun 2026 and is no longer available. " +
+		"Use aiven_organization_billing_group instead.")
+
+	rName := acc.RandStr()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,

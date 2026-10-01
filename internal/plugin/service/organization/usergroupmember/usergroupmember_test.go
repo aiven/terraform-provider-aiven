@@ -13,8 +13,6 @@ import (
 
 // TestAccOrganizationUserGroupMember tests the organization user group member resource.
 func TestAccOrganizationUserGroupMember(t *testing.T) {
-	acc.SkipIfNotBeta(t)
-
 	name := "aiven_organization_user_group_member.foo"
 	suffix := acc.RandStr()
 

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -128,8 +127,6 @@ func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 }
 
 func TestAccAivenAWSOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
-	acc.SkipIfNotBeta(t)
-
 	awsRegion := requireAWSConfig(t)
 	resourceName := awsOrgVPCPeeringResource + ".test_peering"
 	config := testAccAWSOrgVPCPeeringConnectionConfig(t, acc.OrganizationName(), awsRegion)
@@ -165,7 +162,7 @@ func TestAccAivenAWSOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
 func testAccAWSOrgVPCPeeringConnectionConfig(t *testing.T, orgName, awsRegion string) string {
 	t.Helper()
 
-	serviceName := fmt.Sprintf("test-acc-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	serviceName := acc.RandName("peering")
 	return template.InitializeTemplateStore(t).NewBuilder().
 		AddDataSource("aiven_organization", map[string]any{
 			"resource_name": "foo",

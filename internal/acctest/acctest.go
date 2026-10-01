@@ -38,9 +38,11 @@ const (
 	envToken            = "AIVEN_TOKEN"
 	envProjectName      = "AIVEN_PROJECT_NAME"
 	envOrganizationName = "AIVEN_ORGANIZATION_NAME"
+	envOrganizationID   = "AIVEN_ORGANIZATION_ID"
 	envBetaFeatures     = "PROVIDER_AIVEN_ENABLE_BETA"
 	envAccountName      = "AIVEN_ACCOUNT_NAME"
 	envPaymentMethodID  = "AIVEN_PAYMENT_METHOD_ID"
+	envBillingGroupID   = "AIVEN_BILLING_GROUP_ID"
 )
 
 var TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
@@ -111,6 +113,12 @@ func OrganizationName() string {
 	return getEnvVar(envOrganizationName)
 }
 
+// OrganizationID returns the Aiven organization ID (e.g. "org1a2b3c4d"), suitable for
+// inlining as organization_id in HCL without resolving via the aiven_organization data source.
+func OrganizationID() string {
+	return getEnvVar(envOrganizationID)
+}
+
 // AccountName returns the Aiven account name
 func AccountName() string {
 	return getEnvVar(envAccountName)
@@ -118,6 +126,14 @@ func AccountName() string {
 
 func PaymentMethodID() string {
 	return getEnvVar(envPaymentMethodID)
+}
+
+// BillingGroupID returns the id of an existing aiven_organization_billing_group.
+// Tests use it when they need to reference a billing group but cannot create one
+// inline (the shared AIVEN_PAYMENT_METHOD_ID credit card is already bound to a
+// different billing group and the backend forbids creating a second one).
+func BillingGroupID() string {
+	return getEnvVar(envBillingGroupID)
 }
 
 // TestAccPreCheck validates the necessary test API keys exist in the testing environment

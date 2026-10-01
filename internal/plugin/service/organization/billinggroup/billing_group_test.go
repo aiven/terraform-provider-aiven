@@ -9,7 +9,22 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
+// TestAccAivenOrganizationBillingGroup exercises creating and updating an
+// aiven_organization_billing_group.
+//
+// Currently skipped (NEX-2895): the shared AIVEN_PAYMENT_METHOD_ID credit card
+// is already attached to a pre-existing billing group with specific billing and
+// shipping addresses, and OrganizationBillingGroupCreate returns
+//
+//	[409] Credit card payment methods must use the same billing and shipping
+//	addresses across billing groups
+//
+// when the inline aiven_organization_address resources resolve to anything else.
+// The full fixture is kept so the test can be re-enabled once we either have a
+// dedicated test credit card or the backend relaxes the constraint.
 func TestAccAivenOrganizationBillingGroup(t *testing.T) {
+	t.Skip("NEX-2895: shared AIVEN_PAYMENT_METHOD_ID is bound to another billing group whose addresses differ; OrganizationBillingGroupCreate returns 409.")
+
 	// Payment method ID is required for this test
 	paymentMethodID := acc.PaymentMethodID()
 	if paymentMethodID == "" {

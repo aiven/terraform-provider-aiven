@@ -10,8 +10,6 @@ import (
 )
 
 func TestAccOrganizationUserGroupListMember(t *testing.T) {
-	acc.SkipIfNotBeta(t)
-
 	name := "data.aiven_organization_user_group_member_list.foo"
 	userName := acc.RandName("user")
 	resource.ParallelTest(t, resource.TestCase{
