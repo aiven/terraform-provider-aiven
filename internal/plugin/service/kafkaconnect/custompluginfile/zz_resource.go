@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -21,11 +20,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"content_type": schema.StringAttribute{
-				Computed:            true,
-				Default:             stringdefault.StaticString("application/java-archive"),
-				MarkdownDescription: "MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. The default value is `application/java-archive`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.OneOf("application/java-archive", "application/zip")},
 			},
 			"created_at": schema.StringAttribute{
@@ -61,7 +58,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"organization_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the organization the plugin belongs to. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "ID of an organization. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 			},
@@ -134,20 +131,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 32)},
 			},
 			"service_type": schema.StringAttribute{
-				Computed:            true,
-				Default:             stringdefault.StaticString("kafka_connect"),
-				MarkdownDescription: "The Aiven service type this plugin is intended for. The possible value is `kafka_connect`. The default value is `kafka_connect`. Changing this property forces recreation of the resource.",
-				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "The Aiven service type this plugin is intended for. The possible value is `kafka_connect`. Changing this property forces recreation of the resource.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOf("kafka_connect")},
 			},
 			"source": schema.StringAttribute{
 				MarkdownDescription: "Local path to the JAR or ZIP file to upload.",
 				Required:            true,
-			},
-			"source_checksum": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "SHA-256 checksum of the local file. Computed automatically; forces replacement when the file content changes.",
 			},
 			"updated_at": schema.StringAttribute{
 				Computed:            true,
@@ -173,10 +164,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 func resourceSchemaInternal() *adapter.Schema {
 	return &adapter.Schema{
 		Properties: map[string]*adapter.Schema{
-			"content_type": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
+			"content_type": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"created_at": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -275,15 +263,8 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
 			},
-			"service_type": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
-			"source": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"source_checksum": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
+			"service_type": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"source":       &adapter.Schema{Type: adapter.SchemaTypeString},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{
 					"create":  &adapter.Schema{Type: adapter.SchemaTypeString},

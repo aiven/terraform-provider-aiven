@@ -19,12 +19,12 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
   organization_id = "org1a23f456789" // Force new
   plugin_name     = "my-custom-connectors" // Force new
   plugin_version  = "2.7.14" // Force new
+  service_type    = "kafka_connect" // Force new
   source          = "./my-custom-connectors-2.7.14.jar"
 
   // OPTIONAL FIELDS
   content_type     = "application/java-archive" // Force new
   file_description = "Fixed memory leak in the MQTT source connector."
-  service_type     = "kafka_connect" // Force new
 
   /* COMPUTED FIELDS
   plugin_file_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
@@ -46,7 +46,6 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
     updated_at        = "2021-01-01T00:00:00Z"
     updated_by        = "foo"
   }]
-  source_checksum      = "foo"
   updated_at           = "2021-01-01T00:00:00Z"
   updated_by           = "foo"
   verify_error_code    = 42
@@ -59,16 +58,16 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
 
 ### Required
 
-- `organization_id` (String) The ID of the organization the plugin belongs to. Changing this property forces recreation of the resource.
+- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 - `plugin_name` (String) User-provided name identifying this custom plugin (e.g. 'my-custom-connectors'). Length must be between `1` and `64`. Changing this property forces recreation of the resource.
 - `plugin_version` (String) User-provided version string for this plugin upload. Must be a valid PEP 440 version (e.g. '2.7.14', '1.0.0a1', '2.7.14.dev0'). Length must be between `1` and `32`. Changing this property forces recreation of the resource.
+- `service_type` (String) The Aiven service type this plugin is intended for. The possible value is `kafka_connect`. Changing this property forces recreation of the resource.
 - `source` (String) Local path to the JAR or ZIP file to upload.
 
 ### Optional
 
-- `content_type` (String) MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. The default value is `application/java-archive`. Changing this property forces recreation of the resource.
+- `content_type` (String) MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.
 - `file_description` (String) Optional human-readable change notes specific to this plugin version. Maximum length: `256`.
-- `service_type` (String) The Aiven service type this plugin is intended for. The possible value is `kafka_connect`. The default value is `kafka_connect`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -82,7 +81,6 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
 - `plugin_classes` (Attributes Set) Plugin classes discovered within this JAR after successful verification. Empty until file_status is READY. (see [below for nested schema](#nestedatt--plugin_classes))
 - `plugin_file_id` (String) Unique identifier for this custom plugin file upload.
 - `plugin_id` (String) Unique identifier for the plugin identity record (shared across all versions).
-- `source_checksum` (String) SHA-256 checksum of the local file. Computed automatically; forces replacement when the file content changes.
 - `updated_at` (String) Last update timestamp in ISO 8601 format, always in UTC.
 - `updated_by` (String) Email address of the user who last updated this entity.
 - `verify_error_code` (Number) Machine-readable error code when file_status is FAILED.

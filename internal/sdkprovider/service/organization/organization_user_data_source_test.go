@@ -12,13 +12,13 @@ import (
 
 func TestAccAivenOrganizationUserDataSource_using_email(t *testing.T) {
 	var (
-		orgID          = os.Getenv("AIVEN_ORG_ID")
+		orgID          = os.Getenv("AIVEN_ORGANIZATION_ID")
 		email          = os.Getenv("AIVEN_ORG_USER_EMAIL")
 		datasourceName = "data.aiven_organization_user.member"
 	)
 
 	if orgID == "" || email == "" {
-		t.Skip("Skipping test due to missing AIVEN_ORG_ID or AIVEN_ORG_USER_EMAIL environment variable")
+		t.Skip("Skipping test due to missing AIVEN_ORGANIZATION_ID or AIVEN_ORG_USER_EMAIL environment variable")
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -40,13 +40,13 @@ func TestAccAivenOrganizationUserDataSource_using_email(t *testing.T) {
 
 func TestAccAivenOrganizationUserDataSource_using_userid(t *testing.T) {
 	var (
-		orgID          = os.Getenv("AIVEN_ORG_ID")
+		orgID          = os.Getenv("AIVEN_ORGANIZATION_ID")
 		userID         = os.Getenv("AIVEN_ORG_USER_ID")
 		datasourceName = "data.aiven_organization_user.member"
 	)
 
 	if orgID == "" || userID == "" {
-		t.Skip("Skipping test due to missing AIVEN_ORG_ID or AIVEN_ORG_USER_ID environment variable")
+		t.Skip("Skipping test due to missing AIVEN_ORGANIZATION_ID or AIVEN_ORG_USER_ID environment variable")
 	}
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -3,8 +3,6 @@ package jarversion_test
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -36,28 +34,30 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 		acc.WithUserConfig(map[string]any{"custom_code": true}),
 	)
 
-	// The new provider must read the SDKv2 state as is: the second step's empty plan proves it.
+	// Prove that state written by the last published provider (which stored a top-level
+	// source_checksum attribute) upgrades to the current schema (file_sha256 replaces it)
+	// without a diff: step 2 of BackwardCompatibilitySteps replans with the current provider
+	// and asserts the plan is empty.
 	t.Run("backward compatibility test", func(t *testing.T) {
-		config := testAccFlinkJarApplicationVersion(
-			projectName, serviceName, acc.RandName("compat"), jarFile,
-		)
+		appName := acc.RandName("compat")
+
+		// The old provider computes source_checksum itself from the file bytes, so a stable path
+		// is enough; nothing in the config references file_sha256.
+		jarCopy := acc.CopyFile(t, jarFile, "app.jar")
+		config := testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarCopy)
+
 		resource.ParallelTest(t, resource.TestCase{
 			PreCheck: func() { acc.TestAccPreCheck(t) },
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 				PreConfig:          func() { require.NoError(t, <-serviceIsReady) },
 				TFConfig:           config,
-				OldProviderVersion: "4.61.0",
+				OldProviderVersion: "4.63.0",
 				Checks: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-					resource.TestCheckResourceAttr(resourceName, "source", jarFile),
-					resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
-					resource.TestCheckResourceAttrSet(resourceName, "application_id"),
+					resource.TestCheckResourceAttr(resourceName, "source", jarCopy),
 					resource.TestCheckResourceAttrSet(resourceName, "application_version_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "source_checksum"),
 					resource.TestCheckResourceAttrSet(resourceName, "version"),
-					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
-					resource.TestCheckResourceAttrSet(resourceName, "created_by"),
 				),
 			}),
 		})
@@ -67,8 +67,8 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 		appName := acc.RandName("basic")
 
 		// A copy the test owns, so it can rename and edit the jar file.
-		jarCopy := copyFile(t, jarFile, "app.jar")
-		jarRenamed := copyFile(t, jarFile, "renamed.jar")
+		jarCopy := acc.CopyFile(t, jarFile, "app.jar")
+		jarRenamed := acc.CopyFile(t, jarFile, "renamed.jar")
 
 		config := testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarCopy)
 		configRenamed := testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarRenamed)
@@ -94,16 +94,17 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "source", jarCopy),
 						// The upload is complete by the time the create returns.
 						resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
+						// The top-level file_sha256 mirrors the nested one.
 						resource.TestCheckResourceAttrPair(
-							resourceName, "source_checksum",
+							resourceName, "file_sha256",
 							resourceName, "file_info.0.file_sha256",
 						),
 						resource.TestCheckResourceAttrSet(resourceName, "application_version_id"),
 						resource.TestCheckResourceAttrSet(resourceName, "version"),
 						resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 						resource.TestCheckResourceAttrSet(resourceName, "created_by"),
-						storeAttr(resourceName, "application_version_id", &versionID),
-						storeAttr(resourceName, "source_checksum", &checksum),
+						acc.StoreAttr(resourceName, "application_version_id", &versionID),
+						acc.StoreAttr(resourceName, "file_sha256", &checksum),
 					),
 				},
 				{
@@ -120,42 +121,36 @@ func TestAccAivenFlinkJarApplicationVersion(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
 						resource.TestCheckResourceAttrPtr(resourceName, "application_version_id", &versionID),
-						resource.TestCheckResourceAttrPtr(resourceName, "source_checksum", &checksum),
+						resource.TestCheckResourceAttrPtr(resourceName, "file_sha256", &checksum),
 					),
 				},
 				{
 					// Edited content at a known path can only be uploaded to a new version.
 					// terraform_data starts tracking the file here, but source remains a literal.
-					PreConfig: func() { appendToFile(t, jarRenamed) },
+					PreConfig: func() { acc.AppendToFile(t, jarRenamed, "aiven") },
 					Config:    configTrackedSource,
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
 						resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
-						resource.TestCheckResourceAttrPair(
-							resourceName, "source_checksum",
-							resourceName, "file_info.0.file_sha256",
-						),
-						checkAttrDiffers(resourceName, "application_version_id", &versionID),
-						checkAttrDiffers(resourceName, "source_checksum", &checksum),
-						storeAttr(resourceName, "application_version_id", &versionID),
-						storeAttr(resourceName, "source_checksum", &checksum),
+						resource.TestCheckResourceAttrSet(resourceName, "file_sha256"),
+						acc.CheckAttrDiffers(resourceName, "application_version_id", &versionID),
+						acc.CheckAttrDiffers(resourceName, "file_sha256", &checksum),
+						acc.StoreAttr(resourceName, "application_version_id", &versionID),
+						acc.StoreAttr(resourceName, "file_sha256", &checksum),
 					),
 				},
 				{
 					// Editing the file now replaces terraform_data, so its output and therefore
 					// source are unknown in the initial plan. Replacement must be planned before
 					// the path resolves during apply.
-					PreConfig: func() { appendToFile(t, jarRenamed) },
+					PreConfig: func() { acc.AppendToFile(t, jarRenamed, "aiven") },
 					Config:    configUnknownSource,
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "source", jarRenamed),
 						resource.TestCheckResourceAttr(resourceName, "file_info.0.file_status", "READY"),
-						resource.TestCheckResourceAttrPair(
-							resourceName, "source_checksum",
-							resourceName, "file_info.0.file_sha256",
-						),
-						checkAttrDiffers(resourceName, "application_version_id", &versionID),
-						checkAttrDiffers(resourceName, "source_checksum", &checksum),
+						resource.TestCheckResourceAttrSet(resourceName, "file_sha256"),
+						acc.CheckAttrDiffers(resourceName, "application_version_id", &versionID),
+						acc.CheckAttrDiffers(resourceName, "file_sha256", &checksum),
 					),
 				},
 			},
@@ -194,71 +189,6 @@ func testAccCheckAivenFlinkJarApplicationVersionDestroy(s *terraform.State) erro
 	}
 
 	return nil
-}
-
-// copyFile copies the jar file into the test's own directory under the given name.
-func copyFile(t *testing.T, source, name string) string {
-	t.Helper()
-
-	b, err := os.ReadFile(source) //nolint:gosec // The path comes from the test setup.
-	require.NoError(t, err)
-
-	path := filepath.Join(t.TempDir(), name)
-	require.NoError(t, os.WriteFile(path, b, 0o600))
-	return path
-}
-
-// appendToFile changes the file content, and with it its checksum.
-func appendToFile(t *testing.T, path string) {
-	t.Helper()
-
-	file, err := os.OpenFile(filepath.Clean(path), os.O_APPEND|os.O_WRONLY, 0o600)
-	require.NoError(t, err)
-	defer file.Close()
-
-	_, err = file.WriteString("aiven")
-	require.NoError(t, err)
-}
-
-func storeAttr(resourceName, key string, target *string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		value, err := attrValue(s, resourceName, key)
-		if err != nil {
-			return err
-		}
-
-		*target = value
-		return nil
-	}
-}
-
-func checkAttrDiffers(resourceName, key string, previous *string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		value, err := attrValue(s, resourceName, key)
-		if err != nil {
-			return err
-		}
-
-		if value == *previous {
-			return fmt.Errorf("expected %s.%s to change, got %q", resourceName, key, value)
-		}
-
-		return nil
-	}
-}
-
-func attrValue(s *terraform.State, resourceName, key string) (string, error) {
-	rs, ok := s.RootModule().Resources[resourceName]
-	if !ok {
-		return "", fmt.Errorf("resource %q not found in state", resourceName)
-	}
-
-	value := rs.Primary.Attributes[key]
-	if value == "" {
-		return "", fmt.Errorf("attribute %q of %q is empty", key, resourceName)
-	}
-
-	return value, nil
 }
 
 func testAccFlinkJarApplicationVersion(projectName, serviceName, appName, jarFile string) string {

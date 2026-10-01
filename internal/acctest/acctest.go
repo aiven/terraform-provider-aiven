@@ -38,6 +38,7 @@ const (
 	envToken            = "AIVEN_TOKEN"
 	envProjectName      = "AIVEN_PROJECT_NAME"
 	envOrganizationName = "AIVEN_ORGANIZATION_NAME"
+	envOrganizationID   = "AIVEN_ORGANIZATION_ID"
 	envBetaFeatures     = "PROVIDER_AIVEN_ENABLE_BETA"
 	envAccountName      = "AIVEN_ACCOUNT_NAME"
 	envPaymentMethodID  = "AIVEN_PAYMENT_METHOD_ID"
@@ -109,6 +110,12 @@ func ProjectName() string {
 // OrganizationName returns the Aiven organization name
 func OrganizationName() string {
 	return getEnvVar(envOrganizationName)
+}
+
+// OrganizationID returns the Aiven organization ID (e.g. "org1a2b3c4d"), suitable for inlining
+// as organization_id in HCL without resolving via the aiven_organization data source.
+func OrganizationID() string {
+	return getEnvVar(envOrganizationID)
 }
 
 // AccountName returns the Aiven account name
