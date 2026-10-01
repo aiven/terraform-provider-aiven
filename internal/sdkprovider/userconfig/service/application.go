@@ -61,7 +61,7 @@ func applicationUserConfig() *schema.Schema {
 								ValidateFunc: validation.StringInSlice([]string{"HTTP"}, false),
 							},
 							"security": {
-								Description: "Access control for this port. Omit to leave the port reachable by anyone who can reach its address",
+								Description: "Access control for the application's ports. An application supports a single OIDC provider, which protects every port: set `security` on one port, or on several with the same value, and it is stored on every port. Omit it from every port to leave the ports reachable by anyone who can reach their address",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"authentication_method": {
 										Description:  "Enum: `oidc`. Which of the authentication configurations below applies to this port.",
