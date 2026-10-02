@@ -171,7 +171,7 @@ Optional:
 - `switchover_windows` (Block List, Max: 28) (see [below for nested schema](#nestedblock--pg_user_config--switchover_windows))
 - `synchronous_replication` (String) Enum: `off`, `quorum`. Use synchronous_commit instead. Any change to this setting will automatically update synchronous_commit. Setting the value to quorum changes synchronous_commit to remote_write, while setting it to off changes synchronous_commit to off.
 - `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
-- `variant` (String) Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
+- `variant` (String) Enum: `aiven`, `pg_lake`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
 - `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. The default is 1MB + 0.075% of total RAM (up to 32MB). Example: `4`.
 
 <a id="nestedblock--pg_user_config--ip_filter_object"></a>
