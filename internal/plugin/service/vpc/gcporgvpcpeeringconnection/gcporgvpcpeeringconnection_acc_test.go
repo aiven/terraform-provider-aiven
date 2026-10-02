@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -86,8 +85,7 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 		gcpProject   = acc.RequireEnvVars(t, "GOOGLE_PROJECT")["GOOGLE_PROJECT"]
 		resourceName = fmt.Sprintf("%s.%s", gcpOrgVPCPeeringResource, "test_peering")
 
-		randName    = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		serviceName = fmt.Sprintf("test-acc-%s", randName)
+		serviceName = acc.RandName("peering")
 
 		// Register the templates needed for this test
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
@@ -152,8 +150,6 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 }
 
 func TestAccAivenGCPOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
-	acc.SkipIfNotBeta(t)
-
 	gcpProject := acc.RequireEnvVars(t, "GOOGLE_PROJECT")["GOOGLE_PROJECT"]
 	resourceName := gcpOrgVPCPeeringResource + ".test_peering"
 	config := testAccGCPOrgVPCPeeringBackwardCompatConfig(acc.OrganizationName(), gcpProject)
