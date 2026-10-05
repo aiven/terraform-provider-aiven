@@ -26,10 +26,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 
 	// Plugin framework sweepers
-	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/application"
-	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/deployment"
-	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jarapplication"
-	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink/jardeployment"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/governance/access"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/address"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/applicationusertoken"
@@ -57,7 +53,11 @@ func knownMissingSweepers() []string {
 		"aiven_clickhouse_grant",
 		"aiven_clickhouse_role",
 		"aiven_clickhouse_user",
+		"aiven_flink_application",
+		"aiven_flink_application_deployment",
 		"aiven_flink_application_version",
+		"aiven_flink_jar_application",
+		"aiven_flink_jar_application_deployment",
 		"aiven_flink_jar_application_version",
 		"aiven_gcp_privatelink_connection_approval",
 		"aiven_kafka_acl",

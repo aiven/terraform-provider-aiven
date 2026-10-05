@@ -416,6 +416,7 @@ jobs:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.selproj.outputs.suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+          AIVEN_ORGANIZATION_ID: ${{ secrets.AIVEN_ORGANIZATION_ID }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
 
   result:

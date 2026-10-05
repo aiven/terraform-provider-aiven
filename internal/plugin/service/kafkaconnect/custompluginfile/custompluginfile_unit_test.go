@@ -1,8 +1,6 @@
 package custompluginfile
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -11,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/fileupload"
 )
 
 type replacementTrackingResourceData struct {
@@ -58,21 +57,21 @@ func TestModifyPlan(t *testing.T) {
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
 		require.Empty(t, d.requiresReplace)
 
-		want, err := fileChecksum(path)
+		want, err := fileupload.Checksum(path)
 		require.NoError(t, err)
-		require.Equal(t, want, d.Get(sourceChecksumField))
+		require.Equal(t, want, d.Get(fileSha256Field))
 	})
 
 	t.Run("same content does not require replacement", func(t *testing.T) {
 		t.Parallel()
 
 		path := write(t)
-		checksum, err := fileChecksum(path)
+		checksum, err := fileupload.Checksum(path)
 		require.NoError(t, err)
 
 		d := newData(t,
 			map[string]any{"source": path},
-			map[string]any{"id": "org/file", sourceChecksumField: checksum},
+			map[string]any{"id": "org/file", fileSha256Field: checksum},
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
@@ -84,11 +83,26 @@ func TestModifyPlan(t *testing.T) {
 
 		d := newData(t,
 			map[string]any{"source": write(t)},
-			map[string]any{"id": "org/file", sourceChecksumField: "old-checksum"},
+			map[string]any{"id": "org/file", fileSha256Field: "old-checksum"},
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Equal(t, []string{sourceChecksumField}, d.requiresReplace)
+		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
+	})
+
+	t.Run("existing resource with empty prior checksum requires replacement", func(t *testing.T) {
+		// Covers the backward-compat upgrade with -refresh=false: Read never runs to mirror the
+		// backend hash, so prev stays empty. Without triggering replace, a local edit would
+		// never be re-uploaded (createView is the only upload path).
+		t.Parallel()
+
+		d := newData(t,
+			map[string]any{"source": write(t)},
+			map[string]any{"id": "org/file"},
+		)
+
+		require.NoError(t, modifyPlan(t.Context(), nil, d))
+		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
 	})
 
 	t.Run("unknown source of a new resource does not require replacement", func(t *testing.T) {
@@ -105,11 +119,11 @@ func TestModifyPlan(t *testing.T) {
 
 		d := newData(t,
 			map[string]any{"source": tftypes.NewValue(tftypes.String, tftypes.UnknownValue)},
-			map[string]any{"id": "org/file", sourceChecksumField: "old-checksum"},
+			map[string]any{"id": "org/file", fileSha256Field: "old-checksum"},
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Equal(t, []string{sourceChecksumField}, d.requiresReplace)
+		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
 	})
 
 	t.Run("missing file is an error", func(t *testing.T) {
@@ -118,88 +132,5 @@ func TestModifyPlan(t *testing.T) {
 		d := newData(t, map[string]any{"source": filepath.Join(t.TempDir(), "missing.jar")}, nil)
 
 		require.Error(t, modifyPlan(t.Context(), nil, d))
-	})
-}
-
-func TestUploadFile(t *testing.T) {
-	t.Parallel()
-
-	const (
-		checksum    = "0f4e2b1a"
-		contentType = "application/zip"
-	)
-
-	cases := map[string]struct {
-		status      int
-		response    string
-		expectedErr string
-	}{
-		"accepted":            {status: http.StatusOK},
-		"rejected with body":  {status: http.StatusForbidden, response: "<Error>AccessDenied</Error>", expectedErr: `s3 upload error: 403 Forbidden: "<Error>AccessDenied</Error>"`},
-		"rejected empty body": {status: http.StatusBadGateway, expectedErr: `s3 upload error: 502 Bad Gateway: ""`},
-		"accepted with body":  {status: http.StatusOK, response: "unexpected", expectedErr: "s3 upload error: unexpected"},
-	}
-
-	type request struct {
-		method      string
-		checksum    string
-		contentType string
-		body        []byte
-	}
-
-	for name, opt := range cases {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			path := filepath.Join(t.TempDir(), "plugin.zip")
-			require.NoError(t, os.WriteFile(path, []byte("jar"), 0o600))
-
-			// The channel hands the request to the assertions below: a test failure must not be
-			// reported from the handler's goroutine.
-			requests := make(chan request, 1)
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				body := make([]byte, r.ContentLength)
-				_, _ = r.Body.Read(body)
-				requests <- request{
-					method:      r.Method,
-					checksum:    r.Header.Get("Content-SHA256"),
-					contentType: r.Header.Get("Content-Type"),
-					body:        body,
-				}
-
-				w.WriteHeader(opt.status)
-				_, _ = w.Write([]byte(opt.response))
-			}))
-			defer server.Close()
-
-			err := uploadFile(t.Context(), path, checksum, contentType, server.URL)
-
-			got := <-requests
-			require.Equal(t, http.MethodPut, got.method)
-			require.Equal(t, checksum, got.checksum)
-			require.Equal(t, contentType, got.contentType)
-			require.Equal(t, []byte("jar"), got.body)
-
-			if opt.expectedErr == "" {
-				require.NoError(t, err)
-				return
-			}
-
-			require.ErrorContains(t, err, opt.expectedErr)
-		})
-	}
-
-	t.Run("directory", func(t *testing.T) {
-		t.Parallel()
-
-		err := uploadFile(t.Context(), t.TempDir(), checksum, contentType, "http://127.0.0.1:0")
-		require.ErrorContains(t, err, "directory")
-	})
-
-	t.Run("missing file", func(t *testing.T) {
-		t.Parallel()
-
-		err := uploadFile(t.Context(), filepath.Join(t.TempDir(), "nope"), checksum, contentType, "http://127.0.0.1:0")
-		require.ErrorContains(t, err, "failed to open file")
 	})
 }

@@ -28,16 +28,17 @@ operations:
   - id: ServiceFlinkDeleteJarApplicationVersion
     type: delete
 schema:
-  # Neither field exists in the API: the jar file is uploaded out of band.
+  # Virtual: the jar file is uploaded out of band to a pre-signed URL.
   source:
     type: string
     required: true
-    # A path change alone uploads nothing, so it doesn't replace the version. There is no update
-    # operation either: the adapter skips a nil Update and just refreshes the state.
+    # A path change alone uploads nothing. The hash under file_sha256 drives replacement.
     forceNew: false
     description: The path to the jar file to upload.
     example: ./example.jar
-  source_checksum:
+  # Flat mirror of file_info.0.file_sha256 so the shared file-upload modify plan can read and
+  # write it without walking the nested block.
+  file_sha256:
     type: string
     computed: true
-    description: The sha256 checksum of the jar file to upload.
+    description: The sha256 checksum of the uploaded jar file.

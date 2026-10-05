@@ -5,9 +5,7 @@ limitedAvailability: true
 resource:
   removeMissing: true
   modifyPlan: true
-  stateAttribute: file_status
-  refreshStateDesired: [READY]
-  refreshStateFailed: [FAILED]
+  refreshStateExists: true
   description: |
     Creates and manages an Aiven Kafka Connect custom plugin file at the organization level. The
     file is uploaded to the pre-signed URL the API returns, and the provider polls until the
@@ -27,38 +25,15 @@ operations:
     type: delete
 remove:
   - upload_info
-  # Belongs to the plugin, a separate entity shared by all its files, which the API only lets
-  # you set for a new plugin name. It isn't managed here.
+  # Lives on the plugin, which the API only lets you set when creating a new plugin name.
   - plugin_description
 schema:
-  organization_id:
-    forceNew: true
-    description: The ID of the organization the plugin belongs to.
-  plugin_name:
-    forceNew: true
-  plugin_version:
-    forceNew: true
-  service_type:
-    optional: true
-    computed: true
-    default: kafka_connect
-    forceNew: true
-    useStateForUnknown: true
-  content_type:
-    optional: true
-    computed: true
-    default: application/java-archive
-    forceNew: true
-    useStateForUnknown: true
-  # Neither field exists in the API: the file is uploaded out of band, on a pre-signed URL.
+  # Virtual: the file is uploaded out of band to a pre-signed URL.
   source:
     type: string
     required: true
-    # A path change alone re-uploads nothing; source_checksum (via modifyPlan) drives replacement.
-    forceNew: false
     description: Local path to the JAR or ZIP file to upload.
     example: ./my-custom-connectors-2.7.14.jar
-  source_checksum:
-    type: string
-    computed: true
-    description: SHA-256 checksum of the local file. Computed automatically; forces replacement when the file content changes.
+  # Default both into the API request and the Content-Type header sent to the pre-signed URL.
+  content_type:
+    default: application/java-archive
