@@ -3,6 +3,7 @@ package kafkaconnectcustompluginfile
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,6 +18,8 @@ func init() {
 	sweep.AddTestSweepers("aiven_kafka_connect_custom_plugin_file", &resource.Sweeper{
 		Name: "aiven_kafka_connect_custom_plugin_file",
 		F: func(_ string) error {
+			orgName := os.Getenv("AIVEN_ORGANIZATION_NAME")
+
 			client, err := sweep.SharedGenClient()
 			if err != nil {
 				return err
@@ -28,7 +31,7 @@ func init() {
 			}
 
 			for _, o := range organizations {
-				if !strings.HasPrefix(o.AccountName, sweep.DefaultPrefix) {
+				if o.AccountName != orgName {
 					continue
 				}
 
@@ -50,6 +53,5 @@ func init() {
 
 			return nil
 		},
-		Dependencies: []string{"aiven_organization"},
 	})
 }
