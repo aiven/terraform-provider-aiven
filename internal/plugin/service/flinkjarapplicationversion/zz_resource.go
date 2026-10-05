@@ -67,6 +67,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 				}},
 			},
+			"file_sha256": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The sha256 checksum of the uploaded jar file.",
+			},
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource ID composed as: `project/service_name/application_id/application_version_id`.",
@@ -85,10 +89,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"source": schema.StringAttribute{
 				MarkdownDescription: "The path to the jar file to upload.",
 				Required:            true,
-			},
-			"source_checksum": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The sha256 checksum of the jar file to upload.",
 			},
 			"version": schema.Int64Attribute{
 				Computed:            true,
@@ -156,6 +156,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				},
 				Type: adapter.SchemaTypeList,
 			},
+			"file_sha256": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"id": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -163,10 +167,6 @@ func resourceSchemaInternal() *adapter.Schema {
 			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"source":       &adapter.Schema{Type: adapter.SchemaTypeString},
-			"source_checksum": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{
 					"create":  &adapter.Schema{Type: adapter.SchemaTypeString},

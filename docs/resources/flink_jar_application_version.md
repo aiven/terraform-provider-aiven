@@ -33,8 +33,8 @@ resource "aiven_flink_jar_application_version" "example" {
     verify_error_code    = 1
     verify_error_message = "foo"
   }]
-  source_checksum = "foo"
-  version         = 42
+  file_sha256 = "foo"
+  version     = 42
   */
 }
 ```
@@ -58,8 +58,8 @@ resource "aiven_flink_jar_application_version" "example" {
 - `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
 - `created_by` (String) The creator of this entity.
 - `file_info` (Attributes List, Max: 1) Flink JarApplicationVersion FileInfo. (see [below for nested schema](#nestedatt--file_info))
+- `file_sha256` (String) The sha256 checksum of the uploaded jar file.
 - `id` (String) Resource ID composed as: `project/service_name/application_id/application_version_id`.
-- `source_checksum` (String) The sha256 checksum of the jar file to upload.
 - `version` (Number) Version number.
 
 <a id="nestedblock--timeouts"></a>

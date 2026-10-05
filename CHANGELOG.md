@@ -67,6 +67,9 @@ nav_order: 1
 - Remove `mysql_grants` field from the `aiven_kafka_user`, `aiven_opensearch_user`, `aiven_pg_user`,
   and `aiven_valkey_user` resources and data sources: it was added accidentally and had no effect.
 - Add `aiven_kafka_connect_custom_plugin_file` resource.
+- Add `aiven_flink_jar_application_version` field `file_sha256`: a flat mirror of `file_info.0.file_sha256` that drives
+  replacement when the local jar changes. Replaces the internal `source_checksum` attribute, which was computed from
+  the local file and consumed only by the provider's plan logic; existing state upgrades in place with no plan drift.
 
 ## [4.63.0] - 2026-09-21
 

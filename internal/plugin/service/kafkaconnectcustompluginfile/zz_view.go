@@ -21,17 +21,13 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:       true,
-	Create:     createView,
-	Delete:     deleteView,
-	IDFields:   idFields(),
-	ModifyPlan: modifyPlan,
-	Read:       readView,
-	RefreshState: &adapter.RefreshStateCondition{
-		Attribute: "file_status",
-		Desired:   []string{"READY"},
-		Failed:    []string{"FAILED"},
-	},
+	Beta:           true,
+	Create:         createView,
+	Delete:         deleteView,
+	IDFields:       idFields(),
+	ModifyPlan:     modifyPlan,
+	Read:           readView,
+	RefreshState:   &adapter.RefreshStateCondition{},
 	RemoveMissing:  true,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),

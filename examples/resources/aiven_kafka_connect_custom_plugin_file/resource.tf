@@ -2,12 +2,12 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
   organization_id = "org1a23f456789" // Force new
   plugin_name     = "my-custom-connectors" // Force new
   plugin_version  = "2.7.14" // Force new
+  service_type    = "kafka_connect" // Force new
   source          = "./my-custom-connectors-2.7.14.jar"
 
   // OPTIONAL FIELDS
   content_type     = "application/java-archive" // Force new
   file_description = "Fixed memory leak in the MQTT source connector."
-  service_type     = "kafka_connect" // Force new
 
   /* COMPUTED FIELDS
   plugin_file_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
@@ -29,7 +29,6 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
     updated_at        = "2021-01-01T00:00:00Z"
     updated_by        = "foo"
   }]
-  source_checksum      = "foo"
   updated_at           = "2021-01-01T00:00:00Z"
   updated_by           = "foo"
   verify_error_code    = 42
