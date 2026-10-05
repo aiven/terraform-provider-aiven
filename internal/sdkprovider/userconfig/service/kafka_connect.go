@@ -25,6 +25,24 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"custom_plugins": {
+				Description: "Install custom plugins uploaded via the custom file service",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"plugin_name": {
+						Description: "The name of the custom plugin as specified during upload. Example: `my-custom-connector`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"plugin_version": {
+						Description: "The version to install. Use a semver version (e.g. `1.0.0`) or `latest` to always use the most recent version. Example: `latest`.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 10,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"gcp_auth_allowed_urls": {
 				Description: "Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
