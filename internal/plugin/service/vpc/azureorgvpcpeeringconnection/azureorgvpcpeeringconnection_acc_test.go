@@ -66,7 +66,6 @@ func TestAccAivenAzureOrgVPCPeeringConnection(t *testing.T) {
 }
 
 func TestAccAivenAzureOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
-	acc.SkipIfNotBeta(t)
 	t.Skip("Skipping due to Azure SDK dependency")
 
 	env := acc.RequireEnvVars(

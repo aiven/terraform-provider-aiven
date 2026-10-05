@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -17,7 +16,7 @@ import (
 )
 
 func TestAccAivenClickhouseGrant(t *testing.T) {
-	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	serviceName := acc.RandName("ch")
 	projectName := acc.ProjectName()
 
 	baseConfig := fmt.Sprintf(`
@@ -151,16 +150,9 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
     database  = "*"
   }
 
-  # Since ClickHouse 25.7 the S3 privilege is a deprecated alias stored as READ and WRITE.
-  privilege_grant {
-    privilege = "READ"
-    database  = "*"
-  }
-
-  privilege_grant {
-    privilege = "WRITE"
-    database  = "*"
-  }
+  # Note: Since ClickHouse 25.7 the S3 privilege is a deprecated alias stored as READ and WRITE.
+  # READ/WRITE ON * cannot be granted here because avnadmin lacks READ ON * WITH GRANT OPTION
+  # (and the required per-source grants, e.g. READ ON S3), so we skip exercising those grants.
 
   privilege_grant {
     privilege = "INSERT"
@@ -182,22 +174,6 @@ resource "aiven_clickhouse_grant" "foo-role-grant" {
 						"privilege_grant.*",
 						map[string]string{
 							"privilege": "DROP FUNCTION",
-							"database":  "*",
-						},
-					),
-					resource.TestCheckTypeSetElemNestedAttrs(
-						"aiven_clickhouse_grant.foo-role-grant",
-						"privilege_grant.*",
-						map[string]string{
-							"privilege": "READ",
-							"database":  "*",
-						},
-					),
-					resource.TestCheckTypeSetElemNestedAttrs(
-						"aiven_clickhouse_grant.foo-role-grant",
-						"privilege_grant.*",
-						map[string]string{
-							"privilege": "WRITE",
 							"database":  "*",
 						},
 					),
@@ -356,7 +332,7 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 // TestAccAivenClickhouseGrantRole demonstrates the creation of a ClickHouse grant for a role
 // with overlapping privileges. It leads to non-empty plan output.
 func TestAccAivenClickhouseOverlappingGrants(t *testing.T) {
-	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	serviceName := acc.RandName("ch")
 	projectName := acc.ProjectName()
 
 	baseConfig := fmt.Sprintf(`
@@ -477,7 +453,7 @@ resource "aiven_clickhouse_grant" "foo" {
 // TestAccAivenClickhouseGrantInvalid tests the case where neither user nor role is specified in the grant.
 // This should fail with an error.
 func TestAccAivenClickhouseGrantInvalid(t *testing.T) {
-	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	serviceName := acc.RandName("ch")
 	projectName := acc.ProjectName()
 
 	invalidManifest := fmt.Sprintf(`

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -16,11 +15,9 @@ import (
 func TestAccOrganizationGroupProject(t *testing.T) {
 	t.Skip("Deprecated resource")
 
-	acc.SkipIfNotBeta(t)
-
 	name := "aiven_organization_group_project.foo"
 
-	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+	suffix := acc.RandStr()
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
