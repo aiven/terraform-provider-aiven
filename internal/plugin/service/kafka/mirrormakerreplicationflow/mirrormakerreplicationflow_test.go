@@ -204,6 +204,10 @@ func TestAccAivenMirrorMakerReplicationFlow(t *testing.T) {
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 				TFConfig: testAccMirrorMakerReplicationFlowResource(projectName, sourceName, targetName, mmName, topicName, ""),
 				Checks: resource.ComposeTestCheckFunc(
+					// Topic create returns before the topic shows up in the list
+					// endpoint; without this wait, the post-apply refresh 404s
+					// and the plan wants to re-create the topic.
+					acc.WaitForKafkaTopicsInList(t),
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "source_cluster", "source"),
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
@@ -228,6 +232,10 @@ func TestAccAivenMirrorMakerReplicationFlow(t *testing.T) {
 			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 				TFConfig: testAccMirrorMakerReplicationFlowMinimal(projectName, sourceName, targetName, mmName, topicName),
 				Checks: resource.ComposeTestCheckFunc(
+					// See `backward_compat` above: waits for topics to show up
+					// in the list endpoint so the post-apply refresh doesn't
+					// 404 and recreate them.
+					acc.WaitForKafkaTopicsInList(t),
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
 					resource.TestCheckNoResourceAttr(resourceName, "topics.#"),
 					resource.TestCheckNoResourceAttr(resourceName, "topics_blacklist.#"),
