@@ -125,7 +125,7 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.sum', '**/*.go') }}
+          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.mod', 'go.sum', '**/*.go') }}
           restore-keys: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-
       - uses: arduino/setup-task@v3
         with:
@@ -180,7 +180,7 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.sum', '**/*.go') }}
+          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.mod', 'go.sum', '**/*.go') }}
           restore-keys: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-
       - uses: arduino/setup-task@v3
         with:
