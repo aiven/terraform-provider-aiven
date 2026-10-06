@@ -24,6 +24,19 @@ type Matrix struct {
 	Slow   []Test `json:"slow"`
 }
 
+// DefaultSlowTests lists the unique names (see pathToUniqueName) of test packages that run in CI's slow lane.
+// Picked from nightly timings. Keep in sync with reality.
+var DefaultSlowTests = []string{
+	"sdk-service-kafkaschema",
+	"plugin-service-kafka-topic",
+	"plugin-service-kafka-mirrormakerreplicationflow",
+	"sdk-service-kafka",
+	"sdk-service-pg",
+	"sdk-service-serviceintegration",
+	"plugin-service-kafka-acl",
+	"plugin-service-kafkaschema-registryacl",
+}
+
 // GenerateMatrix discovers test suites, partitions them, and returns the matrix
 func GenerateMatrix(root string, slowTestsCSV string, filterServicesCSV string) (*Matrix, error) {
 	// slow tests lookup map
