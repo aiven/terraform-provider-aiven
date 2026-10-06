@@ -239,9 +239,9 @@ tasks:
       - task: internal:docs
 
   ci:discover-test-matrix:
-    desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2"
+    desc: "Finds Go tests, partitions them into normal/slow (test.DefaultSlowTests unless SLOW_TESTS_CSV overrides it), and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix [SLOW_TESTS_CSV=slow_test1,slow_test2]"
     vars:
-      SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV | default "sdk-service-vpc"}}'
+      SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV | default ""}}'
     cmds:
       - task: internal:discover-test-matrix
         vars:

@@ -213,6 +213,20 @@ func TestGenerateMatrixLabelsAreUnique(t *testing.T) {
 	}
 }
 
+// TestDefaultSlowTestsExist runs against the real ./internal tree: a stale entry would silently send nothing to the slow lane.
+func TestDefaultSlowTestsExist(t *testing.T) {
+	t.Parallel()
+	root := filepath.Join("..", "..", "internal")
+	matrix, err := GenerateMatrix(root, strings.Join(DefaultSlowTests, ","), "")
+	require.NoError(t, err)
+
+	found := make([]string, 0, len(matrix.Slow))
+	for _, test := range matrix.Slow {
+		found = append(found, pathToUniqueName(root, test.Path))
+	}
+	assert.ElementsMatch(t, DefaultSlowTests, found, "every DefaultSlowTests entry must match an existing test package")
+}
+
 func TestGenerateMatrix(t *testing.T) {
 	t.Parallel()
 

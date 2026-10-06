@@ -36,7 +36,7 @@ vars:
   PKG_PATH: internal                     # Default Go package path for acceptance tests
   TEST_COUNT: 1                          # Default count for running tests
   ACC_TEST_TIMEOUT: 180m                 # Default timeout for acceptance tests
-  ACC_TEST_PARALLELISM: 10               # Default parallelism for acceptance tests
+  ACC_TEST_PARALLELISM: '{{env "ACC_TEST_PARALLELISM" | default "10"}}' # Default parallelism for acceptance tests; CI overrides it via env
   SWEEP: global                          # Default scope for resource sweeper
   OLD_SCHEMA: .oldSchema.json            # Temp file to store previous provider schema for diffing
   CHANGELOG_CMD: "{{.GO_CMD}} run ./generators/changelog/..." # Command to run the internal changelog generation tool
@@ -244,12 +244,12 @@ tasks:
       - find ./examples -type f \( -name '*.tfstate' -o -name '*.tfstate.backup' \) -delete
 
   discover-test-matrix:
-    desc: "Finds Go tests, partitions them into normal/slow via SLOW_TESTS_CSV, optionally filters by FILTER_SERVICES, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2 FILTER_SERVICES='kafka,pg'"
+    desc: "Finds Go tests, partitions them into normal/slow (test.DefaultSlowTests unless SLOW_TESTS_CSV overrides it), optionally filters by FILTER_SERVICES, and generates a JSON matrix for CI. Usage: task ci:discover-test-matrix SLOW_TESTS_CSV=slow_test1,slow_test2 FILTER_SERVICES='kafka,pg'"
     vars:
-      SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV}}'
+      SLOW_TESTS_CSV: '{{.SLOW_TESTS_CSV | default ""}}'
       FILTER_SERVICES: '{{.FILTER_SERVICES | default ""}}'
     cmds:
-        - "{{.GO_CMD}} run ./tools/main.go tests matrix --slow-tests-csv {{.SLOW_TESTS_CSV}}{{if .FILTER_SERVICES}} --filter {{.FILTER_SERVICES}}{{end}}"
+        - "{{.GO_CMD}} run ./tools/main.go tests matrix{{if .SLOW_TESTS_CSV}} --slow-tests-csv {{.SLOW_TESTS_CSV}}{{end}}{{if .FILTER_SERVICES}} --filter {{.FILTER_SERVICES}}{{end}}"
     silent: true
 
   verify-version:

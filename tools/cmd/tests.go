@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -25,6 +26,10 @@ The output is a JSON object suitable for use as a job matrix in GitHub Actions.`
 		slowTestsCSV, err := cmd.Flags().GetString("slow-tests-csv")
 		if err != nil {
 			return fmt.Errorf("could not retrieve slow-tests-csv flag: %w", err)
+		}
+
+		if slowTestsCSV == "" {
+			slowTestsCSV = strings.Join(test.DefaultSlowTests, ",")
 		}
 
 		filterCSV, err := cmd.Flags().GetString("filter")
@@ -52,6 +57,6 @@ The output is a JSON object suitable for use as a job matrix in GitHub Actions.`
 
 func init() {
 	testsCmd.AddCommand(discoverTestMatrixCmd)
-	discoverTestMatrixCmd.Flags().String("slow-tests-csv", "", "A comma-separated list of test names to be considered slow.")
+	discoverTestMatrixCmd.Flags().String("slow-tests-csv", "", "A comma-separated list of test names to be considered slow. Defaults to test.DefaultSlowTests.")
 	discoverTestMatrixCmd.Flags().String("filter", "", "Comma or space-separated list of service names to filter tests (e.g., 'kafka,pg,vpc' or 'kafka pg vpc').")
 }
