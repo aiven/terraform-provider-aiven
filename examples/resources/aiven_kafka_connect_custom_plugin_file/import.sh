@@ -1,0 +1,1 @@
+terraform import aiven_kafka_connect_custom_plugin_file.example ORGANIZATION_ID/PLUGIN_FILE_ID

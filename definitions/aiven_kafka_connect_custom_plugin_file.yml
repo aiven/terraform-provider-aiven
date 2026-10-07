@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=.schema.yml
+location: internal/plugin/service/kafkaconnect/custompluginfile
+beta: true
+limitedAvailability: true
+resource:
+  removeMissing: true
+  modifyPlan: true
+  refreshStateExists: true
+  description: |
+    Creates and manages an Aiven Kafka Connect custom plugin file at the organization level. The
+    file is uploaded to the pre-signed URL the API returns, and the provider polls until the
+    upload is verified.
+clientHandler: kafkaconnectcustomplugin
+idAttributeComposed: [organization_id, plugin_file_id]
+legacyTimeouts: true
+operations:
+  - id: KafkaConnectCustomPluginFileCreate
+    type: create
+    disableView: true
+  - id: KafkaConnectCustomPluginFileGet
+    type: read
+  - id: KafkaConnectCustomPluginFileUpdate
+    type: update
+  - id: KafkaConnectCustomPluginFileDelete
+    type: delete
+remove:
+  - upload_info
+  # Lives on the plugin, which the API only lets you set when creating a new plugin name.
+  - plugin_description
+schema:
+  # Virtual: the file is uploaded out of band to a pre-signed URL.
+  source:
+    type: string
+    required: true
+    description: Local path to the JAR or ZIP file to upload.
+    example: ./my-custom-connectors-2.7.14.jar
+  # Default both into the API request and the Content-Type header sent to the pre-signed URL.
+  content_type:
+    default: application/java-archive

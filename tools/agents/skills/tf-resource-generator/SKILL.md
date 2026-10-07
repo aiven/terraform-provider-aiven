@@ -578,18 +578,11 @@ Whatever `modifyPlan` writes with `d.Set` becomes the planned value, which is th
 `d.RequiresReplace("attr")` marks attributes whose planned value forces the resource to be replaced. Schema plan modifiers (`forceNew: true` -> `RequiresReplace()`) run **before** `modifyPlan`, so they compare a value it has not written yet: a computed value produced here needs `d.RequiresReplace` to have any effect. Marking an unknown attribute panics.
 
 ```go
-// A version is immutable, so edited file content can only go into a new one.
+// A version is immutable, so edited file content can only go into a new one. The shared helper
+// hashes the file at d.Get("source"), compares against the sha stored in state under
+// fileSha256Field, and triggers RequiresReplace when they differ.
 func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
-    checksum, err := fileChecksum(d.Get("source").(string))
-    if err != nil {
-        return err
-    }
-
-    if !d.IsNewResource() && checksum != d.GetState(sourceChecksumField) {
-        d.RequiresReplace(sourceChecksumField)
-    }
-
-    return d.Set(sourceChecksumField, checksum)
+    return fileupload.ModifyPlan(d, "source", fileSha256Field)
 }
 ```
 
