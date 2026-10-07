@@ -60,39 +60,6 @@ jobs:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
-  # Compiles every test package once and caches GOCACHE/GOMODCACHE for the test jobs below.
-  warm_go_cache:
-    runs-on: ubuntu-latest
-    outputs:
-      cache_key: ${{ steps.key.outputs.cache_key }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.ref }}
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go.mod
-          cache: false
-      - id: key
-        name: Compute cache key
-        run: >-
-          echo "cache_key=acc-go-${{ runner.os }}-$(go env GOVERSION)-${{ inputs.tags }}-${{ hashFiles('go.sum', 'internal/**/*.go') }}"
-          >> $GITHUB_OUTPUT
-      - id: cache
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ steps.key.outputs.cache_key }}
-          restore-keys: |
-            acc-go-${{ runner.os }}-
-      - name: Compile test packages
-        if: steps.cache.outputs.cache-hit != 'true'
-        # -run '^$' builds and starts every test binary without running any test
-        run: go test ./internal/... ${{ inputs.tags && format('-tags={0}', inputs.tags) || '' }} -count 1 -run '^$'
-
   # This job discovers all Go test packages and partitions them into two groups:
   # 'normal' and 'slow'.
   # The 'normal' tests are numerous and relatively fast.
@@ -132,7 +99,7 @@ jobs:
 
   test-normal:
     name: ${{ matrix.pkg.label }} (${{ matrix.pkg.type }}, normal)
-    needs: [setup_aiven_project_suffix, find_tests, warm_go_cache]
+    needs: [setup_aiven_project_suffix, find_tests]
     if: needs.find_tests.outputs.has_normal_tests == 'true'
     runs-on: ubuntu-latest
     env:
@@ -148,7 +115,8 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v7
+      - id: go
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: false
@@ -157,7 +125,8 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ needs.warm_go_cache.outputs.cache_key }}
+          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.mod', 'go.sum', '**/*.go') }}
+          restore-keys: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-
       - uses: arduino/setup-task@v3
         with:
           version: '3.x'
@@ -185,7 +154,7 @@ jobs:
 
   test-slow:
     name: ${{ matrix.pkg.label }} (${{ matrix.pkg.type }}, slow)
-    needs: [setup_aiven_project_suffix, find_tests, warm_go_cache]
+    needs: [setup_aiven_project_suffix, find_tests]
     if: needs.find_tests.outputs.has_slow_tests == 'true'
     runs-on: ubuntu-latest
     env:
@@ -201,7 +170,8 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-      - uses: actions/setup-go@v7
+      - id: go
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: false
@@ -210,7 +180,8 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ needs.warm_go_cache.outputs.cache_key }}
+          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.mod', 'go.sum', '**/*.go') }}
+          restore-keys: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-
       - uses: arduino/setup-task@v3
         with:
           version: '3.x'

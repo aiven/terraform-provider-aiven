@@ -1,0 +1,46 @@
+name: Go Cache
+
+# Compiles every test package on main and saves GOCACHE/GOMODCACHE for the acceptance test jobs.
+# See: https://github.blog/changelog/2026-06-26-read-only-actions-cache-for-untrusted-triggers/
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/go-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: go-cache
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - id: go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      # Must match the key used by the restore steps in reusable-acceptance-tests.yml
+      - id: cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-${{ hashFiles('go.mod', 'go.sum', '**/*.go') }}
+          restore-keys: acc-go-${{ runner.os }}-${{ steps.go.outputs.go-version }}-
+      - name: Compile test packages
+        if: steps.cache.outputs.cache-hit != 'true'
+        # -run '^$' builds and starts every test binary without running any test
+        run: go test ./internal/... -count 1 -run '^$'
