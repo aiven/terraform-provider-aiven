@@ -18,9 +18,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/providerdata"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/groupproject"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/permission"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationgroupproject"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationpermission"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -167,8 +167,8 @@ func New(version string) provider.Provider {
 func ResourcesMap() map[string]func() resource.Resource {
 	result := map[string]func() resource.Resource{
 		"aiven_organization":               organization.NewResource,
-		"aiven_organization_group_project": groupproject.NewResource,
-		"aiven_organization_permission":    permission.NewResource,
+		"aiven_organization_group_project": organizationgroupproject.NewResource,
+		"aiven_organization_permission":    organizationpermission.NewResource,
 	}
 
 	return lo.Assign(result, Resources())

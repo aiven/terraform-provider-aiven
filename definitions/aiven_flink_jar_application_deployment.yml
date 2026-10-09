@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/flink/jardeployment
 beta: true
 limitedAvailability: true
 resource:

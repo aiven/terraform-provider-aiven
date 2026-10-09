@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/usergrouplist
 datasource:
   description: List all user groups within an organization
 idAttributeComposed: [organization_id]

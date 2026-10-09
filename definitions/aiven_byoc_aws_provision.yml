@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
-location: internal/plugin/service/byoc/aws_provision
 resource:
   ignoreAlreadyExists: true
   description: |

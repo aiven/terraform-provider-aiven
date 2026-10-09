@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/billinggroup
 resource:
   description: Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.
   deprecationMessage: Use `aiven_organization_billing_group` instead. This resource will be removed in the next major release.

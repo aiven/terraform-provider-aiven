@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/vpc/transitgatewayvpcattachment
 resource:
   description: Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC.
   refreshStateExists: true

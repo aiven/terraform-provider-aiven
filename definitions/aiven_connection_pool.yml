@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/pg/connectionpool
 resource:
   refreshStateExists: true
   removeMissing: true

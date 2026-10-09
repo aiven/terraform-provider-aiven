@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/cmk/accessor/gcp
 datasource:
   description: |
     Gets the GCP CMK accessor for an Aiven project.

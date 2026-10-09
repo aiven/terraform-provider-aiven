@@ -235,11 +235,6 @@ properties:
     items:
       type: string
       $comment: A list of fields to compose the ID attribute from
-  location:
-    type: string
-    $comment: |
-      Specifies the file path where the resource package is located.
-      Example: location: "internal/plugin/service/organization"
   operations:
     type: array
     $comment: |
@@ -278,7 +273,6 @@ properties:
       Set to true to fail Create/Read/Update when the target service is powered off.
       Requires top-level `project` and `service_name` string attributes. Delete is not gated.
 required:
-  - location
   - operations
 additionalProperties: false
 

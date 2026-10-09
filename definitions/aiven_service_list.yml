@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
 beta: false
-location: internal/plugin/service/servicelist
 datasource:
   description: A list of all services in a project.
   disableExample: true

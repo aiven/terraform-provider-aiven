@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/flink/application
 resource:
   refreshStateExists: true
   removeMissing: true

@@ -28,13 +28,13 @@ type Matrix struct {
 // Picked from nightly timings. Keep in sync with reality.
 var DefaultSlowTests = []string{
 	"sdk-service-kafkaschema",
-	"plugin-service-kafka-topic",
-	"plugin-service-kafka-mirrormakerreplicationflow",
+	"plugin-service-kafkatopic",
+	"plugin-service-mirrormakerreplicationflow",
 	"sdk-service-kafka",
 	"sdk-service-pg",
 	"sdk-service-serviceintegration",
-	"plugin-service-kafka-acl",
-	"plugin-service-kafkaschema-registryacl",
+	"plugin-service-kafkaacl",
+	"plugin-service-kafkaschemaregistryacl",
 }
 
 // GenerateMatrix discovers test suites, partitions them, and returns the matrix

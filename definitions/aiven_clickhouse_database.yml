@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/clickhouse/database
 resource:
   refreshStateExists: true
   removeMissing: true

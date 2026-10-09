@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/upgradepipeline/step
 limitedAvailability: true
 resource:
   description: Creates and manages an Aiven Upgrade Pipeline step between source and destination services.
