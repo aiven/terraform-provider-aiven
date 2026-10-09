@@ -776,6 +776,21 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"knn_cache_item_expiry_enabled": {
+						Description: "Enable or disable removing KNN graphs from the cache when they are idle. Disabled by default.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"knn_cache_item_expiry_minutes": {
+						Description: "If enabled, the amount of time in minutes a KNN graph can be idle in the cache before being evicted. Example: `180`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"knn_circuit_breaker_unset_percentage": {
+						Description: "The native memory usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets. Defaults to 5%.",
+						Optional:    true,
+						Type:        schema.TypeFloat,
+					},
 					"knn_memory_circuit_breaker_enabled": {
 						Description: "Enable or disable KNN memory circuit breaker. Defaults to true.",
 						Optional:    true,
@@ -1308,7 +1323,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, and newer. OpenSearch version.",
+				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, `3.8`, and newer. OpenSearch version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
