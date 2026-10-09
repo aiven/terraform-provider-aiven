@@ -313,6 +313,45 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 			},
 		})
 	})
+
+	// Verifies that state created by the previous provider version is compatible
+	// with the current schema, in particular that dropping the unused
+	// `mysql_grants` field does not force a plan change on upgrade.
+	t.Run("backward compatibility test", func(t *testing.T) {
+		userName := acc.RandName("user")
+		config := fmt.Sprintf(`
+resource "aiven_pg_user" "test" {
+  project      = %[1]q
+  service_name = %[2]q
+  username     = %[3]q
+}
+
+data "aiven_pg_user" "test" {
+  project      = aiven_pg_user.test.project
+  service_name = aiven_pg_user.test.service_name
+  username     = aiven_pg_user.test.username
+}`, projectName, serviceName, userName)
+
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck: func() { acc.TestAccPreCheck(t) },
+			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+				TFConfig: config,
+				PreConfig: func() {
+					require.NoError(t, <-serviceIsReady)
+				},
+				OldProviderVersion: "4.63.0",
+				Checks: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("aiven_pg_user.test", "id"),
+					resource.TestCheckResourceAttr("aiven_pg_user.test", "username", userName),
+					resource.TestCheckResourceAttrSet("aiven_pg_user.test", "password"),
+					resource.TestCheckResourceAttr("aiven_pg_user.test", "type", "normal"),
+
+					resource.TestCheckResourceAttr("data.aiven_pg_user.test", "username", userName),
+					resource.TestCheckResourceAttrSet("data.aiven_pg_user.test", "password"),
+				),
+			}),
+		})
+	})
 }
 
 // TestAccAivenPGUser_OutOfBandPasswordRotation pins the CURRENT behavior when a service

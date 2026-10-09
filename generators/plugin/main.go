@@ -40,6 +40,35 @@ var sensitiveFields = []string{
 	"service_uri",
 }
 
+// serviceTypes groups Aiven service identifiers (and their aliases) for
+// pruneCrossGroupFields: e.g. `mysql_grants` is dropped from aiven_pg_user.
+var serviceTypes = [][]string{
+	{"cassandra"},
+	{"clickhouse"},
+	{"flink"},
+	{"grafana"},
+	{"influxdb"},
+	{"kafka"},
+	{"m3aggregator"},
+	{"m3db"},
+	{"mysql"},
+	{"opensearch", "os", "elasticsearch", "es"},
+	{"pg", "postgres", "postgresql"},
+	{"redis"},
+	{"thanos"},
+	{"valkey"},
+}
+
+// cloudTypes groups cloud providers (with aliases) for pruneCrossGroupFields:
+// e.g. an `azure_*` field is dropped from aiven_aws_privatelink.
+var cloudTypes = [][]string{
+	{"aws", "amazon"},
+	{"azure"},
+	{"digitalocean", "do"},
+	{"gcp", "google"},
+	{"oracle", "oci"},
+}
+
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: ""})
 
@@ -442,7 +471,55 @@ func createRootItem(scope *Scope) (*Item, error) {
 		}
 	}
 
+	// Skip cross-cloud pruning on service-owned resources: they may legitimately
+	// expose cloud-prefixed fields (e.g. `aws_*` on an `aiven_pg_*` resource).
+	if !pruneCrossGroupFields(scope.Definition, root, serviceTypes) {
+		pruneCrossGroupFields(scope.Definition, root, cloudTypes)
+	}
+
 	return root, nil
+}
+
+// pruneCrossGroupFields drops root properties whose name tokens belong to a
+// different group than the definition's typeName. Each inner slice is a set
+// of aliases (one group). ID-participating fields are left alone. Returns
+// true when at least one property was removed.
+func pruneCrossGroupFields(def *Definition, root *Item, groups [][]string) bool {
+	tokenGroup := make(map[string]int)
+	for i, g := range groups {
+		for _, tok := range g {
+			tokenGroup[tok] = i
+		}
+	}
+
+	own := make(map[int]bool)
+	for _, tok := range strings.Split(def.typeName, "_") {
+		if gi, ok := tokenGroup[tok]; ok {
+			own[gi] = true
+		}
+	}
+	if len(own) == 0 {
+		return false
+	}
+
+	pruned := 0
+	for name, item := range root.Properties {
+		if item.IDAttribute {
+			continue
+		}
+		for _, tok := range strings.Split(name, "_") {
+			gi, ok := tokenGroup[tok]
+			if !ok {
+				continue
+			}
+			if !own[gi] {
+				delete(root.Properties, name)
+				pruned++
+				break
+			}
+		}
+	}
+	return pruned > 0
 }
 
 func fromOperationID(scope *Scope, operation *Operation, root *Item) error {

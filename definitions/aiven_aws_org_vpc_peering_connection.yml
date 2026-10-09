@@ -43,8 +43,6 @@ operations:
     disableView: true
 remove:
   - create_time
-  - "*_azure_*"
-  - "*_gcp_*"
   - peer_resource_group
   - state_info
   - update_time

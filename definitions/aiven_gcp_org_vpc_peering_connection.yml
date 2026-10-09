@@ -39,8 +39,6 @@ operations:
     disableView: true
 remove:
   - create_time
-  - "*_aws_*"
-  - "*_azure_*"
   - peer_region
   - peer_resource_group
   - peering_connection_id
