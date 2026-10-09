@@ -1308,7 +1308,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, and newer. OpenSearch version.",
+				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, `3.8`, and newer. OpenSearch version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

@@ -61,13 +61,13 @@ func applicationUserConfig() *schema.Schema {
 								ValidateFunc: validation.StringInSlice([]string{"HTTP"}, false),
 							},
 							"security": {
-								Description: "Access control for this port. Omit to leave the port reachable by anyone who can reach its address",
+								Description: "Access control for the application's ports. An application supports a single OIDC provider, which protects every port: set `security` on one port, or on several with the same value, and it is stored on every port. Omit it from every port to leave the ports reachable by anyone who can reach their address",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"authentication_method": {
-										Description:  "Enum: `oidc`. Which of the authentication configurations below applies to this port.",
+										Description:  "Enum: `aiven_platform`, `oidc`. Which of the authentication configurations below applies to this port.",
 										Required:     true,
 										Type:         schema.TypeString,
-										ValidateFunc: validation.StringInSlice([]string{"oidc"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"aiven_platform", "oidc"}, false),
 									},
 									"oidc": {
 										Description: "Generic OpenID Connect provider that callers of this port must authenticate against",
@@ -95,7 +95,7 @@ func applicationUserConfig() *schema.Schema {
 											},
 										}},
 										MaxItems: 1,
-										Required: true,
+										Optional: true,
 										Type:     schema.TypeList,
 									},
 								}},
@@ -104,6 +104,7 @@ func applicationUserConfig() *schema.Schema {
 								Type:     schema.TypeList,
 							},
 						}},
+						MaxItems: 5,
 						Optional: true,
 						Type:     schema.TypeList,
 					},

@@ -859,10 +859,10 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"variant": {
-				Description:  "Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.",
+				Description:  "Enum: `aiven`, `pg_lake`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"aiven", "timescale"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"aiven", "pg_lake", "timescale"}, false),
 			},
 			"work_mem": {
 				Description: "Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. The default is 1MB + 0.075% of total RAM (up to 32MB). Example: `4`.",
