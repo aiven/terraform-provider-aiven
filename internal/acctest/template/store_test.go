@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	org "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization/organization"
+	org "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 )
 

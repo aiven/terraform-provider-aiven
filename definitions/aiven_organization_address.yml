@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/address
 resource:
   description: Creates and manages an organization address.
 datasource:

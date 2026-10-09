@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
-location: internal/plugin/service/byoc/aws_entity
 resource:
   description: |
     Creates and manages a BYOC custom cloud environment on AWS.

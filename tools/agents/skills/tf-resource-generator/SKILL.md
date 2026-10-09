@@ -122,10 +122,11 @@ File: `definitions/aiven_my_resource.yml`
 
 **IMPORTANT**: Definition files MUST have the `aiven_` prefix. The filename (without `.yml`) becomes the resource name directly: `aiven_my_resource.yml` -> resource `aiven_my_resource`.
 
+The generated package always lives at `internal/plugin/service/<resource-name-minus-aiven-prefix-and-underscores>` — e.g. `aiven_my_resource` -> `internal/plugin/service/myresource`, `aiven_kafka_topic` -> `internal/plugin/service/kafkatopic`. The directory, the Go package name, and the import alias in `zz_provider.go` are all the same string, derived from the filename.
+
 Start minimal:
 ```yaml
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/myresource
 operations:
   - id: OperationIDFromOpenAPI
     type: create|read|update|delete
@@ -152,7 +153,6 @@ Review generated `zz_*.go` files. Refine YAML definition as needed.
 **IMPORTANT**: Always check `definitions/.schema.yml` for the complete, authoritative schema specification.
 
 Common fields:
-- `location` - Package path (e.g., `internal/plugin/service/mysql`)
 - `operations` - Array of CRUD operations (id, type, resultKey, etc.)
 - `resource` / `datasource` - Configuration metadata
 - `idAttributeComposed` - Fields that compose the ID (e.g., `[project, service_name]`)
@@ -229,7 +229,7 @@ func fileIsReady(d adapter.ResourceData) error {
 
 Prefer the declarative form: reach for `RefreshStateCheck` only when the condition cannot be
 expressed as desired/failed values of one top-level attribute. See
-`internal/plugin/service/flink/jarversion/jarversion.go` and `internal/plugin/serviceuser` for
+`internal/plugin/service/flinkjarapplicationversion/jarversion.go` and `internal/plugin/serviceuser` for
 reference implementations.
 
 `deleteStateGone: true` enables the delete poller and completes when Read returns 404.
@@ -556,7 +556,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 
 **Reference implementations:**
 - `internal/plugin/service/billinggroup/billinggroup.go` — extracts `billing_group_id` from composite `id` for SDK backward compat
-- `internal/plugin/service/flink/deployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
+- `internal/plugin/service/flinkapplicationdeployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
 
 For name -> ID resolution in data sources, use the generated `datasourceLookup` pattern instead of a hand-written `planModifier`. See [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key).
 
@@ -594,8 +594,8 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 ```
 
 **Reference implementations:**
-- `internal/plugin/service/kafka/topic/topic.go` — plan-time checks against prior state
-- `internal/plugin/service/flink/jarversion/jarversion.go` — computed checksum that drives replacement
+- `internal/plugin/service/kafkatopic/topic.go` — plan-time checks against prior state
+- `internal/plugin/service/flinkjarapplicationversion/jarversion.go` — computed checksum that drives replacement
 
 ## Custom View Overrides
 
@@ -666,7 +666,7 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 ```
 
-**Reference**: See `internal/plugin/service/flink/deployment/deployment.go` and `internal/plugin/service/pg/user/user.go`.
+**Reference**: See `internal/plugin/service/flinkapplicationdeployment/deployment.go` and `internal/plugin/service/pguser/user.go`.
 
 ## Write-Only Fields
 
@@ -722,7 +722,7 @@ schema:
 - In `flattenModifier`, clear the regular field from state when the write-only variant is active
 - In create/update logic, read the write-only field via `d.Get()` (falls through to config)
 
-**Reference**: See `internal/plugin/service/pg/user/user.go` for a complete implementation.
+**Reference**: See `internal/plugin/service/pguser/user.go` for a complete implementation.
 
 ## Data Source with Alternative Lookup Key
 
@@ -868,8 +868,8 @@ Search the codebase for similar patterns:
 | `flink_application` | Alt data source lookup key via `datasourceLookup` read op, field rename |
 | `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
 | `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
-| `organization/unit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
-| `flink/jarversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
+| `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
+| `flinkjarapplicationversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements
 
@@ -907,7 +907,7 @@ func TestAccAivenMyResource_basic(t *testing.T) {
 }
 ```
 
-**Find test examples**: `ls internal/plugin/service/*/mysql/*_test.go`
+**Find test examples**: `ls internal/plugin/service/mysql*/*_test.go`
 
 ## Commands
 

@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/permission
 resource:
   description: |
     Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)

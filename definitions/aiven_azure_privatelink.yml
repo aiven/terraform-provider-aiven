@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/vpc/azureprivatelink
 resource:
   stateAttribute: state
   refreshStateDesired: [active]

@@ -159,12 +159,12 @@ turn the whole collection back into a block. Data sources keep blocks too: their
 planned against a configuration, so a block holding API values causes no diff there.
 
 For an optional+computed block, drop the values the user did not set instead — see
-`flattenConfig` in `internal/plugin/service/kafka/topic/topic.go`. `Flatten` writes back only
+`flattenConfig` in `internal/plugin/service/kafkatopic/topic.go`. `Flatten` writes back only
 the keys the response carries, so `delete(dto, name)` leaves whatever prior state holds;
 `d.Set(name, nil)` removes it.
 
 Generated example: `application_versions` in
-`internal/plugin/service/flink/jarapplication/zz_resource.go`.
+`internal/plugin/service/flinkjarapplication/zz_resource.go`.
 
 ### 4. Preserve ID Structure
 
@@ -223,7 +223,7 @@ away with it through its legacy type-system shims. Decide what the suppression w
   `ForceNew` computed field). Compute the value in `modifyPlan` and call `d.RequiresReplace` on it.
 
 Whichever applies, the behavior changes for at least some configurations, so call it out in
-`CHANGELOG.md`. `internal/plugin/service/flink/jarversion` migrated a resource that used both a
+`CHANGELOG.md`. `internal/plugin/service/flinkjarapplicationversion` migrated a resource that used both a
 `DiffSuppressFunc` and `CustomizeDiff`.
 
 ### 6. Create YAML Definition
@@ -293,8 +293,8 @@ head -20 CHANGELOG.md
 3. Verifies state is compatible and attributes match
 
 **Examples**:
-- `internal/plugin/service/mysql/database/database_test.go` - Basic backward compatibility
-- `internal/plugin/service/pg/user/user_test.go` - Complex resource with custom update logic
+- `internal/plugin/service/mysqldatabase/database_test.go` - Basic backward compatibility
+- `internal/plugin/service/pguser/user_test.go` - Complex resource with custom update logic
 
 ### 10. Parity Testing
 
@@ -369,6 +369,8 @@ grep -A 2 "SetId" internal/sdkprovider/service/resource.go
 
 # Compare implementations
 diff internal/sdkprovider/service/resource.go internal/plugin/service/resource/zz_resource.go
+# (resource dir name = typeName with "aiven_" stripped and underscores removed,
+#  e.g. aiven_my_resource -> internal/plugin/service/myresource)
 
 # Run backward compatibility test
 task test-acc -- -run TestAccAivenResource_backwardCompat

@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/cmk/accessor/aws
 datasource:
   description: |
     Gets the AWS CMK accessor for an Aiven project.

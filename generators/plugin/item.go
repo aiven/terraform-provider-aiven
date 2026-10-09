@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"maps"
+	"path/filepath"
 	"slices"
 	"sort"
 	"strings"
@@ -179,7 +180,6 @@ type Definition struct {
 	typeName            string            // e.g. aiven_organization_address, aiven_kafka_topic
 	Beta                *bool             `yaml:"beta"` // Is figured as beta from `x-experimental` OpenAPI field
 	LimitedAvailability *bool             `yaml:"limitedAvailability"`
-	Location            string            `yaml:"location"`
 	Schema              map[string]*Item  `yaml:"schema,omitempty"`
 	Remove              []string          `yaml:"remove,omitempty"`
 	Rename              map[string]string `yaml:"rename,omitempty"`
@@ -196,6 +196,21 @@ type Definition struct {
 	// RequireServicePoweredOn gates Create/Read/Update via schemautil.CheckServiceIsPowered.
 	// Requires `project` and `service_name` in the schema. Delete is not gated.
 	RequireServicePoweredOn bool `yaml:"requireServicePoweredOn,omitempty"`
+}
+
+// ShortName returns the Terraform type name with the "aiven_" prefix stripped,
+// e.g. "aiven_kafka_topic" -> "kafka_topic". It is the canonical form used for
+// the root item's name and for the per-resource doc filename.
+func (d *Definition) ShortName() string {
+	return strings.TrimPrefix(d.typeName, typeNamePrefix)
+}
+
+// Location returns the package path for the generated files. The directory and
+// the Go package name are the ShortName with underscores stripped, so a
+// definition for aiven_kafka_topic ends up in internal/plugin/service/kafkatopic
+// as package kafkatopic. There is no YAML field for it.
+func (d *Definition) Location() string {
+	return filepath.Join(providerFilePath, "service", strings.ReplaceAll(d.ShortName(), "_", ""))
 }
 
 // IsRemoved reports whether the given JSON path is excluded by the `remove` list.

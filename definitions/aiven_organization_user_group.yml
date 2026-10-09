@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/organization/usergroup
 resource:
   description: Creates and manages a [user group](https://aiven.io/docs/platform/howto/list-groups) in an organization.
 datasource:

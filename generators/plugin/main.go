@@ -137,7 +137,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			return err
 		}
 
-		root.Name = strings.TrimPrefix(def.typeName, typeNamePrefix)
+		root.Name = def.ShortName()
 
 		// Datasource-only schema overlay. Applied on a deep copy of the root
 		// (which has already had base-schema merged and recalcDeep run) so
@@ -158,12 +158,13 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			return err
 		}
 
-		err = os.MkdirAll(def.Location, os.ModePerm)
+		location := def.Location()
+		err = os.MkdirAll(location, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("could not create directory %s: %w", def.Location, err)
+			return fmt.Errorf("could not create directory %s: %w", location, err)
 		}
 
-		pkgName := goPkgName(def.Location)
+		pkgName := goPkgName(location)
 		if doOnce {
 			doOnce = false
 			var codes []jen.Code
@@ -193,7 +194,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				viewFile.Add(v).Line()
 			}
 
-			viewFilePath := genFilePath(def.Location, viewFileName)
+			viewFilePath := genFilePath(location, viewFileName)
 			err = saveGoFile(viewFile, viewFilePath)
 			if err != nil {
 				return fmt.Errorf("could not save file %s: %w", viewFilePath, err)
@@ -201,7 +202,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		}
 
 		isResource := entity.isResource()
-		filePath := genFilePath(def.Location, entity)
+		filePath := genFilePath(location, entity)
 		file := newFile(
 			pkgName,
 			entity.Import(schemaPackageFmt),

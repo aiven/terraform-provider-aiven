@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=.schema.yml
-location: internal/plugin/service/cmk/accessor/oci
 datasource:
   description: |
     Gets the OCI CMK accessor for an Aiven project.

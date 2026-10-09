@@ -46,7 +46,7 @@ func docEntityLabel(entity entityType) string {
 }
 
 func docFileName(def *Definition) string {
-	return strings.TrimPrefix(def.typeName, typeNamePrefix) + ".md"
+	return def.ShortName() + ".md"
 }
 
 func docOutputDir(entity entityType) string {
