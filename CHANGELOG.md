@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.64.0] - 2026-10-09
+
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_max_model_on_node`: Maximum number
   of ML models that can be deployed on a single ML node
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_auto_deploy_enable`: For externally
