@@ -126,7 +126,7 @@ func TestAccAivenOpenSearchUser_basic(t *testing.T) {
 	t.Run("backward compatibility test", func(t *testing.T) {
 		var (
 			userName        = acc.RandName("user")
-			providerVersion = "4.47.0"
+			providerVersion = "4.63.0"
 		)
 
 		resource.ParallelTest(t, resource.TestCase{

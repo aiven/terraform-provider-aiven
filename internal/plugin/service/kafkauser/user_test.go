@@ -210,7 +210,7 @@ data "aiven_kafka_user" "user" {
 				PreConfig: func() {
 					require.NoError(t, <-serviceIsReady)
 				},
-				OldProviderVersion: "4.47.0",
+				OldProviderVersion: "4.63.0",
 				Checks: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("aiven_kafka_user.foo", "id"),
 					resource.TestCheckResourceAttr("aiven_kafka_user.foo", "username", userName),

@@ -56,6 +56,8 @@ nav_order: 1
 - Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.8`
 - Change `aiven_pg` field `pg_user_config.variant` (enum): add `pg_lake`
 - Change `aiven_service_integration` field `integration_type` (enum): add `pg_for_analytics_credentials`
+- Remove `mysql_grants` field from the `aiven_kafka_user`, `aiven_opensearch_user`, `aiven_pg_user`,
+  and `aiven_valkey_user` resources and data sources: it was added accidentally and had no effect.
 
 ## [4.63.0] - 2026-09-21
 

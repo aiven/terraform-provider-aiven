@@ -18,13 +18,6 @@ operations:
   - id: CustomCloudEnvironmentDelete
     type: delete
 remove:
-  # The API serves every cloud provider from one schema. This resource is AWS
-  # only, so anything named after another provider is dropped, including fields
-  # the API may add later.
-  - "*azure*"
-  - "*gcp*"
-  - "*google*"
-  - "*oracle*"
   - custom_cloud_names
   - errors
   - state

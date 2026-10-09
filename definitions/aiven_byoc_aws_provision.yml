@@ -24,13 +24,6 @@ operations:
   - id: CustomCloudEnvironmentDelete
     type: delete
 remove:
-  # The API serves every cloud provider from one schema. This resource is AWS
-  # only, so anything named after another provider is dropped, including fields
-  # the API may add later.
-  - "*azure*"
-  - "*gcp*"
-  - "*google*"
-  - "*oracle*"
   # Environment attributes belong to aiven_byoc_aws_entity, which creates the
   # environment. This resource only hands over the IAM role that activates it.
   - aiven_aws_object_storage_credentials_creator_arn

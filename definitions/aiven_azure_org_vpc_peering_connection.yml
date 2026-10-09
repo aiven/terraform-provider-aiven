@@ -42,8 +42,6 @@ operations:
     disableView: true
 remove:
   - create_time
-  - "*_aws_*"
-  - "*_gcp_*"
   - peer_region
   - state_info
   - update_time
