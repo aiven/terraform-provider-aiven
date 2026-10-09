@@ -117,7 +117,7 @@ Optional:
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
-- `opensearch_version` (String) Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, and newer. OpenSearch version.
+- `opensearch_version` (String) Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, `3.8`, and newer. OpenSearch version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
@@ -305,6 +305,9 @@ Optional:
 - `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index.
 - `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Example: `8`.
 - `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Example: `30`.
+- `knn_cache_item_expiry_enabled` (Boolean) Enable or disable removing KNN graphs from the cache when they are idle. Disabled by default.
+- `knn_cache_item_expiry_minutes` (Number) If enabled, the amount of time in minutes a KNN graph can be idle in the cache before being evicted. Example: `180`.
+- `knn_circuit_breaker_unset_percentage` (Number) The native memory usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets. Defaults to 5%.
 - `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
 - `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory in percentage that can be used for the KNN index. Defaults to 50% of the JVM heap size. 0 is used to set it to null which can be used to invalidate caches.
 - `ml_commons_connector_access_control_enabled` (Boolean) When set to true, the setting allows admins to control access and permissions to the connector API using backend_roles. Defaults to false.
