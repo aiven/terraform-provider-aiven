@@ -225,12 +225,19 @@ func getSchemaVersion(ctx context.Context, client avngen.Client, project, servic
 			return 0, ctx.Err()
 		case <-time.After(time.Second):
 			versions, err := client.ServiceSchemaRegistrySubjectVersionsGet(ctx, project, serviceName, subjectName)
+			if avngen.IsNotFound(err) {
+				// The registry is eventually consistent: the subject may not be visible right after creation.
+				continue
+			}
 			if err != nil {
 				return 0, err
 			}
 
 			for _, v := range versions {
 				s, err := client.ServiceSchemaRegistrySubjectVersionGet(ctx, project, serviceName, subjectName, v)
+				if avngen.IsNotFound(err) {
+					continue
+				}
 				if err != nil {
 					return 0, err
 				}
