@@ -196,6 +196,12 @@ type Definition struct {
 	// RequireServicePoweredOn gates Create/Read/Update via schemautil.CheckServiceIsPowered.
 	// Requires `project` and `service_name` in the schema. Delete is not gated.
 	RequireServicePoweredOn bool `yaml:"requireServicePoweredOn,omitempty"`
+
+	// prunedFields holds cross-group attributes dropped by
+	// pruneCrossGroupFields across the resource and datasource passes;
+	// written back to the YAML's `remove:` list at end of generation.
+	// Keyed by name, value is the first non-empty description seen.
+	prunedFields map[string]string
 }
 
 // ShortName returns the Terraform type name with the "aiven_" prefix stripped,

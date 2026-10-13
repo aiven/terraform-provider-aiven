@@ -311,26 +311,37 @@ remove:
   - plans/node_count # attribute nested under "plans"
 ```
 
-Entries are glob patterns. `*` and `?` match within a single path segment, `**` matches across
-segments, and a pattern with no wildcards is an exact match:
+**For service / cloud cross-group fields, let the generator do it (preferred).** When a resource's
+`typeName` matches a service group (`pg`, `kafka`, `mysql`, ...) or a cloud group (`aws`, `gcp`,
+`azure`, ...), the generator detects root attributes whose name tokens belong to a *different*
+group — `mysql_grants` on an `aiven_pg_user`, `azure_subnet` on `aiven_byoc_aws_entity` — appends
+them to this `remove:` list in the YAML, and attaches the field's description as a trailing
+comment. The first `task generate` writes the missing entries; subsequent runs are idempotent.
+Group membership is defined by `serviceTypes` and `cloudTypes` in `generators/plugin/main.go`;
+see `definitions/aiven_byoc_aws_entity.yml` for the result. Prefer this over hand-rolled globs:
+the generator keeps the list exhaustive and self-updating as the API grows new fields.
+
+**Use globs for cases the group tables do not cover.** Entries are glob patterns, so `*` and `?`
+match within a single path segment, `**` matches across segments, and a pattern with no wildcards
+is an exact match:
 
 ```yaml
 remove:
-  - "azure_*" # every top-level attribute with that prefix
-  - "*google*" # every top-level attribute containing "google"
-  - "**/errors" # "errors" at any depth
+  - "peer_azure_*"  # prefix the group tables do not include
+  - "state_info/*"  # sweep an entire nested mapping
+  - "**/errors"     # "errors" at any depth
 ```
 
-Quote glob patterns — an unquoted leading `*` is an alias reference in YAML and fails to parse.
+Reach for a glob when:
 
-Reach for a glob when the removed attributes share an obvious naming pattern, most often a cloud
-provider that the resource does not support. Some Aiven endpoints serve every provider from one
-schema, so a provider-specific resource has to drop the rest. A glob keeps doing that when the API
-grows new fields, whereas an explicit list silently lets them into the schema on the next
-`task generate`. See `definitions/aiven_byoc_aws_entity.yml` for this pattern.
+- the resource's `typeName` matches no service or cloud group (so auto-detection does nothing) —
+  see `definitions/aiven_transit_gateway_vpc_attachment.yml`,
+- the fields live under a nested path (auto-detection only looks at top-level `root.Properties`), or
+- the shared prefix / suffix is not a service or cloud token (`peer_azure_`, `*_time`, ...).
 
-Globs only match attribute names, not descriptions or enum values, so a `cloud_provider` attribute
-whose enum lists `azure` is unaffected by `"*azure*"`.
+Quote glob patterns — an unquoted leading `*` is a YAML alias reference and fails to parse. Globs
+only match attribute names, not descriptions or enum values, so a `cloud_provider` attribute whose
+enum lists `azure` is unaffected by `"*azure*"`.
 
 ### Schema Customization
 
