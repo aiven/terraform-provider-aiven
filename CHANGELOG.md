@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_service_list` datasource field `services.first_use_time`: Timestamp when the service was first used
+  (ISO 8601), null if it has not been used yet.
+
 ## [4.64.0] - 2026-10-12
 
 - Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_max_model_on_node`: Maximum number

@@ -48,6 +48,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Megabytes of disk space for data storage.",
 					},
+					"first_use_time": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Timestamp when the service was first used (ISO 8601), null if it has not been used yet.",
+					},
 					"is_cluster_plan": schema.BoolAttribute{
 						Computed:            true,
 						MarkdownDescription: "True when the service uses a cluster plan with dedicated node groups.",
@@ -140,6 +144,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 						"disk_space_mb": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeInt,
+						},
+						"first_use_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
 						},
 						"is_cluster_plan": &adapter.Schema{
 							Computed: true,
