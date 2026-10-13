@@ -123,9 +123,10 @@ type ResourceOptions struct {
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []resource.ConfigValidator
 
-	// RequireServicePoweredOn calls schemautil.CheckServiceIsPowered before
-	// Create/Read/Update. Delete is not gated. Requires `project` and `service_name`.
-	RequireServicePoweredOn bool
+	// RequireServiceReady, when non-empty, calls schemautil.CheckServiceReady with
+	// this expected service type before Create/Read/Update. Delete is not gated.
+	// Requires `project` and `service_name` string attributes in the schema.
+	RequireServiceReady string
 }
 
 func NewResource(options ResourceOptions) resource.Resource {
@@ -217,8 +218,8 @@ func (a *resourceAdapter) Create(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServicePoweredOn {
-		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+	if a.resource.RequireServiceReady != "" {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
 			diags.AddError("failed to create resource", err.Error())
 			return
 		}
@@ -308,8 +309,8 @@ func (a *resourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServicePoweredOn {
-		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+	if a.resource.RequireServiceReady != "" {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
 			diags.AddError("failed to read resource", err.Error())
 			return
 		}
@@ -481,8 +482,8 @@ func (a *resourceAdapter) Update(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServicePoweredOn {
-		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+	if a.resource.RequireServiceReady != "" {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
 			diags.AddError("failed to update resource", err.Error())
 			return
 		}

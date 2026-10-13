@@ -58,14 +58,14 @@ func TestCheckDbConflict(t *testing.T) {
 			mockClient := avngen.NewMockClient(t)
 			mockClient.EXPECT().
 				ServiceGet(ctx, projectName, serviceName).
-				Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+				Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
 				Once()
 			mockClient.EXPECT().
 				ServiceDatabaseList(ctx, projectName, serviceName, [][2]string{service.ServiceDatabaseListMaxItems(250)}).
 				Return(&service.ServiceDatabaseListOut{Databases: tt.remoteDBs}, nil).
 				Once()
 
-			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, tt.dbName)
+			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, ServiceTypePG, tt.dbName)
 			if tt.expectedError != nil {
 				require.ErrorIs(t, err, tt.expectedError)
 				assert.Contains(t, err.Error(), tt.dbName)
@@ -84,7 +84,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	mockClient := avngen.NewMockClient(t)
 	mockClient.EXPECT().
 		ServiceGet(ctx, projectName, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
 		Once()
 
 	mockClient.EXPECT().
@@ -95,7 +95,7 @@ func TestCheckDbConflict_ConcurrentCalls(t *testing.T) {
 	done := make(chan error, 3)
 	for range 3 {
 		go func() {
-			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, dbName)
+			err := CheckDbConflict(ctx, mockClient, projectName, serviceName, ServiceTypePG, dbName)
 			done <- err
 		}()
 	}
@@ -122,7 +122,7 @@ func TestCheckDbConflict_Pagination(t *testing.T) {
 	mockClient := avngen.NewMockClient(t)
 	mockClient.EXPECT().
 		ServiceGet(ctx, projectName, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
 		Once()
 
 	nextCursor := "page-1-db-2"
@@ -156,7 +156,7 @@ func TestCheckDbConflict_Pagination(t *testing.T) {
 		Once()
 
 	// A brand-new database name must not conflict and triggers the full paginated fetch.
-	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, "brand-new-db")
+	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, ServiceTypePG, "brand-new-db")
 	require.NoError(t, err)
 
 	// Every database from both pages must be registered in seenDatabases.
@@ -174,7 +174,7 @@ func TestCheckDbConflict_ConflictOnSecondPage(t *testing.T) {
 	mockClient := avngen.NewMockClient(t)
 	mockClient.EXPECT().
 		ServiceGet(ctx, projectName, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
 		Once()
 
 	nextCursor := "cursor-2"
@@ -200,7 +200,7 @@ func TestCheckDbConflict_ConflictOnSecondPage(t *testing.T) {
 		Once()
 
 	// The database only appears on page 2, but the conflict must still be detected.
-	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, "second-page-db")
+	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, ServiceTypePG, "second-page-db")
 	require.ErrorIs(t, err, ErrDbAlreadyExists)
 	assert.Contains(t, err.Error(), "second-page-db")
 }
@@ -213,7 +213,7 @@ func TestCheckDbConflict_ErrorOnSecondPage(t *testing.T) {
 	mockClient := avngen.NewMockClient(t)
 	mockClient.EXPECT().
 		ServiceGet(ctx, projectName, serviceName).
-		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning}, nil).
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
 		Once()
 
 	nextCursor := "cursor-2"
@@ -235,7 +235,7 @@ func TestCheckDbConflict_ErrorOnSecondPage(t *testing.T) {
 		Return(nil, fmt.Errorf("boom")).
 		Once()
 
-	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, "some-db")
+	err := CheckDbConflict(ctx, mockClient, projectName, serviceName, ServiceTypePG, "some-db")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "error checking databases for conflict")
 	assert.Contains(t, err.Error(), "boom")

@@ -397,7 +397,7 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 	})
 }
 
-func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
+func TestGenNewResourceRequireServiceReady(t *testing.T) {
 	// serviceItem returns an item with the two attributes the runtime check
 	// consumes (project, service_name). Anything else the individual test
 	// case wants to add is merged in on top.
@@ -415,24 +415,24 @@ func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
 	}
 
 	t.Run("resource emits the option when both service fields are present", func(t *testing.T) {
-		def := &Definition{Resource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		def := &Definition{Resource: &SchemaMeta{}, RequireServiceReady: "kafka"}
 		code, err := genNewResource(resourceType, def, serviceItem(nil), false)
 		require.NoError(t, err)
-		require.Contains(t, renderCode(t, code), "RequireServicePoweredOn: true")
+		require.Contains(t, renderCode(t, code), `RequireServiceReady: "kafka"`)
 	})
 
 	t.Run("datasource emits the option when both service fields are present", func(t *testing.T) {
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "pg"}
 		code, err := genNewResource(datasourceType, def, serviceItem(nil), false)
 		require.NoError(t, err)
-		require.Contains(t, renderCode(t, code), "RequireServicePoweredOn: true")
+		require.Contains(t, renderCode(t, code), `RequireServiceReady: "pg"`)
 	})
 
-	t.Run("omitted when the flag is false", func(t *testing.T) {
+	t.Run("omitted when the field is empty", func(t *testing.T) {
 		def := &Definition{Datasource: &SchemaMeta{}}
 		code, err := genNewResource(datasourceType, def, serviceItem(nil), false)
 		require.NoError(t, err)
-		require.NotContains(t, renderCode(t, code), "RequireServicePoweredOn")
+		require.NotContains(t, renderCode(t, code), "RequireServiceReady")
 	})
 
 	t.Run("rejects missing project", func(t *testing.T) {
@@ -440,10 +440,10 @@ func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
 			"service_name": {Name: "service_name", Type: SchemaTypeString, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `requireServicePoweredOn requires "project" attribute in schema`)
+		require.Contains(t, err.Error(), `requireServiceReady requires "project" attribute in schema`)
 	})
 
 	t.Run("rejects missing service_name", func(t *testing.T) {
@@ -451,10 +451,10 @@ func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
 			"project": {Name: "project", Type: SchemaTypeString, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `requireServicePoweredOn requires "service_name" attribute in schema`)
+		require.Contains(t, err.Error(), `requireServiceReady requires "service_name" attribute in schema`)
 	})
 
 	t.Run("rejects a non-string service_name", func(t *testing.T) {
@@ -463,10 +463,10 @@ func TestGenNewResourceRequireServicePoweredOn(t *testing.T) {
 			"service_name": {Name: "service_name", Type: SchemaTypeInteger, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServicePoweredOn: true}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `requireServicePoweredOn requires "service_name" to be a string attribute`)
+		require.Contains(t, err.Error(), `requireServiceReady requires "service_name" to be a string attribute`)
 	})
 }
 

@@ -21,16 +21,16 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:                  createView,
-	Delete:                  deleteView,
-	IDFields:                idFields(),
-	Read:                    readView,
-	RefreshState:            &adapter.RefreshStateCondition{},
-	RemoveMissing:           true,
-	RequireServicePoweredOn: true,
-	Schema:                  resourceSchema,
-	SchemaInternal:          resourceSchemaInternal(),
-	TypeName:                typeName,
+	Create:              createView,
+	Delete:              deleteView,
+	IDFields:            idFields(),
+	Read:                readView,
+	RefreshState:        &adapter.RefreshStateCondition{},
+	RemoveMissing:       true,
+	RequireServiceReady: "kafka",
+	Schema:              resourceSchema,
+	SchemaInternal:      resourceSchemaInternal(),
+	TypeName:            typeName,
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

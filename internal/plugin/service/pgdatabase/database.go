@@ -19,7 +19,7 @@ func init() {
 }
 
 func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := schemautil.CheckDbConflict(ctx, client, d.Get("project").(string), d.Get("service_name").(string), d.Get("database_name").(string))
+	err := schemautil.CheckDbConflict(ctx, client, d.Get("project").(string), d.Get("service_name").(string), schemautil.ServiceTypePG, d.Get("database_name").(string))
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 }
 
 // read the database list is fetched with cursor pagination. The powered-on precheck
-// runs in the adapter via the `requireServicePoweredOn` schema flag.
+// runs in the adapter via the `requireServiceReady` schema flag.
 func read(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -89,7 +89,7 @@ func delete(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 }
 
 func findDatabaseByName(ctx context.Context, client avngen.Client, project, serviceName, dbName string) (*service.DatabaseOut, error) {
-	err := schemautil.CheckServiceIsPowered(ctx, client, project, serviceName)
+	err := schemautil.CheckServiceReady(ctx, client, project, serviceName, schemautil.ServiceTypePG)
 	if err != nil {
 		return nil, err
 	}

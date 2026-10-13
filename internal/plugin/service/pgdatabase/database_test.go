@@ -238,7 +238,7 @@ func TestAccAivenPGDatabase(t *testing.T) {
 
 func servicePowerOn(t *testing.T, projectName, serviceName string, on bool) error {
 	// Each test step should start with a clean service powered map
-	schemautil.ServicePoweredOffForget(projectName, serviceName)
+	schemautil.ServiceReadyForget(projectName, serviceName)
 
 	client, err := acc.GetTestGenAivenClient()
 	if err != nil {
