@@ -39,8 +39,8 @@ type DataSourceOptions struct {
 	// https://developer.hashicorp.com/terraform/plugin/framework/data-sources/validate-configuration#configvalidators-method
 	ConfigValidators func(ctx context.Context, client avngen.Client) []datasource.ConfigValidator
 
-	// RequireServicePoweredOn gates Read. See ResourceOptions.RequireServicePoweredOn.
-	RequireServicePoweredOn bool
+	// RequireServiceReady gates Read. See ResourceOptions.RequireServiceReady.
+	RequireServiceReady string
 }
 
 func NewDataSource(options DataSourceOptions) datasource.DataSource {
@@ -130,8 +130,8 @@ func (a *datasourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.datasource.RequireServicePoweredOn {
-		if err := schemautil.CheckServiceIsPowered(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string)); err != nil {
+	if a.datasource.RequireServiceReady != "" {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.datasource.RequireServiceReady); err != nil {
 			diags.AddError("failed to read datasource", err.Error())
 			return
 		}

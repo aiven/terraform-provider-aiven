@@ -94,8 +94,8 @@ func ListServiceDatabases(ctx context.Context, client avngen.Client, projectName
 // And the go client gets 409 Conflict error.
 // This function can prove the database does not exist before creating it.
 // It also prevents users from creating a database with the same name.
-func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, serviceName, dbName string) error {
-	err := CheckServiceIsPowered(ctx, client, projectName, serviceName)
+func CheckDbConflict(ctx context.Context, client avngen.Client, projectName, serviceName, serviceType, dbName string) error {
+	err := CheckServiceReady(ctx, client, projectName, serviceName, serviceType)
 	if err != nil {
 		return err
 	}

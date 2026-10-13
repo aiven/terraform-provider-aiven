@@ -11,7 +11,7 @@ resource:
 clientHandler: flinkjarapplication
 idAttributeComposed: [project, service_name, application_id]
 legacyTimeouts: true
-requireServicePoweredOn: true
+requireServiceReady: flink
 rename:
   id: application_id
 # Response envelope fields, not part of the resource.
