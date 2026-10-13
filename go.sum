@@ -76,8 +76,8 @@ github.com/agnivade/levenshtein v1.2.1 h1:EHBY3UOn1gwdy/VbFwgo4cxecRznFk7fKWN1KO
 github.com/agnivade/levenshtein v1.2.1/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
 github.com/aiven/aiven-go-client/v2 v2.44.0 h1:UiWQLsVEsAPpHomNqq8PYVb3EEBVvggNZ9Ymx3GTOBI=
 github.com/aiven/aiven-go-client/v2 v2.44.0/go.mod h1:BBpB3Lb2FFAElQZugsEKDYe8of5v3G3TlEkERDoQ01g=
-github.com/aiven/go-api-schemas v1.231.0 h1:S7ZCIRM0yKzr6jsmDhFI212UFC9NaYiCE5rH3fRNVH0=
-github.com/aiven/go-api-schemas v1.231.0/go.mod h1:GuGjWMV+HcZPZI+1jOuY7KHMWwsFWUQ2TDo/yhjbnUs=
+github.com/aiven/go-api-schemas v1.232.0 h1:sdyiuQGFlLKoKkUlPmxnV9zx0w38upBFYRhg7aFXr5M=
+github.com/aiven/go-api-schemas v1.232.0/go.mod h1:GuGjWMV+HcZPZI+1jOuY7KHMWwsFWUQ2TDo/yhjbnUs=
 github.com/aiven/go-client-codegen v0.228.0 h1:hF2H5go5YFXEG+gSIe+uBArpQ+38zaYhXmo35gqgQXM=
 github.com/aiven/go-client-codegen v0.228.0/go.mod h1:wzapCv+imzDdpOzY8fIv+Kp5aefHDMITs7bQYnv0r74=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=

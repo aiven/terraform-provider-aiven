@@ -44,6 +44,11 @@ func applicationUserConfig() *schema.Schema {
 					"ports": {
 						Description: "Ports",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"custom_domain": {
+								Description: "Custom hostname served by this port. Example: `app.example.com`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
 							"name": {
 								Description: "Allowed characters: ASCII letters, digits, underscore, hyphen. Single (non-consecutive) ASCII spaces are allowed between characters. No leading or trailing spaces. Example: `default`.",
 								Required:    true,

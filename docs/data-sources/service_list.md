@@ -74,6 +74,7 @@ Read-Only:
 - `cmk_id` (String) Active Customer Managed Key identifier (CMK ID).
 - `create_time` (String) Service creation timestamp (ISO 8601).
 - `disk_space_mb` (Number) Megabytes of disk space for data storage.
+- `first_use_time` (String) Timestamp when the service was first used (ISO 8601), null if it has not been used yet.
 - `is_cluster_plan` (Boolean) True when the service uses a cluster plan with dedicated node groups.
 - `node_count` (Number) Number of service nodes in the active plan.
 - `node_cpu_count` (Number) Number of CPUs for each node.
