@@ -165,6 +165,7 @@ Common fields:
 - `beta` - Mark resource as beta (requires `PROVIDER_AIVEN_ENABLE_BETA` env var)
 - `limitedAvailability` - Mark resource as limited availability
 - `legacyTimeouts` - Enable SDK v2-style timeout blocks
+- `requireServiceReady` - Gate CRUD on the target service's type and power state (see [Service Readiness Gating](#service-readiness-gating))
 
 ### Resource Configuration
 
@@ -266,6 +267,35 @@ datasource:
 ```
 
 For alternative lookup keys (e.g. look up by `name` instead of `id`), see [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key) below.
+
+### Service Readiness Gating
+
+Service-scoped resources (users, databases, ACLs, topics, etc.) should fail fast when the parent
+service is powered off or is the wrong type instead of letting the operation surface as an opaque
+503. Set `requireServiceReady` to the expected service type:
+
+```yaml
+requireServiceReady: pg
+```
+
+The value must be one of the enum members in `.schema.yml`
+(`pg`, `cassandra`, `opensearch`, `grafana`, `mysql`, `kafka`, `kafka_connect`,
+`kafka_mirrormaker`, `flink`, `clickhouse`, `dragonfly`, `thanos`, `valkey`) and the resource
+schema must expose top-level string attributes named `project` and `service_name`. The generator
+fails at generation time if either precondition is missing.
+
+Behavior:
+- Create, Read, and Update call `schemautil.CheckServiceReady` before issuing the resource's own
+  API request.
+- The precheck returns `schemautil.ErrServicePoweredOff` when the service is in `POWEROFF` state,
+  `schemautil.ErrServiceTypeMismatch` when the service exists but is the wrong type, and
+  `schemautil.ErrInvalidServiceType` when the YAML value is not a known type code.
+- Delete is **not** gated — Terraform must still be able to remove the resource from state when
+  the parent service has already been torn down.
+
+The ServiceType* enum lives in `internal/schemautil/service.go` next to a `validServiceTypes()`
+helper that mirrors the YAML enum. When adding a new service type, update both the YAML enum in
+`.schema.yml` and the const + helper in `service.go`.
 
 ### Operations Configuration
 

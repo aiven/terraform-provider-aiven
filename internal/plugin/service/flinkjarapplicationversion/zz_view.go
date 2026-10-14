@@ -20,18 +20,18 @@ func idFields() []string {
 }
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:                    true,
-	Create:                  createView,
-	Delete:                  deleteView,
-	IDFields:                idFields(),
-	ModifyPlan:              modifyPlan,
-	Read:                    readView,
-	RefreshState:            &adapter.RefreshStateCondition{},
-	RemoveMissing:           true,
-	RequireServicePoweredOn: true,
-	Schema:                  resourceSchema,
-	SchemaInternal:          resourceSchemaInternal(),
-	TypeName:                typeName,
+	Beta:                true,
+	Create:              createView,
+	Delete:              deleteView,
+	IDFields:            idFields(),
+	ModifyPlan:          modifyPlan,
+	Read:                readView,
+	RefreshState:        &adapter.RefreshStateCondition{},
+	RemoveMissing:       true,
+	RequireServiceReady: "flink",
+	Schema:              resourceSchema,
+	SchemaInternal:      resourceSchemaInternal(),
+	TypeName:            typeName,
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
