@@ -58,24 +58,6 @@ schema:
       be replicated. MirrorMaker will not replicate these topics even if they are
       matched by `topics`. The topics to exclude are defined by a
       [list of regular expressions in Java format](https://aiven.io/docs/products/kafka/kafka-mirrormaker/concepts/replication-flow-topics-regex).
-  # The SDK required these, but the API marks them optional. Every configuration
-  # and state written by the SDK has them set, so relaxing them cannot introduce a
-  # diff. Unlike topics they cannot be cleared: their request fields are bare
-  # `omitempty` enums, so an empty value is dropped before it reaches the API and
-  # the backend keeps the previous one. computed + useStateForUnknown plans that
-  # value instead of failing the apply with an inconsistent result.
-  replication_policy_class:
-    computed: true
-    useStateForUnknown: true
-  offset_syncs_topic_location:
-    computed: true
-    useStateForUnknown: true
-  # Numbers cannot be cleared either: the adapter only sends an empty value for
-  # strings and arrays that leave the configuration, so the backend keeps the last
-  # number it was given. Computed for the same reason as the two fields above.
-  replication_factor:
-    computed: true
-    useStateForUnknown: true
   # SDK defaults, preserved so omitting the field does not drift existing state.
   sync_group_offsets_enabled:
     default: false
@@ -89,14 +71,6 @@ schema:
     default: false
   exactly_once_delivery_enabled:
     default: false
-  follower_fetching_enabled:
-    computed: true
-    useStateForUnknown: true
-  # New field, not exposed by the SDK. Computed for the same reason as
-  # replication_factor: a number that leaves the configuration is not cleared.
-  offset_lag_max:
-    computed: true
-    useStateForUnknown: true
   # The API models this as a comma-separated string, but the SDK exposed it as a
   # set of strings. The expand/flatten modifiers convert between the two.
   config_properties_exclude:

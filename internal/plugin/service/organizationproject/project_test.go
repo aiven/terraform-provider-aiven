@@ -215,6 +215,19 @@ func TestAccAivenOrganizationProjectUpdateSteps(t *testing.T) {
 		// Basic configuration: two organizational units in the organization.
 		// organization_id / billing_group_id are formatted directly into each step.
 		baseConfig = generateBaseConfig(rName, organizationID)
+
+		// Config shared by the "update with technical_emails" step and the
+		// follow-up ExpectEmptyPlan step that proves base_port survives via
+		// UseStateForUnknown when omitted from config.
+		emailsConfig = baseConfig + fmt.Sprintf(`
+resource "aiven_organization_project" "foo" {
+  project_id       = %[1]q
+  organization_id  = %[2]q
+  billing_group_id = %[3]q
+  parent_id        = aiven_organizational_unit.foo.id
+  technical_emails = ["john.doe+1@gmail.com", "john.doe+2@gmail.com"]
+}
+`, projectID, organizationID, billingGroupID)
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -249,26 +262,33 @@ resource "aiven_organization_project" "foo" {
 				ImportStateVerify: true,
 			},
 			{
-				// updating with technical_emails
-				Config: baseConfig + fmt.Sprintf(`
-resource "aiven_organization_project" "foo" {
-  project_id       = %[1]q
-  organization_id  = %[2]q
-  billing_group_id = %[3]q
-  parent_id        = aiven_organizational_unit.foo.id
-  technical_emails = ["john.doe+1@gmail.com", "john.doe+2@gmail.com"]
-}
-`, projectID, organizationID, billingGroupID),
+				// updating with technical_emails. base_port is omitted from the
+				// config; the server-echoed value from the previous step must
+				// stay in state unchanged.
+				Config: emailsConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
 					resource.TestCheckResourceAttr(resourceName, "organization_id", organizationID),
 					resource.TestCheckResourceAttr(resourceName, "billing_group_id", billingGroupID),
 					resource.TestCheckResourceAttrPair(resourceName, "parent_id", "aiven_organizational_unit.foo", "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "base_port", "10000"),
 					resource.TestCheckResourceAttr(resourceName, "technical_emails.#", "2"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "technical_emails.*", "john.doe+1@gmail.com"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "technical_emails.*", "john.doe+2@gmail.com"),
 				),
+			},
+			{
+				// Re-apply the same base_port-less config: the Optional+Computed
+				// field is echoed by Read, so without UseStateForUnknown the
+				// planner would mark base_port "known after apply" and produce a
+				// non-empty plan. ExpectEmptyPlan asserts the generator wired USFU
+				// correctly for a round-trip field left out of config.
+				Config: emailsConfig,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
+				Check: resource.TestCheckResourceAttr(resourceName, "base_port", "10000"),
 			},
 			{
 				// change parent_id which belongs to the same organization, should succeed. Also, remove technical_emails

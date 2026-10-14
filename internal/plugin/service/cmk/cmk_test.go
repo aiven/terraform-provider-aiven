@@ -29,6 +29,9 @@ func TestAccCMKResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", project),
 					resource.TestCheckResourceAttr(resourceName, "cmk_provider", "gcp"),
 					resource.TestCheckResourceAttr(resourceName, "resource", resName),
+					// default_cmk is omitted from the config; the server fills it
+					// in and the auto-promoted Optional+Computed+USFU schema
+					// accepts the value on Read.
 					resource.TestCheckResourceAttr(resourceName, "default_cmk", "false"),
 					resource.TestCheckResourceAttr(resourceName, "status", "current"),
 					resource.TestCheckResourceAttrSet(resourceName, "cmk_id"),
@@ -36,6 +39,8 @@ func TestAccCMKResource(t *testing.T) {
 				),
 			},
 			{
+				// Import against the same minimal config: without the fix
+				// the Flatten'd default_cmk would be rejected on state write.
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -58,7 +63,6 @@ resource "aiven_cmk" "foo" {
   project      = %q
   resource     = %q
   cmk_provider = "gcp"
-  default_cmk  = false
 }
 `, projectName, resName)
 }

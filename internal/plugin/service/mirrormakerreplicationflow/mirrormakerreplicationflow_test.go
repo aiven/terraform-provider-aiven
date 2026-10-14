@@ -158,6 +158,17 @@ func TestAccAivenMirrorMakerReplicationFlow(t *testing.T) {
 					Config:   testAccMirrorMakerReplicationFlowMinimal(projectName, sourceName, targetName, mmName, topicName),
 					PlanOnly: true,
 				},
+				{
+					// Import against the minimal config exercises IsAutoComputed:
+					// replication_factor, offset_lag_max, and follower_fetching_enabled
+					// are server-defaulted scalars the API echoes back. Without the
+					// Optional+Computed promotion the framework would reject the
+					// Flatten'd values and the import would fail.
+					Config:            testAccMirrorMakerReplicationFlowMinimal(projectName, sourceName, targetName, mmName, topicName),
+					ResourceName:      resourceName,
+					ImportState:       true,
+					ImportStateVerify: true,
+				},
 			},
 		})
 	})

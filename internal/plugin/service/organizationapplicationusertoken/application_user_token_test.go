@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 func TestAccOrganizationApplicationUserTokenResource(t *testing.T) {
@@ -64,8 +66,34 @@ resource "aiven_organization_application_user_token" "bar" {
 					resource.TestCheckResourceAttrWith(tokenBar, "full_token", validToken),
 				),
 			},
+			{
+				// Minimal-config token: the config omits max_age_seconds and
+				// extend_when_used. Both are echoed by Read, and max_age_seconds
+				// was not Computed before the generator's auto-promotion rule;
+				// import would reject the Flatten'd value without this fix.
+				ResourceName:      tokenBar,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// full_token is returned only once at create time.
+				ImportStateVerifyIgnore: []string{"full_token"},
+				ImportStateIdFunc:       importIDFunc(tokenBar),
+			},
 		},
 	})
+}
+
+func importIDFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, err := acc.ResourceFromState(state, resourceName)
+		if err != nil {
+			return "", err
+		}
+		return util.ComposeID(
+			rs.Primary.Attributes["organization_id"],
+			rs.Primary.Attributes["user_id"],
+			rs.Primary.Attributes["token_prefix"],
+		), nil
+	}
 }
 
 func validToken(s string) error {

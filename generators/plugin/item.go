@@ -114,16 +114,30 @@ func (o Operations) AppearsInID(operationID OperationID, handler OperationType, 
 	return operationToHandler()[o[operationIndex].Type] | source | (1 << bitOffset)
 }
 
-// AppearsInHandler finds all operation IDs matching the operation, merges the result
-// There are can be multiple read operations, for example.
-func (o Operations) AppearsInHandler(handler OperationType, source AppearsIn) AppearsIn {
-	var appearsIn AppearsIn
+// handlerMask ORs the AppearsInID bits of every matching op: generic
+// handler/source bits plus one unique bit per op. Used by AppearsInHandler.
+func (o Operations) handlerMask(handler OperationType, source AppearsIn) AppearsIn {
+	var mask AppearsIn
 	for _, op := range o {
 		if op.Type == handler {
-			appearsIn |= o.AppearsInID(op.ID, handler, source)
+			mask |= o.AppearsInID(op.ID, handler, source)
 		}
 	}
-	return appearsIn
+	return mask
+}
+
+// AppearsInHandler reports whether itemBits appears in at least one op of the
+// given handler and source. AND with handlerMask, then strip the generic bits
+// that every matching op shares — a non-zero remainder means a per-op bit
+// survived.
+//
+// Example: ops = [FooCreate, FooRead, FooAuxRead]. A field only in FooRead's
+// response has {ReadHandler, ResponseBody, fooReadResBit}. AppearsInHandler
+// with (Read, ResponseBody) returns true (fooReadResBit survives). The
+// alternative itemBits.Contains(handlerMask(...)) would also require
+// fooAuxReadResBit and wrongly return false.
+func (o Operations) AppearsInHandler(itemBits AppearsIn, handler OperationType, source AppearsIn) bool {
+	return itemBits&o.handlerMask(handler, source)&^(operationToHandler()[handler]|source) != 0
 }
 
 type Scope struct {
@@ -356,20 +370,35 @@ type Item struct {
 	Pattern            string     `yaml:"pattern,omitempty"`
 	Required           bool       `yaml:"_required,omitempty"`
 	Computed           bool       `yaml:"_computed,omitempty"`
-	Virtual            bool       `yaml:"_virtual,omitempty"` // The field doesn't appear in API request/response. Only "id" for now.
-	Nullable           bool       `yaml:"_nullable,omitempty"`
-	Optional           bool       `yaml:"_optional,omitempty"`
-	Sensitive          bool       `yaml:"_sensitive,omitempty"`
-	ForceNew           bool       `yaml:"_forceNew,omitempty"`
-	Default            any        `yaml:"default,omitempty"`
-	Enum               []any      `yaml:"enum,omitempty"`
-	MinLength          int        `yaml:"minLength,omitempty"`
-	MaxLength          int        `yaml:"maxLength,omitempty"`
-	MinItems           int        `yaml:"minItems,omitempty"`
-	MaxItems           int        `yaml:"maxItems,omitempty"`
-	Minimum            int        `yaml:"minimum,omitempty"`
-	Maximum            int        `yaml:"maximum,omitempty"`
-	Example            any        `yaml:"example,omitempty"`
+	// AutoComputed marks a user-settable scalar/enum that is echoed by the
+	// Read response for Optional+Computed promotion (plus UseStateForUnknown).
+	// Without this, d.Flatten(rsp) in the Read handler would write the server
+	// value into state for an Optional-only attribute, which the framework
+	// rejects and which breaks terraform import.
+	//
+	// Qualifiers (set by recalcDeep):
+	//   - Root attribute, not Required.
+	//   - int/number/bool, or enum string. Free-form strings and collections
+	//     are cleared by sending empty values, which would silently retain a
+	//     removed value.
+	//   - Appears in a Create request body AND a Read response body (per-op,
+	//     see Operations.AppearsInHandler). E.g. kafka_topic.retention_bytes:
+	//     user sets it on create, server defaults it, Read echoes the value.
+	AutoComputed bool  `yaml:"_autoComputed,omitempty"`
+	Virtual      bool  `yaml:"_virtual,omitempty"` // The field doesn't appear in API request/response. Only "id" for now.
+	Nullable     bool  `yaml:"_nullable,omitempty"`
+	Optional     bool  `yaml:"_optional,omitempty"`
+	Sensitive    bool  `yaml:"_sensitive,omitempty"`
+	ForceNew     bool  `yaml:"_forceNew,omitempty"`
+	Default      any   `yaml:"default,omitempty"`
+	Enum         []any `yaml:"enum,omitempty"`
+	MinLength    int   `yaml:"minLength,omitempty"`
+	MaxLength    int   `yaml:"maxLength,omitempty"`
+	MinItems     int   `yaml:"minItems,omitempty"`
+	MaxItems     int   `yaml:"maxItems,omitempty"`
+	Minimum      int   `yaml:"minimum,omitempty"`
+	Maximum      int   `yaml:"maximum,omitempty"`
+	Example      any   `yaml:"example,omitempty"`
 }
 
 // UniqueName generates unique name by composing all ancestor names
@@ -518,20 +547,46 @@ var assignedOnceAttributes = []string{"uuid", "created_at", "created_by", "creat
 
 // UsesStateForUnknown reports whether the attribute keeps its state value instead of
 // planning as "known after apply", which would cascade unknowns into everything
-// referencing it. The definition wins when set, otherwise root "*_id" and
-// assignedOnceAttributes qualify. Nested ones don't: a child entity (e.g. the current
-// deployment) is replaced over its parent's lifetime.
+// referencing it. The definition wins when set, otherwise root "*_id",
+// assignedOnceAttributes, and AutoComputed attributes qualify. Nested ones don't:
+// a child entity (e.g. the current deployment) is replaced over its parent's lifetime.
 // Unrelated to the spec's "createOnly", which means ForceNew.
 func (item *Item) UsesStateForUnknown() bool {
 	if item.OverrideUseStateForUnknown != nil {
 		return *item.OverrideUseStateForUnknown
 	}
 
-	if !item.IsRootProperty() || !item.Computed || item.Optional || item.Required {
+	if !item.IsRootProperty() || !item.Computed || item.Required {
+		return false
+	}
+
+	// Auto-promoted scalar/enum optionals get USFU so the server-echoed value
+	// doesn't flap between apply and refresh.
+	if item.AutoComputed {
+		return true
+	}
+
+	if item.Optional {
 		return false
 	}
 
 	return strings.HasSuffix(item.Name, "_id") || slices.Contains(assignedOnceAttributes, item.Name)
+}
+
+// isAutoComputedShape is the Operations-independent half of the AutoComputed
+// rule: root scalar/enum, not required. recalcDeep ANDs this with the
+// per-operation AppearsIn check to set item.AutoComputed.
+func (item *Item) isAutoComputedShape() bool {
+	if !item.IsRootProperty() || item.Required {
+		return false
+	}
+	switch item.Type {
+	case SchemaTypeInteger, SchemaTypeNumber, SchemaTypeBoolean:
+		return true
+	case SchemaTypeString:
+		return item.IsEnum()
+	}
+	return false
 }
 
 func (item *Item) PropertiesByEntity(entity entityType) map[string]*Item {

@@ -485,7 +485,6 @@ func createRootItem(scope *Scope) (*Item, error) {
 
 	// Marks ID fields.
 	// The virtual "id" is not inferred by UsesStateForUnknown, so it is set here.
-	isMutable := scope.Definition.Operations.AppearsInHandler(OperationUpdate, RequestBody)
 	idField.OverrideUseStateForUnknown = or(idField.OverrideUseStateForUnknown, new(true))
 	for i, v := range pkg.IDAttributeComposed {
 		if _, ok := root.Properties[v]; !ok {
@@ -500,7 +499,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 		// This applies to virtual ID only,
 		// because custom id (e.g. "organization_id") has already been calculated
 		// or modified using "UseStateForUnknown" field.
-		if root.Properties[v].AppearsIn.Contains(isMutable) {
+		if scope.Definition.Operations.AppearsInHandler(root.Properties[v].AppearsIn, OperationUpdate, RequestBody) {
 			idField.OverrideUseStateForUnknown = new(false)
 		}
 	}
@@ -1070,15 +1069,24 @@ func recalcDeep(def *Definition, item *Item) error {
 	in := func(a AppearsIn) bool {
 		return item.AppearsIn.Contains(a)
 	}
+	inOp := func(handler OperationType, source AppearsIn) bool {
+		return def.Operations.AppearsInHandler(item.AppearsIn, handler, source)
+	}
 
-	createPathParam := def.Operations.AppearsInHandler(OperationCreate, PathParameter)
-	createRequestBody := def.Operations.AppearsInHandler(OperationCreate, RequestBody)
-	updateRequestBody := def.Operations.AppearsInHandler(OperationUpdate, RequestBody)
-
-	item.Required = in(createPathParam) || item.Required && in(createRequestBody) // Sometimes field required in GET
+	item.Required = inOp(OperationCreate, PathParameter) || item.Required && inOp(OperationCreate, RequestBody) // Sometimes field required in GET
 	item.Optional = item.Optional || !item.Required && in(RequestBody)
-	item.Computed = item.Computed || item.Default != nil || !item.Required && !in(RequestBody) && in(ResponseBody)
-	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !in(updateRequestBody)
+	// Order: after Required (isAutoComputedShape reads it), before Computed
+	// (responseEcho reads AutoComputed). E.g. an enum string the user sets on
+	// Create and the server echoes on Read qualifies, so it needs USFU to
+	// avoid flapping on refresh.
+	item.AutoComputed = item.isAutoComputedShape() &&
+		inOp(OperationCreate, RequestBody) &&
+		inOp(OperationRead, ResponseBody)
+	// Promote to Computed when the server either sets the value (response-only
+	// field or schema default) or echoes a scalar the user may configure.
+	responseEcho := !item.Required && in(ResponseBody) && (!in(RequestBody) || item.AutoComputed)
+	item.Computed = item.Computed || item.Default != nil || responseEcho
+	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !inOp(OperationUpdate, RequestBody)
 
 	// Overrides that come from the user config
 	item.Optional = ptrOrDefault(item.OverrideOptional, item.Optional)

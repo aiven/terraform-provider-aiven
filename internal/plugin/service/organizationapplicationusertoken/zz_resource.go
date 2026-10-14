@@ -54,7 +54,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "Extend token expiration time when token is used. Only applicable if max_age_seconds is specified. The default value is `false`. Changing this property forces recreation of the resource.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()},
 			},
 			"full_token": schema.StringAttribute{
 				Computed:            true,
@@ -90,9 +90,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Human readable user agent string of the client that last used the token in case user agent is known.",
 			},
 			"max_age_seconds": schema.Int64Attribute{
+				Computed:            true,
 				MarkdownDescription: "Time the token remains valid since creation (or since last use if extend_when_used is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace(), int64planmodifier.UseStateForUnknown()},
 				Validators:          []validator.Int64{int64validator.Between(600, 315360000)},
 			},
 			"organization_id": schema.StringAttribute{
@@ -174,6 +175,7 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"max_age_seconds": &adapter.Schema{
+				Computed:       true,
 				Type:           adapter.SchemaTypeInt,
 				ZeroNotAllowed: true,
 			},

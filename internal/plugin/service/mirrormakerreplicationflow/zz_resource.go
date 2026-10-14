@@ -32,20 +32,24 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Optional:            true,
 			},
 			"diskless_az_enabled": schema.BoolAttribute{
+				Computed:            true,
 				MarkdownDescription: "Adds a diskless_az= hint to the replication flow's Kafka client.id so that diskless Kafka clusters serve the flow from brokers in the same availability zone.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"emit_backward_heartbeats_enabled": schema.BoolAttribute{
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"emit_heartbeats_enabled": schema.BoolAttribute{
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "Whether to emit heartbeats to the target cluster. The default value is `false`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"enable": schema.BoolAttribute{
 				MarkdownDescription: "Is replication flow enabled.",
@@ -56,6 +60,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "Whether to enable exactly-once message delivery. We recommend you set this to enabled for new replications. The default value is `false`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"follower_fetching_enabled": schema.BoolAttribute{
 				Computed:            true,
@@ -116,12 +121,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster. The default value is `false`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"sync_group_offsets_interval_seconds": schema.Int64Attribute{
 				Computed:            true,
 				Default:             int64default.StaticInt64(1),
 				MarkdownDescription: "Frequency at which consumer group offsets are synced (default: 60, every minute). Minimum value: `1`. The default value is `1`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 				Validators:          []validator.Int64{int64validator.AtLeast(1)},
 			},
 			"target_cluster": schema.StringAttribute{
@@ -154,7 +161,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
 				Type:  adapter.SchemaTypeSet,
 			},
-			"diskless_az_enabled": &adapter.Schema{Type: adapter.SchemaTypeBool},
+			"diskless_az_enabled": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeBool,
+			},
 			"emit_backward_heartbeats_enabled": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeBool,
