@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/dave/jennifer/jen"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -72,14 +74,39 @@ var cloudTypes = [][]string{
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: ""})
 
-	err := exec()
+	skipHashCheck := flag.Bool(
+		"skip-openapi-hash-check",
+		false,
+		"skip verifying that openapi.json matches the hash embedded in the go-client-codegen release",
+	)
+	flag.Parse()
+
+	err := exec(*skipHashCheck)
 	if err != nil {
 		println(err.Error())
 		os.Exit(1)
 	}
 }
 
-func exec() error {
+func exec(skipHashCheck bool) error {
+	// Enforce that the pinned client and this openapi.json come from the same spec,
+	// so handler models can marshal every field the Terraform schema exposes.
+	if !skipHashCheck {
+		got, err := fileSHA256(openAPIPath)
+		if err != nil {
+			return err
+		}
+		if want := avngen.OpenAPISpecHash(); got != want {
+			return fmt.Errorf(
+				"openapi.json hash mismatch: got %s, want %s (from go-client-codegen %s); "+
+					"the client and the Terraform schema must be generated from the same openapi.json, "+
+					"so bump go-client-codegen to a release whose OpenAPISpecHash matches this spec; "+
+					"to bypass, re-run with -skip-openapi-hash-check (or `task generate skip_hash_check=true`)",
+				got, want, avngen.Version(),
+			)
+		}
+	}
+
 	// Loads OpenAPIDoc with the patch
 	doc, err := readOpenAPIDoc(openAPIPath, openAPIPatchPath)
 	if err != nil {

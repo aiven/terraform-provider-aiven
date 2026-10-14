@@ -14,6 +14,9 @@ nav_order: 1
 
 - Add `aiven_service_list` datasource field `services.first_use_time`: Timestamp when the service was first used
   (ISO 8601), null if it has not been used yet.
+- Change `aiven_account_team_project` field `team_type` (enum): add `application:access:connect`
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `application:access:connect`
+- Change `aiven_project_user` field `member_type` (enum): add `application:access:connect`
 
 ## [4.64.0] - 2026-10-12
 
