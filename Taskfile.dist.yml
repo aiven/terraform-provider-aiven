@@ -132,9 +132,10 @@ tasks:
   #################################################
 
   generate:
-    desc: Generate Go code, documentation, and mocks
+    desc: "Generate Go code, documentation, and mocks. Pass skip_hash_check=true to bypass the openapi.json/go-client-codegen hash check."
     vars:
       no_spec: '{{.no_spec | default "false"}}'
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
     cmds:
       - defer:
           task: fmt
@@ -143,13 +144,18 @@ tasks:
       - task: internal:generate
         vars:
           no_spec: '{{.no_spec}}'
+          skip_hash_check: '{{.skip_hash_check}}'
 
   docs:
-    desc: Generate documentation for the provider (tfplugindocs, gen-plugin, merge into docs/)
+    desc: "Generate documentation for the provider (tfplugindocs, gen-plugin, merge into docs/). Pass skip_hash_check=true to bypass the openapi.json/go-client-codegen hash check."
+    vars:
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
     cmds:
       - defer:
           task: fmt
       - task: internal:docs
+        vars:
+          skip_hash_check: '{{.skip_hash_check}}'
 
   update-schemas:
     desc: "Update Go client codegen and API schemas, regenerate mocks, and update CHANGELOG.md"

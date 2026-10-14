@@ -139,17 +139,25 @@ tasks:
     desc: "Generate Terraform Plugin Framework resources"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
     cmds:
+      # Wipe stale output so removed definitions don't leak into docs/ via docs-merge.sh
+      - rm -rf docs-plugin
       - task: '{{if eq .no_spec "true"}}nothing{{else}}get-spec{{end}}'
       - task: gen-plugin-generator
+        vars:
+          skip_hash_check: '{{.skip_hash_check}}'
 
   gen-plugin-generator:
     desc: "Run the plugin generator (requires openapi.json to exist)"
+    vars:
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
+      skip_hash_flag: '{{if eq .skip_hash_check "true"}} -skip-openapi-hash-check{{end}}'
     preconditions:
       - sh: test -f {{.OPENAPI_FILE}}
         msg: "{{.OPENAPI_FILE}} not found. Run 'task get-spec' to download it."
     cmds:
-      - "{{.GO_CMD}} run ./generators/plugin/..."
+      - "{{.GO_CMD}} run ./generators/plugin/...{{.skip_hash_flag}}"
 
   gen-plugin-report:
     desc: "Generate plugin migration report"
@@ -159,7 +167,8 @@ tasks:
   gen-docs:
     desc: "Generate Terraform provider documentation (tfplugindocs; SDK resources and guides)"
     cmds:
-      - rm -f docs-tfplugindocs/.DS_Store
+      # Wipe stale output so removed resources don't leak into docs/ via docs-merge.sh
+      - rm -rf docs-tfplugindocs
       - "{{.TFPLUGINDOCS}} generate --provider-name terraform-provider-aiven --rendered-website-dir docs-tfplugindocs"
       - find docs-tfplugindocs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
 
@@ -167,22 +176,26 @@ tasks:
     desc: "Generate all provider documentation (tfplugindocs, gen-plugin, merge into docs/)"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
     cmds:
       - task: gen-docs
       - task: gen-plugin
         vars:
           no_spec: '{{.no_spec}}'
+          skip_hash_check: '{{.skip_hash_check}}'
       - ./tools/scripts/docs-merge.sh
 
   generate:
     desc: "Run all code generation tasks"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
+      skip_hash_check: '{{.skip_hash_check | default "false"}}'
     cmds:
       - task: gen-go
       - task: docs
         vars:
           no_spec: '{{.no_spec}}'
+          skip_hash_check: '{{.skip_hash_check}}'
       - task: gen-plugin-report
       - task: mockery
 
@@ -197,11 +210,10 @@ tasks:
 
   diff-schemas:
     desc: "Compare current schemas against {{.OLD_SCHEMA}} and update CHANGELOG.md"
+    # No sources/generates: schema diffs depend on external client enums, not local files.
     cmds:
       - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog={{.CHANGELOG_FILE}}"
       - rm {{.OLD_SCHEMA}}
-    sources: ["**/*.go"]
-    generates: ["{{.CHANGELOG_FILE}}"]
 
   load-codegen:
     desc: "Update go-client-codegen module dependency"

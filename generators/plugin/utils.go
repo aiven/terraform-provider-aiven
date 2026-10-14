@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"maps"
+	"os"
 	"reflect"
 	"regexp"
 	"slices"
@@ -14,6 +17,16 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
+
+// fileSHA256 returns the hex-encoded SHA-256 of path, matching `sha256sum`.
+func fileSHA256(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("read %s: %w", path, err)
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
 
 // distinct doesn't preserve the order of the input arguments.
 func distinct[T any](args ...T) []T {
