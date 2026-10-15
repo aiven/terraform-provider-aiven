@@ -47,6 +47,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(63)},
 			},
 			"technical_emails": schema.SetAttribute{
 				Computed:            true,

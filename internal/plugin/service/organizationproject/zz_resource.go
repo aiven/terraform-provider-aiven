@@ -51,9 +51,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The name of the project. Names must be globally unique among all Aiven customers. Names must begin with a letter (a-z), and consist of letters, numbers, and dashes. It's recommended to use a random string or your organization name as a prefix or suffix. Changing this property forces recreation of the resource. Maximum length: `63`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.LengthAtMost(63)},
 			},
 			"technical_emails": schema.SetAttribute{
 				ElementType:         types.StringType,
