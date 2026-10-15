@@ -30,6 +30,7 @@ remove:
   - password_updated_time
   - access_cert
   - access_key
+  - mysql_grants # MySQL grants for the service user
 schema:
   password:
     type: string

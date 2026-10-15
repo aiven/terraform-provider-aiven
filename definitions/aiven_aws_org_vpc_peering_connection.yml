@@ -48,6 +48,8 @@ remove:
   - update_time
   - user_peer_network_cidrs
   - vpc_peering_connection_type
+  - peer_azure_app_id # Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet
+  - peer_azure_tenant_id # Azure tenant id in UUID4 form
 schema:
   organization_vpc_id:
     example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d

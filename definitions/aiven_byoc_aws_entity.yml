@@ -23,6 +23,16 @@ remove:
   - state
   - update_time
   - aws_iam_role_arn
+  - aiven_azure_cce_client_id # Application (client) ID of the Aiven multi-tenant Azure CCE service principal.
+  - aiven_google_account_principal # Google account identifier
+  - azure_subscription_id # UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed.
+  - azure_tenant_id # Entra ID tenant ID of the customer's directory where the Aiven CCE enterprise application is installed.
+  - google_bastion_cidr # Private IP address block for the workload VPC containing the bastion subnet
+  - google_privilege_bearing_service_account_id # Google account identifier
+  - google_workload_cidr # Private IP address block for the workload VPC containing the workload subnet
+  - oracle_compartment_id # Used to uniquely identify an asset in Oracle's cloud. May refer to a range of object types including instance, tenancy,...
+  - oracle_subnet_bastion # CIDR for the bastion subnet
+  - oracle_subnet_workload # CIDR for the private workload subnet
 schema:
   cloud_provider:
     forceNew: true

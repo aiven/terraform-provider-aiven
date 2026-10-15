@@ -325,6 +325,13 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			}
 		}
 	}
+
+	// Persist cross-group drops into the YAML's `remove:` so they are
+	// visible and the regular remove-list path handles them next run.
+	if err := persistPrunedRemoves(def); err != nil {
+		return fmt.Errorf("could not persist pruned removes for %q: %w", def.fileName, err)
+	}
+
 	return nil
 }
 
@@ -507,10 +514,12 @@ func createRootItem(scope *Scope) (*Item, error) {
 	return root, nil
 }
 
-// pruneCrossGroupFields drops root properties whose name tokens belong to a
-// different group than the definition's typeName. Each inner slice is a set
-// of aliases (one group). ID-participating fields are left alone. Returns
-// true when at least one property was removed.
+// pruneCrossGroupFields drops root properties whose name tokens belong
+// to a different group than def.typeName. Each inner slice is one group
+// of aliases. ID-participating fields are left alone. Dropped entries
+// are recorded on def.prunedFields (first non-empty description wins,
+// so resource and datasource passes merge cleanly). Returns true iff
+// anything was pruned.
 func pruneCrossGroupFields(def *Definition, root *Item, groups [][]string) bool {
 	tokenGroup := make(map[string]int)
 	for i, g := range groups {
@@ -529,7 +538,7 @@ func pruneCrossGroupFields(def *Definition, root *Item, groups [][]string) bool 
 		return false
 	}
 
-	pruned := 0
+	pruned := false
 	for name, item := range root.Properties {
 		if item.IDAttribute {
 			continue
@@ -540,13 +549,35 @@ func pruneCrossGroupFields(def *Definition, root *Item, groups [][]string) bool 
 				continue
 			}
 			if !own[gi] {
+				if def.prunedFields == nil {
+					def.prunedFields = map[string]string{}
+				}
+				if def.prunedFields[name] == "" {
+					def.prunedFields[name] = item.Description
+				}
 				delete(root.Properties, name)
-				pruned++
+				pruned = true
 				break
 			}
 		}
 	}
-	return pruned > 0
+	// Local flag, not len(def.prunedFields): datasource runs before
+	// resource, so a cumulative check would skip resource's cloudTypes
+	// pass if its serviceTypes pass drops nothing.
+	return pruned
+}
+
+// persistPrunedRemoves appends def.prunedFields (deduped) to the
+// definition's top-level `remove:` list.
+func persistPrunedRemoves(def *Definition) error {
+	if len(def.prunedFields) == 0 {
+		return nil
+	}
+	path := filepath.Join(definitionsPath, def.fileName)
+	return writeBackYAMLFile(path, func(root *yaml.Node) error {
+		appendUniqueScalars(findOrCreateSeq(root, "remove"), def.prunedFields)
+		return nil
+	})
 }
 
 func fromOperationID(scope *Scope, operation *Operation, root *Item) error {

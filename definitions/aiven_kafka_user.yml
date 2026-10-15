@@ -28,6 +28,7 @@ remove:
   - authentication
   - expiring_cert_not_valid_after_time
   - password_updated_time
+  - mysql_grants # MySQL grants for the service user
 schema:
   password:
     type: string
