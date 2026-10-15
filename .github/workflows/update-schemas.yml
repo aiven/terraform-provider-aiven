@@ -2,7 +2,7 @@ name: Update Schemas
 
 on:
   schedule:
-    - cron: 0 5 * * 1-5
+    - cron: 0 12 * * 1-5
   workflow_dispatch: {}
 
 permissions: read-all

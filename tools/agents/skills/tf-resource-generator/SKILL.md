@@ -52,7 +52,7 @@ Use the `AskUserQuestion` tool with these options:
 2. **Scope** - Project-level, service-level, organization-level?
 
 ### Discovery Process
-1. **Update OpenAPI spec** first by running `task get-spec` to ensure you have the latest API schema
+1. **Update OpenAPI spec** first by running `task get-spec` to get the spec matching the pinned `go-client-codegen`
 2. **Search OpenAPI spec** for operation IDs
 3. **Show the user** what you found and ask for confirmation
 4. **Find similar resources** in `definitions/` and show them
@@ -93,7 +93,7 @@ grep -l "idAttributeComposed:" definitions/aiven_*.yml
 
 ### 1. Update OpenAPI Spec
 
-Always start by downloading the latest API schema:
+Always start by downloading the API schema. It comes from the `openapi.zip` asset of the `go-client-codegen` release pinned in `go.mod`, so the spec and the client always match. To pick up a newer API, bump the client first (`task update-client`):
 ```bash
 task get-spec
 ```
@@ -923,9 +923,9 @@ func TestAccAivenMyResource_basic(t *testing.T) {
 ## Commands
 
 ```bash
-task get-spec                          # Update OpenAPI spec
-task generate                          # Generate code
-task generate no_spec=true             # Generate without spec update
+task get-spec                          # Download OpenAPI spec for the pinned go-client-codegen
+task generate                          # Download spec and generate code
+task generate no_spec=true             # Generate from the local openapi.json
 task build                             # Build provider
 task lint                              # Run linters
 task test-unit                         # Unit tests (no API)
