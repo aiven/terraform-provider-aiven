@@ -15,6 +15,3 @@ operations:
     type: update
 remove:
   - last_validation
-schema:
-  auto_validation_delay_days:
-    computed: true

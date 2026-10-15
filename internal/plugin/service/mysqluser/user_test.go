@@ -9,6 +9,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -102,6 +103,15 @@ func TestAccAivenMySQLUser_basic(t *testing.T) {
 						resource.TestCheckResourceAttr("data.aiven_mysql_user.user", "project", projectName),
 						resource.TestCheckResourceAttr("data.aiven_mysql_user.user", "service_name", serviceName),
 					),
+				},
+				{
+					// Re-plan with the same config: authentication is omitted and
+					// server-echoed. UseStateForUnknown must hold the state value
+					// so the plan stays empty.
+					Config: testAccMySQLUserResource(projectName, serviceName, userName, "Test$1234"),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+					},
 				},
 				{
 					// update optional password

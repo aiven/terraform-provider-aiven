@@ -58,8 +58,6 @@ schema:
     items:
       type: string
       example: test@example.com
-  billing_currency:
-    computed: true
   country_code:
     computed: true
   company:

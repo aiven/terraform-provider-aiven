@@ -35,6 +35,12 @@ func TestUsesStateForUnknown(t *testing.T) {
 			// Optional with a server side default: the plan can't assume the
 			// state value, the user may have just set it.
 			"parent_id": {Optional: true, Computed: true},
+			// Auto-promoted enum string (optional on Create, echoed on Read):
+			// qualifies via AutoComputed even though Optional is set.
+			// AutoComputed is cached by recalcDeep from the surrounding
+			// Operations; preset here because this test exercises
+			// UsesStateForUnknown in isolation.
+			"content_type": {Optional: true, Computed: true, AutoComputed: true},
 			// Changes over the resource's lifetime, so the state value is stale.
 			"updated_at":     {Computed: true},
 			"updated_by":     {Computed: true},
@@ -88,6 +94,7 @@ func TestUsesStateForUnknown(t *testing.T) {
 		"access_cert":      false,
 		"access_key":       false,
 		"opted_out_id":     false,
+		"content_type":     true,
 	}
 
 	for name, want := range expect {
@@ -96,6 +103,199 @@ func TestUsesStateForUnknown(t *testing.T) {
 
 	nested := root.Properties["current_deployment"].Properties["deployment_id"]
 	assert.False(t, nested.UsesStateForUnknown(), "nested deployment_id")
+}
+
+func TestAutoComputed(t *testing.T) {
+	t.Parallel()
+
+	// A canonical definition with one create and two reads. The second read is
+	// an auxiliary GET (e.g. ProjectKmsGetCA) that only returns an unrelated
+	// field; a round-trip body is expected to appear in the primary read, not
+	// in every read.
+	def := &Definition{
+		Operations: Operations{
+			{ID: "FooCreate", Type: OperationCreate},
+			{ID: "FooRead", Type: OperationRead},
+			{ID: "FooAuxRead", Type: OperationRead},
+			{ID: "FooUpdate", Type: OperationUpdate},
+		},
+	}
+	ops := def.Operations
+	createReqBit := ops.AppearsInID("FooCreate", OperationCreate, RequestBody)
+	createResBit := ops.AppearsInID("FooCreate", OperationCreate, ResponseBody)
+	readResBit := ops.AppearsInID("FooRead", OperationRead, ResponseBody)
+	readPathBit := ops.AppearsInID("FooRead", OperationRead, PathParameter)
+	auxReadResBit := ops.AppearsInID("FooAuxRead", OperationRead, ResponseBody)
+	updateReqBit := ops.AppearsInID("FooUpdate", OperationUpdate, RequestBody)
+
+	// Round-trip: present in Create request + Update request + primary Read
+	// response. The Update bit is required so recalcDeep does not infer
+	// ForceNew (which would veto AutoComputed). Not in the aux Read response —
+	// matches real-world fields like `aiven_organization_project.base_port`
+	// which the OR-merged mask would have missed.
+	roundTrip := createReqBit | updateReqBit | readResBit
+
+	root := &Item{Name: "root", Type: SchemaTypeObject}
+	mk := func(name string, item *Item) *Item {
+		item.Name = name
+		item.Parent = root
+		return item
+	}
+
+	// Without Update, configurable fields require replacement. Automatic Computed
+	// must not change config removal into prior state preservation.
+	// Models aiven_organization_application_user_token.max_age_seconds.
+	noUpdateDef := &Definition{
+		Operations: Operations{
+			{ID: "TokenCreate", Type: OperationCreate},
+			{ID: "TokenRead", Type: OperationRead},
+			{ID: "TokenDelete", Type: OperationDelete},
+		},
+	}
+	noUpdateCreateReq := noUpdateDef.Operations.AppearsInID("TokenCreate", OperationCreate, RequestBody)
+	noUpdateReadRes := noUpdateDef.Operations.AppearsInID("TokenRead", OperationRead, ResponseBody)
+
+	cases := []struct {
+		name string
+		def  *Definition
+		item *Item
+		want bool
+	}{
+		// Scalars eligible for auto-promotion.
+		{"integer round-trip", def, mk("replication_factor", &Item{Type: SchemaTypeInteger, AppearsIn: roundTrip}), true},
+		{"number round-trip", def, mk("offset_lag_max", &Item{Type: SchemaTypeNumber, AppearsIn: roundTrip}), true},
+		{"boolean round-trip", def, mk("restart_enabled", &Item{Type: SchemaTypeBoolean, AppearsIn: roundTrip}), true},
+		{"enum string round-trip", def, mk("content_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Enum: []any{"application/java-archive", "application/zip"}}), true},
+		// Free-form strings: the resource adapter clears them by sending "".
+		{"free-form string", def, mk("host", &Item{Type: SchemaTypeString, AppearsIn: roundTrip}), false},
+		// Collections: the adapter clears them by sending [].
+		{"array", def, mk("topics", &Item{Type: SchemaTypeArrayOrdered, AppearsIn: roundTrip, Items: &Item{Type: SchemaTypeString}}), false},
+		// Required+Computed is rejected by the framework.
+		{"required scalar", def, mk("service_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Required: true, Enum: []any{"kafka_connect"}}), false},
+		// Response-only is handled by the existing "response-only ⇒ Computed" branch.
+		{"response only", def, mk("created_at", &Item{Type: SchemaTypeString, AppearsIn: readResBit}), false},
+		// Request-only has nothing to flatten.
+		{"request only", def, mk("plugin_description", &Item{Type: SchemaTypeString, AppearsIn: createReqBit}), false},
+		// Mixed-origin: in Create response + Update request + Read path parameter.
+		// The old implementation OR'd generic bits (CreateHandler | RequestBody
+		// | ReadHandler | ResponseBody) and accepted this. The per-operation
+		// check rejects it. (CodeRabbit review on PR #3121.)
+		{"mixed origin bits", def, mk("etag_mixed_origin", &Item{Type: SchemaTypeString, AppearsIn: createResBit | updateReqBit | readPathBit, Enum: []any{"a", "b"}}), false},
+		// Multiple reads: the primary read echoes the field, the aux read does
+		// not. OR-merged handlerMask would require both; AppearsInHandler allows one.
+		// Includes updateReqBit so recalcDeep does not infer ForceNew.
+		{"primary read only, aux read ignored", def, mk("base_port", &Item{Type: SchemaTypeInteger, AppearsIn: createReqBit | updateReqBit | readResBit}), true},
+		{"only aux read echoes the field", def, mk("ca_cert", &Item{Type: SchemaTypeString, AppearsIn: createReqBit | updateReqBit | auxReadResBit, Enum: []any{"a", "b"}}), true},
+		// No Update op → recalcDeep infers ForceNew=true, so AutoComputed must
+		// stay false to preserve replacement when the field leaves the config.
+		// Models aiven_organization_application_user_token.max_age_seconds.
+		{"create and read only, no update op", noUpdateDef, mk("max_age_seconds", &Item{Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes}), false},
+		// The inverse: no Update op in the spec, but OverrideForceNew=false
+		// restores USFU for fields updatable out-of-band (e.g.
+		// aiven_mysql_user.authentication via ServiceUserCredentialsModify).
+		{"create and read only, forceNew override cleared", noUpdateDef, mk("authentication", &Item{Type: SchemaTypeString, AppearsIn: noUpdateCreateReq | noUpdateReadRes, Enum: []any{"caching_sha2_password", "mysql_native_password"}, OverrideForceNew: lo.ToPtr(false)}), true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			require.NoError(t, recalcDeep(tc.def, tc.item))
+			assert.Equal(t, tc.want, tc.item.AutoComputed)
+		})
+	}
+
+	// Assert the final schema contract as well as the inference flag above.
+	t.Run("mutable scalar accepts server values", func(t *testing.T) {
+		item := mk("replication_factor", &Item{Type: SchemaTypeInteger, AppearsIn: roundTrip})
+		require.NoError(t, recalcDeep(def, item))
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar preserves replacement on removal", func(t *testing.T) {
+		item := mk("max_age_seconds", &Item{Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("forceNew false permits automatic computed", func(t *testing.T) {
+		item := mk("authentication", &Item{
+			Type: SchemaTypeString, Enum: []any{"caching_sha2_password", "mysql_native_password"},
+			AppearsIn: noUpdateCreateReq | noUpdateReadRes, OverrideForceNew: lo.ToPtr(false),
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("forceNew true prevents automatic computed despite update support", func(t *testing.T) {
+		item := mk("replication_factor", &Item{
+			Type: SchemaTypeInteger, AppearsIn: roundTrip, OverrideForceNew: lo.ToPtr(true),
+		})
+		require.NoError(t, recalcDeep(def, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar keeps default without automatic state preservation", func(t *testing.T) {
+		item := mk("extend_when_used", &Item{
+			Type: SchemaTypeBoolean, AppearsIn: noUpdateCreateReq | noUpdateReadRes, Default: false,
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.Equal(t, false, item.Default)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar explicitly retains server values", func(t *testing.T) {
+		item := mk("parallelism", &Item{
+			Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes,
+			OverrideComputed: lo.ToPtr(true), OverrideUseStateForUnknown: lo.ToPtr(true),
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("computed false overrides automatic promotion", func(t *testing.T) {
+		item := mk("replication_factor", &Item{
+			Type: SchemaTypeInteger, AppearsIn: roundTrip, OverrideComputed: lo.ToPtr(false),
+		})
+		require.NoError(t, recalcDeep(def, item))
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("nested never auto-promotes", func(t *testing.T) {
+		t.Parallel()
+		parent := &Item{
+			Name: "config", Type: SchemaTypeObject, Parent: root, AppearsIn: roundTrip,
+			Properties: map[string]*Item{
+				"retention_ms": {Name: "retention_ms", Type: SchemaTypeInteger, AppearsIn: roundTrip},
+			},
+		}
+		parent.Properties["retention_ms"].Parent = parent
+		require.NoError(t, recalcDeep(def, parent))
+		assert.False(t, parent.Properties["retention_ms"].AutoComputed)
+	})
 }
 
 func TestItemPath(t *testing.T) {
@@ -454,7 +654,7 @@ func TestOperationsIDAppearsIn(t *testing.T) {
 				// Same as by handler type
 				require.Equal(t,
 					fmt.Sprintf("%b", this),
-					fmt.Sprintf("%b", operations.AppearsInHandler(op.Type, source)),
+					fmt.Sprintf("%b", operations.handlerMask(op.Type, source)),
 				)
 
 				// Proves the mask doesn't contain other operations: create, update, etc
@@ -521,7 +721,7 @@ func TestOperationsIDAppearsInUpsert(t *testing.T) {
 		}
 	}
 
-	// Test that AppearsInHandler merges both create and update when same ID is used
+	// Test that handlerMask merges both create and update when same ID is used
 	for _, source := range sources {
 		createMask := operations.AppearsInID("FooUpsert", OperationCreate, source)
 		updateMask := operations.AppearsInID("FooUpsert", OperationUpdate, source)
@@ -529,14 +729,14 @@ func TestOperationsIDAppearsInUpsert(t *testing.T) {
 		// Create and update masks should be different
 		require.NotEqual(t, createMask, updateMask)
 
-		// AppearsInHandler should return only the specific handler's mask
+		// handlerMask should return only the specific handler's mask
 		require.Equal(t,
 			fmt.Sprintf("%b", createMask),
-			fmt.Sprintf("%b", operations.AppearsInHandler(OperationCreate, source)),
+			fmt.Sprintf("%b", operations.handlerMask(OperationCreate, source)),
 		)
 		require.Equal(t,
 			fmt.Sprintf("%b", updateMask),
-			fmt.Sprintf("%b", operations.AppearsInHandler(OperationUpdate, source)),
+			fmt.Sprintf("%b", operations.handlerMask(OperationUpdate, source)),
 		)
 	}
 }

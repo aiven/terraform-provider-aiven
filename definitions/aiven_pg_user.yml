@@ -37,6 +37,8 @@ schema:
     description: The name of the service.
   username:
     description: The name of the service user for this service.
+  # Hoisted out of access_control (which the resource removes) and reshaped at the root. The
+  # spec has no entry at this level, so the schema shape has to be spelled out in full here.
   pg_allow_replication:
     type: boolean
     optional: true
