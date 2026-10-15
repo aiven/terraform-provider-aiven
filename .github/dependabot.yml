@@ -18,8 +18,6 @@ updates:
     schedule:
       interval: weekly
     ignore:
-      - dependency-name: golang.org/x/tools
-      - dependency-name: google.golang.org/grpc
       # These libs are updated by a Makefile command
       - dependency-name: github.com/aiven/go-client-codegen
       - dependency-name: github.com/aiven/go-api-schemas
@@ -36,9 +34,6 @@ updates:
     directory: /tools
     schedule:
       interval: weekly
-    ignore:
-      - dependency-name: golang.org/x/tools
-      - dependency-name: google.golang.org/grpc
     groups:
       main:
         applies-to: version-updates
