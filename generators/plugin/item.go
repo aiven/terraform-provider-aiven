@@ -381,6 +381,10 @@ type Item struct {
 	//   - int/number/bool, or enum string. Free-form strings and collections
 	//     are cleared by sending empty values, which would silently retain a
 	//     removed value.
+	//   - Not ForceNew. Adding Computed can make config removal preserve state
+	//     instead of triggering replacement (e.g. application user token max_age_seconds).
+	//     ForceNew fields may still explicitly opt into Computed and UseStateForUnknown
+	//     when retaining server values is part of their contract (e.g. Flink parallelism).
 	//   - Appears in a Create request body AND a Read response body (per-op,
 	//     see Operations.AppearsInHandler). E.g. kafka_topic.retention_bytes:
 	//     user sets it on create, server defaults it, Read echoes the value.

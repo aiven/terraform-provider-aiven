@@ -7,6 +7,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -128,6 +129,18 @@ func TestAccAivenFlinkJarApplicationDeployment(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "parallelism", "2"),
 						resource.TestCheckResourceAttr(resourceName, "restart_enabled", "false"),
 					),
+				},
+				{
+					// Removing only parallelism must retain the server value of 2.
+					// Keep restart_enabled configured to isolate this transition.
+					Config: testAccFlinkJarApplicationDeployment(projectName, serviceName, appName, jarFile, `
+  restart_enabled = false
+`),
+					PlanOnly: true,
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PostApplyPreRefresh:  []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+						PostApplyPostRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+					},
 				},
 			},
 		})

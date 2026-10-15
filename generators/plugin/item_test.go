@@ -128,11 +128,12 @@ func TestAutoComputed(t *testing.T) {
 	auxReadResBit := ops.AppearsInID("FooAuxRead", OperationRead, ResponseBody)
 	updateReqBit := ops.AppearsInID("FooUpdate", OperationUpdate, RequestBody)
 
-	// Round-trip: present in Create request + primary Read response. Not in
-	// the aux Read response — matches real-world fields like
-	// `aiven_organization_project.base_port` which the OR-merged mask would
-	// have missed.
-	roundTrip := createReqBit | readResBit
+	// Round-trip: present in Create request + Update request + primary Read
+	// response. The Update bit is required so recalcDeep does not infer
+	// ForceNew (which would veto AutoComputed). Not in the aux Read response —
+	// matches real-world fields like `aiven_organization_project.base_port`
+	// which the OR-merged mask would have missed.
+	roundTrip := createReqBit | updateReqBit | readResBit
 
 	root := &Item{Name: "root", Type: SchemaTypeObject}
 	mk := func(name string, item *Item) *Item {
@@ -141,44 +142,147 @@ func TestAutoComputed(t *testing.T) {
 		return item
 	}
 
+	// Without Update, configurable fields require replacement. Automatic Computed
+	// must not change config removal into prior state preservation.
+	// Models aiven_organization_application_user_token.max_age_seconds.
+	noUpdateDef := &Definition{
+		Operations: Operations{
+			{ID: "TokenCreate", Type: OperationCreate},
+			{ID: "TokenRead", Type: OperationRead},
+			{ID: "TokenDelete", Type: OperationDelete},
+		},
+	}
+	noUpdateCreateReq := noUpdateDef.Operations.AppearsInID("TokenCreate", OperationCreate, RequestBody)
+	noUpdateReadRes := noUpdateDef.Operations.AppearsInID("TokenRead", OperationRead, ResponseBody)
+
 	cases := []struct {
 		name string
+		def  *Definition
 		item *Item
 		want bool
 	}{
 		// Scalars eligible for auto-promotion.
-		{"integer round-trip", mk("replication_factor", &Item{Type: SchemaTypeInteger, AppearsIn: roundTrip}), true},
-		{"number round-trip", mk("offset_lag_max", &Item{Type: SchemaTypeNumber, AppearsIn: roundTrip}), true},
-		{"boolean round-trip", mk("restart_enabled", &Item{Type: SchemaTypeBoolean, AppearsIn: roundTrip}), true},
-		{"enum string round-trip", mk("content_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Enum: []any{"application/java-archive", "application/zip"}}), true},
+		{"integer round-trip", def, mk("replication_factor", &Item{Type: SchemaTypeInteger, AppearsIn: roundTrip}), true},
+		{"number round-trip", def, mk("offset_lag_max", &Item{Type: SchemaTypeNumber, AppearsIn: roundTrip}), true},
+		{"boolean round-trip", def, mk("restart_enabled", &Item{Type: SchemaTypeBoolean, AppearsIn: roundTrip}), true},
+		{"enum string round-trip", def, mk("content_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Enum: []any{"application/java-archive", "application/zip"}}), true},
 		// Free-form strings: the resource adapter clears them by sending "".
-		{"free-form string", mk("host", &Item{Type: SchemaTypeString, AppearsIn: roundTrip}), false},
+		{"free-form string", def, mk("host", &Item{Type: SchemaTypeString, AppearsIn: roundTrip}), false},
 		// Collections: the adapter clears them by sending [].
-		{"array", mk("topics", &Item{Type: SchemaTypeArrayOrdered, AppearsIn: roundTrip, Items: &Item{Type: SchemaTypeString}}), false},
+		{"array", def, mk("topics", &Item{Type: SchemaTypeArrayOrdered, AppearsIn: roundTrip, Items: &Item{Type: SchemaTypeString}}), false},
 		// Required+Computed is rejected by the framework.
-		{"required scalar", mk("service_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Required: true, Enum: []any{"kafka_connect"}}), false},
+		{"required scalar", def, mk("service_type", &Item{Type: SchemaTypeString, AppearsIn: roundTrip, Required: true, Enum: []any{"kafka_connect"}}), false},
 		// Response-only is handled by the existing "response-only ⇒ Computed" branch.
-		{"response only", mk("created_at", &Item{Type: SchemaTypeString, AppearsIn: readResBit}), false},
+		{"response only", def, mk("created_at", &Item{Type: SchemaTypeString, AppearsIn: readResBit}), false},
 		// Request-only has nothing to flatten.
-		{"request only", mk("plugin_description", &Item{Type: SchemaTypeString, AppearsIn: createReqBit}), false},
+		{"request only", def, mk("plugin_description", &Item{Type: SchemaTypeString, AppearsIn: createReqBit}), false},
 		// Mixed-origin: in Create response + Update request + Read path parameter.
 		// The old implementation OR'd generic bits (CreateHandler | RequestBody
 		// | ReadHandler | ResponseBody) and accepted this. The per-operation
 		// check rejects it. (CodeRabbit review on PR #3121.)
-		{"mixed origin bits", mk("etag_mixed_origin", &Item{Type: SchemaTypeString, AppearsIn: createResBit | updateReqBit | readPathBit, Enum: []any{"a", "b"}}), false},
+		{"mixed origin bits", def, mk("etag_mixed_origin", &Item{Type: SchemaTypeString, AppearsIn: createResBit | updateReqBit | readPathBit, Enum: []any{"a", "b"}}), false},
 		// Multiple reads: the primary read echoes the field, the aux read does
 		// not. OR-merged handlerMask would require both; AppearsInHandler allows one.
-		{"primary read only, aux read ignored", mk("base_port", &Item{Type: SchemaTypeInteger, AppearsIn: createReqBit | readResBit}), true},
-		{"only aux read echoes the field", mk("ca_cert", &Item{Type: SchemaTypeString, AppearsIn: createReqBit | auxReadResBit, Enum: []any{"a", "b"}}), true},
+		// Includes updateReqBit so recalcDeep does not infer ForceNew.
+		{"primary read only, aux read ignored", def, mk("base_port", &Item{Type: SchemaTypeInteger, AppearsIn: createReqBit | updateReqBit | readResBit}), true},
+		{"only aux read echoes the field", def, mk("ca_cert", &Item{Type: SchemaTypeString, AppearsIn: createReqBit | updateReqBit | auxReadResBit, Enum: []any{"a", "b"}}), true},
+		// No Update op → recalcDeep infers ForceNew=true, so AutoComputed must
+		// stay false to preserve replacement when the field leaves the config.
+		// Models aiven_organization_application_user_token.max_age_seconds.
+		{"create and read only, no update op", noUpdateDef, mk("max_age_seconds", &Item{Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes}), false},
+		// The inverse: no Update op in the spec, but OverrideForceNew=false
+		// restores USFU for fields updatable out-of-band (e.g.
+		// aiven_mysql_user.authentication via ServiceUserCredentialsModify).
+		{"create and read only, forceNew override cleared", noUpdateDef, mk("authentication", &Item{Type: SchemaTypeString, AppearsIn: noUpdateCreateReq | noUpdateReadRes, Enum: []any{"caching_sha2_password", "mysql_native_password"}, OverrideForceNew: lo.ToPtr(false)}), true},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			require.NoError(t, recalcDeep(def, tc.item))
+			require.NoError(t, recalcDeep(tc.def, tc.item))
 			assert.Equal(t, tc.want, tc.item.AutoComputed)
 		})
 	}
+
+	// Assert the final schema contract as well as the inference flag above.
+	t.Run("mutable scalar accepts server values", func(t *testing.T) {
+		item := mk("replication_factor", &Item{Type: SchemaTypeInteger, AppearsIn: roundTrip})
+		require.NoError(t, recalcDeep(def, item))
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar preserves replacement on removal", func(t *testing.T) {
+		item := mk("max_age_seconds", &Item{Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("forceNew false permits automatic computed", func(t *testing.T) {
+		item := mk("authentication", &Item{
+			Type: SchemaTypeString, Enum: []any{"caching_sha2_password", "mysql_native_password"},
+			AppearsIn: noUpdateCreateReq | noUpdateReadRes, OverrideForceNew: lo.ToPtr(false),
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("forceNew true prevents automatic computed despite update support", func(t *testing.T) {
+		item := mk("replication_factor", &Item{
+			Type: SchemaTypeInteger, AppearsIn: roundTrip, OverrideForceNew: lo.ToPtr(true),
+		})
+		require.NoError(t, recalcDeep(def, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar keeps default without automatic state preservation", func(t *testing.T) {
+		item := mk("extend_when_used", &Item{
+			Type: SchemaTypeBoolean, AppearsIn: noUpdateCreateReq | noUpdateReadRes, Default: false,
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.Equal(t, false, item.Default)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("immutable scalar explicitly retains server values", func(t *testing.T) {
+		item := mk("parallelism", &Item{
+			Type: SchemaTypeInteger, AppearsIn: noUpdateCreateReq | noUpdateReadRes,
+			OverrideComputed: lo.ToPtr(true), OverrideUseStateForUnknown: lo.ToPtr(true),
+		})
+		require.NoError(t, recalcDeep(noUpdateDef, item))
+		assert.False(t, item.AutoComputed)
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.True(t, item.ForceNew)
+		assert.True(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("computed false overrides automatic promotion", func(t *testing.T) {
+		item := mk("replication_factor", &Item{
+			Type: SchemaTypeInteger, AppearsIn: roundTrip, OverrideComputed: lo.ToPtr(false),
+		})
+		require.NoError(t, recalcDeep(def, item))
+		assert.True(t, item.Optional)
+		assert.False(t, item.Computed)
+		assert.False(t, item.ForceNew)
+		assert.False(t, item.UsesStateForUnknown())
+	})
 
 	t.Run("nested never auto-promotes", func(t *testing.T) {
 		t.Parallel()

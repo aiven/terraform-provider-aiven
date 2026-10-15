@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -77,6 +78,54 @@ resource "aiven_organization_application_user_token" "bar" {
 				// full_token is returned only once at create time.
 				ImportStateVerifyIgnore: []string{"full_token"},
 				ImportStateIdFunc:       importIDFunc(tokenBar),
+			},
+		},
+	})
+}
+
+func TestAccOrganizationApplicationUserTokenResource_removeMaxAgeSeconds(t *testing.T) {
+	org := acc.OrganizationName()
+	name := acc.RandStr()
+	resourceName := "aiven_organization_application_user_token.foo"
+	config := func(maxAgeConfig string) string {
+		return fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = %q
+}
+
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "test-acc-%s"
+}
+
+resource "aiven_organization_application_user_token" "foo" {
+  organization_id  = aiven_organization_application_user.foo.organization_id
+  user_id          = aiven_organization_application_user.foo.user_id
+  extend_when_used = false
+  %s
+}
+`, org, name, maxAgeConfig)
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: config("max_age_seconds = 3600"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "max_age_seconds", "3600"),
+			},
+			{
+				// Removing the lifetime must replace the token, rather than
+				// silently retaining the previously configured expiration.
+				Config:             config(""),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
 			},
 		},
 	})

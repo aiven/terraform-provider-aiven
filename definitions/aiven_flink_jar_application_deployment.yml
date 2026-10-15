@@ -35,7 +35,9 @@ schema:
   # configuration omits it, replacing every deployment that runs with another parallelism.
   # SDKv2 had no default either, so the state may hold any value the API reported.
   parallelism:
+    computed: true
     dropDefault: true
+    useStateForUnknown: true
   # The API defaults this field to true but never returns it. SDKv2 left it absent when omitted
   # and retained an explicit false. Drop the schema default so a refreshless migration plan can
   # preserve the legacy null or false instead of forcing replacement. The create and read views

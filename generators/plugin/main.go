@@ -1075,18 +1075,28 @@ func recalcDeep(def *Definition, item *Item) error {
 
 	item.Required = inOp(OperationCreate, PathParameter) || item.Required && inOp(OperationCreate, RequestBody) // Sometimes field required in GET
 	item.Optional = item.Optional || !item.Required && in(RequestBody)
-	// Order: after Required (isAutoComputedShape reads it), before Computed
-	// (responseEcho reads AutoComputed). E.g. an enum string the user sets on
-	// Create and the server echoes on Read qualifies, so it needs USFU to
-	// avoid flapping on refresh.
+	// Settle ForceNew before AutoComputed to preserve the meaning of config removal:
+	// adding Computed can retain prior state where removal previously caused replacement.
+	// Explicit Computed and UseStateForUnknown overrides remain valid for ForceNew
+	// fields whose contract requires retaining server values, such as Flink parallelism.
+	// The OverrideForceNew pass covers the inverse case: fields the generator
+	// infers as ForceNew because no declared Update op accepts them, but which
+	// are updatable out-of-band (e.g. aiven_mysql_user.authentication is
+	// changed via ServiceUserCredentialsModify).
+	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !inOp(OperationUpdate, RequestBody)
+	item.ForceNew = ptrOrDefault(item.OverrideForceNew, item.ForceNew)
+	// Order: after Required (isAutoComputedShape reads it) and after ForceNew,
+	// before Computed (responseEcho reads AutoComputed). E.g. an enum string the
+	// user sets on Create and the server echoes on Read qualifies, so it needs
+	// USFU to avoid flapping on refresh.
 	item.AutoComputed = item.isAutoComputedShape() &&
+		!item.ForceNew &&
 		inOp(OperationCreate, RequestBody) &&
 		inOp(OperationRead, ResponseBody)
 	// Promote to Computed when the server either sets the value (response-only
 	// field or schema default) or echoes a scalar the user may configure.
 	responseEcho := !item.Required && in(ResponseBody) && (!in(RequestBody) || item.AutoComputed)
 	item.Computed = item.Computed || item.Default != nil || responseEcho
-	item.ForceNew = item.ForceNew || (item.Optional || item.Required) && in(CreateHandler) && !inOp(OperationUpdate, RequestBody)
 
 	// Overrides that come from the user config
 	item.Optional = ptrOrDefault(item.OverrideOptional, item.Optional)
@@ -1112,7 +1122,6 @@ func recalcDeep(def *Definition, item *Item) error {
 
 	item.Sensitive = ptrOrDefault(item.OverrideSensitive, item.Sensitive)
 	item.Computed = ptrOrDefault(item.OverrideComputed, item.Computed)
-	item.ForceNew = ptrOrDefault(item.OverrideForceNew, item.ForceNew)
 
 	// The Plugin Framework rejects a default on a non-computed attribute, and an
 	// attribute cannot be both required and computed. Some OpenAPI schemas mark a
