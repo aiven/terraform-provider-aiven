@@ -16,7 +16,7 @@ resource "aiven_flink_jar_application_version" "example" {
     verify_error_code    = 1
     verify_error_message = "foo"
   }]
-  source_checksum = "foo"
-  version         = 42
+  file_sha256 = "foo"
+  version     = 42
   */
 }

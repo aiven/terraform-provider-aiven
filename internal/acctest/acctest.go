@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -306,6 +307,8 @@ func CreateTestService(t *testing.T, projectName, serviceName string, opts ...Cr
 	client, err := GetTestGenAivenClient()
 	require.NoError(t, err, "getting Aiven generated client failed")
 
+	var tearDown atomic.Bool
+
 	// Check if a pre-existing service should be reused in tests.
 	_, err = client.ServiceGet(ctx, projectName, serviceName)
 	if avngen.IsNotFound(err) {
@@ -318,6 +321,7 @@ func CreateTestService(t *testing.T, projectName, serviceName string, opts ...Cr
 		require.NoErrorf(t, err, "creating service %q failed", serviceName)
 
 		t.Cleanup(func() {
+			tearDown.Store(true)
 			// Destroys the service no matter what, uses context.Background()
 			_ = client.ServiceDelete(context.Background(), projectName, serviceName)
 		})
@@ -336,6 +340,12 @@ func CreateTestService(t *testing.T, projectName, serviceName string, opts ...Cr
 				s, err := client.ServiceGet(ctx, projectName, serviceName)
 				switch {
 				case err != nil:
+					switch {
+					case tearDown.Load():
+						err = fmt.Errorf("test teardown: %w", err)
+					case avngen.IsNotFound(err):
+						return fmt.Errorf("service now lost: %w", err)
+					}
 					return retryGo.Unrecoverable(fmt.Errorf("error getting service %q: %w", serviceName, err))
 				case s.State != service.ServiceStateTypeRunning:
 					return fmt.Errorf("waiting for %q to be running, current state %s", serviceName, s.State)
