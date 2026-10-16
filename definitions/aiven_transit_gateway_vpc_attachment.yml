@@ -9,15 +9,23 @@ resource:
     - PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC/PEER_REGION
 datasource:
   description: Gets information about an AWS Transit Gateway VPC attachment for an Aiven project VPC.
+  # VpcGet returns all peerings for a VPC and accepts no peer filters.
+  # These overrides define Terraform's local lookup, which OpenAPI does not describe.
   schemaOverride:
+    # OpenAPI has no compound Terraform ID; the lookup builds it as an output.
     id:
       computed: true
+    # OpenAPI requires project and project_vpc_id separately; Terraform combines them into this required input.
     vpc_id:
       required: true
+    # VpcGet exposes peer_cloud_account only in its response; local lookup needs it as a required input.
     peer_cloud_account:
       required: true
+    # VpcGet exposes peer_vpc only in its response; local lookup needs it as a required input.
     peer_vpc:
       required: true
+    # OpenAPI's region default applies to creation; local lookup searches all regions when omitted.
+    # Optional + Computed allows either an explicit filter or a region filled from the unique match.
     peer_region:
       computed: true
       description: AWS region of the Transit Gateway. When omitted, the data source searches all regions and requires a single matching attachment.
