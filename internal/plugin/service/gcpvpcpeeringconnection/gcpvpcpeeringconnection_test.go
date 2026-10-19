@@ -7,6 +7,10 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/vpc"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -189,6 +193,100 @@ func TestDeleteViewUsesLegacyID(t *testing.T) {
 	client.EXPECT().VpcPeeringConnectionDelete(t.Context(), "aiven-project", "aiven-vpc", "gcp-project", "peer-network").
 		Return(&vpc.VpcPeeringConnectionDeleteOut{}, nil).Once()
 	require.NoError(t, deleteView(t.Context(), client, d))
+}
+
+func TestReadViewImport(t *testing.T) {
+	t.Run("composed ID", func(t *testing.T) {
+		client := avngen.NewMockClient(t)
+		d := newReadData(t, map[string]any{
+			"project": "aiven-project", "project_vpc_id": "aiven-vpc", "gcp_project_id": "gcp-project", "peer_vpc": "peer-network",
+		})
+		client.EXPECT().VpcGet(t.Context(), "aiven-project", "aiven-vpc").
+			Return(&vpc.VpcGetOut{PeeringConnections: []vpc.PeeringConnectionOut{testConnection()}}, nil).Once()
+		require.NoError(t, ResourceOptions.Read(t.Context(), client, d))
+		require.Equal(t, testID, d.ID())
+		require.Equal(t, "aiven-project/aiven-vpc", d.Get("vpc_id"))
+	})
+
+	t.Run("legacy ID with region", func(t *testing.T) {
+		client := avngen.NewMockClient(t)
+		d := newReadData(t, map[string]any{
+			"project": "aiven-project", "project_vpc_id": "aiven-vpc", "gcp_project_id": "gcp-project", "peer_vpc": "peer-network/europe-west1",
+		})
+		connection := testConnection()
+		connection.PeerRegion = new("europe-west1")
+		other := testConnection()
+		other.PeerRegion = new("europe-west4")
+		client.EXPECT().VpcGet(t.Context(), "aiven-project", "aiven-vpc").
+			Return(&vpc.VpcGetOut{PeeringConnections: []vpc.PeeringConnectionOut{other, connection}}, nil).Once()
+		require.NoError(t, ResourceOptions.Read(t.Context(), client, d))
+		require.Equal(t, testID, d.ID())
+		require.Equal(t, "peer-network", d.Get("peer_vpc"))
+	})
+}
+
+func TestModifyPlanProjectVPC(t *testing.T) {
+	migrated := map[string]any{"id": testID, "project": "aiven-project", "project_vpc_id": "aiven-vpc", "vpc_id": "aiven-project/aiven-vpc"}
+	sdk := map[string]any{"id": testID, "vpc_id": "aiven-project/aiven-vpc"}
+	separate := map[string]any{"project": "aiven-project", "project_vpc_id": "aiven-vpc"}
+	for _, tc := range []struct {
+		name    string
+		state   map[string]any
+		config  map[string]any
+		replace bool
+	}{
+		{name: "switch to separate fields", state: migrated, config: separate},
+		{name: "switch to separate fields from SDK state", state: sdk, config: separate},
+		{name: "switch to vpc_id", state: migrated, config: map[string]any{"vpc_id": "aiven-project/aiven-vpc"}},
+		{name: "change VPC", state: migrated, config: map[string]any{"project": "aiven-project", "project_vpc_id": "other-vpc"}, replace: true},
+		{name: "change vpc_id", state: sdk, config: map[string]any{"vpc_id": "aiven-project/other-vpc"}, replace: true},
+		{name: "unknown VPC", state: migrated, config: map[string]any{"project": "aiven-project", "project_vpc_id": tftypes.UnknownValue}, replace: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			config := planValue(t, tc.config, nil)
+			planned := map[string]any{"id": testID}
+			for name, value := range tc.config {
+				planned[name] = value
+			}
+			plan := planValue(t, planned, tftypes.UnknownValue)
+			req := resource.ModifyPlanRequest{
+				Plan: tfsdk.Plan{Raw: plan}, State: tfsdk.State{Raw: planValue(t, tc.state, nil)}, Config: tfsdk.Config{Raw: config},
+			}
+			rsp := resource.ModifyPlanResponse{Plan: tfsdk.Plan{Raw: plan}}
+			adapter.NewResource(ResourceOptions).(resource.ResourceWithModifyPlan).ModifyPlan(t.Context(), req, &rsp)
+			require.False(t, rsp.Diagnostics.HasError(), "%v", rsp.Diagnostics)
+			if tc.replace {
+				require.Equal(t, path.Paths{path.Root("project"), path.Root("project_vpc_id"), path.Root("vpc_id")}, rsp.RequiresReplace)
+				return
+			}
+			require.Empty(t, rsp.RequiresReplace)
+			var attributes map[string]tftypes.Value
+			require.NoError(t, rsp.Plan.Raw.As(&attributes))
+			for name, value := range migrated {
+				var planned string
+				require.NoError(t, attributes[name].As(&planned), name)
+				require.Equal(t, value, planned, name)
+			}
+		})
+	}
+}
+
+// planValue sets the peer fields and values; unset VPC fields get missing.
+func planValue(t *testing.T, values map[string]any, missing any) tftypes.Value {
+	t.Helper()
+	typ := resourceSchema(t.Context()).Type().TerraformType(t.Context()).(tftypes.Object)
+	all := map[string]any{"gcp_project_id": "gcp-project", "peer_vpc": "peer-network"}
+	for _, name := range []string{"project", "project_vpc_id", "vpc_id"} {
+		all[name] = missing
+	}
+	for name, value := range values {
+		all[name] = value
+	}
+	attributes := make(map[string]tftypes.Value, len(typ.AttributeTypes))
+	for name, attributeType := range typ.AttributeTypes {
+		attributes[name] = tftypes.NewValue(attributeType, all[name])
+	}
+	return tftypes.NewValue(typ, attributes)
 }
 
 func testConnection() vpc.PeeringConnectionOut {

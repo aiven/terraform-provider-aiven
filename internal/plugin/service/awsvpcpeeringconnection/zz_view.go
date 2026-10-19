@@ -8,9 +8,9 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 const typeName = "aiven_aws_vpc_peering_connection"
 
 // idFields the ID attribute fields, i.e.:
-// terraform import aiven_aws_vpc_peering_connection.foo ID
+// terraform import aiven_aws_vpc_peering_connection.foo PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID
 func idFields() []string {
-	return []string{"id"}
+	return []string{"project", "project_vpc_id", "aws_account_id", "aws_vpc_id"}
 }
 
 var ResourceOptions = adapter.ResourceOptions{

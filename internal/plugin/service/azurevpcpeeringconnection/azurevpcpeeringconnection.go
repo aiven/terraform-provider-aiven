@@ -16,8 +16,16 @@ func init() {
 	DataSourceOptions.Read = datasourceReadView
 }
 
+func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+	return pluginvpc.PlanProjectVPC(d)
+}
+
 func configuredID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
-	return pluginvpc.ProjectPeeringIDFromConfig(d, "azure_subscription_id", "vnet_name")
+	return pluginvpc.NewProjectPeeringID(d, "azure_subscription_id", "vnet_name")
+}
+
+func stateID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
+	return pluginvpc.StateProjectPeeringID(d, "azure_subscription_id", "vnet_name")
 }
 
 func matchResourceGroup(group string) func(*vpc.PeeringConnectionOut) bool {
@@ -54,7 +62,7 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	id, err := pluginvpc.ParseProjectPeeringID(d.ID())
+	id, err := stateID(d)
 	if err != nil {
 		return err
 	}
@@ -99,7 +107,7 @@ func setConnectionState(ctx context.Context, d adapter.ResourceData, id *pluginv
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	id, err := pluginvpc.ParseProjectPeeringID(d.ID())
+	id, err := stateID(d)
 	if err != nil {
 		return err
 	}

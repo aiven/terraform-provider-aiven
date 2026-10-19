@@ -21,10 +21,10 @@ func init() {
 	DataSourceOptions.Read = datasourceReadView
 }
 
-// parsePeeringID accepts PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC and
-// PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC/PEER_REGION.
-func parsePeeringID(src string) (*pluginvpc.ProjectPeeringID, error) {
-	id, err := pluginvpc.ParseProjectPeeringID(src)
+// stateID takes the region from a legacy five-part ID, then from a configured
+// peer_region. An omitted peer_region leaves it unset, matching any region.
+func stateID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
+	id, err := pluginvpc.StateProjectPeeringID(d, "peer_cloud_account", "peer_vpc")
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,14 @@ func parsePeeringID(src string) (*pluginvpc.ProjectPeeringID, error) {
 	if id.PeerRegion != nil && *id.PeerRegion == "" {
 		return nil, errors.New("peer region in the fifth ID component must not be empty")
 	}
+	if region, _ := d.Get("peer_region").(string); id.PeerRegion == nil && region != "" {
+		id.PeerRegion = &region
+	}
 	return id, nil
 }
 
 func expandPeeringID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
-	id, err := pluginvpc.ProjectPeeringIDFromConfig(d, "peer_cloud_account", "peer_vpc")
+	id, err := pluginvpc.NewProjectPeeringID(d, "peer_cloud_account", "peer_vpc")
 	if err != nil {
 		return nil, err
 	}
@@ -66,12 +69,11 @@ func createView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) e
 	}); err != nil {
 		return fmt.Errorf("creating VPC peering connection: %w", err)
 	}
-
-	return d.SetID(id.String())
+	return nil
 }
 
 func readView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
-	id, err := parsePeeringID(d.ID())
+	id, err := stateID(d)
 	if err != nil {
 		return fmt.Errorf("parsing peering VPC ID: %w", err)
 	}
@@ -128,13 +130,13 @@ func datasourceReadView(ctx context.Context, cl avngen.Client, d adapter.Resourc
 	if conn.PeerRegion != nil && *conn.PeerRegion != "" {
 		id.PeerRegion = conn.PeerRegion
 	}
-	if err := d.SetID(id.String()); err != nil {
-		return err
-	}
 	return setConnectionState(d, id, conn)
 }
 
 func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+	if err := pluginvpc.PlanProjectVPC(d); err != nil {
+		return err
+	}
 	// Outside the live states the API intentionally projects CIDRs as an empty set,
 	// regardless of whether the underlying rows still exist. Keep state aligned with
 	// that projection and suppress the resulting configuration diff: Update rejects
@@ -153,7 +155,7 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 }
 
 func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
-	id, err := parsePeeringID(d.ID())
+	id, err := stateID(d)
 	if err != nil {
 		return fmt.Errorf("error parsing peering VPC ID: %w", err)
 	}
@@ -209,7 +211,7 @@ func updateCIDRs(ctx context.Context, cl avngen.Client, id *pluginvpc.ProjectPee
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	id, err := parsePeeringID(d.ID())
+	id, err := stateID(d)
 	if err != nil {
 		return fmt.Errorf("error parsing peering VPC ID: %w", err)
 	}
@@ -225,19 +227,20 @@ func setConnectionState(d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, 
 		"state":                   string(conn.State),
 		"state_info":              pluginvpc.StateInfoMap(conn.StateInfo),
 		"user_peer_network_cidrs": conn.UserPeerNetworkCidrs,
+		"project":                 id.Project,
+		"project_vpc_id":          id.ProjectVPCID,
 		"vpc_id":                  schemautil.BuildResourceID(id.Project, id.ProjectVPCID),
 	}
 	// Terraform distinguishes an explicitly configured empty string from null. Both
-	// mean omission during resource Create and produce a four-part ID, but replacing ""
-	// with null would be an inconsistent result. Leave an existing empty value untouched
-	// because ResourceData.Set also normalizes a top-level empty string to null. A
-	// five-part managed-resource ID remains authoritative, so a data source may resolve one
-	// from the API while retaining its explicitly configured empty selector.
+	// mean omission during resource Create, but replacing "" with null would be an
+	// inconsistent result. Leave an existing empty value untouched because
+	// ResourceData.Set also normalizes a top-level empty string to null. A legacy
+	// five-part resource ID remains authoritative, so a data source may resolve a
+	// region from the API while retaining its explicitly configured empty selector.
 	if peerRegion, ok := d.GetOk("peer_region"); !ok || peerRegion.(string) != "" || (id.PeerRegion != nil && !d.IsDataSource()) {
 		values["peer_region"] = nil
-		// A four-part resource ID means peer_region was omitted from configuration.
-		// Do not turn the region discovered by the API into ForceNew configuration;
-		// five-part resource and data source IDs carry the region explicitly.
+		// Without a configured or legacy ID region, peer_region was omitted. Do not
+		// turn the region discovered by the API into ForceNew configuration.
 		if id.PeerRegion != nil {
 			values["peer_region"] = *id.PeerRegion
 		}
@@ -251,7 +254,7 @@ func setConnectionState(d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, 
 		}
 	}
 
-	return nil
+	return d.SetID(id.Project, id.ProjectVPCID, conn.PeerCloudAccount, conn.PeerVpc)
 }
 
 func isLiveState(state string) bool {

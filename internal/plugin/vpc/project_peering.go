@@ -122,12 +122,24 @@ func (id *ProjectPeeringID) Delete(ctx context.Context, client avngen.Client, re
 	return err
 }
 
-// ProjectPeeringIDFromConfig expands the public vpc_id (PROJECT/VPC_ID) into API
-// path components. The cloud-specific resource adds its region when applicable.
-func ProjectPeeringIDFromConfig(d adapter.ResourceData, accountField, networkField string) (*ProjectPeeringID, error) {
-	project, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
-	if err != nil {
-		return nil, err
+// NewProjectPeeringID builds the API path components from the resource fields.
+// The cloud-specific resource adds its region when applicable.
+func NewProjectPeeringID(d adapter.ResourceData, accountField, networkField string) (*ProjectPeeringID, error) {
+	// vpc_id goes first: SDKv2 state lacks the separate fields, and GetOk derives a
+	// missing ID field by splitting the ID, which panics for a legacy ID of another length.
+	var project, vpcID string
+	if value, ok := d.GetOk("vpc_id"); ok {
+		var err error
+		project, vpcID, err = schemautil.SplitResourceID2(value.(string))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// The separate fields, as after an import.
+		project, vpcID = d.Get("project").(string), d.Get("project_vpc_id").(string)
+		if project == "" || vpcID == "" {
+			return nil, fmt.Errorf("either `vpc_id` or `project` and `project_vpc_id` must be set")
+		}
 	}
 	return &ProjectPeeringID{
 		Project: project, ProjectVPCID: vpcID,
@@ -135,7 +147,85 @@ func ProjectPeeringIDFromConfig(d adapter.ResourceData, accountField, networkFie
 	}, nil
 }
 
-// ProjectPeeringFields restores the compound VPC ID and legacy state_info format.
+// StateProjectPeeringID reads the ID, which wins over the fields as in the SDK.
+// Only an import of a 4-part composed ID leaves the ID unset; it splits a legacy
+// 5-part import string into 4 fields, leaving "NETWORK/REGION" in networkField.
+func StateProjectPeeringID(d adapter.ResourceData, accountField, networkField string) (*ProjectPeeringID, error) {
+	if value := d.ID(); value != "" {
+		return ParseProjectPeeringID(value)
+	}
+	id, err := NewProjectPeeringID(d, accountField, networkField)
+	if err != nil {
+		return nil, err
+	}
+	if network, region, ok := strings.Cut(id.PeerVPC, "/"); ok {
+		id.PeerVPC, id.PeerRegion = network, &region
+	}
+	return id, nil
+}
+
+// PlanProjectVPC plans project, project_vpc_id and vpc_id from whichever form
+// the configuration uses. It replaces the resource only when the Aiven VPC changes:
+// schema-level RequiresReplace would also fire when switching forms, because the
+// form left out of the configuration is planned as unknown.
+func PlanProjectVPC(d adapter.ResourceData) error {
+	// Config validators guarantee that one of the forms is set.
+	project, projectOK := configString(d, "project")
+	vpcID, vpcIDOK := configString(d, "project_vpc_id")
+	known := projectOK && vpcIDOK
+	if !projectOK && !vpcIDOK {
+		if compound, ok := configString(d, "vpc_id"); ok {
+			var err error
+			project, vpcID, err = schemautil.SplitResourceID2(compound)
+			if err != nil {
+				return err
+			}
+			known = true
+		}
+	}
+	// The configured VPC is unknown until apply.
+	if !known {
+		if !d.IsNewResource() {
+			d.RequiresReplace("project", "project_vpc_id", "vpc_id")
+		}
+		return nil
+	}
+	for key, value := range map[string]string{
+		"project": project, "project_vpc_id": vpcID, "vpc_id": schemautil.BuildResourceID(project, vpcID),
+	} {
+		if err := d.Set(key, value); err != nil {
+			return err
+		}
+	}
+	if d.IsNewResource() {
+		return nil
+	}
+
+	stateProject, stateVPCID := d.GetState("project").(string), d.GetState("project_vpc_id").(string)
+	if stateProject == "" || stateVPCID == "" {
+		// SDKv2 state, planned without a refresh.
+		var err error
+		stateProject, stateVPCID, err = schemautil.SplitResourceID2(d.GetState("vpc_id").(string))
+		if err != nil {
+			return err
+		}
+	}
+	if project != stateProject || vpcID != stateVPCID {
+		d.RequiresReplace("project", "project_vpc_id", "vpc_id")
+	}
+	return nil
+}
+
+// configString returns a known, non-null configuration value.
+func configString(d adapter.ResourceData, key string) (string, bool) {
+	value, ok := d.GetConfigOk(key)
+	if !ok {
+		return "", false
+	}
+	return value.(string), true
+}
+
+// ProjectPeeringFields fills every form of the Aiven VPC and restores the legacy state_info format.
 func ProjectPeeringFields(ctx context.Context, id *ProjectPeeringID, cloud string) adapter.MapModifier {
 	return adapter.ComposeMapModifiers(
 		PendingPeerWarning(ctx, cloud),
@@ -145,6 +235,8 @@ func ProjectPeeringFields(ctx context.Context, id *ProjectPeeringID, cloud strin
 			if dto["create_time"] == (time.Time{}).Format(time.RFC3339Nano) {
 				dto["create_time"] = ""
 			}
+			dto["project"] = id.Project
+			dto["project_vpc_id"] = id.ProjectVPCID
 			dto["vpc_id"] = schemautil.BuildResourceID(id.Project, id.ProjectVPCID)
 			info, _ := dto["state_info"].(map[string]any)
 			dto["state_info"] = StateInfoMap(info)

@@ -8,9 +8,9 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 const typeName = "aiven_azure_vpc_peering_connection"
 
 // idFields the ID attribute fields, i.e.:
-// terraform import aiven_azure_vpc_peering_connection.foo ID
+// terraform import aiven_azure_vpc_peering_connection.foo PROJECT/PROJECT_VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME
 func idFields() []string {
-	return []string{"id"}
+	return []string{"project", "project_vpc_id", "azure_subscription_id", "vnet_name"}
 }
 
 var ResourceOptions = adapter.ResourceOptions{
@@ -18,6 +18,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Delete:         deleteView,
 	DeleteState:    &adapter.DeleteStateOptions{},
 	IDFields:       idFields(),
+	ModifyPlan:     modifyPlan,
 	Read:           readView,
 	RefreshState:   &adapter.RefreshStateCondition{},
 	RemoveMissing:  true,

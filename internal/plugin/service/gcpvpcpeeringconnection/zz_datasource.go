@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -30,12 +31,24 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Resource ID in the `PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC` format.",
+				MarkdownDescription: "Resource ID composed as: `project/project_vpc_id/gcp_project_id/peer_vpc`.",
 			},
 			"peer_vpc": schema.StringAttribute{
 				MarkdownDescription: "Google Cloud VPC network name.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(1024)},
+			},
+			"project": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The name of the project the Aiven VPC belongs to. The field is required with `project_vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project_vpc_id"))},
+			},
+			"project_vpc_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The ID of the Aiven VPC. The field is required with `project`. The field conflicts with `vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project")), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("vpc_id"))},
 			},
 			"self_link": schema.StringAttribute{
 				Computed:            true,
@@ -51,9 +64,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "State-specific help or error information.",
 			},
 			"vpc_id": schema.StringAttribute{
-				MarkdownDescription: "The VPC the peering connection belongs to, in the `PROJECT/VPC_ID` format.",
-				Required:            true,
-				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^/]*/[^/]*$"), "must match pattern \"^[^/]*/[^/]*$\"")},
+				Computed:            true,
+				DeprecationMessage:  "Use the separate `project` and `project_vpc_id` fields instead.",
+				MarkdownDescription: "The VPC the peering connection belongs to, in the `PROJECT/PROJECT_VPC_ID` format. Exactly one of the fields must be specified: `project` or `vpc_id`. **Deprecated**: Use the separate `project` and `project_vpc_id` fields instead.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^/]*/[^/]*$"), "must match pattern \"^[^/]*/[^/]*$\""), stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("project"), path.MatchRelative().AtParent().AtName("vpc_id"))},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
@@ -73,6 +88,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"peer_vpc": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"project": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project_vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"self_link": &adapter.Schema{
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
@@ -93,7 +116,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,
 			},
-			"vpc_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

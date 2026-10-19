@@ -4,26 +4,27 @@ resource:
   refreshStateExists: true
   deleteStateGone: true
   removeMissing: true
-  importIDFormats:
-    - PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC
+  modifyPlan: true
 datasource:
   description: The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
   # VpcGet returns all peerings for a VPC and accepts no peer filters.
   # These overrides define Terraform's local lookup, which OpenAPI does not describe.
   schemaOverride:
-    # OpenAPI has no compound Terraform ID; the lookup builds it as an output.
-    id:
+    # Either `vpc_id` or `project` with `project_vpc_id` selects the Aiven VPC.
+    project:
+      optional: true
       computed: true
-    # OpenAPI requires project and project_vpc_id separately; Terraform combines them into this required input.
+      description: The name of the project the Aiven VPC belongs to.
+    project_vpc_id:
+      optional: true
+      computed: true
+      description: The ID of the Aiven VPC.
     vpc_id:
-      required: true
-    # VpcGet exposes peer_cloud_account only in its response; local lookup needs it as a required input.
-    gcp_project_id:
-      required: true
-    # VpcGet exposes peer_vpc only in its response; local lookup needs it as a required input.
-    peer_vpc:
-      required: true
+      optional: true
+      computed: true
+      description: The VPC the peering connection belongs to, in the `PROJECT/PROJECT_VPC_ID` format.
 clientHandler: vpc
+idAttributeComposed: [project, project_vpc_id, gcp_project_id, peer_vpc]
 legacyTimeouts: true
 rename:
   peer_cloud_account: gcp_project_id
@@ -42,8 +43,6 @@ remove:
   - peer_region
   - peer_resource_group
   - peering_connection_id
-  - project
-  - project_vpc_id
   - "state_info/*"
   - update_time
   - user_peer_network_cidrs
@@ -55,18 +54,33 @@ schema:
     description: |
       VPC peering connection creation timestamp. Re-creating a connection updates this timestamp even when its ID stays the same.
       May be `null` for legacy connections whose creation time is unknown.
-  id:
-    type: string
+  # modifyPlan replaces the resource when the Aiven VPC changes, so switching between
+  # `vpc_id` and `project` with `project_vpc_id` keeps the connection.
+  project:
+    optional: true
     computed: true
-    example: example-project/example-vpc/my-gcp-project/my-vpc
-    description: Resource ID in the `PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC` format.
+    forceNew: false
+    alsoRequires: [project_vpc_id]
+    description: The name of the project the Aiven VPC belongs to. Changing the Aiven VPC forces recreation of the resource.
+    example: example-project
+  project_vpc_id:
+    optional: true
+    computed: true
+    forceNew: false
+    alsoRequires: [project]
+    conflictsWith: [vpc_id]
+    description: The ID of the Aiven VPC. Changing the Aiven VPC forces recreation of the resource.
+    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
   vpc_id:
     type: string
-    required: true
-    forceNew: true
+    optional: true
+    computed: true
+    forceNew: false
+    exactlyOneOf: [vpc_id, project]
     pattern: '^[^/]*/[^/]*$'
-    example: example-project/example-vpc
-    description: The VPC the peering connection belongs to, in the `PROJECT/VPC_ID` format.
+    description: The VPC the peering connection belongs to, in the `PROJECT/PROJECT_VPC_ID` format. Changing the Aiven VPC forces recreation of the resource; switching to `project` and `project_vpc_id` doesn't.
+    deprecationMessage: Use the separate `project` and `project_vpc_id` fields instead.
+    example: example-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
   gcp_project_id:
     description: Google Cloud project ID.
     example: my-gcp-project

@@ -27,6 +27,19 @@ nav_order: 1
 - Report ambiguous VPC peering lookups instead of selecting the first connection.
 - Change `aiven_aws_vpc_peering_connection`: retain an explicitly empty `aws_vpc_region` in state. Upgrading an existing
   resource configured with an empty region can show a state-only update; the peering connection is preserved.
+- Add `project` and `project_vpc_id` to AWS, Azure and GCP VPC peering and transit gateway VPC attachment resources
+  and data sources, and deprecate `vpc_id` in their favor. Switching between the two forms doesn't recreate the connection.
+- Fix `aiven_aws_vpc_peering_connection` ID: it's now `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID`, consistent with
+  the Azure and GCP peering resources, and stays stable when `aws_vpc_region` is empty. Existing IDs are updated
+  on the next refresh without recreating the connection. The previous format with the region is still accepted for import.
+  Configurations that reference or parse the resource or data source `id` see the new value; read `aws_vpc_region`
+  and the other attributes directly instead. With `aws_vpc_region = ""`, a refresh reports an ambiguous lookup
+  if the Aiven VPC has another connection to the same AWS VPC in a different region; set `aws_vpc_region` to resolve it.
+- Fix `aiven_transit_gateway_vpc_attachment` ID: it's now always `PROJECT/PROJECT_VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC`,
+  consistent with the VPC peering resources, instead of gaining a region part when `peer_region` is set. Existing
+  IDs are updated on the next refresh without recreating the attachment. The previous format with the region is still
+  accepted for import. Configurations that reference or parse the resource or data source `id` see the new value; read
+  `peer_region` and the other attributes directly instead.
 
 ## [4.64.0] - 2026-10-12
 

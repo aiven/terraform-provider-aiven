@@ -16,9 +16,12 @@ func init() {
 }
 
 // The SDK suppressed every diff to an empty region. Framework must keep that
-// configured value, so it is stored by a local update. The actual region remains
-// in the ID and continues to drive reads and deletes.
-func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+// configured value, so it is stored by a local update. Reads and deletes then
+// resolve the actual region from the API.
+func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	if err := pluginvpc.PlanProjectVPC(d); err != nil {
+		return err
+	}
 	if d.IsNewResource() {
 		return nil
 	}
@@ -30,13 +33,13 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 	if region == "" || !d.HasChange("aws_vpc_region") {
 		return nil
 	}
-	id, err := pluginvpc.ParseProjectPeeringID(d.ID())
+	id, err := stateID(d, d.GetState("aws_vpc_region").(string))
 	if err != nil {
 		return err
 	}
-	actualRegion := d.GetState("aws_vpc_region")
-	if id.PeerRegion != nil {
-		actualRegion = *id.PeerRegion
+	actualRegion, err := resolveRegion(ctx, client, id)
+	if err != nil {
+		return err
 	}
 	if region != actualRegion {
 		d.RequiresReplace("aws_vpc_region")
@@ -45,7 +48,7 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 }
 
 func configuredID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
-	id, err := pluginvpc.ProjectPeeringIDFromConfig(d, "aws_account_id", "aws_vpc_id")
+	id, err := pluginvpc.NewProjectPeeringID(d, "aws_account_id", "aws_vpc_id")
 	if err != nil {
 		return nil, err
 	}
@@ -56,43 +59,54 @@ func configuredID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
 	return id, nil
 }
 
+// stateID takes the region from a legacy five-part ID, then from stateRegion.
+// It leaves the region unset for `aws_vpc_region = ""`, matching any region.
+func stateID(d adapter.ResourceData, stateRegion string) (*pluginvpc.ProjectPeeringID, error) {
+	id, err := pluginvpc.StateProjectPeeringID(d, "aws_account_id", "aws_vpc_id")
+	if err != nil {
+		return nil, err
+	}
+	if id.PeerRegion == nil && stateRegion != "" {
+		id.PeerRegion = &stateRegion
+	}
+	return id, nil
+}
+
+// resolveRegion returns the region of id, looking up the connection when unset.
+func resolveRegion(ctx context.Context, client avngen.Client, id *pluginvpc.ProjectPeeringID) (string, error) {
+	if id.PeerRegion != nil {
+		return *id.PeerRegion, nil
+	}
+	connection, err := id.Find(ctx, client)
+	if err != nil {
+		return "", err
+	}
+	if connection.PeerRegion == nil {
+		return "", nil
+	}
+	return *connection.PeerRegion, nil
+}
+
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	id, err := configuredID(d)
 	if err != nil {
 		return err
 	}
-	err = id.Create(ctx, client, &vpc.VpcPeeringConnectionCreateIn{
+	return id.Create(ctx, client, &vpc.VpcPeeringConnectionCreateIn{
 		PeerCloudAccount: id.PeerCloudAccount,
 		PeerVpc:          id.PeerVPC,
 		PeerRegion:       id.PeerRegion,
 	})
-	if err != nil {
-		return err
-	}
-	// Checkpoint even a regionless request before refresh. The matching regionless
-	// delete route uses the same default region as POST if refresh fails.
-	return d.SetID(id.String())
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	id, err := pluginvpc.ParseProjectPeeringID(d.ID())
+	id, err := stateID(d, d.Get("aws_vpc_region").(string))
 	if err != nil {
 		return err
 	}
 	connection, err := id.Find(ctx, client)
 	if err != nil {
 		return err
-	}
-	// The resolved region is available only on VpcGet. Pin it in the legacy
-	// five-part ID so future reads/deletes remain exact even when configuration
-	// keeps aws_vpc_region empty.
-	if id.PeerRegion == nil && connection.PeerRegion != nil && *connection.PeerRegion != "" {
-		id.PeerRegion = connection.PeerRegion
-	}
-	if id.String() != d.ID() {
-		if err := d.SetID(id.String()); err != nil {
-			return err
-		}
 	}
 	return setConnectionState(ctx, d, id, connection)
 }
@@ -106,9 +120,6 @@ func datasourceReadView(ctx context.Context, client avngen.Client, d adapter.Res
 	id.PeerRegion = new(d.Get("aws_vpc_region").(string))
 	connection, err := id.Find(ctx, client)
 	if err != nil {
-		return err
-	}
-	if err := d.SetID(id.String()); err != nil {
 		return err
 	}
 	return setConnectionState(ctx, d, id, connection)
@@ -137,9 +148,16 @@ func setConnectionState(ctx context.Context, d adapter.ResourceData, id *pluginv
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	id, err := pluginvpc.ParseProjectPeeringID(d.ID())
+	id, err := stateID(d, d.Get("aws_vpc_region").(string))
 	if err != nil {
 		return err
+	}
+	region, err := resolveRegion(ctx, client, id)
+	if err != nil {
+		return err
+	}
+	if region != "" {
+		id.PeerRegion = &region
 	}
 	return id.Delete(ctx, client, nil)
 }

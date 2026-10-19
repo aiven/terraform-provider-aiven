@@ -14,11 +14,13 @@ The GCP VPC Peering Connection data source provides information about the existi
 ```terraform
 data "aiven_gcp_vpc_peering_connection" "example" {
   gcp_project_id = "my-gcp-project"
-  vpc_id         = "example-project/example-vpc"
   peer_vpc       = "my-vpc"
 
+  // OPTIONAL FIELDS
+  project        = "example-project"
+  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+
   /* COMPUTED FIELDS
-  id          = "example-project/example-vpc/my-gcp-project/my-vpc"
   create_time = "2021-01-01T00:00:00Z"
   self_link   = "https://www.googleapis.com/compute/v1/projects/my-gcp-project/global/networks/my-vpc"
   state       = "ACTIVE"
@@ -35,16 +37,18 @@ data "aiven_gcp_vpc_peering_connection" "example" {
 
 - `gcp_project_id` (String) Google Cloud project ID.
 - `peer_vpc` (String) Google Cloud VPC network name.
-- `vpc_id` (String) The VPC the peering connection belongs to, in the `PROJECT/VPC_ID` format.
 
 ### Optional
 
+- `project` (String) The name of the project the Aiven VPC belongs to. The field is required with `project_vpc_id`.
+- `project_vpc_id` (String) The ID of the Aiven VPC. The field is required with `project`. The field conflicts with `vpc_id`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `vpc_id` (String, Deprecated) The VPC the peering connection belongs to, in the `PROJECT/PROJECT_VPC_ID` format. Exactly one of the fields must be specified: `project` or `vpc_id`. **Deprecated**: Use the separate `project` and `project_vpc_id` fields instead.
 
 ### Read-Only
 
 - `create_time` (String) VPC peering connection creation timestamp. Re-creating a connection updates this timestamp even when its ID stays the same. May be `null` for legacy connections whose creation time is unknown.
-- `id` (String) Resource ID in the `PROJECT/VPC_ID/GCP_PROJECT_ID/PEER_VPC` format.
+- `id` (String) Resource ID composed as: `project/project_vpc_id/gcp_project_id/peer_vpc`.
 - `self_link` (String) Computed Google Cloud network peering link.
 - `state` (String) Project VPC peering connection state. The possible values are `ACTIVE`, `APPROVED`, `APPROVED_PEER_REQUESTED`, `DELETED`, `DELETED_BY_PEER`, `DELETING`, `ERROR`, `INVALID_SPECIFICATION`, `PENDING_PEER` and `REJECTED_BY_PEER`.
 - `state_info` (Map of String) State-specific help or error information.

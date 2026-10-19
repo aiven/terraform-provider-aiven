@@ -119,9 +119,10 @@ func awsPeeringChecks(c awsConfig) resource.TestCheckFunc {
 		func(state *terraform.State) error {
 			r := state.RootModule().Resources[peeringResource]
 			accountID := state.RootModule().Resources["aws_vpc.aws_vpc"].Primary.Attributes["owner_id"]
-			want := fmt.Sprintf("%s/%s/%s/%s", r.Primary.Attributes["vpc_id"], accountID, r.Primary.Attributes["aws_vpc_id"], c.region)
-			if r.Primary.ID != want {
-				return fmt.Errorf("expected legacy peering ID %q, got %q", want, r.Primary.ID)
+			want := fmt.Sprintf("%s/%s/%s", r.Primary.Attributes["vpc_id"], accountID, r.Primary.Attributes["aws_vpc_id"])
+			// The SDK provider appends the region.
+			if r.Primary.ID != want && r.Primary.ID != want+"/"+c.region {
+				return fmt.Errorf("expected peering ID %q, got %q", want, r.Primary.ID)
 			}
 			return nil
 		},

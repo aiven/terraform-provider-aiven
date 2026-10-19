@@ -5,9 +5,11 @@ package transitgatewayvpcattachment
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -24,7 +26,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Terraform identifier for the VPC peering connection.",
+				MarkdownDescription: "Resource ID composed as: `project/project_vpc_id/peer_cloud_account/peer_vpc`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"peer_cloud_account": schema.StringAttribute{
@@ -50,6 +52,18 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Legacy AWS VPC peering connection ID (`pcx-*`) for ordinary AWS VPC peering connections, if available. This is not the AWS Transit Gateway attachment ID; TGW attachment details are exposed in `state_info`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
+			"project": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The name of the project the Aiven VPC belongs to. Changing the Aiven VPC forces recreation of the resource. The field is required with `project_vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project_vpc_id"))},
+			},
+			"project_vpc_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The ID of the Aiven VPC. Changing the Aiven VPC forces recreation of the resource. The field is required with `project`. The field conflicts with `vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project")), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("vpc_id"))},
+			},
 			"state": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Project VPC peering connection state. The possible values are `ACTIVE`, `APPROVED`, `APPROVED_PEER_REQUESTED`, `DELETED`, `DELETED_BY_PEER`, `DELETING`, `ERROR`, `INVALID_SPECIFICATION`, `PENDING_PEER` and `REJECTED_BY_PEER`.",
@@ -68,9 +82,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.Set{setvalidator.SizeAtMost(128)},
 			},
 			"vpc_id": schema.StringAttribute{
-				MarkdownDescription: "Aiven project VPC ID in the `PROJECT/VPC_ID` format. Changing this property forces recreation of the resource.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Required:            true,
+				Computed:            true,
+				DeprecationMessage:  "Use the separate `project` and `project_vpc_id` fields instead.",
+				MarkdownDescription: "Aiven project VPC ID in the `PROJECT/PROJECT_VPC_ID` format. Changing the Aiven VPC forces recreation of the resource; switching to `project` and `project_vpc_id` doesn't. Exactly one of the fields must be specified: `project` or `vpc_id`. Must match pattern: `^[^/]*/[^/]*$`. **Deprecated**: Use the separate `project` and `project_vpc_id` fields instead.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^/]*/[^/]*$"), "must match pattern \"^[^/]*/[^/]*$\""), stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("project"), path.MatchRelative().AtParent().AtName("vpc_id"))},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
@@ -91,6 +107,14 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed:       true,
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
+			},
+			"project": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project_vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
 			},
 			"state": &adapter.Schema{
 				Computed: true,
@@ -122,7 +146,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				},
 				Type: adapter.SchemaTypeSet,
 			},
-			"vpc_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

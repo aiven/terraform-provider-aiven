@@ -1,1 +1,1 @@
-terraform import aiven_azure_vpc_peering_connection.example PROJECT/VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME
+terraform import aiven_azure_vpc_peering_connection.example PROJECT/PROJECT_VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME

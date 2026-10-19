@@ -80,8 +80,11 @@ func getExampleItemPriority(def *Definition, entity entityType, item *Item) int 
 	optional := item.IsOptional(def, entity)
 
 	switch {
-	case item.IDAttribute && (optional || required):
+	case item.IDAttribute && required:
 		return item.IDAttributePosition
+	case item.IDAttribute && optional:
+		// Sorts between the required (10) and the optional (20) fields.
+		return 15 + item.IDAttributePosition
 	case required:
 		score = 10
 	case optional:
