@@ -25,7 +25,7 @@ resource "aiven_kafka_schema_registry_acl" "example" {
 }
 
 resource "aiven_kafka" "example_kafka" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "business-4"
   service_name = "example-kafka"
 }

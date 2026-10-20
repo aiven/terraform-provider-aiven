@@ -23,7 +23,7 @@ resource "aiven_pg_database" "example" {
 }
 
 resource "aiven_pg" "example_postgres" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "startup-4"
   service_name = "example-postgres-service"
 }

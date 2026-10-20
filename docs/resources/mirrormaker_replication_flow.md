@@ -44,7 +44,7 @@ resource "aiven_mirrormaker_replication_flow" "example" {
 }
 
 resource "aiven_kafka_mirrormaker" "example_mirrormaker" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "startup-4"
   service_name = "example-mirrormaker-service"
 }
