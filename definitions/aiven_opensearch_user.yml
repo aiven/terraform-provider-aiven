@@ -32,6 +32,10 @@ remove:
   - access_key
   - mysql_grants # MySQL grants for the service user
 schema:
+  project:
+    ref: aiven_opensearch.project
+  service_name:
+    ref: aiven_opensearch.service_name
   password:
     type: string
     optional: true

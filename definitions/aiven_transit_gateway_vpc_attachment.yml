@@ -56,6 +56,7 @@ schema:
     example: example-project/example-vpc/123456789012/tgw-0123456789abcdef0/us-east-1
     description: Terraform identifier for the VPC peering connection.
   vpc_id:
+    ref: aiven_project_vpc.id
     type: string
     required: true
     forceNew: true

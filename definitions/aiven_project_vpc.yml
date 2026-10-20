@@ -50,3 +50,6 @@ remove:
   - peering_connections
   - pending_build_only_peering_connections
   - update_time
+schema:
+  project:
+    ref: aiven_organization_project.project_id

@@ -39,6 +39,10 @@ remove:
   - service
   - mysql_grants # MySQL grants for the service user
 schema:
+  project:
+    ref: aiven_valkey.project
+  service_name:
+    ref: aiven_valkey.service_name
   username:
     pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
   valkey_acl_categories:

@@ -44,6 +44,7 @@ schema:
   name:
     description: The name of the organizational unit.
   parent_id:
+    ref: aiven_organization.id
     required: true
     forceNew: false # the value can be account_id or organization_id. It should be possible to change it without recreating the resource.
     description: The ID of the organization that the unit is created in.

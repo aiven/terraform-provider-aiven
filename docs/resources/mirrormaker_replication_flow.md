@@ -13,10 +13,10 @@ Creates and manages an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io
 
 ```terraform
 resource "aiven_mirrormaker_replication_flow" "example" {
-  project        = "my-project" // Force new
-  service_name   = "foo" // Force new
-  source_cluster = "kafka-abc" // Force new
-  target_cluster = "kafka-abc" // Force new
+  project        = aiven_kafka_mirrormaker.example_mirrormaker.project      // e.g. "my-project". Force new
+  service_name   = aiven_kafka_mirrormaker.example_mirrormaker.service_name // e.g. "foo". Force new
+  source_cluster = "kafka-abc"                                              // Force new
+  target_cluster = "kafka-abc"                                              // Force new
   enable         = true
 
   // OPTIONAL FIELDS
@@ -41,6 +41,12 @@ resource "aiven_mirrormaker_replication_flow" "example" {
   sync_group_offsets_interval_seconds = 1
   topics                              = [".*"]
   topics_blacklist                    = [".*[\\-\\.]internal", ".*\\.replica", "__.*"]
+}
+
+resource "aiven_kafka_mirrormaker" "example_mirrormaker" {
+  project      = data.aiven_project.example_project.project
+  plan         = "startup-4"
+  service_name = "example-mirrormaker-service"
 }
 ```
 

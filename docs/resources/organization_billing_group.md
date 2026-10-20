@@ -13,9 +13,9 @@ Creates and manages an organization billing group.
 
 ```terraform
 resource "aiven_organization_billing_group" "example" {
-  organization_id     = "org1a23f456789" // Force new
-  billing_address_id  = "addr4b1ff1ceeaa"
-  shipping_address_id = "addr4b1ff1ceeaa"
+  organization_id     = aiven_organization.example.id                 // e.g. "org1a23f456789". Force new
+  billing_address_id  = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
+  shipping_address_id = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
   billing_contact_emails {
     email = "jane@example.com"
   }
@@ -36,6 +36,18 @@ resource "aiven_organization_billing_group" "example" {
   billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
   create_time      = "2021-01-01T00:00:00Z"
   */
+}
+
+resource "aiven_organization_address" "example" {
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  address_lines   = ["Street 1", "Street 2"]
+  city            = "Helsinki"
+  country_code    = "FI"
+  name            = "Aiven Oy"
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

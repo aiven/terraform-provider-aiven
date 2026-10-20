@@ -22,5 +22,7 @@ operations:
     resultListLookupKeys:
       StaticIPAddressId: static_ip_address_id
 schema:
+  project:
+    ref: aiven_organization_project.project_id
   termination_protection:
     default: false

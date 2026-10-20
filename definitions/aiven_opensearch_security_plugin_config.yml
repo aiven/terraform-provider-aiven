@@ -33,5 +33,9 @@ rename:
   security_plugin_available: available
   security_plugin_enabled: enabled
 schema:
+  project:
+    ref: aiven_opensearch.project
+  service_name:
+    ref: aiven_opensearch.service_name
   admin_password:
     sensitive: true

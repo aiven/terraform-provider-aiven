@@ -13,8 +13,8 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 
 ```terraform
 resource "aiven_static_ip" "example" {
-  project    = "my-project" // Force new
-  cloud_name = "aws-eu-central-1" // Force new
+  project    = aiven_organization_project.example.project_id // e.g. "my-project". Force new
+  cloud_name = "aws-eu-central-1"                            // Force new
 
   // OPTIONAL FIELDS
   termination_protection = false
@@ -25,6 +25,42 @@ resource "aiven_static_ip" "example" {
   service_name         = "foo"
   state                = "assigned"
   */
+}
+
+resource "aiven_organization_project" "example" {
+  organization_id  = aiven_organization.example.id                             // e.g. "org1234abcd"
+  project_id       = "project-1"                                               // Force new
+  billing_group_id = aiven_organization_billing_group.example.billing_group_id // e.g. "721bf796-1d89-402d-9195-425a23c4efdc"
+  parent_id        = aiven_organization.example.id                             // e.g. "a3fd7a594e01"
+}
+
+resource "aiven_organization_billing_group" "example" {
+  organization_id     = aiven_organization.example.id                 // e.g. "org1a23f456789". Force new
+  billing_address_id  = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
+  shipping_address_id = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
+  billing_contact_emails {
+    email = "jane@example.com"
+  }
+  billing_emails {
+    email = "jane@example.com"
+  }
+  billing_group_name = "Default billing group for the organization"
+  payment_method {
+    payment_method_id   = "pm4b1ff1ceeaa"
+    payment_method_type = "credit_card"
+  }
+}
+
+resource "aiven_organization_address" "example" {
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  address_lines   = ["Street 1", "Street 2"]
+  city            = "Helsinki"
+  country_code    = "FI"
+  name            = "Aiven Oy"
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

@@ -16,7 +16,7 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 
 ```terraform
 resource "aiven_governance_access" "example" {
-  organization_id = "org1a23f456789" // Force new
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
   access_data {
     acls {
       operation       = "Write"
@@ -40,7 +40,7 @@ resource "aiven_governance_access" "example" {
     username = "api3"
   }
   access_name = "My Access" // Force new
-  access_type = "KAFKA" // Force new
+  access_type = "KAFKA"     // Force new
 
   // OPTIONAL FIELDS
   owner_user_group_id = "ug22ba494e096" // Force new
@@ -48,6 +48,10 @@ resource "aiven_governance_access" "example" {
   /* COMPUTED FIELDS
   access_id = "foo"
   */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

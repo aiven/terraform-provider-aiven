@@ -13,9 +13,9 @@ Creates and manages an Aiven for MySQL® service user. If this resource is missi
 
 ```terraform
 resource "aiven_mysql_user" "example" {
-  project      = "my-project" // Force new
-  service_name = "my-mysql" // Force new
-  username     = "testuser" // Force new
+  project      = aiven_mysql.example_mysql.project      // e.g. "my-project". Force new
+  service_name = aiven_mysql.example_mysql.service_name // e.g. "my-mysql". Force new
+  username     = "testuser"                             // Force new
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
@@ -29,6 +29,12 @@ resource "aiven_mysql_user" "example" {
   password_encryption_type = "md5"
   type                     = "foo"
   */
+}
+
+resource "aiven_mysql" "example_mysql" {
+  project      = data.aiven_project.example_project.project
+  plan         = "business-4"
+  service_name = "example-mysql"
 }
 ```
 

@@ -20,10 +20,29 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 
 ```terraform
 resource "aiven_byoc_permissions" "example" {
-  organization_id             = "org1a23f456789" // Force new
-  custom_cloud_environment_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" // Force new
+  organization_id             = aiven_organization.example.id                                // e.g. "org1a23f456789". Force new
+  custom_cloud_environment_id = aiven_byoc_aws_provision.example.custom_cloud_environment_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d". Force new
   accounts                    = ["a22ba494e096", "a441b467e067"]
   projects                    = ["project-prod", "project-dev"]
+}
+
+resource "aiven_byoc_aws_provision" "example" {
+  organization_id             = aiven_organization.example.id                             // e.g. "org1a23f456789". Force new
+  custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d". Force new
+  aws_iam_role_arn            = "arn:aws:iam::012345678901:root"                          // Force new
+}
+
+resource "aiven_byoc_aws_entity" "example" {
+  organization_id  = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_provider   = "aws"                         // Force new
+  cloud_region     = "eu-west-1"                   // Force new
+  deployment_model = "standard"                    // Force new
+  display_name     = "byoc-cloud-prod-eu-west-1"
+  reserved_cidr    = "192.168.6.0/24" // Force new
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

@@ -13,16 +13,37 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+// exampleLabel is the block label of generated examples.
+const exampleLabel = "example"
+
 // exampleRoot generates example usage for the TF resource or data source.
 func exampleRoot(def *Definition, entity entityType, item *Item) ([]byte, error) {
+	w := &exampleWriter{def: def, entity: entity}
+	return w.root(item)
+}
+
+// exampleWriter renders an example block.
+type exampleWriter struct {
+	def    *Definition
+	entity entityType
+
+	// withRefs renders `ref` fields as references to the target resources, collected in deps.
+	withRefs bool
+	deps     []*refExample
+
+	// requiredOnly skips optional and computed fields.
+	requiredOnly bool
+}
+
+func (w *exampleWriter) root(item *Item) ([]byte, error) {
 	t := "data"
-	if entity.isResource() {
+	if w.entity.isResource() {
 		t = "resource"
 	}
 
 	f := hclwrite.NewEmptyFile()
-	rootBody := f.Body().AppendNewBlock(t, []string{def.typeName, "example"}).Body()
-	err := exampleObjectItem(def, entity, item, rootBody, false)
+	rootBody := f.Body().AppendNewBlock(t, []string{w.def.typeName, exampleLabel}).Body()
+	err := w.object(item, rootBody, false)
 	if err != nil {
 		return nil, err
 	}
@@ -92,9 +113,10 @@ func getExampleItemPriority(def *Definition, entity entityType, item *Item) int 
 	return score
 }
 
-// exampleObjectItem renders an object item into the body.
+// object renders an object item into the body.
 // inComputedBlock - true if the current block is a computed block, so we don't add "Computed" title within a computed block.
-func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hclwrite.Body, inComputedBlock bool) error {
+func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock bool) error {
+	def, entity := w.def, w.entity
 	var seenComputed, seenOptional bool
 	conflictsWith := make(map[string]bool)
 	alternatives, err := datasourceAlternativeAttrs(def, entity, item)
@@ -107,6 +129,10 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 		if v.Virtual || v.DeprecationMessage != "" {
 			// Don't expose internal virtual properties, like "id"
 			// or deprecated properties.
+			continue
+		}
+
+		if w.requiredOnly && !v.IsRequired(def, entity) {
 			continue
 		}
 
@@ -167,7 +193,7 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			}
 
 			valBlock := body.AppendNewBlock(k, nil)
-			err := exampleObjectItem(def, entity, v, valBlock.Body(), seenComputed || inComputedBlock)
+			err := w.object(v, valBlock.Body(), seenComputed || inComputedBlock)
 			if err != nil {
 				return fmt.Errorf("example items error: %w", err)
 			}
@@ -180,14 +206,27 @@ func exampleObjectItem(def *Definition, entity entityType, item *Item, body *hcl
 			return err
 		}
 
-		tokens := hclwrite.TokensForValue(val)
-		if val.Type().IsListType() {
-			tokens = exampleCollectionTokens(val)
+		var tokens hclwrite.Tokens
+		var comments []string
+		if w.withRefs && v.Ref != "" && !v.IsReadOnly(def, entity) {
+			tokens, err = w.refTokens(v)
+			if err != nil {
+				return err
+			}
+			comments = append(comments, "e.g. "+string(hclwrite.TokensForValue(val).Bytes()))
+		} else {
+			tokens = hclwrite.TokensForValue(val)
+			if val.Type().IsListType() {
+				tokens = exampleCollectionTokens(val)
+			}
 		}
 		if item.IsRoot() && entity.isResource() && v.ForceNew {
+			comments = append(comments, "Force new")
+		}
+		if len(comments) > 0 {
 			tokens = append(tokens, &hclwrite.Token{
 				Type:  hclsyntax.TokenComment,
-				Bytes: []byte("// Force new"),
+				Bytes: []byte("// " + strings.Join(comments, ". ")),
 			})
 		}
 

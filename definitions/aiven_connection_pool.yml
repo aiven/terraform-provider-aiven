@@ -25,9 +25,15 @@ operations:
     resultListLookupKeys:
       PoolName: pool_name
 schema:
+  project:
+    ref: aiven_pg.project
+  service_name:
+    ref: aiven_pg.service_name
   username:
+    ref: aiven_pg_user.username
     minLength: 1
   connection_uri:
     sensitive: true
   database_name:
+    ref: aiven_pg_database.database_name
     forceNew: true

@@ -40,5 +40,9 @@ operations:
     type: delete
     resultKey: acl
 schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
   username:
     pattern: ^[-._*?A-Za-z0-9]+$

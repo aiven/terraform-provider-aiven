@@ -27,6 +27,8 @@ remove:
   - peering_connections
   - pending_build_only_peering_connections
 schema:
+  organization_id:
+    ref: aiven_organization.id
   cloud_name:
     type: string
     required: true

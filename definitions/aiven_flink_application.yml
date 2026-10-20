@@ -33,3 +33,8 @@ operations:
       Name: name
   - id: ServiceFlinkUpdateApplication
     type: update
+schema:
+  project:
+    ref: aiven_flink.project
+  service_name:
+    ref: aiven_flink.service_name

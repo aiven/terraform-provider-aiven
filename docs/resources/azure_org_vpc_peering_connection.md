@@ -13,18 +13,28 @@ Creates and manages an Azure VPC peering connection with an Aiven VPC. If this r
 
 ```terraform
 resource "aiven_azure_org_vpc_peering_connection" "example" {
-  organization_id       = "org1a23f456789" // Force new
-  organization_vpc_id   = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" // Force new
-  azure_subscription_id = "12345678-1234-1234-1234-123456789012" // Force new
-  vnet_name             = "my-vnet" // Force new
-  peer_resource_group   = "my-resource-group" // Force new
-  peer_azure_app_id     = "87654321-4321-4321-4321-210987654321" // Force new
-  peer_azure_tenant_id  = "11111111-2222-3333-4444-555555555555" // Force new
+  organization_id       = aiven_organization.example.id                      // e.g. "org1a23f456789". Force new
+  organization_vpc_id   = aiven_organization_vpc.example.organization_vpc_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d". Force new
+  azure_subscription_id = "12345678-1234-1234-1234-123456789012"             // Force new
+  vnet_name             = "my-vnet"                                          // Force new
+  peer_resource_group   = "my-resource-group"                                // Force new
+  peer_azure_app_id     = "87654321-4321-4321-4321-210987654321"             // Force new
+  peer_azure_tenant_id  = "11111111-2222-3333-4444-555555555555"             // Force new
 
   /* COMPUTED FIELDS
   peering_connection_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
   state                 = "ACTIVE"
   */
+}
+
+resource "aiven_organization_vpc" "example" {
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_name      = "aws-eu-west-1"               // Force new
+  network_cidr    = "10.0.0.0/24"                 // Force new
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

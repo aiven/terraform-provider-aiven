@@ -13,9 +13,9 @@ Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project V
 
 ```terraform
 resource "aiven_transit_gateway_vpc_attachment" "example" {
-  vpc_id             = "example-project/example-vpc" // Force new
-  peer_cloud_account = "123456789012" // Force new
-  peer_vpc           = "tgw-0123456789abcdef0" // Force new
+  vpc_id             = aiven_project_vpc.example.id // e.g. "example-project/example-vpc". Force new
+  peer_cloud_account = "123456789012"               // Force new
+  peer_vpc           = "tgw-0123456789abcdef0"      // Force new
 
   // OPTIONAL FIELDS
   peer_region             = "us-east-1" // Force new
@@ -29,6 +29,48 @@ resource "aiven_transit_gateway_vpc_attachment" "example" {
     foo = "foo"
   }
   */
+}
+
+resource "aiven_project_vpc" "example" {
+  project      = aiven_organization_project.example.project_id // e.g. "my-project". Force new
+  cloud_name   = "aws-eu-central-1"                            // Force new
+  network_cidr = "192.168.6.0/24"                              // Force new
+}
+
+resource "aiven_organization_project" "example" {
+  organization_id  = aiven_organization.example.id                             // e.g. "org1234abcd"
+  project_id       = "project-1"                                               // Force new
+  billing_group_id = aiven_organization_billing_group.example.billing_group_id // e.g. "721bf796-1d89-402d-9195-425a23c4efdc"
+  parent_id        = aiven_organization.example.id                             // e.g. "a3fd7a594e01"
+}
+
+resource "aiven_organization_billing_group" "example" {
+  organization_id     = aiven_organization.example.id                 // e.g. "org1a23f456789". Force new
+  billing_address_id  = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
+  shipping_address_id = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
+  billing_contact_emails {
+    email = "jane@example.com"
+  }
+  billing_emails {
+    email = "jane@example.com"
+  }
+  billing_group_name = "Default billing group for the organization"
+  payment_method {
+    payment_method_id   = "pm4b1ff1ceeaa"
+    payment_method_type = "credit_card"
+  }
+}
+
+resource "aiven_organization_address" "example" {
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  address_lines   = ["Street 1", "Street 2"]
+  city            = "Helsinki"
+  country_code    = "FI"
+  name            = "Aiven Oy"
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

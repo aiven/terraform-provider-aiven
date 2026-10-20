@@ -28,6 +28,10 @@ operations:
   - id: ServiceFlinkDeleteJarApplication
     type: delete
 schema:
+  project:
+    ref: aiven_flink.project
+  service_name:
+    ref: aiven_flink.service_name
   # A list in the SDK schema: keep the ordering so existing state stays valid.
   application_versions:
     type: arrayOrdered

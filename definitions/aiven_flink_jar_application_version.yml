@@ -27,6 +27,12 @@ operations:
   - id: ServiceFlinkDeleteJarApplicationVersion
     type: delete
 schema:
+  project:
+    ref: aiven_flink.project
+  service_name:
+    ref: aiven_flink.service_name
+  application_id:
+    ref: aiven_flink_jar_application.application_id
   # Neither field exists in the API: the jar file is uploaded out of band.
   source:
     type: string

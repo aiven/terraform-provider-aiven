@@ -13,14 +13,14 @@ Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/pr
 
 ```terraform
 resource "aiven_kafka_topic" "example" {
-  project      = "my-project" // Force new
-  service_name = "my-kafka" // Force new
-  topic_name   = "mytopic" // Force new
+  project      = aiven_kafka.example_kafka.project      // e.g. "my-project". Force new
+  service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
+  topic_name   = "mytopic"                              // Force new
   partitions   = 3
   replication  = 3
 
   // OPTIONAL FIELDS
-  owner_user_group_id = "ug22ba494e096"
+  owner_user_group_id = aiven_organization_user_group.example.group_id // e.g. "ug22ba494e096"
   config {
     cleanup_policy = "delete"
 
@@ -62,6 +62,22 @@ resource "aiven_kafka_topic" "example" {
     value = "My tag value, value."
   }
   topic_description = "Platform events"
+}
+
+resource "aiven_kafka" "example_kafka" {
+  project      = data.aiven_project.example_project.project
+  plan         = "business-4"
+  service_name = "example-kafka"
+}
+
+resource "aiven_organization_user_group" "example" {
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  description     = "The group of admins for the organization"
+  name            = "Admin Users"
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

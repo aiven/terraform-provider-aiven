@@ -237,6 +237,11 @@ Focus on migration-specific concerns:
 - Preserve ID structure
 - Copy descriptions from SDK resource
 - Keep every SDK `Sensitive` field as `sensitive: true` in YAML (no regressions)
+- Add `ref:` to fields that reference other resources, see **tf-resource-generator** → Field References.
+  The SDK example's references show the intent: `data.aiven_project.foo.project` becomes
+  `ref: aiven_organization_project.project_id` (newest, non-deprecated target).
+- Once the YAML has a generated example, definitions referencing this resource use that generated block,
+  labelled `example`, instead of the hand-written one. Regenerate and review their docs.
 
 ### 7. Generate and Build
 

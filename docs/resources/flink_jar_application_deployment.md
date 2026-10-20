@@ -16,17 +16,17 @@ This feature is in the limited availability stage and may change without notice.
 
 ```terraform
 resource "aiven_flink_jar_application_deployment" "example" {
-  project        = "my-project" // Force new
-  service_name   = "my-application" // Force new
-  application_id = "foo" // Force new
-  version_id     = "543e420d-aa63-43e8-b8e8-294a78c600e7" // Force new
+  project        = aiven_flink.example_flink.project                                  // e.g. "my-project". Force new
+  service_name   = aiven_flink.example_flink.service_name                             // e.g. "my-application". Force new
+  application_id = aiven_flink_jar_application.example.application_id                 // e.g. "foo". Force new
+  version_id     = aiven_flink_jar_application_version.example.application_version_id // e.g. "543e420d-aa63-43e8-b8e8-294a78c600e7". Force new
 
   // OPTIONAL FIELDS
   entry_class        = "com.example.MyFlinkJob" // Force new
-  parallelism        = 1 // Force new
-  program_args       = ["example-argument"] // Force new
-  restart_enabled    = true // Force new
-  starting_savepoint = "path/to/savepoint" // Force new
+  parallelism        = 1                        // Force new
+  program_args       = ["example-argument"]     // Force new
+  restart_enabled    = true                     // Force new
+  starting_savepoint = "path/to/savepoint"      // Force new
 
   /* COMPUTED FIELDS
   deployment_id  = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
@@ -37,6 +37,25 @@ resource "aiven_flink_jar_application_deployment" "example" {
   last_savepoint = "foo"
   status         = "CANCELED"
   */
+}
+
+resource "aiven_flink_jar_application_version" "example" {
+  project        = aiven_flink.example_flink.project                  // e.g. "my-project". Force new
+  service_name   = aiven_flink.example_flink.service_name             // e.g. "my-application". Force new
+  application_id = aiven_flink_jar_application.example.application_id // e.g. "foo". Force new
+  source         = "./example.jar"
+}
+
+resource "aiven_flink_jar_application" "example" {
+  project      = aiven_flink.example_flink.project      // e.g. "my-project". Force new
+  service_name = aiven_flink.example_flink.service_name // e.g. "my-application". Force new
+  name         = "TestJob"
+}
+
+resource "aiven_flink" "example_flink" {
+  project      = data.aiven_project.example_project.project
+  plan         = "business-4"
+  service_name = "example-flink-service"
 }
 ```
 

@@ -13,7 +13,7 @@ Creates and manages an organization address.
 
 ```terraform
 resource "aiven_organization_address" "example" {
-  organization_id = "org1a23f456789" // Force new
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
   address_lines   = ["Street 1", "Street 2"]
   city            = "Helsinki"
   country_code    = "FI"
@@ -28,6 +28,10 @@ resource "aiven_organization_address" "example" {
   create_time = "2021-01-01T00:00:00Z"
   update_time = "2021-01-01T00:00:00Z"
   */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

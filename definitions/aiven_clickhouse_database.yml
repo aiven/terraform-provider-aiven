@@ -24,3 +24,8 @@ operations:
     resultKey: databases
     resultListLookupKeys:
       Name: name
+schema:
+  project:
+    ref: aiven_clickhouse.project
+  service_name:
+    ref: aiven_clickhouse.service_name

@@ -16,9 +16,9 @@ This feature is in the limited availability stage and may change without notice.
 
 ```terraform
 resource "aiven_flink_jar_application_version" "example" {
-  project        = "my-project" // Force new
-  service_name   = "my-application" // Force new
-  application_id = "foo" // Force new
+  project        = aiven_flink.example_flink.project                  // e.g. "my-project". Force new
+  service_name   = aiven_flink.example_flink.service_name             // e.g. "my-application". Force new
+  application_id = aiven_flink_jar_application.example.application_id // e.g. "foo". Force new
   source         = "./example.jar"
 
   /* COMPUTED FIELDS
@@ -36,6 +36,18 @@ resource "aiven_flink_jar_application_version" "example" {
   source_checksum = "foo"
   version         = 42
   */
+}
+
+resource "aiven_flink_jar_application" "example" {
+  project      = aiven_flink.example_flink.project      // e.g. "my-project". Force new
+  service_name = aiven_flink.example_flink.service_name // e.g. "my-application". Force new
+  name         = "TestJob"
+}
+
+resource "aiven_flink" "example_flink" {
+  project      = data.aiven_project.example_project.project
+  plan         = "business-4"
+  service_name = "example-flink-service"
 }
 ```
 

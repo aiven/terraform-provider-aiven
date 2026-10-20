@@ -30,6 +30,10 @@ remove:
   - password_updated_time
   - mysql_grants # MySQL grants for the service user
 schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
   password:
     type: string
     optional: true

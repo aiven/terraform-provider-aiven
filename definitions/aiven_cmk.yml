@@ -23,6 +23,8 @@ rename:
   id: cmk_id # some endpoints return "id" some "cmk_id"
   provider: cmk_provider # the name "provider" is reserved by Terraform
 schema:
+  project:
+    ref: aiven_organization_project.project_id
   cmk_provider:
     description: The cloud provider hosting the key management service (KMS).
   resource:

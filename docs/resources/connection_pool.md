@@ -13,19 +13,37 @@ Creates and manages a [connection pool](https://aiven.io/docs/products/postgresq
 
 ```terraform
 resource "aiven_connection_pool" "example" {
-  project       = "my-project" // Force new
-  service_name  = "foo" // Force new
-  pool_name     = "mypool-x-y-z" // Force new
-  database_name = "testdb" // Force new
+  project       = aiven_pg.example_postgres.project       // e.g. "my-project". Force new
+  service_name  = aiven_pg.example_postgres.service_name  // e.g. "foo". Force new
+  pool_name     = "mypool-x-y-z"                          // Force new
+  database_name = aiven_pg_database.example.database_name // e.g. "testdb". Force new
 
   // OPTIONAL FIELDS
   pool_mode = "transaction"
   pool_size = 10
-  username  = "testuser"
+  username  = aiven_pg_user.example.username // e.g. "testuser"
 
   /* COMPUTED FIELDS
   connection_uri = "foo"
   */
+}
+
+resource "aiven_pg_database" "example" {
+  project       = aiven_pg.example_postgres.project      // e.g. "my-project". Force new
+  service_name  = aiven_pg.example_postgres.service_name // e.g. "my-pg". Force new
+  database_name = "testdb"                               // Force new
+}
+
+resource "aiven_pg_user" "example" {
+  project      = aiven_pg.example_postgres.project      // e.g. "my-project". Force new
+  service_name = aiven_pg.example_postgres.service_name // e.g. "my-pg". Force new
+  username     = "testuser"                             // Force new
+}
+
+resource "aiven_pg" "example_postgres" {
+  project      = data.aiven_project.example_project.project
+  plan         = "startup-4"
+  service_name = "example-postgres-service"
 }
 ```
 
