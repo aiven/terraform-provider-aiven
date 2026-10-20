@@ -136,7 +136,12 @@ idAttributeComposed: [field1, field2]
 clientHandler: project
 ```
 
-### 5. Generate and Iterate
+### 5. Reference Fields
+
+Add `ref:` to every field that references another resource, see [Field References](#field-references).
+Check other definitions too: a new resource can be the better target for their fields.
+
+### 6. Generate and Iterate
 
 ```bash
 task generate       # Generate code
@@ -368,6 +373,7 @@ schema:
     default: value
     dropDefault: true              # Migration workaround, see tf-resource-migration. Drops the OpenAPI default
     deprecationMessage: "..."
+    ref: aiven_kafka.service_name  # Docs only, see Field References
 ```
 
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
@@ -386,6 +392,50 @@ marked `todo: ... v5.0.0`. Generated examples use attribute assignment
 (`file_info = [{ ... }]`) for computed nested attributes, not block syntax.
 
 **Find examples**: `grep -A 10 "schema:" definitions/aiven_*.yml`
+
+### Field References
+
+`ref: <resource type>.<attribute>` marks a scalar field whose value usually comes from another resource.
+The resource doc example renders the resource first, then the resources it references (dependents before
+their dependencies). Fields with a `ref` point to the target attributes, with the literal example kept as a comment:
+
+```terraform
+service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
+```
+
+Refs are written by hand in the YAML. The generator only renders them; it never infers a ref.
+Decide each one by reading the target resource's schema (`docs/resources/<name>.md`), not by field name alone.
+
+Add a ref to every field that takes another resource's attribute: `project`, `service_name`, `organization_id`,
+and `*_id`/`*_name` fields naming another resource (`group_id`, `database_name`, `application_id`, ...).
+Choosing the target:
+
+1. **Service-scoped resources**: reference both `project` and `service_name` to the service resource
+   (`aiven_pg.project`, `aiven_pg.service_name`), so they reference the same block.
+2. **Newest, non-deprecated wins.** When several resources fit, pick the newest one that isn't deprecated.
+   Organization resources (`aiven_organization_*`) are the newest:
+   - `project` → `aiven_organization_project.project_id`, not `aiven_project.project`
+   - billing group → `aiven_organization_billing_group`, not `aiven_billing_group`
+   - user group → `aiven_organization_user_group`, not `aiven_account_team`
+3. **Stay consistent with the chain.** If a referenced resource already provides the value, reuse it:
+   `aiven_organization_application_user_token.organization_id` → `aiven_organization_application_user.organization_id`.
+4. **Skip ambiguous fields**: values that can be any service type (privatelink `service_name`), patterns
+   (Kafka ACL `topic = "top*"`), or polymorphic IDs (`aiven_organization_permission.resource_id`).
+
+How the example is assembled:
+
+- A referenced definition contributes its generated block with **required fields only**, with its own refs resolved recursively.
+  Shared dependencies are rendered once.
+- SDK resources and definitions with `disableExample` contribute the first matching `resource` block of their
+  hand-written `examples/resources/<type>/resource.tf`, with its label (e.g. `example_kafka`).
+  It is reduced to required top-level fields too, per the plugin schema or, for SDK resources, the SDK schema.
+- `examples/resources/<type>/resource.tf` stays a single block with literals, because `examples_tests` plans it
+  with a provider that serves Plugin Framework resources only. Only the doc page shows the example with refs.
+- Resources with a doc template override (`templates/resources/<name>.md.tmpl`) don't render it.
+
+`task generate` fails on a malformed ref, a self-reference, a cycle, an unknown target or attribute
+(checked against the SDK schema for SDK resources), or a YAML target that is deprecated or has no resource.
+SDK deprecation isn't checked, so verify it in `docs/resources/<name>.md`.
 
 ## Generated View Structure
 

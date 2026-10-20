@@ -13,9 +13,9 @@ Creates and manages an Aiven for OpenSearch® service user. If this resource is 
 
 ```terraform
 resource "aiven_opensearch_user" "example" {
-  project      = "my-project" // Force new
-  service_name = "my-opensearch" // Force new
-  username     = "testuser" // Force new
+  project      = aiven_opensearch.example_opensearch.project      // e.g. "my-project". Force new
+  service_name = aiven_opensearch.example_opensearch.service_name // e.g. "my-opensearch". Force new
+  username     = "testuser"                                       // Force new
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
@@ -25,6 +25,12 @@ resource "aiven_opensearch_user" "example" {
   password_encryption_type = "md5"
   type                     = "foo"
   */
+}
+
+resource "aiven_opensearch" "example_opensearch" {
+  project      = data.aiven_project.example_project.project
+  plan         = "startup-4"
+  service_name = "example-opensearch"
 }
 ```
 

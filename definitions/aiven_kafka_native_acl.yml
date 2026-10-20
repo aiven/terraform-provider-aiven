@@ -23,6 +23,10 @@ operations:
   - id: ServiceKafkaNativeAclDelete
     type: delete
 schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
   # host is optional on create (no default in the spec), but when omitted the
   # server still returns a value (e.g. "*"). Marking it computed lets that
   # server-assigned value populate state without a "provider produced

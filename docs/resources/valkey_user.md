@@ -13,9 +13,9 @@ Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valk
 
 ```terraform
 resource "aiven_valkey_user" "example" {
-  project      = "my-project" // Force new
-  service_name = "my-valkey" // Force new
-  username     = "testuser" // Force new
+  project      = aiven_valkey.example_valkey.project      // e.g. "my-project". Force new
+  service_name = aiven_valkey.example_valkey.service_name // e.g. "my-valkey". Force new
+  username     = "testuser"                               // Force new
 
   // OPTIONAL FIELDS
   password_wo           = "password123"
@@ -29,6 +29,12 @@ resource "aiven_valkey_user" "example" {
   password_encryption_type = "md5"
   type                     = "foo"
   */
+}
+
+resource "aiven_valkey" "example_valkey" {
+  project      = data.aiven_project.example_project.project
+  plan         = "startup-4"
+  service_name = "example-valkey-service"
 }
 ```
 

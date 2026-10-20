@@ -13,7 +13,7 @@ Creates and manages an [organizational unit](https://aiven.io/docs/platform/conc
 
 ```terraform
 resource "aiven_organizational_unit" "example" {
-  parent_id = "a22ba494e096"
+  parent_id = aiven_organization.example.id // e.g. "a22ba494e096"
   name      = "Aiven Ltd"
 
   /* COMPUTED FIELDS
@@ -22,6 +22,10 @@ resource "aiven_organizational_unit" "example" {
   create_time = "2021-01-01T00:00:00Z"
   update_time = "2021-01-01T00:00:00Z"
   */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

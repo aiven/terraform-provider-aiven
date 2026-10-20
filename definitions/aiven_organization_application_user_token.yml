@@ -17,6 +17,10 @@ operations:
     resultListLookupKeys:
       TokenPrefix: token_prefix
 schema:
+  organization_id:
+    ref: aiven_organization_application_user.organization_id
+  user_id:
+    ref: aiven_organization_application_user.user_id
   full_token:
     sensitive: true
   description:

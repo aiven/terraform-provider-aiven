@@ -34,6 +34,8 @@ remove:
   - oracle_subnet_bastion # CIDR for the bastion subnet
   - oracle_subnet_workload # CIDR for the private workload subnet
 schema:
+  organization_id:
+    ref: aiven_organization.id
   cloud_provider:
     forceNew: true
   cloud_region:

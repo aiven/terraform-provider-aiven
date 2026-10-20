@@ -13,15 +13,15 @@ Creates and manages an application user token. Review the [best practices](https
 
 ```terraform
 resource "aiven_organization_application_user_token" "example" {
-  organization_id = "org1a23f456789" // Force new
-  user_id         = "foo" // Force new
+  organization_id = aiven_organization_application_user.example.organization_id // e.g. "org1a23f456789". Force new
+  user_id         = aiven_organization_application_user.example.user_id         // e.g. "foo". Force new
 
   // OPTIONAL FIELDS
-  description      = "Integration client Alpha" // Force new
-  extend_when_used = false // Force new
+  description      = "Integration client Alpha"          // Force new
+  extend_when_used = false                               // Force new
   ip_allowlist     = ["192.168.0.0/24", "2001:db8::/32"] // Force new
-  max_age_seconds  = 600 // Force new
-  scopes           = ["user:read"] // Force new
+  max_age_seconds  = 600                                 // Force new
+  scopes           = ["user:read"]                       // Force new
 
   /* COMPUTED FIELDS
   create_time                    = "2021-01-01T00:00:00Z"
@@ -35,6 +35,11 @@ resource "aiven_organization_application_user_token" "example" {
   last_user_agent_human_readable = "foo"
   token_prefix                   = "foo"
   */
+}
+
+resource "aiven_organization_application_user" "example" {
+  organization_id = "org1a23f456789" // Force new
+  name            = "devops app user"
 }
 ```
 

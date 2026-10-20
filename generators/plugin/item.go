@@ -216,6 +216,14 @@ type Definition struct {
 	// written back to the YAML's `remove:` list at end of generation.
 	// Keyed by name, value is the first non-empty description seen.
 	prunedFields map[string]string
+
+	// refTargets are the YAML definitions referenced by `ref` fields, keyed by type name.
+	refTargets map[string]*Definition
+
+	// resourceRoot and refExample are set when the resource is generated,
+	// so definitions referencing this one can validate and render against them.
+	resourceRoot *Item
+	refExample   *refExample
 }
 
 // ShortName returns the Terraform type name with the "aiven_" prefix stripped,
@@ -403,6 +411,10 @@ type Item struct {
 	Minimum      int   `yaml:"minimum,omitempty"`
 	Maximum      int   `yaml:"maximum,omitempty"`
 	Example      any   `yaml:"example,omitempty"`
+
+	// Ref points to the resource attribute this field usually references, e.g. "aiven_kafka.service_name".
+	// Documentation only: the doc example renders the target resource and references its attribute.
+	Ref string `yaml:"ref,omitempty"`
 }
 
 // UniqueName generates unique name by composing all ancestor names

@@ -33,6 +33,10 @@ remove:
   - topics.exclude
   - topics_exclude
 schema:
+  project:
+    ref: aiven_kafka_mirrormaker.project
+  service_name:
+    ref: aiven_kafka_mirrormaker.service_name
   # SDK exposed these as ordered lists (TypeList), keep the same representation.
   # They stay plain optional, like in the SDK, because they are the only fields
   # here that can be cleared: their request fields are `*[]string`, so dropping

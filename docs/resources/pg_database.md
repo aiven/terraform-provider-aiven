@@ -13,13 +13,19 @@ Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/p
 
 ```terraform
 resource "aiven_pg_database" "example" {
-  project       = "my-project" // Force new
-  service_name  = "my-pg" // Force new
-  database_name = "testdb" // Force new
+  project       = aiven_pg.example_postgres.project      // e.g. "my-project". Force new
+  service_name  = aiven_pg.example_postgres.service_name // e.g. "my-pg". Force new
+  database_name = "testdb"                               // Force new
 
   // OPTIONAL FIELDS
   lc_collate = "en_US.UTF-8" // Force new
   lc_ctype   = "en_US.UTF-8" // Force new
+}
+
+resource "aiven_pg" "example_postgres" {
+  project      = data.aiven_project.example_project.project
+  plan         = "startup-4"
+  service_name = "example-postgres-service"
 }
 ```
 

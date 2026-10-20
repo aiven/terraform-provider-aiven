@@ -25,6 +25,10 @@ rename:
   user_group_id: group_id
 remove: [members, operation, member_ids, user_info] # user_info — is a computed block, which is not supported by the Plugin Framework
 schema:
+  organization_id:
+    ref: aiven_organization.id
+  group_id:
+    ref: aiven_organization_user_group.group_id
   # The UserID is not an explicit field in the API schema; it is instead included within the 'member_ids' payload.
   # See: https://api.aiven.io/doc/#tag/Groups/operation/UserGroupMembersUpdate
   user_id:

@@ -21,6 +21,8 @@ remove:
   - created_by
   - create_time
 schema:
+  organization_id:
+    ref: aiven_organization.id
   access_data:
     properties:
       username:

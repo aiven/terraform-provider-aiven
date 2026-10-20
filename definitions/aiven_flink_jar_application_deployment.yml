@@ -25,6 +25,14 @@ operations:
     type: read
 # The read response carries these, so the API value wins when the configuration has none.
 schema:
+  project:
+    ref: aiven_flink.project
+  service_name:
+    ref: aiven_flink.service_name
+  application_id:
+    ref: aiven_flink_jar_application.application_id
+  version_id:
+    ref: aiven_flink_jar_application_version.application_version_id
   entry_class:
     computed: true
   program_args:

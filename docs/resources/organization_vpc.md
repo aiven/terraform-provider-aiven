@@ -13,9 +13,9 @@ Creates and manages a VPC for an Aiven organization. If this resource is missing
 
 ```terraform
 resource "aiven_organization_vpc" "example" {
-  organization_id = "org1a23f456789" // Force new
-  cloud_name      = "aws-eu-west-1" // Force new
-  network_cidr    = "10.0.0.0/24" // Force new
+  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_name      = "aws-eu-west-1"               // Force new
+  network_cidr    = "10.0.0.0/24"                 // Force new
 
   // OPTIONAL FIELDS
   display_name = "My organization VPC"
@@ -26,6 +26,10 @@ resource "aiven_organization_vpc" "example" {
   state               = "ACTIVE"
   update_time         = "2021-01-01T00:00:00Z"
   */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 

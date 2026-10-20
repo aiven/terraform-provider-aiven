@@ -25,3 +25,8 @@ operations:
     resultKeyField: Databases
     resultListLookupKeys:
       DatabaseName: database_name
+schema:
+  project:
+    ref: aiven_mysql.project
+  service_name:
+    ref: aiven_mysql.service_name

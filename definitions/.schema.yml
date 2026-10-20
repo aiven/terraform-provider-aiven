@@ -406,6 +406,17 @@ definitions:
           for strings, integer for ints, etc.). Examples are also auto-loaded from
           the OpenAPI spec; set this only when the spec lacks one or you need to
           override it.
+      ref:
+        type: string
+        pattern: ^aiven_[a-z0-9_]+\.[a-z0-9_]+$
+        $comment: |
+          The resource attribute this field usually references, as "<resource type>.<attribute>",
+          e.g. `aiven_kafka.service_name`. Documentation only: the resource doc example renders
+          the referenced resource and references its attribute instead of a literal value.
+          The referenced block comes from the target definition's generated example,
+          or from `examples/resources/<resource type>/resource.tf` for hand-written examples, required fields only.
+          Scalar fields only. When several resources fit, reference the newest non-deprecated one:
+          organization resources are the newest, e.g. `aiven_organization_project.project_id`, not `aiven_project.project`.
       items:
         $ref: "#/definitions/Schema"
         $comment: Array item or Map item configuration

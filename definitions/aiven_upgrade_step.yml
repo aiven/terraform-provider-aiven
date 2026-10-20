@@ -15,3 +15,6 @@ operations:
     type: update
 remove:
   - last_validation
+schema:
+  organization_id:
+    ref: aiven_organization.id

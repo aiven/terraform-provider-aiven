@@ -25,6 +25,10 @@ operations:
     resultListLookupKeys:
       DatabaseName: database_name
 schema:
+  project:
+    ref: aiven_pg.project
+  service_name:
+    ref: aiven_pg.service_name
   lc_collate:
     optional: true
     default: en_US.UTF-8

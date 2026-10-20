@@ -26,3 +26,6 @@ operations:
     type: update
   - id: UserGroupDelete
     type: delete
+schema:
+  organization_id:
+    ref: aiven_organization.id

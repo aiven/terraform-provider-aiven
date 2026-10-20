@@ -95,8 +95,14 @@ func exec() error {
 		return fmt.Errorf("no definitions found in %s", definitionsPath)
 	}
 
+	// Ref targets are generated first, so their examples are cached for the dependents.
+	ordered, err := resolveRefs(definitions)
+	if err != nil {
+		return err
+	}
+
 	// Generates files
-	for _, def := range definitions {
+	for _, def := range ordered {
 		log.Info().Str("file", def.fileName).Msg("generating")
 		err := genDefinition(doc, def)
 		if err != nil {
@@ -231,6 +237,16 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		}
 
 		isResource := entity.isResource()
+		if isResource {
+			def.resourceRoot = renderRoot
+			if !resDat.DisableExample {
+				def.refExample, err = newRefExample(def, renderRoot)
+				if err != nil {
+					return fmt.Errorf("could not generate ref example: %w", err)
+				}
+			}
+		}
+
 		filePath := genFilePath(location, entity)
 		file := newFile(
 			pkgName,
@@ -1005,6 +1021,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	if !isEmpty(b.Example) {
 		a.Example = b.Example
 	}
+	a.Ref = or(b.Ref, a.Ref)
 
 	// Validators
 	a.ConflictsWith = mergeSlices(a.ConflictsWith, b.ConflictsWith)

@@ -15,5 +15,7 @@ operations:
   - id: OrganizationAddressUpdate
     type: update
 schema:
+  organization_id:
+    ref: aiven_organization.id
   address_lines:
     type: arrayOrdered

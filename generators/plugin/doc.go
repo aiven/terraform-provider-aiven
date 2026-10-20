@@ -182,6 +182,16 @@ func docWriteFrontMatter(b *strings.Builder, def *Definition, entity entityType,
 }
 
 func docExample(def *Definition, entity entityType, renderRoot *Item, resDat *SchemaMeta) (string, bool, error) {
+	// The example file stays a single block to be plan-tested on its own,
+	// the doc example also renders the referenced resources.
+	if entity.isResource() && !resDat.DisableExample {
+		b, err := exampleDoc(def, renderRoot)
+		if err != nil {
+			return "", false, err
+		}
+		return "```terraform\n" + strings.TrimSpace(string(b)) + "\n```", true, nil
+	}
+
 	entityString := strings.ReplaceAll(entity.String(), "data", "data-")
 	examplePath := filepath.Join(examplesDir, entityString+"s", def.typeName, entityString+".tf")
 	content, err := os.ReadFile(examplePath)

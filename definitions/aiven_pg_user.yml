@@ -31,9 +31,12 @@ remove:
   - password_updated_time
   - mysql_grants # MySQL grants for the service user
 schema:
+  project:
+    ref: aiven_pg.project
   type:
     description: The service user account type, either primary or regular.
   service_name:
+    ref: aiven_pg.service_name
     description: The name of the service.
   username:
     description: The name of the service user for this service.

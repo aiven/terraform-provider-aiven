@@ -28,12 +28,15 @@ remove:
   - expiring_cert_not_valid_after_time
   - password_updated_time
 schema:
+  project:
+    ref: aiven_mysql.project
   authentication:
     forceNew: false # The field is updated by ServiceUserCredentialsModify
     computed: true
   type:
     description: User account type, such as primary or regular account.
   service_name:
+    ref: aiven_mysql.service_name
     description: The name of the MySQL® service user.
   username:
     description: The name of the MySQL® service user.

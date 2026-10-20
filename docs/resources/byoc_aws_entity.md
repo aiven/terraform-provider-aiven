@@ -16,10 +16,10 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 
 ```terraform
 resource "aiven_byoc_aws_entity" "example" {
-  organization_id  = "org1a23f456789" // Force new
-  cloud_provider   = "aws" // Force new
-  cloud_region     = "eu-west-1" // Force new
-  deployment_model = "standard" // Force new
+  organization_id  = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_provider   = "aws"                         // Force new
+  cloud_region     = "eu-west-1"                   // Force new
+  deployment_model = "standard"                    // Force new
   display_name     = "byoc-cloud-prod-eu-west-1"
   reserved_cidr    = "192.168.6.0/24" // Force new
 
@@ -58,6 +58,10 @@ resource "aiven_byoc_aws_entity" "example" {
   byoc_unique_name           = "foo"
   use_customer_owned_storage = true
   */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
 }
 ```
 
