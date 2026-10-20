@@ -17,6 +17,9 @@ nav_order: 1
 - Change `aiven_account_team_project` field `team_type` (enum): add `application:access:connect`
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `application:access:connect`
 - Change `aiven_project_user` field `member_type` (enum): add `application:access:connect`
+- Migrate `aiven_gcp_privatelink_connection_approval` to the Plugin Framework. Creation now waits for `active`,
+  and changing the IP of an approved connection reports an error because the Aiven API doesn't support updating it.
+  Existing state and both import ID formats remain supported.
 
 ## [4.64.0] - 2026-10-12
 
