@@ -455,6 +455,13 @@ How the example is assembled:
 - `examples/resources/<type>/resource.tf` stays a single block with literals, because `examples_tests` plans it
   with a provider that serves Plugin Framework resources only. Only the doc page shows the example with refs.
 - Resources with a doc template override (`templates/resources/<name>.md.tmpl`) don't render it.
+- `resource.refDepth: N` keeps N blocks along each ref chain, the resource included; the last block renders
+  its refs as literals. It also caps the resource's block in dependents' examples.
+
+Stop project-scoped chains before the project (`aiven_organization_project`) and anything it leads to:
+set `refDepth` to the depth of the last block before it, so refs to it render as literals.
+`refDepth: 2` stops a VPC peering example at `aiven_project_vpc`; `refDepth: 1` renders `aiven_project_vpc` alone.
+Organization-scoped resources may render `aiven_organization`, their natural parent.
 
 `task generate` fails on a malformed ref, a self-reference, a cycle, an unknown target or attribute
 (checked against the SDK schema for SDK resources), or a YAML target that is deprecated or has no resource.

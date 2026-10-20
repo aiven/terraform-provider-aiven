@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
+  refDepth: 1
   stateAttribute: state
   refreshStateDesired: [ACTIVE]
   deleteStateDesired: [DELETED]

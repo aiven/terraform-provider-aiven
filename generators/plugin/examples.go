@@ -31,6 +31,9 @@ type exampleWriter struct {
 	withRefs bool
 	deps     []*refExample
 
+	// refDepth is the number of blocks left along the ref chain, this one included. Zero means unlimited.
+	refDepth int
+
 	// requiredOnly skips optional and computed fields.
 	requiredOnly bool
 }
@@ -211,7 +214,7 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 
 		var tokens hclwrite.Tokens
 		var comments []string
-		if w.withRefs && v.Ref != "" && !v.IsReadOnly(def, entity) {
+		if w.withRefs && w.refDepth != 1 && v.Ref != "" && !v.IsReadOnly(def, entity) {
 			tokens, err = w.refTokens(v)
 			if err != nil {
 				return err

@@ -13,13 +13,13 @@ Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project V
 
 ```terraform
 resource "aiven_transit_gateway_vpc_attachment" "example" {
-  peer_cloud_account = "123456789012" // Force new
+  peer_cloud_account = "123456789012"          // Force new
   peer_vpc           = "tgw-0123456789abcdef0" // Force new
 
   // OPTIONAL FIELDS
-  project                 = "example-project"
-  project_vpc_id          = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
-  peer_region             = "us-east-1" // Force new
+  project                 = aiven_project_vpc.example.project        // e.g. "example-project"
+  project_vpc_id          = aiven_project_vpc.example.project_vpc_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  peer_region             = "us-east-1"                              // Force new
   user_peer_network_cidrs = ["192.168.6.0/24"]
 
   /* COMPUTED FIELDS
@@ -29,6 +29,12 @@ resource "aiven_transit_gateway_vpc_attachment" "example" {
     foo = "foo"
   }
   */
+}
+
+resource "aiven_project_vpc" "example" {
+  project      = "my-project"       // Force new
+  cloud_name   = "aws-eu-central-1" // Force new
+  network_cidr = "192.168.6.0/24"   // Force new
 }
 ```
 

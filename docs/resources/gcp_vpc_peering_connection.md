@@ -14,11 +14,11 @@ Creates and manages a Google Cloud VPC peering connection. If this resource is m
 ```terraform
 resource "aiven_gcp_vpc_peering_connection" "example" {
   gcp_project_id = "my-gcp-project" // Force new
-  peer_vpc       = "my-vpc" // Force new
+  peer_vpc       = "my-vpc"         // Force new
 
   // OPTIONAL FIELDS
-  project        = "example-project"
-  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  project        = aiven_project_vpc.example.project        // e.g. "example-project"
+  project_vpc_id = aiven_project_vpc.example.project_vpc_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 
   /* COMPUTED FIELDS
   create_time = "2021-01-01T00:00:00Z"
@@ -28,6 +28,12 @@ resource "aiven_gcp_vpc_peering_connection" "example" {
     foo = "foo"
   }
   */
+}
+
+resource "aiven_project_vpc" "example" {
+  project      = "my-project"       // Force new
+  cloud_name   = "aws-eu-central-1" // Force new
+  network_cidr = "192.168.6.0/24"   // Force new
 }
 ```
 

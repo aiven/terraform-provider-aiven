@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   description: Creates and manages an AWS VPC peering connection with an Aiven VPC.
+  refDepth: 2
   refreshStateExists: true
   deleteStateGone: true
   removeMissing: true
@@ -69,6 +70,7 @@ schema:
   # modifyPlan replaces the resource when the Aiven VPC changes, so switching between
   # `vpc_id` and `project` with `project_vpc_id` keeps the connection.
   project:
+    ref: aiven_project_vpc.project
     optional: true
     computed: true
     forceNew: false
@@ -76,6 +78,7 @@ schema:
     description: The name of the project the Aiven VPC belongs to. Changing the Aiven VPC forces recreation of the resource.
     example: example-project
   project_vpc_id:
+    ref: aiven_project_vpc.project_vpc_id
     optional: true
     computed: true
     forceNew: false
@@ -84,6 +87,7 @@ schema:
     description: The ID of the Aiven VPC. Changing the Aiven VPC forces recreation of the resource.
     example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
   vpc_id:
+    ref: aiven_project_vpc.id
     type: string
     optional: true
     computed: true

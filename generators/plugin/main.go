@@ -240,7 +240,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		if isResource {
 			def.resourceRoot = renderRoot
 			if !resDat.DisableExample {
-				def.refExample, err = newRefExample(def, renderRoot)
+				def.refExample, err = newRefExample(def, renderRoot, resDat.RefDepth)
 				if err != nil {
 					return fmt.Errorf("could not generate ref example: %w", err)
 				}
