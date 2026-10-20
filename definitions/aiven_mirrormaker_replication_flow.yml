@@ -8,7 +8,7 @@ datasource:
 clientHandler: kafkamirrormaker
 idAttributeComposed: [project, service_name, source_cluster, target_cluster]
 legacyTimeouts: true
-requireServicePoweredOn: true
+requireServiceReady: kafka_mirrormaker
 expandModifier: true
 flattenModifier: true
 rename:

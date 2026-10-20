@@ -49,6 +49,13 @@ func GetDefaultTimeout() time.Duration {
 	return defaultTimeout * time.Minute
 }
 
+// TODO: promote these to a `type ServiceType string` enum once the remaining
+// SDKv2 service resources are migrated to the Plugin Framework. We attempted
+// the retype but SDKv2 resource schemas and user-config glue pass the raw
+// string through many APIs (`map[string]*schema.Schema` keys, `string + "_user_config"`
+// concatenation, `*schema.ResourceData.Set/Get` keys), so the cascade of
+// `string(...)` conversions made the diff too large to justify at this stage.
+// Revisit after the plugin-framework migration shrinks that surface.
 const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
@@ -64,6 +71,28 @@ const (
 	ServiceTypeThanos           = "thanos"
 	ServiceTypeValkey           = "valkey"
 )
+
+// validServiceTypes returns the set of known service type codes.
+// Mirrors the ServiceType* constants above and the `requireServiceReady`
+// enum in `definitions/.schema.yml`; keep them in sync when adding a
+// new service type.
+func validServiceTypes() map[string]bool {
+	return map[string]bool{
+		ServiceTypePG:               true,
+		ServiceTypeCassandra:        true,
+		ServiceTypeOpenSearch:       true,
+		ServiceTypeGrafana:          true,
+		ServiceTypeMySQL:            true,
+		ServiceTypeKafka:            true,
+		ServiceTypeKafkaConnect:     true,
+		ServiceTypeKafkaMirrormaker: true,
+		ServiceTypeFlink:            true,
+		ServiceTypeClickhouse:       true,
+		ServiceTypeDragonfly:        true,
+		ServiceTypeThanos:           true,
+		ServiceTypeValkey:           true,
+	}
+}
 
 var TechEmailsResourceSchema = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -1309,31 +1338,53 @@ func ContainsRedactedCreds(config map[string]any) error {
 }
 
 var (
-	servicePoweredOff    DoOnce[bool]
-	ErrServicePoweredOff = fmt.Errorf("the service is powered off")
+	// serviceCheck caches ServiceGet per (project, serviceName). The
+	// value is the lookup result, not a verdict: a (project,serviceName)
+	// is one service with one type, so readiness is evaluated per
+	// caller against the shared cached shape.
+	serviceCheck           DoOnce[*service.ServiceGetOut]
+	ErrServicePoweredOff   = fmt.Errorf("the service is powered off")
+	ErrServiceTypeMismatch = fmt.Errorf("service type mismatch")
+	ErrInvalidServiceType  = fmt.Errorf("invalid service type")
 )
 
-// ServicePoweredOffForget for test purposes only.
-func ServicePoweredOffForget(project, serviceName string) {
-	servicePoweredOff.Forget(project, serviceName)
+// ServiceReadyForget drops the cached ServiceGet for (project, serviceName).
+// For test purposes only.
+func ServiceReadyForget(project, serviceName string) {
+	serviceCheck.Forget(project, serviceName)
 }
 
-// CheckServiceIsPowered checks if a service is powered on before performing operations that require it.
-// Some operations like database management require the service to be running.
-// For example, `ServiceDatabaseList` returns a generic 503 error when the service is powered off:
+// CheckServiceReady verifies the target service exists, is powered on,
+// and has the expected service type before performing operations that
+// require it. Some operations like database management need the service
+// to be running. For example, `ServiceDatabaseList` returns a generic
+// 503 error when the service is powered off:
 // "503: An error occurred. Please try again later."
-// This function provides a clearer error message by explicitly checking the service power state first.
-func CheckServiceIsPowered(ctx context.Context, client avngen.Client, project, serviceName string) error {
-	isOff, err := servicePoweredOff.Do(func() (bool, error) {
-		s, err := client.ServiceGet(ctx, project, serviceName)
-		if err != nil {
-			return false, err
-		}
-		return s.State == service.ServiceStateTypePoweroff, nil
-	}, project, serviceName)
+// This function returns a clearer error by explicitly prechecking.
+// serviceType must be one of the known service type codes (see
+// validServiceTypes). An unknown code returns ErrInvalidServiceType; a
+// mismatch against ServiceGetOut.ServiceType returns
+// ErrServiceTypeMismatch; a service in POWEROFF returns
+// ErrServicePoweredOff.
+func CheckServiceReady(ctx context.Context, client avngen.Client, project, serviceName, serviceType string) error {
+	if !validServiceTypes()[serviceType] {
+		return fmt.Errorf("%w: %q", ErrInvalidServiceType, serviceType)
+	}
 
-	if err == nil && isOff {
+	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
+		return client.ServiceGet(ctx, project, serviceName)
+	}, project, serviceName)
+	if err != nil {
+		return err
+	}
+	if s.ServiceType != serviceType {
+		return fmt.Errorf(
+			"%w: service %s/%s is of type %q, expected %q",
+			ErrServiceTypeMismatch, project, serviceName, s.ServiceType, serviceType,
+		)
+	}
+	if s.State == service.ServiceStateTypePoweroff {
 		return ErrServicePoweredOff
 	}
-	return err
+	return nil
 }
