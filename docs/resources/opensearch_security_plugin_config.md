@@ -29,7 +29,7 @@ resource "aiven_opensearch_security_plugin_config" "example" {
 }
 
 resource "aiven_opensearch" "example_opensearch" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "startup-4"
   service_name = "example-opensearch"
 }

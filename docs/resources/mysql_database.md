@@ -19,7 +19,7 @@ resource "aiven_mysql_database" "example" {
 }
 
 resource "aiven_mysql" "example_mysql" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "business-4"
   service_name = "example-mysql"
 }

@@ -32,7 +32,7 @@ resource "aiven_valkey_user" "example" {
 }
 
 resource "aiven_valkey" "example_valkey" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "startup-4"
   service_name = "example-valkey-service"
 }

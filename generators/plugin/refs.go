@@ -172,12 +172,19 @@ func requiredBlock(src []byte, b *hclsyntax.Block, required func(name string) bo
 		name   string
 		isAttr bool
 		rng    hcl.Range
+		raw    []byte
 	}
 
 	var fields []field
 	for name, a := range b.Body.Attributes {
 		if required(name) {
-			fields = append(fields, field{name: name, isAttr: true, rng: a.Expr.Range()})
+			v := field{name: name, isAttr: true, rng: a.Expr.Range()}
+			// Hand-written service examples reference an undeclared `data.aiven_project`.
+			// todo: remove when services are migrated to the plugin and their examples are generated.
+			if name == "project" && len(a.Expr.Variables()) > 0 {
+				v.raw = []byte(`"my-project"`)
+			}
+			fields = append(fields, v)
 		}
 	}
 	for _, nested := range b.Body.Blocks {
@@ -192,7 +199,10 @@ func requiredBlock(src []byte, b *hclsyntax.Block, required func(name string) bo
 	f := hclwrite.NewEmptyFile()
 	body := f.Body().AppendNewBlock(b.Type, b.Labels).Body()
 	for _, v := range fields {
-		raw := hclwrite.Tokens{{Type: hclsyntax.TokenIdent, Bytes: v.rng.SliceBytes(src)}}
+		if v.raw == nil {
+			v.raw = v.rng.SliceBytes(src)
+		}
+		raw := hclwrite.Tokens{{Type: hclsyntax.TokenIdent, Bytes: v.raw}}
 		if v.isAttr {
 			body.SetAttributeRaw(v.name, raw)
 		} else {

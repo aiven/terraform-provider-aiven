@@ -28,7 +28,7 @@ resource "aiven_clickhouse_user" "example" {
 }
 
 resource "aiven_clickhouse" "example_clickhouse" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "business-4"
   service_name = "example-clickhouse-service"
 }

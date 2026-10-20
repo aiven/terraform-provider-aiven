@@ -109,7 +109,7 @@ func TestRequiredBlock(t *testing.T) {
 		return slices.Contains([]string{"project", "plan", "service_name", "required_block"}, name)
 	}
 	assert.Equal(t, `resource "aiven_kafka" "example_kafka" {
-  project      = data.aiven_project.example_project.project
+  project      = "my-project"
   plan         = "business-4"
   service_name = "example-kafka"
   required_block {
