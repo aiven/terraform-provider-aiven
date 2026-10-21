@@ -12,11 +12,17 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.65.0] - 2026-10-21
+
 - Add `aiven_service_list` datasource field `services.first_use_time`: Timestamp when the service was first used
   (ISO 8601), null if it has not been used yet.
 - Change `aiven_account_team_project` field `team_type` (enum): add `application:access:connect`
 - Change `aiven_organization_permission` resource field `permissions.permissions` (enum): add `application:access:connect`
 - Change `aiven_project_user` field `member_type` (enum): add `application:access:connect`
+- Add `aiven_kafka_connect_custom_plugin_file` resource.
+- Add `aiven_flink_jar_application_version` field `file_sha256`: a flat mirror of `file_info.0.file_sha256` that drives
+  replacement when the local jar changes. Replaces the internal `source_checksum` attribute, which was computed from
+  the local file and consumed only by the provider's plan logic; existing state upgrades in place with no plan drift.
 
 ## [4.64.0] - 2026-10-12
 
@@ -66,10 +72,6 @@ nav_order: 1
 - Change `aiven_service_integration` field `integration_type` (enum): add `pg_for_analytics_credentials`
 - Remove `mysql_grants` field from the `aiven_kafka_user`, `aiven_opensearch_user`, `aiven_pg_user`,
   and `aiven_valkey_user` resources and data sources: it was added accidentally and had no effect.
-- Add `aiven_kafka_connect_custom_plugin_file` resource.
-- Add `aiven_flink_jar_application_version` field `file_sha256`: a flat mirror of `file_info.0.file_sha256` that drives
-  replacement when the local jar changes. Replaces the internal `source_checksum` attribute, which was computed from
-  the local file and consumed only by the provider's plan logic; existing state upgrades in place with no plan drift.
 
 ## [4.63.0] - 2026-09-21
 
