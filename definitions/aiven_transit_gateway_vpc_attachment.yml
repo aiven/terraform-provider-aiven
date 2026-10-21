@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   description: Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC.
+  refDepth: 2
   refreshStateExists: true
   deleteStateGone: true
   removeMissing: true

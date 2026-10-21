@@ -173,6 +173,10 @@ type SchemaMeta struct {
 	RemoveMissing       bool     `yaml:"removeMissing,omitempty"`
 	IgnoreAlreadyExists bool     `yaml:"ignoreAlreadyExists,omitempty"`
 	DisableExample      bool     `yaml:"disableExample,omitempty"`
+	// RefDepth limits the doc example to this many blocks along each ref chain, the resource included.
+	// The last block renders its refs as literals. It also caps the block in dependents' examples.
+	// Zero means unlimited.
+	RefDepth int `yaml:"refDepth,omitempty"`
 	// ImportIDFormats overrides the generated import examples without changing runtime ID fields.
 	ImportIDFormats []string `yaml:"importIDFormats,omitempty"`
 	ValidateConfig  bool     `yaml:"validateConfig,omitempty"`
