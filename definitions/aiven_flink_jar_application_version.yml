@@ -33,6 +33,7 @@ schema:
     ref: aiven_flink.service_name
   application_id:
     ref: aiven_flink_jar_application.application_id
+    format: uuid
   # Virtual: the jar file is uploaded out of band to a pre-signed URL.
   source:
     type: string

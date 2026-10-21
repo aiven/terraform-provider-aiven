@@ -27,8 +27,8 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
   file_description = "Fixed memory leak in the MQTT source connector."
 
   /* COMPUTED FIELDS
-  plugin_file_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
-  plugin_id      = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  plugin_file_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  plugin_id      = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   created_at     = "2021-01-01T00:00:00Z"
   created_by     = "foo"
   file_sha256    = "foo"

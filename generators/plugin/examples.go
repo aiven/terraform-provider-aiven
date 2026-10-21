@@ -316,7 +316,7 @@ func exampleItemValue(def *Definition, entity entityType, item *Item) (cty.Value
 	}
 }
 
-const uuidExample = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+const uuidExample = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
 
 // exampleListWrapWidth is the single-line length above which a list/set example
 // is rendered one element per line. hclwrite.TokensForValue always emits
@@ -381,6 +381,8 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 		// Default values are preferred for examples,
 		// because "default" usually means "best", while "example" is just a random value.
 		anyValue = item.Default
+	case item.Format == "uuid":
+		anyValue = uuidExample
 	case !isEmpty(item.Example):
 		anyValue = item.Example
 	case item.Minimum > 0:
@@ -411,7 +413,7 @@ func exampleScalarValue(def *Definition, item *Item, anyValue any) (cty.Value, e
 						break
 					}
 				}
-			case item.Name == "uuid", item.MinLength == len(uuidExample):
+			case item.Name == "uuid", item.Format == "uuid", item.MinLength == len(uuidExample):
 				anyValue = uuidExample
 			default:
 				// Some placeholders that can improve the example

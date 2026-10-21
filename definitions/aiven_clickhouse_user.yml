@@ -42,6 +42,8 @@ schema:
     ref: aiven_clickhouse.project
   service_name:
     ref: aiven_clickhouse.service_name
+  uuid:
+    format: uuid
   password:
     type: string
     optional: true

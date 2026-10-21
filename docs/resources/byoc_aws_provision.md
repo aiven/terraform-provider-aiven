@@ -19,7 +19,7 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 ```terraform
 resource "aiven_byoc_aws_provision" "example" {
   organization_id             = aiven_organization.example.id                             // e.g. "org1a23f456789". Force new
-  custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d". Force new
+  custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
   aws_iam_role_arn            = "arn:aws:iam::012345678901:root"                          // Force new
 
   /* COMPUTED FIELDS

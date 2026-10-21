@@ -62,5 +62,6 @@ schema:
   custom_cloud_environment_id:
     ref: aiven_byoc_aws_entity.custom_cloud_environment_id
     forceNew: true
+    format: uuid
   aws_iam_role_arn:
     required: true

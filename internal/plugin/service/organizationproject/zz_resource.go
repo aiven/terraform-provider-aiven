@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -32,7 +33,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID to assign to the project. It's required when moving projects between organizations. Minimum length: `1`.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+				Validators:          []validator.String{stringvalidator.LengthAtLeast(1), validators.UUID()},
 			},
 			"ca_cert": schema.StringAttribute{
 				Computed:            true,

@@ -40,7 +40,10 @@ remove:
   - payment_method
 schema:
   billing_group_id:
+    format: uuid
     description: The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.
+  copy_from_billing_group:
+    format: uuid
   account_id:
     computed: true
     deprecationMessage: Use `parent_id` instead. This field will be removed in the next major release.

@@ -9,9 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -21,6 +23,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Application Id. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"application_version_id": schema.StringAttribute{
 				Computed:            true,

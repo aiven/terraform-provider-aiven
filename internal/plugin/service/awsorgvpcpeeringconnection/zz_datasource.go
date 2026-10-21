@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -47,6 +48,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"organization_vpc_id": schema.StringAttribute{
 				MarkdownDescription: "Organization VPC ID.",
 				Required:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"peering_connection_id": schema.StringAttribute{
 				Computed:            true,

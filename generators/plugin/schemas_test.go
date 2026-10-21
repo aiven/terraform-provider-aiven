@@ -136,3 +136,26 @@ func TestGenSchemaAddsCIDRValidatorForCIDRFormat(t *testing.T) {
 	require.Contains(t, got, `"network_cidr": schema.StringAttribute{`)
 	require.Contains(t, got, `[]validator.String{validators.CIDR()}`)
 }
+
+func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
+	root := &Item{
+		Name: "root",
+		Type: SchemaTypeObject,
+		Properties: map[string]*Item{
+			"tenant_id": {
+				Name:     "tenant_id",
+				Type:     SchemaTypeString,
+				Required: true,
+				Format:   "uuid",
+			},
+		},
+	}
+	root.Properties["tenant_id"].Parent = root
+
+	code, err := genSchema(&Definition{Resource: &SchemaMeta{}}, resourceType, root)
+	require.NoError(t, err)
+
+	got := renderCode(t, code)
+	require.Contains(t, got, `"tenant_id": schema.StringAttribute{`)
+	require.Contains(t, got, `[]validator.String{validators.UUID()}`)
+}

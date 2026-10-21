@@ -948,6 +948,16 @@ func TestExampleArrayElems(t *testing.T) {
 	})
 }
 
+func TestExampleScalarItemUUIDFormat(t *testing.T) {
+	def := &Definition{}
+	for _, example := range []any{nil, "adcf7194-d877-4505-a47a-91fefd96e3b8", "123456789012"} {
+		item := &Item{Type: SchemaTypeString, Format: "uuid", Example: example}
+		got, err := exampleScalarItem(def, item)
+		require.NoError(t, err)
+		assert.Equal(t, uuidExample, got.AsString(), "example: %v", example)
+	}
+}
+
 // todo: drop in v5.0.0 with Item.DropDefault.
 func TestMergeItemDropDefault(t *testing.T) {
 	t.Parallel()

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -24,6 +25,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "Billing group ID.",
 				Required:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"billing_group_name": schema.StringAttribute{
 				Computed:            true,

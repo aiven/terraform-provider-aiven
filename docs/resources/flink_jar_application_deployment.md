@@ -18,8 +18,8 @@ This feature is in the limited availability stage and may change without notice.
 resource "aiven_flink_jar_application_deployment" "example" {
   project        = aiven_flink.example_flink.project                                  // e.g. "my-project". Force new
   service_name   = aiven_flink.example_flink.service_name                             // e.g. "my-application". Force new
-  application_id = aiven_flink_jar_application.example.application_id                 // e.g. "foo". Force new
-  version_id     = aiven_flink_jar_application_version.example.application_version_id // e.g. "543e420d-aa63-43e8-b8e8-294a78c600e7". Force new
+  application_id = aiven_flink_jar_application.example.application_id                 // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
+  version_id     = aiven_flink_jar_application_version.example.application_version_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
 
   // OPTIONAL FIELDS
   entry_class        = "com.example.MyFlinkJob" // Force new
@@ -29,7 +29,7 @@ resource "aiven_flink_jar_application_deployment" "example" {
   starting_savepoint = "path/to/savepoint"      // Force new
 
   /* COMPUTED FIELDS
-  deployment_id  = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  deployment_id  = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   job_id         = "foo"
   created_at     = "2021-01-01T00:00:00Z"
   created_by     = "foo"
@@ -42,7 +42,7 @@ resource "aiven_flink_jar_application_deployment" "example" {
 resource "aiven_flink_jar_application_version" "example" {
   project        = aiven_flink.example_flink.project                  // e.g. "my-project". Force new
   service_name   = aiven_flink.example_flink.service_name             // e.g. "my-application". Force new
-  application_id = aiven_flink_jar_application.example.application_id // e.g. "foo". Force new
+  application_id = aiven_flink_jar_application.example.application_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
   source         = "./example.jar"
 }
 

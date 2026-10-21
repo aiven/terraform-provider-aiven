@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -48,6 +49,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "User identifier. Exactly one of the fields must be specified: `uuid` or `username`.",
 				Optional:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},

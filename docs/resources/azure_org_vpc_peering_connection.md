@@ -14,15 +14,15 @@ Creates and manages an Azure VPC peering connection with an Aiven VPC. If this r
 ```terraform
 resource "aiven_azure_org_vpc_peering_connection" "example" {
   organization_id       = aiven_organization.example.id                      // e.g. "org1a23f456789". Force new
-  organization_vpc_id   = aiven_organization_vpc.example.organization_vpc_id // e.g. "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d". Force new
-  azure_subscription_id = "12345678-1234-1234-1234-123456789012"             // Force new
+  organization_vpc_id   = aiven_organization_vpc.example.organization_vpc_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
+  azure_subscription_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"             // Force new
   vnet_name             = "my-vnet"                                          // Force new
   peer_resource_group   = "my-resource-group"                                // Force new
-  peer_azure_app_id     = "87654321-4321-4321-4321-210987654321"             // Force new
-  peer_azure_tenant_id  = "11111111-2222-3333-4444-555555555555"             // Force new
+  peer_azure_app_id     = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"             // Force new
+  peer_azure_tenant_id  = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"             // Force new
 
   /* COMPUTED FIELDS
-  peering_connection_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  peering_connection_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   state                 = "ACTIVE"
   */
 }
@@ -45,8 +45,8 @@ resource "aiven_organization" "example" {
 - `azure_subscription_id` (String) The ID of the Azure subscription in UUID4 format. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 - `organization_vpc_id` (String) Organization VPC ID. Changing this property forces recreation of the resource.
-- `peer_azure_app_id` (String) The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format. Maximum length: `1024`. Changing this property forces recreation of the resource.
-- `peer_azure_tenant_id` (String) The Azure tenant ID in UUID4 format. Maximum length: `1024`. Changing this property forces recreation of the resource.
+- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Maximum length: `1024`. Changing this property forces recreation of the resource.
+- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `peer_resource_group` (String) The name of the Azure resource group associated with the VNet. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `vnet_name` (String) The name of the Azure VNet. Maximum length: `1024`. Changing this property forces recreation of the resource.
 

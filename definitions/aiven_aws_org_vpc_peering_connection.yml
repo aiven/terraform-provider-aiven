@@ -55,7 +55,7 @@ schema:
     ref: aiven_organization.id
   organization_vpc_id:
     ref: aiven_organization_vpc.organization_vpc_id
-    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    format: uuid
   aws_account_id:
     description: AWS account ID.
   aws_vpc_id:

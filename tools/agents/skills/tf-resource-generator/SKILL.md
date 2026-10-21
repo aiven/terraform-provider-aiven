@@ -396,6 +396,8 @@ schema:
     enum: [val1, val2]
     minimum: 1
     maximum: 100
+    format: uuid|cidr              # String validator, see Formats
+    example: value                 # Doc example; ignored with format: uuid
     conflictsWith: [other_field]
     exactlyOneOf: [field_a, field_b]
     atLeastOneOf: [field_a, field_b]
@@ -407,6 +409,14 @@ schema:
 ```
 
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
+
+**Formats**: set `format: uuid` on string fields that hold a UUID instead of writing a UUID `example`.
+It emits `validators.UUID()` and the doc example always uses the UUIDv4 `1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d`.
+Prefer the OpenAPI description; override it only when the spec text is wrong for the field (e.g. renamed generic fields).
+Typical fields: VPC, billing group, Flink application/version, and BYOC environment IDs, Azure subscription/tenant/app IDs.
+Skip prefixed IDs (`org…`, `u…`, `ug…`, `acl…`, `addr…`, `pm…`), composite IDs (`project/vpc_id`), and computed-only
+fields, which get no validators. `format: cidr` emits `validators.CIDR()`. Formats apply to scalar strings only, not
+list or set items.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**

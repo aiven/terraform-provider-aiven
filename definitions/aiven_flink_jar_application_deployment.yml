@@ -31,8 +31,10 @@ schema:
     ref: aiven_flink.service_name
   application_id:
     ref: aiven_flink_jar_application.application_id
+    format: uuid
   version_id:
     ref: aiven_flink_jar_application_version.application_version_id
+    format: uuid
   entry_class:
     computed: true
   program_args:

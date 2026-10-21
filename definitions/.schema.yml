@@ -481,9 +481,10 @@ definitions:
         type: string
         enum:
           - cidr
+          - uuid
         $comment: |
-          Known semantic format for string attributes. Currently supports `cidr`,
-          enforced via the reusable Plugin Framework CIDR validator.
+          Known semantic format for string attributes, enforced via a reusable Plugin Framework validator:
+          `cidr` (`validators.CIDR`) or `uuid` (`validators.UUID`, canonical 8-4-4-4-12 hex form).
       nullable:
         type: boolean
         $comment: Set to true if this attribute can be null. It can't be both nullable and optional.
