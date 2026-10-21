@@ -52,7 +52,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 				// fresh Plugin Framework creates must not inherit the SDKv2 required-set behavior.
 				Config: testAccAivenAWSTransitGatewayVPCAttachment(prefix, config, nil, &peerRegion),
 				Check: resource.ComposeTestCheckFunc(
-					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, nil, 5),
+					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, nil),
 					resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "peer_region", config.Region),
 					testAccCheckAivenAWSTransitGatewayVPCAttachmentActive(ctx, config.Region),
 				),
@@ -65,7 +65,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs, 5),
+					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs),
 					resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "peer_region", config.Region),
 				),
 			},
@@ -82,7 +82,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 					PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs, 5),
+					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs),
 					resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "peer_region", config.Region),
 				),
 			},
@@ -94,7 +94,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, emptyCIDRs, 5),
+					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, emptyCIDRs),
 					resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "peer_region", config.Region),
 				),
 			},
@@ -122,7 +122,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_backwardCompat(t *testing.T) {
 	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 		TFConfig:           tfConfig,
 		OldProviderVersion: "4.61.0",
-		Checks:             testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs, 4),
+		Checks:             testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs),
 	})
 	// The SDKv2 provider creates a four-part ID when peer_region is omitted, but
 	// its Read writes the API-discovered region into the Optional-only ForceNew
@@ -237,7 +237,7 @@ func testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringChecks(c *awsConf
 			"state_info.aws_vpc_peering_connection_id",
 		),
 		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "state_info.aws_transit_gateway_attachment_id"),
-		testAccCheckAivenTransitGatewayVPCAttachmentIDParts(5),
+		testAccCheckAivenTransitGatewayVPCAttachmentIDParts(4),
 
 		// Data source
 		testAccCheckAivenAWSTransitGatewayVPCAttachmentDataSourceID(c.Region),
@@ -264,7 +264,7 @@ func testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringChecks(c *awsConf
 	)
 }
 
-func testAccAivenAWSTransitGatewayVPCAttachmentChecks(c *awsConfig, cidrs []string, idParts int) resource.TestCheckFunc {
+func testAccAivenAWSTransitGatewayVPCAttachmentChecks(c *awsConfig, cidrs []string) resource.TestCheckFunc {
 	checks := []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(transitGatewayAttachmentResourceName, "vpc_id", "aiven_project_vpc.aiven_vpc", "id"),
 		resource.TestCheckResourceAttrPair(transitGatewayAttachmentResourceName, "peer_cloud_account", "aws_ec2_transit_gateway.transit_gateway", "owner_id"),
@@ -273,7 +273,7 @@ func testAccAivenAWSTransitGatewayVPCAttachmentChecks(c *awsConfig, cidrs []stri
 		resource.TestMatchResourceAttr(transitGatewayAttachmentResourceName, "state", liveAttachmentStatePattern),
 		resource.TestCheckResourceAttrSet(transitGatewayAttachmentResourceName, "state_info.aws_transit_gateway_attachment_id"),
 		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "peering_connection_id"),
-		testAccCheckAivenTransitGatewayVPCAttachmentIDParts(idParts),
+		testAccCheckAivenTransitGatewayVPCAttachmentIDParts(4),
 
 		testAccCheckAivenAWSTransitGatewayVPCAttachmentDataSourceID(c.Region),
 		resource.TestCheckResourceAttrPair(transitGatewayAttachmentDataSourceName, "vpc_id", transitGatewayAttachmentResourceName, "vpc_id"),
@@ -312,14 +312,8 @@ func testAccCheckAivenAWSTransitGatewayVPCAttachmentDataSourceID(peerRegion stri
 		}
 
 		want := attachment.Primary.ID
-		switch len(strings.Split(want, "/")) {
-		case 4:
-			want += "/" + peerRegion
-		case 5:
-		default:
-			return fmt.Errorf("expected resource ID with 4-5 parts, got %q", attachment.Primary.ID)
-		}
-		if got := dataSource.Primary.ID; got != want {
+		// The SDK provider appends the region to the data source ID.
+		if got := dataSource.Primary.ID; got != want && got != want+"/"+peerRegion {
 			return fmt.Errorf(
 				"expected transit gateway VPC attachment data source ID %q, got %q",
 				want,

@@ -8,9 +8,9 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 const typeName = "aiven_transit_gateway_vpc_attachment"
 
 // idFields the ID attribute fields, i.e.:
-// terraform import aiven_transit_gateway_vpc_attachment.foo ID
+// terraform import aiven_transit_gateway_vpc_attachment.foo PROJECT/PROJECT_VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC
 func idFields() []string {
-	return []string{"id"}
+	return []string{"project", "project_vpc_id", "peer_cloud_account", "peer_vpc"}
 }
 
 var ResourceOptions = adapter.ResourceOptions{

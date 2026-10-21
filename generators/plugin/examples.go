@@ -31,6 +31,9 @@ type exampleWriter struct {
 	withRefs bool
 	deps     []*refExample
 
+	// refDepth is the number of blocks left along the ref chain, this one included. Zero means unlimited.
+	refDepth int
+
 	// requiredOnly skips optional and computed fields.
 	requiredOnly bool
 }
@@ -80,8 +83,11 @@ func getExampleItemPriority(def *Definition, entity entityType, item *Item) int 
 	optional := item.IsOptional(def, entity)
 
 	switch {
-	case item.IDAttribute && (optional || required):
+	case item.IDAttribute && required:
 		return item.IDAttributePosition
+	case item.IDAttribute && optional:
+		// Sorts between the required (10) and the optional (20) fields.
+		return 15 + item.IDAttributePosition
 	case required:
 		score = 10
 	case optional:
@@ -208,7 +214,7 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 
 		var tokens hclwrite.Tokens
 		var comments []string
-		if w.withRefs && v.Ref != "" && !v.IsReadOnly(def, entity) {
+		if w.withRefs && w.refDepth != 1 && v.Ref != "" && !v.IsReadOnly(def, entity) {
 			tokens, err = w.refTokens(v)
 			if err != nil {
 				return err

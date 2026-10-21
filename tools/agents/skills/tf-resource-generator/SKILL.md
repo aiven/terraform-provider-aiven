@@ -178,9 +178,6 @@ Common fields:
 resource:
   description: "..."
   deprecationMessage: "..."
-  importIDFormats:                 # Optional docs-only override for resources with multiple import forms
-    - PROJECT/RESOURCE_ID
-    - PROJECT/RESOURCE_ID/REGION
   terminationProtection: true # Check field before delete
   stateAttribute: state # Terraform attribute polled after Create/Update/Delete
   refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
@@ -189,10 +186,6 @@ resource:
   removeMissing: true # Remove from state on 404
   deleteStateDesired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
 ```
-
-`importIDFormats` generates every listed form in both the resource's `Import` documentation and
-`examples/resources/<resource>/import.sh`. It does not change `IDFields` or runtime import parsing.
-Omit it when the single import form can be derived from `idAttributeComposed`.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
 successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
@@ -462,6 +455,13 @@ How the example is assembled:
 - `examples/resources/<type>/resource.tf` stays a single block with literals, because `examples_tests` plans it
   with a provider that serves Plugin Framework resources only. Only the doc page shows the example with refs.
 - Resources with a doc template override (`templates/resources/<name>.md.tmpl`) don't render it.
+- `resource.refDepth: N` keeps N blocks along each ref chain, the resource included; the last block renders
+  its refs as literals. It also caps the resource's block in dependents' examples.
+
+Stop project-scoped chains before the project (`aiven_organization_project`) and anything it leads to:
+set `refDepth` to the depth of the last block before it, so refs to it render as literals.
+`refDepth: 2` stops a VPC peering example at `aiven_project_vpc`; `refDepth: 1` renders `aiven_project_vpc` alone.
+Organization-scoped resources may render `aiven_organization`, their natural parent.
 
 `task generate` fails on a malformed ref, a self-reference, a cycle, an unknown target or attribute
 (checked against the SDK schema for SDK resources), or a YAML target that is deprecated or has no resource.

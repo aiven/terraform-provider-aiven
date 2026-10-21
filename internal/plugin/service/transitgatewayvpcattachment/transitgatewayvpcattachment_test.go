@@ -3,7 +3,6 @@
 package transitgatewayvpcattachment
 
 import (
-	"errors"
 	"maps"
 	"testing"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
 )
 
 const (
@@ -30,29 +30,41 @@ const (
 	testLegacyFourPartID = "example-project/example-vpc/123456789012/vpc-0123456789abcdef0"
 )
 
-func TestParsePeeringID(t *testing.T) {
-	f := func(value string, wantRegion *string, wantErr string) {
+func TestStateID(t *testing.T) {
+	f := func(state map[string]any, wantRegion *string, wantErr string) {
 		t.Helper()
 
-		id, err := parsePeeringID(value)
+		id, err := stateID(newReadResourceData(t, state))
 		if wantErr != "" {
 			require.EqualError(t, err, wantErr)
 			return
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, testProject, id.project)
-		require.Equal(t, testProjectVpcID, id.projectVpcID)
-		require.Equal(t, testPeerCloudAccount, id.peerCloudAccount)
-		require.Equal(t, testPeerVpc, id.peerVpc)
-		require.Equal(t, wantRegion, id.peerRegion)
+		require.Equal(t, testProject, id.Project)
+		require.Equal(t, testProjectVpcID, id.ProjectVPCID)
+		require.Equal(t, testPeerCloudAccount, id.PeerCloudAccount)
+		require.Equal(t, testPeerVpc, id.PeerVPC)
+		require.Equal(t, wantRegion, id.PeerRegion)
+	}
+	imported := func(peerVpc string) map[string]any {
+		return map[string]any{
+			"project": testProject, "project_vpc_id": testProjectVpcID,
+			"peer_cloud_account": testPeerCloudAccount, "peer_vpc": peerVpc,
+		}
 	}
 
-	f(testFourPartID, nil, "")
-	f(testFivePartID, new(testPeerRegion), "")
-	f(testFourPartID+"/", nil, "peer region in the fifth ID component must not be empty")
-	f("example-project/example-vpc/123456789012", nil, "expected unix path-like string with 4-5 chunks, got 3")
-	f(testFivePartID+"/extra", nil, "expected unix path-like string with 4-5 chunks, got 6")
+	f(map[string]any{"id": testFourPartID}, nil, "")
+	f(map[string]any{"id": testFourPartID, "peer_region": ""}, nil, "")
+	f(map[string]any{"id": testFourPartID, "peer_region": testPeerRegion}, new(testPeerRegion), "")
+	f(map[string]any{"id": testFivePartID}, new(testPeerRegion), "")
+	f(map[string]any{"id": testFivePartID, "peer_region": "us-east-1"}, new(testPeerRegion), "")
+	f(imported(testPeerVpc), nil, "")
+	f(imported(testPeerVpc+"/"+testPeerRegion), new(testPeerRegion), "")
+	f(imported(testPeerVpc+"/"), nil, "peer region in the fifth ID component must not be empty")
+	f(map[string]any{"id": testFourPartID + "/"}, nil, "peer region in the fifth ID component must not be empty")
+	f(map[string]any{"id": "example-project/example-vpc/123456789012"}, nil, "expected unix path-like string with 4-5 chunks, got 3")
+	f(map[string]any{"id": testFivePartID + "/extra"}, nil, "expected unix path-like string with 4-5 chunks, got 6")
 }
 
 func TestCreateView(t *testing.T) {
@@ -60,7 +72,6 @@ func TestCreateView(t *testing.T) {
 		peerRegion, wantAPIPeerRegion *string,
 		cidrs []string,
 		configureCIDRs bool,
-		wantID string,
 	) {
 		t.Helper()
 
@@ -79,6 +90,8 @@ func TestCreateView(t *testing.T) {
 		}
 		d := newCreateResourceData(t, plan)
 
+		client.EXPECT().VpcGet(ctx, testProject, testProjectVpcID).
+			Return(&vpc.VpcGetOut{CloudName: "aws-" + testPeerRegion}, nil).Once()
 		client.EXPECT().
 			VpcPeeringConnectionCreate(ctx, testProject, testProjectVpcID, mock.MatchedBy(
 				func(req *vpc.VpcPeeringConnectionCreateIn) bool {
@@ -98,20 +111,17 @@ func TestCreateView(t *testing.T) {
 			Once()
 
 		require.NoError(t, createView(ctx, client, d))
-		require.Equal(t, wantID, d.ID())
 	}
 
-	f(nil, nil, nil, false, testFourPartID)
-	f(new(""), nil, []string{}, true, testFourPartID)
-	f(new(testPeerRegion), new(testPeerRegion), []string{"10.10.0.0/24", "10.20.0.0/24"}, true, testFivePartID)
+	f(nil, nil, nil, false)
+	f(new(""), nil, []string{}, true)
+	f(new(testPeerRegion), new(testPeerRegion), []string{"10.10.0.0/24", "10.20.0.0/24"}, true)
 }
 
 func TestSetConnectionStatePeerRegion(t *testing.T) {
-	f := func(d adapter.ResourceData, idValue string, wantValue string, wantOK bool) {
+	f := func(d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, wantValue string, wantOK bool) {
 		t.Helper()
 
-		id, err := parsePeeringID(idValue)
-		require.NoError(t, err)
 		connection := newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeActive, nil, nil)
 		require.NoError(t, setConnectionState(
 			d,
@@ -124,13 +134,25 @@ func TestSetConnectionStatePeerRegion(t *testing.T) {
 		if wantOK {
 			require.Equal(t, wantValue, value)
 		}
+		require.Equal(t, testFourPartID, d.ID())
+	}
+	read := func(state map[string]any) (adapter.ResourceData, *pluginvpc.ProjectPeeringID) {
+		d := newReadResourceData(t, state)
+		id, err := stateID(d)
+		require.NoError(t, err)
+		return d, id
 	}
 
-	f(newCreateResourceData(t, map[string]any{}), testFourPartID, "", false)
-	f(newCreateResourceData(t, map[string]any{"peer_region": ""}), testFourPartID, "", true)
-	f(newReadResourceData(t, map[string]any{"id": testFourPartID, "peer_region": ""}), testFourPartID, "", true)
-	f(newReadResourceData(t, map[string]any{"id": testFourPartID, "peer_region": testPeerRegion}), testFourPartID, "", false)
-	f(newReadResourceData(t, map[string]any{"id": testFivePartID}), testFivePartID, testPeerRegion, true)
+	f(newCreateResourceData(t, map[string]any{}), parseID(t, testFourPartID), "", false)
+	f(newCreateResourceData(t, map[string]any{"peer_region": ""}), parseID(t, testFourPartID), "", true)
+	d, id := read(map[string]any{"id": testFourPartID, "peer_region": ""})
+	f(d, id, "", true)
+	d, id = read(map[string]any{"id": testFourPartID, "peer_region": testPeerRegion})
+	f(d, id, testPeerRegion, true)
+	d, id = read(map[string]any{"id": testFourPartID})
+	f(d, id, "", false)
+	d, id = read(map[string]any{"id": testFivePartID})
+	f(d, id, testPeerRegion, true)
 }
 
 func TestReadViewReconcilesConfiguredTransitGatewayCIDRs(t *testing.T) {
@@ -269,29 +291,6 @@ func TestReadViewAddsPendingPeerWarning(t *testing.T) {
 	)))
 }
 
-func TestStateInfoMap(t *testing.T) {
-	f := func(info map[string]any, want map[string]string) {
-		t.Helper()
-
-		require.Equal(t, want, stateInfoMap(info))
-	}
-
-	f(nil, nil)
-	f(map[string]any{
-		"aws_transit_gateway_attachment_id": "tgw-attach-123",
-		"empty":                             "",
-		"future_nested":                     map[string]any{"details": []any{"alpha", 42}},
-		"message":                           "attachment available",
-		"type":                              "attachment-ready",
-	}, map[string]string{
-		"aws_transit_gateway_attachment_id": "tgw-attach-123",
-		"empty":                             "",
-		"future_nested":                     "map[details:[alpha 42]]",
-		"message":                           "attachment available",
-		"type":                              "attachment-ready",
-	})
-}
-
 func TestSetConnectionStateStateInfo(t *testing.T) {
 	f := func(
 		connectionType vpc.VpcPeeringConnectionType,
@@ -327,10 +326,8 @@ func TestSetConnectionStateStateInfo(t *testing.T) {
 		)
 		connection.VpcPeeringConnectionType = connectionType
 		connection.PeerVpc = peerVpc
-		id, err := parsePeeringID(idValue)
-		require.NoError(t, err)
 
-		require.NoError(t, setConnectionState(d, id, &connection))
+		require.NoError(t, setConnectionState(d, parseID(t, idValue), &connection))
 		if wantStateInfo == nil {
 			require.Empty(t, d.Get("state_info"))
 		} else {
@@ -382,7 +379,7 @@ func TestSetConnectionStateStateInfo(t *testing.T) {
 	f(vpc.VpcPeeringConnectionTypeAWSTgwVpcAttachment, nil, nil, "")
 }
 
-func TestFindPeeringConnection(t *testing.T) {
+func TestReadViewSelectsConnection(t *testing.T) {
 	f := func(
 		idValue string,
 		connections []vpc.PeeringConnectionOut,
@@ -391,18 +388,18 @@ func TestFindPeeringConnection(t *testing.T) {
 	) {
 		t.Helper()
 
-		id, err := parsePeeringID(idValue)
-		require.NoError(t, err)
+		d := newReadResourceData(t, map[string]any{"id": idValue})
 		client := avngen.NewMockClient(t)
 		expectVpcGet(t, client, connections...)
-		connection, err := findPeeringConnection(t.Context(), client, id)
+		err := readView(t.Context(), client, d)
 		if wantErr != nil {
 			require.ErrorIs(t, err, wantErr)
 			return
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, []string{wantCIDR}, connection.UserPeerNetworkCidrs)
+		require.Equal(t, []any{wantCIDR}, d.Get("user_peer_network_cidrs"))
+		require.Equal(t, testFourPartID, d.ID())
 	}
 
 	wrong := newConnection("us-east-1", vpc.VpcPeeringConnectionStateTypeActive, []string{"10.1.0.0/24"}, nil)
@@ -429,7 +426,6 @@ func TestDatasourceReadView(t *testing.T) {
 	f := func(
 		requestedRegion *string,
 		connections []vpc.PeeringConnectionOut,
-		wantID string,
 		wantCIDR string,
 		wantRegion *string,
 	) {
@@ -439,7 +435,7 @@ func TestDatasourceReadView(t *testing.T) {
 		client := avngen.NewMockClient(t)
 		expectVpcGet(t, client, connections...)
 		require.NoError(t, DataSourceOptions.Read(t.Context(), client, d))
-		require.Equal(t, wantID, d.ID())
+		require.Equal(t, testFourPartID, d.ID())
 		require.ElementsMatch(t, []any{wantCIDR}, d.Get("user_peer_network_cidrs"))
 		switch {
 		case wantRegion == nil:
@@ -460,10 +456,10 @@ func TestDatasourceReadView(t *testing.T) {
 	east := newConnection("us-east-1", vpc.VpcPeeringConnectionStateTypeActive, []string{"10.1.0.0/24"}, nil)
 	regionless := newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeActive, []string{"10.3.0.0/24"}, nil)
 	regionless.PeerRegion = nil
-	f(new(testPeerRegion), []vpc.PeeringConnectionOut{east, west}, testFivePartID, "10.2.0.0/24", new(testPeerRegion))
-	f(nil, []vpc.PeeringConnectionOut{west}, testFivePartID, "10.2.0.0/24", new(testPeerRegion))
-	f(new(""), []vpc.PeeringConnectionOut{west}, testFivePartID, "10.2.0.0/24", new(""))
-	f(nil, []vpc.PeeringConnectionOut{regionless}, testFourPartID, "10.3.0.0/24", nil)
+	f(new(testPeerRegion), []vpc.PeeringConnectionOut{east, west}, "10.2.0.0/24", new(testPeerRegion))
+	f(nil, []vpc.PeeringConnectionOut{west}, "10.2.0.0/24", new(testPeerRegion))
+	f(new(""), []vpc.PeeringConnectionOut{west}, "10.2.0.0/24", new(""))
+	f(nil, []vpc.PeeringConnectionOut{regionless}, "10.3.0.0/24", nil)
 }
 
 func TestModifyPlanCIDRs(t *testing.T) {
@@ -644,50 +640,14 @@ func TestUpdateViewCIDRGuards(t *testing.T) {
 	)
 }
 
-func TestRefreshStateCheck(t *testing.T) {
-	f := func(state string, stateInfo map[string]any, wantErr, wantFailed bool, wantContains string) {
-		t.Helper()
-
-		values := map[string]any{"state": state}
-		if stateInfo != nil {
-			values["state_info"] = stateInfo
-		}
-		d := newReadResourceData(t, values)
-		err := refreshStateCheck(d)
-		if !wantErr {
-			require.NoError(t, err)
-			return
-		}
-
-		require.Error(t, err)
-		require.Equal(t, wantFailed, errors.Is(err, adapter.ErrRefreshStateFailed))
-		require.ErrorContains(t, err, wantContains)
-	}
-
-	f("ACTIVE", nil, false, false, "")
-	f("PENDING_PEER", nil, false, false, "")
-	f("APPROVED", map[string]any{
-		"type":    "action-required",
-		"message": "backend detail",
-	}, true, false, `state_info: message="backend detail", type="action-required"`)
-	f("APPROVED_PEER_REQUESTED", nil, true, false, "transient state")
-	f("DELETED", nil, true, true, "was deleted")
-	f("DELETING", nil, true, true, "was deleted")
-	f("DELETED_BY_PEER", nil, true, true, "peer cloud resource was deleted")
-	f("REJECTED_BY_PEER", nil, true, true, "rejected by the peer")
-	f("INVALID_SPECIFICATION", nil, true, true, "specification is invalid")
-	f("ERROR", nil, true, true, "reached ERROR")
-	f("FUTURE_STATE", nil, true, false, `unknown VPC peering connection state "FUTURE_STATE"`)
-}
-
-func TestDeleteViewSelectsEndpointFromID(t *testing.T) {
-	f := func(id string) {
+func TestDeleteViewSelectsEndpointFromRegion(t *testing.T) {
+	f := func(state map[string]any, regional bool) {
 		t.Helper()
 
 		ctx := t.Context()
 		client := avngen.NewMockClient(t)
-		d := newReadResourceData(t, map[string]any{"id": id})
-		if id == testFourPartID {
+		d := newReadResourceData(t, state)
+		if !regional {
 			client.EXPECT().
 				VpcPeeringConnectionDelete(ctx, testProject, testProjectVpcID, testPeerCloudAccount, testPeerVpc).
 				Return(&vpc.VpcPeeringConnectionDeleteOut{}, nil).
@@ -709,8 +669,17 @@ func TestDeleteViewSelectsEndpointFromID(t *testing.T) {
 		require.NoError(t, deleteView(ctx, client, d))
 	}
 
-	f(testFourPartID)
-	f(testFivePartID)
+	f(map[string]any{"id": testFourPartID}, false)
+	f(map[string]any{"id": testFourPartID, "peer_region": testPeerRegion}, true)
+	f(map[string]any{"id": testFivePartID}, true)
+}
+
+func parseID(t *testing.T, value string) *pluginvpc.ProjectPeeringID {
+	t.Helper()
+
+	id, err := pluginvpc.ParseProjectPeeringID(value)
+	require.NoError(t, err)
+	return id
 }
 
 func newCreateResourceData(t *testing.T, plan map[string]any) adapter.ResourceData {

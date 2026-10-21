@@ -240,7 +240,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 		if isResource {
 			def.resourceRoot = renderRoot
 			if !resDat.DisableExample {
-				def.refExample, err = newRefExample(def, renderRoot)
+				def.refExample, err = newRefExample(def, renderRoot, resDat.RefDepth)
 				if err != nil {
 					return fmt.Errorf("could not generate ref example: %w", err)
 				}
@@ -269,7 +269,11 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			importData := importCommands(def, importIDFormats(def, root))
+			importData := fmt.Sprintf(
+				"terraform import %s.example %s\n",
+				def.typeName,
+				importID(def, root),
+			)
 
 			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
 			if err != nil {
