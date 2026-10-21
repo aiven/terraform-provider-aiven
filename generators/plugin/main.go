@@ -1057,7 +1057,12 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.ForceNew = a.ForceNew || b.ForceNew
 	a.Sensitive = a.Sensitive || b.Sensitive
 	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
-	a.Enum = mergeSlices(a.Enum, b.Enum)
+	if len(b.Enum) > 0 && b.AppearsIn == 0 {
+		// User defined values in definition.yml replace the OpenAPI enum
+		a.Enum = b.Enum
+	} else {
+		a.Enum = mergeSlices(a.Enum, b.Enum)
+	}
 	a.MinItems = max(a.MinItems, b.MinItems)
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)

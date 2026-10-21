@@ -1,0 +1,113 @@
+---
+page_title: "aiven_byoc_azure_entity Resource - terraform-provider-aiven"
+subcategory: ""
+description: |-
+  Creates and manages a BYOC custom cloud environment on Azure. Beta resource. This resource is in the beta stage and may change without notice. Set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+---
+
+# aiven_byoc_azure_entity (Resource)
+
+Creates and manages a BYOC custom cloud environment on Azure.
+
+~> **Beta resource**
+This resource is in the beta stage and may change without notice. Set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+
+## Example Usage
+
+```terraform
+resource "aiven_byoc_azure_entity" "example" {
+  organization_id  = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_region     = "westeurope"                  // Force new
+  deployment_model = "standard"                    // Force new
+  display_name     = "byoc-cloud-prod-westeurope"
+  reserved_cidr    = "192.168.6.0/24" // Force new
+
+  // OPTIONAL FIELDS
+  contact_emails {
+    email = "jane@example.com"
+
+    // OPTIONAL FIELDS
+    real_name = "Jane Smith"
+    role      = "admin"
+  }
+  tags = {
+    foo = "foo"
+  }
+
+  /* COMPUTED FIELDS
+  aiven_azure_cce_client_id    = "foo"
+  custom_cloud_environment_id  = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  aiven_management_cidr_blocks = ["10.0.0.0/24"]
+  bucket_names = {
+    foo = "foo"
+  }
+  byoc_resource_tags = {
+    foo = "foo"
+  }
+  byoc_unique_name           = "foo"
+  use_customer_owned_storage = true
+  */
+}
+
+resource "aiven_organization" "example" {
+  name = "Aiven Ltd"
+}
+```
+
+## Schema
+
+### Required
+
+- `cloud_region` (String) Cloud region for the BYOC cloud. Maximum length: `32`. Changing this property forces recreation of the resource.
+- `deployment_model` (String) Deployment model for the BYOC cloud. The possible values are `standard` and `standard_public`. Changing this property forces recreation of the resource.
+- `display_name` (String) Short name for this BYOC cloud. Maximum length: `64`.
+- `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
+- `reserved_cidr` (String) CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`. Changing this property forces recreation of the resource.
+
+### Optional
+
+- `contact_emails` (Block Set, Max: 10) Email addresses for notifications and alerts for this BYOC cloud (see [below for nested schema](#nestedblock--contact_emails))
+- `tags` (Map of String) Set of resource tags.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
+### Read-Only
+
+- `aiven_azure_cce_client_id` (String) Application (client) ID of the Aiven multi-tenant Azure CCE service principal.
+- `aiven_management_cidr_blocks` (Set of String) IP address ranges for incoming connections to the bastion host from the Aiven management plane.
+- `bucket_names` (Map of String) Names and usages of buckets required for workloads.
+- `byoc_resource_tags` (Map of String) Set of tags for the resources provisioned on the BYOC account.
+- `byoc_unique_name` (String) Name for all the resources created for the custom cloud environment.
+- `custom_cloud_environment_id` (String) ID of a custom cloud environment.
+- `id` (String) Resource ID composed as: `organization_id/custom_cloud_environment_id`.
+- `use_customer_owned_storage` (Boolean) True if this BYOC cloud is using customer owned storage.
+
+<a id="nestedblock--contact_emails"></a>
+### Nested Schema for `contact_emails`
+
+Required:
+
+- `email` (String) User email address. Maximum length: `254`.
+
+Optional:
+
+- `real_name` (String) User real name. Maximum length: `256`.
+- `role` (String) Role of this user. Maximum length: `256`.
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_byoc_azure_entity.example ORGANIZATION_ID/CUSTOM_CLOUD_ENVIRONMENT_ID
+```

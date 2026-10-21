@@ -9,6 +9,8 @@ operations:
   - id: CustomCloudEnvironmentCreate
     type: create
     resultKey: custom_cloud_environment
+    fixedValues:
+      cloud_provider: aws
   - id: CustomCloudEnvironmentGet
     type: read
     resultKey: custom_cloud_environment
@@ -18,11 +20,13 @@ operations:
   - id: CustomCloudEnvironmentDelete
     type: delete
 remove:
+  - cloud_provider # Polymorphic endpoint discriminator, set by the create operation's fixedValues
   - custom_cloud_names
   - errors
   - state
   - update_time
   - aws_iam_role_arn
+  - aiven_object_storage_credentials_creator_user # Google service account, the name lacks a cloud token for the generator to prune
   - aiven_azure_cce_client_id # Application (client) ID of the Aiven multi-tenant Azure CCE service principal.
   - aiven_google_account_principal # Google account identifier
   - azure_subscription_id # UUID identifying the customer's Azure subscription where BYOC infrastructure is deployed.
@@ -36,8 +40,6 @@ remove:
 schema:
   organization_id:
     ref: aiven_organization.id
-  cloud_provider:
-    forceNew: true
   cloud_region:
     forceNew: true
   deployment_model:

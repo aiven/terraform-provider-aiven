@@ -372,6 +372,13 @@ definitions:
         type: string
         $comment: |
           When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
+      fixedValues:
+        type: object
+        additionalProperties:
+          type: string
+        $comment: |
+          Request fields always sent with these values (create only), e.g. the discriminator
+          of a polymorphic endpoint: `cloud_provider: azure`. The fields must be listed in `remove`.
     required:
       - id
       - type
@@ -453,7 +460,7 @@ definitions:
         type: array
         items:
           type: any
-        $comment: List of allowed values for this attribute
+        $comment: List of allowed values for this attribute, replaces the OpenAPI enum
       forceNew:
         type: boolean
         $comment: Set to true if changes to this attribute destroy the resource

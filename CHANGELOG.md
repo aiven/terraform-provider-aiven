@@ -16,6 +16,19 @@ nav_order: 1
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
+- Add `aiven_byoc_azure_entity` resource: creates and manages a BYOC custom cloud environment on Azure.
+- Add `aiven_byoc_azure_provision` resource: provisions a BYOC custom cloud environment on Azure.
+- Remove field `aiven_object_storage_credentials_creator_user` from `aiven_byoc_aws_entity` resource: it holds a Google
+  service account identifier, which does not apply to AWS. References to it can be safely removed from Terraform files
+  without replacing the resource.
+- Remove field `cloud_provider` from `aiven_byoc_aws_entity` resource: the resource always creates an AWS environment.
+  The field can be safely removed from Terraform files: although it forced replacement before, removing it does
+  not replace the resource.
+- Fix `aiven_byoc_aws_provision`: changing `aws_iam_role_arn` updates the custom cloud environment in place. It used
+  to replace the resource, which deleted the environment and left `aiven_byoc_aws_entity` pointing at it.
+- Fix `aiven_byoc_aws_provision`: fail as soon as the custom cloud environment reaches `creation_failed` or `deleted`
+  instead of waiting for the create or update timeout.
+- Change `aiven_byoc_aws_entity` field `reserved_cidr`: validate IPv4 CIDR notation at plan time.
 
 ## [4.65.0] - 2026-10-21
 
