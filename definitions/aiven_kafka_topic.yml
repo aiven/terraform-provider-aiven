@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 version: 1
 resource:
+  refDepth: 2
   description: Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).
   terminationProtection: true
   removeMissing: true

@@ -37,8 +37,8 @@ type refExample struct {
 }
 
 // newRefExample renders the compact block (required fields only) that dependents prepend to their doc example.
-func newRefExample(def *Definition, root *Item) (*refExample, error) {
-	w := &exampleWriter{def: def, entity: resourceType, withRefs: true, requiredOnly: true}
+func newRefExample(def *Definition, root *Item, refDepth int) (*refExample, error) {
+	w := &exampleWriter{def: def, entity: resourceType, withRefs: true, requiredOnly: true, refDepth: refDepth}
 	b, err := w.root(root)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func newRefExample(def *Definition, root *Item) (*refExample, error) {
 
 // exampleDoc renders the resource doc example: the resource itself, then the referenced resources, dependents first.
 func exampleDoc(def *Definition, root *Item) ([]byte, error) {
-	w := &exampleWriter{def: def, entity: resourceType, withRefs: true}
+	w := &exampleWriter{def: def, entity: resourceType, withRefs: true, refDepth: def.Resource.RefDepth}
 	b, err := w.root(root)
 	if err != nil {
 		return nil, err
@@ -90,12 +90,13 @@ func (w *exampleWriter) refTokens(item *Item) (hclwrite.Tokens, error) {
 		return nil, fmt.Errorf("%s: %w", item.Path(), err)
 	}
 
-	target, err := refTarget(w.def, typeName, attr)
+	refDepth := max(w.refDepth-1, 0)
+	target, err := refTarget(w.def, typeName, attr, refDepth)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", item.Path(), err)
 	}
 
-	if !slices.Contains(w.deps, target) {
+	if !slices.ContainsFunc(w.deps, func(d *refExample) bool { return d.typeName == target.typeName }) {
 		w.deps = append(w.deps, target)
 	}
 
@@ -107,8 +108,9 @@ func (w *exampleWriter) refTokens(item *Item) (hclwrite.Tokens, error) {
 }
 
 // refTarget returns the example of the referenced resource: the cached one for generated
-// definitions, otherwise the block from its hand-written example file (SDK resources).
-func refTarget(def *Definition, typeName, attr string) (*refExample, error) {
+// definitions, re-rendered for a refDepth below the target's own, otherwise the block from
+// its hand-written example file (SDK resources).
+func refTarget(def *Definition, typeName, attr string, refDepth int) (*refExample, error) {
 	if t := def.refTargets[typeName]; t != nil {
 		if t.resourceRoot == nil {
 			return nil, fmt.Errorf("referenced resource %q is not generated yet", typeName)
@@ -117,7 +119,10 @@ func refTarget(def *Definition, typeName, attr string) (*refExample, error) {
 			return nil, fmt.Errorf("referenced resource %q has no attribute %q", typeName, attr)
 		}
 		if t.refExample != nil {
-			return t.refExample, nil
+			if own := t.Resource.RefDepth; refDepth == 0 || (own > 0 && own <= refDepth) {
+				return t.refExample, nil
+			}
+			return newRefExample(t, t.resourceRoot, refDepth)
 		}
 	} else {
 		r, err := sdkResource(typeName)

@@ -116,6 +116,12 @@ properties:
         type: boolean
         $comment: |
           Set to true to disable Terraform example file generation for this resource.
+      refDepth:
+        type: integer
+        minimum: 1
+        $comment: |
+          Limits the doc example to this many resource blocks along each `ref` chain, this resource included.
+          The last block renders its refs as literals. Unlimited when omitted.
       importIDFormats:
         type: array
         minItems: 1

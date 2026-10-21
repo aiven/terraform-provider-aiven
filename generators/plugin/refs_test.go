@@ -123,10 +123,10 @@ func TestRefTargetSDK(t *testing.T) {
 	t.Parallel()
 
 	def := refTestDef("aiven_a", nil)
-	_, err := refTarget(def, "aiven_kafka", "no_such_attribute")
+	_, err := refTarget(def, "aiven_kafka", "no_such_attribute", 0)
 	require.ErrorContains(t, err, `referenced resource "aiven_kafka" has no attribute "no_such_attribute"`)
 
-	_, err = refTarget(def, "aiven_no_such_resource", "id")
+	_, err = refTarget(def, "aiven_no_such_resource", "id", 0)
 	require.ErrorContains(t, err, `referenced resource "aiven_no_such_resource" not found`)
 }
 
@@ -140,7 +140,7 @@ func TestExampleDoc(t *testing.T) {
 		&Item{Name: "id", Type: SchemaTypeString, Computed: true},
 	)
 	var err error
-	org.refExample, err = newRefExample(org, org.resourceRoot)
+	org.refExample, err = newRefExample(org, org.resourceRoot, 0)
 	require.NoError(t, err)
 
 	group := refTestDef("aiven_group", map[string]string{"organization_id": "aiven_org.id"})
@@ -149,7 +149,7 @@ func TestExampleDoc(t *testing.T) {
 		&Item{Name: "organization_id", Type: SchemaTypeString, Required: true, Ref: "aiven_org.id", Example: "org123"},
 		&Item{Name: "name", Type: SchemaTypeString, Required: true, Example: "admins"},
 	)
-	group.refExample, err = newRefExample(group, group.resourceRoot)
+	group.refExample, err = newRefExample(group, group.resourceRoot, 0)
 	require.NoError(t, err)
 
 	member := refTestDef("aiven_member", nil)
@@ -180,6 +180,34 @@ resource "aiven_org" "example" {
 	plain, err := exampleRoot(member, resourceType, root)
 	require.NoError(t, err)
 	assert.NotContains(t, string(plain), "aiven_org.example")
+
+	member.Resource.RefDepth = 2
+	got, err = exampleDoc(member, refTestRoot(
+		&Item{Name: "group_id", Type: SchemaTypeString, Required: true, Ref: "aiven_group.id", Example: "ug123"},
+	))
+	require.NoError(t, err)
+	assert.Equal(t, `resource "aiven_member" "example" {
+  group_id = aiven_group.example.id // e.g. "ug123"
+}
+
+resource "aiven_group" "example" {
+  organization_id = "org123"
+  name            = "admins"
+}
+`, string(got))
+	member.Resource.RefDepth = 0
+
+	cached := group.refExample
+	group.Resource.RefDepth = 1
+	group.refExample, err = newRefExample(group, group.resourceRoot, 1)
+	require.NoError(t, err)
+	got, err = exampleDoc(member, refTestRoot(
+		&Item{Name: "group_id", Type: SchemaTypeString, Required: true, Ref: "aiven_group.id", Example: "ug123"},
+	))
+	require.NoError(t, err)
+	assert.Contains(t, string(got), `organization_id = "org123"`)
+	assert.NotContains(t, string(got), `resource "aiven_org"`)
+	group.Resource.RefDepth, group.refExample = 0, cached
 
 	member.refTargets["aiven_group"] = refTestDef("aiven_group", nil)
 	member.refTargets["aiven_group"].resourceRoot = refTestRoot()

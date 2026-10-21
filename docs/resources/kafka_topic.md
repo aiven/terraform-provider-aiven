@@ -71,13 +71,9 @@ resource "aiven_kafka" "example_kafka" {
 }
 
 resource "aiven_organization_user_group" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  organization_id = "org1a23f456789" // Force new
   description     = "The group of admins for the organization"
   name            = "Admin Users"
-}
-
-resource "aiven_organization" "example" {
-  name = "Aiven Ltd"
 }
 ```
 
