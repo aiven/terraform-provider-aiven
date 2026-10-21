@@ -403,7 +403,21 @@ func (d *DoOnce[T]) Do(fn func() (T, error), key ...string) (T, error) {
 	return val, err
 }
 
+// Store sets the cached result for key, so later Do calls skip fn.
+func (d *DoOnce[T]) Store(val T, key ...string) {
+	k := filepath.Join(key...)
+	mtx, _ := d.mutexes.LoadOrStore(k, &sync.Mutex{})
+	m := mtx.(*sync.Mutex)
+	m.Lock()
+	defer m.Unlock()
+	d.results.Store(k, &doOnceResult[T]{val: val})
+}
+
 func (d *DoOnce[T]) Forget(key ...string) {
 	k := filepath.Join(key...)
+	mtx, _ := d.mutexes.LoadOrStore(k, &sync.Mutex{})
+	m := mtx.(*sync.Mutex)
+	m.Lock()
+	defer m.Unlock()
 	d.results.Delete(k)
 }

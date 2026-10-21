@@ -2,12 +2,14 @@ package schemautil
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/mocks"
 )
@@ -345,5 +347,29 @@ func TestFlattenServiceComponents(t *testing.T) {
 			result := FlattenServiceComponents(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
+	}
+}
+
+func TestCheckServiceReadyNotFoundNotCached(t *testing.T) {
+	const projectName = "test-project-ready-not-found"
+	const serviceName = "test-service-ready-not-found"
+
+	ctx := context.Background()
+	mockClient := avngen.NewMockClient(t)
+	mockClient.EXPECT().
+		ServiceGet(ctx, projectName, serviceName).
+		Return(nil, avngen.Error{Status: http.StatusNotFound}).
+		Once()
+	mockClient.EXPECT().
+		ServiceGet(ctx, projectName, serviceName).
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: ServiceTypePG}, nil).
+		Once()
+
+	err := CheckServiceReady(ctx, mockClient, projectName, serviceName, ServiceTypePG)
+	require.True(t, avngen.IsNotFound(err))
+
+	// The success is cached: the mock fails on a third ServiceGet.
+	for range 2 {
+		require.NoError(t, CheckServiceReady(ctx, mockClient, projectName, serviceName, ServiceTypePG))
 	}
 }
