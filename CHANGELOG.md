@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
+
 ## [4.65.0] - 2026-10-21
 
 - Add `aiven_service_list` datasource field `services.first_use_time`: Timestamp when the service was first used
