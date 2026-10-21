@@ -19,7 +19,19 @@ jobs:
     runs-on: ubuntu-latest
     if: ((github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push') && github.actor != 'dependabot[bot]'
     steps:
-      - uses: dangoslen/changelog-enforcer@v3
+      - name: Check commit messages for [skip no-changelog]
+        id: marker
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/commits" --jq '.[].commit.message' | grep -qiF '[skip no-changelog]'; then
+            echo "INFO: Found [skip no-changelog] in a commit message. Skipping..."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.marker.outputs.skip != 'true'
+        uses: dangoslen/changelog-enforcer@v3
         with:
           skipLabels: no changelog
           versionPattern: '^## \[(\d*\.\d*\.\d*-?\w*|MAJOR.MINOR.PATCH)\]'
