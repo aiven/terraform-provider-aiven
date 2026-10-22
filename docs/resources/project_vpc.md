@@ -29,7 +29,7 @@ resource "aiven_project_vpc" "example" {
 ### Required
 
 - `cloud_name` (String) Target cloud. Maximum length: `256`. Changing this property forces recreation of the resource.
-- `network_cidr` (String) IPv4 network range CIDR. Maximum length: `18`. Changing this property forces recreation of the resource.
+- `network_cidr` (String) IPv4 network range CIDR. Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 
 ### Optional

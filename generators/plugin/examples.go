@@ -353,9 +353,10 @@ func exampleCollectionTokens(val cty.Value) hclwrite.Tokens {
 // but only when the items schema is a plain scalar. Some fields flatten an object
 // list to a scalar list (e.g. billing emails keep the object's "email" property on
 // the items), and their spec example is a list of objects that doesn't fit a scalar
-// element; those fall back to the items example.
+// element; those fall back to the items example. So do items with a declared format.
 func exampleArrayElems(def *Definition, item *Item) ([]cty.Value, error) {
-	if list, ok := item.Example.([]any); ok && len(list) > 0 && item.Items.IsScalar() && len(item.Items.Properties) == 0 {
+	if list, ok := item.Example.([]any); ok && len(list) > 0 && item.Items.IsScalar() && len(item.Items.Properties) == 0 &&
+		stringFormats[item.Items.Format].example == "" {
 		elems := make([]cty.Value, 0, len(list))
 		for _, e := range list {
 			value, err := exampleScalarValue(def, item.Items, e)
@@ -381,8 +382,9 @@ func exampleScalarItem(def *Definition, item *Item) (cty.Value, error) {
 		// Default values are preferred for examples,
 		// because "default" usually means "best", while "example" is just a random value.
 		anyValue = item.Default
-	case item.Format == "uuid":
-		anyValue = uuidExample
+	case stringFormats[item.Format].example != "":
+		// Spec examples of declared formats are often not valid values.
+		anyValue = stringFormats[item.Format].example
 	case !isEmpty(item.Example):
 		anyValue = item.Example
 	case item.Minimum > 0:
@@ -413,12 +415,14 @@ func exampleScalarValue(def *Definition, item *Item, anyValue any) (cty.Value, e
 						break
 					}
 				}
-			case item.Name == "uuid", item.Format == "uuid", item.MinLength == len(uuidExample):
+			case stringFormats[itemFormat(item)].example != "":
+				anyValue = stringFormats[itemFormat(item)].example
+			case item.MinLength == uuidLength:
+				// Too weak a signal for a validator, prefixed IDs can be 36 chars long.
 				anyValue = uuidExample
 			default:
 				// Some placeholders that can improve the example
 				placeholders := map[string]string{
-					"cidr":             "10.0.0.0/24",
 					"_ip":              "192.168.1.1",
 					"email":            "foo@example.com",
 					"password":         "password123",

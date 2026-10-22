@@ -109,6 +109,15 @@ const (
 	SchemaTypeBoolean      SchemaType = "boolean"
 )
 
+// StringFormat is a string schema format. Known ones get a validator, see stringFormats.
+type StringFormat string
+
+const (
+	StringFormatCIDR     StringFormat = "cidr"
+	StringFormatIPv4CIDR StringFormat = "ipv4-cidr"
+	StringFormatUUID     StringFormat = "uuid"
+)
+
 // OASchema represents a parsed OpenAPIDoc schema.
 type OASchema struct {
 	Type                 SchemaType           `json:"type"`
@@ -124,7 +133,7 @@ type OASchema struct {
 	MaxLength            int                  `json:"maxLength"`
 	Minimum              int                  `json:"minimum"`
 	Maximum              int                  `json:"maximum"`
-	Format               string               `json:"format"`
+	Format               StringFormat         `json:"format"`
 	Pattern              string               `json:"pattern"`
 	Ref                  string               `json:"$ref"`
 	Description          string               `json:"description"`

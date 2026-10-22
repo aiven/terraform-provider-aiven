@@ -396,8 +396,8 @@ schema:
     enum: [val1, val2]
     minimum: 1
     maximum: 100
-    format: uuid|cidr              # String validator, see Formats
-    example: value                 # Doc example; ignored with format: uuid
+    format: uuid|cidr|ipv4-cidr    # String validator, see Formats
+    example: value                 # Doc example; ignored with a declared format
     conflictsWith: [other_field]
     exactlyOneOf: [field_a, field_b]
     atLeastOneOf: [field_a, field_b]
@@ -411,14 +411,18 @@ schema:
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
 
 **Formats**: set `format: uuid` on string fields that hold a UUID instead of writing a UUID `example`.
-It emits `validators.UUID()`, drops length validators and hints it already implies, and the doc example always uses
-the UUIDv4 `1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d`. Resource docs get a "Must be a valid UUID." hint unless the
-description already mentions UUID.
+It emits `validators.UUID()` and the doc example always uses the UUIDv4 `1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d`.
+Resource docs get a "Must be a valid UUID." hint unless the description already mentions UUID.
 Prefer the OpenAPI description; override it only when the spec text is wrong for the field (e.g. renamed generic fields).
 Typical fields: VPC, billing group, Flink application/version, and BYOC environment IDs, Azure subscription/tenant/app IDs.
 Skip prefixed IDs (`org…`, `u…`, `ug…`, `acl…`, `addr…`, `pm…`), composite IDs (`project/vpc_id`), and computed-only
-fields, which get no validators. `format: cidr` emits `validators.CIDR()`. Formats apply to scalar strings only, not
-list or set items.
+fields, which get no validators. `format: cidr` emits `validators.CIDR()`; resource docs get a CIDR example hint unless
+the description has an IP example.
+`format: ipv4-cidr` emits `validators.IPv4CIDR()`, which rejects IPv6.
+When unset, the format is guessed: `uuid` for fields named `uuid`, `cidr` for fields named `*cidr*`, `ipv4-cidr` when
+such a field also has `maxLength: 18`. A guessed format keeps the field's own example and only fills in a missing one;
+declare it to replace a bad one.
+Any format replaces the length validators and hints. Validators apply to scalar strings only, not list or set items.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**

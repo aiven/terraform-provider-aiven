@@ -74,7 +74,7 @@ resource "aiven_organization" "example" {
 - `deployment_model` (String) Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.
 - `display_name` (String) Short name for this BYOC cloud. Maximum length: `64`.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `reserved_cidr` (String) CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`. Changing this property forces recreation of the resource.
+- `reserved_cidr` (String) CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`. Changing this property forces recreation of the resource.
 
 ### Optional
 

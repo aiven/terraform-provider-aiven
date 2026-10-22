@@ -951,11 +951,42 @@ func TestExampleArrayElems(t *testing.T) {
 func TestExampleScalarItemUUIDFormat(t *testing.T) {
 	def := &Definition{}
 	for _, example := range []any{nil, "adcf7194-d877-4505-a47a-91fefd96e3b8", "123456789012"} {
-		item := &Item{Type: SchemaTypeString, Format: "uuid", Example: example}
+		item := &Item{Type: SchemaTypeString, Format: StringFormatUUID, Example: example}
 		got, err := exampleScalarItem(def, item)
 		require.NoError(t, err)
 		assert.Equal(t, uuidExample, got.AsString(), "example: %v", example)
 	}
+}
+
+func TestExampleScalarItemGuessedFormat(t *testing.T) {
+	def := &Definition{}
+	cases := []struct {
+		item *Item
+		want string
+	}{
+		{item: &Item{Name: "uuid", Type: SchemaTypeString}, want: uuidExample},
+		{item: &Item{Name: "cmk_id", Type: SchemaTypeString, MinLength: 36}, want: uuidExample},
+		{item: &Item{Name: "peering_connection_id", Type: SchemaTypeString, MinLength: 36, Example: "pcx-0123"}, want: "pcx-0123"},
+		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString}, want: "10.0.0.0/24"},
+		{item: &Item{Name: "network_cidr", Type: SchemaTypeString, Example: "192.168.0.0/24"}, want: "192.168.0.0/24"},
+	}
+	for _, c := range cases {
+		got, err := exampleScalarItem(def, c.item)
+		require.NoError(t, err)
+		assert.Equal(t, c.want, got.AsString(), c.item.Name)
+	}
+}
+
+func TestExampleArrayElemsDeclaredFormat(t *testing.T) {
+	item := &Item{
+		Type:    SchemaTypeArrayOrdered,
+		Example: []any{"not-a-cidr", "also-not"},
+		Items:   &Item{Type: SchemaTypeString, Format: StringFormatCIDR},
+	}
+	elems, err := exampleArrayElems(&Definition{}, item)
+	require.NoError(t, err)
+	require.Len(t, elems, 1)
+	assert.Equal(t, "10.0.0.0/24", elems[0].AsString())
 }
 
 // todo: drop in v5.0.0 with Item.DropDefault.

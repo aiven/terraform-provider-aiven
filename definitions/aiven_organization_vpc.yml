@@ -37,7 +37,6 @@ schema:
     description: The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.
   network_cidr:
     type: string
-    format: cidr
     required: true
     forceNew: true
     description: Network address range used by the VPC. For example, `192.168.0.0/24`.
