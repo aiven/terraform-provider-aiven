@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -43,10 +44,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "IP address ranges for incoming connections to the bastion host from the Aiven management plane.",
 			},
-			"aiven_object_storage_credentials_creator_user": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Google account identifier.",
-			},
 			"aws_subnets_bastion": schema.MapAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -70,12 +67,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"byoc_unique_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Name for all the resources created for the custom cloud environment.",
-			},
-			"cloud_provider": schema.StringAttribute{
-				MarkdownDescription: "Cloud provider for the BYOC cloud. The possible values are `aws`, `azure`, `google` and `oracle`. Changing this property forces recreation of the resource.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("aws", "azure", "google", "oracle")},
 			},
 			"cloud_region": schema.StringAttribute{
 				MarkdownDescription: "Cloud region for the BYOC cloud. Maximum length: `32`. Changing this property forces recreation of the resource.",
@@ -113,7 +104,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(18), validators.CIDR()},
 			},
 			"tags": schema.MapAttribute{
 				ElementType:         types.StringType,
@@ -180,10 +171,6 @@ func resourceSchemaInternal() *adapter.Schema {
 				},
 				Type: adapter.SchemaTypeSet,
 			},
-			"aiven_object_storage_credentials_creator_user": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeString,
-			},
 			"aws_subnets_bastion": &adapter.Schema{
 				Computed: true,
 				Items: &adapter.Schema{
@@ -220,8 +207,7 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
-			"cloud_provider": &adapter.Schema{Type: adapter.SchemaTypeString},
-			"cloud_region":   &adapter.Schema{Type: adapter.SchemaTypeString},
+			"cloud_region": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"contact_emails": &adapter.Schema{
 				Items: &adapter.Schema{
 					Properties: map[string]*adapter.Schema{

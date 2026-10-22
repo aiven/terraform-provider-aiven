@@ -78,6 +78,9 @@ type Operation struct {
 	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
+	// Request fields always sent with these values, e.g. the discriminator of a polymorphic endpoint.
+	// The fields must be removed from the schema.
+	FixedValues map[string]string `yaml:"fixedValues"`
 
 	Request  *OASchema
 	Response *OASchema

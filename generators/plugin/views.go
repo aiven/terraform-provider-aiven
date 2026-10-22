@@ -21,6 +21,7 @@ const (
 	modifyPlan                 = "modifyPlan"
 	resourceData               = "ResourceData"
 	renameFieldsModifier       = "RenameFields"
+	setFixedValuesModifier     = "SetFixedValues"
 	flattenModifier            = "flattenModifier"
 	expandModifier             = "expandModifier"
 )
@@ -365,7 +366,11 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		return properties[i].Name < properties[j].Name
 	})
 
-	hasRequest := len(filterAppearsIn(properties, inRequest)) > 0
+	if err := validateFixedValues(item, operation); err != nil {
+		return err
+	}
+
+	hasRequest := len(filterAppearsIn(properties, inRequest)) > 0 || len(operation.FixedValues) > 0
 	// Ops with resultIDField never merge their response into root.Properties, but the
 	// emitted view still consumes the response (FindOne, then d.Set id + readView).
 	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0 || (operation.ResultIDField != "" && operation.Response != nil)
@@ -381,6 +386,9 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 				g.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client"))
 			}
 			if code := renameFieldsArg(def.Rename, operation.Request, true); code != nil {
+				g.Add(code)
+			}
+			if code := fixedValuesArg(operation.FixedValues); code != nil {
 				g.Add(code)
 			}
 		})
@@ -636,6 +644,51 @@ func renameFieldsArg(rename map[string]string, schema *OASchema, forExpand bool)
 	return jen.Qual(adapterPackage, renameFieldsModifier).Call(
 		jen.Map(jen.String()).String().Values(dict),
 	)
+}
+
+// fixedValuesArg emits adapter.SetFixedValues with sorted key-value pairs.
+func fixedValuesArg(values map[string]string) jen.Code {
+	if len(values) == 0 {
+		return nil
+	}
+	args := make([]jen.Code, 0, len(values)*2)
+	for _, k := range sortedKeys(values) {
+		args = append(args, jen.Lit(k), jen.Lit(values[k]))
+	}
+	return jen.Qual(adapterPackage, setFixedValuesModifier).Call(args...)
+}
+
+// validateFixedValues requires each fixed value to be a string request field of the operation,
+// within its enum, and removed from the schema, so the user can't set it.
+func validateFixedValues(item *Item, operation *Operation) error {
+	if len(operation.FixedValues) == 0 {
+		return nil
+	}
+	if operation.Type != OperationCreate {
+		return fmt.Errorf("operation %q: fixedValues is only supported on create operations", operation.ID)
+	}
+	for _, k := range sortedKeys(operation.FixedValues) {
+		v := operation.FixedValues[k]
+		var field *OASchema
+		if operation.Request != nil {
+			field = operation.Request.Properties[k]
+		}
+		if field == nil {
+			return fmt.Errorf("operation %q: fixedValues field %q is not in the request body", operation.ID, k)
+		}
+		if field.Type != SchemaTypeString {
+			return fmt.Errorf("operation %q: fixedValues field %q must be a string, got %q", operation.ID, k, field.Type)
+		}
+		if len(field.Enum) > 0 && !enumContainsString(field.Enum, v) {
+			return fmt.Errorf("operation %q: fixedValues field %q value %q is not one of %v", operation.ID, k, v, field.Enum)
+		}
+		for _, p := range item.Properties {
+			if p.Name == k || p.JSONName == k {
+				return fmt.Errorf("operation %q: fixedValues field %q must be removed from the schema", operation.ID, k)
+			}
+		}
+	}
+	return nil
 }
 
 // humanizeCodeList turns ["foo", "bar", "baz"] -> "`foo`, `bar` and `baz`"

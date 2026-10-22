@@ -977,6 +977,23 @@ func TestMergeItemDropDefault(t *testing.T) {
 	require.Nil(t, got.Default)
 }
 
+func TestMergeItemEnum(t *testing.T) {
+	t.Parallel()
+
+	openAPI := func() *Item {
+		return &Item{Name: "model", Type: SchemaTypeString, AppearsIn: RequestBody, Enum: []any{"a", "b", "c"}}
+	}
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+
+	got, err := mergeItem(parent, openAPI(), &Item{Name: "model", Type: SchemaTypeString, Enum: []any{"a", "b"}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"a", "b"}, got.Enum, "definition enum overrides")
+
+	got, err = mergeItem(parent, openAPI(), &Item{Name: "model", Type: SchemaTypeString, AppearsIn: ResponseBody, Enum: []any{"d"}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"a", "b", "c", "d"}, got.Enum, "OpenAPI enums merge")
+}
+
 func TestExampleNestedAttributeUsesAssignment(t *testing.T) {
 	t.Parallel()
 
