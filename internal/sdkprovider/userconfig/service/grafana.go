@@ -466,7 +466,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"grafana_version": {
-				Description: "Enum: `11`, and newer. Grafana major version.",
+				Description: "Enum: `11`, `12`, and newer. Grafana major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
