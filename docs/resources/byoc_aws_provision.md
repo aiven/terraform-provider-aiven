@@ -49,7 +49,7 @@ resource "aiven_organization" "example" {
 ### Required
 
 - `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.
-- `custom_cloud_environment_id` (String) ID of a custom cloud environment. Length must be exactly `36`. Changing this property forces recreation of the resource.
+- `custom_cloud_environment_id` (String) ID of a custom cloud environment. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 
 ### Optional

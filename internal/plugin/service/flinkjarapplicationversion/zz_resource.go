@@ -20,7 +20,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"application_id": schema.StringAttribute{
-				MarkdownDescription: "Application Id. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Application Id. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{validators.UUID()},

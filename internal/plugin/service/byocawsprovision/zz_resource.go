@@ -37,10 +37,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
 			},
 			"custom_cloud_environment_id": schema.StringAttribute{
-				MarkdownDescription: "ID of a custom cloud environment. Length must be exactly `36`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "ID of a custom cloud environment. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"custom_cloud_names": schema.SetAttribute{
 				Computed:            true,

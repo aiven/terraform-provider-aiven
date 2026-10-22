@@ -18,6 +18,15 @@ var stringFormatValidators = map[string]func() jen.Code{
 	},
 }
 
+const uuidLength = 36
+
+// lengthImpliedByFormat reports whether the format validator already enforces the length limits.
+func lengthImpliedByFormat(item *Item) bool {
+	return item.Format == "uuid" &&
+		item.MinLength <= uuidLength &&
+		(item.MaxLength == 0 || item.MaxLength >= uuidLength)
+}
+
 func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, error) {
 	pkg := getTypedImport(item.Type, validatorTypedImport)
 	codes := make([]jen.Code, 0)
@@ -38,7 +47,7 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	// Length constraints only exist on stringvalidator; guard by type so that a
 	// scalar field overridden to an array/set (which may carry a stray maxLength)
 	// does not emit a non-existent setvalidator.Length* call.
-	if item.Type == SchemaTypeString {
+	if item.Type == SchemaTypeString && !lengthImpliedByFormat(item) {
 		switch {
 		case item.MinLength > 0 && item.MaxLength > 0:
 			codes = append(codes, jen.Qual(pkg, "LengthBetween").Call(jen.Lit(item.MinLength), jen.Lit(item.MaxLength)))

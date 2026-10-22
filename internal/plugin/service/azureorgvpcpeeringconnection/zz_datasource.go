@@ -21,7 +21,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"azure_subscription_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Azure subscription in UUID4 format.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(1024), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,

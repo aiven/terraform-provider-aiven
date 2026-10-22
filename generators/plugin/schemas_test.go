@@ -143,14 +143,26 @@ func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
 		Type: SchemaTypeObject,
 		Properties: map[string]*Item{
 			"tenant_id": {
-				Name:     "tenant_id",
-				Type:     SchemaTypeString,
-				Required: true,
-				Format:   "uuid",
+				Name:        "tenant_id",
+				Type:        SchemaTypeString,
+				Description: "Tenant ID.",
+				Required:    true,
+				Format:      "uuid",
+				MinLength:   36,
+				MaxLength:   1024,
+			},
+			"app_id": {
+				Name:        "app_id",
+				Type:        SchemaTypeString,
+				Description: "App ID in UUID4 form.",
+				Required:    true,
+				Format:      "uuid",
 			},
 		},
 	}
-	root.Properties["tenant_id"].Parent = root
+	for _, p := range root.Properties {
+		p.Parent = root
+	}
 
 	code, err := genSchema(&Definition{Resource: &SchemaMeta{}}, resourceType, root)
 	require.NoError(t, err)
@@ -158,4 +170,8 @@ func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
 	got := renderCode(t, code)
 	require.Contains(t, got, `"tenant_id": schema.StringAttribute{`)
 	require.Contains(t, got, `[]validator.String{validators.UUID()}`)
+	require.NotContains(t, got, "Length")
+	require.NotContains(t, got, "length")
+	require.Contains(t, got, `"Tenant ID. Must be a valid UUID."`)
+	require.Contains(t, got, `"App ID in UUID4 form."`)
 }

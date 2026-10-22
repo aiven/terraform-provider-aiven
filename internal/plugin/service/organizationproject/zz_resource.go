@@ -31,9 +31,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.Int64{int64validator.Between(10000, 30000)},
 			},
 			"billing_group_id": schema.StringAttribute{
-				MarkdownDescription: "Billing group ID to assign to the project. It's required when moving projects between organizations. Minimum length: `1`.",
+				MarkdownDescription: "Billing group ID to assign to the project. It's required when moving projects between organizations. Must be a valid UUID.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"ca_cert": schema.StringAttribute{
 				Computed:            true,

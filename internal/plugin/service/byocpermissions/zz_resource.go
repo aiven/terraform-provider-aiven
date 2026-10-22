@@ -28,7 +28,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.Set{setvalidator.SizeAtMost(1000)},
 			},
 			"custom_cloud_environment_id": schema.StringAttribute{
-				MarkdownDescription: "ID of a custom cloud environment. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "ID of a custom cloud environment. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{validators.UUID()},

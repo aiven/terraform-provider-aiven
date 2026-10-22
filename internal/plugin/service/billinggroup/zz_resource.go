@@ -82,10 +82,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.LengthAtMost(83)},
 			},
 			"copy_from_billing_group": schema.StringAttribute{
-				MarkdownDescription: "Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Billing group ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"country_code": schema.StringAttribute{
 				Computed:            true,

@@ -42,11 +42,11 @@ resource "aiven_organization" "example" {
 
 ### Required
 
-- `azure_subscription_id` (String) The ID of the Azure subscription in UUID4 format. Maximum length: `1024`. Changing this property forces recreation of the resource.
+- `azure_subscription_id` (String) The ID of the Azure subscription in UUID4 format. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `organization_vpc_id` (String) Organization VPC ID. Changing this property forces recreation of the resource.
-- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Maximum length: `1024`. Changing this property forces recreation of the resource.
-- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. Maximum length: `1024`. Changing this property forces recreation of the resource.
+- `organization_vpc_id` (String) Organization VPC ID. Must be a valid UUID. Changing this property forces recreation of the resource.
+- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Changing this property forces recreation of the resource.
+- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. Changing this property forces recreation of the resource.
 - `peer_resource_group` (String) The name of the Azure resource group associated with the VNet. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `vnet_name` (String) The name of the Azure VNet. Maximum length: `1024`. Changing this property forces recreation of the resource.
 

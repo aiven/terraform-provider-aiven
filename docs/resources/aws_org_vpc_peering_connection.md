@@ -45,7 +45,7 @@ resource "aiven_organization" "example" {
 - `aws_vpc_id` (String) AWS VPC ID. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `aws_vpc_region` (String) The AWS region of the peered VPC. For example, `eu-central-1`. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `organization_vpc_id` (String) Organization VPC ID. Changing this property forces recreation of the resource.
+- `organization_vpc_id` (String) Organization VPC ID. Must be a valid UUID. Changing this property forces recreation of the resource.
 
 ### Optional
 
