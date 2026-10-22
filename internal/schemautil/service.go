@@ -617,6 +617,11 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
+	// ServiceGet may still return 404 for a fresh service (backend eventual
+	// consistency) while dependent calls like database creation already work.
+	// Seeding the cache keeps CheckServiceReady from failing on that 404.
+	serviceCheck.Store(s, project, s.ServiceName)
+
 	username := adminUsername(s, serviceType)
 	if err := upsertServicePassword(ctx, d, client, username); err != nil {
 		return diag.Errorf("error setting service password for %s/%s: %s", project, s.ServiceName, err)
@@ -718,8 +723,16 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, client a
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
 	}
 
-	if _, err = WaitForServiceUpdate(ctx, d, client); err != nil {
+	updated, err := WaitForServiceUpdate(ctx, d, client)
+	if err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
+	}
+
+	// The update powers the service on, so a POWEROFF result is stale.
+	if updated.State == service.ServiceStateTypePoweroff {
+		serviceCheck.Forget(projectName, serviceName)
+	} else {
+		serviceCheck.Store(updated, projectName, serviceName)
 	}
 
 	username := adminUsername(s, serviceType)
@@ -819,6 +832,7 @@ func resourceServiceDelete(ctx context.Context, d *schema.ResourceData, client a
 	if err := client.ServiceDelete(ctx, projectName, serviceName); err != nil && !avngen.IsNotFound(err) {
 		return diag.Errorf("error deleting a service: %s", err)
 	}
+	serviceCheck.Forget(projectName, serviceName)
 
 	// Delete already takes care of static IPs disassociation; no need to explicitly disassociate them here
 
@@ -1338,10 +1352,11 @@ func ContainsRedactedCreds(config map[string]any) error {
 }
 
 var (
-	// serviceCheck caches ServiceGet per (project, serviceName). The
-	// value is the lookup result, not a verdict: a (project,serviceName)
-	// is one service with one type, so readiness is evaluated per
-	// caller against the shared cached shape.
+	// serviceCheck caches ServiceGet per (project, serviceName). It is
+	// seeded on service creation and update, and dropped on deletion. The value is the
+	// lookup result, not a verdict: a (project,serviceName) is one service
+	// with one type, so readiness is evaluated per caller against the
+	// shared cached shape.
 	serviceCheck           DoOnce[*service.ServiceGetOut]
 	ErrServicePoweredOff   = fmt.Errorf("the service is powered off")
 	ErrServiceTypeMismatch = fmt.Errorf("service type mismatch")
@@ -1375,6 +1390,11 @@ func CheckServiceReady(ctx context.Context, client avngen.Client, project, servi
 		return client.ServiceGet(ctx, project, serviceName)
 	}, project, serviceName)
 	if err != nil {
+		if avngen.IsNotFound(err) {
+			// A 404 may be eventual consistency for a service created
+			// elsewhere, so let the next caller retry.
+			serviceCheck.Forget(project, serviceName)
+		}
 		return err
 	}
 	if s.ServiceType != serviceType {

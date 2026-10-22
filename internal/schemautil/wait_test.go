@@ -31,3 +31,20 @@ func TestDoOnce(t *testing.T) {
 	// Called only once
 	assert.Equal(t, int64(1), incr)
 }
+
+func TestDoOnceStore(t *testing.T) {
+	var doOnce DoOnce[int]
+	doOnce.Store(42, "project", "service")
+
+	val, err := doOnce.Do(func() (int, error) {
+		t.Fatal("fn must not be called for a stored key")
+		return 0, nil
+	}, "project", "service")
+	require.NoError(t, err)
+	assert.Equal(t, 42, val)
+
+	doOnce.Forget("project", "service")
+	val, err = doOnce.Do(func() (int, error) { return 7, nil }, "project", "service")
+	require.NoError(t, err)
+	assert.Equal(t, 7, val)
+}
