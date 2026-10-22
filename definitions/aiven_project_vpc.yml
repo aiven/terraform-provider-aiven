@@ -26,7 +26,7 @@ datasource:
       type: string
       optional: true
       conflictsWith: [project]
-      example: "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+      example: "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
       description: The ID of the VPC in `project/project_vpc_id` format.
       deprecationMessage: This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.
 clientHandler: vpc
@@ -54,3 +54,5 @@ remove:
 schema:
   project:
     ref: aiven_organization_project.project_id
+  project_vpc_id:
+    format: uuid

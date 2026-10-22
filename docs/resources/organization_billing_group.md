@@ -33,7 +33,7 @@ resource "aiven_organization_billing_group" "example" {
   custom_invoice_text = "Extra billing text"
 
   /* COMPUTED FIELDS
-  billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  billing_group_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   create_time      = "2021-01-01T00:00:00Z"
   */
 }

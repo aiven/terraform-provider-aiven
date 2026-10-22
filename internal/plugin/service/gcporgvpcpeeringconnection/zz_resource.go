@@ -14,6 +14,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -39,6 +40,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Organization VPC ID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"peer_vpc": schema.StringAttribute{
 				MarkdownDescription: "Google Cloud VPC network name. Maximum length: `1024`. Changing this property forces recreation of the resource.",

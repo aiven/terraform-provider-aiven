@@ -32,5 +32,7 @@ schema:
     forceNew: true
   version_id:
     forceNew: true
+    format: uuid
   application_id:
     forceNew: true
+    format: uuid

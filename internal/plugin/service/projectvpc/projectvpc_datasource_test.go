@@ -29,7 +29,7 @@ func TestDataSourceConfigValidation(t *testing.T) {
 		{
 			name: "both_discriminators",
 			config: `data "aiven_project_vpc" "x" {
-  vpc_id  = "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  vpc_id  = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   project = "my-project"
 }`,
 			expectError: regexp.MustCompile(`(?s)Attribute "project" cannot be specified when "vpc_id" is specified`),
@@ -39,13 +39,13 @@ func TestDataSourceConfigValidation(t *testing.T) {
 			config: `data "aiven_project_vpc" "x" {
   project        = "my-project"
   cloud_name     = "google-europe-west1"
-  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  project_vpc_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
 }`,
 			expectError: regexp.MustCompile(`(?s)Exactly one of these attributes must be configured:\s+\[project_vpc_id,cloud_name,vpc_id\]`),
 		},
 		{
 			name:        "by_vpc_id",
-			config:      `data "aiven_project_vpc" "x" { vpc_id = "my-project/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" }`,
+			config:      `data "aiven_project_vpc" "x" { vpc_id = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d" }`,
 			expectError: acc.ErrNoopErrorRegex,
 		},
 		{
@@ -60,7 +60,7 @@ func TestDataSourceConfigValidation(t *testing.T) {
 			name: "by_project_and_project_vpc_id",
 			config: `data "aiven_project_vpc" "x" {
   project        = "my-project"
-  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  project_vpc_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
 }`,
 			expectError: acc.ErrNoopErrorRegex,
 		},

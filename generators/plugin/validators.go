@@ -13,6 +13,9 @@ var stringFormatValidators = map[string]func() jen.Code{
 	"cidr": func() jen.Code {
 		return jen.Qual(customValidatorsPackage, "CIDR").Call()
 	},
+	"uuid": func() jen.Code {
+		return jen.Qual(customValidatorsPackage, "UUID").Call()
+	},
 }
 
 func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, error) {

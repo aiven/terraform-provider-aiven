@@ -4,7 +4,7 @@ data "aiven_organization_billing_group_list" "example" {
   /* COMPUTED FIELDS
   billing_groups {
     billing_address_id  = "foo"
-    billing_group_id    = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+    billing_group_id    = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
     organization_id     = "org1a23f456789"
     shipping_address_id = "foo"
     vat_id              = "foo"

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -39,7 +40,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "ID of a custom cloud environment. Length must be exactly `36`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},
+				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
 			},
 			"custom_cloud_names": schema.SetAttribute{
 				Computed:            true,

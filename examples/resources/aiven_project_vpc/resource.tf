@@ -4,7 +4,7 @@ resource "aiven_project_vpc" "example" {
   network_cidr = "192.168.6.0/24" // Force new
 
   /* COMPUTED FIELDS
-  project_vpc_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  project_vpc_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   state          = "ACTIVE"
   */
 }

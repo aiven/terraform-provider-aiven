@@ -18,11 +18,11 @@ This feature is in the limited availability stage and may change without notice.
 resource "aiven_flink_jar_application_version" "example" {
   project        = aiven_flink.example_flink.project                  // e.g. "my-project". Force new
   service_name   = aiven_flink.example_flink.service_name             // e.g. "my-application". Force new
-  application_id = aiven_flink_jar_application.example.application_id // e.g. "foo". Force new
+  application_id = aiven_flink_jar_application.example.application_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
   source         = "./example.jar"
 
   /* COMPUTED FIELDS
-  application_version_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  application_version_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   created_at             = "2021-01-01T00:00:00Z"
   created_by             = "foo"
   file_info = [{

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -20,7 +21,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"azure_subscription_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Azure subscription in UUID4 format.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(1024)},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(1024), validators.UUID()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -33,14 +34,15 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"organization_vpc_id": schema.StringAttribute{
 				MarkdownDescription: "Organization VPC ID.",
 				Required:            true,
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"peer_azure_app_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.",
+				MarkdownDescription: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.",
 			},
 			"peer_azure_tenant_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The Azure tenant ID in UUID4 format.",
+				MarkdownDescription: "Azure tenant id in UUID4 form.",
 			},
 			"peer_resource_group": schema.StringAttribute{
 				MarkdownDescription: "The name of the Azure resource group associated with the VNet.",

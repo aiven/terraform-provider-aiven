@@ -15,7 +15,7 @@ Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/o
 resource "aiven_organization_project" "example" {
   organization_id  = aiven_organization.example.id                             // e.g. "org1234abcd"
   project_id       = "project-1"                                               // Force new
-  billing_group_id = aiven_organization_billing_group.example.billing_group_id // e.g. "721bf796-1d89-402d-9195-425a23c4efdc"
+  billing_group_id = aiven_organization_billing_group.example.billing_group_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   parent_id        = aiven_organization.example.id                             // e.g. "a3fd7a594e01"
 
   // OPTIONAL FIELDS

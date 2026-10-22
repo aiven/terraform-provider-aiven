@@ -12,12 +12,12 @@ resource "aiven_billing_group" "example" {
   billing_extra_text      = "Purchase order: PO100018"
   city                    = "Helsinki"
   company                 = "My Company"
-  copy_from_billing_group = "ffb3f0cd-5532-4eb9-8867-f2cac5823492" // Force new
+  copy_from_billing_group = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d" // Force new
   country_code            = "FI"
   state                   = "foo"
   zip_code                = "01234"
 
   /* COMPUTED FIELDS
-  billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  billing_group_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   */
 }

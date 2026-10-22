@@ -16,7 +16,7 @@ Use `aiven_organization_billing_group` instead. This data source will be removed
 
 ```terraform
 data "aiven_billing_group" "example" {
-  billing_group_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  billing_group_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
 
   /* COMPUTED FIELDS
   card_id                 = "9330c086-8781-11e5-89ff-5404a64abfef"
@@ -29,7 +29,7 @@ data "aiven_billing_group" "example" {
   billing_extra_text      = "Purchase order: PO100018"
   city                    = "Helsinki"
   company                 = "My Company"
-  copy_from_billing_group = "ffb3f0cd-5532-4eb9-8867-f2cac5823492"
+  copy_from_billing_group = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   country_code            = "FI"
   name                    = "my billing group"
   state                   = "foo"

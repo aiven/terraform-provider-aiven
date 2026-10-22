@@ -52,9 +52,9 @@ schema:
     ref: aiven_organization.id
   organization_vpc_id:
     ref: aiven_organization_vpc.organization_vpc_id
-    example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    format: uuid
   azure_subscription_id:
-    example: 12345678-1234-1234-1234-123456789012
+    format: uuid
     description: The ID of the Azure subscription in UUID4 format.
   vnet_name:
     example: my-vnet
@@ -65,11 +65,9 @@ schema:
     description: The name of the Azure resource group associated with the VNet.
   peer_azure_app_id:
     required: true
-    example: 87654321-4321-4321-4321-210987654321
-    description: The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.
+    format: uuid
   peer_azure_tenant_id:
     required: true
-    example: 11111111-2222-3333-4444-555555555555
-    description: The Azure tenant ID in UUID4 format.
+    format: uuid
   state:
     description: State of the peering connection.

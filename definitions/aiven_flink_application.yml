@@ -38,3 +38,5 @@ schema:
     ref: aiven_flink.project
   service_name:
     ref: aiven_flink.service_name
+  application_id:
+    format: uuid

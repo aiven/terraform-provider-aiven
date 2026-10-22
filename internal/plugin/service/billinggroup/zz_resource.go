@@ -16,6 +16,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -84,7 +85,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},
+				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
 			},
 			"country_code": schema.StringAttribute{
 				Computed:            true,

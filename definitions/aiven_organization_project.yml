@@ -38,6 +38,7 @@ schema:
     ref: aiven_organization.id
   billing_group_id:
     ref: aiven_organization_billing_group.billing_group_id
+    format: uuid
   base_port:
     description: Valid port number (10000-30000) to use as a base for service port allocation.
     computed: true

@@ -17,7 +17,7 @@ data "aiven_flink_application" "example" {
   service_name = "my-application"
 
   // LOOKUP — provide `application_id` or `name`
-  application_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  application_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   // name        = "TestJob"
 
   /* COMPUTED FIELDS

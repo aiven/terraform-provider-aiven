@@ -10,7 +10,7 @@ description: |-
 
 # aiven_external_identity (Data Source)
 
-Links external usernames to Aiven users, ensuring that requesters and approvers are correctly identified for [Aiven for Apache Kafka® Governance approval workflows](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals).
+Links external usernames to Aiven users, ensuring that requesters and approvers are correctly identified for [Aiven for Apache Kafka® Governance approval workflows](https://aiven.io/docs/products/kafka/howto/terraform-governance-approvals). 
 
 **This resource is in the beta stage and may change without notice.** Set
 the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

@@ -18,6 +18,8 @@ operations:
 schema:
   organization_id:
     ref: aiven_organization.id
+  billing_group_id:
+    format: uuid
   billing_address_id:
     ref: aiven_organization_address.address_id
   shipping_address_id:

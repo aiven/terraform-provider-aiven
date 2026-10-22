@@ -14,15 +14,15 @@ Gets information about an Azure VPC peering connection.
 ```terraform
 data "aiven_azure_org_vpc_peering_connection" "example" {
   organization_id       = "org1a23f456789"
-  organization_vpc_id   = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
-  azure_subscription_id = "12345678-1234-1234-1234-123456789012"
+  organization_vpc_id   = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  azure_subscription_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   vnet_name             = "my-vnet"
   peer_resource_group   = "my-resource-group"
 
   /* COMPUTED FIELDS
-  peer_azure_app_id     = "87654321-4321-4321-4321-210987654321"
-  peer_azure_tenant_id  = "11111111-2222-3333-4444-555555555555"
-  peering_connection_id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+  peer_azure_app_id     = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  peer_azure_tenant_id  = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  peering_connection_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   state                 = "ACTIVE"
   */
 }
@@ -45,8 +45,8 @@ data "aiven_azure_org_vpc_peering_connection" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `organization_id/organization_vpc_id/azure_subscription_id/vnet_name/peer_resource_group`.
-- `peer_azure_app_id` (String) The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.
-- `peer_azure_tenant_id` (String) The Azure tenant ID in UUID4 format.
+- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.
+- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form.
 - `peering_connection_id` (String) Organization peering connection ID.
 - `state` (String) State of the peering connection. The possible values are `ACTIVE`, `APPROVED`, `APPROVED_PEER_REQUESTED`, `DELETED`, `DELETED_BY_PEER`, `DELETING`, `ERROR`, `INVALID_SPECIFICATION`, `PENDING_PEER` and `REJECTED_BY_PEER`.
 

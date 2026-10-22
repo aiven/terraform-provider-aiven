@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -49,7 +50,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},
+				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
 			},
 			"card_id": schema.StringAttribute{
 				Computed:            true,

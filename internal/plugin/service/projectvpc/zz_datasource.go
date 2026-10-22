@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func datasourceSchema(ctx context.Context) schema.Schema {
@@ -41,7 +42,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Project VPC ID. The field is required with `project`. Exactly one of the fields must be specified: `project_vpc_id`, `cloud_name` or `vpc_id`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project"))},
+				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID(), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project"))},
 			},
 			"state": schema.StringAttribute{
 				Computed:            true,
