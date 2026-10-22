@@ -52,7 +52,7 @@ data "aiven_organization_billing_group_list" "example" {
 
 ### Read-Only
 
-- `billing_groups` (Block Set) A list of all billing groups belonging to the organization. (see [below for nested schema](#nestedblock--billing_groups))
+- `billing_groups` (Block Set) A list of all billing groups belonging to the organization (see [below for nested schema](#nestedblock--billing_groups))
 - `id` (String) Resource ID, equal to `organization_id`.
 
 <a id="nestedblock--timeouts"></a>
@@ -69,14 +69,14 @@ Optional:
 Read-Only:
 
 - `billing_address_id` (String) Billing address ID.
-- `billing_contact_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_groups--billing_contact_emails))
-- `billing_emails` (Block Set) List of billing contact emails. (see [below for nested schema](#nestedblock--billing_groups--billing_emails))
+- `billing_contact_emails` (Block Set) List of billing contact emails (see [below for nested schema](#nestedblock--billing_groups--billing_contact_emails))
+- `billing_emails` (Block Set) List of billing contact emails (see [below for nested schema](#nestedblock--billing_groups--billing_emails))
 - `billing_group_id` (String) Billing group ID.
 - `billing_group_name` (String) Billing Group Name.
 - `create_time` (String) The date when this billing group was created.
 - `custom_invoice_text` (String) Extra billing text.
 - `organization_id` (String) Organization ID.
-- `payment_method` (Block List) Payment method. (see [below for nested schema](#nestedblock--billing_groups--payment_method))
+- `payment_method` (Block List) Payment method (see [below for nested schema](#nestedblock--billing_groups--payment_method))
 - `shipping_address_id` (String) Shipping address ID.
 - `vat_id` (String) VAT ID.
 

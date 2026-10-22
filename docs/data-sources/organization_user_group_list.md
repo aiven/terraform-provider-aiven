@@ -42,7 +42,7 @@ data "aiven_organization_user_group_list" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID, equal to `organization_id`.
-- `user_groups` (Block Set) User Groups. (see [below for nested schema](#nestedblock--user_groups))
+- `user_groups` (Block Set) User Groups (see [below for nested schema](#nestedblock--user_groups))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

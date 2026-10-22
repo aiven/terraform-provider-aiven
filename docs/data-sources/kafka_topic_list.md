@@ -53,7 +53,7 @@ data "aiven_kafka_topic_list" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_name`.
-- `topics` (Block List) List of Kafka topics. (see [below for nested schema](#nestedblock--topics))
+- `topics` (Block List) List of Kafka topics (see [below for nested schema](#nestedblock--topics))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -78,7 +78,7 @@ Read-Only:
 - `retention_bytes` (Number) This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the 'delete' retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.
 - `retention_hours` (Number) Retention period (hours).
 - `state` (String) Topic state. The possible values are `ACTIVE`, `CONFIGURING` and `DELETING`.
-- `tags` (Block Set) Topic tags. (see [below for nested schema](#nestedblock--topics--tags))
+- `tags` (Block Set) Topic tags (see [below for nested schema](#nestedblock--topics--tags))
 - `topic_description` (String) Topic description.
 - `topic_name` (String) Topic name.
 

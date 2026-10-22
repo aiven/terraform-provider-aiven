@@ -79,10 +79,10 @@ resource "aiven_flink" "example_flink" {
 ### Read-Only
 
 - `application_id` (String) Application ID.
-- `application_versions` (Attributes List, Max: 64) JarApplicationVersions. (see [below for nested schema](#nestedatt--application_versions))
+- `application_versions` (Attributes List, Max: 64) JarApplicationVersions (see [below for nested schema](#nestedatt--application_versions))
 - `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
 - `created_by` (String) The creator of this entity.
-- `current_deployment` (Attributes List, Max: 1) Flink JarApplicationDeployment. (see [below for nested schema](#nestedatt--current_deployment))
+- `current_deployment` (Attributes List, Max: 1) Flink JarApplicationDeployment (see [below for nested schema](#nestedatt--current_deployment))
 - `id` (String) Resource ID composed as: `project/service_name/application_id`.
 - `updated_at` (String) The update timestamp of this entity in ISO 8601 format, always in UTC.
 - `updated_by` (String) The latest updater of this entity.
@@ -106,7 +106,7 @@ Read-Only:
 
 - `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
 - `created_by` (String) The creator of this entity.
-- `file_info` (Attributes List, Max: 1) Flink JarApplicationVersion FileInfo. (see [below for nested schema](#nestedatt--application_versions--file_info))
+- `file_info` (Attributes List, Max: 1) Flink JarApplicationVersion FileInfo (see [below for nested schema](#nestedatt--application_versions--file_info))
 - `id` (String) ApplicationVersion ID.
 - `version` (Number) Version number.
 

@@ -37,7 +37,7 @@ data "aiven_organization_payment_method_list" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID, equal to `organization_id`.
-- `payment_methods` (Block Set) Payment Methods. (see [below for nested schema](#nestedblock--payment_methods))
+- `payment_methods` (Block Set) Payment Methods (see [below for nested schema](#nestedblock--payment_methods))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

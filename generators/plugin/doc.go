@@ -352,13 +352,18 @@ func docWritePropertyLine(b *strings.Builder, def *Definition, entity entityType
 	b.WriteString(typeLabel)
 
 	desc := strings.TrimSpace(docAttrDescription(def, entity, item))
+	hasNested := docHasNestedSchema(item)
+	if hasNested {
+		// The "(see below)" link ends the sentence
+		desc = strings.TrimSuffix(desc, ".")
+	}
 	if desc != "" {
 		b.WriteByte(' ')
 		b.WriteString(desc)
 	}
 
 	nestedTypes := make([]docNestedType, 0)
-	if docHasNestedSchema(item) {
+	if hasNested {
 		anchorID := docAnchorID(def, entity, path, item)
 		b.WriteString(" (see [below for nested schema](#")
 		b.WriteString(anchorID)

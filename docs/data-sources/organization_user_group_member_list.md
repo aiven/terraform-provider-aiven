@@ -52,7 +52,7 @@ data "aiven_organization_user_group_member_list" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `organization_id/user_group_id`.
-- `members` (Block Set) User group members. (see [below for nested schema](#nestedblock--members))
+- `members` (Block Set) User group members (see [below for nested schema](#nestedblock--members))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -69,7 +69,7 @@ Read-Only:
 
 - `last_activity_time` (String) Last Activity Time.
 - `user_id` (String) User ID.
-- `user_info` (Block List) OrganizationUserInfo. (see [below for nested schema](#nestedblock--members--user_info))
+- `user_info` (Block List) OrganizationUserInfo (see [below for nested schema](#nestedblock--members--user_info))
 
 <a id="nestedblock--members--user_info"></a>
 ### Nested Schema for `members.user_info`
