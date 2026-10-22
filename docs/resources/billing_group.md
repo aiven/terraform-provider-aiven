@@ -58,7 +58,7 @@ resource "aiven_billing_group" "example" {
 - `card_id` (String) Credit card ID. Maximum length: `64`.
 - `city` (String) Address city. Maximum length: `50`.
 - `company` (String) Name of a company. Maximum length: `83`.
-- `copy_from_billing_group` (String) Billing group ID. Length must be exactly `36`. Changing this property forces recreation of the resource.
+- `copy_from_billing_group` (String) Billing group ID. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `country_code` (String) Two letter country code for billing country. Maximum length: `2`.
 - `state` (String) Address state or province. Maximum length: `30`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

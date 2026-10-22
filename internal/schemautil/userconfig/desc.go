@@ -53,6 +53,8 @@ type DescriptionBuilder struct {
 	withMaximum *int
 	// withPattern is the regular expression that string values must match.
 	withPattern string
+	// withUUID adds a UUID format hint.
+	withUUID bool
 	// withDefaultValue is a flag that indicates if the default value should be included.
 	withDefaultValue any
 	// withUseReference is a flag that indicates if the reference should be used.
@@ -158,6 +160,12 @@ func (db *DescriptionBuilder) Maximum(value int) *DescriptionBuilder {
 // Pattern sets the regular expression that string values must match.
 func (db *DescriptionBuilder) Pattern(pattern string) *DescriptionBuilder {
 	db.withPattern = pattern
+	return db
+}
+
+// UUID adds a hint that the value must be a UUID.
+func (db *DescriptionBuilder) UUID() *DescriptionBuilder {
+	db.withUUID = true
 	return db
 }
 
@@ -305,6 +313,11 @@ func (db *DescriptionBuilder) build(page bool) string {
 	case db.withMaxLen != nil:
 		builder.WriteRune(' ')
 		builder.WriteString(fmt.Sprintf("Maximum length: `%d`.", *db.withMaxLen))
+	}
+
+	if db.withUUID {
+		builder.WriteRune(' ')
+		builder.WriteString("Must be a valid UUID.")
 	}
 
 	switch {

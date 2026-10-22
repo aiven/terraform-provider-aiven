@@ -37,7 +37,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"organization_vpc_id": schema.StringAttribute{
-				MarkdownDescription: "Organization VPC ID. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Organization VPC ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{validators.UUID()},

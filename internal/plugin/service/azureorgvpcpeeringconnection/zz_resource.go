@@ -21,10 +21,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"azure_subscription_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the Azure subscription in UUID4 format. Maximum length: `1024`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The ID of the Azure subscription in UUID4 format. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(1024), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -37,22 +37,22 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"organization_vpc_id": schema.StringAttribute{
-				MarkdownDescription: "Organization VPC ID. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Organization VPC ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{validators.UUID()},
 			},
 			"peer_azure_app_id": schema.StringAttribute{
-				MarkdownDescription: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Maximum length: `1024`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(1024), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"peer_azure_tenant_id": schema.StringAttribute{
-				MarkdownDescription: "Azure tenant id in UUID4 form. Maximum length: `1024`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Azure tenant id in UUID4 form. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(1024), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"peer_resource_group": schema.StringAttribute{
 				MarkdownDescription: "The name of the Azure resource group associated with the VNet. Maximum length: `1024`. Changing this property forces recreation of the resource.",

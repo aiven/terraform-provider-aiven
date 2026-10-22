@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -50,7 +49,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"billing_group_id": schema.StringAttribute{
 				MarkdownDescription: "The [ID of the billing group](https://aiven.io/docs/platform/reference/get-resource-IDs#get-a-billing-group-id). To set up proper dependencies please refer to this variable as a reference.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"card_id": schema.StringAttribute{
 				Computed:            true,

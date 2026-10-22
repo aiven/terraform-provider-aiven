@@ -411,7 +411,9 @@ schema:
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
 
 **Formats**: set `format: uuid` on string fields that hold a UUID instead of writing a UUID `example`.
-It emits `validators.UUID()` and the doc example always uses the UUIDv4 `1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d`.
+It emits `validators.UUID()`, drops length validators and hints it already implies, and the doc example always uses
+the UUIDv4 `1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d`. Resource docs get a "Must be a valid UUID." hint unless the
+description already mentions UUID.
 Prefer the OpenAPI description; override it only when the spec text is wrong for the field (e.g. renamed generic fields).
 Typical fields: VPC, billing group, Flink application/version, and BYOC environment IDs, Azure subscription/tenant/app IDs.
 Skip prefixed IDs (`org…`, `u…`, `ug…`, `acl…`, `addr…`, `pm…`), composite IDs (`project/vpc_id`), and computed-only

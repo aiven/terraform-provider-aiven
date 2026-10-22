@@ -41,7 +41,7 @@ resource "aiven_organization" "example" {
 
 - `gcp_project_id` (String) Google Cloud project ID. Maximum length: `1024`. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `organization_vpc_id` (String) Organization VPC ID. Changing this property forces recreation of the resource.
+- `organization_vpc_id` (String) Organization VPC ID. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `peer_vpc` (String) Google Cloud VPC network name. Maximum length: `1024`. Changing this property forces recreation of the resource.
 
 ### Optional

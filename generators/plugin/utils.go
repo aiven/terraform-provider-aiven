@@ -190,7 +190,7 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 
 		// Length hints apply to strings only. Guard by type so a scalar field
 		// overridden to an array/set does not inherit a stray "length" hint.
-		if item.Type == SchemaTypeString {
+		if item.Type == SchemaTypeString && !lengthImpliedByFormat(item) {
 			if item.MinLength > 0 {
 				b.MinLen(item.MinLength)
 			}
@@ -198,6 +198,10 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 			if item.MaxLength > 0 {
 				b.MaxLen(item.MaxLength)
 			}
+		}
+
+		if item.Format == "uuid" && !strings.Contains(strings.ToLower(item.Description), "uuid") {
+			b.UUID()
 		}
 
 		if item.Minimum > 0 {

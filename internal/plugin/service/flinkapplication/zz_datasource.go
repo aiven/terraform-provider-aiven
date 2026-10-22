@@ -22,7 +22,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Application ID. Exactly one of the fields must be specified: `application_id` or `name`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"created_at": schema.StringAttribute{
 				Computed:            true,

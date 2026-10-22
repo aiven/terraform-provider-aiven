@@ -27,7 +27,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"application_id": schema.StringAttribute{
-				MarkdownDescription: "Application Id. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Application Id. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{validators.UUID()},
@@ -115,10 +115,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Deployment status. The possible values are `CANCELED`, `CANCELLING`, `CANCELLING_REQUESTED`, `CREATED`, `DELETE_REQUESTED`, `DELETING`, `FAILED`, `FAILING`, `FINISHED`, `INITIALIZING`, `RECONCILING`, `RESTARTING`, `RUNNING`, `SAVING`, `SAVING_AND_STOP`, `SAVING_AND_STOP_REQUESTED` and `SUSPENDED`.",
 			},
 			"version_id": schema.StringAttribute{
-				MarkdownDescription: "ApplicationVersion ID. Length must be exactly `36`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "ApplicationVersion ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},

@@ -51,7 +51,7 @@ resource "aiven_organization" "example" {
 ### Required
 
 - `accounts` (Set of String) Accounts.
-- `custom_cloud_environment_id` (String) ID of a custom cloud environment. Changing this property forces recreation of the resource.
+- `custom_cloud_environment_id` (String) ID of a custom cloud environment. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 - `projects` (Set of String) Projects.
 

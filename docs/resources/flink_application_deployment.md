@@ -69,10 +69,10 @@ resource "aiven_flink_application_deployment" "main" {
 
 ### Required
 
-- `application_id` (String) Application Id. Changing this property forces recreation of the resource.
+- `application_id` (String) Application Id. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 - `service_name` (String) Service name. Changing this property forces recreation of the resource.
-- `version_id` (String) ApplicationVersion ID. Length must be exactly `36`. Changing this property forces recreation of the resource.
+- `version_id` (String) ApplicationVersion ID. Must be a valid UUID. Changing this property forces recreation of the resource.
 
 ### Optional
 

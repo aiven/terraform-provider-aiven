@@ -46,7 +46,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"organization_vpc_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Aiven Organization VPC.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36), validators.UUID()},
+				Validators:          []validator.String{validators.UUID()},
 			},
 			"state": schema.StringAttribute{
 				Computed:            true,
