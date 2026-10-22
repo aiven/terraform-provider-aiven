@@ -62,7 +62,7 @@ output "business_4_aws_eu_west_1_memory" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_type`.
-- `service_plans` (Block List) List of plans available for this type of service. (see [below for nested schema](#nestedblock--service_plans))
+- `service_plans` (Block List) List of plans available for this type of service (see [below for nested schema](#nestedblock--service_plans))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -82,7 +82,7 @@ Read-Only:
 - `max_memory_percent` (Number) Maximum amount of system memory as a percentage (0-100) the service can actually use after taking into account management overhead. This is relevant for memory bound services for which some service management operations require allocating proportional amount of memory on top the basic load.
 - `node_count` (Number) Number of nodes in this service plan.
 - `primary_count` (Number) Number of primary nodes in this Valkey cluster service plan.
-- `regions` (Attributes Map) Service plan hourly price per cloud region. (see [below for nested schema](#nestedatt--service_plans--regions))
+- `regions` (Attributes Map) Service plan hourly price per cloud region (see [below for nested schema](#nestedatt--service_plans--regions))
 - `service_plan` (String) Subscription plan.
 - `service_type` (String) Service type code.
 - `shard_count` (Number) Number of shards in this service plan.

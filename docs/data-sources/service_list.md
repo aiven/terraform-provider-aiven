@@ -54,7 +54,7 @@ output "kafka_service_names" {
 ### Read-Only
 
 - `id` (String) Resource ID, equal to `project`.
-- `services` (Block List) List of services under the project. (see [below for nested schema](#nestedblock--services))
+- `services` (Block List) List of services under the project (see [below for nested schema](#nestedblock--services))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

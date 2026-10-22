@@ -51,7 +51,7 @@ data "aiven_organization_user_list" "example" {
 
 ### Read-Only
 
-- `users` (Block List) List of users of the organization. (see [below for nested schema](#nestedblock--users))
+- `users` (Block List) List of users of the organization (see [below for nested schema](#nestedblock--users))
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -70,7 +70,7 @@ Read-Only:
 - `join_time` (String) Join time.
 - `last_activity_time` (String) Last activity time.
 - `user_id` (String) User ID.
-- `user_info` (Block List) OrganizationUserInfo. (see [below for nested schema](#nestedblock--users--user_info))
+- `user_info` (Block List) OrganizationUserInfo (see [below for nested schema](#nestedblock--users--user_info))
 
 <a id="nestedblock--users--user_info"></a>
 ### Nested Schema for `users.user_info`

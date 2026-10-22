@@ -76,12 +76,12 @@ data "aiven_kafka_topic" "example" {
 
 ### Read-Only
 
-- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration. (see [below for nested schema](#nestedblock--config))
+- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration (see [below for nested schema](#nestedblock--config))
 - `id` (String) Resource ID composed as: `project/service_name/topic_name`.
 - `owner_user_group_id` (String) The user group that owns this topic.
 - `partitions` (Number) Number of partitions.
 - `replication` (Number) Number of replicas.
-- `tag` (Block Set) Topic tags. (see [below for nested schema](#nestedblock--tag))
+- `tag` (Block Set) Topic tags (see [below for nested schema](#nestedblock--tag))
 - `termination_protection` (Boolean, Deprecated) Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
 - `topic_description` (String) Topic description.
 

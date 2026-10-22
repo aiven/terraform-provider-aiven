@@ -44,7 +44,7 @@ resource "aiven_organization" "example" {
 ### Required
 
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `permissions` (Block Set) List of roles to set. (see [below for nested schema](#nestedblock--permissions))
+- `permissions` (Block Set) List of roles to set (see [below for nested schema](#nestedblock--permissions))
 - `resource_id` (String) The ID of the organization, unit, or project to grant permissions for. The project ID is the name of the project. Changing this property forces recreation of the resource.
 - `resource_type` (String) Resource type. The possible values are `organization`, `organization_unit` and `project`. Changing this property forces recreation of the resource.
 

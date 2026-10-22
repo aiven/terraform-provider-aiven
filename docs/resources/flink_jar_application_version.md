@@ -69,7 +69,7 @@ resource "aiven_flink" "example_flink" {
 - `application_version_id` (String) ApplicationVersion ID.
 - `created_at` (String) The creation timestamp of this entity in ISO 8601 format, always in UTC.
 - `created_by` (String) The creator of this entity.
-- `file_info` (Attributes List, Max: 1) Flink JarApplicationVersion FileInfo. (see [below for nested schema](#nestedatt--file_info))
+- `file_info` (Attributes List, Max: 1) Flink JarApplicationVersion FileInfo (see [below for nested schema](#nestedatt--file_info))
 - `file_sha256` (String) The sha256 checksum of the uploaded jar file.
 - `id` (String) Resource ID composed as: `project/service_name/application_id/application_version_id`.
 - `version` (Number) Version number.

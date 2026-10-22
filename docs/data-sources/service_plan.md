@@ -61,7 +61,7 @@ output "estimated_monthly_cost" {
 
 ### Read-Only
 
-- `backup_config` (Block List) Backup configuration for this service plan. (see [below for nested schema](#nestedblock--backup_config))
+- `backup_config` (Block List) Backup configuration for this service plan (see [below for nested schema](#nestedblock--backup_config))
 - `base_price_usd` (String) Hourly service price in this region in USD.
 - `disk_space_cap_mb` (Number) Maximum amount of disk space possible for the plan in the given region.
 - `disk_space_mb` (Number) Combined amount of service disk space of all service nodes in megabytes.

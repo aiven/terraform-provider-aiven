@@ -82,7 +82,7 @@ resource "aiven_organization" "example" {
 - `file_size` (Number) Size of the uploaded file in bytes, populated after successful verification.
 - `file_status` (String) Verification status of the uploaded JAR. INITIAL: upload pending or in progress. READY: verified and plugin classes discovered. FAILED: verification failed. The possible values are `FAILED`, `INITIAL` and `READY`.
 - `id` (String) Resource ID composed as: `organization_id/plugin_file_id`.
-- `plugin_classes` (Attributes Set) Plugin classes discovered within this JAR after successful verification. Empty until file_status is READY. (see [below for nested schema](#nestedatt--plugin_classes))
+- `plugin_classes` (Attributes Set) Plugin classes discovered within this JAR after successful verification. Empty until file_status is READY (see [below for nested schema](#nestedatt--plugin_classes))
 - `plugin_file_id` (String) Unique identifier for this custom plugin file upload.
 - `plugin_id` (String) Unique identifier for the plugin identity record (shared across all versions).
 - `updated_at` (String) Last update timestamp in ISO 8601 format, always in UTC.
