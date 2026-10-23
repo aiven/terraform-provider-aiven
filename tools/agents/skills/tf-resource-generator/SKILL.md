@@ -1,7 +1,7 @@
 ---
 name: tf-resource-generator
 description: Generate new Terraform resources and data sources from YAML definitions and OpenAPI specs. Use when adding resources, creating YAML definitions, working with the Plugin Framework generator, or when the user asks about code generation.
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent, AskUserQuestion
 ---
 
 # Terraform Resource Generator Skill
@@ -38,14 +38,16 @@ The generator creates Terraform resources by combining:
 
 When the user requests a new resource, gather requirements BEFORE starting:
 
-### First Question (REQUIRED)
+### First Question
 
-**ALWAYS start by asking what type of Terraform component is needed:**
-
-Use the `AskUserQuestion` tool with these options:
-- **Both resource and data source** - Full CRUD resource + read-only data source
+Settle which Terraform component is needed before writing YAML:
+- **Both resource and data source** - Full CRUD resource + read-only data source (the usual answer)
 - **Resource only** - Just the resource (create, read, update, delete)
 - **Data source only** - Read-only data source
+
+If the request does not make it obvious, ask with `AskUserQuestion`. When running
+without a user to answer (autonomous mode), default to both and
+state the assumption in the summary instead of blocking.
 
 ### Additional Information to Gather
 1. **Resource name** - What API resource/endpoint? (e.g., "MySQL database", "Kafka topic")
@@ -59,6 +61,8 @@ Use the `AskUserQuestion` tool with these options:
 5. **Clarify specifics** if needed (composite ID, fields to exclude/rename, custom modifiers)
 
 ### When NOT to Ask
+These rules skip the discovery questions, not the component question above: a lone read
+operation ID still leaves resource-vs-data-source open, so ask (or apply the autonomous default).
 - If the user provided specific operation IDs -> proceed
 - If the user provided a complete YAML definition -> proceed
 - If it's a modification to existing definition -> read the file and proceed
@@ -715,9 +719,16 @@ The generator produces standard CRUD views, but you can override **any** of them
 - **Delete** requires a multi-step state machine (e.g., cancel then delete)
 - **Read** needs post-processing not expressible via modifiers
 
-Use `disableView: true` on the operation in YAML to skip generating the view you plan to override.
+Two ways to plug a handwritten view in; pick one per operation:
 
-**Override pattern:**
+- **Keep the generated view, override in `init()`** — the generated `<op>View` stays (possibly unused),
+  your function can have any name. Used by `pgdatabase` for `read`.
+- **`disableView: true` on the op** — the generator omits `<op>View` but still emits `<Op>: <op>View` in
+  `ResourceOptions`/`DataSourceOptions`, so you **must** define a function with exactly that name
+  (`createView`, `readView`, ...) or the package does not compile. No `init()` assignment needed.
+  Used by `pg_user` for `create`.
+
+**Override pattern (first way):**
 ```go
 func init() {
     ResourceOptions.Create = createView   // Custom create
@@ -776,6 +787,18 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 ```
 
 **Reference**: See `internal/plugin/service/flinkapplicationdeployment/deployment.go` and `internal/plugin/service/pguser/user.go`.
+
+### Paginated list reads
+
+The generator does **not** follow cursor pagination: a generated `readView` issues a single
+list call, so a resource whose read op is a cursor-paginated list silently misses items past
+the first page. For such endpoints provide a handwritten read — either override
+`ResourceOptions.Read` / `DataSourceOptions.Read` in `init()`, or set `disableView: true` on the
+read op and name the function `readView` (see Custom View Overrides) — and fetch the full list
+through a shared helper that follows the cursor and aggregates every page.
+
+**Reference**: `schemautil.ListServiceDatabases` in `internal/schemautil/database.go`, used by the
+`read` override in `internal/plugin/service/pgdatabase/database.go`.
 
 ## Write-Only Fields
 
