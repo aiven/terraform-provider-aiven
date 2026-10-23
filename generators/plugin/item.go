@@ -375,14 +375,14 @@ type Item struct {
 	AtLeastOneOf  []string `yaml:"atLeastOneOf,omitempty"`
 	AlsoRequires  []string `yaml:"alsoRequires,omitempty"`
 
-	JSONName           string     `yaml:"jsonName,omitempty"`
-	Type               SchemaType `yaml:"type,omitempty"`
-	Description        string     `yaml:"description,omitempty"`
-	DeprecationMessage string     `yaml:"deprecationMessage,omitempty"`
-	Format             string     `yaml:"format,omitempty"`
-	Pattern            string     `yaml:"pattern,omitempty"`
-	Required           bool       `yaml:"_required,omitempty"`
-	Computed           bool       `yaml:"_computed,omitempty"`
+	JSONName           string       `yaml:"jsonName,omitempty"`
+	Type               SchemaType   `yaml:"type,omitempty"`
+	Description        string       `yaml:"description,omitempty"`
+	DeprecationMessage string       `yaml:"deprecationMessage,omitempty"`
+	Format             StringFormat `yaml:"format,omitempty"`
+	Pattern            string       `yaml:"pattern,omitempty"`
+	Required           bool         `yaml:"_required,omitempty"`
+	Computed           bool         `yaml:"_computed,omitempty"`
 	// AutoComputed marks a user-settable scalar/enum that is echoed by the
 	// Read response for Optional+Computed promotion (plus UseStateForUnknown).
 	// Without this, d.Flatten(rsp) in the Read handler would write the server

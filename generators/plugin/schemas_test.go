@@ -120,10 +120,11 @@ func TestGenSchemaAddsCIDRValidatorForCIDRFormat(t *testing.T) {
 		Type: SchemaTypeObject,
 		Properties: map[string]*Item{
 			"network_cidr": {
-				Name:     "network_cidr",
-				Type:     SchemaTypeString,
-				Required: true,
-				Format:   "cidr",
+				Name:      "network_cidr",
+				Type:      SchemaTypeString,
+				Required:  true,
+				Format:    StringFormatCIDR,
+				MaxLength: 18,
 			},
 		},
 	}
@@ -135,6 +136,67 @@ func TestGenSchemaAddsCIDRValidatorForCIDRFormat(t *testing.T) {
 	got := renderCode(t, code)
 	require.Contains(t, got, `"network_cidr": schema.StringAttribute{`)
 	require.Contains(t, got, `[]validator.String{validators.CIDR()}`)
+	require.NotContains(t, got, "Length")
+	require.NotContains(t, got, "length")
+}
+
+func TestItemFormat(t *testing.T) {
+	t.Parallel()
+
+	list := &Item{Name: "peer_cidrs", Type: SchemaTypeArray}
+	list.Items = &Item{Name: "peer_cidrs", Type: SchemaTypeString, Parent: list}
+
+	cases := []struct {
+		item *Item
+		want StringFormat
+	}{
+		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString}, want: StringFormatCIDR},
+		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString, MaxLength: 18}, want: StringFormatIPv4CIDR},
+		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString, MaxLength: 43}, want: StringFormatCIDR},
+		{item: &Item{Name: "network_cidr", Type: SchemaTypeString, Format: StringFormatUUID}, want: StringFormatUUID},
+		{item: &Item{Name: "network", Type: SchemaTypeString}, want: ""},
+		{item: &Item{Name: "uuid", Type: SchemaTypeString}, want: StringFormatUUID},
+		{item: &Item{Name: "peering_connection_id", Type: SchemaTypeString, MinLength: 36, MaxLength: 36}, want: ""},
+		{item: &Item{Name: "uuid", Type: SchemaTypeInteger}, want: ""},
+		{item: list, want: ""},
+		{item: list.Items, want: StringFormatCIDR},
+	}
+	for _, c := range cases {
+		require.Equal(t, c.want, itemFormat(c.item), c.item.Name)
+	}
+}
+
+func TestGenSchemaAddsCIDRHintWithoutIPExample(t *testing.T) {
+	root := &Item{
+		Name: "root",
+		Type: SchemaTypeObject,
+		Properties: map[string]*Item{
+			"reserved_cidr": {
+				Name:        "reserved_cidr",
+				Type:        SchemaTypeString,
+				Description: "Reserved range.",
+				Required:    true,
+			},
+			"network_cidr": {
+				Name:        "network_cidr",
+				Type:        SchemaTypeString,
+				Description: "Network range. For example, `192.168.0.0/24`.",
+				Required:    true,
+				Format:      StringFormatCIDR,
+			},
+		},
+	}
+	for _, p := range root.Properties {
+		p.Parent = root
+	}
+
+	code, err := genSchema(&Definition{Resource: &SchemaMeta{}}, resourceType, root)
+	require.NoError(t, err)
+
+	got := renderCode(t, code)
+	require.Contains(t, got, "\"Reserved range. Must be a valid CIDR block, for example `10.0.0.0/24`.\"")
+	require.Equal(t, 2, strings.Count(got, "validators.CIDR()"))
+	require.Contains(t, got, "\"Network range. For example, `192.168.0.0/24`.\"")
 }
 
 func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
@@ -147,7 +209,7 @@ func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
 				Type:        SchemaTypeString,
 				Description: "Tenant ID.",
 				Required:    true,
-				Format:      "uuid",
+				Format:      StringFormatUUID,
 				MinLength:   36,
 				MaxLength:   1024,
 			},
@@ -156,7 +218,7 @@ func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
 				Type:        SchemaTypeString,
 				Description: "App ID in UUID4 form.",
 				Required:    true,
-				Format:      "uuid",
+				Format:      StringFormatUUID,
 			},
 		},
 	}

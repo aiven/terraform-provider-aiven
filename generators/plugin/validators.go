@@ -4,27 +4,66 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/samber/lo"
 )
 
-var stringFormatValidators = map[string]func() jen.Code{
-	"cidr": func() jen.Code {
-		return jen.Qual(customValidatorsPackage, "CIDR").Call()
+type stringFormatSpec struct {
+	validator  string         // constructor in customValidatorsPackage
+	hint       string         // doc hint, skipped when the description matches documented
+	documented *regexp.Regexp // matches descriptions that already explain the format
+	example    string         // wins over spec examples when the format is declared
+}
+
+var stringFormats = map[StringFormat]stringFormatSpec{
+	StringFormatCIDR: {
+		validator:  "CIDR",
+		hint:       "Must be a valid CIDR block, for example `10.0.0.0/24`.",
+		documented: regexp.MustCompile(`\b\d{1,3}(\.\d{1,3}){3}\b|[0-9a-fA-F]{1,4}::`),
+		example:    "10.0.0.0/24",
 	},
-	"uuid": func() jen.Code {
-		return jen.Qual(customValidatorsPackage, "UUID").Call()
+	StringFormatIPv4CIDR: {
+		validator:  "IPv4CIDR",
+		hint:       "Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`.",
+		documented: regexp.MustCompile(`\b\d{1,3}(\.\d{1,3}){3}\b`),
+		example:    "10.0.0.0/24",
+	},
+	StringFormatUUID: {
+		validator:  "UUID",
+		hint:       "Must be a valid UUID.",
+		documented: regexp.MustCompile(`(?i)uuid`),
+		example:    uuidExample,
 	},
 }
 
-const uuidLength = 36
+// itemFormat returns the declared format, or guesses it from the name of a string field.
+func itemFormat(item *Item) StringFormat {
+	switch {
+	case item.Format != "":
+		return item.Format
+	case item.Type != SchemaTypeString:
+		return ""
+	case item.Name == "uuid":
+		return StringFormatUUID
+	case strings.Contains(item.Name, "cidr") && item.MaxLength == ipv4CIDRMaxLength:
+		return StringFormatIPv4CIDR
+	case strings.Contains(item.Name, "cidr"):
+		return StringFormatCIDR
+	}
+	return ""
+}
 
-// lengthImpliedByFormat reports whether the format validator already enforces the length limits.
-func lengthImpliedByFormat(item *Item) bool {
-	return item.Format == "uuid" &&
-		item.MinLength <= uuidLength &&
-		(item.MaxLength == 0 || item.MaxLength >= uuidLength)
+const (
+	uuidLength        = 36
+	ipv4CIDRMaxLength = len("255.255.255.255/32")
+)
+
+// hasStringFormat reports whether the item gets a format validator, which supersedes length limits.
+func hasStringFormat(item *Item) bool {
+	_, ok := stringFormats[itemFormat(item)]
+	return ok
 }
 
 func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, error) {
@@ -47,7 +86,7 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	// Length constraints only exist on stringvalidator; guard by type so that a
 	// scalar field overridden to an array/set (which may carry a stray maxLength)
 	// does not emit a non-existent setvalidator.Length* call.
-	if item.Type == SchemaTypeString && !lengthImpliedByFormat(item) {
+	if item.Type == SchemaTypeString && !hasStringFormat(item) {
 		switch {
 		case item.MinLength > 0 && item.MaxLength > 0:
 			codes = append(codes, jen.Qual(pkg, "LengthBetween").Call(jen.Lit(item.MinLength), jen.Lit(item.MaxLength)))
@@ -66,8 +105,8 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	}
 
 	if item.Type == SchemaTypeString {
-		if validator, ok := stringFormatValidators[item.Format]; ok {
-			codes = append(codes, validator())
+		if f, ok := stringFormats[itemFormat(item)]; ok {
+			codes = append(codes, jen.Qual(customValidatorsPackage, f.validator).Call())
 		}
 	}
 

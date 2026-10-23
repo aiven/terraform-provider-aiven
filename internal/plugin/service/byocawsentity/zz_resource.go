@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -110,10 +111,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"reserved_cidr": schema.StringAttribute{
-				MarkdownDescription: "CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Maximum length: `18`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "CIDR range reserved for Aiven provisioned networks in the BYOC cloud. Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
+				Validators:          []validator.String{validators.IPv4CIDR()},
 			},
 			"tags": schema.MapAttribute{
 				ElementType:         types.StringType,

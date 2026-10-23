@@ -31,8 +31,8 @@ func TestDescriptionBuilder_Build(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "adds UUID hint",
-			desc: Desc("Billing group ID").UUID().ForceNew(),
+			name: "adds format hint",
+			desc: Desc("Billing group ID").FormatHint("Must be a valid UUID.").ForceNew(),
 			want: "Billing group ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 		},
 		{

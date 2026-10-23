@@ -66,3 +66,33 @@ func TestCIDR(t *testing.T) {
 		})
 	}
 }
+
+func TestIPv4CIDR(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		value types.String
+		valid bool
+	}{
+		{value: types.StringValue("10.0.0.0/24"), valid: true},
+		{value: types.StringValue("255.255.255.255/32"), valid: true},
+		{value: types.StringNull(), valid: true},
+		{value: types.StringUnknown(), valid: true},
+		{value: types.StringValue("2001:db8::/32")},
+		{value: types.StringValue("::ffff:10.0.0.0/120")},
+		{value: types.StringValue("10.0.0.0")},
+		{value: types.StringValue("256.0.0.0/24")},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.value.String(), func(t *testing.T) {
+			req := validator.StringRequest{
+				Path:        path.Root("test"),
+				ConfigValue: tc.value,
+			}
+			res := &validator.StringResponse{}
+			IPv4CIDR().ValidateString(context.Background(), req, res)
+			assert.Equal(t, tc.valid, !res.Diagnostics.HasError())
+		})
+	}
+}

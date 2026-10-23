@@ -14,6 +14,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -31,10 +32,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"network_cidr": schema.StringAttribute{
-				MarkdownDescription: "IPv4 network range CIDR. Maximum length: `18`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "IPv4 network range CIDR. Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtMost(18)},
+				Validators:          []validator.String{validators.IPv4CIDR()},
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name. Changing this property forces recreation of the resource.",
