@@ -1,7 +1,7 @@
 ---
 name: tf-resource-generator
 description: Generate new Terraform resources and data sources from YAML definitions and OpenAPI specs. Use when adding resources, creating YAML definitions, working with the Plugin Framework generator, or when the user asks about code generation.
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent, AskUserQuestion
 ---
 
 # Terraform Resource Generator Skill
@@ -38,14 +38,16 @@ The generator creates Terraform resources by combining:
 
 When the user requests a new resource, gather requirements BEFORE starting:
 
-### First Question (REQUIRED)
+### First Question
 
-**ALWAYS start by asking what type of Terraform component is needed:**
-
-Use the `AskUserQuestion` tool with these options:
-- **Both resource and data source** - Full CRUD resource + read-only data source
+Settle which Terraform component is needed before writing YAML:
+- **Both resource and data source** - Full CRUD resource + read-only data source (the usual answer)
 - **Resource only** - Just the resource (create, read, update, delete)
 - **Data source only** - Read-only data source
+
+If the request does not make it obvious, ask with `AskUserQuestion`. When running
+without a user to answer (autonomous mode), default to both and
+state the assumption in the summary instead of blocking.
 
 ### Additional Information to Gather
 1. **Resource name** - What API resource/endpoint? (e.g., "MySQL database", "Kafka topic")
@@ -776,6 +778,17 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 ```
 
 **Reference**: See `internal/plugin/service/flinkapplicationdeployment/deployment.go` and `internal/plugin/service/pguser/user.go`.
+
+### Paginated list reads
+
+The generator does **not** follow cursor pagination: a generated `readView` issues a single
+list call, so a resource whose read op is a cursor-paginated list silently misses items past
+the first page. For such endpoints set `disableView: true` on the read op (or override
+`ResourceOptions.Read` / `DataSourceOptions.Read` in `init()`) and fetch the full list through
+a shared helper that follows the cursor and aggregates every page.
+
+**Reference**: `schemautil.ListServiceDatabases` in `internal/schemautil/database.go`, used by the
+`read` override in `internal/plugin/service/pgdatabase/database.go`.
 
 ## Write-Only Fields
 

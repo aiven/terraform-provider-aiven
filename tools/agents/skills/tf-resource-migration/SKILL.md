@@ -1,7 +1,7 @@
 ---
 name: tf-resource-migration
 description: Migrate existing Terraform resources from SDK provider (sdkprovider) to Plugin Framework. Use when converting legacy resources, ensuring state compatibility, or when the user asks to port/migrate existing resources.
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent
 ---
 
 # Terraform Resource Migration Skill
@@ -71,10 +71,11 @@ grep -A 5 "client\." internal/sdkprovider/service/resource_name_data_source.go
 
 Then find corresponding OpenAPI operation IDs. See **tf-resource-generator** for OpenAPI search patterns.
 
-**Determine `clientHandler`**: The `clientHandler` YAML value is the Go package name under `github.com/aiven/go-client-codegen/handler/`. Find it by searching for the operation ID in the module cache:
+**Determine `clientHandler`**: The `clientHandler` YAML value is the Go package name under `github.com/aiven/go-client-codegen/handler/`. Find it by searching for the operation ID in the client source, at the version pinned in `go.mod`:
 ```bash
-grep -r "OperationID" $(go env GOMODCACHE)/github.com/aiven/go-client-codegen*/handler/
+grep -rl "OperationID: \"<OperationID>\"" "$(go list -m -f '{{.Dir}}' github.com/aiven/go-client-codegen)/handler/"
 ```
+A local checkout of `go-client-codegen` next to this repo works as well, and is easier to read than the module cache.
 For example, `ServiceFlinkCreateApplication` lives in `handler/flinkapplication/`, so `clientHandler: flinkapplication`.
 
 ### 3. Map SDK Schema to YAML
@@ -276,8 +277,10 @@ func TestAccAivenResource_backwardCompat(t *testing.T) {
     resource.ParallelTest(t, resource.TestCase{
         PreCheck: func() { acc.TestAccPreCheck(t) },
         Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-            TFConfig:           testAccResourceConfig(projectName),
-            OldProviderVersion: "4.47.0", // Check CHANGELOG.md for latest
+            TFConfig: testAccResourceConfig(projectName),
+            // OldProviderVersion is optional: when empty the helper resolves the last
+            // stable release (acc.GetLastStableVersion). Pin it only when the resource
+            // needs a specific older provider, e.g. the last version before a schema change.
             Checks: resource.ComposeTestCheckFunc(
                 resource.TestCheckResourceAttr(resourceName, "project", projectName),
                 // Add all key attribute checks
@@ -287,9 +290,10 @@ func TestAccAivenResource_backwardCompat(t *testing.T) {
 }
 ```
 
-**Find the latest version:**
+**Run it** like any acceptance test (CI runs the same tests through `task test-backward`, which only
+adds the `backwardcompat` build tag; no test file is gated by it today):
 ```bash
-head -20 CHANGELOG.md
+task test-acc -- -run TestAccAivenResource_backwardCompat
 ```
 
 **What this test does:**
