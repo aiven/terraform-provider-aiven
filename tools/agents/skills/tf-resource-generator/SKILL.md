@@ -61,6 +61,8 @@ state the assumption in the summary instead of blocking.
 5. **Clarify specifics** if needed (composite ID, fields to exclude/rename, custom modifiers)
 
 ### When NOT to Ask
+These rules skip the discovery questions, not the component question above: a lone read
+operation ID still leaves resource-vs-data-source open, so ask (or apply the autonomous default).
 - If the user provided specific operation IDs -> proceed
 - If the user provided a complete YAML definition -> proceed
 - If it's a modification to existing definition -> read the file and proceed
@@ -717,9 +719,16 @@ The generator produces standard CRUD views, but you can override **any** of them
 - **Delete** requires a multi-step state machine (e.g., cancel then delete)
 - **Read** needs post-processing not expressible via modifiers
 
-Use `disableView: true` on the operation in YAML to skip generating the view you plan to override.
+Two ways to plug a handwritten view in; pick one per operation:
 
-**Override pattern:**
+- **Keep the generated view, override in `init()`** — the generated `<op>View` stays (possibly unused),
+  your function can have any name. Used by `pgdatabase` for `read`.
+- **`disableView: true` on the op** — the generator omits `<op>View` but still emits `<Op>: <op>View` in
+  `ResourceOptions`/`DataSourceOptions`, so you **must** define a function with exactly that name
+  (`createView`, `readView`, ...) or the package does not compile. No `init()` assignment needed.
+  Used by `pg_user` for `create`.
+
+**Override pattern (first way):**
 ```go
 func init() {
     ResourceOptions.Create = createView   // Custom create
@@ -783,9 +792,10 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 
 The generator does **not** follow cursor pagination: a generated `readView` issues a single
 list call, so a resource whose read op is a cursor-paginated list silently misses items past
-the first page. For such endpoints set `disableView: true` on the read op (or override
-`ResourceOptions.Read` / `DataSourceOptions.Read` in `init()`) and fetch the full list through
-a shared helper that follows the cursor and aggregates every page.
+the first page. For such endpoints provide a handwritten read — either override
+`ResourceOptions.Read` / `DataSourceOptions.Read` in `init()`, or set `disableView: true` on the
+read op and name the function `readView` (see Custom View Overrides) — and fetch the full list
+through a shared helper that follows the cursor and aggregates every page.
 
 **Reference**: `schemautil.ListServiceDatabases` in `internal/schemautil/database.go`, used by the
 `read` override in `internal/plugin/service/pgdatabase/database.go`.

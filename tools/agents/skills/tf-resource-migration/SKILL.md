@@ -73,6 +73,7 @@ Then find corresponding OpenAPI operation IDs. See **tf-resource-generator** for
 
 **Determine `clientHandler`**: The `clientHandler` YAML value is the Go package name under `github.com/aiven/go-client-codegen/handler/`. Find it by searching for the operation ID in the client source, at the version pinned in `go.mod`:
 ```bash
+go mod download github.com/aiven/go-client-codegen   # no-op once built; ensures {{.Dir}} is populated
 grep -rl "OperationID: \"<OperationID>\"" "$(go list -m -f '{{.Dir}}' github.com/aiven/go-client-codegen)/handler/"
 ```
 A local checkout of `go-client-codegen` next to this repo works as well, and is easier to read than the module cache.
@@ -278,9 +279,11 @@ func TestAccAivenResource_backwardCompat(t *testing.T) {
         PreCheck: func() { acc.TestAccPreCheck(t) },
         Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
             TFConfig: testAccResourceConfig(projectName),
-            // OldProviderVersion is optional: when empty the helper resolves the last
-            // stable release (acc.GetLastStableVersion). Pin it only when the resource
-            // needs a specific older provider, e.g. the last version before a schema change.
+            // OldProviderVersion is optional. When empty, acc.GetLastStableVersion uses
+            // AIVEN_BACKWARD_COMPAT_VERSION or else the newest local `v*` git tag (no
+            // prerelease filtering; errors if neither is available). Pin it when the
+            // resource needs a specific older provider, e.g. the last version before a
+            // schema change.
             Checks: resource.ComposeTestCheckFunc(
                 resource.TestCheckResourceAttr(resourceName, "project", projectName),
                 // Add all key attribute checks
