@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -513,13 +514,13 @@ func TestItemRemoveElements(t *testing.T) {
 				Properties: map[string]*OASchema{
 					"regions": {
 						Type: SchemaTypeObject,
-						AdditionalProperties: &OASchema{
+						AdditionalProperties: &OAAdditionalProperties{Schema: &OASchema{
 							Type: SchemaTypeObject,
 							Properties: map[string]*OASchema{
 								"zone":   {Type: SchemaTypeString},
 								"active": {Type: SchemaTypeBoolean},
 							},
-						},
+						}},
 					},
 				},
 			},
@@ -629,6 +630,87 @@ func TestItemRemoveElements(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFromSchemaRefAndOneOf(t *testing.T) {
+	doc := &OpenAPIDoc{}
+	doc.Components.Schemas = map[string]*OASchema{
+		"Tag": {
+			Type:       SchemaTypeObject,
+			Properties: map[string]*OASchema{"key": {Type: SchemaTypeString}},
+		},
+		"TagAlias": {Ref: "#/components/schemas/Tag"},
+		"Loop":     {Ref: "#/components/schemas/Loop"},
+		"OneOfConfig": {
+			Description: "Config",
+			Sensitive:   true,
+			OneOf: []*OASchema{
+				{Type: SchemaTypeObject, Properties: map[string]*OASchema{"a": {Type: SchemaTypeString}}},
+				{Type: SchemaTypeObject, Properties: map[string]*OASchema{"b": {Type: SchemaTypeString}}},
+			},
+		},
+	}
+	schema := &OASchema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*OASchema{
+			"tag":     {Ref: "#/components/schemas/Tag"},
+			"tags":    {Type: SchemaTypeArray, Items: &OASchema{Ref: "#/components/schemas/Tag"}},
+			"alias":   {Ref: "#/components/schemas/TagAlias"},
+			"tag_map": {Type: SchemaTypeObject, AdditionalProperties: &OAAdditionalProperties{Schema: &OASchema{Ref: "#/components/schemas/Tag"}}},
+			"config":  {Ref: "#/components/schemas/OneOfConfig"},
+			"configs": {Type: SchemaTypeArray, Items: &OASchema{Ref: "#/components/schemas/OneOfConfig"}},
+		},
+	}
+
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope := &Scope{OpenAPI: doc, Definition: &Definition{}}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+
+	assert.Equal(t, SchemaTypeObject, root.Properties["tag"].Type)
+	assert.Contains(t, root.Properties["tag"].Properties, "key")
+	assert.Contains(t, root.Properties["tags"].Items.Properties, "key")
+	assert.Contains(t, root.Properties["alias"].Properties, "key")
+	assert.Contains(t, root.Properties["tag_map"].Items.Properties, "key")
+
+	_, err := doc.resolveRef(&OASchema{Ref: "#/components/schemas/Loop"})
+	require.ErrorContains(t, err, "cyclic schema ref")
+
+	// A "oneOf" is an object without properties that keeps its description and flags
+	for _, config := range []*Item{root.Properties["config"], root.Properties["configs"].Items} {
+		assert.Equal(t, SchemaTypeObject, config.Type)
+		assert.Equal(t, "Config", config.Description)
+		assert.True(t, config.Sensitive)
+		assert.Empty(t, config.Properties)
+	}
+
+	// A property renders it as a map of strings
+	require.NotNil(t, root.Properties["config"].Items)
+	assert.Equal(t, SchemaTypeString, root.Properties["config"].Items.Type)
+	assert.Empty(t, doc.Components.Schemas["OneOfConfig"].Type, "the component is not modified")
+}
+
+func TestFromSchemaAdditionalProperties(t *testing.T) {
+	var schema OASchema
+	require.NoError(t, json.Unmarshal([]byte(`{
+		"type": "object",
+		"properties": {
+			"map": {"type": "object", "additionalProperties": {"type": "integer"}},
+			"free": {"type": "object", "additionalProperties": true},
+			"empty": {"type": "object", "additionalProperties": false},
+			"closed": {"type": "object", "additionalProperties": false, "properties": {"a": {"type": "string"}}}
+		}
+	}`), &schema))
+
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope := &Scope{Definition: &Definition{}}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, &schema, ReadHandler))
+
+	assert.Equal(t, SchemaTypeInteger, root.Properties["map"].Items.Type)
+	assert.Equal(t, SchemaTypeString, root.Properties["free"].Items.Type)
+	assert.Nil(t, root.Properties["empty"].Items)
+	assert.Empty(t, root.Properties["empty"].Properties)
+	assert.Nil(t, root.Properties["closed"].Items)
+	assert.Contains(t, root.Properties["closed"].Properties, "a")
 }
 
 func TestOperationsIDAppearsIn(t *testing.T) {

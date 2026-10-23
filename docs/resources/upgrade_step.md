@@ -26,7 +26,7 @@ resource "aiven_upgrade_step" "example" {
   auto_validation_delay_days = 1
 
   /* COMPUTED FIELDS
-  step_id = "550e8400-e29b-41d4-a716-446655440000"
+  step_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   */
 }
 
@@ -53,7 +53,7 @@ resource "aiven_organization" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `organization_id/step_id`.
-- `step_id` (String) Upgrade step ID. The possible value is `550e8400-e29b-41d4-a716-446655440000`.
+- `step_id` (String) Upgrade step ID.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
