@@ -293,6 +293,12 @@ properties:
       Expected service type. Fails Create/Read/Update when the target service is
       powered off or has a different `service_type`. Requires top-level `project`
       and `service_name` string attributes. Delete is not gated.
+  userConfigType:
+    type: string
+    $comment: |
+      The attribute whose value selects the user config schema, e.g. "endpoint_type".
+      Splits the root field with a "oneOf" schema into a "<value>_user_config" block per schema.
+      Only the block of the attribute's value is sent.
 required:
   - operations
 additionalProperties: false
@@ -367,6 +373,13 @@ definitions:
         type: string
         $comment: |
           When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
+      queryParams:
+        type: object
+        additionalProperties:
+          type: string
+        $comment: |
+          Query parameters sent with every call, e.g. `include_secrets: "true"`.
+          The keys must be query parameters of the operation.
     required:
       - id
       - type
@@ -448,7 +461,7 @@ definitions:
         type: array
         items:
           type: any
-        $comment: List of allowed values for this attribute
+        $comment: List of allowed values for this attribute, replaces the OpenAPI enum
       forceNew:
         type: boolean
         $comment: Set to true if changes to this attribute destroy the resource

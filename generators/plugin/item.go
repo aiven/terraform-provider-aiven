@@ -79,6 +79,9 @@ type Operation struct {
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
 
+	// QueryParams are sent with every call, e.g. include_secrets: "true".
+	QueryParams map[string]string `yaml:"queryParams"`
+
 	Request  *OASchema
 	Response *OASchema
 }
@@ -144,6 +147,9 @@ type Scope struct {
 	OpenAPI     *OpenAPIDoc
 	Definition  *Definition
 	CurrentMeta *SchemaMeta
+
+	// userConfigs are the "oneOf" fields found in the operations, see addUserConfigs.
+	userConfigs []*userConfigSource
 }
 
 // SchemaMeta contains fields to override.
@@ -215,6 +221,12 @@ type Definition struct {
 	// Its value is the expected service type (e.g. "kafka"). Requires `project` and `service_name`
 	// in the schema. Delete is not gated.
 	RequireServiceReady string `yaml:"requireServiceReady,omitempty"`
+	// UserConfigType splits a "oneOf" user config field into a "<kind>_user_config" block per schema.
+	// Its value is the attribute that selects the block, e.g. "datadog_user_config" when "endpoint_type" is "datadog".
+	UserConfigType string `yaml:"userConfigType,omitempty"`
+
+	// userConfigField is the API field that holds the "oneOf" schema, e.g. "user_config".
+	userConfigField string
 
 	// prunedFields holds cross-group attributes dropped by
 	// pruneCrossGroupFields across the resource and datasource passes;
@@ -420,6 +432,26 @@ type Item struct {
 	// Ref points to the resource attribute this field usually references, e.g. "aiven_kafka.service_name".
 	// Documentation only: the doc example renders the target resource and references its attribute.
 	Ref string `yaml:"ref,omitempty"`
+
+	// UserConfigKind is the user config type of a user config block, see Definition.UserConfigType.
+	UserConfigKind string `yaml:"_userConfigKind,omitempty"`
+
+	// DocDefault is the spec default of a user config option, documented, but not set in the schema:
+	// the API applies it to a new service, and keeps the value of an option removed from the config.
+	// A schema Default would plan the removed option back to the default and reset it, which SDKv2 never did.
+	// E.g. pg_stat_monitor_enable defaults to false. Its description ends with "The default value is `false`.",
+	// and removing pg_stat_monitor_enable = true from the config keeps the extension enabled.
+	DocDefault any `yaml:"_docDefault,omitempty"`
+}
+
+// InUserConfig reports whether the item is a user config block or nested in one.
+func (item *Item) InUserConfig() bool {
+	for v := item; v != nil; v = v.Parent {
+		if v.UserConfigKind != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // UniqueName generates unique name by composing all ancestor names

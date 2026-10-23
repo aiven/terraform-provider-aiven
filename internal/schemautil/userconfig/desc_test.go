@@ -106,6 +106,17 @@ This data source is in the limited availability stage and may change without not
 This resource is in the limited availability stage and may change without notice. ` + LimitedAvailabilityMessage,
 		},
 		{
+			name: "moves the appended sentences out of a closing callout",
+			desc: Desc("Service setting.\n\n~> **Warning**\nMind the gap.").LimitedAvailability().RemoveMissing(),
+			want: "Service setting.\n\n~> **Warning**\nMind the gap." + `
+
+If this resource is missing (for example, after a service power off), ` +
+				"it's removed from the state and a new create plan is generated." + `
+
+~> **Limited availability resource**
+This resource is in the limited availability stage and may change without notice. ` + LimitedAvailabilityMessage,
+		},
+		{
 			name: "adds beta warning as a callout",
 			desc: Desc("Service setting").Beta(),
 			want: "Service setting.\n\n~> **Beta resource**\n" + fmt.Sprintf(BetaText, "resource"),

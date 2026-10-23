@@ -62,6 +62,10 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 		builders = append(builders, v)
 	}
 
+	if code := genUserConfigFields(def, item); code != nil {
+		codes = append(codes, code)
+	}
+
 	return append(builders, codes...), nil
 }
 
@@ -383,6 +387,9 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			if code := renameFieldsArg(def.Rename, operation.Request, true); code != nil {
 				g.Add(code)
 			}
+			if code := userConfigArg(def, item, operation, inRequest, expandUserConfig); code != nil {
+				g.Add(code)
+			}
 		})
 		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	}
@@ -439,6 +446,10 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			if hasRequest {
 				params.Id("req")
 			}
+
+			for _, k := range sortedKeys(operation.QueryParams) {
+				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
+			}
 		}),
 	)
 
@@ -458,6 +469,10 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			g.Add(rsp)
 
 			if code := renameFieldsArg(def.Rename, operation.Response, false); code != nil {
+				g.Add(code)
+			}
+
+			if code := userConfigArg(def, item, operation, inResponse, flattenUserConfig); code != nil {
 				g.Add(code)
 			}
 
