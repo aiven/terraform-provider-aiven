@@ -213,12 +213,13 @@ func (db *DescriptionBuilder) BuildPage() string {
 func (db *DescriptionBuilder) build(page bool) string {
 	builder := new(strings.Builder)
 
-	builder.WriteString(db.base)
+	base := db.base
 
 	// Add a trailing dot if it's missing.
-	if !strings.HasSuffix(db.base, ".") {
-		builder.WriteString(".")
+	if !strings.HasSuffix(base, ".") {
+		base += "."
 	}
+	builder.WriteString(base)
 
 	const availabilityCommonPart = `
 
@@ -369,6 +370,11 @@ func (db *DescriptionBuilder) build(page bool) string {
 		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
 	}
 
+	// The sentences appended to a callout would be pulled into its box
+	if base = strings.TrimSpace(base); len(s) > len(base) && HasCallout(lastParagraph(base)) {
+		s = base + "\n\n" + strings.TrimSpace(s[len(base):])
+	}
+
 	// A callout is a single paragraph, so the warning goes last:
 	// anything appended after it would be pulled into the box.
 	if page {
@@ -377,6 +383,13 @@ func (db *DescriptionBuilder) build(page bool) string {
 		}
 	}
 
+	return s
+}
+
+func lastParagraph(s string) string {
+	if i := strings.LastIndex(s, "\n\n"); i >= 0 {
+		return s[i+2:]
+	}
 	return s
 }
 

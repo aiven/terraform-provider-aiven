@@ -12,7 +12,17 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- **IMPORTANT**: when upgrading from v3, run `terraform apply -refresh-only` with v4.65.0 first to upgrade the state
+  of `aiven_service_integration` and `aiven_service_integration_endpoint`. This version can't read their v3 state.
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
+- Migrate `aiven_service_integration_endpoint` resource and data source to the Plugin Framework. Add the `endpoint_id`
+  field. The data source looks up an endpoint by either `endpoint_id` or `endpoint_name`.
+- Migrate `aiven_service_integration` resource and data source to the Plugin Framework. Add the `active` field. The data
+  source can also look up an integration by `integration_id`. `integration_type` accepts every type the API supports,
+  including `application_service_credential`, `autoscaler_service` and `kafka_inkless_postgresql`.
+- Change `aiven_service_integration` and `aiven_service_integration_endpoint`: validate the user config options, service
+  and project names, and endpoint IDs against the API limits (length, pattern, range) at plan time. The first plan after
+  upgrading can show the removal of user config blocks that are not in the configuration; applying it keeps the API settings.
 
 ## [4.65.0] - 2026-10-21
 

@@ -45,7 +45,7 @@ type resourceData interface {
 // Must sort keys to rename from bottom to top.
 // Otherwise, might not find the deepest key if parent key is renamed
 func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d resourceData) error {
-	prefix := userConfigKey(kind, name) + ".0."
+	prefix := userConfigKey(name) + ".0."
 	m := getFieldMapping(kind, name)
 
 	for _, to := range sortKeys(m) {

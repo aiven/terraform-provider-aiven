@@ -223,6 +223,8 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 
 	if item.Default != nil {
 		b.DefaultValue(item.Default)
+	} else if item.DocDefault != nil {
+		b.DefaultValue(item.DocDefault)
 	}
 
 	// Root deprecation is rendered in doc.go (~> callout); attributes keep the

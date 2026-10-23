@@ -392,6 +392,11 @@ func createRootItem(scope *Scope) (*Item, error) {
 		}
 	}
 
+	err := addUserConfigs(scope, root)
+	if err != nil {
+		return nil, err
+	}
+
 	// Overwrites the fields with the ones from the config
 	if scope.CurrentMeta != nil {
 		root.Description = or(scope.CurrentMeta.Description, root.Description)
@@ -427,7 +432,6 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	// Patches the schema and creates new properties
-	var err error
 	for k, v := range scope.Definition.Schema {
 		err = fillOptionalFields(root, v, k)
 		if err != nil {
@@ -471,6 +475,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+	keepUserConfigState(root)
 
 	// Marks ID fields.
 	// The virtual "id" is not inferred by UsesStateForUnknown, so it is set here.
@@ -676,14 +681,14 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		Maximum:     numberToInt(s.Maximum, !isInteger),
 		Format:      s.Format,
 		Pattern:     s.Pattern,
-		ForceNew:    s.CreateOnly,
-		Sensitive:   s.Sensitive,
+		ForceNew:    s.CreateOnly || s.CreateOnlyExt,
+		Sensitive:   s.Sensitive || s.SensitiveExt,
 		Nullable:    s.Nullable,
 		Required:    required,
 		Properties:  make(map[string]*Item),
 		Enum: lo.Filter(s.Enum, func(item any, _ int) bool {
 			switch fmt.Sprint(item) {
-			case "", "null":
+			case "", "null", "<nil>":
 				return false
 			}
 			return true
@@ -696,8 +701,21 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		item.Name = newName
 	}
 
-	if slices.Contains(sensitiveFields, item.Name) {
+	// User configs flag secrets with "x-_secure", as SDKv2 does
+	if !parent.InUserConfig() && slices.Contains(sensitiveFields, item.Name) {
 		item.Sensitive = true
+	}
+
+	if parent.InUserConfig() {
+		item.Description = userConfigDescription(s)
+
+		// A default would reset the options removed from the config, which SDKv2 never did
+		item.DocDefault, item.Default = item.Default, nil
+
+		// SDKv2 user configs have lists
+		if item.Type == SchemaTypeArray {
+			item.Type = SchemaTypeArrayOrdered
+		}
 	}
 
 	return item
@@ -705,7 +723,24 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 
 func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
-		thisSchema, err := scope.OpenAPI.resolveSchema(parentSchema.Properties[thisName])
+		thisSchema, err := scope.OpenAPI.resolveRef(parentSchema.Properties[thisName])
+		if err != nil {
+			return fmt.Errorf("%s: %w", thisName, err)
+		}
+
+		if len(thisSchema.OneOf) > 0 && scope.Definition.UserConfigType != "" && parent.IsRoot() {
+			// Added once all operations are read, see addUserConfigs
+			scope.userConfigs = append(scope.userConfigs, &userConfigSource{
+				operation: operation,
+				name:      thisName,
+				schema:    thisSchema,
+				appearsIn: appearsIn,
+			})
+			continue
+		}
+
+		// Other "oneOf" are free-form objects
+		thisSchema, err = scope.OpenAPI.resolveSchema(thisSchema)
 		if err != nil {
 			return fmt.Errorf("%s: %w", thisName, err)
 		}
@@ -768,6 +803,7 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 
 func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPath) error {
 	appearsIn := scope.Definition.Operations.AppearsInID(operation.ID, operation.Type, PathParameter)
+	queryParams := make(map[string]bool)
 	for _, param := range path.Parameters {
 		p, err := scope.OpenAPI.getParameterRef(param.Ref)
 		if err != nil {
@@ -775,7 +811,8 @@ func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPat
 		}
 
 		if p.In != "path" {
-			// Skips query parameters for now
+			// Query parameters aren't fields, but can be set with Operation.QueryParams
+			queryParams[p.Name] = p.In == "query"
 			continue
 		}
 
@@ -784,6 +821,12 @@ func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPat
 		err = addProperty(scope, parent, prop)
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, k := range sortedKeys(operation.QueryParams) {
+		if !queryParams[k] {
+			return fmt.Errorf("queryParams: %q is not a query parameter", k)
 		}
 	}
 	return nil
@@ -1009,7 +1052,12 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.ForceNew = a.ForceNew || b.ForceNew
 	a.Sensitive = a.Sensitive || b.Sensitive
 	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
-	a.Enum = mergeSlices(a.Enum, b.Enum)
+	if len(b.Enum) > 0 && b.AppearsIn == 0 {
+		// User defined values in definition.yml replace the OpenAPI enum
+		a.Enum = b.Enum
+	} else {
+		a.Enum = mergeSlices(a.Enum, b.Enum)
+	}
 	a.MinItems = max(a.MinItems, b.MinItems)
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)
@@ -1031,7 +1079,11 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	if !isEmpty(b.Example) {
 		a.Example = b.Example
 	}
+	if !isEmpty(b.DocDefault) {
+		a.DocDefault = b.DocDefault
+	}
 	a.Ref = or(b.Ref, a.Ref)
+	a.UserConfigKind = or(b.UserConfigKind, a.UserConfigKind)
 
 	// Validators
 	a.ConflictsWith = mergeSlices(a.ConflictsWith, b.ConflictsWith)
