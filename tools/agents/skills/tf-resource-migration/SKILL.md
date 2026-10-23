@@ -55,7 +55,7 @@ find internal/sdkprovider -name "*datasource_*.go" | grep -i "resource_name"
 - Schema definition (all fields, types, attributes)
 - CRUD functions (Create, Read, Update, Delete)
 - Custom logic and transformations
-- State upgrade functions (if any)
+- Schema version (`SchemaVersion`)
 - Existing tests (critical for parity)
 
 ### 2. Identify API Operations
@@ -196,7 +196,7 @@ idAttributeComposed: [project, service_name, database_name]
 
 | SDK Pattern | Generator Feature |
 |-------------|------------------|
-| `StateUpgraders` | May need `version` in YAML + state upgrader |
+| `StateUpgraders` | Not ported, keep `SchemaVersion` as `version` in YAML (see [State Compatibility Verification](#8-state-compatibility-verification)) |
 | `CustomizeDiff` | `modifyPlan: true` (writes plan values, `d.RequiresReplace` for replacement) — not `planModifier`, which runs inside Read |
 | Flatten/Expand functions | `expandModifier: true` / `flattenModifier: true` |
 | `DiffSuppressFunc` | No equivalent, see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
@@ -262,7 +262,14 @@ task lint
 grep -A 3 "SchemaVersion" internal/sdkprovider/service/resource_name.go
 ```
 
-If SDK has `SchemaVersion > 0`, you MUST handle state upgrades.
+If SDK has `SchemaVersion > 0`, set the same `version` in YAML, or the state can't be read.
+Don't port the `StateUpgraders`: users upgrade an older state with the last release that has them,
+the latest version in `CHANGELOG.md`. Then:
+
+- Add a row to the table in `templates/guides/upgrade-guide-v3-to-v4.md`, e.g., `aiven_service_integration` and 4.65.0.
+  Keep it sorted by version, then by name.
+- Add a CHANGELOG `**IMPORTANT**` entry, e.g., "When upgrading from v3, run `terraform apply -refresh-only`
+  with v4.65.0 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4)".
 
 ### 9. Backward Compatibility Testing
 
@@ -354,7 +361,7 @@ Before marking migration complete:
 | Read-only list of objects diffs on every plan | It must render as a computed attribute; check nothing inside it is `optional` (see Read-Only Nested Collections) |
 | Computed field becomes required | Keep as `computed: true` if API provides it |
 | Custom validation lost | Implement in custom modifier or use schema validation |
-| State upgrade needed | Implement state upgrader in Plugin Framework |
+| State from an older `SchemaVersion` fails to load | Not supported, see [State Compatibility Verification](#8-state-compatibility-verification) |
 | DiffSuppressFunc behavior | Not portable — see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
 | Field the API accepts but never returns | Fill it in a `readView` override only when the state has no value, so imports don't keep a null and existing state stays untouched |
 | OpenAPI default would plan a change against SDKv2 state | Workaround: `dropDefault: true` plus `useStateForUnknown: true`, and send the API default from the create view. Goes away in v5.0.0 with SDKv2 state support |

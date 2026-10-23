@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  # SDKv2 also waited until the destination of a kafka_connect integration could list its connectors
+  # (ServiceKafkaConnectList), so connectors could be created right after.
+  # aiven_kafka_connector retries its create on 404.
+  stateAttribute: active
+  refreshStateDesired: ["true"]
+  removeMissing: true
+  # A generated example has every user config block, but an integration takes one
+  disableExample: true
+  description: |
+    Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).
+
+    -> Services integrations are not supported for services running on hobbyist plans.
+
+    You can set up an integration between two Aiven services or an Aiven service and an external
+    service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs
+    into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an
+    [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).
+
+    You can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).
+
+    ~> **Warning:** For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
+    See [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.
+datasource:
+  disableExample: true
+  description: Gets information about an Aiven service integration.
+clientHandler: service
+idAttributeComposed: [project, integration_id]
+legacyTimeouts: true
+version: 1
+expandModifier: true
+flattenModifier: true
+userConfigDiscriminator: integration_type
+rename:
+  service_integration_id: integration_id
+  service_name: source_service_name
+  source_service: source_service_name
+  source_project: source_service_project
+  source_endpoint: source_endpoint_name
+  dest_service: destination_service_name
+  dest_service_type: destination_service_type
+  dest_project: destination_service_project
+  dest_endpoint_id: destination_endpoint_id
+  dest_endpoint: destination_endpoint_name
+# The API changes them in the background
+remove:
+  - enabled
+  - integration_status
+operations:
+  - id: ServiceIntegrationCreate
+    type: create
+    resultKey: service_integration
+  - id: ServiceIntegrationGet
+    type: read
+    resultKey: service_integration
+  - id: ServiceIntegrationList
+    type: read
+    datasourceLookup: true
+    resultKey: service_integrations
+    resultIDField: ServiceIntegrationId
+    resultListLookupKeys:
+      IntegrationType: integration_type
+      SourceService: source_service_name
+      DestService: destination_service_name
+  - id: ServiceIntegrationUpdate
+    type: update
+    resultKey: service_integration
+  - id: ServiceIntegrationDelete
+    type: delete
+schema:
+  project:
+    ref: aiven_organization_project.project_id
+  # The endpoint IDs are "project/endpoint_id", as the endpoint resource IDs are
+  destination_endpoint_id:
+    maxLength: 100
+    pattern: ^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$
+  destination_endpoint_name:
+    useStateForUnknown: true
+  # The API defaults the projects to the integration project
+  destination_service_project:
+    description: Destination service project name. Defaults to `project`.
+    computed: true
+    useStateForUnknown: true
+  destination_service_type:
+    useStateForUnknown: true
+  source_endpoint_id:
+    maxLength: 100
+    pattern: ^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$
+  source_endpoint_name:
+    useStateForUnknown: true
+  source_service_project:
+    description: Source service project name. Defaults to `project`.
+    computed: true
+    useStateForUnknown: true
+  source_service_name:
+    # Required by the data source lookup only
+    required: false
+    optional: true
+    computed: true
+    useStateForUnknown: true
+  source_service_type:
+    useStateForUnknown: true
+  # Describes integration_type, so never changes
+  description:
+    useStateForUnknown: true

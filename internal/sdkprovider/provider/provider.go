@@ -25,7 +25,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
@@ -74,10 +73,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_aws_vpc_peering_connection":   vpc.DatasourceAWSVPCPeeringConnection(),
 			"aiven_azure_vpc_peering_connection": vpc.DatasourceAzureVPCPeeringConnection(),
 			"aiven_gcp_vpc_peering_connection":   vpc.DatasourceGCPVPCPeeringConnection(),
-
-			// service integrations
-			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
-			"aiven_service_integration_endpoint": serviceintegration.DatasourceServiceIntegrationEndpoint(),
 
 			// flink
 			"aiven_flink":                     flink.DatasourceFlink(),
@@ -136,10 +131,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
 			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
-
-			// service integrations
-			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
-			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
 
 			// flink
 			"aiven_flink":                     flink.ResourceFlink(),

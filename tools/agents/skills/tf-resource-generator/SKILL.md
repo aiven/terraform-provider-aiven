@@ -170,11 +170,12 @@ Common fields:
 - `rename` - Field name mappings (API field -> Terraform field)
 - `schema` - Schema customizations (types, validation, behavior)
 - `expandModifier` / `flattenModifier` / `planModifier` - Enable custom Go modifiers
-- `version` - Schema version (for state upgrades)
+- `version` - Schema version, the SDK `SchemaVersion` of a migrated resource (no state upgraders)
 - `beta` - Mark resource as beta (requires `PROVIDER_AIVEN_ENABLE_BETA` env var)
 - `limitedAvailability` - Mark resource as limited availability
 - `legacyTimeouts` - Enable SDK v2-style timeout blocks
 - `requireServiceReady` - Gate CRUD on the target service's type and power state (see [Service Readiness Gating](#service-readiness-gating))
+- `userConfigDiscriminator` - Split a `oneOf` user config into a block per type (see [User Configs](#user-configs))
 
 ### Resource Configuration
 
@@ -335,9 +336,41 @@ operations:
     resultToKey: wrapper_key         # Wrap response as {wrapper_key: ...}
     resultListLookupKeys:            # For list responses
       APIField: terraform_field      # Match items by field
+    queryParams:                     # Query parameters sent with every call of the operation,
+      include_secrets: "true"        # rendered as [2]string{"include_secrets", "true"} client args
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
+
+### User Configs
+
+Some endpoints take a `user_config` whose schema depends on a type attribute, e.g. `endpoint_type`.
+The spec types it as a `oneOf` of one schema per value. `userConfigDiscriminator` names that attribute and turns
+the field into one optional `<value>_user_config` block per schema, as SDKv2 user configs are:
+
+```yaml
+userConfigDiscriminator: endpoint_type
+rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add more
+  external_postgresql_user_config: external_postgresql
+```
+
+- The schemas are matched to the attribute's enum by name, e.g. `IntegrationEndpointDatadogUserConfig`
+  is `datadog`. Values without a schema, or with a schema without properties, get no block.
+- The `oneOf` field must be `user_config`. Expand sends the block of the attribute's value as `user_config`,
+  or `{}` without the block, as SDKv2 does. Flatten sets it back. See `adapter.ExpandUserConfig`
+  and `adapter.FlattenUserConfig`. A block of another value fails the config validation, see
+  `adapter.ValidateUserConfig`.
+- The API returns the defaults too. For resources, Flatten keeps only the options set in the plan or the state,
+  and no block when none is set. The objects of a list are matched by index, the objects beyond the plan
+  or the state are dropped, e.g. a default list item. Data sources keep all the options. Import sets no user config.
+- The blocks are computed: the API keeps the options removed from the config, so the options are
+  Optional + Computed with `UseStateForUnknown`. The options of list objects don't keep their state:
+  the framework matches list objects by index, so removing one would pass its state to the next one.
+  API defaults go to the docs only.
+- Field names and types match SDKv2, so its state still decodes:
+  - Arrays are lists.
+  - Only the `x-_secure` options are sensitive. Names like `access_key` aren't, unlike outside user configs.
+- Without `userConfigDiscriminator`, a `oneOf` field is a free-form map.
 
 ### Removing Fields
 
@@ -397,7 +430,7 @@ schema:
     writeOnly: true|false
     forceNew: true|false           # Triggers replacement
     useStateForUnknown: true|false # Preserve prior state during planning
-    enum: [val1, val2]
+    enum: [val1, val2]             # Replaces the OpenAPI enum
     minimum: 1
     maximum: 100
     format: uuid|cidr|ipv4-cidr    # String validator, see Formats
@@ -427,6 +460,9 @@ When unset, the format is guessed: `uuid` for fields named `uuid`, `cidr` for fi
 such a field also has `maxLength: 18`. A guessed format keeps the field's own example and only fills in a missing one;
 declare it to replace a bad one.
 Any format replaces the length validators and hints. Validators apply to scalar strings only, not list or set items.
+
+**Item enums**: an `enum` on the items of a scalar list or set validates each item, e.g.
+`listvalidator.ValueStringsAre(stringvalidator.OneOf(...))`. Other item constraints are not validated.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**
@@ -1001,6 +1037,8 @@ Search the codebase for similar patterns:
 | `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
 | `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
 | `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
+| `service_integration_endpoint` | `oneOf` user config split by `userConfigDiscriminator`, `queryParams`, Read wrapped in `init()` |
+| `service_integration` | `userConfigDiscriminator`, renamed path parameter, Create/Update waiters wrapped in `init()` |
 | `flinkjarapplicationversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements
