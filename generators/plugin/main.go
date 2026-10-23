@@ -652,6 +652,9 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 var reTFName = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 
 func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool, appearsIn AppearsIn) *Item {
+	// Item bounds are ints. Integer bounds round inward, which is exact,
+	// number bounds round outward, so no valid value is rejected.
+	isInteger := s.Type == SchemaTypeInteger
 	item := &Item{
 		Parent: parent,
 		// Adds "AppearsIn" from the parent to the item.
@@ -669,8 +672,8 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		MaxItems:    s.MaxItems,
 		MinLength:   s.MinLength,
 		MaxLength:   s.MaxLength,
-		Minimum:     s.Minimum,
-		Maximum:     s.Maximum,
+		Minimum:     numberToInt(s.Minimum, isInteger),
+		Maximum:     numberToInt(s.Maximum, !isInteger),
 		Format:      s.Format,
 		Pattern:     s.Pattern,
 		ForceNew:    s.CreateOnly,
@@ -702,7 +705,10 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 
 func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
 	for _, thisName := range sortedKeys(parentSchema.Properties) {
-		thisSchema := parentSchema.Properties[thisName]
+		thisSchema, err := scope.OpenAPI.resolveSchema(parentSchema.Properties[thisName])
+		if err != nil {
+			return fmt.Errorf("%s: %w", thisName, err)
+		}
 
 		// 1. Only the create operation can have required fields.
 		// 2. Some fields are marked as required because they are required in the response, so we check if it's a request.
@@ -715,13 +721,12 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 		var thisItemsSchema *OASchema
 		switch thisSchema.Type {
 		case SchemaTypeArray, SchemaTypeArrayOrdered:
-			if thisSchema.Items != nil {
-				thisItemsSchema = thisSchema.Items
-			}
+			thisItemsSchema = thisSchema.Items
 		case SchemaTypeObject:
-			if thisSchema.AdditionalProperties != nil {
+			additional := thisSchema.AdditionalProperties
+			if additional != nil && additional.Schema != nil {
 				// If additional properties for maps
-				thisItemsSchema = thisSchema.AdditionalProperties
+				thisItemsSchema = additional.Schema
 			} else if v, ok := thisSchema.Properties[anyField]; ok {
 				// ANY is a special case is additional properties
 				thisItemsSchema = v
@@ -731,13 +736,18 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 				if err != nil {
 					return err
 				}
-			} else {
-				// A special case for maps with invalid schema
+			} else if additional == nil || additional.Allowed {
+				// A free-form map, or a map with invalid schema
 				thisItemsSchema = &OASchema{Type: SchemaTypeString}
 			}
+			// Otherwise, "additionalProperties: false" leaves an object without fields
 		}
 
 		// Either array item or additional properties
+		thisItemsSchema, err = scope.OpenAPI.resolveSchema(thisItemsSchema)
+		if err != nil {
+			return fmt.Errorf("%s items: %w", thisName, err)
+		}
 		if thisItemsSchema != nil {
 			// Array or Map items
 			thisItem.Items = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
@@ -747,7 +757,7 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 			}
 		}
 
-		err := addProperty(scope, parent, thisItem)
+		err = addProperty(scope, parent, thisItem)
 		if err != nil {
 			return err
 		}

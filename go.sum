@@ -78,8 +78,8 @@ github.com/aiven/aiven-go-client/v2 v2.44.0 h1:UiWQLsVEsAPpHomNqq8PYVb3EEBVvggNZ
 github.com/aiven/aiven-go-client/v2 v2.44.0/go.mod h1:BBpB3Lb2FFAElQZugsEKDYe8of5v3G3TlEkERDoQ01g=
 github.com/aiven/go-api-schemas v1.233.0 h1:RGqQ3JESoxHF86WLRp7eETNejRhrKVNzDKdvsdiwfzg=
 github.com/aiven/go-api-schemas v1.233.0/go.mod h1:GuGjWMV+HcZPZI+1jOuY7KHMWwsFWUQ2TDo/yhjbnUs=
-github.com/aiven/go-client-codegen v0.231.0 h1:sxb3ZnSNzEIMzaYuwcT3CGicicfscQTpNAJ3eSWnSf0=
-github.com/aiven/go-client-codegen v0.231.0/go.mod h1:OuyZpHom3+gFMj9LB/l1aWbrOA8EMBaDWGzif/GjhU4=
+github.com/aiven/go-client-codegen v0.233.0 h1:f1xLR0KE1axu2Y5m7+k1G54fxF4ZA7PgvmM12oyL6wo=
+github.com/aiven/go-client-codegen v0.233.0/go.mod h1:OuyZpHom3+gFMj9LB/l1aWbrOA8EMBaDWGzif/GjhU4=
 github.com/aiven/go-utils/selproj v0.1.0 h1:ruqLwK4Y4FcMJyt/g9j8QZVDr9vrVO5Y0afM2APzKdE=
 github.com/aiven/go-utils/selproj v0.1.0/go.mod h1:Tc71RJ7tPJ5V0IsVxSrXbAJQICGLpe5iMXS+rq8aLqg=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
