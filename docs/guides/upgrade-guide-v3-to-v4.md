@@ -27,23 +27,38 @@ More information is available in the [detailed changelog](https://github.com/aiv
 
 It's recommended to [upgrade Terraform](https://developer.hashicorp.com/terraform/language/upgrade-guides) to the latest version.
 
-You update the Aiven Terraform Provider by editing the providers block
-of your script. If the version was already set to `>= 3.0.0` then the
-upgrade is automatic.
+The latest v4 versions can't read the v3 state of these resources. Upgrade it with the listed version first:
 
-```hcl
-terraform {
-  required_providers {
-    aiven = {
-      source  = "aiven/aiven"
-      version = ">= 4.0.0"
+| Resource                             | Version |
+| ------------------------------------ | ------- |
+| `aiven_kafka_topic`                  | 4.58.0  |
+| `aiven_service_integration`          | 4.65.1  |
+| `aiven_service_integration_endpoint` | 4.65.1  |
+
+If the state has resources with different versions, use the oldest one, it upgrades them all.
+Alternatively, remove the resource from the state with `terraform state rm` and import it again.
+
+1.  Set the version in the providers block of your script, e.g., 4.65.1:
+
+    ```hcl
+    terraform {
+      required_providers {
+        aiven = {
+          source  = "aiven/aiven"
+          version = "4.65.1"
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-You might need to run `terraform init -upgrade` for the provider version
-upgrade to take place.
+2.  To install the version and upgrade the state, run:
+
+    ```
+    terraform init -upgrade
+    terraform apply -refresh-only
+    ```
+
+3.  Set the version to `>= 4.0.0` and run `terraform init -upgrade` again.
 
 ## Update resource syntax
 

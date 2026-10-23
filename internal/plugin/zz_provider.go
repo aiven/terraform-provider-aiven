@@ -61,6 +61,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pgdatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pguser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/projectvpc"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceintegration"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceintegrationendpoint"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/servicelist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplanlist"
@@ -115,6 +117,8 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_pg_database":                         adapter.NewLazyResource(pgdatabase.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(pguser.ResourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
+		"aiven_service_integration":                 adapter.NewLazyResource(serviceintegration.ResourceOptions),
+		"aiven_service_integration_endpoint":        adapter.NewLazyResource(serviceintegrationendpoint.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyResource(transitgatewayvpcattachment.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(upgradestep.ResourceOptions),
@@ -164,6 +168,8 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_pg_database":                         adapter.NewLazyDataSource(pgdatabase.DataSourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyDataSource(pguser.DataSourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyDataSource(projectvpc.DataSourceOptions),
+		"aiven_service_integration":                 adapter.NewLazyDataSource(serviceintegration.DataSourceOptions),
+		"aiven_service_integration_endpoint":        adapter.NewLazyDataSource(serviceintegrationendpoint.DataSourceOptions),
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(serviceplan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(serviceplanlist.DataSourceOptions),

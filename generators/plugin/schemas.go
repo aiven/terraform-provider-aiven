@@ -214,7 +214,8 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 
 	if !item.IsNested() {
 		if entity.isResource() {
-			typedPlanmodifier := getTypedImport(item.Type, planmodifierTypedImport)
+			// By TFType, as maps are objects too
+			typedPlanmodifier := fmt.Sprintf(string(planmodifierTypedImport), item.GoType())
 			planModifiers := make([]jen.Code, 0)
 			if item.ForceNew {
 				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplace").Call())

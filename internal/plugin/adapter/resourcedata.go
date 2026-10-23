@@ -38,6 +38,7 @@ type ResourceData interface {
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
 	requiresReplaceKeys() []string
+	isUnknown(key string) bool
 }
 
 type resourceData struct {
@@ -109,6 +110,13 @@ func (d *resourceData) RequiresReplace(keys ...string) {
 
 func (d *resourceData) requiresReplaceKeys() []string {
 	return d.requiresReplace
+}
+
+// isUnknown tells if the planned value is unknown until apply, e.g., a dynamic block over an unknown list.
+// Get returns a zero value for it, see WithPreservePlanValues.
+func (d *resourceData) isUnknown(key string) bool {
+	v, ok := d.plan[key].(tftypes.Value)
+	return ok && !v.IsKnown()
 }
 
 // Schema returns the schema of the resource.
@@ -250,7 +258,7 @@ func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error 
 		// Nil is a special case, means "remove"
 		delete(state, key)
 	} else {
-		norm, err := normalizeAny(prop, value, ignoreUnknownKeys, true)
+		norm, err := normalizeStateValue(key, prop, value, ignoreUnknownKeys)
 		if err != nil {
 			return err
 		}
@@ -314,9 +322,17 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		}
 	}
 
-	norm, err := normalizeTyped(d.schema, m, true, true)
-	if err != nil {
-		return err
+	norm := make(map[string]any, len(m))
+	for k, v := range m {
+		prop, ok := d.schema.Properties[k]
+		if !ok {
+			// A new field from the API, or a field not exposed to the user
+			continue
+		}
+		norm[k], err = normalizeStateValue(k, prop, v, true)
+		if err != nil {
+			return err
+		}
 	}
 
 	state := d.currentState()
@@ -505,7 +521,7 @@ func getOk(sch *Schema, data any, path string) (any, *Schema, bool, error) {
 			}
 			data = val
 		case SchemaTypeString, SchemaTypeFloat, SchemaTypeInt, SchemaTypeBool:
-			val, err := normalizeAny(sch, data, false, false)
+			val, err := normalizeAny(sch, data, false, false, false)
 			if err != nil {
 				return nil, nil, false, fmt.Errorf("invalid value for %q at %q: %w", part, path, err)
 			}
@@ -618,9 +634,16 @@ func WithTestConfig(config map[string]any) ResourceDataOpt {
 	}
 }
 
+// normalizeStateValue normalizes a top-level value for the state.
+// A user config option can be an empty string, e.g., datadog_user_config.extra_tags_prefix = "".
+// FlattenUserConfig keeps only the configured options, so the API's empty defaults don't get in.
+func normalizeStateValue(key string, prop *Schema, value any, ignoreUnknownKeys bool) (any, error) {
+	return normalizeAny(prop, value, ignoreUnknownKeys, true, isUserConfigBlock(key))
+}
+
 // normalizeTyped see normalizeAny for more details.
 func normalizeTyped[T any](sch *Schema, m T, ignoreUnknownKeys bool, setFlow bool) (T, error) {
-	v, err := normalizeAny(sch, m, ignoreUnknownKeys, setFlow)
+	v, err := normalizeAny(sch, m, ignoreUnknownKeys, setFlow, false)
 	if err != nil {
 		return m, err
 	}
@@ -696,7 +719,8 @@ func dereference(value any) (any, error) {
 // For writes: validates and casts the value according to the schema.
 // ignoreUnknownKeys — when true, unknown fields are ignored (useful when ResourceData.Flatten sets values; new fields from the API can be safely skipped).
 // setFlow — when true, objects must be wrapped in a list. See Schema.IsObject for more details.
-func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) (any, error) {
+// keepEmpty — when true, setFlow keeps empty strings instead of removing them.
+func normalizeAny(sch *Schema, value any, ignoreUnknownKeys, setFlow, keepEmpty bool) (any, error) {
 	value, err := dereference(value)
 	if err != nil {
 		return nil, err
@@ -718,7 +742,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 		var err error
 		switch sch.Type {
 		case SchemaTypeString:
-			if str == "" && setFlow {
+			if str == "" && setFlow && !keepEmpty {
 				// We don't want to store empty strings in the state
 				return nil, nil
 			}
@@ -752,7 +776,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 		}
 		norm := make([]any, 0, len(list))
 		for _, elem := range list {
-			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow)
+			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, setFlow, keepEmpty)
 			if err != nil {
 				return nil, err
 			}
@@ -777,7 +801,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 				// use them to distinguish a present key from an absent one.
 				itemSetFlow = false
 			}
-			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, itemSetFlow)
+			item, err := normalizeAny(sch.Items, elem, ignoreUnknownKeys, itemSetFlow, keepEmpty)
 			if err != nil {
 				return nil, err
 			}
@@ -800,7 +824,7 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys bool, setFlow bool) 
 				}
 				return nil, fmt.Errorf("unknown property %q", key)
 			}
-			item, err := normalizeAny(prop, elem, ignoreUnknownKeys, setFlow)
+			item, err := normalizeAny(prop, elem, ignoreUnknownKeys, setFlow, keepEmpty)
 			if err != nil {
 				return nil, err
 			}
