@@ -122,14 +122,13 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 
 	// Enums
 	if len(item.Enum) > 0 {
-		// Lit() takes any, so it works naturally with string and int enums
-		// distinct() sorts and removes duplicates
-		sorted := distinct(item.Enum...)
-		enums := lo.Map[any, jen.Code](sorted, func(v any, _ int) jen.Code {
-			return jen.Lit(v)
-		})
+		codes = append(codes, oneOf(pkg, item.Enum))
+	}
 
-		codes = append(codes, jen.Qual(pkg, "OneOf").Call(enums...))
+	// Array item enums, e.g., listvalidator.ValueStringsAre(stringvalidator.OneOf(...))
+	if item.IsArray() && item.Items.IsScalar() && item.Items.Type != SchemaTypeBoolean && len(item.Items.Enum) > 0 {
+		method := "Value" + typingMapping()[item.Items.Type] + "sAre"
+		codes = append(codes, jen.Qual(pkg, method).Call(oneOf(getTypedImport(item.Items.Type, validatorTypedImport), item.Items.Enum)))
 	}
 
 	// Scalar types have Required property
@@ -173,6 +172,15 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	}
 
 	return codes, nil
+}
+
+func oneOf(pkg string, values []any) jen.Code {
+	// Lit() takes any, so it works naturally with string and int enums
+	// distinct() sorts and removes duplicates
+	enums := lo.Map[any, jen.Code](distinct(values...), func(v any, _ int) jen.Code {
+		return jen.Lit(v)
+	})
+	return jen.Qual(pkg, "OneOf").Call(enums...)
 }
 
 // rePathName so far we don't support complex paths, just relative attributes

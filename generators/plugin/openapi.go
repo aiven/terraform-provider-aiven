@@ -161,6 +161,7 @@ type OASchema struct {
 	Required             []string                `json:"required"`
 	Enum                 []any                   `json:"enum"`
 	Default              any                     `json:"default"`
+	Example              any                     `json:"example"`
 	MinItems             int                     `json:"minItems"`
 	MaxItems             int                     `json:"maxItems"`
 	MinLength            int                     `json:"minLength"`
@@ -171,11 +172,17 @@ type OASchema struct {
 	Pattern              string                  `json:"pattern"`
 	Ref                  string                  `json:"$ref"`
 	OneOf                []*OASchema             `json:"oneOf"`
+	Title                string                  `json:"title"`
 	Description          string                  `json:"description"`
 	CreateOnly           bool                    `json:"createOnly"`
 	Sensitive            bool                    `json:"_secure"`
 	Nullable             bool                    `json:"nullable"`
-	name                 string                  // json field name
+
+	// User config schemas prefix the extensions with "x-"
+	CreateOnlyExt bool `json:"x-createOnly"`
+	SensitiveExt  bool `json:"x-_secure"`
+
+	name string // json field name
 }
 
 // OAAdditionalProperties is either the schema of map values,

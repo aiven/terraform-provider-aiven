@@ -10,7 +10,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/pg"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/serviceintegration"
 )
 
 func Cassandra() []schema.StateUpgrader {
@@ -98,26 +97,6 @@ func PG() []schema.StateUpgrader {
 		{
 			Type:    pg.ResourcePG().CoreConfigSchema().ImpliedType(),
 			Upgrade: pg.ResourcePGStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func ServiceIntegration() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    serviceintegration.ResourceServiceIntegration().CoreConfigSchema().ImpliedType(),
-			Upgrade: serviceintegration.ResourceServiceIntegrationStateUpgrade,
-			Version: 0,
-		},
-	}
-}
-
-func ServiceIntegrationEndpoint() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    serviceintegration.ResourceServiceIntegrationEndpoint().CoreConfigSchema().ImpliedType(),
-			Upgrade: serviceintegration.ResourceServiceIntegrationEndpointStateUpgrade,
 			Version: 0,
 		},
 	}

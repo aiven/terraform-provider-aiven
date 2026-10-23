@@ -477,6 +477,30 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 	})
 }
 
+func TestGenNewResourceValidateUserConfig(t *testing.T) {
+	item := &Item{Properties: map[string]*Item{}}
+
+	t.Run("resource validates the user config blocks", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), `ValidateConfig: adapter.ValidateUserConfig("endpoint_type")`)
+	})
+
+	t.Run("datasource doesn't", func(t *testing.T) {
+		def := &Definition{Datasource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(datasourceType, def, item, false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "ValidateConfig")
+	})
+
+	t.Run("rejects validateConfig", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{ValidateConfig: true}, UserConfigDiscriminator: "endpoint_type"}
+		_, err := genNewResource(resourceType, def, item, false)
+		require.EqualError(t, err, "validateConfig: call adapter.ValidateUserConfig from it, userConfigDiscriminator can't set it")
+	})
+}
+
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 

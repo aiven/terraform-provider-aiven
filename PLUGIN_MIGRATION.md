@@ -93,8 +93,8 @@
 |  87 | aiven_project_user                          |        |     2 |
 |  88 | aiven_project_vpc                           | yes    |     2 |
 |  89 | aiven_service_component                     |        |     1 |
-|  90 | aiven_service_integration                   |        |     2 |
-|  91 | aiven_service_integration_endpoint          |        |     2 |
+|  90 | aiven_service_integration                   | yes    |     2 |
+|  91 | aiven_service_integration_endpoint          | yes    |     2 |
 |  92 | aiven_service_list                          | yes    |     1 |
 |  93 | aiven_service_plan                          | yes    |     1 |
 |  94 | aiven_service_plan_list                     | yes    |     1 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 60%                          | 97     |   163 |
+|     | TOTAL MIGRATED 62%                          | 101    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```

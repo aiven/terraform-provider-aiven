@@ -36,6 +36,16 @@ func TestDescriptionBuilder_Build(t *testing.T) {
 			want: "Billing group ID. Must be a valid UUID. Changing this property forces recreation of the resource.",
 		},
 		{
+			name: "adds example",
+			desc: Desc("Connection string").Example("AccountName=IDENT"),
+			want: "Connection string. Example: `AccountName=IDENT`.",
+		},
+		{
+			name: "prefers default to example, renders numbers without exponent",
+			desc: Desc("Batch size").DefaultValue(1e6).Example(5.0),
+			want: "Batch size. The default value is `1000000`.",
+		},
+		{
 			name: "adds beta availability warning",
 			desc: Desc("Service setting").Beta(),
 			want: "Service setting. " + `
@@ -100,6 +110,17 @@ This data source is in the limited availability stage and may change without not
 			name: "keeps the callout last, so nothing is pulled into the box",
 			desc: Desc("Service setting").LimitedAvailability().RemoveMissing(),
 			want: "Service setting. If this resource is missing (for example, after a service power off), " +
+				"it's removed from the state and a new create plan is generated." + `
+
+~> **Limited availability resource**
+This resource is in the limited availability stage and may change without notice. ` + LimitedAvailabilityMessage,
+		},
+		{
+			name: "moves the appended sentences out of a closing callout",
+			desc: Desc("Service setting.\n\n~> **Warning**\nMind the gap.").LimitedAvailability().RemoveMissing(),
+			want: "Service setting.\n\n~> **Warning**\nMind the gap." + `
+
+If this resource is missing (for example, after a service power off), ` +
 				"it's removed from the state and a new create plan is generated." + `
 
 ~> **Limited availability resource**
