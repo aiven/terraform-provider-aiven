@@ -5,6 +5,12 @@ $comment: |
   This schema defines the structure for configuring Terraform provider resources and datasources.
   Use this file to specify how your provider's resources and datasources should behave.
 properties:
+  include:
+    type: string
+    $comment: |
+      A shared definition file to build on, e.g. ".service_user.yml".
+      Its maps are merged and its lists appended, the other values of this file win, e.g. a "remove" list adds to the included one.
+      An included list can't be replaced, e.g. an enum: keep it out of the shared file.
   version:
     type: integer
     $comment: |

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -839,15 +840,38 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 			continue
 		}
 
-		defPath := filepath.Join(definitionsPath, name)
-		defFile, err := os.Open(defPath)
+		data, err := os.ReadFile(filepath.Join(dir, name))
 		if err != nil {
 			return nil, fmt.Errorf("could not open definition file %q: %w", name, err)
 		}
 
+		// "include: .service_user.yml" puts the definition on top of the shared one, see mergeYAML
+		var doc map[string]any
+		if err := yaml.Unmarshal(data, &doc); err != nil {
+			return nil, fmt.Errorf("could not parse definition file %q: %w", name, err)
+		}
+		if include, ok := doc["include"].(string); ok {
+			delete(doc, "include")
+			baseData, err := os.ReadFile(filepath.Join(dir, include))
+			if err != nil {
+				return nil, fmt.Errorf("definition %q: could not open include %q: %w", name, include, err)
+			}
+			var base map[string]any
+			if err := yaml.Unmarshal(baseData, &base); err != nil {
+				return nil, fmt.Errorf("definition %q: could not parse include %q: %w", name, include, err)
+			}
+			if base == nil {
+				return nil, fmt.Errorf("definition %q: include %q must contain a YAML map", name, include)
+			}
+			data, err = yaml.Marshal(mergeYAML(base, doc))
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		// Marshals yaml files with a little validation
 		def := new(Definition)
-		dec := yaml.NewDecoder(defFile)
+		dec := yaml.NewDecoder(bytes.NewReader(data))
 		dec.KnownFields(true)
 		err = dec.Decode(def)
 		if err != nil {
@@ -875,6 +899,30 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 	}
 
 	return defs, nil
+}
+
+// mergeYAML puts src on top of dst: maps are merged, lists appended, other values replaced, e.g.
+//
+//	dst: {remove: [a], schema: {plan: {computed: true}}, version: 1}
+//	src: {remove: [b], schema: {plan: {optional: true}}, version: 2}
+//	out: {remove: [a, b], schema: {plan: {computed: true, optional: true}}, version: 2}
+func mergeYAML(dst, src map[string]any) map[string]any {
+	for k, v := range src {
+		switch v := v.(type) {
+		case map[string]any:
+			if d, ok := dst[k].(map[string]any); ok {
+				dst[k] = mergeYAML(d, v)
+				continue
+			}
+		case []any:
+			if d, ok := dst[k].([]any); ok {
+				dst[k] = append(d, v...)
+				continue
+			}
+		}
+		dst[k] = v
+	}
+	return dst
 }
 
 // deepCopyItem returns a deep copy of item via a yaml round-trip. Every Item
