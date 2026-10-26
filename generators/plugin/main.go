@@ -267,7 +267,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				return fmt.Errorf("could not create directory %s: %w", importDir, err)
 			}
 
-			importData := importCommands(def, importIDFormats(def, root))
+			importData := importCommand(def, root)
 
 			err = os.WriteFile(filepath.Join(importDir, importFileName), []byte(importData), 0o644)
 			if err != nil {

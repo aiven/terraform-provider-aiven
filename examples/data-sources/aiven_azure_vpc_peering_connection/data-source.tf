@@ -1,8 +1,20 @@
-data "aiven_azure_vpc_peering_connection" "azure_to_aiven_peering" {
-  vpc_id                = data.aiven_project_vpc.example_vpc.id
-  azure_subscription_id = "00000000-0000-0000-0000-000000000000"
-  peer_resource_group   = "example-resource-group"
-  vnet_name             = "example-vnet"
-  peer_azure_app_id     = "00000000-0000-0000-0000-000000000000"
-  peer_azure_tenant_id  = "00000000-0000-0000-0000-000000000000"
+data "aiven_azure_vpc_peering_connection" "example" {
+  project = "example-project"
+
+  // OPTIONAL FIELDS
+  project_vpc_id        = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  azure_subscription_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  vnet_name             = "my-vnet"
+  peer_azure_app_id     = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  peer_azure_tenant_id  = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  peer_resource_group   = "my-resource-group"
+
+  /* COMPUTED FIELDS
+  peering_connection_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  create_time           = "2021-01-01T00:00:00Z"
+  state                 = "ACTIVE"
+  state_info = {
+    foo = "foo"
+  }
+  */
 }

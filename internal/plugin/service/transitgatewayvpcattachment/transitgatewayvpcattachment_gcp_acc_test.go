@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -37,7 +38,9 @@ func TestAccAivenGCPTransitGatewayVPCAttachment_basic(t *testing.T) {
 	fullConfig := testAccAivenGCPTransitGatewayVPCAttachment(prefix, networkName, config)
 	ctx := t.Context()
 
+	var identityImport acc.IdentityImportVersionCheck
 	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -69,6 +72,10 @@ func TestAccAivenGCPTransitGatewayVPCAttachment_basic(t *testing.T) {
 				ResourceName:      transitGatewayAttachmentResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName: transitGatewayAttachmentResourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
 			},
 			{
 				// Delete both sides of the peering while the Aiven and Google VPCs

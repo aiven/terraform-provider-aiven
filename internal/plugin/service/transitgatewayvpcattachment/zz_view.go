@@ -8,23 +8,25 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 const typeName = "aiven_transit_gateway_vpc_attachment"
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:         createView,
-	Delete:         deleteView,
-	DeleteState:    &adapter.DeleteStateOptions{},
-	IdentityFields: []string{"id"},
-	Read:           readView,
-	RefreshState:   &adapter.RefreshStateCondition{},
-	RemoveMissing:  true,
-	Schema:         resourceSchema,
-	SchemaInternal: resourceSchemaInternal(),
-	TypeName:       typeName,
-	Update:         updateView,
+	Create:                 createView,
+	Delete:                 deleteView,
+	DeleteState:            &adapter.DeleteStateOptions{},
+	IdentityFields:         []string{"project", "project_vpc_id", "peer_cloud_account", "peer_vpc", "peer_region"},
+	IdentityFieldsOptional: []string{"peer_region"},
+	Read:                   readView,
+	RefreshState:           &adapter.RefreshStateCondition{},
+	RemoveMissing:          true,
+	Schema:                 resourceSchema,
+	SchemaInternal:         resourceSchemaInternal(),
+	TypeName:               typeName,
+	Update:                 updateView,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IdentityFields: []string{"id"},
-	Read:           readView,
-	Schema:         datasourceSchema,
-	SchemaInternal: datasourceSchemaInternal(),
-	TypeName:       typeName,
+	IdentityFields:         []string{"project", "project_vpc_id", "peer_cloud_account", "peer_vpc", "peer_region"},
+	IdentityFieldsOptional: []string{"peer_region"},
+	Read:                   readView,
+	Schema:                 datasourceSchema,
+	SchemaInternal:         datasourceSchemaInternal(),
+	TypeName:               typeName,
 }

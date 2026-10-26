@@ -56,6 +56,10 @@ type ResourceOptions struct {
 	// Unset ones are left out of the string ID: "foo/bar" instead of "foo/bar/baz".
 	IdentityFieldsOptional []string
 
+	// IdentityVersion and IdentityUpgraders migrate saved identities when their schema changes.
+	IdentityVersion   int64
+	IdentityUpgraders map[int64]resource.IdentityUpgrader
+
 	// MutableIdentity disables Terraform's identity-change validation when identity attributes
 	// may change in place (set by the generator from Update request-body membership).
 	MutableIdentity bool
@@ -125,6 +129,12 @@ type ResourceOptions struct {
 	Delete func(ctx context.Context, client avngen.Client, d ResourceData) error
 	Read   func(ctx context.Context, client avngen.Client, d ResourceData) error
 
+	// ImportState overrides string-ID import for resources with legacy or nonstandard identifiers.
+	ImportState func(context.Context, avngen.Client, resource.ImportStateRequest, *resource.ImportStateResponse)
+
+	// StateUpgraders migrate the given prior schema version directly to the current version.
+	StateUpgraders func(context.Context, avngen.Client) map[int64]resource.StateUpgrader
+
 	// ModifyPlan implements resource.ResourceWithModifyPlan.
 	// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
 	ModifyPlan func(ctx context.Context, client avngen.Client, d ResourceData) error
@@ -166,7 +176,20 @@ var (
 	_ resource.ResourceWithValidateConfig   = (*resourceAdapter)(nil)
 	_ resource.ResourceWithConfigValidators = (*resourceAdapter)(nil)
 	_ resource.ResourceWithModifyPlan       = (*resourceAdapter)(nil)
+	_ resource.ResourceWithUpgradeState     = (*resourceAdapter)(nil)
+	_ resource.ResourceWithUpgradeIdentity  = (*resourceAdapter)(nil)
 )
+
+func (a *resourceAdapter) UpgradeIdentity(context.Context) map[int64]resource.IdentityUpgrader {
+	return a.resource.IdentityUpgraders
+}
+
+func (a *resourceAdapter) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	if a.resource.StateUpgraders == nil {
+		return nil
+	}
+	return a.resource.StateUpgraders(ctx, a.client)
+}
 
 type resourceAdapter struct {
 	client   avngen.Client
@@ -211,6 +234,7 @@ func (a *resourceAdapter) Schema(
 
 func (a *resourceAdapter) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, rsp *resource.IdentitySchemaResponse) {
 	rsp.IdentitySchema = identityschema.Schema{
+		Version:    a.resource.IdentityVersion,
 		Attributes: make(map[string]identityschema.Attribute, len(a.resource.IdentityFields)),
 	}
 	for _, name := range a.resource.IdentityFields {
@@ -239,6 +263,9 @@ func (a *resourceAdapter) Create(
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
+	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
 	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutCreate)
@@ -344,6 +371,9 @@ func (a *resourceAdapter) Read(
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
+	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
 	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
@@ -547,6 +577,9 @@ func (a *resourceAdapter) Update(
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
+	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutUpdate)
 	if err != nil {
@@ -708,6 +741,9 @@ func (a *resourceAdapter) Delete(
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
+	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutDelete)
 	if err != nil {
@@ -729,7 +765,7 @@ func (a *resourceAdapter) Delete(
 	} else {
 		err = a.resource.Delete(ctx, a.client, d)
 	}
-	if err != nil && !IsNotFound(err) {
+	if err != nil && (errors.Is(err, ErrDeleteStateFailed) || !IsNotFound(err)) {
 		diags.AddError("failed to delete resource", err.Error())
 	}
 }
@@ -753,6 +789,9 @@ type DeleteStateOptions struct {
 // ErrDeleteStateDesired indicates the delete poller's terminal state was not yet reached after a Read.
 var ErrDeleteStateDesired = errors.New("resource has not reached the desired deleted state")
 
+// ErrDeleteStateFailed stops deletion immediately, without polling Read or retrying Delete.
+var ErrDeleteStateFailed = errors.New("resource deletion cannot continue")
+
 // defaultDeleteStateRetryDelay is the fixed delay between attempts when DeleteStateOptions.retryDelay
 // is zero.
 const defaultDeleteStateRetryDelay = time.Second * 5
@@ -767,6 +806,8 @@ const defaultDeleteStateRetryDelay = time.Second * 5
 //   - a 404 ends the poll and Delete's outer guard treats it as a successful deletion;
 //   - any other Read error fails the delete;
 //   - a successful Read means the resource is still present, so the poll continues.
+//
+// ErrDeleteStateFailed is an exception: it stops deletion before Read and is never retried.
 //
 // The delay is fixed and there is no attempt cap: the poll runs until it succeeds or ctx (the delete
 // timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the last attempt's error,
@@ -796,6 +837,9 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 			// is cleared once Delete finally succeeds.
 			if !deleteSucceeded {
 				deleteErr = a.resource.Delete(ctx, a.client, rd)
+				if errors.Is(deleteErr, ErrDeleteStateFailed) {
+					return deleteErr
+				}
 				deleteSucceeded = deleteErr == nil
 				if !deleteSucceeded {
 					tflog.Debug(ctx, fmt.Sprintf("Delete of %q returned an error (will poll): %s", a.resource.TypeName, deleteErr))
@@ -842,18 +886,18 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 		retry.WrapContextErrorWithLastError(true),
 		retry.RetryIf(func(err error) bool {
 			// Keep polling only while not-terminal; a 404 or any other Read error ends the poll.
-			return errors.Is(err, ErrDeleteStateDesired)
+			return !errors.Is(err, ErrDeleteStateFailed) && errors.Is(err, ErrDeleteStateDesired)
 		}),
 	)
 
 	AddWarnings(ctx, lastAttemptWarnings...)
 
-	// With no attempt cap, the loop only stops on success (nil), a terminal Read error (404 or any
-	// other), or context cancellation. So an ErrDeleteStateDesired here can only be the last attempt's
-	// error wrapped into the context deadline (retry.WrapContextErrorWithLastError): the poll timed
-	// out. Join the last unresolved Delete error (nil once Delete succeeded) so the deadline also
+	// With no attempt cap, the loop only stops on success (nil), ErrDeleteStateFailed, a terminal Read
+	// error (404 or any other), or context cancellation. An ErrDeleteStateDesired here can only be the
+	// last attempt's error wrapped into the context deadline (retry.WrapContextErrorWithLastError):
+	// the poll timed out. Join the last unresolved Delete error (nil once Delete succeeded) so the deadline also
 	// reports why the delete never finished. All other outcomes pass through untouched.
-	if errors.Is(err, ErrDeleteStateDesired) {
+	if !errors.Is(err, ErrDeleteStateFailed) && errors.Is(err, ErrDeleteStateDesired) {
 		err = errors.Join(err, deleteErr)
 	}
 
@@ -865,13 +909,16 @@ func (a *resourceAdapter) ImportState(
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
-	if req.Identity != nil && !req.Identity.Raw.IsNull() {
+	switch {
+	case req.Identity != nil && !req.Identity.Raw.IsNull():
 		for _, name := range a.resource.IdentityFields {
 			var value types.String
 			rsp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root(name), &value)...)
 			rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(name), value)...)
 		}
-	} else {
+	case a.resource.ImportState != nil:
+		a.resource.ImportState(ctx, a.client, req, rsp)
+	default:
 		// Set only ID fields here; Terraform runs Read afterward to populate full state.
 		values, err := splitID(req.ID, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
 		if err != nil {

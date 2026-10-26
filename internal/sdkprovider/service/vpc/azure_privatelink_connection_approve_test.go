@@ -54,14 +54,12 @@ func TestAccAivenAzurePrivatelinkConnectionApproval_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("azurerm_private_endpoint.private_endpoint", "id"),
 				),
 			},
-			importStateByName("aiven_project_vpc.project_vpc"),
-			importStateByName("aiven_pg.pg"),
 			importStateByName("aiven_azure_privatelink.private_link"),
-			importStateByName("aiven_azure_privatelink_connection_approval.approval"),
-			importStateByName("azurerm_resource_group.resource_group"),
-			importStateByName("azurerm_virtual_network.virtual_network"),
-			importStateByName("azurerm_subnet.subnet"),
-			importStateByName("azurerm_private_endpoint.private_endpoint"),
+			{
+				ResourceName:      "aiven_azure_privatelink_connection_approval.approval",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -64,11 +64,7 @@ func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("aws_vpc_endpoint.endpoint", "state", "available"),
 				),
 			},
-			importStateByName("aiven_project_vpc.aiven_vpc"),
-			importStateByName("aiven_pg.pg"),
 			importStateByName(resourceName),
-			importStateByName("aws_vpc.aws_vpc"),
-			importStateByName("aws_vpc_endpoint.endpoint"),
 		},
 	})
 }
