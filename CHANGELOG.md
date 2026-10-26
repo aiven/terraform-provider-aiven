@@ -13,6 +13,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
+- Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the grafana_stat_total_*
+  and grafana_stat_totals_* metrics, which require periodic database queries
 
 ## [4.65.0] - 2026-10-21
 

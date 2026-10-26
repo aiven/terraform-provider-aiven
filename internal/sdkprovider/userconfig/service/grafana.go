@@ -509,6 +509,11 @@ func grafanaUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeSet,
 			},
+			"metrics_disable_total_stats": {
+				Description: "Do not collect the grafana_stat_total_* and grafana_stat_totals_* metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"metrics_enabled": {
 				Description: "Enable Grafana's /metrics endpoint.",
 				Optional:    true,
