@@ -183,9 +183,6 @@ Common fields:
 resource:
   description: "..."
   deprecationMessage: "..."
-  importIDFormats:                 # Optional docs-only override for resources with multiple import forms
-    - PROJECT/RESOURCE_ID
-    - PROJECT/RESOURCE_ID/REGION
   terminationProtection: true # Check field before delete
   stateAttribute: state # Terraform attribute polled after Create/Update/Delete
   refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
@@ -195,15 +192,11 @@ resource:
   deleteStateDesired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
 ```
 
-`importIDFormats` generates every listed form in both the resource's `Import` documentation and
-`examples/resources/<resource>/import.sh`. It does not change `IdentityFields` or runtime import parsing.
-Omit it when the single import form can be derived from `identityFields`.
-
 `identityFields` fields compose the string ID and are also the resource identity
 (Terraform 1.12+). Each must be a top-level string attribute, and `Read` must rebuild state
 from them. `identityFieldsOptional` lists the trailing `identityFields` not required for identity import;
 unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
-identity import for every resource.
+identity import for every resource. String import examples use the full ID, including optional fields.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
 successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
@@ -589,6 +582,7 @@ Beyond basic CRUD, `ResourceOptions` supports:
 - `ModifyPlan` — implements `resource.ResourceWithModifyPlan` (separate from `planModifier` in YAML)
 - `ValidateConfig` — implements `resource.ResourceWithValidateConfig`
 - `ConfigValidators` — implements `resource.ResourceWithConfigValidators`
+- `ImportState` — overrides string-ID import, for example to normalize legacy IDs before Read
 - `IdentityFieldsOptional` — generated from top-level `identityFieldsOptional` in the definition YAML
 - `MutableIdentity` — inferred when an identity field is sent in the Update request body
 - `RefreshStateCheck` — post-Create/Update convergence check that `refreshState` can't express (see [Resource Configuration](#resource-configuration))
@@ -601,8 +595,10 @@ type ResourceData interface {
     Get(key string) any              // Get from plan, then config, then state
     GetOk(key string) (any, bool)    // Get with existence check
     GetState(key string) any         // Get specifically from state
+    GetStateOk(key string) (any, bool) // Get only from prior state; false when absent, including during Create
     HasChange(key string) bool       // Plan value differs from state
     Set(key string, value any) error // Set a value in current state
+    SetUnknown(key string) error     // Let apply determine a computed attribute (ModifyPlan only)
     SetID(parts ...string) error     // Set composite ID
     ID() string                      // Get the "id" field
     IsNewResource() bool             // True if ID is empty

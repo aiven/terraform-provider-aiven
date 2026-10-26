@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -37,7 +38,9 @@ func TestAccAivenGCPTransitGatewayVPCAttachment_basic(t *testing.T) {
 	fullConfig := testAccAivenGCPTransitGatewayVPCAttachment(prefix, networkName, config)
 	ctx := t.Context()
 
-	resource.Test(t, resource.TestCase{
+	var identityImport acc.IdentityImportVersionCheck
+	testCase := resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -71,6 +74,15 @@ func TestAccAivenGCPTransitGatewayVPCAttachment_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				ResourceName: transitGatewayAttachmentResourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
+				ExpectNonEmptyPlan: true, // Configured timeouts cannot be read from the API.
+				ImportPlanChecks: resource.ImportPlanChecks{PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate),
+					acc.ExpectOnlyAttributesChanged(transitGatewayAttachmentResourceName, "timeouts"),
+				}},
+			},
+			{
 				// Delete both sides of the peering while the Aiven and Google VPCs
 				// still exist, so deleting either network cannot hide a broken path.
 				Config: testAccAivenGCPTransitGatewayVPCAttachmentFixture(networkName, config),
@@ -82,7 +94,24 @@ func TestAccAivenGCPTransitGatewayVPCAttachment_basic(t *testing.T) {
 				Check: testAccCheckAivenGCPTransitGatewayVPCAttachmentDeleted(ctx, config.GCPProject, networkName),
 			},
 		},
-	})
+	}
+	for i := range testCase.Steps {
+		testCase.Steps[i].ProtoV6ProviderFactories = acc.TestProtoV6ProviderFactories
+		testCase.Steps[i].ExternalProviders = testCase.ExternalProviders
+	}
+	testCase.ProtoV6ProviderFactories = nil
+	testCase.ExternalProviders = nil
+	current := testCase.Steps[1]
+	published := current
+	published.ProtoV6ProviderFactories = nil
+	published.ExternalProviders = map[string]resource.ExternalProvider{
+		"aiven":  acc.ExternalAivenProvider(t, "4.65.1"),
+		"google": gcpExternalProvider(),
+	}
+	steps := []resource.TestStep{testCase.Steps[0], testCase.Steps[1]}
+	steps = append(steps, acc.ProviderRollbackSteps(t, published, current, &identityImport)...)
+	testCase.Steps = append(steps, testCase.Steps[2:]...)
+	resource.Test(t, testCase)
 }
 
 func testAccAivenGCPTransitGatewayVPCAttachmentChecks(c *gcpConfig) resource.TestCheckFunc {

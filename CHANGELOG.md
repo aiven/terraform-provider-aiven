@@ -51,6 +51,19 @@ nav_order: 1
   and `aiven_service_integration_endpoint` without secrets, e.g., when the token's role can't read them.
 - Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
   for the connection state, and no longer fails when the peer rejected or deleted the connection.
+- **IMPORTANT**: `aiven_aws_vpc_peering_connection` resources and data sources now require a nonempty `aws_vpc_region`.
+  Before upgrading, replace `""` with the existing connection's region from state. Changing the region replaces
+  the connection. Existing resource IDs remain unchanged.
+- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, and `aiven_gcp_vpc_peering_connection`
+  resources and data sources to the Plugin Framework and add `create_time`. They
+  and `aiven_transit_gateway_vpc_attachment` also accept `project` and `project_vpc_id` as alternatives to `vpc_id`.
+  Switching forms for the same VPC does not recreate the connection.
+- Keep created AWS, Azure and GCP VPC peering connections in Terraform state when readiness checks fail, so they
+  can be destroyed or replaced. For these resources and `aiven_transit_gateway_vpc_attachment`, `create_before_destroy`
+  replacements with the same peer identifiers are rejected while the old connection exists; use destroy-before-create.
+- Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
+  For `aiven_transit_gateway_vpc_attachment`, set `peer_region` when another regional match exists.
+- Fix deletion and replacement cleanup of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment`.
 
 ## [4.65.1] - 2026-10-30
 

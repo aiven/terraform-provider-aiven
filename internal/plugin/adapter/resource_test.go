@@ -1030,6 +1030,29 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 		require.Equal(t, 1, reads)
 	})
 
+	t.Run("terminal delete failure stops before read without retrying", func(t *testing.T) {
+		t.Parallel()
+
+		deletes, reads := 0, 0
+		deleteError := fmt.Errorf("unresolved peering region: %w", ErrDeleteStateFailed)
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return deleteError
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return ErrNotFound
+			},
+		)
+
+		err := a.deleteState(t.Context(), nil)
+		require.ErrorIs(t, err, ErrDeleteStateFailed)
+		require.Equal(t, deleteError, err)
+		require.Equal(t, 1, deletes)
+		require.Zero(t, reads, "Read must not resolve a different object after Delete rejected its key")
+	})
+
 	t.Run("polls read until the desired state is reached", func(t *testing.T) {
 		t.Parallel()
 

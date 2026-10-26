@@ -131,17 +131,6 @@ properties:
         $comment: |
           Limits the doc example to this many resource blocks along each `ref` chain, this resource included.
           The last block renders its refs as literals. Unlimited when omitted.
-      importIDFormats:
-        type: array
-        minItems: 1
-        uniqueItems: true
-        items:
-          type: string
-          minLength: 1
-        $comment: |
-          Import identifier formats to show in the generated resource documentation and import.sh.
-          This is documentation metadata only and does not change runtime ID parsing.
-          TODO: remove once aiven_transit_gateway_vpc_attachment uses identityFields and identityFieldsOptional.
       validateConfig:
         type: boolean
         $comment: |
