@@ -1,0 +1,141 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  description: |
+    Creates and manages an AWS VPC peering connection with an Aiven VPC.
+    Configure either `vpc_id` or both `project` and `project_vpc_id` to select the Aiven VPC.
+
+    If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement.
+    To retry with the same peer identifiers, use destroy-before-create for the recovery apply.
+    With `create_before_destroy`, the existing connection prevents creation of its replacement.
+  refDepth: 2
+  refreshStateExists: true
+  deleteStateGone: true
+  removeMissing: true
+  modifyPlan: true
+  importIDFormats:
+    - PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION
+    - PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID
+datasource:
+  description: Gets information about an AWS VPC peering connection.
+  # VpcGet returns all peerings for a VPC and accepts no peer filters.
+  # These overrides define Terraform's local lookup, which OpenAPI does not describe.
+  schemaOverride:
+    # OpenAPI has no Terraform ID; local lookup builds it from the matched connection.
+    id:
+      computed: true
+    # Either `vpc_id` or `project` with `project_vpc_id` selects the Aiven VPC.
+    project:
+      optional: true
+      computed: true
+      description: The name of the project the Aiven VPC belongs to.
+    project_vpc_id:
+      optional: true
+      computed: true
+      description: The ID of the Aiven VPC.
+    vpc_id:
+      optional: true
+      computed: true
+      description: The ID of the Aiven VPC, in the `PROJECT/PROJECT_VPC_ID` format.
+    aws_account_id:
+      required: true
+    aws_vpc_id:
+      required: true
+    aws_vpc_region:
+      required: true
+clientHandler: vpc
+# Preserve existing four-part import IDs instead of rebuilding them with idAttributeComposed.
+legacyTimeouts: true
+rename:
+  peer_cloud_account: aws_account_id
+  peer_vpc: aws_vpc_id
+  peer_region: aws_vpc_region
+operations:
+  - id: VpcPeeringConnectionCreate
+    type: create
+    disableView: true
+  - id: VpcGet
+    type: read
+    resultKey: peering_connections
+    disableView: true
+  - id: VpcPeeringConnectionDelete
+    type: delete
+    disableView: true
+remove:
+  - peer_resource_group
+  - peering_connection_id
+  - "state_info/*"
+  - update_time
+  - user_peer_network_cidrs
+  - vpc_peering_connection_type
+  - peer_azure_app_id # Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet
+  - peer_azure_tenant_id # Azure tenant id in UUID4 form
+schema:
+  id:
+    type: string
+    computed: true
+    description: Resource ID in the `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format. Existing four-part import IDs remain valid.
+    example: example-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d/123456789012/vpc-0123456789abcdef0/eu-west-1
+  create_time:
+    # The generator treats creation timestamps as immutable, but re-requesting a peering changes this value.
+    useStateForUnknown: false
+    description: |
+      VPC peering connection creation timestamp. Re-creating a connection updates this timestamp even when its ID stays the same.
+      May be `null` for legacy connections whose creation time is unknown.
+  # modifyPlan replaces the resource when the Aiven VPC changes, so switching between
+  # `vpc_id` and `project` with `project_vpc_id` keeps the connection.
+  project:
+    ref: aiven_project_vpc.project
+    optional: true
+    computed: true
+    forceNew: false
+    alsoRequires: [project_vpc_id]
+    description: The name of the project the Aiven VPC belongs to. Changing the Aiven VPC forces recreation of the resource.
+    example: example-project
+  project_vpc_id:
+    ref: aiven_project_vpc.project_vpc_id
+    format: uuid
+    # OpenAPI omits the lowercase UUID restriction on project VPC paths.
+    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    optional: true
+    computed: true
+    forceNew: false
+    alsoRequires: [project]
+    conflictsWith: [vpc_id]
+    description: The ID of the Aiven VPC. Changing the Aiven VPC forces recreation of the resource.
+  vpc_id:
+    ref: aiven_project_vpc.id
+    type: string
+    optional: true
+    computed: true
+    forceNew: false
+    exactlyOneOf: [vpc_id, project]
+    # This Terraform selector is absent from OpenAPI; its VPC component must be a lowercase UUID.
+    pattern: '^[^/]*/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    description: The ID of the Aiven VPC, in the `PROJECT/PROJECT_VPC_ID` format. Changing the Aiven VPC forces recreation of the resource; switching to `project` and `project_vpc_id` doesn't.
+    example: example-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d
+  aws_account_id:
+    description: AWS account ID.
+    example: "123456789012"
+  aws_vpc_id:
+    description: AWS VPC ID.
+    example: vpc-0123456789abcdef0
+  aws_vpc_region:
+    required: true
+    forceNew: true
+    minLength: 1
+    # OpenAPI allows omission to select a default; Terraform requires an explicit region
+    # to identify the connection and plan replacement without inferring the API default.
+    description: |
+      The AWS region of the peered VPC. This argument must be nonempty.
+      When upgrading a configuration that uses `""`, set the existing connection's `aws_vpc_region` from Terraform state.
+    example: eu-west-1
+  state_info:
+    additionalProperties:
+      type: string
+  aws_vpc_peering_connection_id:
+    type: string
+    computed: true
+    # The generator treats *_id fields as stable, but the API omits this ID after rejection.
+    useStateForUnknown: false
+    description: The ID of the AWS VPC peering connection.
+    example: pcx-0123456789abcdef0

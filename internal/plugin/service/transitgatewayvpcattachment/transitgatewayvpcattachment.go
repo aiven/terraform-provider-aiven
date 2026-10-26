@@ -12,70 +12,39 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func init() {
 	ResourceOptions.ModifyPlan = modifyPlan
-	ResourceOptions.RefreshStateCheck = refreshStateCheck
+	ResourceOptions.RefreshStateCheck = pluginvpc.PeeringRefreshStateCheck
 	DataSourceOptions.Read = datasourceReadView
 }
 
-type peeringID struct {
-	project          string
-	projectVpcID     string
-	peerCloudAccount string
-	peerVpc          string
-	peerRegion       *string
-}
-
-// parsePeeringID accepts PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC and
-// PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC/PEER_REGION.
-func parsePeeringID(src string) (*peeringID, error) {
-	parts := strings.Split(src, "/")
-	if len(parts) != 4 && len(parts) != 5 {
-		return nil, fmt.Errorf("expected unix path-like string with 4-5 chunks, got %d", len(parts))
-	}
-
-	id := &peeringID{
-		project:          parts[0],
-		projectVpcID:     parts[1],
-		peerCloudAccount: parts[2],
-		peerVpc:          parts[3],
-	}
-	if len(parts) == 5 {
-		if parts[4] == "" {
-			return nil, errors.New("peer region in the fifth ID component must not be empty")
-		}
-		id.peerRegion = &parts[4]
-	}
-	return id, nil
-}
-
-func expandPeeringID(d adapter.ResourceData) (*peeringID, error) {
-	project, projectVpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+// parsePeeringID preserves whether the region was explicitly supplied: the SDK
+// also populated peer_region from the API when the four-part ID omitted it.
+func parsePeeringID(value string) (*pluginvpc.ProjectPeeringID, error) {
+	id, err := pluginvpc.ParseProjectPeeringID(value)
 	if err != nil {
 		return nil, err
 	}
-
-	id := &peeringID{
-		project:          project,
-		projectVpcID:     projectVpcID,
-		peerCloudAccount: d.Get("peer_cloud_account").(string),
-		peerVpc:          d.Get("peer_vpc").(string),
-	}
-	if peerRegion, ok := d.GetOk("peer_region"); ok && peerRegion.(string) != "" {
-		id.peerRegion = new(peerRegion.(string))
+	// TGW rejects an empty fifth component, legacy cloud-specific resources accept it.
+	if id.PeerRegion != nil && *id.PeerRegion == "" {
+		return nil, errors.New("peer region in the fifth ID component must not be empty")
 	}
 	return id, nil
 }
 
-func flattenPeeringID(d adapter.ResourceData, id *peeringID) error {
-	parts := []string{id.project, id.projectVpcID, id.peerCloudAccount, id.peerVpc}
-	if id.peerRegion != nil {
-		parts = append(parts, *id.peerRegion)
+func expandPeeringID(d adapter.ResourceData) (*pluginvpc.ProjectPeeringID, error) {
+	id, err := pluginvpc.NewProjectPeeringID(d, "peer_cloud_account", "peer_vpc")
+	if err != nil {
+		return nil, err
 	}
-	return d.SetID(schemautil.BuildResourceID(parts...))
+	if peerRegion, ok := d.GetOk("peer_region"); ok && peerRegion.(string) != "" {
+		id.PeerRegion = new(peerRegion.(string))
+	}
+	return id, nil
 }
 
 func createView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
@@ -90,16 +59,15 @@ func createView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) e
 		userPeerNetworkCidrs = &cidrs
 	}
 
-	if _, err = cl.VpcPeeringConnectionCreate(ctx, id.project, id.projectVpcID, &vpc.VpcPeeringConnectionCreateIn{
-		PeerCloudAccount:     id.peerCloudAccount,
-		PeerRegion:           id.peerRegion,
-		PeerVpc:              id.peerVpc,
+	if err = id.Create(ctx, cl, &vpc.VpcPeeringConnectionCreateIn{
+		PeerCloudAccount:     id.PeerCloudAccount,
+		PeerRegion:           id.PeerRegion,
+		PeerVpc:              id.PeerVPC,
 		UserPeerNetworkCidrs: userPeerNetworkCidrs,
-	}); err != nil {
+	}, true); err != nil {
 		return fmt.Errorf("creating VPC peering connection: %w", err)
 	}
-
-	return flattenPeeringID(d, id)
+	return d.SetID(id.String())
 }
 
 func readView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
@@ -108,16 +76,12 @@ func readView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) err
 		return fmt.Errorf("parsing peering VPC ID: %w", err)
 	}
 
-	conn, err := findPeeringConnection(ctx, cl, id)
+	conn, err := id.Find(ctx, cl)
 	if err != nil {
 		return fmt.Errorf("find VPC peering connection by Terraform ID: %w", err)
 	}
-	if conn.State == vpc.VpcPeeringConnectionStateTypePendingPeer {
-		detail := "Aiven created its side of the connection, but the connection isn't active until the setup is completed in the peer cloud account."
-		if stateInfo := formatStateInfo(stateInfoMap(conn.StateInfo)); stateInfo != "" {
-			detail += " State info: " + stateInfo
-		}
-		adapter.AddWarning(ctx, "VPC peering connection is pending peer setup", detail)
+	if err := pluginvpc.PendingPeerWarning(ctx, "")(d, map[string]any{"state": conn.State, "state_info": conn.StateInfo}); err != nil {
+		return err
 	}
 
 	configured, ok := d.GetConfigOk("user_peer_network_cidrs")
@@ -134,16 +98,12 @@ func readView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) err
 		return setConnectionState(d, id, conn)
 	}
 
-	if err := updateCIDRs(ctx, cl, id, conn, desired); err != nil {
+	if err := updateCIDRs(ctx, cl, d, id, conn, desired); err != nil {
 		return fmt.Errorf("reconcile configured CIDRs after reading %q: %w", d.ID(), err)
 	}
-	// Keep the planned value while the backend applies the update. Returning the
-	// retry sentinel prevents this intermediate response from becoming final state.
+	// PUT persists CIDRs synchronously; cloud routes are applied asynchronously.
 	conn.UserPeerNetworkCidrs = desired
-	if err := setConnectionState(d, id, conn); err != nil {
-		return err
-	}
-	return fmt.Errorf("waiting for transit gateway VPC attachment CIDRs to converge: %w", adapter.ErrRefreshStateDesired)
+	return setConnectionState(d, id, conn)
 }
 
 func datasourceReadView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
@@ -152,21 +112,26 @@ func datasourceReadView(ctx context.Context, cl avngen.Client, d adapter.Resourc
 		return err
 	}
 
-	conn, err := findPeeringConnection(ctx, cl, id)
+	conn, err := id.Find(ctx, cl)
 	if err != nil {
 		return fmt.Errorf("lookup `aiven_transit_gateway_vpc_attachment` by `peer_cloud_account`, `peer_vpc` and optional `peer_region`: %w", err)
 	}
 
 	if conn.PeerRegion != nil && *conn.PeerRegion != "" {
-		id.peerRegion = conn.PeerRegion
-	}
-	if err := flattenPeeringID(d, id); err != nil {
-		return err
+		id.PeerRegion = conn.PeerRegion
 	}
 	return setConnectionState(d, id, conn)
 }
 
 func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+	if err := pluginvpc.PlanProjectVPC(d); err != nil {
+		return err
+	}
+	if peer, known := d.GetConfigOk("peer_vpc"); known && strings.HasPrefix(peer.(string), "vpc-") {
+		if cidrs, known := d.GetConfigOk("user_peer_network_cidrs"); known && len(cidrs.([]any)) > 0 {
+			return errors.New("user_peer_network_cidrs must be empty for ordinary AWS VPC peering connections; configure CIDRs only for a Transit Gateway (tgw-*)")
+		}
+	}
 	// Outside the live states the API intentionally projects CIDRs as an empty set,
 	// regardless of whether the underlying rows still exist. Keep state aligned with
 	// that projection and suppress the resulting configuration diff: Update rejects
@@ -185,12 +150,19 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 }
 
 func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
+	// Updates limited to Terraform state do not change cloud readiness. A real CIDR write,
+	// including reconciliation during Read, enables the check again.
+	d.SetRefreshStateCheckEnabled(false)
+	// Only explicitly configured CIDRs can be written back to the API.
+	if _, configured := d.GetConfigOk("user_peer_network_cidrs"); !configured {
+		return nil
+	}
 	id, err := parsePeeringID(d.ID())
 	if err != nil {
 		return fmt.Errorf("error parsing peering VPC ID: %w", err)
 	}
 
-	conn, err := findPeeringConnection(ctx, cl, id)
+	conn, err := id.Find(ctx, cl)
 	if err != nil {
 		return fmt.Errorf("cannot get transit gateway vpc attachment by id %s: %w", d.ID(), err)
 	}
@@ -206,18 +178,18 @@ func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) e
 		return fmt.Errorf("cannot update user_peer_network_cidrs while VPC peering connection is in state %q", conn.State)
 	}
 
-	return updateCIDRs(ctx, cl, id, conn, desired)
+	return updateCIDRs(ctx, cl, d, id, conn, desired)
 }
 
-func updateCIDRs(ctx context.Context, cl avngen.Client, id *peeringID, conn *vpc.PeeringConnectionOut, desired []string) error {
+func updateCIDRs(ctx context.Context, cl avngen.Client, d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, conn *vpc.PeeringConnectionOut, desired []string) error {
 	add := make([]vpc.AddIn, 0)
 	for _, cidr := range desired {
 		if !slices.Contains(conn.UserPeerNetworkCidrs, cidr) {
 			add = append(add, vpc.AddIn{
 				Cidr:             cidr,
-				PeerCloudAccount: id.peerCloudAccount,
+				PeerCloudAccount: id.PeerCloudAccount,
 				PeerRegion:       conn.PeerRegion,
-				PeerVpc:          id.peerVpc,
+				PeerVpc:          id.PeerVPC,
 			})
 		}
 	}
@@ -233,9 +205,10 @@ func updateCIDRs(ctx context.Context, cl avngen.Client, id *peeringID, conn *vpc
 		return nil
 	}
 
-	if _, err := cl.VpcPeeringConnectionUpdate(ctx, id.project, id.projectVpcID, &vpc.VpcPeeringConnectionUpdateIn{Add: &add, Delete: &remove}); err != nil {
+	if _, err := cl.VpcPeeringConnectionUpdate(ctx, id.Project, id.ProjectVPCID, &vpc.VpcPeeringConnectionUpdateIn{Add: &add, Delete: &remove}); err != nil {
 		return fmt.Errorf("cannot update transit gateway VPC attachment: %w", err)
 	}
+	d.SetRefreshStateCheckEnabled(true)
 
 	return nil
 }
@@ -246,64 +219,45 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		return fmt.Errorf("error parsing peering VPC ID: %w", err)
 	}
 
-	if id.peerRegion == nil {
-		_, err := client.VpcPeeringConnectionDelete(ctx, id.project, id.projectVpcID, id.peerCloudAccount, id.peerVpc)
-		return err
+	if id.PeerRegion == nil {
+		region, err := id.ResolveRegion(ctx, client)
+		if err != nil {
+			return err
+		}
+		// A regionless DELETE targets the VPC's region, while a four-part ID
+		// can identify an imported peering in another region.
+		if region != "" {
+			id.PeerRegion = &region
+		}
 	}
-
-	_, err = client.VpcPeeringConnectionWithRegionDelete(ctx, id.project, id.projectVpcID, id.peerCloudAccount, id.peerVpc, *id.peerRegion)
-	return err
+	return id.Delete(ctx, client, nil)
 }
 
-func findPeeringConnection(ctx context.Context, cl avngen.Client, id *peeringID) (*vpc.PeeringConnectionOut, error) {
-	rsp, err := cl.VpcGet(ctx, id.project, id.projectVpcID)
-	if err != nil {
-		return nil, err
-	}
-	conn, err := adapter.FindOne(rsp.PeeringConnections, func(i int) bool {
-		candidate := rsp.PeeringConnections[i]
-		return candidate.PeerCloudAccount == id.peerCloudAccount &&
-			candidate.PeerVpc == id.peerVpc &&
-			(id.peerRegion == nil || equalPeerRegions(candidate.PeerRegion, id.peerRegion))
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &conn, nil
-}
-
-func equalPeerRegions(left, right *string) bool {
-	leftEmpty := left == nil || *left == ""
-	rightEmpty := right == nil || *right == ""
-	if leftEmpty || rightEmpty {
-		return leftEmpty && rightEmpty
-	}
-	return *left == *right
-}
-
-func setConnectionState(d adapter.ResourceData, id *peeringID, conn *vpc.PeeringConnectionOut) error {
+func setConnectionState(d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, conn *vpc.PeeringConnectionOut) error {
 	values := map[string]any{
 		"peer_cloud_account":      conn.PeerCloudAccount,
 		"peer_vpc":                conn.PeerVpc,
 		"peering_connection_id":   nil,
 		"state":                   string(conn.State),
-		"state_info":              stateInfoMap(conn.StateInfo),
+		"state_info":              pluginvpc.StateInfoMap(conn.StateInfo),
 		"user_peer_network_cidrs": conn.UserPeerNetworkCidrs,
-		"vpc_id":                  schemautil.BuildResourceID(id.project, id.projectVpcID),
+		"project":                 id.Project,
+		"project_vpc_id":          id.ProjectVPCID,
+		"vpc_id":                  schemautil.BuildResourceID(id.Project, id.ProjectVPCID),
 	}
 	// Terraform distinguishes an explicitly configured empty string from null. Both
-	// mean omission during resource Create and produce a four-part ID, but replacing ""
-	// with null would be an inconsistent result. Leave an existing empty value untouched
-	// because ResourceData.Set also normalizes a top-level empty string to null. A
-	// five-part managed-resource ID remains authoritative, so a data source may resolve one
-	// from the API while retaining its explicitly configured empty selector.
-	if peerRegion, ok := d.GetOk("peer_region"); !ok || peerRegion.(string) != "" || (id.peerRegion != nil && !d.IsDataSource()) {
+	// mean omission during resource Create and produce a four-part ID, but replacing
+	// "" with null would be an inconsistent result. Leave an existing empty value
+	// untouched because ResourceData.Set also normalizes a top-level empty string to
+	// null. A five-part resource ID remains authoritative, so a data source may resolve a
+	// region from the API while retaining its explicitly configured empty selector.
+	if peerRegion, ok := d.GetOk("peer_region"); !ok || peerRegion.(string) != "" || (id.PeerRegion != nil && !d.IsDataSource()) {
 		values["peer_region"] = nil
 		// A four-part resource ID means peer_region was omitted from configuration.
-		// Do not turn the region discovered by the API into ForceNew configuration;
-		// five-part resource and data source IDs carry the region explicitly.
-		if id.peerRegion != nil {
-			values["peer_region"] = *id.peerRegion
+		// Clear any region the SDK discovered so an unchanged configuration does not
+		// replace the attachment. Five-part IDs retain their explicit region.
+		if id.PeerRegion != nil {
+			values["peer_region"] = *id.PeerRegion
 		}
 	}
 	if providerID, ok := conn.StateInfo["aws_vpc_peering_connection_id"].(string); ok && providerID != "" {
@@ -315,63 +269,7 @@ func setConnectionState(d adapter.ResourceData, id *peeringID, conn *vpc.Peering
 		}
 	}
 
-	return nil
-}
-
-func stateInfoMap(info map[string]any) map[string]string {
-	if len(info) == 0 {
-		return nil
-	}
-
-	result := make(map[string]string, len(info))
-	for key, value := range info {
-		if str, ok := value.(string); ok {
-			result[key] = str
-		} else {
-			result[key] = fmt.Sprintf("%+v", value)
-		}
-	}
-	return result
-}
-
-func refreshStateCheck(d adapter.ResourceData) error {
-	state := d.Get("state").(string)
-	stateInfo := lo.MapValues(d.Get("state_info").(map[string]any), func(value any, _ string) string {
-		return value.(string)
-	})
-	detail := formatStateInfo(stateInfo)
-	if detail != "" {
-		detail = "; state_info: " + detail
-	}
-
-	switch vpc.VpcPeeringConnectionStateType(state) {
-	case vpc.VpcPeeringConnectionStateTypeActive, vpc.VpcPeeringConnectionStateTypePendingPeer:
-		return nil
-	case vpc.VpcPeeringConnectionStateTypeApproved, vpc.VpcPeeringConnectionStateTypeApprovedPeerRequested:
-		return fmt.Errorf("VPC peering connection is still in transient state %q%s", state, detail)
-	case vpc.VpcPeeringConnectionStateTypeDeleted, vpc.VpcPeeringConnectionStateTypeDeleting:
-		return fmt.Errorf("%w: VPC peering connection was deleted and cannot become active%s", adapter.ErrRefreshStateFailed, detail)
-	case vpc.VpcPeeringConnectionStateTypeDeletedByPeer:
-		return fmt.Errorf("%w: peer cloud resource was deleted%s", adapter.ErrRefreshStateFailed, detail)
-	case vpc.VpcPeeringConnectionStateTypeRejectedByPeer:
-		return fmt.Errorf("%w: VPC peering connection request was rejected by the peer%s", adapter.ErrRefreshStateFailed, detail)
-	case vpc.VpcPeeringConnectionStateTypeInvalidSpecification:
-		return fmt.Errorf("%w: VPC peering connection specification is invalid%s", adapter.ErrRefreshStateFailed, detail)
-	case vpc.VpcPeeringConnectionStateTypeError:
-		return fmt.Errorf("%w: VPC peering connection reached ERROR%s", adapter.ErrRefreshStateFailed, detail)
-	default:
-		// A newly introduced backend state isn't proof that the connection is terminal.
-		// Keep polling and preserve the checkpointed resource.
-		return fmt.Errorf("unknown VPC peering connection state %q%s", state, detail)
-	}
-}
-
-func formatStateInfo(info map[string]string) string {
-	parts := lo.MapToSlice(info, func(key, value string) string {
-		return fmt.Sprintf("%s=%q", key, value)
-	})
-	slices.Sort(parts)
-	return strings.Join(parts, ", ")
+	return d.SetID(id.String())
 }
 
 func isLiveState(state string) bool {

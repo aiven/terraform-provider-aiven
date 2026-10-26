@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
 )
 
 const (
@@ -39,6 +41,13 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 	cidrs := []string{testPeerNetworkCIDR}
 	emptyCIDRs := []string{}
 	ctx := t.Context()
+	legacyConfig := testAccAivenAWSTransitGatewayVPCAttachment(prefix, config, &cidrs, &peerRegion)
+	separateFieldsConfig := strings.Replace(legacyConfig,
+		"vpc_id             = aiven_project_vpc.aiven_vpc.id",
+		"project = aiven_project_vpc.aiven_vpc.project\n  project_vpc_id = aiven_project_vpc.aiven_vpc.project_vpc_id", 1)
+	if separateFieldsConfig == legacyConfig {
+		t.Fatal("test configuration must replace vpc_id with separate VPC fields")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -58,7 +67,7 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccAivenAWSTransitGatewayVPCAttachment(prefix, config, &cidrs, &peerRegion),
+				Config: legacyConfig,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate),
@@ -73,6 +82,18 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 				ResourceName:      transitGatewayAttachmentResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: separateFieldsConfig,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccAivenAWSTransitGatewayVPCAttachmentChecks(config, cidrs, 5),
+					resource.TestCheckResourceAttrPair(transitGatewayAttachmentResourceName, "project", "aiven_project_vpc.aiven_vpc", "project"),
+					resource.TestCheckResourceAttrPair(transitGatewayAttachmentResourceName, "project_vpc_id", "aiven_project_vpc.aiven_vpc", "project_vpc_id"),
+					resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "peer_region", config.Region),
+				),
 			},
 			{
 				// Omitting an Optional+Computed set relinquishes management; it must
@@ -184,38 +205,207 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_backwardCompat(t *testing.T) {
 }
 
 func TestAccAivenAWSTransitGatewayVPCAttachment_legacyVPCPeering(t *testing.T) {
-	// This characterizes a legacy contract rather than the clean-slate design:
-	// the resource still accepts an ordinary AWS vpc-* and exposes its pcx-* ID.
-	config := getAWSConfig(t)
+	// The resource also accepts an ordinary AWS vpc-* and exposes its pcx-* ID.
+	c := getAWSConfig(t)
 	prefix := "test-tf-acc-" + acctest.RandString(7)
-	ctx := t.Context()
+	config := testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeering(prefix, c)
+	updatedConfig := strings.Replace(config, `create = "10m"`, "create = \"10m\"\n    update = \"20m\"", 1)
+	fixture := testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringFixture(prefix, c)
+	var id *pluginvpc.ProjectPeeringID
+	var cloudID string
+	checkPending := resource.ComposeTestCheckFunc(
+		testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringChecks(c),
+		resource.TestCheckResourceAttrSet(transitGatewayAttachmentResourceName, "project"),
+		resource.TestCheckResourceAttrSet(transitGatewayAttachmentResourceName, "project_vpc_id"),
+		func(state *terraform.State) error {
+			r := state.RootModule().Resources[transitGatewayAttachmentResourceName].Primary
+			cloudID = r.Attributes["peering_connection_id"]
+			var err error
+			id, err = pluginvpc.ParseProjectPeeringID(r.ID)
+			return err
+		},
+	)
+	deleteStep := resource.TestStep{
+		Config: fixture,
+		ConfigPlanChecks: resource.ConfigPlanChecks{
+			PreApply: []plancheck.PlanCheck{
+				plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionDestroy),
+			},
+		},
+		Check: testAccCheckAivenAWSTransitGatewayVPCAttachmentDeleted(t.Context(), "aws_vpc.peer"),
+	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		PreCheck:                 func() { preCheckAWSPeeringCLI(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"aws": awsExternalProvider(),
+		ExternalProviders:        map[string]resource.ExternalProvider{"aws": awsExternalProvider()},
+		AdditionalCLIOptions: &resource.AdditionalCLIOptions{
+			Plan: resource.PlanOptions{NoRefresh: true},
 		},
 		Steps: []resource.TestStep{
-			{
-				Config: testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeering(prefix, config),
-				Check:  testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringChecks(config),
-			},
+			{Config: config, Check: checkPending},
 			{
 				ResourceName:      transitGatewayAttachmentResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			deleteStep,
 			{
-				Config: testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeeringFixture(prefix, config),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionDestroy),
-					},
-				},
-				Check: testAccCheckAivenAWSTransitGatewayVPCAttachmentDeleted(ctx, "aws_vpc.peer"),
+				// Cover deletion while pending, then reuse the VPCs for the rejected-connection update.
+				Config: config,
+				Check:  checkPending,
 			},
+			{
+				// Only the timeout changes; no peering update is sent to the API.
+				PreConfig: func() { rejectAWSPeering(t, id, cloudID) },
+				Config:    updatedConfig,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply:            []plancheck.PlanCheck{plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate)},
+					PostApplyPreRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
+				Check: func(state *terraform.State) error {
+					return resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "id", id.String()),
+						resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "state", "REJECTED_BY_PEER"),
+						resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "peering_connection_id"),
+						resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "state_info.aws_vpc_peering_connection_id"),
+					)(state)
+				},
+			},
+			deleteStep,
 		},
+	})
+}
+
+func TestAccAivenAWSTransitGatewayVPCAttachment_backwardCompatWithoutRefreshRejected(t *testing.T) {
+	c := getAWSConfig(t)
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	var id *pluginvpc.ProjectPeeringID
+	var cloudID string
+	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+		// This is an ordinary AWS vpc-* peering managed through the TGW resource.
+		TFConfig: testAccAivenAWSTransitGatewayVPCAttachmentLegacyVPCPeering(prefix, c), OldProviderVersion: "4.61.0",
+	})
+	steps[0].Check = resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "state", "PENDING_PEER"),
+		resource.TestMatchResourceAttr(transitGatewayAttachmentResourceName, "peer_vpc", regexp.MustCompile(`^vpc-`)),
+		resource.TestMatchResourceAttr(transitGatewayAttachmentResourceName, "peering_connection_id", regexp.MustCompile(`^pcx-`)),
+		resource.TestCheckResourceAttrPair(transitGatewayAttachmentResourceName, "peering_connection_id", transitGatewayAttachmentResourceName, "state_info.aws_vpc_peering_connection_id"),
+		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "project"),
+		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "project_vpc_id"),
+		func(state *terraform.State) error {
+			r := state.RootModule().Resources[transitGatewayAttachmentResourceName].Primary
+			cloudID = r.Attributes["peering_connection_id"]
+			var err error
+			id, err = pluginvpc.ParseProjectPeeringID(r.ID)
+			return err
+		},
+	)
+	steps[1].PreConfig = func() {
+		// Leave the old Terraform state untouched while the peer rejects the request.
+		rejectAWSPeering(t, id, cloudID)
+	}
+	steps[1].ConfigPlanChecks = resource.ConfigPlanChecks{
+		PreApply:            []plancheck.PlanCheck{plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate)},
+		PostApplyPreRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+	}
+	steps[1].Check = func(state *terraform.State) error {
+		return resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "id", id.String()),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "project", id.Project),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "project_vpc_id", id.ProjectVPCID),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "state", "REJECTED_BY_PEER"),
+			resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "peering_connection_id"),
+			resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "state_info.aws_vpc_peering_connection_id"),
+		)(state)
+	}
+	for i := range steps {
+		if steps[i].ExternalProviders == nil {
+			steps[i].ExternalProviders = make(map[string]resource.ExternalProvider)
+		}
+		steps[i].ExternalProviders["aws"] = awsExternalProvider()
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { preCheckAWSPeeringCLI(t) },
+		AdditionalCLIOptions: &resource.AdditionalCLIOptions{
+			Plan: resource.PlanOptions{NoRefresh: true},
+		},
+		Steps: steps,
+	})
+}
+
+func TestAccAivenAWSTransitGatewayVPCAttachment_backwardCompatWithoutRefreshUnconfiguredCIDRs(t *testing.T) {
+	c := getAWSConfig(t)
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	cidrs := []string{testPeerNetworkCIDR}
+	const migratedCIDR = "10.20.0.0/24"
+	const updatedCIDR = "10.30.0.0/24"
+	var id *pluginvpc.ProjectPeeringID
+	config := testAccAivenAWSTransitGatewayVPCAttachment(prefix, c, nil, &c.Region)
+	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+		TFConfig: config,
+		// This PF version permits omitted CIDRs but predates the separate VPC fields.
+		OldProviderVersion: "4.65.0",
+	})
+	for i := range steps {
+		if steps[i].ExternalProviders == nil {
+			steps[i].ExternalProviders = make(map[string]resource.ExternalProvider)
+		}
+		steps[i].ExternalProviders["aws"] = awsExternalProvider()
+	}
+	create := steps[0]
+	create.Config = testAccAivenAWSTransitGatewayVPCAttachment(prefix, c, &cidrs, &c.Region)
+	create.Check = resource.ComposeTestCheckFunc(
+		testAccAivenAWSTransitGatewayVPCAttachmentChecks(c, cidrs, 5),
+		testAccCheckAivenAWSTransitGatewayVPCAttachmentActive(t.Context(), c.Region),
+		func(state *terraform.State) error {
+			var err error
+			id, err = pluginvpc.ParseProjectPeeringID(state.RootModule().Resources[transitGatewayAttachmentResourceName].Primary.ID)
+			return err
+		},
+	)
+	// Stop configuring CIDRs under the old provider, retaining the learned set in state.
+	steps[0].ConfigPlanChecks.PreApply = []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}
+	steps[0].Check = resource.ComposeTestCheckFunc(
+		testAccAivenAWSTransitGatewayVPCAttachmentChecks(c, cidrs, 5),
+		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "project"),
+		resource.TestCheckNoResourceAttr(transitGatewayAttachmentResourceName, "project_vpc_id"),
+	)
+	steps[1].PreConfig = func() {
+		// Change only the API; the no-refresh upgrade must not restore the old CIDRs.
+		replaceAWSTransitGatewayCIDR(t, id, testPeerNetworkCIDR, migratedCIDR)
+	}
+	steps[1].ConfigPlanChecks = resource.ConfigPlanChecks{
+		PreApply:            []plancheck.PlanCheck{plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate)},
+		PostApplyPreRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+	}
+	steps[1].Check = func(state *terraform.State) error {
+		return resource.ComposeTestCheckFunc(
+			testAccAivenAWSTransitGatewayVPCAttachmentChecks(c, []string{migratedCIDR}, 5),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "id", id.String()),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "project", id.Project),
+			resource.TestCheckResourceAttr(transitGatewayAttachmentResourceName, "project_vpc_id", id.ProjectVPCID),
+		)(state)
+	}
+	steps = append([]resource.TestStep{create}, steps...)
+	steps = append(steps, resource.TestStep{
+		// A later timeout-only update must also leave unconfigured CIDRs alone.
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		ExternalProviders:        map[string]resource.ExternalProvider{"aws": awsExternalProvider()},
+		PreConfig:                func() { replaceAWSTransitGatewayCIDR(t, id, migratedCIDR, updatedCIDR) },
+		Config:                   strings.Replace(config, `create = "10m"`, "create = \"10m\"\n    update = \"20m\"", 1),
+		ConfigPlanChecks: resource.ConfigPlanChecks{
+			PreApply:            []plancheck.PlanCheck{plancheck.ExpectResourceAction(transitGatewayAttachmentResourceName, plancheck.ResourceActionUpdate)},
+			PostApplyPreRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+		},
+		Check: testAccAivenAWSTransitGatewayVPCAttachmentChecks(c, []string{updatedCIDR}, 5),
+	})
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { acc.TestAccPreCheck(t) },
+		AdditionalCLIOptions: &resource.AdditionalCLIOptions{
+			Plan: resource.PlanOptions{NoRefresh: true},
+		},
+		Steps: steps,
 	})
 }
 
@@ -602,5 +792,85 @@ func awsExternalProvider() resource.ExternalProvider {
 	return resource.ExternalProvider{
 		Source:            "hashicorp/aws",
 		VersionConstraint: "=6.23.0",
+	}
+}
+
+func preCheckAWSPeeringCLI(t *testing.T) {
+	t.Helper()
+	acc.TestAccPreCheck(t)
+	if _, err := exec.LookPath("aws"); err != nil {
+		t.Fatalf("AWS CLI v2 is required to reject peering outside Terraform: %v", err)
+	}
+}
+
+func replaceAWSTransitGatewayCIDR(t *testing.T, id *pluginvpc.ProjectPeeringID, oldCIDR, newCIDR string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Minute)
+	defer cancel()
+	client, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	add := []vpc.AddIn{{
+		Cidr: newCIDR, PeerCloudAccount: id.PeerCloudAccount, PeerVpc: id.PeerVPC, PeerRegion: id.PeerRegion,
+	}}
+	remove := []string{oldCIDR}
+	if _, err := client.VpcPeeringConnectionUpdate(ctx, id.Project, id.ProjectVPCID, &vpc.VpcPeeringConnectionUpdateIn{
+		Add: &add, Delete: &remove,
+	}); err != nil {
+		t.Fatalf("change TGW CIDRs outside Terraform: %v", err)
+	}
+	wait := &retry.StateChangeConf{
+		Target: []string{"updated"},
+		Refresh: func() (any, string, error) {
+			connection, err := id.Find(ctx, client)
+			if err != nil {
+				return nil, "", err
+			}
+			if connection.State == vpc.VpcPeeringConnectionStateTypeActive &&
+				len(connection.UserPeerNetworkCidrs) == 1 && connection.UserPeerNetworkCidrs[0] == newCIDR {
+				return connection, "updated", nil
+			}
+			return connection, string(connection.State), nil
+		},
+		Timeout:      10 * time.Minute,
+		PollInterval: 5 * time.Second,
+	}
+	if _, err := wait.WaitForStateContext(ctx); err != nil {
+		t.Fatalf("wait for externally changed TGW CIDRs: %v", err)
+	}
+}
+
+func rejectAWSPeering(t *testing.T, id *pluginvpc.ProjectPeeringID, cloudID string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "aws", "ec2", "reject-vpc-peering-connection",
+		"--vpc-peering-connection-id", cloudID, "--region", *id.PeerRegion, "--no-cli-pager", "--no-cli-auto-prompt")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("reject AWS peering connection: %v\n%s", err, output)
+	}
+	client, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wait := &retry.StateChangeConf{
+		Target: []string{string(vpc.VpcPeeringConnectionStateTypeRejectedByPeer)},
+		Refresh: func() (any, string, error) {
+			connection, err := id.Find(ctx, client)
+			if err != nil {
+				return nil, "", err
+			}
+			return connection, string(connection.State), nil
+		},
+		Timeout:      10 * time.Minute,
+		PollInterval: 5 * time.Second,
+	}
+	connection, err := wait.WaitForStateContext(ctx)
+	if err != nil {
+		t.Fatalf("wait for Aiven to report rejected peering: %v", err)
+	}
+	if _, ok := connection.(*vpc.PeeringConnectionOut).StateInfo["aws_vpc_peering_connection_id"]; ok {
+		t.Fatal("rejected peering still has an AWS peering ID in the API")
 	}
 }

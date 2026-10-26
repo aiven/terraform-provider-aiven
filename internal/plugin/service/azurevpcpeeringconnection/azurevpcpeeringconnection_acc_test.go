@@ -1,0 +1,343 @@
+package azurevpcpeeringconnection_test
+
+import (
+	"context"
+	"fmt"
+	"regexp"
+	"testing"
+
+	"github.com/aiven/go-client-codegen/handler/vpc"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/kelseyhightower/envconfig"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	pluginvpc "github.com/aiven/terraform-provider-aiven/internal/plugin/vpc"
+)
+
+const peeringResource = "aiven_azure_vpc_peering_connection.peering_connection"
+
+type azureSecrets struct {
+	Project        string `envconfig:"AIVEN_PROJECT_NAME" required:"true"`
+	AivenAppID     string `envconfig:"AIVEN_AZURE_APP_ID" required:"true"`
+	TenantID       string `envconfig:"AZURE_TENANT_ID" required:"true"`
+	SubscriptionID string `envconfig:"AZURE_SUBSCRIPTION_ID" required:"true"`
+}
+
+func TestAccAivenAzureVPCPeeringConnection_basic(t *testing.T) {
+	var s azureSecrets
+	err := envconfig.Process("", &s)
+	if err != nil {
+		t.Skipf("Not all values has been provided: %s", err)
+	}
+
+	// This test requires dynamic provider configuration (user secret made in Azure).
+	// Terraform doesn't support dynamic configuration https://github.com/hashicorp/terraform/issues/25244
+	// Apply the two configurations in sequence.
+
+	prefix := "test-tf-acc-vpcpeering-" + acctest.RandString(7)
+	configOne := testAccVPCPeeringConnectionAzureResourcePartOne(prefix, &s)
+	configTwo := configOne + testAccVPCPeeringConnectionAzureResourcePartTwo(prefix, &s)
+	var peeringID string
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             checkAzurePeeringDestroy,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"azurerm": {
+				Source:            "hashicorp/azurerm",
+				VersionConstraint: "=3.30.0",
+			},
+			"azuread": {
+				Source:            "hashicorp/azuread",
+				VersionConstraint: "=2.30.0",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: configOne,
+				Check: resource.ComposeTestCheckFunc(
+					azurePeeringChecks(),
+					func(state *terraform.State) error {
+						peeringID = state.RootModule().Resources[peeringResource].Primary.ID
+						return nil
+					},
+					resource.TestCheckResourceAttr("aiven_project_vpc.vpc", "state", "ACTIVE"),
+				),
+			},
+			{ResourceName: peeringResource, ImportState: true, ImportStateVerify: true},
+			{
+				// Keep the parent VPC and Azure fixtures while testing peering deletion.
+				Config: testAccAzureFixture(prefix, &s),
+				Check: func(_ *terraform.State) error {
+					return checkAzurePeeringDeleted(context.Background(), peeringID, prefix+"-resource-group")
+				},
+			},
+			{Config: configOne, Check: azurePeeringChecks()},
+			// This test runs dynamic provider config
+			// azurerm_virtual_network_peering can not be imported cause terraform doesn't work well with dynamic vars
+			// https://github.com/hashicorp/terraform/issues/27934
+			{
+				Config: configTwo,
+				Check: resource.ComposeTestCheckFunc(
+					azurePeeringChecks(),
+					resource.TestCheckResourceAttrSet("azurerm_virtual_network_peering.network_peering", "id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAivenAzureVPCPeeringConnection_backwardCompat(t *testing.T) {
+	var s azureSecrets
+	if err := envconfig.Process("", &s); err != nil {
+		t.Skipf("Azure test configuration is missing: %s", err)
+	}
+	prefix := "test-tf-acc-vpcpeering-" + acctest.RandString(7)
+	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+		TFConfig:           testAccVPCPeeringConnectionAzureResourcePartOne(prefix, &s),
+		OldProviderVersion: "4.62.0", Checks: azurePeeringChecks(),
+	})
+	for i := range steps {
+		if steps[i].ExternalProviders == nil {
+			steps[i].ExternalProviders = make(map[string]resource.ExternalProvider)
+		}
+		steps[i].ExternalProviders["azurerm"] = resource.ExternalProvider{Source: "hashicorp/azurerm", VersionConstraint: "=3.30.0"}
+		steps[i].ExternalProviders["azuread"] = resource.ExternalProvider{Source: "hashicorp/azuread", VersionConstraint: "=2.30.0"}
+	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() { acc.TestAccPreCheck(t) }, CheckDestroy: checkAzurePeeringDestroy, Steps: steps,
+	})
+}
+
+// Based on https://aiven.io/docs/platform/howto/vnet-peering-azure
+func testAccAzureFixture(prefix string, s *azureSecrets) string {
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+  tenant_id       = %[3]q
+  subscription_id = %[4]q
+}
+
+provider "azuread" {
+  tenant_id = %[3]q
+}
+
+data "azuread_client_config" "current" {}
+
+data "aiven_project" "project" {
+  project = %[2]q
+}
+
+data "azurerm_subscription" "subscription" {
+  subscription_id = %[4]q
+}
+
+resource "aiven_project_vpc" "vpc" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "azure-germany-westcentral"
+  network_cidr = "192.168.1.0/24"
+
+  timeouts {
+    create = "15m"
+  }
+}
+
+resource "azurerm_resource_group" "resource_group" {
+  location = "germanywestcentral"
+  name     = "%[1]s-resource-group"
+}
+
+resource "azurerm_virtual_network" "virtual_network" {
+  name                = "%[1]s-virtual-network"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+}
+
+# 1. Log in with an Azure admin account
+# Skip, no login required for terraform
+
+# 2. Create application object
+resource "azuread_application" "application" {
+  display_name = "%[1]s-application"
+  # Keep the caller as an owner for credential management and cleanup.
+  owners = [data.azuread_client_config.current.object_id]
+  # Accounts in any organizational directory (multi-tenant)
+  #  https://learn.microsoft.com/en-us/azure/active-directory/develop/supported-accounts-validation
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
+
+  api {
+    requested_access_token_version = 2
+  }
+}
+
+# 3. Create a service principal for your app object
+resource "azuread_service_principal" "app_principal" {
+  application_id = azuread_application.application.application_id
+  owners         = [data.azuread_client_config.current.object_id]
+}
+
+# 4. Set a password for your app object
+resource "azuread_application_password" "app_password" {
+  application_object_id = azuread_application.application.object_id
+}
+
+# 5. Find the id properties of your virtual network
+# Skip, we have values in the state
+
+# 6. Grant your service principal permissions to peer
+resource "azurerm_role_assignment" "app_role_assignment" {
+  role_definition_name = "Network Contributor"
+  principal_id         = azuread_service_principal.app_principal.object_id
+  scope                = azurerm_virtual_network.virtual_network.id
+}
+
+# 7. Read the existing service principal for the Aiven application object.
+# It is shared across peerings in this tenant and must survive test cleanup.
+data "azuread_service_principal" "aiven_principal" {
+  application_id = %[5]q
+}
+
+# 8. Create a custom role for the Aiven application object
+resource "azurerm_role_definition" "role_definition" {
+  name        = "%[1]s-role-definition"
+  description = "Allows creating a peering to vnets in scope (but not from)"
+  scope       = "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}"
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/peer/action"]
+  }
+
+  assignable_scopes = [
+    "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}"
+  ]
+}
+
+# 9. Assign the custom role to the Aiven service principal
+resource "azurerm_role_assignment" "aiven_role_assignment" {
+  role_definition_id = azurerm_role_definition.role_definition.role_definition_resource_id
+  principal_id       = data.azuread_service_principal.aiven_principal.object_id
+  scope              = azurerm_virtual_network.virtual_network.id
+
+  depends_on = [
+    azurerm_role_assignment.app_role_assignment
+  ]
+}
+
+# 10. Find your AD tenant id
+# Skip, it's in the env
+
+`, prefix, s.Project, s.TenantID, s.SubscriptionID, s.AivenAppID)
+}
+
+// testAccVPCPeeringConnectionAzureResourcePartTwo returns dynamically configured provider
+// https://github.com/hashicorp/terraform/issues/25244
+func testAccVPCPeeringConnectionAzureResourcePartTwo(prefix string, s *azureSecrets) string {
+	return fmt.Sprintf(`
+# 13. Create peering from your VNet to the Project VPC's VNet
+provider "azurerm" {
+  features {}
+  alias                = "app"
+  client_id            = azuread_application.application.application_id
+  client_secret        = azuread_application_password.app_password.value
+  subscription_id      = data.azurerm_subscription.subscription.subscription_id
+  tenant_id            = %[2]q
+  auxiliary_tenant_ids = [data.azuread_service_principal.aiven_principal.application_tenant_id]
+}
+
+resource "azurerm_virtual_network_peering" "network_peering" {
+  provider                     = azurerm.app
+  name                         = "%[1]s-network-peering"
+  remote_virtual_network_id    = aiven_azure_vpc_peering_connection.peering_connection.state_info["to-network-id"]
+  resource_group_name          = azurerm_resource_group.resource_group.name
+  virtual_network_name         = azurerm_virtual_network.virtual_network.name
+  allow_virtual_network_access = true
+}
+`, prefix, s.TenantID)
+}
+
+func testAccVPCPeeringConnectionAzureResourcePartOne(prefix string, s *azureSecrets) string {
+	return testAccAzureFixture(prefix, s) + fmt.Sprintf(`
+# 11. Create a peering connection from the Aiven Project VPC
+# 12. Wait for the Aiven platform to set up the connection
+resource "aiven_azure_vpc_peering_connection" "peering_connection" {
+  vpc_id                = aiven_project_vpc.vpc.id
+  peer_resource_group   = azurerm_resource_group.resource_group.name
+  azure_subscription_id = data.azurerm_subscription.subscription.subscription_id
+  vnet_name             = azurerm_virtual_network.virtual_network.name
+  peer_azure_app_id     = azuread_application.application.application_id
+  peer_azure_tenant_id  = %[1]q
+
+  depends_on = [
+    azurerm_role_assignment.aiven_role_assignment
+  ]
+}
+
+
+data "aiven_azure_vpc_peering_connection" "peering_connection" {
+  vpc_id                = aiven_azure_vpc_peering_connection.peering_connection.vpc_id
+  azure_subscription_id = aiven_azure_vpc_peering_connection.peering_connection.azure_subscription_id
+  vnet_name             = aiven_azure_vpc_peering_connection.peering_connection.vnet_name
+  peer_resource_group   = aiven_azure_vpc_peering_connection.peering_connection.peer_resource_group
+  peer_azure_app_id     = aiven_azure_vpc_peering_connection.peering_connection.peer_azure_app_id
+  peer_azure_tenant_id  = aiven_azure_vpc_peering_connection.peering_connection.peer_azure_tenant_id
+}
+`, s.TenantID)
+}
+
+func azurePeeringChecks() resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrPair(peeringResource, "vpc_id", "aiven_project_vpc.vpc", "id"),
+		resource.TestCheckResourceAttrPair(peeringResource, "azure_subscription_id", "data.azurerm_subscription.subscription", "subscription_id"),
+		resource.TestCheckResourceAttrPair(peeringResource, "vnet_name", "azurerm_virtual_network.virtual_network", "name"),
+		resource.TestCheckResourceAttrPair(peeringResource, "peer_resource_group", "azurerm_resource_group.resource_group", "name"),
+		resource.TestCheckResourceAttrPair(peeringResource, "peer_azure_app_id", "azuread_application.application", "application_id"),
+		resource.TestCheckResourceAttrPair("data."+peeringResource, "id", peeringResource, "id"),
+		resource.TestMatchResourceAttr(peeringResource, "state", regexp.MustCompile(`^(ACTIVE|PENDING_PEER)$`)),
+		func(state *terraform.State) error {
+			r := state.RootModule().Resources[peeringResource]
+			want := fmt.Sprintf("%s/%s/%s", r.Primary.Attributes["vpc_id"], r.Primary.Attributes["azure_subscription_id"], r.Primary.Attributes["vnet_name"])
+			if r.Primary.ID != want {
+				return fmt.Errorf("expected legacy peering ID %q, got %q", want, r.Primary.ID)
+			}
+			return nil
+		},
+	)
+}
+
+func checkAzurePeeringDeleted(ctx context.Context, value, group string) error {
+	id, err := pluginvpc.ParseProjectPeeringID(value)
+	if err != nil {
+		return err
+	}
+	client, err := acc.GetTestGenAivenClient()
+	if err != nil {
+		return err
+	}
+	connection, err := id.FindMatching(ctx, client, func(connection *vpc.PeeringConnectionOut) bool { return connection.PeerResourceGroup == group })
+	if adapter.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if connection.State != vpc.VpcPeeringConnectionStateTypeDeleted {
+		return fmt.Errorf("Azure peering %q still exists in state %s", value, connection.State)
+	}
+	return nil
+}
+
+func checkAzurePeeringDestroy(state *terraform.State) error {
+	for _, r := range state.RootModule().Resources {
+		if r.Type == "aiven_azure_vpc_peering_connection" {
+			if err := checkAzurePeeringDeleted(context.Background(), r.Primary.ID, r.Primary.Attributes["peer_resource_group"]); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

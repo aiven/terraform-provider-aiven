@@ -18,7 +18,13 @@ func PendingPeerWarning(ctx context.Context, cloud string) adapter.MapModifier {
 			return nil
 		}
 
-		detail := fmt.Sprintf("Aiven created the peering connection, but it will not become active until the peer setup is completed in %s.", cloud)
+		summary := "VPC peering setup is incomplete"
+		location := "the peer cloud account"
+		if cloud != "" {
+			summary = cloud + " " + summary
+			location = cloud
+		}
+		detail := fmt.Sprintf("Aiven created the peering connection, but it will not become active until the peer setup is completed in %s.", location)
 		if stateInfo, ok := dto["state_info"].(map[string]any); ok {
 			message, _ := stateInfo["message"].(string)
 			stateType, _ := stateInfo["type"].(string)
@@ -33,7 +39,7 @@ func PendingPeerWarning(ctx context.Context, cloud string) adapter.MapModifier {
 			}
 		}
 
-		adapter.AddWarning(ctx, fmt.Sprintf("%s VPC peering setup is incomplete", cloud), detail)
+		adapter.AddWarning(ctx, summary, detail)
 		return nil
 	}
 }

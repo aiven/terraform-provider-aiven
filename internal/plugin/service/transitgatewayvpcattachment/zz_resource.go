@@ -5,18 +5,20 @@ package transitgatewayvpcattachment
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -24,7 +26,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Terraform identifier for the VPC peering connection.",
+				MarkdownDescription: "Resource ID in the `PROJECT/PROJECT_VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC` format, with `/PEER_REGION` appended when the region is explicitly specified.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"peer_cloud_account": schema.StringAttribute{
@@ -48,7 +50,18 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"peering_connection_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Legacy AWS VPC peering connection ID (`pcx-*`) for ordinary AWS VPC peering connections, if available. This is not the AWS Transit Gateway attachment ID; TGW attachment details are exposed in `state_info`.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"project": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The name of the project the Aiven VPC belongs to. Changing the Aiven VPC forces recreation of the resource. The field is required with `project_vpc_id`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project_vpc_id"))},
+			},
+			"project_vpc_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The ID of the Aiven VPC. Changing the Aiven VPC forces recreation of the resource. The field is required with `project`. The field conflicts with `vpc_id`. Must be a valid UUID. Must match pattern: `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"), "must match pattern \"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\""), validators.UUID(), stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("project")), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("vpc_id"))},
 			},
 			"state": schema.StringAttribute{
 				Computed:            true,
@@ -64,17 +77,17 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "List of private IPv4 ranges to route through the peering connection.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.Set{setvalidator.SizeAtMost(128)},
 			},
 			"vpc_id": schema.StringAttribute{
-				MarkdownDescription: "Aiven project VPC ID in the `PROJECT/VPC_ID` format. Changing this property forces recreation of the resource.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Required:            true,
+				Computed:            true,
+				MarkdownDescription: "Aiven project VPC ID in the `PROJECT/PROJECT_VPC_ID` format. Changing the Aiven VPC forces recreation of the resource; switching to `project` and `project_vpc_id` doesn't. Exactly one of the fields must be specified: `project` or `vpc_id`. Must match pattern: `^[^/]*/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`.",
+				Optional:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^/]*/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"), "must match pattern \"^[^/]*/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\""), stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("project"), path.MatchRelative().AtParent().AtName("vpc_id"))},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC. Configure either `vpc_id` or both `project` and `project_vpc_id` to select the Aiven VPC.\n\nLegacy configurations using an AWS VPC ID (`vpc-*`) as `peer_vpc` create ordinary AWS VPC peerings. When `peer_region` is omitted, lookups require a single matching connection across all regions. Another connection with the same AWS account and VPC in a different region can prevent refresh or deletion. Use `aiven_aws_vpc_peering_connection` for new AWS VPC peerings. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {
@@ -91,6 +104,14 @@ func resourceSchemaInternal() *adapter.Schema {
 				Computed:       true,
 				Type:           adapter.SchemaTypeString,
 				ZeroNotAllowed: true,
+			},
+			"project": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
+			"project_vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
 			},
 			"state": &adapter.Schema{
 				Computed: true,
@@ -122,7 +143,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				},
 				Type: adapter.SchemaTypeSet,
 			},
-			"vpc_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"vpc_id": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 		},
 		Type: adapter.SchemaTypeObject,
 	}

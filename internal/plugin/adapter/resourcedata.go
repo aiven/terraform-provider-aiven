@@ -25,8 +25,10 @@ type ResourceData interface {
 	GetOk(key string) (any, bool)
 	GetConfigOk(key string) (any, bool)
 	GetState(key string) any
+	GetStateOk(key string) (any, bool)
 	HasChange(key string) bool
 	Set(key string, value any) error
+	SetUnknown(key string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -34,10 +36,12 @@ type ResourceData interface {
 	IsResource() bool
 	RequiresReplace(keys ...string)
 	Schema() *Schema
+	SetRefreshStateCheckEnabled(enabled bool)
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
 	requiresReplaceKeys() []string
+	refreshStateCheckEnabled() bool
 }
 
 type resourceData struct {
@@ -47,9 +51,21 @@ type resourceData struct {
 	isDataSource        bool
 	preservePlanValues  bool
 	requiresReplace     []string
+	skipRefreshCheck    bool
 }
 
 var _ ResourceData = (*resourceData)(nil)
+
+// SetRefreshStateCheckEnabled controls readiness validation for this operation.
+// A local update can disable it; a later write from Read can enable it again.
+// The post-operation Read and declarative refresh conditions still run.
+func (d *resourceData) SetRefreshStateCheckEnabled(enabled bool) {
+	d.skipRefreshCheck = !enabled
+}
+
+func (d *resourceData) refreshStateCheckEnabled() bool {
+	return !d.skipRefreshCheck
+}
 
 // GetConfigOk looks up a value in the original Terraform configuration. Unlike GetOk,
 // it never falls back to plan or state. This is useful during a post-operation Read when
@@ -206,11 +222,18 @@ func (d *resourceData) GetState(key string) any {
 	if d.state == nil {
 		panic(fmt.Errorf("state is nil"))
 	}
-	v, _, _, err := getOk(d.schema, d.state, key)
+	v, _ := d.GetStateOk(key)
+	return v
+}
+
+// GetStateOk reads only prior state. During Create there is no prior state,
+// even after the new resource's ID has been checkpointed in the plan.
+func (d *resourceData) GetStateOk(key string) (any, bool) {
+	v, _, ok, err := getOk(d.schema, d.state, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
 	}
-	return v
+	return v, ok
 }
 
 func (d *resourceData) HasChange(key string) bool {
@@ -237,6 +260,27 @@ func (d *resourceData) HasChange(key string) bool {
 // Returns an error if the key is not found in the schema.
 func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
+}
+
+// SetUnknown marks a computed attribute as unknown during ModifyPlan so Read can
+// determine its value during apply. Unknown values cannot be written to state.
+func (d *resourceData) SetUnknown(key string) error {
+	if d.plan == nil || !d.preservePlanValues {
+		return fmt.Errorf("SetUnknown is only supported during ModifyPlan")
+	}
+	prop, ok := d.schema.Properties[key]
+	if !ok {
+		return fmt.Errorf("key %q not found in schema", key)
+	}
+	if !prop.Computed {
+		return fmt.Errorf("attribute %q is not computed", key)
+	}
+	value, err := toTFValue(prop, nil)
+	if err != nil {
+		return err
+	}
+	d.plan[key] = tftypes.NewValue(value.Type(), tftypes.UnknownValue)
+	return nil
 }
 
 func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {

@@ -30,6 +30,40 @@ func TestResourceDataRequiresReplace(t *testing.T) {
 	require.Panics(t, func() { d.RequiresReplace("nope") })
 }
 
+func TestResourceDataSetUnknown(t *testing.T) {
+	t.Parallel()
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":   {Type: SchemaTypeString, Computed: true},
+			"tags": {Type: SchemaTypeMap, Items: &Schema{Type: SchemaTypeString}, Computed: true},
+			"name": {Type: SchemaTypeString},
+		},
+	}
+	t.Run("unknown values survive plan serialization", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"}, WithPreservePlanValues(), WithTestPlan(map[string]any{"id": "old"}))
+		require.NoError(t, err)
+		require.NoError(t, d.SetUnknown("id"))
+		require.NoError(t, d.SetUnknown("tags"))
+		var attributes map[string]tftypes.Value
+		require.NoError(t, d.tfValue().As(&attributes))
+		require.False(t, attributes["id"].IsKnown())
+		require.True(t, attributes["id"].Type().Equal(tftypes.String))
+		require.False(t, attributes["tags"].IsKnown())
+		require.True(t, attributes["tags"].Type().Equal(tftypes.Map{ElementType: tftypes.String}))
+		require.ErrorContains(t, d.SetUnknown("missing"), "not found in schema")
+		require.ErrorContains(t, d.SetUnknown("name"), "not computed")
+	})
+	t.Run("unknown values cannot be written outside ModifyPlan", func(t *testing.T) {
+		for _, opt := range []ResourceDataOpt{WithTestState(map[string]any{"id": "old"}), WithTestPlan(map[string]any{"id": "old"})} {
+			d, err := NewResourceData(sch, []string{"id"}, opt)
+			require.NoError(t, err)
+			require.ErrorContains(t, d.SetUnknown("id"), "only supported during ModifyPlan")
+			require.Equal(t, "old", d.ID())
+		}
+	})
+}
+
 // TestGetOkFalseIsAValue pins down that a stored false is a value, not a missing one.
 // Read overrides that fill in a field the API never returns (jardeployment's
 // restart_enabled) use GetOk to tell "the user set this" from "nothing is stored",
@@ -253,6 +287,33 @@ func TestResourceDataGetConfigOkWithoutConfig(t *testing.T) {
 
 	_, ok := rd.GetConfigOk("value")
 	require.False(t, ok, "state-only reads must not treat state as configuration")
+}
+
+func TestResourceDataGetStateOk(t *testing.T) {
+	sch := &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
+		"id": {Type: SchemaTypeString, Computed: true},
+	}}
+
+	t.Run("create with checkpointed ID has no prior state", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"}, WithTestPlan(map[string]any{}))
+		require.NoError(t, err)
+		require.NoError(t, d.SetID("new-id"))
+		require.Equal(t, "new-id", d.ID())
+		_, ok := d.GetStateOk("id")
+		require.False(t, ok)
+	})
+
+	t.Run("update retains prior ID after migration", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"},
+			WithTestState(map[string]any{"id": "legacy-id"}),
+			WithTestPlan(map[string]any{"id": "new-id"}),
+		)
+		require.NoError(t, err)
+		id, ok := d.GetStateOk("id")
+		require.True(t, ok)
+		require.Equal(t, "legacy-id", id)
+		require.Equal(t, "legacy-id", d.GetState("id"))
+	})
 }
 
 // TestResourceDataPreservedUnknownAndNullPlan verifies that preserved
