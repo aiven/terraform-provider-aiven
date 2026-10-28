@@ -16,6 +16,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocawsentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocawsprovision"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocpermissions"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhousedatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouseuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
@@ -24,6 +25,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmkaccessorgcp"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmkaccessoroci"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkapplication"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkapplicationdeployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkjarapplication"
@@ -32,16 +34,22 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/gcporgvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/gcpprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governanceaccess"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/grafana"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaacl"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnect"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnectcustompluginfile"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkamirrormaker"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkanativeacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschemaregistryacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkatopic"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkatopiclist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkauser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mirrormakerreplicationflow"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysqldatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysqluser"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearchsecuritypluginconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearchuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationaddress"
@@ -58,6 +66,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationusergroupmemberlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationuserlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationvpc"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pgdatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pguser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/projectvpc"
@@ -67,8 +76,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplanlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/transitgatewayvpcattachment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradestep"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkeyuser"
 )
 
@@ -82,10 +93,12 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(byocawsentity.ResourceOptions),
 		"aiven_byoc_aws_provision":                  adapter.NewLazyResource(byocawsprovision.ResourceOptions),
 		"aiven_byoc_permissions":                    adapter.NewLazyResource(byocpermissions.ResourceOptions),
+		"aiven_clickhouse":                          adapter.NewLazyResource(clickhouse.ResourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(clickhousedatabase.ResourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyResource(clickhouseuser.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyResource(connectionpool.ResourceOptions),
+		"aiven_flink":                               adapter.NewLazyResource(flink.ResourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyResource(flinkapplication.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(flinkapplicationdeployment.ResourceOptions),
 		"aiven_flink_jar_application":               adapter.NewLazyResource(flinkjarapplication.ResourceOptions),
@@ -94,15 +107,21 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyResource(gcporgvpcpeeringconnection.ResourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(governanceaccess.ResourceOptions),
+		"aiven_grafana":                             adapter.NewLazyResource(grafana.ResourceOptions),
+		"aiven_kafka":                               adapter.NewLazyResource(kafka.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(kafkaacl.ResourceOptions),
+		"aiven_kafka_connect":                       adapter.NewLazyResource(kafkaconnect.ResourceOptions),
 		"aiven_kafka_connect_custom_plugin_file":    adapter.NewLazyResource(kafkaconnectcustompluginfile.ResourceOptions),
+		"aiven_kafka_mirrormaker":                   adapter.NewLazyResource(kafkamirrormaker.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(kafkaschemaregistryacl.ResourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyResource(kafkatopic.ResourceOptions),
 		"aiven_kafka_user":                          adapter.NewLazyResource(kafkauser.ResourceOptions),
 		"aiven_mirrormaker_replication_flow":        adapter.NewLazyResource(mirrormakerreplicationflow.ResourceOptions),
+		"aiven_mysql":                               adapter.NewLazyResource(mysql.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(mysqldatabase.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(mysqluser.ResourceOptions),
+		"aiven_opensearch":                          adapter.NewLazyResource(opensearch.ResourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(opensearchsecuritypluginconfig.ResourceOptions),
 		"aiven_opensearch_user":                     adapter.NewLazyResource(opensearchuser.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(organizationaddress.ResourceOptions),
@@ -114,14 +133,17 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organization_user_group_member":      adapter.NewLazyResource(organizationusergroupmember.ResourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyResource(organizationvpc.ResourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyResource(organizationalunit.ResourceOptions),
+		"aiven_pg":                                  adapter.NewLazyResource(pg.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(pgdatabase.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(pguser.ResourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
 		"aiven_service_integration":                 adapter.NewLazyResource(serviceintegration.ResourceOptions),
 		"aiven_service_integration_endpoint":        adapter.NewLazyResource(serviceintegrationendpoint.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
+		"aiven_thanos":                              adapter.NewLazyResource(thanos.ResourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyResource(transitgatewayvpcattachment.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(upgradestep.ResourceOptions),
+		"aiven_valkey":                              adapter.NewLazyResource(valkey.ResourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyResource(valkeyuser.ResourceOptions),
 	}
 }
@@ -133,6 +155,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_azure_org_vpc_peering_connection":    adapter.NewLazyDataSource(azureorgvpcpeeringconnection.DataSourceOptions),
 		"aiven_azure_privatelink":                   adapter.NewLazyDataSource(azureprivatelink.DataSourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
+		"aiven_clickhouse":                          adapter.NewLazyDataSource(clickhouse.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(clickhousedatabase.DataSourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(clickhouseuser.DataSourceOptions),
 		"aiven_cmk_accessor_aws":                    adapter.NewLazyDataSource(cmkaccessoraws.DataSourceOptions),
@@ -140,17 +163,24 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_cmk_accessor_gcp":                    adapter.NewLazyDataSource(cmkaccessorgcp.DataSourceOptions),
 		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(cmkaccessoroci.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
+		"aiven_flink":                               adapter.NewLazyDataSource(flink.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(flinkapplication.DataSourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyDataSource(gcporgvpcpeeringconnection.DataSourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyDataSource(gcpprivatelink.DataSourceOptions),
+		"aiven_grafana":                             adapter.NewLazyDataSource(grafana.DataSourceOptions),
+		"aiven_kafka":                               adapter.NewLazyDataSource(kafka.DataSourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyDataSource(kafkaacl.DataSourceOptions),
+		"aiven_kafka_connect":                       adapter.NewLazyDataSource(kafkaconnect.DataSourceOptions),
+		"aiven_kafka_mirrormaker":                   adapter.NewLazyDataSource(kafkamirrormaker.DataSourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(kafkaschemaregistryacl.DataSourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyDataSource(kafkatopic.DataSourceOptions),
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(kafkatopiclist.DataSourceOptions),
 		"aiven_kafka_user":                          adapter.NewLazyDataSource(kafkauser.DataSourceOptions),
 		"aiven_mirrormaker_replication_flow":        adapter.NewLazyDataSource(mirrormakerreplicationflow.DataSourceOptions),
+		"aiven_mysql":                               adapter.NewLazyDataSource(mysql.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(mysqldatabase.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(mysqluser.DataSourceOptions),
+		"aiven_opensearch":                          adapter.NewLazyDataSource(opensearch.DataSourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyDataSource(opensearchsecuritypluginconfig.DataSourceOptions),
 		"aiven_opensearch_user":                     adapter.NewLazyDataSource(opensearchuser.DataSourceOptions),
 		"aiven_organization_address":                adapter.NewLazyDataSource(organizationaddress.DataSourceOptions),
@@ -165,6 +195,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_user_list":              adapter.NewLazyDataSource(organizationuserlist.DataSourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyDataSource(organizationvpc.DataSourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyDataSource(organizationalunit.DataSourceOptions),
+		"aiven_pg":                                  adapter.NewLazyDataSource(pg.DataSourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyDataSource(pgdatabase.DataSourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyDataSource(pguser.DataSourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyDataSource(projectvpc.DataSourceOptions),
@@ -173,7 +204,9 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(serviceplan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(serviceplanlist.DataSourceOptions),
+		"aiven_thanos":                              adapter.NewLazyDataSource(thanos.DataSourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyDataSource(transitgatewayvpcattachment.DataSourceOptions),
+		"aiven_valkey":                              adapter.NewLazyDataSource(valkey.DataSourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyDataSource(valkeyuser.DataSourceOptions),
 	}
 }

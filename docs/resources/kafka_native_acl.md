@@ -15,14 +15,14 @@ Kafka-native ACLs provide advanced resource-level access control with fine-grain
 
 ```terraform
 resource "aiven_kafka_native_acl" "example" {
-  project         = aiven_kafka.example_kafka.project      // e.g. "my-project". Force new
-  service_name    = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
-  operation       = "Read"                                 // Force new
-  pattern_type    = "LITERAL"                              // Force new
-  permission_type = "ALLOW"                                // Force new
-  principal       = "User:alice"                           // Force new
-  resource_name   = "consumer-group-1."                    // Force new
-  resource_type   = "Topic"                                // Force new
+  project         = aiven_kafka.example.project      // e.g. "my-project". Force new
+  service_name    = aiven_kafka.example.service_name // e.g. "my-kafka". Force new
+  operation       = "Read"                           // Force new
+  pattern_type    = "LITERAL"                        // Force new
+  permission_type = "ALLOW"                          // Force new
+  principal       = "User:alice"                     // Force new
+  resource_name   = "consumer-group-1."              // Force new
+  resource_type   = "Topic"                          // Force new
 
   // OPTIONAL FIELDS
   host = "*" // Force new
@@ -32,10 +32,10 @@ resource "aiven_kafka_native_acl" "example" {
   */
 }
 
-resource "aiven_kafka" "example_kafka" {
-  project      = "my-project"
-  plan         = "business-4"
-  service_name = "example-kafka"
+resource "aiven_kafka" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka"   // Force new
+  plan         = "startup-4"
 }
 ```
 

@@ -91,7 +91,10 @@ func TestUserConfigEmptyString(t *testing.T) {
 		}
 	}
 
-	plan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(values()))
+	create := values()
+	delete(create, "id")
+	delete(create, "endpoint_id")
+	plan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(create))
 	require.NoError(t, err)
 	req := new(service.ServiceIntegrationEndpointCreateIn)
 	require.NoError(t, plan.Expand(req, adapter.ExpandUserConfig("endpoint_type")))
@@ -119,7 +122,13 @@ func TestUserConfigEmptyString(t *testing.T) {
 			// The next plan has the flattened block, and sends the same config
 			next := values()
 			next["datadog_user_config"] = d.Get("datadog_user_config")
-			nextPlan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(next))
+			nextPlan, err := adapter.NewResourceData(
+				resourceSchemaInternal(),
+				ResourceOptions.IdentityFields,
+				adapter.WithTestPlan(next),
+				adapter.WithTestState(next),
+				adapter.WithTestConfig(values()),
+			)
 			require.NoError(t, err)
 			nextReq := new(service.ServiceIntegrationEndpointUpdateIn)
 			require.NoError(t, nextPlan.Expand(nextReq, adapter.ExpandUserConfig("endpoint_type")))

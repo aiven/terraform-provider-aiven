@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for Metrics®](https://aiven.io/docs/products/metrics/concepts/metrics-overview) service.
+datasource:
+  description: Gets information about an Aiven for Thanos® service.
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: thanos
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-thanos
+  thanos_user_config:
+    minimalExample: true
+  thanos:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Thanos server connection details.
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: Thanos server URIs.
+      query_frontend_uri:
+        type: string
+        description: Query frontend URI.
+      query_uri:
+        type: string
+        description: Query URI.
+      receiver_remote_write_uri:
+        type: string
+        description: Receiver remote write URI.

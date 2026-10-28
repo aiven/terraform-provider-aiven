@@ -47,4 +47,11 @@ type Schema struct {
 	// Because we can't distinguish between zero values and missing values in the SDKv2 state,
 	// this flag allows such cases to be ignored.
 	ZeroNotAllowed bool
+
+	// JSONName is the API name of a user config option named differently,
+	// e.g., "ip_filter" for "ip_filter_string", or "pg_stat_statements.track" for "pg_stat_statements__dot__track".
+	JSONName string
+
+	// CreateOnly user config options are sent on create only, e.g., admin_password.
+	CreateOnly bool
 }

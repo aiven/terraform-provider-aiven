@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for Grafana®](https://aiven.io/docs/products/grafana) service.
+datasource:
+  description: Gets information about an Aiven for Grafana® service.
+version: 1
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: grafana
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-grafana
+  grafana_user_config:
+    minimalExample: true
+  grafana:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Values provided by the Grafana server.
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: Grafana server URIs.

@@ -68,14 +68,6 @@ func GetTagsFromSchema(d ResourceData) map[string]string {
 	return tags
 }
 
-// PointerValueOrDefault returns pointer's value or default
-func PointerValueOrDefault[T comparable](v *T, d T) T {
-	if v == nil {
-		return d
-	}
-	return *v
-}
-
 // ComposeContexts composes multiple context (create, update, read or delete) functions into one.
 // So instead of chaining them, they can be composed
 func ComposeContexts(funcs ...func(context.Context, *schema.ResourceData, any) diag.Diagnostics) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {

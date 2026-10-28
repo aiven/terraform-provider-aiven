@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service.
+datasource:
+  description: Gets information about an Aiven for Valkey service.
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: valkey
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-valkey
+  valkey_user_config:
+    minimalExample: true
+  service_integrations:
+    items:
+      properties:
+        integration_type:
+          enum: [read_replica]
+  valkey:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Valkey server provided values
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: Valkey server URIs.
+      slave_uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: Valkey slave server URIs.
+      replica_uri:
+        type: string
+        description: Valkey replica server URI.
+      password:
+        type: string
+        description: Valkey password.

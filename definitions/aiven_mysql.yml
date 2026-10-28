@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) service.
+datasource:
+  description: Gets information about an Aiven for MySQL® service.
+version: 1
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: mysql
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-mysql
+  mysql_user_config:
+    minimalExample: true
+  service_integrations:
+    items:
+      properties:
+        integration_type:
+          enum: [read_replica]
+  mysql:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: MySQL server-provided values.
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: MySQL connection URIs.
+      params:
+        type: arrayOrdered
+        description: MySQL connection parameters.
+        items:
+          type: object
+          properties:
+            database_name:
+              type: string
+              description: The name of the primary MySQL database.
+            host:
+              type: string
+              description: MySQL host IP or name.
+            password:
+              type: string
+              description: The password for the admin service user.
+            port:
+              type: integer
+              description: MySQL port.
+            sslmode:
+              type: string
+              description: "MySQL SSL mode setting. Always set to \"require\"."
+            user:
+              type: string
+              description: The username for the admin service user.
+      replica_uri:
+        type: string
+        description: MySQL replica URI for services with a replica.
+      standby_uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: MySQL standby connection URIs.
+      syncing_uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: MySQL syncing connection URIs.
