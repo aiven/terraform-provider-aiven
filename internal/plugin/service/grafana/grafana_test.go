@@ -45,10 +45,11 @@ func TestAccAiven_grafana(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					// Gets default IP filter list from the API
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.1", "::/0"),
+					// The API sets the default IP filter list, the resource keeps the configured options only
+					resource.TestCheckNoResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.ip_filter.#", "2"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.ip_filter.0", "0.0.0.0/0"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.ip_filter.1", "::/0"),
 				),
 			},
 			{
@@ -148,7 +149,9 @@ func TestAccAiven_grafana_user_config(t *testing.T) {
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
+					// The API sets the default IP filter list, the resource keeps the configured options only
+					resource.TestCheckNoResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "true"),
 				),
@@ -229,7 +232,9 @@ data "aiven_grafana" "common" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					// Removing public_access keeps the API value
+					resource.TestCheckNoResourceAttr(resourceName, "grafana_user_config.0.public_access.#"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.public_access.0.grafana", "false"),
 				),
 			},
 			{
@@ -265,7 +270,7 @@ data "aiven_grafana" "common" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.public_access.0.grafana", "false"),
 				),
 			},
 			{
@@ -295,9 +300,11 @@ data "aiven_grafana" "common" {
   depends_on = [aiven_grafana.bar]
 }`, acc.ProjectName(), rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					// Removing the block sends nothing, the API keeps the options
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.#", "0"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.ip_filter.#", "2"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.alerting_enabled", "true"),
+					resource.TestCheckResourceAttr("data.aiven_grafana.common", "grafana_user_config.0.public_access.0.grafana", "false"),
 				),
 			},
 		},
@@ -738,7 +745,7 @@ func TestAccAiven_grafana_and_default_vpc(t *testing.T) {
 					// Grafana
 					resource.TestCheckResourceAttr(grafanaResource, "project", project),
 					resource.TestCheckResourceAttr(grafanaResource, "cloud_name", cloudName),
-					resource.TestCheckResourceAttr(grafanaResource, "project_vpc_id", ""),
+					resource.TestCheckNoResourceAttr(grafanaResource, "project_vpc_id"),
 
 					// Proves the remote state
 					func(_ *terraform.State) error {
@@ -849,7 +856,7 @@ resource "aiven_grafana" "foo" {
 							return fmt.Errorf("expected service %q to not have a project VPC ID", serviceName)
 						}
 
-						return resource.TestCheckResourceAttr(resourceName, "project_vpc_id", "")(s)
+						return resource.TestCheckNoResourceAttr(resourceName, "project_vpc_id")(s)
 					},
 				),
 			},
