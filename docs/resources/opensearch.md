@@ -102,7 +102,7 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the `public-*` hostname and the custom domain. Example: `grafana.example.org`.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
