@@ -10,8 +10,6 @@ func GetUserConfig(kind string) *schema.Schema {
 		return applicationUserConfig()
 	case "clickhouse":
 		return clickhouseUserConfig()
-	case "dragonfly":
-		return dragonflyUserConfig()
 	case "flink":
 		return flinkUserConfig()
 	case "grafana":
@@ -47,10 +45,6 @@ func GetFieldMapping(kind string) map[string]string {
 			"ip_filter_string": "ip_filter",
 		},
 		"clickhouse": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
-		},
-		"dragonfly": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
 		},
@@ -136,5 +130,5 @@ func GetFieldMapping(kind string) map[string]string {
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"application", "clickhouse", "dragonfly", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "nomadclient", "opensearch", "pg", "thanos", "valkey"}
+	return []string{"application", "clickhouse", "flink", "grafana", "kafka", "kafka_connect", "kafka_mirrormaker", "mysql", "nomadclient", "opensearch", "pg", "thanos", "valkey"}
 }

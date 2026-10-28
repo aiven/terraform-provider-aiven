@@ -15,7 +15,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
@@ -100,9 +99,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// clickhouse
 			"aiven_clickhouse": clickhouse.DatasourceClickhouse(),
 
-			// dragonfly
-			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
-
 			// thanos
 			"aiven_thanos": thanos.DatasourceThanos(),
 
@@ -167,9 +163,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),
 			"aiven_clickhouse_role":  clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
-
-			// dragonfly
-			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
 
 			// thanos
 			"aiven_thanos": thanos.ResourceThanos(),

@@ -22,7 +22,6 @@ After you are set up on the Aiven Platform, the following examples can help you 
 Use these examples to create services and integrate them:
 
 - [ClickHouse and integrations](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse)
-- [Dragonfly](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/dragonfly)
 - [Grafana](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/grafana)
 - [Kafka, Kafka Connect, and Mirrormaker](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka)
 - [Karapace schema registry for Kafka](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/kafka/karapace_schema_registry)

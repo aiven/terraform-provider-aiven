@@ -292,7 +292,6 @@ properties:
       - kafka_mirrormaker
       - flink
       - clickhouse
-      - dragonfly
       - thanos
       - valkey
     $comment: |

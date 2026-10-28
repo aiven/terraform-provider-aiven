@@ -184,7 +184,6 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 				"aiven_kafka_connector",
 				"aiven_kafka_connect",
 				"aiven_clickhouse",
-				"aiven_dragonfly",
 				"aiven_thanos",
 				"aiven_valkey",
 			}

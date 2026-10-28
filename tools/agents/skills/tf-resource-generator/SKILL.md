@@ -289,7 +289,7 @@ requireServiceReady: pg
 
 The value must be one of the enum members in `.schema.yml`
 (`pg`, `cassandra`, `opensearch`, `grafana`, `mysql`, `kafka`, `kafka_connect`,
-`kafka_mirrormaker`, `flink`, `clickhouse`, `dragonfly`, `thanos`, `valkey`) and the resource
+`kafka_mirrormaker`, `flink`, `clickhouse`, `thanos`, `valkey`) and the resource
 schema must expose top-level string attributes named `project` and `service_name`. The generator
 fails at generation time if either precondition is missing.
 
