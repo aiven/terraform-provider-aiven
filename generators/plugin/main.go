@@ -262,6 +262,15 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			return fmt.Errorf("could not save file %s: %w", filePath, err)
 		}
 
+		// The docs and the examples belong to the SDK resource until it is migrated
+		isSDK, err := isSDKEntity(entity, def.typeName)
+		if err != nil {
+			return err
+		}
+		if isSDK {
+			continue
+		}
+
 		// Generates import.sh file
 		if isResource {
 			importDir := filepath.Join(examplesDir, "resources", def.typeName)
@@ -441,6 +450,18 @@ func createRootItem(scope *Scope) (*Item, error) {
 		root.Properties[k], err = mergeItem(root, root.Properties[k], v)
 		if err != nil {
 			return nil, fmt.Errorf("can't create item %q: %w", k, err)
+		}
+	}
+
+	// The user can't change a fixed value, the state keeps the one read back
+	for _, v := range root.Properties {
+		if fixed, ok := scope.Definition.FixedValue(v.JSONName); ok {
+			v.Example = fixed
+			v.OverrideRequired = or(v.OverrideRequired, new(false))
+			v.OverrideOptional = or(v.OverrideOptional, new(false))
+			v.OverrideComputed = or(v.OverrideComputed, new(true))
+			v.OverrideForceNew = or(v.OverrideForceNew, new(false))
+			v.OverrideUseStateForUnknown = or(v.OverrideUseStateForUnknown, new(true))
 		}
 	}
 
@@ -669,25 +690,27 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		AppearsIn: parent.AppearsIn | appearsIn,
 
 		// Keeps TF names consistent
-		Name:        reTFName.ReplaceAllString(name, "_"),
-		JSONName:    name,
-		Type:        s.Type,
-		Description: s.Description,
-		Default:     s.Default,
-		DocExample:  s.Example,
-		MinItems:    s.MinItems,
-		MaxItems:    s.MaxItems,
-		MinLength:   s.MinLength,
-		MaxLength:   s.MaxLength,
-		Minimum:     numberToInt(s.Minimum, isInteger),
-		Maximum:     numberToInt(s.Maximum, !isInteger),
-		Format:      s.Format,
-		Pattern:     s.Pattern,
-		ForceNew:    s.CreateOnly || s.CreateOnlyExt,
-		Sensitive:   s.Sensitive || s.SensitiveExt,
-		Nullable:    s.Nullable,
-		Required:    required,
-		Properties:  make(map[string]*Item),
+		Name:               reTFName.ReplaceAllString(name, "_"),
+		JSONName:           or(s.jsonName, name),
+		DeprecationMessage: s.deprecation,
+		ConflictsWith:      s.conflictsWith,
+		Type:               s.Type,
+		Description:        s.Description,
+		Default:            s.Default,
+		DocExample:         s.Example,
+		MinItems:           s.MinItems,
+		MaxItems:           s.MaxItems,
+		MinLength:          s.MinLength,
+		MaxLength:          s.MaxLength,
+		Minimum:            numberToInt(s.Minimum, isInteger),
+		Maximum:            numberToInt(s.Maximum, !isInteger),
+		Format:             s.Format,
+		Pattern:            s.Pattern,
+		ForceNew:           s.CreateOnly || s.CreateOnlyExt,
+		Sensitive:          s.Sensitive || s.SensitiveExt,
+		Nullable:           s.Nullable,
+		Required:           required,
+		Properties:         make(map[string]*Item),
 		Enum: lo.Filter(s.Enum, func(item any, _ int) bool {
 			switch fmt.Sprint(item) {
 			case "", "null", "<nil>":
@@ -695,6 +718,10 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 			}
 			return true
 		}),
+	}
+
+	if parent.InUserConfig() && isLegacyUserConfigName(name) {
+		item.Name = strings.ReplaceAll(name, ".", "__dot__")
 	}
 
 	// Renames it to match the definition.
@@ -715,8 +742,13 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		item.DocDefault, item.Default = item.Default, nil
 
 		// SDKv2 user configs have lists
-		if item.Type == SchemaTypeArray {
+		if item.Type == SchemaTypeArray && !isUserConfigSet(item) {
 			item.Type = SchemaTypeArrayOrdered
+		}
+
+		// Lets older provider versions manage new versions
+		if strings.HasSuffix(item.Name, "_version") {
+			item.DocEnum, item.Enum = item.Enum, nil
 		}
 	}
 
@@ -724,8 +756,13 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 }
 
 func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
-	for _, thisName := range sortedKeys(parentSchema.Properties) {
-		thisSchema, err := scope.OpenAPI.resolveRef(parentSchema.Properties[thisName])
+	properties := parentSchema.Properties
+	if parent.InUserConfig() {
+		properties = userConfigProperties(properties)
+	}
+
+	for _, thisName := range sortedKeys(properties) {
+		thisSchema, err := scope.OpenAPI.resolveRef(properties[thisName])
 		if err != nil {
 			return fmt.Errorf("%s: %w", thisName, err)
 		}
@@ -1107,6 +1144,7 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	} else {
 		a.Enum = mergeSlices(a.Enum, b.Enum)
 	}
+	a.DocEnum = mergeSlices(a.DocEnum, b.DocEnum)
 	a.MinItems = max(a.MinItems, b.MinItems)
 	a.MaxItems = max(a.MaxItems, b.MaxItems)
 	a.MinLength = max(a.MinLength, b.MinLength)
@@ -1128,6 +1166,8 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	if !isEmpty(b.Example) {
 		a.Example = b.Example
 	}
+	a.DisableExample = a.DisableExample || b.DisableExample
+	a.MinimalExample = a.MinimalExample || b.MinimalExample
 	if !isEmpty(b.DocDefault) {
 		a.DocDefault = b.DocDefault
 	}
@@ -1242,8 +1282,9 @@ func recalcDeep(def *Definition, item *Item) error {
 	}
 
 	for k, v := range item.Properties {
-		// If parent is computed, child must be computed too
+		// If parent is computed (sensitive), child must be computed (sensitive) too
 		v.Computed = v.Computed || item.Computed
+		v.Sensitive = v.Sensitive || item.Sensitive
 		v.OverrideUseStateForUnknown = or(v.OverrideUseStateForUnknown, item.OverrideUseStateForUnknown)
 		err := recalcDeep(def, v)
 		if err != nil {
@@ -1252,8 +1293,9 @@ func recalcDeep(def *Definition, item *Item) error {
 	}
 
 	if item.Items != nil {
-		// If parent is computed, child must be computed too
+		// If parent is computed (sensitive), child must be computed (sensitive) too
 		item.Items.Computed = item.Items.Computed || item.Computed
+		item.Items.Sensitive = item.Items.Sensitive || item.Sensitive
 		item.Items.OverrideUseStateForUnknown = or(item.Items.OverrideUseStateForUnknown, item.OverrideUseStateForUnknown)
 		err := recalcDeep(def, item.Items)
 		if err != nil {

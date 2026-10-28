@@ -15,21 +15,21 @@ Aiven ACLs provide simplified topic-level control with basic permissions and wil
 
 ```terraform
 resource "aiven_kafka_acl" "example" {
-  project      = aiven_kafka.example_kafka.project      // e.g. "my-project". Force new
-  service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
-  permission   = "readwrite"                            // Force new
-  topic        = "top*"                                 // Force new
-  username     = "admin*"                               // Force new
+  project      = aiven_kafka.example.project      // e.g. "my-project". Force new
+  service_name = aiven_kafka.example.service_name // e.g. "my-kafka". Force new
+  permission   = "readwrite"                      // Force new
+  topic        = "top*"                           // Force new
+  username     = "admin*"                         // Force new
 
   /* COMPUTED FIELDS
   acl_id = "foo"
   */
 }
 
-resource "aiven_kafka" "example_kafka" {
-  project      = "my-project"
-  plan         = "business-4"
-  service_name = "example-kafka"
+resource "aiven_kafka" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka"   // Force new
+  plan         = "startup-4"
 }
 ```
 

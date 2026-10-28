@@ -13,9 +13,9 @@ Creates and manages an Aiven for Apache Kafka® or Aiven for Apache Kafka® Conn
 
 ```terraform
 resource "aiven_kafka_user" "example" {
-  project      = aiven_kafka.example_kafka.project      // e.g. "my-project". Force new
-  service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
-  username     = "testuser"                             // Force new
+  project      = aiven_kafka.example.project      // e.g. "my-project". Force new
+  service_name = aiven_kafka.example.service_name // e.g. "my-kafka". Force new
+  username     = "testuser"                       // Force new
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
@@ -29,10 +29,10 @@ resource "aiven_kafka_user" "example" {
   */
 }
 
-resource "aiven_kafka" "example_kafka" {
-  project      = "my-project"
-  plan         = "business-4"
-  service_name = "example-kafka"
+resource "aiven_kafka" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka"   // Force new
+  plan         = "startup-4"
 }
 ```
 

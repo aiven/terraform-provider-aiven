@@ -78,6 +78,9 @@ type Operation struct {
 	ResultListLookupKeys map[string]string `yaml:"resultListLookupKeys"` // When the response is a list, these keys are used to locate the correct item
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
+	// Request fields always sent with these values, e.g. the discriminator of a polymorphic endpoint.
+	// A field kept in the schema is computed-only.
+	FixedValues map[string]string `yaml:"fixedValues"`
 
 	// QueryParams are sent with every call, e.g. include_secrets: "true".
 	QueryParams map[string]string `yaml:"queryParams"`
@@ -246,6 +249,16 @@ type Definition struct {
 // the root item's name and for the per-resource doc filename.
 func (d *Definition) ShortName() string {
 	return strings.TrimPrefix(d.typeName, typeNamePrefix)
+}
+
+// FixedValue returns the value the create operation always sends for the request field.
+func (d *Definition) FixedValue(jsonName string) (string, bool) {
+	for _, op := range d.Operations {
+		if v, ok := op.FixedValues[jsonName]; ok && op.Type == OperationCreate {
+			return v, true
+		}
+	}
+	return "", false
 }
 
 // Location returns the package path for the generated files. The directory and
@@ -427,6 +440,12 @@ type Item struct {
 	Maximum      int   `yaml:"maximum,omitempty"`
 	Example      any   `yaml:"example,omitempty"`
 
+	// DisableExample keeps the field out of the generated examples, e.g., a block the service type rejects.
+	DisableExample bool `yaml:"disableExample,omitempty"`
+
+	// MinimalExample renders only the required fields of the block, or nothing without them, e.g., "pg_user_config".
+	MinimalExample bool `yaml:"minimalExample,omitempty"`
+
 	// Ref points to the resource attribute this field usually references, e.g. "aiven_kafka.service_name".
 	// Documentation only: the doc example renders the target resource and references its attribute.
 	// The field's examples use the attribute's example value.
@@ -444,6 +463,12 @@ type Item struct {
 
 	// DocExample is the example of the field schema, documented only: Example feeds the generated examples.
 	DocExample any `yaml:"_docExample,omitempty"`
+
+	// DocEnum is the spec enum of a user config "*_version" option, documented, but not validated:
+	// a provider release can't keep up with the versions the API adds, so a OneOf would reject them.
+	// E.g. pg_version lists "The possible values are `13`, ... and `19`." in its description,
+	// and an older provider still sets pg_version = "20" once the API supports it.
+	DocEnum []any `yaml:"_docEnum,omitempty"`
 }
 
 // InUserConfig reports whether the item is a user config block or nested in one.

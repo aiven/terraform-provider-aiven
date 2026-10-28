@@ -123,8 +123,8 @@ func TestRefTargetSDK(t *testing.T) {
 	t.Parallel()
 
 	def := refTestDef("aiven_a", nil)
-	_, err := refTarget(def, "aiven_kafka", "no_such_attribute", 0)
-	require.ErrorContains(t, err, `referenced resource "aiven_kafka" has no attribute "no_such_attribute"`)
+	_, err := refTarget(def, "aiven_project", "no_such_attribute", 0)
+	require.ErrorContains(t, err, `referenced resource "aiven_project" has no attribute "no_such_attribute"`)
 
 	_, err = refTarget(def, "aiven_no_such_resource", "id", 0)
 	require.ErrorContains(t, err, `referenced resource "aiven_no_such_resource" not found`)

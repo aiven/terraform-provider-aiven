@@ -66,6 +66,8 @@ func TestUserConfigDescription(t *testing.T) {
 		"Values: `delete`, `compact`.":            {Description: "Values: 'delete', 'compact'."},
 		"Don't touch apostrophes.":                {Description: "Don't touch apostrophes."},
 		"A longer `title`":                        {Description: "Short", Title: "A longer 'title'"},
+		"The `grafana_stat_total_*` metrics.":     {Description: "The grafana_stat_total_* metrics."},
+		"Matches `public-*`.":                     {Description: "Matches public-*."},
 	}
 	for want, s := range cases {
 		assert.Equal(t, want, userConfigDescription(s))
@@ -109,6 +111,12 @@ func TestKeepUserConfigState(t *testing.T) {
 				Computed:                   true,
 				OverrideUseStateForUnknown: falseOverride,
 			},
+			"ip_filter_string": {
+				Name:          "ip_filter_string",
+				Type:          SchemaTypeString,
+				Computed:      true,
+				ConflictsWith: []string{"ip_filter"},
+			},
 		},
 	}
 	root.Properties["datadog_user_config"] = variant
@@ -130,6 +138,7 @@ func TestKeepUserConfigState(t *testing.T) {
 	assert.Nil(t, variant.Properties["required"].OverrideUseStateForUnknown)
 	assert.Nil(t, variant.Properties["plain"].OverrideUseStateForUnknown)
 	assert.Same(t, falseOverride, variant.Properties["explicit_false"].OverrideUseStateForUnknown)
+	assert.Nil(t, variant.Properties["ip_filter_string"].OverrideUseStateForUnknown)
 	assert.Nil(t, root.Properties["outside"].OverrideUseStateForUnknown)
 	assert.Nil(t, tableOption.OverrideUseStateForUnknown, "list items are matched by index")
 }
@@ -216,4 +225,166 @@ func TestAddUserConfigsFieldName(t *testing.T) {
 	}
 	root := &Item{Properties: map[string]*Item{"endpoint_type": {Enum: []any{"datadog"}}}}
 	assert.EqualError(t, addUserConfigs(scope, root), `userConfigDiscriminator: oneOf field "config" is not "user_config"`)
+}
+
+func TestAddUserConfigsFixedType(t *testing.T) {
+	t.Parallel()
+
+	newScope := func(kind string) *Scope {
+		openAPI := &OpenAPIDoc{}
+		openAPI.Components.Schemas = map[string]*OASchema{
+			"ServicePgUserConfig": {
+				Type: SchemaTypeObject,
+				Properties: map[string]*OASchema{
+					"ip_filter": {
+						Type: SchemaTypeArray,
+						Items: &OASchema{
+							AnyOf:      []*OASchema{{Type: SchemaTypeString}, {Type: SchemaTypeObject}},
+							Properties: map[string]*OASchema{"network": {Type: SchemaTypeString}},
+						},
+					},
+					"pg_version": {Type: SchemaTypeString, Enum: []any{"17", "18"}},
+					"pg": {
+						Type: SchemaTypeObject,
+						Properties: map[string]*OASchema{
+							"pg_partman_bgw.role": {Type: SchemaTypeString},
+							"log_line_prefix":     {Type: SchemaTypeArray, Items: &OASchema{Type: SchemaTypeString}},
+							"access_key":          {Type: SchemaTypeString},
+							"password":            {Type: SchemaTypeString, SensitiveExt: true},
+						},
+					},
+				},
+			},
+			"ServiceKafkaUserConfig": {
+				Type:       SchemaTypeObject,
+				Properties: map[string]*OASchema{"kafka_rest": {Type: SchemaTypeBoolean}},
+			},
+		}
+		return &Scope{
+			OpenAPI: openAPI,
+			Definition: &Definition{
+				UserConfigDiscriminator: "service_type",
+				Operations: Operations{{
+					ID:          "ServiceCreate",
+					Type:        OperationCreate,
+					FixedValues: map[string]string{"service_type": kind},
+				}},
+			},
+			userConfigs: []*userConfigSource{{
+				operation: &Operation{Type: OperationCreate},
+				name:      "user_config",
+				schema: &OASchema{OneOf: []*OASchema{
+					{Ref: "#/components/schemas/ServiceKafkaUserConfig"},
+					{Ref: "#/components/schemas/ServicePgUserConfig"},
+				}},
+				appearsIn: RequestBody,
+			}},
+		}
+	}
+	newRoot := func() *Item {
+		return &Item{
+			Name:       "root",
+			Type:       SchemaTypeObject,
+			Properties: map[string]*Item{"service_type": {Name: "service_type", JSONName: "service_type", Type: SchemaTypeString}},
+		}
+	}
+
+	t.Run("only the fixed type gets a block", func(t *testing.T) {
+		t.Parallel()
+		root := newRoot()
+		require.NoError(t, addUserConfigs(newScope("pg"), root))
+		assert.NotContains(t, root.Properties, "kafka_user_config")
+
+		pg := root.Properties["pg_user_config"]
+		require.NotNil(t, pg)
+
+		for _, k := range []string{"ip_filter", "ip_filter_string", "ip_filter_object"} {
+			require.Contains(t, pg.Properties, k)
+			assert.Equal(t, SchemaTypeArray, pg.Properties[k].Type, "%s is a set", k)
+			assert.Equal(t, "ip_filter", pg.Properties[k].JSONName)
+		}
+		assert.Equal(t, "Deprecated. Use `ip_filter_string` instead.", pg.Properties["ip_filter"].DeprecationMessage)
+		assert.Equal(t, SchemaTypeString, pg.Properties["ip_filter"].Items.Type)
+		assert.Equal(t, SchemaTypeString, pg.Properties["ip_filter_string"].Items.Type)
+		assert.Equal(t, SchemaTypeObject, pg.Properties["ip_filter_object"].Items.Type)
+		assert.Contains(t, pg.Properties["ip_filter_object"].Items.Properties, "network")
+
+		version := pg.Properties["pg_version"]
+		assert.Empty(t, version.Enum, "a version isn't validated")
+		assert.Equal(t, []any{"17", "18"}, version.DocEnum)
+
+		nested := pg.Properties["pg"]
+		require.Contains(t, nested.Properties, "pg_partman_bgw__dot__role")
+		assert.Equal(t, "pg_partman_bgw.role", nested.Properties["pg_partman_bgw__dot__role"].JSONName)
+		assert.Equal(t, SchemaTypeArrayOrdered, nested.Properties["log_line_prefix"].Type, "other arrays are lists")
+		assert.False(t, nested.Properties["access_key"].Sensitive, "only x-_secure is sensitive")
+		assert.True(t, nested.Properties["password"].Sensitive)
+	})
+
+	t.Run("no schema matches", func(t *testing.T) {
+		t.Parallel()
+		err := addUserConfigs(newScope("mysql"), newRoot())
+		require.ErrorContains(t, err, `no "user_config" schema matches: mysql`)
+	})
+}
+
+func TestUserConfigProperties(t *testing.T) {
+	t.Parallel()
+
+	untyped := &OASchema{OneOf: []*OASchema{{Type: SchemaTypeObject}, {Type: SchemaTypeObject}}}
+	properties := map[string]*OASchema{
+		"ratio":   {AnyOf: []*OASchema{{Type: SchemaTypeInteger}, {Type: SchemaTypeNumber}}},
+		"timeout": {Type: SchemaTypeInteger, AnyOf: []*OASchema{{}, {}}},
+		"keystores": {Type: SchemaTypeArray, Items: &OASchema{
+			Type:       SchemaTypeObject,
+			Required:   []string{"settings"},
+			Properties: map[string]*OASchema{"name": {Type: SchemaTypeString}, "settings": untyped},
+		}},
+		"optional": {Type: SchemaTypeObject, Properties: map[string]*OASchema{"settings": untyped}},
+		"settings": untyped,
+	}
+
+	result := userConfigProperties(properties)
+	assert.Equal(t, SchemaTypeNumber, result["ratio"].Type)
+	assert.Nil(t, result["ratio"].AnyOf)
+	assert.Empty(t, properties["ratio"].Type, "the original is intact")
+	assert.Equal(t, SchemaTypeInteger, result["timeout"].Type)
+	assert.NotContains(t, result, "settings")
+	assert.NotContains(t, result, "keystores", "requires an untyped option")
+	assert.Contains(t, result, "optional", "the untyped option is optional")
+}
+
+func TestSplitMultiTypeArrays(t *testing.T) {
+	t.Parallel()
+
+	single := &OASchema{Type: SchemaTypeArray, Items: &OASchema{Type: SchemaTypeString}}
+	mixed := &OASchema{
+		Type: SchemaTypeArray,
+		Items: &OASchema{
+			AnyOf:      []*OASchema{{Type: SchemaTypeObject}, {Type: SchemaTypeString}},
+			MaxLength:  43,
+			Properties: map[string]*OASchema{"network": {Type: SchemaTypeString}},
+			Required:   []string{"network"},
+		},
+	}
+	got := splitMultiTypeArrays(map[string]*OASchema{"single": single, "mixed": mixed})
+
+	assert.Len(t, got, 4)
+	assert.Same(t, single, got["single"])
+
+	str := got["mixed_string"]
+	assert.Equal(t, "mixed", str.jsonName)
+	assert.Equal(t, SchemaTypeString, str.Items.Type)
+	assert.Equal(t, 43, str.Items.MaxLength)
+	assert.Empty(t, str.Items.Properties)
+
+	obj := got["mixed_object"]
+	assert.Equal(t, SchemaTypeObject, obj.Items.Type)
+	assert.Zero(t, obj.Items.MaxLength)
+	assert.Equal(t, []string{"network"}, obj.Items.Required)
+
+	orig := got["mixed"]
+	assert.Equal(t, SchemaTypeString, orig.Items.Type, "scalars go first")
+	assert.Equal(t, "Deprecated. Use `mixed_string` instead.", orig.deprecation)
+	assert.Empty(t, mixed.Items.Type, "the original schema is intact")
 }

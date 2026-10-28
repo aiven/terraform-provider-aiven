@@ -1,0 +1,240 @@
+# The schema every service shares, in the shape SDKv2 stored it.
+# A service definition includes it and adds its operations, user config and connection info,
+# see internal/plugin/util/serviceutil for the fields mapped by hand.
+idAttributeComposed: [project, service_name]
+legacyTimeouts: true
+clientHandler: service
+userConfigDiscriminator: service_type
+expandModifier: true
+flattenModifier: true
+resource:
+  modifyPlan: true
+  refDepth: 1
+  # The create and update views wait for the service, see serviceutil.Wrap
+  refreshStateExists: true
+rename:
+  cloud: cloud_name
+remove:
+  - acl
+  - backups
+  - cloud_description
+  - components/az
+  - components/path
+  - connection_info
+  - connection_pools
+  - copy_tags
+  - create_time
+  - databases
+  - disk_space_mb
+  - features
+  - first_use_time
+  - group_list
+  - group_name
+  - is_cluster_plan
+  - kafka_acl
+  - karapace
+  - maintenance
+  - metadata
+  - node_count
+  - node_cpu_count
+  - node_memory_mb
+  - node_states
+  - opensearch_user_config/elasticsearch_version # Dropped by go-api-schemas, so SDKv2 never had it
+  - plan_price_usd
+  - powered
+  - project_vpc_id
+  - schema_registry_acl
+  - schema_registry_authz
+  - server_group
+  - service_integrations
+  - service_notifications
+  - service_type_description
+  - service_uri_params
+  - tags
+  - topics
+  - update_time
+  - users
+schema:
+  project:
+    description: The name of the project this resource belongs to.
+    pattern: ^[a-zA-Z0-9_-]*$
+    ref: aiven_organization_project.project_id
+  cloud_name:
+    computed: true
+    example: google-europe-west1
+    description: "The cloud provider and region the service is hosted in. The format is `provider-region`, for example: `google-europe-west1`. The [available cloud regions](https://aiven.io/docs/platform/reference/list_of_clouds) can differ per project and service. Changing this value [migrates the service to another cloud provider or region](https://aiven.io/docs/platform/howto/migrate-services-cloud-region). The migration runs in the background and includes a DNS update to redirect traffic to the new region. Most services experience no downtime, but some databases may have a brief interruption during DNS propagation."
+  plan:
+    minLength: 1
+    example: startup-4
+    pattern: ^[a-z][a-z0-9_-]*[a-z0-9]$
+    description: "Plans define the computing resources allocated for the service. The plan names lowercase alphanumeric values in the format `TIER-MEMORY`, for example: `business-8` or `startup-32`. The available options can be seen on the [Aiven pricing page](https://aiven.io/pricing). Kafka Classic plan names are shown in the [Aiven Console](https://console.aiven.io). When changing to a smaller plan, the new plan must have enough disk space to store all current data. Switching to a plan with fewer nodes is not supported for all services."
+  service_name:
+    description: Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+  service_type:
+    description: Aiven internal service type code
+  project_vpc_id:
+    type: string
+    optional: true
+    example: my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d
+    description: Specifies the VPC the service should run in. If the value is not set, the service runs on the Public Internet. When set, the value should be given as a reference to set up dependencies correctly, and the VPC must be in the same cloud and region as the service itself. The service can be freely moved to and from VPC after creation, but doing so triggers migration to new servers, so the operation can take a significant amount of time to complete if the service has a lot of data.
+  cmk_id:
+    computed: true
+    minLength: 36
+    maxLength: 36
+    description: UUID of the Customer Managed Key (CMK) used to apply [bring your own key (BYOK) encryption](https://aiven.io/docs/platform/howto/bring-your-own-key) to this service's data at rest. You can register a CMK for an Aiven project using the `aiven_cmk` resource. Removing this attribute doesn't remove the CMK association. To remove it from this service, set this attribute to the all-zero UUID `00000000-0000-0000-0000-000000000000`.
+  maintenance_window_dow:
+    type: string
+    optional: true
+    computed: true
+    useStateForUnknown: true
+    # The API can return "never", which can't be set
+    enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    description: Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+  maintenance_window_time:
+    type: string
+    optional: true
+    computed: true
+    useStateForUnknown: true
+    pattern: ^(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]$
+    example: "10:00:00"
+    description: Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+  maintenance_window_enabled:
+    type: boolean
+    computed: true
+    description: Indicates whether the maintenance window is currently enabled for this service.
+  termination_protection:
+    default: false
+    description: Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+  disk_space:
+    type: string
+    optional: true
+    pattern: ^[1-9][0-9]*(GiB|G)$
+    conflictsWith: [additional_disk_space]
+    description: Service disk space to set. Possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+  disk_space_used:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: "The disk space that the service is currently using. This is the sum of the `plan` default disk space and `additional_disk_space` in human-readable format (for example: `90GiB`)."
+  disk_space_default:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+  additional_disk_space:
+    type: string
+    optional: true
+    computed: true
+    example: 30GiB
+    pattern: ^[1-9][0-9]*(GiB|G)$
+    conflictsWith: [disk_space]
+    description: Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30 GiB to the default disk space defined by the `plan`. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes.
+  disk_space_step:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+  disk_space_cap:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+  service_uri:
+    useStateForUnknown: true
+    description: URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+  service_host:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: The hostname of the service.
+  service_port:
+    type: integer
+    computed: true
+    useStateForUnknown: true
+    description: The port of the service
+  service_password:
+    type: string
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Password used for connecting to the service, if applicable
+  service_username:
+    type: string
+    computed: true
+    useStateForUnknown: true
+    description: Username used for connecting to the service, if applicable
+  state:
+    description: Service state. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle).
+  service_integrations:
+    type: array
+    optional: true
+    # Most services reject any integration type
+    disableExample: true
+    description: Service integrations to specify when creating a service. Not applied after initial service creation
+    items:
+      type: object
+      properties:
+        source_service_name:
+          type: string
+          required: true
+          description: Name of the source service
+        integration_type:
+          type: string
+          required: true
+          description: Type of the service integration
+  static_ips:
+    forceNew: false
+    description: Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+  components:
+    type: arrayOrdered
+    useStateForUnknown: true
+    description: Service component information objects
+    items:
+      properties:
+        component:
+          description: Service component name
+        host:
+          description: Host name for connecting to the service component
+        port:
+          description: Port number for connecting to the service component
+        connection_uri:
+          type: string
+          computed: true
+          description: Connection info for connecting to the service component. This is a combination of host and port.
+        kafka_authentication_method:
+          type: string
+          description: Kafka authentication method. This is a value specific to the 'kafka' service component
+        kafka_ssl_ca:
+          type: string
+          description: Kafka certificate used.
+        route:
+          type: string
+          description: Network access route
+        ssl:
+          description: Whether the endpoint is encrypted or accepts plaintext. By default endpoints are always encrypted and this property is only included for service components they may disable encryption
+        usage:
+          type: string
+          description: DNS usage name
+        privatelink_connection_id:
+          description: Privatelink connection ID
+  tag:
+    type: array
+    optional: true
+    description: Tags are key-value pairs that allow you to categorize services.
+    items:
+      type: object
+      properties:
+        key:
+          type: string
+          required: true
+          description: Service tag key
+        value:
+          type: string
+          required: true
+          description: Service tag value
+  tech_emails:
+    description: " The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level."
+    items:
+      properties:
+        email:
+          description: An email address to contact for technical issues

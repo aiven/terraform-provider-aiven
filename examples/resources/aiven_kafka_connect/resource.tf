@@ -1,41 +1,49 @@
-# Create a Kafka service.
-resource "aiven_kafka" "example_kafka" {
-  project      = data.aiven_project.example_project.project
-  service_name = "example-kafka-service"
-  cloud_name   = "google-europe-west1"
+resource "aiven_kafka_connect" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka-connect" // Force new
   plan         = "startup-4"
-}
 
-# Create a Kafka Connect service.
-resource "aiven_kafka_connect" "example_kafka_connect" {
-  project      = data.aiven_project.example_project.project
-  cloud_name   = "google-europe-west1"
-  plan         = "startup-4"
-  service_name = "example-connect-service"
-
-  kafka_connect_user_config {
-    kafka_connect {
-      consumer_isolation_level = "read_committed"
-    }
-
-    public_access {
-      kafka_connect = true
-    }
+  // OPTIONAL FIELDS
+  cmk_id                  = "12345678-1234-1234-1234-12345678abcd"
+  project_vpc_id          = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  additional_disk_space   = "30GiB"
+  cloud_name              = "google-europe-west1"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  static_ips              = ["ip350351b76da"]
+  tag {
+    key   = "foo"
+    value = "foo"
   }
-}
-
-# Integrate the Kafka and Kafka Connect services.
-resource "aiven_service_integration" "kafka_connect_integration" {
-  project                  = data.aiven_project.example_project.project
-  integration_type         = "kafka_connect"
-  source_service_name      = aiven_kafka.example_kafka.service_name
-  destination_service_name = aiven_kafka_connect.example_kafka_connect.service_name
-
-  kafka_connect_user_config {
-    kafka_connect {
-      group_id             = "connect"
-      status_storage_topic = "__connect_status"
-      offset_storage_topic = "__connect_offsets"
-    }
+  tech_emails {
+    email = "jane@example.com"
   }
+  termination_protection = false
+
+  /* COMPUTED FIELDS
+  components = [{
+    component                   = "foo"
+    connection_uri              = "foo"
+    host                        = "foo"
+    kafka_authentication_method = "certificate"
+    kafka_ssl_ca                = "letsencrypt"
+    port                        = 42
+    privatelink_connection_id   = "foo"
+    route                       = "dynamic"
+    ssl                         = true
+    usage                       = "disaster_recovery"
+  }]
+  disk_space_cap             = "foo"
+  disk_space_default         = "foo"
+  disk_space_step            = "foo"
+  disk_space_used            = "foo"
+  maintenance_window_enabled = true
+  service_host               = "foo"
+  service_password           = "password123"
+  service_port               = 42
+  service_type               = "kafka_connect"
+  service_uri                = "foo"
+  service_username           = "foo"
+  state                      = "POWEROFF"
+  */
 }

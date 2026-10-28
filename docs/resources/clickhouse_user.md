@@ -13,9 +13,9 @@ Creates and manages an Aiven for ClickHouse user. If this resource is missing (f
 
 ```terraform
 resource "aiven_clickhouse_user" "example" {
-  project      = aiven_clickhouse.example_clickhouse.project      // e.g. "my-project". Force new
-  service_name = aiven_clickhouse.example_clickhouse.service_name // e.g. "my-clickhouse". Force new
-  username     = "alice"                                          // Force new
+  project      = aiven_clickhouse.example.project      // e.g. "my-project". Force new
+  service_name = aiven_clickhouse.example.service_name // e.g. "my-clickhouse". Force new
+  username     = "alice"                               // Force new
 
   // OPTIONAL FIELDS
   password_wo         = "password123"
@@ -27,10 +27,10 @@ resource "aiven_clickhouse_user" "example" {
   */
 }
 
-resource "aiven_clickhouse" "example_clickhouse" {
-  project      = "my-project"
-  plan         = "business-4"
-  service_name = "example-clickhouse-service"
+resource "aiven_clickhouse" "example" {
+  project      = "my-project"    // Force new
+  service_name = "my-clickhouse" // Force new
+  plan         = "startup-4"
 }
 ```
 

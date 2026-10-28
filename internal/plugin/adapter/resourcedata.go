@@ -27,6 +27,7 @@ type ResourceData interface {
 	GetState(key string) any
 	HasChange(key string) bool
 	Set(key string, value any) error
+	SetUnknown(keys ...string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -230,13 +231,57 @@ func (d *resourceData) HasChange(key string) bool {
 	if pOK != sOK {
 		return true
 	}
-	return !cmp.Equal(planVal, stateVal)
+	return !cmp.Equal(withoutNulls(planVal), stateVal)
+}
+
+// withoutNulls drops the null placeholders of ModifyPlan, as the state has no nulls, e.g.,
+// {"foo": 1, "bar": tftypes.String<null>} → {"foo": 1}. An unknown value is a change, so it stays.
+func withoutNulls(v any) any {
+	switch v := v.(type) {
+	case map[string]any:
+		result := make(map[string]any, len(v))
+		for k, item := range v {
+			if tv, ok := item.(tftypes.Value); !ok || !tv.IsNull() {
+				result[k] = withoutNulls(item)
+			}
+		}
+		return result
+	case []any:
+		result := make([]any, len(v))
+		for i, item := range v {
+			result[i] = withoutNulls(item)
+		}
+		return result
+	}
+	return v
 }
 
 // Set sets a value by a path.
 // Returns an error if the key is not found in the schema.
 func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
+}
+
+// SetUnknown plans the attributes as "(known after apply)", e.g., the computed values a plan change resets.
+// ModifyPlan only: the other operations must store known values.
+func (d *resourceData) SetUnknown(keys ...string) error {
+	if !d.preservePlanValues {
+		return fmt.Errorf("unknown values can be set by ModifyPlan only")
+	}
+
+	for _, key := range keys {
+		prop, ok := d.schema.Properties[key]
+		if !ok {
+			return fmt.Errorf("key %q not found in schema", key)
+		}
+
+		null, err := toTFValue(prop, nil)
+		if err != nil {
+			return err
+		}
+		d.plan[key] = tftypes.NewValue(null.Type(), tftypes.UnknownValue)
+	}
+	return nil
 }
 
 func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {

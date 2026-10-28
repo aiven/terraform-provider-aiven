@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"net/mail"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 )
@@ -103,28 +101,6 @@ func EmptyObjectDiffSuppressFunc(k, oldValue, newValue string, d *schema.Resourc
 	return false
 }
 
-// EmptyObjectDiffSuppressFuncSkipArrays generates a DiffSuppressFunc that skips all the array/list fields
-// and uses schemautil.EmptyObjectDiffSuppressFunc in all others cases
-func EmptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.SchemaDiffSuppressFunc {
-	var skipKeys []string
-	for key, sh := range s {
-		switch sh.Type { //nolint:gocritic
-		case schema.TypeList:
-			skipKeys = append(skipKeys, key)
-		}
-	}
-
-	return func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-		for _, key := range skipKeys {
-			if strings.Contains(k, fmt.Sprintf(".%s.", key)) {
-				return false
-			}
-		}
-
-		return EmptyObjectDiffSuppressFunc(k, oldValue, newValue, d)
-	}
-}
-
 // EmptyObjectNoChangeDiffSuppressFunc it suppresses a diff if a field is empty but have not
 // been set before to any value
 func EmptyObjectNoChangeDiffSuppressFunc(k, _, newValue string, d *schema.ResourceData) bool {
@@ -139,45 +115,8 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, newValue string, d *schema.Resour
 	return false
 }
 
-// IPFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
-// the IP filter user config value has default. We don't want to force users to always
-// define explicit value just because of the Terraform restriction so suppress the
-// change from default to empty (which would be nonsensical operation anyway)
-func IPFilterArrayDiffSuppressFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
-	// TODO: Add support for ip_filter_object.
-
-	if oldValue == "1" && newValue == "0" && strings.HasSuffix(k, ".ip_filter.#") {
-		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]any); ok {
-			if len(list) == 1 {
-				return list[0] == "0.0.0.0/0"
-			}
-		}
-	}
-
-	return false
-}
-
-func IPFilterValueDiffSuppressFunc(k, oldValue, newValue string, _ *schema.ResourceData) bool {
-	// TODO: Add support for ip_filter_object.
-
-	return oldValue == "0.0.0.0/0" && newValue == "" && strings.HasSuffix(k, ".ip_filter.0")
-}
-
 func TrimSpaceDiffSuppressFunc(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	return strings.TrimSpace(oldValue) == strings.TrimSpace(newValue)
-}
-
-// ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
-// as units.Bytes format
-func ValidateHumanByteSizeString(v any, k string) (ws []string, errors []error) {
-	// only allow `^[1-9][0-9]*(GiB|G)*` without fractions
-	if ok, _ := regexp.MatchString("^[1-9][0-9]*(GiB|G)$", v.(string)); !ok {
-		return ws, append(errors, fmt.Errorf("%q: configured string must match ^[1-9][0-9]*(G|GiB)", k))
-	}
-	if _, err := units.RAMInBytes(v.(string)); err != nil {
-		return ws, append(errors, fmt.Errorf("%q: invalid human readable byte size", k))
-	}
-	return
 }
 
 // ValidateEmailAddress is a ValidateFunc that ensures a string is a valid email address
@@ -191,25 +130,6 @@ func ValidateEmailAddress(v any, k string) (ws []string, errors []error) {
 
 	if strings.ToLower(addr.Address) != addr.Address {
 		errors = append(errors, fmt.Errorf("%q: invalid email address", k))
-	}
-
-	return
-}
-
-// ValidateMaintenanceWindowTime ensures a string is a valid HH:mm:ss time format
-func ValidateMaintenanceWindowTime(v any, k string) (ws []string, errors []error) {
-	timeStr, ok := v.(string)
-	if !ok {
-		errors = append(errors, fmt.Errorf("%q: expected string, got %T", k, v))
-		return
-	}
-
-	if ok, _ := regexp.MatchString("^(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]$", timeStr); !ok {
-		errors = append(
-			errors,
-			fmt.Errorf(`%q: must be in HH:mm:ss format where HH is 00-23 (two digits), mm and ss are 00-59 (e.g., "09:30:00", "23:59:59")`, k),
-		)
-		return
 	}
 
 	return

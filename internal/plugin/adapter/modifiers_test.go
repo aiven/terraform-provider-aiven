@@ -9,6 +9,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestSetFixedValues(t *testing.T) {
+	t.Parallel()
+
+	t.Run("sets and overrides fields", func(t *testing.T) {
+		dto := map[string]any{"cloud_provider": "aws", "display_name": "foo"}
+		err := SetFixedValues("cloud_provider", "azure", "deployment_model", "standard")(nil, dto)
+		require.NoError(t, err)
+		require.Equal(t, map[string]any{
+			"cloud_provider":   "azure",
+			"deployment_model": "standard",
+			"display_name":     "foo",
+		}, dto)
+	})
+
+	t.Run("odd number of arguments", func(t *testing.T) {
+		err := SetFixedValues("cloud_provider")(nil, map[string]any{})
+		require.ErrorContains(t, err, "key-value pairs")
+	})
+}
+
 func TestExpandUserConfig(t *testing.T) {
 	t.Parallel()
 
@@ -73,6 +93,63 @@ func TestExpandUserConfig(t *testing.T) {
 			},
 		}, dto["user_config"])
 	})
+}
+
+func TestKeepConfigured(t *testing.T) {
+	t.Parallel()
+
+	sch := userConfigTestSchema().Properties["rsyslog_user_config"].Items
+	networks := []any{"10.0.0.0/8"}
+	objects := []any{map[string]any{"network": "10.0.0.0/8"}}
+
+	cases := []struct {
+		name                string
+		plan, config, state map[string]any
+		want                map[string]any
+	}{
+		{
+			name:   "removed option isn't sent",
+			plan:   map[string]any{"server": "foo", "ip_filter": networks},
+			config: map[string]any{},
+			state:  map[string]any{"server": "foo", "ip_filter": networks},
+			want:   map[string]any{},
+		},
+		{
+			name:   "cleared ip_filter is sent",
+			plan:   map[string]any{"ip_filter": []any{}},
+			config: map[string]any{},
+			state:  map[string]any{"ip_filter": networks},
+			want:   map[string]any{"ip_filter": []any{}},
+		},
+		{
+			name:   "ip_filter replaced with ip_filter_string isn't sent",
+			plan:   map[string]any{"ip_filter": []any{}, "ip_filter_string": networks},
+			config: map[string]any{"ip_filter_string": networks},
+			state:  map[string]any{"ip_filter": networks},
+			want:   map[string]any{"ip_filter_string": networks},
+		},
+		{
+			name:   "removed ip_filter_object is sent",
+			plan:   map[string]any{"ip_filter_object": []any{}},
+			config: map[string]any{"ip_filter_object": []any{}},
+			state:  map[string]any{"ip_filter_object": objects},
+			want:   map[string]any{"ip_filter_object": []any{}},
+		},
+		{
+			name:   "ip_filter_object replaced with ip_filter_string isn't sent",
+			plan:   map[string]any{"ip_filter_object": []any{}, "ip_filter_string": networks},
+			config: map[string]any{"ip_filter_object": []any{}, "ip_filter_string": networks},
+			state:  map[string]any{"ip_filter_object": objects},
+			want:   map[string]any{"ip_filter_string": networks},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			keepConfigured(sch, tc.plan, tc.config, tc.state)
+			assert.Equal(t, tc.want, tc.plan)
+		})
+	}
 }
 
 func TestValidateUserConfig(t *testing.T) {
@@ -162,7 +239,13 @@ func userConfigTestSchema() *Schema {
 				}),
 			}),
 			"rsyslog_user_config": object(map[string]*Schema{
-				"server": {Type: SchemaTypeString, Computed: true},
+				"server":           {Type: SchemaTypeString, Computed: true},
+				"ip_filter":        {Type: SchemaTypeSet, Computed: true, Items: &Schema{Type: SchemaTypeString}},
+				"ip_filter_string": {Type: SchemaTypeSet, Computed: true, JSONName: "ip_filter", Items: &Schema{Type: SchemaTypeString}},
+				"ip_filter_object": {Type: SchemaTypeSet, Computed: true, JSONName: "ip_filter", Items: &Schema{
+					Type:       SchemaTypeObject,
+					Properties: map[string]*Schema{"network": {Type: SchemaTypeString}, "description": {Type: SchemaTypeString}},
+				}},
 			}),
 		},
 	}
@@ -213,6 +296,20 @@ func TestFlattenUserConfig(t *testing.T) {
 		dto := map[string]any{"endpoint_type": "datadog"}
 		require.NoError(t, mod(dataSource, dto))
 		assert.NotContains(t, dto, "datadog_user_config")
+	})
+
+	t.Run("data source fills each ip_filter option", func(t *testing.T) {
+		t.Parallel()
+		dto := map[string]any{
+			"endpoint_type": "rsyslog",
+			"user_config":   map[string]any{"ip_filter": []any{map[string]any{"network": "10.0.0.0/8", "description": "office"}}},
+		}
+		require.NoError(t, mod(dataSource, dto))
+		require.Equal(t, map[string]any{
+			"ip_filter":        []any{"10.0.0.0/8"},
+			"ip_filter_string": []any{"10.0.0.0/8"},
+			"ip_filter_object": []any{map[string]any{"network": "10.0.0.0/8", "description": "office"}},
+		}, dto["rsyslog_user_config"])
 	})
 
 	t.Run("unknown kind sets no block", func(t *testing.T) {

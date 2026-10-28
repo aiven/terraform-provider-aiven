@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.
+datasource:
+  description: Gets information about an Aiven for Apache Kafka® service.
+version: 1
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: kafka
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-kafka
+  kafka_user_config:
+    minimalExample: true
+  karapace:
+    type: boolean
+    optional: true
+    description: "Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy. This attribute is deprecated, use `schema_registry` and `kafka_rest` instead."
+    deprecationMessage: Usage of this field is discouraged.
+  default_acl:
+    type: boolean
+    optional: true
+    default: true
+    description: Create a default wildcard Kafka ACL.
+  kafka:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Kafka server connection details.
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: Kafka server URIs.
+      access_cert:
+        type: string
+        description: The Kafka client certificate.
+      access_key:
+        type: string
+        description: The Kafka client certificate key.
+      connect_uri:
+        type: string
+        description: The Kafka Connect URI.
+      rest_uri:
+        type: string
+        description: The Kafka REST URI.
+      schema_registry_uri:
+        type: string
+        description: The Schema Registry URI.

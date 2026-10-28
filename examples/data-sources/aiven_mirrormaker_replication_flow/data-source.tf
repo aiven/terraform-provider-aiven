@@ -1,6 +1,6 @@
 data "aiven_mirrormaker_replication_flow" "example" {
   project        = "my-project"
-  service_name   = "foo"
+  service_name   = "my-kafka-mirrormaker"
   source_cluster = "kafka-abc"
   target_cluster = "kafka-abc"
 
