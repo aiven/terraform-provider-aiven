@@ -336,12 +336,12 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.kafka_rest from Aiven")
 		}
 
-		if a["kafka_user_config.0.public_access.0.kafka"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.kafka from Aiven")
+		if v := a["kafka_user_config.0.public_access.0.kafka"]; v == "true" {
+			return fmt.Errorf("expected public_access.kafka to be disabled, got %q", v)
 		}
 
-		if a["kafka_user_config.0.public_access.0.prometheus"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
+		if v := a["kafka_user_config.0.public_access.0.prometheus"]; v == "true" {
+			return fmt.Errorf("expected public_access.prometheus to be disabled, got %q", v)
 		}
 
 		if a["kafka_user_config.0.ip_filter.0"] != "0.0.0.0/0" || a["kafka_user_config.0.ip_filter.1"] != "::/0" {
@@ -409,7 +409,9 @@ func TestAccAiven_kafka_user_config_kafka_omits_null_fields(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms"),
+					resource.TestCheckNoResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes"),
 				),
 			},
 		},
@@ -421,6 +423,7 @@ func TestAccAiven_kafka_user_config_boolean_field_removed(t *testing.T) {
 	project := acc.ProjectName()
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
+	dataSourceName := "data.aiven_kafka.kafka"
 	withConfig := func(c string) string {
 		return fmt.Sprintf(`
 resource "aiven_kafka" "kafka" {
@@ -430,6 +433,13 @@ resource "aiven_kafka" "kafka" {
   plan         = "startup-4"
 
   %s
+}
+
+data "aiven_kafka" "kafka" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+
+  depends_on = [aiven_kafka.kafka]
 }
 `, project, prefix, c)
 	}
@@ -453,8 +463,9 @@ kafka_user_config {
 				// Removes the config and expects nothing changed
 				Config: withConfig(``),
 				Check: resource.ComposeTestCheckFunc(
-					// The value remains true
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					// Removing the block sends nothing, the API keeps the options
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "kafka_user_config.0.schema_registry", "true"),
 				),
 			},
 			{
@@ -498,8 +509,9 @@ kafka_user_config {
 				// Removing the whole block acts as expected
 				Config: withConfig(``),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(dataSourceName, "kafka_user_config.0.kafka_rest", "false"),
 				),
 			},
 		},

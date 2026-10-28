@@ -313,7 +313,7 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "disk_space", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "disk_space"),
 					resource.TestCheckResourceAttrSet(resourceName, "disk_space_used"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
@@ -1000,12 +1000,12 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.pg from Aiven")
 		}
 
-		if a["pg_user_config.0.public_access.0.pgbouncer"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.pgbouncer from Aiven")
+		if v := a["pg_user_config.0.public_access.0.pgbouncer"]; v == "true" {
+			return fmt.Errorf("expected public_access.pgbouncer to be disabled, got %q", v)
 		}
 
-		if a["pg_user_config.0.public_access.0.prometheus"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
+		if v := a["pg_user_config.0.public_access.0.prometheus"]; v == "true" {
+			return fmt.Errorf("expected public_access.prometheus to be disabled, got %q", v)
 		}
 
 		if a["pg_user_config.0.service_to_fork_from"] != "" {
