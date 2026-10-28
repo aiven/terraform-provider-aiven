@@ -30,7 +30,7 @@ func TestAccAivenPG_no_existing_project(t *testing.T) {
 }
 
 func TestAccAivenPG_invalid_disk_size(t *testing.T) {
-	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
+	expectErrorRegexBadString := regexp.MustCompile(`must\s+match\s+pattern\s+"\^\[1-9\]\[0-9\]\*\(GiB\|G\)\$"`)
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -1316,7 +1316,7 @@ func TestAccAivenPG_AdminPasswordConflicts(t *testing.T) {
 					),
 				},
 				{
-					Config:      testAccPGResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123!", "writeonly123!", 1),
+					Config:      testAccPGResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123", "writeonly123!", 1),
 					ExpectError: regexp.MustCompile(`cannot set 'service_password_wo' and 'pg_user_config\.0\.admin_password' simultaneously`),
 				},
 			},
@@ -1336,7 +1336,7 @@ resource "aiven_pg" "test" {
   service_password_wo_version = %[4]d
 
   pg_user_config {
-    admin_password = "ConflictingPassword123!"
+    admin_password = "ConflictingPassword123"
   }
 }
 `, acc.ProjectName(), name, woPassword, version)
