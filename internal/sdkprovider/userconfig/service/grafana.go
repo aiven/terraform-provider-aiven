@@ -338,7 +338,7 @@ func grafanaUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"lax", "none", "strict"}, false),
 			},
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the `public-*` hostname and the custom domain. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -508,6 +508,11 @@ func grafanaUserConfig() *schema.Schema {
 				MaxItems: 8000,
 				Optional: true,
 				Type:     schema.TypeSet,
+			},
+			"metrics_disable_total_stats": {
+				Description: "Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.",
+				Optional:    true,
+				Type:        schema.TypeBool,
 			},
 			"metrics_enabled": {
 				Description: "Enable Grafana's /metrics endpoint.",

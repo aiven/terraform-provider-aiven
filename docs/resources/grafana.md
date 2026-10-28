@@ -101,7 +101,7 @@ Optional:
 - `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the `public-*` hostname and the custom domain. Example: `grafana.example.org`.
 - `dashboard_previews_enabled` (Boolean) Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
 - `dashboard_scenes_enabled` (Boolean) Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
@@ -117,6 +117,7 @@ Optional:
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `metrics_disable_total_stats` (Boolean) Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.
 - `metrics_enabled` (Boolean) Enable Grafana's /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP. This setup introduces significant security risks, such as potential phishing, spoofing, and other data breaches.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))

@@ -338,7 +338,10 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 }
 
 var (
-	reCode       = regexp.MustCompile(`'([^'\s]+)'`)
+	reCode = regexp.MustCompile(`'([^'\s]+)'`)
+	// reGlob matches unquoted wildcard names (e.g. public-*), which Markdown
+	// would otherwise parse as emphasis delimiters.
+	reGlob       = regexp.MustCompile(`(^|\s)([\w-]+\*[\w*-]*)`)
 	reWhitespace = regexp.MustCompile(`\s+`)
 )
 
@@ -367,6 +370,7 @@ func getDescription(o *object) string {
 	if d != "" {
 		// Wraps code chunks with backticks to render them as code blocks
 		d = reCode.ReplaceAllString(d, "`$1`")
+		d = reGlob.ReplaceAllString(d, "$1`$2`")
 
 		// Adds a trailing dot if missing
 		desc = append(desc, addDot(d))

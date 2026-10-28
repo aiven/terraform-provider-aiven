@@ -118,6 +118,7 @@ Read-Only:
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
+- `metrics_disable_total_stats` (Boolean)
 - `metrics_enabled` (Boolean)
 - `oauth_allow_insecure_email_lookup` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--private_access))
