@@ -353,11 +353,27 @@ func TestAccAivenMySQL_AdminPasswordConflicts(t *testing.T) {
 					),
 				},
 				{
-					Config:      testAccMySQLResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123!", "writeonly123!", 1),
+					Config:      testAccMySQLResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123", "writeonly123!", 1),
 					ExpectError: regexp.MustCompile(`cannot set 'service_password_wo' and 'mysql_user_config\.0\.admin_password' simultaneously`),
 				},
 			},
 		})
+	})
+}
+
+func TestAccAivenMySQL_AdminPasswordPattern(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:   testAccMySQLResourceWithAdminPassword(acc.RandName("mysql"), "ConflictingPassword123!"),
+				PlanOnly: true,
+				ExpectError: regexp.MustCompile(
+					`Attribute\s+mysql_user_config\[0\]\.admin_password\s+must\s+match\s+pattern\s+"\^\[a-zA-Z0-9-_\]\+\$",\s+got:\s+ConflictingPassword123!`,
+				),
+			},
+		},
 	})
 }
 
@@ -373,7 +389,7 @@ resource "aiven_mysql" "test" {
   service_password_wo_version = %[4]d
 
   mysql_user_config {
-    admin_password = "ConflictingPassword123!"
+    admin_password = "ConflictingPassword123"
   }
 }
 `, acc.ProjectName(), name, woPassword, version)
