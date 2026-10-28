@@ -67,7 +67,6 @@ const (
 	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
 	ServiceTypeFlink            = "flink"
 	ServiceTypeClickhouse       = "clickhouse"
-	ServiceTypeDragonfly        = "dragonfly"
 	ServiceTypeThanos           = "thanos"
 	ServiceTypeValkey           = "valkey"
 )
@@ -88,7 +87,6 @@ func validServiceTypes() map[string]bool {
 		ServiceTypeKafkaMirrormaker: true,
 		ServiceTypeFlink:            true,
 		ServiceTypeClickhouse:       true,
-		ServiceTypeDragonfly:        true,
 		ServiceTypeThanos:           true,
 		ServiceTypeValkey:           true,
 	}
@@ -1117,11 +1115,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		// CassandraHosts will be renamed to CassandraURIs in the next major version of the Go client.
 		// That's why we name the props key `uris` here.
 		props["uris"] = connectionInfo.Cassandra
-	case ServiceTypeDragonfly:
-		props["uris"] = connectionInfo.Redis
-		props["slave_uris"] = connectionInfo.RedisSlave
-		setProp(props, "replica_uri", connectionInfo.RedisReplicaUri)
-		setProp(props, "password", connectionInfo.RedisPassword)
 	case ServiceTypeValkey:
 		props["uris"] = connectionInfo.Valkey
 		props["slave_uris"] = connectionInfo.ValkeySlave
@@ -1162,7 +1155,7 @@ func setServicePassword(d ResourceData, password any) error {
 // Different services use different default usernames (e.g., avnadmin, default, etc.).
 func DefaultServiceUsername(serviceType string) string {
 	switch serviceType {
-	case ServiceTypeDragonfly, ServiceTypeValkey:
+	case ServiceTypeValkey:
 		return "default"
 	default:
 		return "avnadmin" // most services use avnadmin

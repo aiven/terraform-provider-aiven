@@ -88,7 +88,6 @@ func TestUpsertServicePassword(t *testing.T) {
 			{"opensearch", ServiceTypeOpenSearch, "avnadmin"},
 			{"grafana", ServiceTypeGrafana, "avnadmin"},
 			{"kafka", ServiceTypeKafka, "avnadmin"},
-			{"dragonfly", ServiceTypeDragonfly, "default"},
 			{"valkey", ServiceTypeValkey, "default"},
 		}
 

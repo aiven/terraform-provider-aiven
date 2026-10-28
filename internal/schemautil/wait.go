@@ -237,13 +237,7 @@ func grafanaReady(s *service.ServiceGetOut) bool {
 }
 
 func backupsReady(s *service.ServiceGetOut) bool {
-	switch s.ServiceType {
-	case ServiceTypePG, ServiceTypeDragonfly:
-		// See https://github.com/aiven/terraform-provider-aiven/issues/756
-		if s.UserConfig["dragonfly_persistence"] == "off" {
-			return true
-		}
-	default:
+	if s.ServiceType != ServiceTypePG {
 		return true
 	}
 
