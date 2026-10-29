@@ -37,6 +37,10 @@ nav_order: 1
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the whole block shows a change, which
     sends nothing: the API keeps the options, including a custom `ip_filter` that SDKv2 cleared.
+  - The first plan after the upgrade might show an in-place change that removes the user config blocks SDKv2 stored
+    but the configuration doesn't have, e.g., `pg_user_config` or its `pg` block. The Plugin Framework can't keep a block
+    missing in the configuration. It's safe to apply: the change sends nothing, so the service settings, hosts
+    and credentials stay the same.
   - An empty string is null in the state, e.g., `project_vpc_id` without a VPC.
   - The user config options are validated at plan time, e.g., `email_sender_username = ""` fails its pattern.
   - The connection blocks, e.g., `pg` and `kafka`, are read-only.

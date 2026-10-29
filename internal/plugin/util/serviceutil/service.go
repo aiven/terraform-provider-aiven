@@ -52,10 +52,19 @@ func (s Service) Wrap(r *adapter.ResourceOptions, ds *adapter.DataSourceOptions)
 		}
 
 		// These change the disks, the hosts, the credentials, etc. Only kafka has karapace.
-		changed := slices.ContainsFunc([]string{"plan", "cloud_name", "project_vpc_id", "disk_space", "additional_disk_space", "karapace", s.userConfig()}, func(k string) bool {
+		changed := slices.ContainsFunc([]string{"plan", "cloud_name", "disk_space", "additional_disk_space", "karapace"}, func(k string) bool {
 			_, ok := d.Schema().Properties[k]
 			return ok && d.HasChange(k)
 		})
+
+		// SDKv2 stored "" for no VPC, which the plan has as null
+		_, vpcSet := d.GetConfigOk("project_vpc_id")
+		changed = changed || d.HasChange("project_vpc_id") && (vpcSet || d.GetState("project_vpc_id") != "")
+
+		// Removing the whole block sends nothing, e.g., the SDKv2 state has the block the config doesn't
+		v, _ := d.GetConfigOk(s.userConfig())
+		userConfig, _ := v.([]any)
+		changed = changed || len(userConfig) > 0 && d.HasChange(s.userConfig())
 		if !changed {
 			return nil
 		}
