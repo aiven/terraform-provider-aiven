@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 var (
@@ -96,6 +97,13 @@ type BackwardCompatConfig struct {
 	// e.g. Adding optional fields can be breaking for PlanOnly mode since old state lacks these fields
 	// and Read function doesn't run to migrate them. This may affect some CI pipelines using `plan -refresh=false`.
 	PlanOnly bool
+
+	// ExpectNonEmptyPlan allows the verification step to change resources, which ConfigPlanChecks should narrow down,
+	// e.g., a service drops the user config options SDKv2 stored while the resource under test doesn't change.
+	ExpectNonEmptyPlan bool
+
+	// ConfigPlanChecks are the plan checks of the verification step.
+	ConfigPlanChecks resource.ConfigPlanChecks
 }
 
 // BackwardCompatibilitySteps creates a two-step backward compatibility test:
@@ -103,7 +111,7 @@ type BackwardCompatConfig struct {
 // Step 2: Verify new provider can read state without changes
 //
 // When switching from old provider to new provider with SAME config,
-// the plan MUST be empty (no changes needed).
+// the plan MUST be empty (no changes needed), unless ExpectNonEmptyPlan is set.
 func BackwardCompatibilitySteps(t *testing.T, config BackwardCompatConfig) []resource.TestStep {
 	t.Helper()
 
@@ -131,8 +139,22 @@ func BackwardCompatibilitySteps(t *testing.T, config BackwardCompatConfig) []res
 			ProtoV6ProviderFactories: TestProtoV6ProviderFactories,
 			Config:                   config.TFConfig,
 			PlanOnly:                 config.PlanOnly,
-			ExpectNonEmptyPlan:       false,
+			ExpectNonEmptyPlan:       config.ExpectNonEmptyPlan,
+			ConfigPlanChecks:         config.ConfigPlanChecks,
 			Check:                    config.Checks,
 		},
 	}
+}
+
+// UpgradePlanChecks expects both plans of a PlanOnly verification step to keep unchanged as is
+// and to update updated in place, e.g., services that drop the user config options SDKv2 stored.
+func UpgradePlanChecks(unchanged, updated []string) resource.ConfigPlanChecks {
+	checks := make([]plancheck.PlanCheck, 0, len(unchanged)+len(updated))
+	for _, v := range unchanged {
+		checks = append(checks, plancheck.ExpectResourceAction(v, plancheck.ResourceActionNoop))
+	}
+	for _, v := range updated {
+		checks = append(checks, plancheck.ExpectResourceAction(v, plancheck.ResourceActionUpdate))
+	}
+	return resource.ConfigPlanChecks{PostApplyPreRefresh: checks, PostApplyPostRefresh: checks}
 }
