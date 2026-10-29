@@ -10,7 +10,11 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -62,7 +66,7 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceIntegrationLogs(rName, "2"),
+				Config: testAccServiceIntegrationLogs(rName, "2", "logs"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
@@ -77,18 +81,37 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccServiceIntegrationLogs(rName, "5"),
+				Config: testAccServiceIntegrationLogs(rName, "7", "logs"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-os-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "logs_user_config.0.elasticsearch_index_days_max", "5"),
+					resource.TestCheckResourceAttr(resourceName, "logs_user_config.0.elasticsearch_index_days_max", "7"),
 				),
 			},
 			{
-				Config:                  testAccServiceIntegrationLogs(rName, "5"),
+				// Changing the prefix forces an update while retention is omitted from HCL.
+				Config: testAccServiceIntegrationLogs(rName, "", "custom-logs"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "logs_user_config.0.elasticsearch_index_days_max", "7"),
+					resource.TestCheckResourceAttr(resourceName, "logs_user_config.0.elasticsearch_index_prefix", "custom-logs"),
+					testAccCheckIntegrationUserConfig(resourceName, func(config map[string]any) error {
+						if fmt.Sprint(config["elasticsearch_index_days_max"]) != "7" || config["elasticsearch_index_prefix"] != "custom-logs" {
+							return fmt.Errorf("API did not preserve retention while updating the index prefix: %v", config)
+						}
+						return nil
+					}),
+				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply:             []plancheck.PlanCheck{plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate)},
+					PostApplyPreRefresh:  []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+					PostApplyPostRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
+			},
+			{
+				Config:                  testAccServiceIntegrationLogs(rName, "", "custom-logs"),
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -188,13 +211,33 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *test
 				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["foo", "bar", "baz"]`),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.name", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.1.name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.2.name", "baz"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.auto_offset_reset", "latest"),
+					testAccCheckClickhouseKafkaTables(resourceName, "foo", "bar", "baz"),
 				),
 			},
 			{
 				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["bar"]`),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.group_name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.topics.0.name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.columns.0.name", "bar"),
+					testAccCheckClickhouseKafkaTables(resourceName, "bar"),
 				),
+				ConfigStateChecks: []statecheck.StateCheck{
+					// The remaining table must not inherit foo's explicit value at the old index.
+					statecheck.ExpectKnownValue(resourceName, tfjsonpath.New("clickhouse_kafka_user_config").AtSliceIndex(0).
+						AtMapKey("tables").AtSliceIndex(0).AtMapKey("auto_offset_reset"), knownvalue.Null()),
+				},
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply:             []plancheck.PlanCheck{plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate)},
+					PostApplyPreRefresh:  []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+					PostApplyPostRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
 			},
 		},
 	})
@@ -531,7 +574,11 @@ resource "aiven_service_integration" "i2" {
 }`, acc.ProjectName(), name, name, name, name, name)
 }
 
-func testAccServiceIntegrationLogs(name, indexDaysMax string) string {
+func testAccServiceIntegrationLogs(name, indexDaysMax, indexPrefix string) string {
+	retentionConfig := ""
+	if indexDaysMax != "" {
+		retentionConfig = fmt.Sprintf("elasticsearch_index_days_max = %q", indexDaysMax)
+	}
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -561,8 +608,8 @@ resource "aiven_service_integration" "bar" {
   source_service_name      = resource.aiven_pg.source.service_name
   destination_service_name = resource.aiven_opensearch.sink.service_name
   logs_user_config {
-    elasticsearch_index_days_max = %q
-    elasticsearch_index_prefix   = "logs"
+    %s
+    elasticsearch_index_prefix = %q
   }
 }
 
@@ -573,7 +620,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, acc.ProjectName(), name, name, indexDaysMax)
+}`, acc.ProjectName(), name, name, retentionConfig, indexPrefix)
 }
 
 func testAccServiceIntegrationBackwardCompat(name string) string {
@@ -810,15 +857,16 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
     dynamic "tables" {
       for_each = %[3]s
       content {
-        data_format   = "AvroConfluent"
-        name          = tables.key
-        group_name    = tables.key
-        num_consumers = 1
+        data_format       = "AvroConfluent"
+        name              = tables.value
+        group_name        = tables.value
+        num_consumers     = 1
+        auto_offset_reset = tables.value == "foo" ? "latest" : null
         topics {
-          name = tables.key
+          name = tables.value
         }
         columns {
-          name = tables.key
+          name = tables.value
           type = "LowCardinality(String)"
         }
       }
@@ -826,6 +874,51 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
   }
 }
 `, prefix, project, tables)
+}
+
+func testAccCheckIntegrationUserConfig(resourceName string, check func(map[string]any) error) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok || rs.Primary == nil {
+			return fmt.Errorf("resource %s not found in state", resourceName)
+		}
+		project, integrationID, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		client, err := acc.GetTestGenAivenClient()
+		if err != nil {
+			return err
+		}
+		integration, err := client.ServiceIntegrationGet(context.Background(), project, integrationID)
+		if err != nil {
+			return err
+		}
+		return check(integration.UserConfig)
+	}
+}
+
+func testAccCheckClickhouseKafkaTables(resourceName string, names ...string) resource.TestCheckFunc {
+	return testAccCheckIntegrationUserConfig(resourceName, func(config map[string]any) error {
+		tables, ok := config["tables"].([]any)
+		if !ok || len(tables) != len(names) {
+			return fmt.Errorf("expected %d API tables, got %v", len(names), config["tables"])
+		}
+		for i, name := range names {
+			table, ok := tables[i].(map[string]any)
+			if !ok || table["name"] != name || table["group_name"] != name {
+				return fmt.Errorf("API table %d does not match %q: %v", i, name, tables[i])
+			}
+			wantOffset := "earliest" // Server default for tables without an explicit value.
+			if name == "foo" {
+				wantOffset = "latest"
+			}
+			if table["auto_offset_reset"] != wantOffset {
+				return fmt.Errorf("API table %q: expected offset %q, got %v", name, wantOffset, table["auto_offset_reset"])
+			}
+		}
+		return nil
+	})
 }
 
 func testAccServiceIntegrationClickhousePostgresUserConfig(prefix, project string) string {
