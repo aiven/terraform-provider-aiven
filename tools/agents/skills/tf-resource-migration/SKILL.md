@@ -394,10 +394,12 @@ Once all tests pass and state compatibility is verified:
 
 1. **Remove SDK resource** - Delete from `internal/sdkprovider/` and remove provider registration
 2. **Update documentation** - Ensure docs reflect the Plugin Framework version
-3. **Add migration notes if needed** - Document any unavoidable behavioral differences
+3. **Add migration notes if needed** - Document any unavoidable behavioral differences. Differences every migrated
+   resource shares, e.g., removed blocks in the first plan or null in place of zero values, are in the "Plugin Framework
+   migration" section of `templates/guides/upgrade-guide-v3-to-v4.md`: link it, don't repeat it
 4. **Add changelog entry** - Add record to `CHANGELOG.md` under the unreleased section:
    ```markdown
-   - Migrate `aiven_resource_name` to the Plugin Framework
+   - Migrate `aiven_resource_name` to the Plugin Framework, see [Plugin Framework migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration) in the upgrade guide
    - Change `aiven_resource_name`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
    ```
 

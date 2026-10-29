@@ -282,8 +282,8 @@ nav_order: 1
 ## [4.59.0] - 2026-06-22
 
 - Add `aiven_kafka_schema` field `references`: Schema references to other registered subjects.
-- Change `aiven_kafka_topic`: migrated to Terraform Plugin Framework. Recommended: upgrade state via v4.58.0 or re-import
-  if coming from v3.
+- Change `aiven_kafka_topic`: migrated to Terraform Plugin Framework, see [Plugin Framework migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide. Recommended: upgrade state via v4.58.0 or re-import if coming from v3.
 - Change `aiven_kafka_topic`: empty strings are no longer accepted for `topic_description` and `owner_user_group_id`; omit
   the attribute or use `null` to leave it unset.
 - Add `aiven_kafka` field `kafka_user_config.kafka.group_coordinator_rebalance_protocols` (enum): The enabled consumer
