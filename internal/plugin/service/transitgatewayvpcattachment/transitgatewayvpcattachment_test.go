@@ -903,15 +903,17 @@ func TestMigrationWithoutRefreshUnconfiguredCIDRs(t *testing.T) {
 		"refreshing unconfigured CIDRs must agree with the plan")
 }
 
-func TestUpdateChecksReadinessAfterCIDRWrite(t *testing.T) {
+func TestUpdateDoesNotWaitForReadinessAfterCIDRWrite(t *testing.T) {
 	check := func(t *testing.T, priorCIDR string) {
 		t.Helper()
+		ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+		defer cancel()
 		sch := resourceSchema(t.Context())
 		values := map[string]any{
 			"id": testFivePartID, "vpc_id": testProject + "/" + testProjectVpcID,
 			"project": testProject, "project_vpc_id": testProjectVpcID,
 			"peer_cloud_account": testPeerCloudAccount, "peer_vpc": testPeerVpc,
-			"peer_region": testPeerRegion, "state": "ACTIVE",
+			"peer_region": testPeerRegion, "state": "APPROVED",
 			"user_peer_network_cidrs": []tftypes.Value{tftypes.NewValue(tftypes.String, priorCIDR)},
 		}
 		state := tfsdk.State{Raw: attachmentStateValue(t, values), Schema: sch}
@@ -921,51 +923,53 @@ func TestUpdateChecksReadinessAfterCIDRWrite(t *testing.T) {
 		r := adapter.NewResource(ResourceOptions)
 		r.(resource.ResourceWithConfigure).Configure(t.Context(), resource.ConfigureRequest{ProviderData: migrationProviderData{client}}, &resource.ConfigureResponse{})
 		client.EXPECT().VpcGet(mock.Anything, testProject, testProjectVpcID).Return(&vpc.VpcGetOut{
-			PeeringConnections: []vpc.PeeringConnectionOut{newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeActive, []string{"10.10.0.0/24"}, nil)},
+			PeeringConnections: []vpc.PeeringConnectionOut{newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeApproved, []string{"10.10.0.0/24"}, nil)},
 		}, nil).Once()
 		client.EXPECT().VpcPeeringConnectionUpdate(mock.Anything, testProject, testProjectVpcID, cidrUpdateMatcher(
 			new(testPeerRegion), []string{"10.20.0.0/24"}, []string{"10.10.0.0/24"},
 		)).Return(&vpc.VpcPeeringConnectionUpdateOut{}, nil).Once()
+		// PUT persists the CIDRs without changing the attachment's state.
 		client.EXPECT().VpcGet(mock.Anything, testProject, testProjectVpcID).Return(&vpc.VpcGetOut{
-			PeeringConnections: []vpc.PeeringConnectionOut{newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeError, nil, map[string]any{"message": "routing update failed"})},
+			PeeringConnections: []vpc.PeeringConnectionOut{newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeApproved, []string{"10.20.0.0/24"}, nil)},
 		}, nil).Once()
 		updated := resource.UpdateResponse{State: tfsdk.State{Schema: sch}}
-		r.Update(t.Context(), resource.UpdateRequest{State: state, Plan: plan, Config: tfsdk.Config{Raw: plan.Raw}}, &updated)
-		require.True(t, updated.Diagnostics.HasError(), "an actual CIDR write must still validate readiness")
-		require.Contains(t, updated.Diagnostics.Errors()[0].Detail(), "routing update failed")
+		r.Update(ctx, resource.UpdateRequest{State: state, Plan: plan, Config: tfsdk.Config{Raw: plan.Raw}}, &updated)
+		require.False(t, updated.Diagnostics.HasError(), "%v", updated.Diagnostics)
+		var cidrs []string
+		require.False(t, updated.State.GetAttribute(t.Context(), path.Root("user_peer_network_cidrs"), &cidrs).HasError())
+		require.Equal(t, []string{"10.20.0.0/24"}, cidrs)
 	}
 	t.Run("configured CIDRs changed", func(t *testing.T) { check(t, "10.10.0.0/24") })
 	t.Run("unchanged CIDRs drifted in the API", func(t *testing.T) { check(t, "10.20.0.0/24") })
 }
 
-func TestUpdateChecksReadinessAfterReadReconcilesCIDRs(t *testing.T) {
+func TestUpdateDoesNotWaitForReadinessAfterReadReconcilesCIDRs(t *testing.T) {
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
 	sch := resourceSchema(t.Context())
 	state := tfsdk.State{Schema: sch, Raw: attachmentStateValue(t, map[string]any{
 		"id": testFivePartID, "vpc_id": testProject + "/" + testProjectVpcID,
 		"peer_cloud_account": testPeerCloudAccount, "peer_vpc": testPeerVpc, "peer_region": testPeerRegion,
+		"state":                   "APPROVED",
 		"user_peer_network_cidrs": []tftypes.Value{tftypes.NewValue(tftypes.String, "10.20.0.0/24")},
 	})}
 	client := avngen.NewMockClient(t)
 	// Update itself has nothing to write. CIDRs drift before its subsequent Read.
-	expectVpcGet(t, client, newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeActive, []string{"10.20.0.0/24"}, nil))
-	expectVpcGet(t, client, newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeActive, []string{"10.10.0.0/24"}, nil))
+	expectVpcGet(t, client, newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeApproved, []string{"10.20.0.0/24"}, nil))
+	expectVpcGet(t, client, newConnection(testPeerRegion, vpc.VpcPeeringConnectionStateTypeApproved, []string{"10.10.0.0/24"}, nil))
 	client.EXPECT().VpcPeeringConnectionUpdate(mock.Anything, testProject, testProjectVpcID, cidrUpdateMatcher(
 		new(testPeerRegion), []string{"10.20.0.0/24"}, []string{"10.10.0.0/24"},
 	)).Return(&vpc.VpcPeeringConnectionUpdateOut{}, nil).Once()
-	options := ResourceOptions
-	checks := 0
-	options.RefreshStateCheck = func(d adapter.ResourceData) error {
-		checks++
-		return ResourceOptions.RefreshStateCheck(d)
-	}
-	r := adapter.NewResource(options)
+	r := adapter.NewResource(ResourceOptions)
 	r.(resource.ResourceWithConfigure).Configure(t.Context(), resource.ConfigureRequest{ProviderData: migrationProviderData{client}}, &resource.ConfigureResponse{})
 	updated := resource.UpdateResponse{State: state}
-	r.Update(t.Context(), resource.UpdateRequest{
+	r.Update(ctx, resource.UpdateRequest{
 		State: state, Plan: tfsdk.Plan{Raw: state.Raw, Schema: sch}, Config: tfsdk.Config{Raw: state.Raw},
 	}, &updated)
 	require.False(t, updated.Diagnostics.HasError(), "%v", updated.Diagnostics)
-	require.Equal(t, 1, checks, "a CIDR write during Read must enable the readiness check")
+	var cidrs []string
+	require.False(t, updated.State.GetAttribute(t.Context(), path.Root("user_peer_network_cidrs"), &cidrs).HasError())
+	require.Equal(t, []string{"10.20.0.0/24"}, cidrs)
 }
 
 func TestReadThenDeleteCrossRegionImport(t *testing.T) {

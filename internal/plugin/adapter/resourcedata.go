@@ -36,12 +36,10 @@ type ResourceData interface {
 	IsResource() bool
 	RequiresReplace(keys ...string)
 	Schema() *Schema
-	SetRefreshStateCheckEnabled(enabled bool)
 	Expand(out any, modifiers ...MapModifier) error
 	Flatten(in any, modifiers ...MapModifier) error
 	tfValue() tftypes.Value
 	requiresReplaceKeys() []string
-	refreshStateCheckEnabled() bool
 }
 
 type resourceData struct {
@@ -51,21 +49,9 @@ type resourceData struct {
 	isDataSource        bool
 	preservePlanValues  bool
 	requiresReplace     []string
-	skipRefreshCheck    bool
 }
 
 var _ ResourceData = (*resourceData)(nil)
-
-// SetRefreshStateCheckEnabled controls readiness validation for this operation.
-// A local update can disable it; a later write from Read can enable it again.
-// The post-operation Read and declarative refresh conditions still run.
-func (d *resourceData) SetRefreshStateCheckEnabled(enabled bool) {
-	d.skipRefreshCheck = !enabled
-}
-
-func (d *resourceData) refreshStateCheckEnabled() bool {
-	return !d.skipRefreshCheck
-}
 
 // GetConfigOk looks up a value in the original Terraform configuration. Unlike GetOk,
 // it never falls back to plan or state. This is useful during a post-operation Read when

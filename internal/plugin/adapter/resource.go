@@ -413,7 +413,7 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 				}
 			}
 
-			if a.resource.RefreshStateCheck != nil && rd.refreshStateCheckEnabled() {
+			if a.resource.RefreshStateCheck != nil {
 				if err := a.resource.RefreshStateCheck(rd); err != nil {
 					if errors.Is(err, ErrRefreshStateFailed) {
 						return err

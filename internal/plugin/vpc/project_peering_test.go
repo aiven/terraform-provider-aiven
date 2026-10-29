@@ -117,7 +117,7 @@ func TestStateInfoMap(t *testing.T) {
 	})
 }
 
-func TestPeeringRefreshStateCheck(t *testing.T) {
+func TestPeeringCreateStateCheckStates(t *testing.T) {
 	for _, tc := range []struct {
 		state  string
 		failed bool
@@ -140,9 +140,9 @@ func TestPeeringRefreshStateCheck(t *testing.T) {
 			d, err := adapter.NewResourceData(&adapter.Schema{Type: adapter.SchemaTypeObject, Properties: map[string]*adapter.Schema{
 				"id": {Type: adapter.SchemaTypeString}, "state": {Type: adapter.SchemaTypeString},
 				"state_info": {Type: adapter.SchemaTypeMap, Items: &adapter.Schema{Type: adapter.SchemaTypeString}},
-			}}, []string{"id"}, adapter.WithTestState(map[string]any{"state": tc.state, "state_info": info}))
+			}}, []string{"id"}, adapter.WithTestPlan(map[string]any{"state": tc.state, "state_info": info}))
 			require.NoError(t, err)
-			err = PeeringRefreshStateCheck(d)
+			err = PeeringCreateStateCheck(d)
 			switch {
 			case tc.done:
 				require.NoError(t, err)
@@ -180,7 +180,7 @@ func TestPeeringCreateStateCheck(t *testing.T) {
 		require.NoError(t, PeeringCreateStateCheck(d))
 	})
 
-	t.Run("local update only refreshes state", func(t *testing.T) {
+	t.Run("update only refreshes state", func(t *testing.T) {
 		d, err := adapter.NewResourceData(sch, []string{"id"},
 			adapter.WithTestState(map[string]any{"id": "legacy-id"}),
 			adapter.WithTestPlan(map[string]any{"id": "new-id", "state": "REJECTED_BY_PEER"}),

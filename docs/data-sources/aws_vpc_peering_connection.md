@@ -52,7 +52,7 @@ data "aiven_aws_vpc_peering_connection" "example" {
 
 - `aws_vpc_peering_connection_id` (String) The ID of the AWS VPC peering connection.
 - `create_time` (String) VPC peering connection creation timestamp. Re-creating a connection updates this timestamp even when its ID stays the same. May be `null` for legacy connections whose creation time is unknown.
-- `id` (String) Resource ID in the `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format. Existing four-part import IDs remain valid.
+- `id` (String) Resource ID in the `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format.
 - `state` (String) Project VPC peering connection state. The possible values are `ACTIVE`, `APPROVED`, `APPROVED_PEER_REQUESTED`, `DELETED`, `DELETED_BY_PEER`, `DELETING`, `ERROR`, `INVALID_SPECIFICATION`, `PENDING_PEER` and `REJECTED_BY_PEER`.
 - `state_info` (Map of String) State-specific help or error information.
 

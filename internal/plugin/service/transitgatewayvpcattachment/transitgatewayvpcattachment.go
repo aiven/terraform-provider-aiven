@@ -18,7 +18,8 @@ import (
 
 func init() {
 	ResourceOptions.ModifyPlan = modifyPlan
-	ResourceOptions.RefreshStateCheck = pluginvpc.PeeringRefreshStateCheck
+	// CIDR updates persist synchronously; the API does not expose cloud route readiness.
+	ResourceOptions.RefreshStateCheck = pluginvpc.PeeringCreateStateCheck
 	DataSourceOptions.Read = datasourceReadView
 }
 
@@ -98,7 +99,7 @@ func readView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) err
 		return setConnectionState(d, id, conn)
 	}
 
-	if err := updateCIDRs(ctx, cl, d, id, conn, desired); err != nil {
+	if err := updateCIDRs(ctx, cl, id, conn, desired); err != nil {
 		return fmt.Errorf("reconcile configured CIDRs after reading %q: %w", d.ID(), err)
 	}
 	// PUT persists CIDRs synchronously; cloud routes are applied asynchronously.
@@ -150,9 +151,6 @@ func modifyPlan(_ context.Context, _ avngen.Client, d adapter.ResourceData) erro
 }
 
 func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) error {
-	// Updates limited to Terraform state do not change cloud readiness. A real CIDR write,
-	// including reconciliation during Read, enables the check again.
-	d.SetRefreshStateCheckEnabled(false)
 	// Only explicitly configured CIDRs can be written back to the API.
 	if _, configured := d.GetConfigOk("user_peer_network_cidrs"); !configured {
 		return nil
@@ -178,10 +176,10 @@ func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) e
 		return fmt.Errorf("cannot update user_peer_network_cidrs while VPC peering connection is in state %q", conn.State)
 	}
 
-	return updateCIDRs(ctx, cl, d, id, conn, desired)
+	return updateCIDRs(ctx, cl, id, conn, desired)
 }
 
-func updateCIDRs(ctx context.Context, cl avngen.Client, d adapter.ResourceData, id *pluginvpc.ProjectPeeringID, conn *vpc.PeeringConnectionOut, desired []string) error {
+func updateCIDRs(ctx context.Context, cl avngen.Client, id *pluginvpc.ProjectPeeringID, conn *vpc.PeeringConnectionOut, desired []string) error {
 	add := make([]vpc.AddIn, 0)
 	for _, cidr := range desired {
 		if !slices.Contains(conn.UserPeerNetworkCidrs, cidr) {
@@ -208,8 +206,6 @@ func updateCIDRs(ctx context.Context, cl avngen.Client, d adapter.ResourceData, 
 	if _, err := cl.VpcPeeringConnectionUpdate(ctx, id.Project, id.ProjectVPCID, &vpc.VpcPeeringConnectionUpdateIn{Add: &add, Delete: &remove}); err != nil {
 		return fmt.Errorf("cannot update transit gateway VPC attachment: %w", err)
 	}
-	d.SetRefreshStateCheckEnabled(true)
-
 	return nil
 }
 

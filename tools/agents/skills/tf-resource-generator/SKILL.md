@@ -567,7 +567,6 @@ type ResourceData interface {
     IsNewResource() bool             // True if ID is empty
     RequiresReplace(keys ...string)  // Force replacement over attributes (ModifyPlan only)
     Schema() *Schema                 // Access internal schema
-    SetRefreshStateCheckEnabled(enabled bool) // Enable/disable the custom readiness check for this operation
     Expand(out any, modifiers ...MapModifier) error   // Plan -> API request
     Flatten(in any, modifiers ...MapModifier) error    // API response -> state
 }

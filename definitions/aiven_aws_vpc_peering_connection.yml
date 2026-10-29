@@ -14,7 +14,6 @@ resource:
   modifyPlan: true
   importIDFormats:
     - PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION
-    - PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID
 datasource:
   description: Gets information about an AWS VPC peering connection.
   # VpcGet returns all peerings for a VPC and accepts no peer filters.
@@ -73,7 +72,7 @@ schema:
   id:
     type: string
     computed: true
-    description: Resource ID in the `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format. Existing four-part import IDs remain valid.
+    description: Resource ID in the `PROJECT/PROJECT_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION` format.
     example: example-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d/123456789012/vpc-0123456789abcdef0/eu-west-1
   create_time:
     # The generator treats creation timestamps as immutable, but re-requesting a peering changes this value.

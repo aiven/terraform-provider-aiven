@@ -286,18 +286,13 @@ func formatStateInfo(info map[string]string) string {
 	return strings.Join(parts, ", ")
 }
 
-// PeeringCreateStateCheck waits for creation to finish. Cloud-specific peerings
-// have only local updates, which do not change the connection's readiness.
+// PeeringCreateStateCheck waits for creation to finish and includes cloud error
+// details in diagnostics. Updates only refresh state without checking readiness.
 func PeeringCreateStateCheck(d adapter.ResourceData) error {
 	if _, exists := d.GetStateOk("id"); exists {
 		return nil
 	}
-	return PeeringRefreshStateCheck(d)
-}
 
-// PeeringRefreshStateCheck keeps cloud error details in operation diagnostics.
-// It runs during the adapter's post-operation refresh, never during plain Read.
-func PeeringRefreshStateCheck(d adapter.ResourceData) error {
 	state := d.Get("state").(string)
 	detail := formatStateInfo(StateInfoMap(d.Get("state_info").(map[string]any)))
 	if detail != "" {

@@ -26,9 +26,9 @@ nav_order: 1
   are rejected; use destroy-before-create.
 - Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
   `aiven_transit_gateway_vpc_attachment` also rejects creation without `peer_region` when another regional match exists.
-- Breaking change: the `aiven_aws_vpc_peering_connection` resource and data source now require a nonempty
-  `aws_vpc_region`. Before upgrading configurations that use `""`, set the existing connection's region from Terraform
-  state. Changing the region requires replacement.
+- **IMPORTANT:** The `aiven_aws_vpc_peering_connection` resource and data source now require a nonempty `aws_vpc_region`.
+  Before upgrading configurations that use `""`, set the existing connection's region from Terraform state. Changing
+  the region requires replacement.
 - Fix deletion of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment` with a four-part ID.
 
 ## [4.65.0] - 2026-10-21
