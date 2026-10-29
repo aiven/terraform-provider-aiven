@@ -87,7 +87,10 @@ func importIDFormats(def *Definition, root *Item) []string {
 
 func importCommands(def *Definition, formats []string) string {
 	var b strings.Builder
-	for _, format := range formats {
+	for i, format := range formats {
+		if i > 0 {
+			b.WriteString("# Alternatively:\n# ")
+		}
 		fmt.Fprintf(&b, "terraform import %s.example %s\n", def.typeName, format)
 	}
 	return b.String()

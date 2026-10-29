@@ -588,7 +588,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 			return nil
 		}
 
-		err := a.refreshState(t.Context(), nil)
+		err := a.refreshState(t.Context(), &resourceData{})
 
 		require.NoError(t, err)
 		require.Equal(t, 3, attempts)
@@ -610,7 +610,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 			return fmt.Errorf("custom check: %w", ErrRefreshStateFailed)
 		}
 
-		err := a.refreshState(t.Context(), nil)
+		err := a.refreshState(t.Context(), &resourceData{})
 
 		require.ErrorIs(t, err, ErrRefreshStateFailed)
 		require.NotErrorIs(t, err, ErrRefreshStateDesired)
@@ -633,7 +633,7 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
 		defer cancel()
 
-		err := a.refreshState(ctx, nil)
+		err := a.refreshState(ctx, &resourceData{})
 
 		require.ErrorIs(t, err, context.DeadlineExceeded)
 		require.ErrorContains(t, err, "password is not available yet")

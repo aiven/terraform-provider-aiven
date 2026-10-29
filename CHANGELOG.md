@@ -16,6 +16,20 @@ nav_order: 1
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
+- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, and `aiven_gcp_vpc_peering_connection`
+  resources and data sources to the Plugin Framework and add the computed `create_time` field.
+- Add `project` and `project_vpc_id` as alternatives to `vpc_id` for AWS, Azure, GCP and transit gateway VPC peering
+  resources and data sources. Switching forms for the same VPC does not recreate the connection.
+- Preserve AWS, Azure and GCP VPC peering connections in Terraform state when creation succeeds but the readiness check
+  fails. Terraform plans their replacement on the next apply. For these resources
+  and `aiven_transit_gateway_vpc_attachment`, `create_before_destroy` replacements with the same peer identifiers
+  are rejected; use destroy-before-create.
+- Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
+  `aiven_transit_gateway_vpc_attachment` also rejects creation without `peer_region` when another regional match exists.
+- **IMPORTANT:** The `aiven_aws_vpc_peering_connection` resource and data source now require a nonempty `aws_vpc_region`.
+  Before upgrading configurations that use `""`, set the existing connection's region from Terraform state. Changing
+  the region requires replacement.
+- Fix deletion of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment` with a four-part ID.
 
 ## [4.65.0] - 2026-10-21
 

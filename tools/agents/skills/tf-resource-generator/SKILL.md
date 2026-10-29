@@ -195,7 +195,8 @@ resource:
 ```
 
 `importIDFormats` generates every listed form in both the resource's `Import` documentation and
-`examples/resources/<resource>/import.sh`. It does not change `IDFields` or runtime import parsing.
+`examples/resources/<resource>/import.sh`. The first command is executable; subsequent formats are
+commented alternatives. It does not change `IDFields` or runtime import parsing.
 Omit it when the single import form can be derived from `idAttributeComposed`.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
@@ -557,8 +558,10 @@ type ResourceData interface {
     Get(key string) any              // Get from plan, then config, then state
     GetOk(key string) (any, bool)    // Get with existence check
     GetState(key string) any         // Get specifically from state
+    GetStateOk(key string) (any, bool) // Get only from prior state; false when absent, including during Create
     HasChange(key string) bool       // Plan value differs from state
     Set(key string, value any) error // Set a value in current state
+    SetUnknown(key string) error     // Let apply determine a computed attribute (ModifyPlan only)
     SetID(parts ...string) error     // Set composite ID
     ID() string                      // Get the "id" field
     IsNewResource() bool             // True if ID is empty
