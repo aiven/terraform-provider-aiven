@@ -17,7 +17,6 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 ```terraform
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = aiven_organization.example.id // e.g. "org1a23f456789". Force new
-  cloud_provider   = "aws"                         // Force new
   cloud_region     = "eu-west-1"                   // Force new
   deployment_model = "standard"                    // Force new
   display_name     = "byoc-cloud-prod-eu-west-1"
@@ -42,7 +41,6 @@ resource "aiven_byoc_aws_entity" "example" {
   aiven_aws_object_storage_credentials_creator_arn = "foo"
   aiven_aws_object_storage_user_arn                = "foo"
   aiven_management_cidr_blocks                     = ["10.0.0.0/24"]
-  aiven_object_storage_credentials_creator_user    = "foo"
   aws_subnets_bastion = {
     foo = "foo"
   }
@@ -69,7 +67,6 @@ resource "aiven_organization" "example" {
 
 ### Required
 
-- `cloud_provider` (String) Cloud provider for the BYOC cloud. The possible values are `aws`, `azure`, `google` and `oracle`. Changing this property forces recreation of the resource.
 - `cloud_region` (String) Cloud region for the BYOC cloud. Maximum length: `32`. Changing this property forces recreation of the resource.
 - `deployment_model` (String) Deployment model for the BYOC cloud. The possible values are `direct_ipsec_ingress`, `hipaa`, `ipsec_ingress`, `pci_dss`, `standard` and `standard_public`. Changing this property forces recreation of the resource.
 - `display_name` (String) Short name for this BYOC cloud. Maximum length: `64`.
@@ -89,7 +86,6 @@ resource "aiven_organization" "example" {
 - `aiven_aws_object_storage_credentials_creator_arn` (String) Amazon Resource Name.
 - `aiven_aws_object_storage_user_arn` (String) Amazon Resource Name.
 - `aiven_management_cidr_blocks` (Set of String) IP address ranges for incoming connections to the bastion host from the Aiven management plane.
-- `aiven_object_storage_credentials_creator_user` (String) Google account identifier.
 - `aws_subnets_bastion` (Map of String) Subnets to build in the bastion VPC.
 - `aws_subnets_workload` (Map of String) Subnets to build in the workload VPC.
 - `bucket_names` (Map of String) Names and usages of buckets required for workloads.

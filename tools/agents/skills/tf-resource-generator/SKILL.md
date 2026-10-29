@@ -335,9 +335,39 @@ operations:
     resultToKey: wrapper_key         # Wrap response as {wrapper_key: ...}
     resultListLookupKeys:            # For list responses
       APIField: terraform_field      # Match items by field
+    fixedValues:                     # Request fields always sent with these values (create only),
+      cloud_provider: azure          # rendered as adapter.SetFixedValues("cloud_provider", "azure") in Expand
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
+
+### Polymorphic Endpoints
+
+A polymorphic endpoint serves several variants through one flattened schema, selected by a
+discriminator field: `CustomCloudEnvironmentCreate` takes `cloud_provider: aws|azure|google|oracle`
+and returns the `aws_*`, `azure_*`, `google_*` and `oracle_*` fields of every variant.
+
+Create one resource per variant, named after it (`aiven_byoc_aws_entity`, `aiven_byoc_azure_entity`), and:
+
+1. Remove the discriminator from the schema and set it with `fixedValues` on the create operation.
+   Don't ask the user for it with a one-value `enum`.
+2. Let cross-group pruning drop the other variants' fields, then remove by hand the ones it misses
+   (see [Removing Fields](#removing-fields)).
+3. Narrow shared enums with a definition `enum` when the variant supports fewer values
+   (`aiven_byoc_azure_entity.deployment_model`).
+
+```yaml
+operations:
+  - id: CustomCloudEnvironmentCreate
+    type: create
+    fixedValues:
+      cloud_provider: azure
+remove:
+  - cloud_provider # Polymorphic endpoint discriminator, set by the create operation's fixedValues
+```
+
+The generator fails if a `fixedValues` field is not a string field of the operation's request body,
+is outside its enum, or is still in the schema.
 
 ### Removing Fields
 
@@ -359,6 +389,11 @@ comment. The first `task generate` writes the missing entries; subsequent runs a
 Group membership is defined by `serviceTypes` and `cloudTypes` in `generators/plugin/main.go`;
 see `definitions/aiven_byoc_aws_entity.yml` for the result. Prefer this over hand-rolled globs:
 the generator keeps the list exhaustive and self-updating as the API grows new fields.
+
+Auto-detection reads names only. A field that belongs to another group but has no group token in
+its name is kept, so remove it by hand: on the BYOC entities, `aiven_object_storage_credentials_creator_user`
+is a Google service account (same OpenAPI `title` and `maxLength` as the `google_*` account fields).
+Compare each kept field's `title`, `description` and `maxLength` with its siblings before trusting it.
 
 **Use globs for cases the group tables do not cover.** Entries are glob patterns, so `*` and `?`
 match within a single path segment, `**` matches across segments, and a pattern with no wildcards
@@ -397,7 +432,7 @@ schema:
     writeOnly: true|false
     forceNew: true|false           # Triggers replacement
     useStateForUnknown: true|false # Preserve prior state during planning
-    enum: [val1, val2]
+    enum: [val1, val2]             # Replaces the OpenAPI enum
     minimum: 1
     maximum: 100
     format: uuid|cidr|ipv4-cidr    # String validator, see Formats
@@ -427,6 +462,10 @@ When unset, the format is guessed: `uuid` for fields named `uuid`, `cidr` for fi
 such a field also has `maxLength: 18`. A guessed format keeps the field's own example and only fills in a missing one;
 declare it to replace a bad one.
 Any format replaces the length validators and hints. Validators apply to scalar strings only, not list or set items.
+
+**Fixed request values**: to pin a request field to one value, `remove:` it and set it with the
+operation's `fixedValues` (see [Polymorphic Endpoints](#polymorphic-endpoints)) instead of asking the
+user for it.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**
@@ -1001,6 +1040,7 @@ Search the codebase for similar patterns:
 | `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
 | `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
 | `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
+| `byoc_azure_entity` | Polymorphic endpoint: discriminator set by `fixedValues`, other variants' fields removed |
 | `flinkjarapplicationversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements

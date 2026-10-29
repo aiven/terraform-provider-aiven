@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+resource:
+  ignoreAlreadyExists: true
+  description: |
+    Provisions a BYOC custom cloud environment by handing Aiven the Azure
+    subscription and Entra ID tenant of the customer. Transitions the environment
+    from `draft` to `active` so services can be deployed into it.
+
+    Create this resource after the customer-side Azure infrastructure
+    (Aiven CCE enterprise application, role assignments, networking) has been defined.
+  stateAttribute: state
+  refreshStateDesired: [active]
+  refreshStateFailed: [creation_failed, deleted] # Checked after create/update only; delete polls deleteStateDesired
+  deleteStateDesired: [deleted]
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentProvision
+    type: create
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentGet
+    type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentDelete
+    type: delete
+remove:
+  - aiven_management_cidr_blocks # Environment attribute, exposed by aiven_byoc_azure_entity
+  - aiven_object_storage_credentials_creator_user # Environment attribute, exposed by aiven_byoc_azure_entity
+  - bucket_names # Environment attribute, exposed by aiven_byoc_azure_entity
+  - byoc_resource_tags # Environment attribute, exposed by aiven_byoc_azure_entity
+  - byoc_unique_name # Environment attribute, exposed by aiven_byoc_azure_entity
+  - cloud_provider # Entity input, set on aiven_byoc_azure_entity
+  - cloud_region # Entity input, set on aiven_byoc_azure_entity
+  - contact_emails # Entity input, set on aiven_byoc_azure_entity
+  - deployment_model # Entity input, set on aiven_byoc_azure_entity
+  - display_name # Entity input, set on aiven_byoc_azure_entity
+  - errors # Not exposed on aiven_byoc_aws_provision either, the resource waits on state instead
+  - reserved_cidr # Entity input, set on aiven_byoc_azure_entity
+  - tags # Entity input, set on aiven_byoc_azure_entity
+  - update_time # Not exposed on aiven_byoc_aws_provision either, changes on every environment update
+  - use_customer_owned_storage # Environment attribute, exposed by aiven_byoc_azure_entity
+  # Other clouds' fields, appended by the generator (pruneCrossGroupFields).
+  - aiven_aws_account_principal # Entity that assumes the IAM role for controlling the BYOC account
+  - aiven_aws_assume_role_external_id # External ID for assuming the IAM role for controlling the BYOC account
+  - aiven_aws_object_storage_credentials_creator_arn # Amazon Resource Name
+  - aiven_aws_object_storage_user_arn # Amazon Resource Name
+  - aiven_google_account_principal # Google account identifier
+  - aws_iam_role_arn # Amazon Resource Name
+  - aws_subnets_bastion # Subnets to build in the bastion VPC
+  - aws_subnets_workload # Subnets to build in the workload VPC
+  - google_bastion_cidr # Private IP address block for the workload VPC containing the bastion subnet
+  - google_privilege_bearing_service_account_id # Google account identifier
+  - google_workload_cidr # Private IP address block for the workload VPC containing the workload subnet
+  - oracle_compartment_id # Used to uniquely identify an asset in Oracle's cloud. May refer to a range of object types including instance, tenancy,...
+  - oracle_subnet_bastion # CIDR for the bastion subnet
+  - oracle_subnet_workload # CIDR for the private workload subnet
+schema:
+  organization_id:
+    ref: aiven_organization.id
+    forceNew: true
+  custom_cloud_environment_id:
+    ref: aiven_byoc_azure_entity.custom_cloud_environment_id
+    forceNew: true
+    format: uuid
+  azure_subscription_id:
+    required: true
+    format: uuid
+  azure_tenant_id:
+    required: true
+    format: uuid

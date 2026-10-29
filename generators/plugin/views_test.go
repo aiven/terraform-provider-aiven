@@ -470,6 +470,50 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 	})
 }
 
+func TestFixedValues(t *testing.T) {
+	t.Parallel()
+
+	request := &OASchema{Properties: map[string]*OASchema{
+		"cloud_provider": {Type: SchemaTypeString, Enum: []any{"aws", "azure"}},
+		"display_name":   {Type: SchemaTypeString},
+		"node_count":     {Type: SchemaTypeInteger},
+	}}
+	item := &Item{Properties: map[string]*Item{
+		"display_name": {Name: "display_name", JSONName: "display_name", Type: SchemaTypeString},
+	}}
+	op := func(typ OperationType, values map[string]string) *Operation {
+		return &Operation{ID: "CustomCloudEnvironmentCreate", Type: typ, Request: request, FixedValues: values}
+	}
+
+	t.Run("renders sorted key-value pairs", func(t *testing.T) {
+		code := fixedValuesArg(map[string]string{"cloud_provider": "azure", "a": "b"})
+		require.Contains(t, renderCode(t, jen.Var().Id("_").Op("=").Add(code)), `adapter.SetFixedValues("a", "b", "cloud_provider", "azure")`)
+		require.Nil(t, fixedValuesArg(nil))
+	})
+
+	t.Run("accepts a removed request field within its enum", func(t *testing.T) {
+		require.NoError(t, validateFixedValues(item, op(OperationCreate, map[string]string{"cloud_provider": "azure"})))
+	})
+
+	cases := []struct {
+		name   string
+		typ    OperationType
+		values map[string]string
+		errMsg string
+	}{
+		{"rejects update operations", OperationUpdate, map[string]string{"cloud_provider": "azure"}, "only supported on create operations"},
+		{"rejects unknown fields", OperationCreate, map[string]string{"region": "x"}, `"region" is not in the request body`},
+		{"rejects non-string fields", OperationCreate, map[string]string{"node_count": "3"}, `"node_count" must be a string, got "integer"`},
+		{"rejects values outside the enum", OperationCreate, map[string]string{"cloud_provider": "azur"}, `value "azur" is not one of`},
+		{"rejects fields kept in the schema", OperationCreate, map[string]string{"display_name": "x"}, `"display_name" must be removed from the schema`},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			require.ErrorContains(t, validateFixedValues(item, op(c.typ, c.values)), c.errMsg)
+		})
+	}
+}
+
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 
