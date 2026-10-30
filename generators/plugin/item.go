@@ -419,6 +419,7 @@ type Item struct {
 
 	// Ref points to the resource attribute this field usually references, e.g. "aiven_kafka.service_name".
 	// Documentation only: the doc example renders the target resource and references its attribute.
+	// The field's examples use the attribute's example value.
 	Ref string `yaml:"ref,omitempty"`
 }
 

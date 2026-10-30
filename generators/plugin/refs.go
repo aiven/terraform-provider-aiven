@@ -107,6 +107,31 @@ func (w *exampleWriter) refTokens(item *Item) (hclwrite.Tokens, error) {
 	}), nil
 }
 
+// refSource follows the refs of item to the last generated attribute with an example or a default,
+// so a dependent shows the value of the referenced resource's example. Returns item otherwise.
+func refSource(def *Definition, item *Item) (*Definition, *Item) {
+	if item.Ref == "" {
+		return def, item
+	}
+	typeName, attr, err := parseRef(item.Ref)
+	if err != nil {
+		return def, item
+	}
+	t := def.refTargets[typeName]
+	if t == nil || t.resourceRoot == nil {
+		return def, item
+	}
+	v := t.resourceRoot.Properties[attr]
+	if v == nil || v.Type != item.Type {
+		return def, item
+	}
+	t, v = refSource(t, v)
+	if isEmpty(v.Example) && isEmpty(v.Default) {
+		return def, item
+	}
+	return t, v
+}
+
 // refTarget returns the example of the referenced resource: the cached one for generated
 // definitions, re-rendered for a refDepth below the target's own, otherwise the block from
 // its hand-written example file (SDK resources).
