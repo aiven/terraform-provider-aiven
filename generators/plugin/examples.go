@@ -279,7 +279,7 @@ func exampleItemValue(def *Definition, entity entityType, item *Item) (cty.Value
 		}
 		return cty.ListVal([]cty.Value{cty.ObjectVal(attrs)}), nil
 	case item.IsScalar():
-		return exampleScalarItem(def, item)
+		return exampleScalarItem(refSource(def, item))
 	case item.IsArray():
 		// Always a list literal so the example keeps source order. Sets and lists
 		// share `[...]` HCL syntax, but cty.SetVal reorders lexicographically.

@@ -214,3 +214,127 @@ resource "aiven_group" "example" {
 	_, err = exampleDoc(member, root)
 	require.ErrorContains(t, err, `has no attribute "id"`)
 }
+
+func TestRefSource(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		run  func(t *testing.T) (*Definition, *Item, *Definition, *Item)
+	}{
+		{
+			name: "no ref",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				def := refTestDef("aiven_a", nil)
+				item := &Item{Name: "foo", Type: SchemaTypeString, Example: "x"}
+				return def, item, def, item
+			},
+		},
+		{
+			name: "target example",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				id := &Item{Name: "id", Type: SchemaTypeString, Example: "org123"}
+				target := refTestDef("aiven_org", nil)
+				target.resourceRoot = refTestRoot(
+					&Item{Name: "name", Type: SchemaTypeString, Required: true},
+					id,
+				)
+				def := refTestDef("aiven_member", nil)
+				def.refTargets = map[string]*Definition{"aiven_org": target}
+				item := &Item{Name: "organization_id", Type: SchemaTypeString, Ref: "aiven_org.id"}
+				return def, item, target, id
+			},
+		},
+		{
+			name: "chain resolves to example on leaf",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				cID := &Item{Name: "id", Type: SchemaTypeString, Example: "c-id"}
+				c := refTestDef("aiven_c", nil)
+				c.resourceRoot = refTestRoot(cID)
+
+				bID := &Item{Name: "id", Type: SchemaTypeString, Ref: "aiven_c.id"}
+				b := refTestDef("aiven_b", nil)
+				b.resourceRoot = refTestRoot(bID)
+				b.refTargets = map[string]*Definition{"aiven_c": c}
+
+				def := refTestDef("aiven_a", nil)
+				def.refTargets = map[string]*Definition{"aiven_b": b}
+				item := &Item{Name: "b_id", Type: SchemaTypeString, Ref: "aiven_b.id"}
+				return def, item, c, cID
+			},
+		},
+		{
+			name: "chain stops at example on intermediate",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				cID := &Item{Name: "id", Type: SchemaTypeString}
+				c := refTestDef("aiven_c", nil)
+				c.resourceRoot = refTestRoot(cID)
+
+				bID := &Item{Name: "id", Type: SchemaTypeString, Ref: "aiven_c.id", Example: "b-id"}
+				b := refTestDef("aiven_b", nil)
+				b.resourceRoot = refTestRoot(bID)
+				b.refTargets = map[string]*Definition{"aiven_c": c}
+
+				def := refTestDef("aiven_a", nil)
+				def.refTargets = map[string]*Definition{"aiven_b": b}
+				item := &Item{Name: "b_id", Type: SchemaTypeString, Ref: "aiven_b.id"}
+				return def, item, b, bID
+			},
+		},
+		{
+			name: "target without example or default",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				id := &Item{Name: "id", Type: SchemaTypeString}
+				target := refTestDef("aiven_org", nil)
+				target.resourceRoot = refTestRoot(id)
+				def := refTestDef("aiven_member", nil)
+				def.refTargets = map[string]*Definition{"aiven_org": target}
+				item := &Item{Name: "organization_id", Type: SchemaTypeString, Ref: "aiven_org.id"}
+				return def, item, def, item
+			},
+		},
+		{
+			name: "target default only",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				id := &Item{Name: "id", Type: SchemaTypeString, Default: "default-id"}
+				target := refTestDef("aiven_org", nil)
+				target.resourceRoot = refTestRoot(id)
+				def := refTestDef("aiven_member", nil)
+				def.refTargets = map[string]*Definition{"aiven_org": target}
+				item := &Item{Name: "organization_id", Type: SchemaTypeString, Ref: "aiven_org.id"}
+				return def, item, target, id
+			},
+		},
+		{
+			name: "type mismatch",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				id := &Item{Name: "id", Type: SchemaTypeInteger, Example: 42}
+				target := refTestDef("aiven_org", nil)
+				target.resourceRoot = refTestRoot(id)
+				def := refTestDef("aiven_member", nil)
+				def.refTargets = map[string]*Definition{"aiven_org": target}
+				item := &Item{Name: "organization_id", Type: SchemaTypeString, Ref: "aiven_org.id"}
+				return def, item, def, item
+			},
+		},
+		{
+			name: "target not generated",
+			run: func(t *testing.T) (*Definition, *Item, *Definition, *Item) {
+				target := refTestDef("aiven_org", nil)
+				def := refTestDef("aiven_member", nil)
+				def.refTargets = map[string]*Definition{"aiven_org": target}
+				item := &Item{Name: "organization_id", Type: SchemaTypeString, Ref: "aiven_org.id"}
+				return def, item, def, item
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			def, item, wantDef, wantItem := tt.run(t)
+			gotDef, gotItem := refSource(def, item)
+			assert.Same(t, wantDef, gotDef)
+			assert.Same(t, wantItem, gotItem)
+		})
+	}
+}
