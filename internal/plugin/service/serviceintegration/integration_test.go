@@ -293,6 +293,9 @@ func TestAccAivenServiceIntegration_backwardCompat(t *testing.T) {
 			TFConfig:           testAccServiceIntegrationBackwardCompat(rName),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// The services drop the user config SDKv2 stored, which sends nothing
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks:   acc.UpgradePlanChecks([]string{resourceName}, []string{"aiven_pg.source", "aiven_opensearch.sink"}),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
@@ -317,6 +320,12 @@ func TestAccAivenServiceIntegration_autoscaler_backwardCompat(t *testing.T) {
 			TFConfig:           testAccServiceIntegrationAutoscaler(prefix, false),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// aiven_pg drops the pg_user_config SDKv2 stored, which sends nothing
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks: acc.UpgradePlanChecks(
+				[]string{resourceName, "aiven_service_integration_endpoint.test_endpoint"},
+				[]string{"aiven_pg.test_pg"},
+			),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "project", project),
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "autoscaler"),
@@ -338,6 +347,10 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_backwardCompat(t *testing.T
 			TFConfig:           testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, acc.ProjectName(), `["foo", "bar"]`),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// The services drop the user config SDKv2 stored, which sends nothing. The kafka_user_config
+			// options are set, so aiven_kafka changes only if SDKv2 stored a nested block the config doesn't have.
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks:   acc.UpgradePlanChecks([]string{resourceName}, []string{"aiven_clickhouse.clickhouse"}),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
 				resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "2"),

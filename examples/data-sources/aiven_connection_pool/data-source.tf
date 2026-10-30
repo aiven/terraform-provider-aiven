@@ -1,6 +1,6 @@
 data "aiven_connection_pool" "example" {
   project      = "my-project"
-  service_name = "foo"
+  service_name = "my-pg"
   pool_name    = "mypool-x-y-z"
 
   /* COMPUTED FIELDS

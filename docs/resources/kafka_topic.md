@@ -13,9 +13,9 @@ Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/pr
 
 ```terraform
 resource "aiven_kafka_topic" "example" {
-  project      = aiven_kafka.example_kafka.project      // e.g. "my-project". Force new
-  service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
-  topic_name   = "mytopic"                              // Force new
+  project      = aiven_kafka.example.project      // e.g. "my-project". Force new
+  service_name = aiven_kafka.example.service_name // e.g. "my-kafka". Force new
+  topic_name   = "mytopic"                        // Force new
   partitions   = 3
   replication  = 3
 
@@ -64,10 +64,10 @@ resource "aiven_kafka_topic" "example" {
   topic_description = "Platform events"
 }
 
-resource "aiven_kafka" "example_kafka" {
-  project      = "my-project"
-  plan         = "business-4"
-  service_name = "example-kafka"
+resource "aiven_kafka" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka"   // Force new
+  plan         = "startup-4"
 }
 
 resource "aiven_organization_user_group" "example" {

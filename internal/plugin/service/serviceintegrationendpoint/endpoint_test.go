@@ -157,6 +157,9 @@ func TestAccAivenServiceIntegrationEndpointExternalPostgresql_backwardCompat(t *
 			TFConfig:           testAccAivenServiceIntegrationEndpointExternalPostgresql(acc.RandStr()),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// aiven_pg drops the pg_user_config SDKv2 stored, which sends nothing and keeps the endpoint inputs known
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks:   acc.UpgradePlanChecks([]string{resourceName}, []string{"aiven_pg.pg"}),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_postgresql"),
 				resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.port", "1234"),

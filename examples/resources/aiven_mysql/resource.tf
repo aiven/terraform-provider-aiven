@@ -1,21 +1,63 @@
-resource "aiven_mysql" "example_mysql" {
-  project                 = data.aiven_project.example_project.project
+resource "aiven_mysql" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-mysql" // Force new
+  plan         = "startup-4"
+
+  // OPTIONAL FIELDS
+  cmk_id                  = "12345678-1234-1234-1234-12345678abcd"
+  project_vpc_id          = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  additional_disk_space   = "30GiB"
   cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
-  service_name            = "example-mysql"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-
-  mysql_user_config {
-    mysql_version = 8
-
-    mysql {
-      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
-      sql_require_primary_key = true
-    }
-
-    public_access {
-      mysql = true
-    }
+  static_ips              = ["ip350351b76da"]
+  tag {
+    key   = "foo"
+    value = "foo"
   }
+  tech_emails {
+    email = "jane@example.com"
+  }
+  termination_protection = false
+
+  /* COMPUTED FIELDS
+  components = [{
+    component                   = "foo"
+    connection_uri              = "foo"
+    host                        = "foo"
+    kafka_authentication_method = "certificate"
+    kafka_ssl_ca                = "letsencrypt"
+    port                        = 42
+    privatelink_connection_id   = "foo"
+    route                       = "dynamic"
+    ssl                         = true
+    usage                       = "disaster_recovery"
+  }]
+  disk_space_cap             = "foo"
+  disk_space_default         = "foo"
+  disk_space_step            = "foo"
+  disk_space_used            = "foo"
+  maintenance_window_enabled = true
+  mysql = [{
+    params = [{
+      database_name = "foo"
+      host          = "foo"
+      password      = "password123"
+      port          = 42
+      sslmode       = "foo"
+      user          = "foo"
+    }]
+    replica_uri  = "foo"
+    standby_uris = ["foo"]
+    syncing_uris = ["foo"]
+    uris         = ["foo"]
+  }]
+  service_host     = "foo"
+  service_password = "password123"
+  service_port     = 42
+  service_type     = "mysql"
+  service_uri      = "foo"
+  service_username = "foo"
+  state            = "POWEROFF"
+  */
 }

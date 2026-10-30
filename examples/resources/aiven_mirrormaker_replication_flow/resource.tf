@@ -1,6 +1,6 @@
 resource "aiven_mirrormaker_replication_flow" "example" {
   project        = "my-project" // Force new
-  service_name   = "foo" // Force new
+  service_name   = "my-kafka-mirrormaker" // Force new
   source_cluster = "kafka-abc" // Force new
   target_cluster = "kafka-abc" // Force new
   enable         = true

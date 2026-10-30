@@ -1,25 +1,58 @@
-resource "aiven_kafka" "example_kafka" {
-  project                 = data.aiven_project.example_project.project
+resource "aiven_kafka" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka" // Force new
+  plan         = "startup-4"
+
+  // OPTIONAL FIELDS
+  cmk_id                  = "12345678-1234-1234-1234-12345678abcd"
+  project_vpc_id          = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  additional_disk_space   = "30GiB"
   cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
-  service_name            = "example-kafka"
+  default_acl             = true
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-
-  kafka_user_config {
-    kafka_rest      = true
-    kafka_connect   = true
-    schema_registry = true
-    kafka_version   = "3.8"
-
-    kafka {
-      group_max_session_timeout_ms = 70000
-      log_retention_bytes          = 1000000000
-    }
-
-    public_access {
-      kafka_rest    = true
-      kafka_connect = true
-    }
+  static_ips              = ["ip350351b76da"]
+  tag {
+    key   = "foo"
+    value = "foo"
   }
+  tech_emails {
+    email = "jane@example.com"
+  }
+  termination_protection = false
+
+  /* COMPUTED FIELDS
+  components = [{
+    component                   = "foo"
+    connection_uri              = "foo"
+    host                        = "foo"
+    kafka_authentication_method = "certificate"
+    kafka_ssl_ca                = "letsencrypt"
+    port                        = 42
+    privatelink_connection_id   = "foo"
+    route                       = "dynamic"
+    ssl                         = true
+    usage                       = "disaster_recovery"
+  }]
+  disk_space_cap     = "foo"
+  disk_space_default = "foo"
+  disk_space_step    = "foo"
+  disk_space_used    = "foo"
+  kafka = [{
+    access_cert         = "foo"
+    access_key          = "foo"
+    connect_uri         = "foo"
+    rest_uri            = "foo"
+    schema_registry_uri = "foo"
+    uris                = ["foo"]
+  }]
+  maintenance_window_enabled = true
+  service_host               = "foo"
+  service_password           = "password123"
+  service_port               = 42
+  service_type               = "kafka"
+  service_uri                = "foo"
+  service_username           = "foo"
+  state                      = "POWEROFF"
+  */
 }

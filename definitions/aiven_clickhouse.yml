@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an [Aiven for ClickHouse®](https://aiven.io/docs/products/clickhouse/concepts/features-overview) service.
+datasource:
+  description: Gets information about a ClickHouse service.
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: clickhouse
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-clickhouse
+  clickhouse_user_config:
+    minimalExample: true
+  service_uri:
+    description: "The service URI for the ClickHouse service, which contains the hostname and port (e.g., 'service-name.h.aivencloud.com:16539') used to connect to the service. For protocol-specific connections, see the [ClickHouse service example](https://github.com/aiven/terraform-provider-aiven/tree/main/examples/clickhouse/clickhouse_service)."
+  clickhouse:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Values provided by the ClickHouse server.
+    properties:
+      uris:
+        type: arrayOrdered
+        items:
+          type: string
+        description: ClickHouse server URIs.

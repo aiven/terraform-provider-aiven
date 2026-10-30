@@ -1,0 +1,110 @@
+# yaml-language-server: $schema=.schema.yml
+include: .service.yml
+resource:
+  description: Creates and manages an Aiven for PostgreSQL® service.
+datasource:
+  description: Gets information about an Aiven for PostgreSQL® service.
+version: 1
+operations:
+  - id: ServiceCreate
+    type: create
+    resultKey: service
+    fixedValues:
+      service_type: pg
+  - id: ServiceGet
+    type: read
+    resultKey: service
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceUpdate
+    type: update
+    resultKey: service
+  - id: ServiceDelete
+    type: delete
+schema:
+  service_name:
+    example: my-pg
+  pg_user_config:
+    minimalExample: true
+  service_integrations:
+    items:
+      properties:
+        integration_type:
+          enum: [read_replica, disaster_recovery]
+  pg:
+    type: object
+    computed: true
+    sensitive: true
+    useStateForUnknown: true
+    description: Values provided by the PostgreSQL server.
+    properties:
+      uri:
+        type: string
+        description: PostgreSQL primary connection URI.
+      uris:
+        type: arrayOrdered
+        description: PostgreSQL primary connection URIs.
+        items:
+          type: string
+      bouncer:
+        type: string
+        description: PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
+        deprecationMessage: This field was added by mistake and has never worked. It will be removed in future versions.
+      host:
+        type: string
+        description: PostgreSQL primary node host IP or name.
+      port:
+        type: integer
+        description: PostgreSQL port.
+      sslmode:
+        type: string
+        description: PostgreSQL SSL mode setting.
+      user:
+        type: string
+        description: PostgreSQL admin user name.
+      password:
+        type: string
+        description: PostgreSQL admin user password.
+      dbname:
+        type: string
+        description: Primary PostgreSQL database name.
+      params:
+        type: arrayOrdered
+        description: PostgreSQL connection parameters.
+        items:
+          type: object
+          properties:
+            host:
+              type: string
+              description: PostgreSQL host IP or name.
+            port:
+              type: integer
+              description: PostgreSQL port.
+            sslmode:
+              type: string
+              description: PostgreSQL SSL mode setting.
+            user:
+              type: string
+              description: PostgreSQL admin user name.
+            password:
+              type: string
+              description: PostgreSQL admin user password.
+            database_name:
+              type: string
+              description: Primary PostgreSQL database name.
+      replica_uri:
+        type: string
+        description: PostgreSQL replica URI for services with a replica.
+      standby_uris:
+        type: arrayOrdered
+        description: PostgreSQL standby connection URIs.
+        items:
+          type: string
+      syncing_uris:
+        type: arrayOrdered
+        description: PostgreSQL syncing connection URIs.
+        items:
+          type: string
+      max_connections:
+        type: integer
+        description: The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.

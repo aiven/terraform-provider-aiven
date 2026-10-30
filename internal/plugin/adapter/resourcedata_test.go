@@ -314,6 +314,51 @@ func TestResourceDataPreservedUnknownAndNullPlan(t *testing.T) {
 	}
 }
 
+// TestResourceDataHasChangeNestedNulls ModifyPlan keeps the nulls of the plan, which the state has none of,
+// e.g., {"foo": "a", "bar": null} is {"foo": "a"} in the state.
+func TestResourceDataHasChangeNestedNulls(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id": {Type: SchemaTypeString, Computed: true},
+			"config": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"foo": {Type: SchemaTypeString},
+						"bar": {Type: SchemaTypeString},
+					},
+				},
+			},
+		},
+	}
+
+	cases := []struct {
+		name string
+		bar  any
+		want bool
+	}{
+		{name: "null", bar: tftypes.NewValue(tftypes.String, nil), want: false},
+		{name: "unknown", bar: tftypes.NewValue(tftypes.String, tftypes.UnknownValue), want: true},
+		{name: "value", bar: "b", want: true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rd, err := NewResourceData(sch, []string{"id"},
+				WithTestPlan(map[string]any{"id": "x", "config": []any{map[string]any{"foo": "a", "bar": tc.bar}}}),
+				WithTestState(map[string]any{"id": "x", "config": []any{map[string]any{"foo": "a"}}}),
+			)
+			require.NoError(t, err)
+			require.Equal(t, tc.want, rd.HasChange("config"))
+		})
+	}
+}
+
 // TestResourceDataGetOkSplitsCompositeID verifies that GetOk derives id-field
 // component values by splitting the composite "id" string from state when the
 // components are not stored as their own top-level fields (e.g. legacy state

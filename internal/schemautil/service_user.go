@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -198,6 +199,69 @@ func CustomizeDiffServiceUserPasswordWoVersion(ctx context.Context, diff *schema
 	}
 
 	return CustomizeDiffWriteOnlyPasswordTransitionWarning("password", "password_wo_version")(ctx, diff, m)
+}
+
+// customizeDiffPasswordWoVersion is a helper that ensures a password write-only version field only increases.
+// Allows removal of write-only password by setting version to 0.
+// This enforces the policy that write-only passwords can only be rotated forward and follow the same UX as other providers.
+func customizeDiffPasswordWoVersion(fieldName string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ any) error {
+		if !diff.HasChange(fieldName) {
+			return nil
+		}
+
+		oldRaw, newRaw := diff.GetChange(fieldName)
+
+		var oldVersion int
+		if oldRaw != nil {
+			oldVersion = oldRaw.(int)
+		}
+
+		// initial setting or upgrade from old provider version
+		if oldVersion == 0 {
+			return nil
+		}
+
+		var newVersion int
+		if newRaw != nil {
+			newVersion = newRaw.(int)
+		}
+
+		// allow removal (transition back to auto-generated password)
+		if newVersion == 0 {
+			return nil
+		}
+
+		// prevent decrement
+		if newVersion < oldVersion {
+			return fmt.Errorf("%s must be incremented (old: %d, new: %d). Decrementing version is not allowed", fieldName, oldVersion, newVersion)
+		}
+
+		return nil
+	}
+}
+
+// CustomizeDiffWriteOnlyPasswordTransitionWarning checks for a transition from plaintext
+// password field to write-only field (version 0 -> >0). If detected, it forces the password field to be re-computed.
+// This ensures the plan shows that the plaintext password is being cleared from the state,
+// warning the user about potential breaking changes in downstream interpolations.
+func CustomizeDiffWriteOnlyPasswordTransitionWarning(passwordField, versionField string) schema.CustomizeDiffFunc {
+	return customdiff.If(
+		func(ctx context.Context, d *schema.ResourceDiff, meta any) bool {
+			oldV, newV := d.GetChange(versionField)
+			var oldInt, newInt int
+			if oldV != nil {
+				oldInt = oldV.(int)
+			}
+			if newV != nil {
+				newInt = newV.(int)
+			}
+			return oldInt == 0 && newInt > 0
+		},
+		func(ctx context.Context, d *schema.ResourceDiff, meta any) error {
+			return d.SetNewComputed(passwordField)
+		},
+	)
 }
 
 // ClearPasswordIfWriteOnly clears the password field if using write-only mode.

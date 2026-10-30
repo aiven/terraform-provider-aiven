@@ -1,1 +1,1 @@
-terraform import aiven_kafka_connect.example_kafka_connect PROJECT/SERVICE_NAME
+terraform import aiven_kafka_connect.example PROJECT/SERVICE_NAME

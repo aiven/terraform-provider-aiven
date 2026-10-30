@@ -1,6 +1,6 @@
 resource "aiven_connection_pool" "example" {
   project       = "my-project" // Force new
-  service_name  = "foo" // Force new
+  service_name  = "my-pg" // Force new
   pool_name     = "mypool-x-y-z" // Force new
   database_name = "testdb" // Force new
 

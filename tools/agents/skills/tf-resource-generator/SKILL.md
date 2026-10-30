@@ -336,6 +336,8 @@ operations:
     resultToKey: wrapper_key         # Wrap response as {wrapper_key: ...}
     resultListLookupKeys:            # For list responses
       APIField: terraform_field      # Match items by field
+    fixedValues:                     # Request fields always sent with these values (create only),
+      cloud_provider: azure          # rendered as adapter.SetFixedValues("cloud_provider", "azure") in Expand
     queryParams:                     # Query parameters sent with every call of the operation,
       include_secrets: "true"        # rendered as [2]string{"include_secrets", "true"} client args
 ```
@@ -356,6 +358,8 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
 
 - The schemas are matched to the attribute's enum by name, e.g. `IntegrationEndpointDatadogUserConfig`
   is `datadog`. Values without a schema, or with a schema without properties, get no block.
+- A fixed value of the attribute limits the blocks to it. A service resource has one type:
+  `fixedValues: {service_type: pg}` on the create operation gets `pg_user_config` only.
 - The `oneOf` field must be `user_config`. Expand sends the block of the attribute's value as `user_config`,
   or `{}` without the block, as SDKv2 does. Flatten sets it back. See `adapter.ExpandUserConfig`
   and `adapter.FlattenUserConfig`. A block of another value fails the config validation, see
@@ -368,9 +372,17 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
   the framework matches list objects by index, so removing one would pass its state to the next one.
   API defaults go to the docs only.
 - Field names and types match SDKv2, so its state still decodes:
-  - Arrays are lists.
+  - Arrays are lists, except the top-level `ip_filter` fields, which are sets.
+  - An array of mixed item types, e.g. `ip_filter` of strings and objects, gets a field per type:
+    `ip_filter_string` and `ip_filter_object`. `ip_filter` keeps the strings, deprecated.
+  - Dots in names become `_`, except the `pg_partman_bgw.*` and `pg_stat_*` options: `__dot__`.
+  - `*_version` enums are documented, not validated, so an older provider can set a newer version.
   - Only the `x-_secure` options are sensitive. Names like `access_key` aren't, unlike outside user configs.
+  - An integer or number option is a number. Options without a type are skipped, and so are the objects
+    that require them, e.g. OpenSearch `custom_keystores`.
 - Without `userConfigDiscriminator`, a `oneOf` field is a free-form map.
+- While SDKv2 still has a resource or a data source of the same name, the generator writes no docs or
+  examples for it.
 
 ### Removing Fields
 
@@ -443,7 +455,11 @@ schema:
     dropDefault: true              # Migration workaround, see tf-resource-migration. Drops the OpenAPI default
     deprecationMessage: "..."
     ref: aiven_kafka.service_name  # Docs only, see Field References
+    disableExample: true           # Keeps the field out of the generated examples, e.g. a block the service rejects
+    minimalExample: true           # Renders only the required fields of the block, or nothing without them
 ```
+
+The service definitions set `minimalExample` on their user config blocks (e.g. `pg_user_config`) for now.
 
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
 
@@ -463,6 +479,12 @@ Any format replaces the length validators and hints. Validators apply to scalar 
 
 **Item enums**: an `enum` on the items of a scalar list or set validates each item, e.g.
 `listvalidator.ValueStringsAre(stringvalidator.OneOf(...))`. Other item constraints are not validated.
+
+**Fixed request values**: to pin a request field to one value, set it with the create operation's
+`fixedValues` instead of asking the user for it with a one-value `enum`. Either `remove:` the field,
+or keep it to read it back: it becomes computed-only with `UseStateForUnknown`, e.g. a service's `service_type`.
+The generator fails if a `fixedValues` field is not a string field of the operation's request body,
+is outside its enum, or is optional or required.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**
@@ -486,7 +508,7 @@ The resource doc example renders the resource first, then the resources it refer
 their dependencies). Fields with a `ref` point to the target attributes, with the literal example kept as a comment:
 
 ```terraform
-service_name = aiven_kafka.example_kafka.service_name // e.g. "my-kafka". Force new
+service_name = aiven_kafka.example.service_name // e.g. "my-kafka". Force new
 ```
 
 Refs are written by hand in the YAML. The generator only renders them; it never infers a ref.
