@@ -38,7 +38,7 @@ resource "aiven_organization_address" "address" {
 
 resource "aiven_organization_billing_group" "group" {
   organization_id    = data.aiven_organization.org.id
-  billing_group_name = "Test Billing Group"
+  billing_group_name = %q
   billing_emails {
     email = "test@example.com"
   }
@@ -57,11 +57,12 @@ resource "aiven_organization_billing_group" "group" {
 
 data "aiven_organization_billing_group_list" "ds" {
   organization_id = data.aiven_organization.org.id
-}`, organizationName, paymentMethodID)
+}`, organizationName, acc.RandName("bg"), paymentMethodID)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				// Create a billing group and verify it appears in the list

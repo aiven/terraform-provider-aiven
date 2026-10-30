@@ -34,6 +34,8 @@ func TestAccAivenOrganizationBillingGroup(t *testing.T) {
 	var (
 		name             = "aiven_organization_billing_group.billing_group"
 		organizationName = acc.OrganizationName()
+		groupName        = acc.RandName("bg")
+		updatedGroupName = groupName + "-updated"
 	)
 
 	// Base configuration with shared resources:
@@ -79,7 +81,7 @@ resource "aiven_organization_billing_group" "billing_group" {
   billing_emails {
     email = "invoices@example.com"
   }
-  billing_group_name  = "Test Billing Group"
+  billing_group_name  = %q
   custom_invoice_text = "Custom invoice text"
   payment_method {
     payment_method_id   = %q
@@ -87,7 +89,7 @@ resource "aiven_organization_billing_group" "billing_group" {
   }
   shipping_address_id = aiven_organization_address.shipping_address.address_id
   vat_id              = "VAT123"
-}`, paymentMethodID)
+}`, groupName, paymentMethodID)
 
 	// Updated configuration modifies the billing group with:
 	// - Added additional billing contact email
@@ -110,7 +112,7 @@ resource "aiven_organization_billing_group" "billing_group" {
   billing_emails {
     email = "invoices2@example.com"
   }
-  billing_group_name  = "Test ACC Updated Billing Group"
+  billing_group_name  = %q
   custom_invoice_text = "Updated invoice text"
   payment_method {
     payment_method_id   = %q
@@ -118,11 +120,12 @@ resource "aiven_organization_billing_group" "billing_group" {
   }
   shipping_address_id = aiven_organization_address.shipping_address.address_id
   vat_id              = "VAT456"
-}`, paymentMethodID)
+}`, updatedGroupName, paymentMethodID)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				// Test creation with all fields
@@ -147,7 +150,7 @@ resource "aiven_organization_billing_group" "billing_group" {
 
 					// Check other fields
 					resource.TestCheckResourceAttr(name, "payment_method.0.payment_method_id", paymentMethodID),
-					resource.TestCheckResourceAttr(name, "billing_group_name", "Test Billing Group"),
+					resource.TestCheckResourceAttr(name, "billing_group_name", groupName),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Custom invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT123"),
 				),
@@ -168,7 +171,7 @@ resource "aiven_organization_billing_group" "billing_group" {
 					resource.TestCheckTypeSetElemNestedAttrs(name, "billing_emails.*", map[string]string{"email": "invoices@example.com"}),
 
 					// Check updated fields
-					resource.TestCheckResourceAttr(name, "billing_group_name", "Test ACC Updated Billing Group"),
+					resource.TestCheckResourceAttr(name, "billing_group_name", updatedGroupName),
 					resource.TestCheckResourceAttr(name, "custom_invoice_text", "Updated invoice text"),
 					resource.TestCheckResourceAttr(name, "vat_id", "VAT456"),
 				),

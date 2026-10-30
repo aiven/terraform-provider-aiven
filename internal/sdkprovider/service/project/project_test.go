@@ -398,5 +398,5 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 		}
 	}
 
-	return nil
+	return acc.TestAccCheckBillingGroupsDestroyed(s)
 }

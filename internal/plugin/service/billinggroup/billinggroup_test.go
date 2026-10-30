@@ -2,16 +2,14 @@ package billinggroup_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 // TestAccAivenBillingGroup_basic creates a dedicated organization to avoid hitting
@@ -88,15 +86,14 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		db, err := c.BillingGroupGet(ctx, rs.Primary.ID)
-		var e aiven.Error
-		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
+		_, err := c.BillingGroupGet(ctx, rs.Primary.ID)
+		if avngen.IsNotFound(err) {
+			continue
+		}
+		if err != nil {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}
-
-		if db != nil {
-			return fmt.Errorf("billing group (%s) still exists", rs.Primary.ID)
-		}
+		return fmt.Errorf("billing group (%s) still exists", rs.Primary.ID)
 	}
 
 	return nil

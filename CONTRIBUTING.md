@@ -41,6 +41,8 @@ export AIVEN_TOKEN="your-token"
 export AIVEN_PROJECT_NAME="your-project-name"
 export AIVEN_ORGANIZATION_NAME="your-existing-org-name"
 export AIVEN_ACCOUNT_NAME="$AIVEN_ORGANIZATION_NAME"
+# an existing billing group in the organization, assigned to test projects
+export AIVEN_BILLING_GROUP_ID="your-billing-group-id"
 
 # run all acceptance tests
 task test-acc

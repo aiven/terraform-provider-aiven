@@ -15,15 +15,27 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
+// requireBillingGroupID returns the billing group for test projects: without one,
+// the backend creates a default billing group that outlives the project.
+func requireBillingGroupID(t *testing.T) string {
+	billingGroupID := acc.BillingGroupID()
+	if billingGroupID == "" {
+		t.Skip("Skipping test due to missing AIVEN_BILLING_GROUP_ID environment variable")
+	}
+	return billingGroupID
+}
+
 func TestAccAivenOrganizationPermission_basic(t *testing.T) {
+	billingGroupID := requireBillingGroupID(t)
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	permission := "aiven_organization_permission.permission"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrganizationPermissionResource(rName, "developer"),
+				Config: testAccOrganizationPermissionResource(rName, billingGroupID, "developer"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(permission, "resource_type", "project"),
 					resource.TestCheckResourceAttr(permission, "permissions.#", "1"),
@@ -33,14 +45,14 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOrganizationPermissionResource(rName, "admin"),
+				Config: testAccOrganizationPermissionResource(rName, billingGroupID, "admin"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(permission, "permissions.0.permissions.0", "admin"),
 				),
 			},
 			{
 				// Removes permissions
-				Config: testAccOrganizationPermissionResource(rName, ""),
+				Config: testAccOrganizationPermissionResource(rName, billingGroupID, ""),
 				Check: func(s *terraform.State) error {
 					ctx := context.Background()
 					client, err := acc.GetTestGenAivenClient()
@@ -68,28 +80,29 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 	})
 }
 
-func testAccOrganizationPermissionResource(name, permission string) string {
+func testAccOrganizationPermissionResource(name, billingGroupID, permission string) string {
 	config := fmt.Sprintf(`
-resource "aiven_organization" "org" {
-  name = "test-acc-permissions-%[1]s"
+data "aiven_organization" "org" {
+  name = %[1]q
 }
 
 resource "aiven_project" "project" {
-  parent_id = aiven_organization.org.id
-  project   = "test-acc-permissions-%[1]s"
+  parent_id     = data.aiven_organization.org.id
+  project       = "test-acc-permissions-%[2]s"
+  billing_group = %[3]q
 }
 
 resource "aiven_organization_user_group" "group" {
-  organization_id = aiven_organization.org.id
-  name            = "test-acc-%[1]s"
+  organization_id = data.aiven_organization.org.id
+  name            = "test-acc-%[2]s"
   description     = "test group description"
 }
-`, name)
+`, acc.OrganizationName(), name, billingGroupID)
 
 	if permission != "" {
 		config += fmt.Sprintf(`
 resource "aiven_organization_permission" "permission" {
-  organization_id = aiven_organization.org.id
+  organization_id = data.aiven_organization.org.id
   resource_type   = "project"
   resource_id     = aiven_project.project.id
 
@@ -106,9 +119,11 @@ resource "aiven_organization_permission" "permission" {
 }
 
 func TestAccAivenOrganizationPermission_conflict(t *testing.T) {
+	billingGroupID := requireBillingGroupID(t)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				ExpectError: regexp.MustCompile("already has permissions configured"),
@@ -118,8 +133,9 @@ data "aiven_organization" "org" {
 }
 
 resource "aiven_project" "project" {
-  parent_id = data.aiven_organization.org.id
-  project   = "test-acc-%[2]s"
+  parent_id     = data.aiven_organization.org.id
+  project       = "test-acc-%[2]s"
+  billing_group = %[3]q
 }
 
 resource "aiven_organization_user_group" "group" {
@@ -151,7 +167,7 @@ resource "aiven_organization_permission" "second_conflicting" {
     permissions    = ["developer"]
   }
 }
-`, acc.OrganizationName(), acc.RandStr()),
+`, acc.OrganizationName(), acc.RandStr(), billingGroupID),
 			},
 		},
 	})
