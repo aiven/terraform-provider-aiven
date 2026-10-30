@@ -221,8 +221,15 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 		b.ForceNew()
 	}
 
-	if item.Default != nil {
+	switch {
+	case item.Default != nil:
 		b.DefaultValue(item.Default)
+	case item.DocDefault != nil:
+		b.DefaultValue(item.DocDefault)
+	default:
+		if v := descExample(item); v != nil {
+			b.Example(v)
+		}
 	}
 
 	// Root deprecation is rendered in doc.go (~> callout); attributes keep the
@@ -264,6 +271,28 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 	}
 
 	return b
+}
+
+// descExample returns the scalar example of the field: of the definition or the operation, then of the field schema.
+// Skips the examples that tell nothing new: of booleans, enums, and fields whose description has the default.
+func descExample(item *Item) any {
+	switch {
+	// todo: drop to document the examples of all fields, regenerating the docs in a separate PR.
+	case !item.InUserConfig():
+		return nil
+	case !item.IsScalar(), item.Type == SchemaTypeBoolean, len(itemEnumValues(item)) > 0,
+		strings.Contains(strings.ToLower(item.Description), "defaults to"):
+		return nil
+	}
+	for _, v := range []any{item.Example, item.DocExample} {
+		switch v.(type) {
+		case string, int, float64:
+			if !isEmpty(v) {
+				return v
+			}
+		}
+	}
+	return nil
 }
 
 func itemEnumValues(item *Item) []any {

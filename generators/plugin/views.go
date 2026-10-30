@@ -210,8 +210,13 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			values["TerminationProtection"] = jen.True()
 		}
 
-		if def.Resource.ValidateConfig {
+		switch {
+		case def.Resource.ValidateConfig && def.UserConfigDiscriminator != "":
+			return nil, fmt.Errorf("validateConfig: call adapter.%s from it, userConfigDiscriminator can't set it", validateUserConfig)
+		case def.Resource.ValidateConfig:
 			values["ValidateConfig"] = jen.Id(validateConfig)
+		case def.UserConfigDiscriminator != "":
+			values["ValidateConfig"] = jen.Qual(adapterPackage, validateUserConfig).Call(jen.Lit(def.UserConfigDiscriminator))
 		}
 
 		if def.Resource.ModifyPlan {
@@ -387,6 +392,9 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			if code := renameFieldsArg(def.Rename, operation.Request, true); code != nil {
 				g.Add(code)
 			}
+			if code := userConfigArg(def, item, inRequest, expandUserConfig); code != nil {
+				g.Add(code)
+			}
 		})
 		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	}
@@ -443,6 +451,10 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			if hasRequest {
 				params.Id("req")
 			}
+
+			for _, k := range sortedKeys(operation.QueryParams) {
+				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
+			}
 		}),
 	)
 
@@ -462,6 +474,10 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			g.Add(rsp)
 
 			if code := renameFieldsArg(def.Rename, operation.Response, false); code != nil {
+				g.Add(code)
+			}
+
+			if code := userConfigArg(def, item, inResponse, flattenUserConfig); code != nil {
 				g.Add(code)
 			}
 

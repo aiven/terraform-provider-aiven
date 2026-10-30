@@ -385,6 +385,29 @@ func TestNormalizeDescription(t *testing.T) {
 	)
 }
 
+func TestDescriptionExample(t *testing.T) {
+	def := &Definition{Resource: &SchemaMeta{}}
+	root := &Item{Name: "root", Type: SchemaTypeObject}
+	userConfig := &Item{Name: "pg_user_config", Type: SchemaTypeObject, UserConfigType: "pg", Parent: root}
+	cases := map[string]*Item{
+		"Connection string. Example: `AccountName=IDENT`.": {Description: "Connection string", Type: SchemaTypeString, Example: "AccountName=IDENT"},
+		"Host. Example: `my.host`.":                        {Description: "Host", Type: SchemaTypeString, Example: "my.host", DocExample: "spec.host"},
+		"Port. Example: `8080`.":                           {Description: "Port", Type: SchemaTypeInteger, DocExample: 8080.0},
+		"Batch size. The default value is `1000000`.":      {Description: "Batch size", Type: SchemaTypeNumber, Default: 1e6, Example: 5.0},
+		"Enabled.": {Description: "Enabled", Type: SchemaTypeBoolean, Example: true},
+		"Mode. The possible values are `a` and `b`.": {Description: "Mode", Type: SchemaTypeString, Enum: []any{"a", "b"}, Example: "a"},
+		"Port, defaults to 80.":                      {Description: "Port, defaults to 80", Type: SchemaTypeInteger, Example: 8080},
+	}
+	for want, item := range cases {
+		item.Name = "field"
+		item.Parent = userConfig
+		assert.Equal(t, want, fmtDescription(def, resourceType, item))
+	}
+
+	outside := &Item{Name: "field", Description: "Name", Type: SchemaTypeString, Example: "foo", Parent: root}
+	assert.Equal(t, "Name.", fmtDescription(def, resourceType, outside))
+}
+
 func TestLimitedAvailabilitySchemaDescription(t *testing.T) {
 	code, err := genSchema(
 		&Definition{
@@ -1088,6 +1111,23 @@ func TestMergeItemDropDefault(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, got.DropDefault)
 	require.Nil(t, got.Default)
+}
+
+func TestMergeItemEnum(t *testing.T) {
+	t.Parallel()
+
+	openAPI := func() *Item {
+		return &Item{Name: "model", Type: SchemaTypeString, AppearsIn: RequestBody, Enum: []any{"a", "b", "c"}}
+	}
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+
+	got, err := mergeItem(parent, openAPI(), &Item{Name: "model", Type: SchemaTypeString, Enum: []any{"a", "b"}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"a", "b"}, got.Enum, "definition enum overrides")
+
+	got, err = mergeItem(parent, openAPI(), &Item{Name: "model", Type: SchemaTypeString, AppearsIn: ResponseBody, Enum: []any{"d"}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"a", "b", "c", "d"}, got.Enum, "OpenAPI enums merge")
 }
 
 func TestExampleNestedAttributeUsesAssignment(t *testing.T) {

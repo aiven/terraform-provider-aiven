@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  refreshStateExists: true
+  removeMissing: true
+  # A generated example has every user config block, but an endpoint takes one
+  disableExample: true
+  description: |
+    Creates and manages an integration endpoint.
+
+    Integration endpoints let you send data like metrics and logs from Aiven services to external systems. The `autoscaler` endpoint lets you automatically scale the disk space on your services.
+
+    After creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service.
+datasource:
+  disableExample: true
+  description: Gets information about an integration endpoint.
+clientHandler: service
+idAttributeComposed: [project, endpoint_id]
+legacyTimeouts: true
+version: 1
+userConfigDiscriminator: endpoint_type
+rename:
+  integration_endpoint_id: endpoint_id
+  # The SDKv2 names, hardcoded in adapter.userConfigBlock
+  external_google_cloud_bigquery_user_config: external_google_cloud_bigquery
+  external_postgresql_user_config: external_postgresql
+operations:
+  - id: ServiceIntegrationEndpointCreate
+    type: create
+    resultKey: service_integration_endpoint
+  - id: ServiceIntegrationEndpointGet
+    type: read
+    resultKey: service_integration_endpoint
+    queryParams:
+      include_secrets: "true"
+  - id: ServiceIntegrationEndpointList
+    type: read
+    datasourceLookup: true
+    resultKey: service_integration_endpoints
+    resultIDField: EndpointId
+    resultListLookupKeys:
+      EndpointName: endpoint_name
+  - id: ServiceIntegrationEndpointUpdate
+    type: update
+    resultKey: service_integration_endpoint
+  - id: ServiceIntegrationEndpointDelete
+    type: delete
+schema:
+  project:
+    ref: aiven_organization_project.project_id
+  endpoint_id:
+    format: uuid
