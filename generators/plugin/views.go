@@ -219,7 +219,7 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 		}
 	}
 
-	if def.RequireServiceReady != "" {
+	if len(def.RequireServiceReady) > 0 {
 		for _, name := range []string{"project", "service_name"} {
 			prop, ok := item.Properties[name]
 			if !ok {
@@ -229,7 +229,11 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 				return nil, fmt.Errorf("requireServiceReady requires %q to be a string attribute, got %q", name, prop.Type)
 			}
 		}
-		values["RequireServiceReady"] = jen.Lit(def.RequireServiceReady)
+		values["RequireServiceReady"] = jen.Index().String().ValuesFunc(func(g *jen.Group) {
+			for _, t := range def.RequireServiceReady {
+				g.Lit(t)
+			}
+		})
 	}
 
 	if hasConfigValidators {

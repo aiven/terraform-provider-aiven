@@ -27,7 +27,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
-	RequireServiceReady: "flink",
+	RequireServiceReady: []string{"flink"},
 	Schema:              resourceSchema,
 	SchemaInternal:      resourceSchemaInternal(),
 	TypeName:            typeName,

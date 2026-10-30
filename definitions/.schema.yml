@@ -280,24 +280,28 @@ properties:
   flattenModifier:
     type: boolean
   requireServiceReady:
-    type: string
-    enum:
-      - pg
-      - cassandra
-      - opensearch
-      - grafana
-      - mysql
-      - kafka
-      - kafka_connect
-      - kafka_mirrormaker
-      - flink
-      - clickhouse
-      - thanos
-      - valkey
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items:
+      type: string
+      enum:
+        - pg
+        - cassandra
+        - opensearch
+        - grafana
+        - mysql
+        - kafka
+        - kafka_connect
+        - kafka_mirrormaker
+        - flink
+        - clickhouse
+        - thanos
+        - valkey
     $comment: |
-      Expected service type. Fails Create/Read/Update when the target service is
-      powered off or has a different `service_type`. Requires top-level `project`
-      and `service_name` string attributes. Delete is not gated.
+      Accepted service types. Fails Create/Read/Update when the target service is
+      powered off or its `service_type` is not in the list. Requires top-level
+      `project` and `service_name` string attributes. Delete is not gated.
 required:
   - operations
 additionalProperties: false

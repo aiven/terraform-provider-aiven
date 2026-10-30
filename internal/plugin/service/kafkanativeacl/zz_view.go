@@ -27,7 +27,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
-	RequireServiceReady: "kafka",
+	RequireServiceReady: []string{"kafka"},
 	Schema:              resourceSchema,
 	SchemaInternal:      resourceSchemaInternal(),
 	TypeName:            typeName,

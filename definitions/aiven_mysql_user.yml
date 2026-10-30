@@ -4,7 +4,7 @@ resource:
   description: Creates and manages an Aiven for MySQL® service user.
 datasource:
   description: Gets information about an Aiven for MySQL® service user.
-requireServiceReady: mysql
+requireServiceReady: [mysql]
 schema:
   project:
     ref: aiven_mysql.project

@@ -124,9 +124,9 @@ type ResourceOptions struct {
 	ConfigValidators func(ctx context.Context, client avngen.Client) []resource.ConfigValidator
 
 	// RequireServiceReady, when non-empty, calls schemautil.CheckServiceReady with
-	// this expected service type before Create/Read/Update. Delete is not gated.
+	// these accepted service types before Create/Read/Update. Delete is not gated.
 	// Requires `project` and `service_name` string attributes in the schema.
-	RequireServiceReady string
+	RequireServiceReady []string
 }
 
 func NewResource(options ResourceOptions) resource.Resource {
@@ -218,8 +218,8 @@ func (a *resourceAdapter) Create(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServiceReady != "" {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
+	if len(a.resource.RequireServiceReady) > 0 {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to create resource", err.Error())
 			return
 		}
@@ -309,8 +309,8 @@ func (a *resourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServiceReady != "" {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
+	if len(a.resource.RequireServiceReady) > 0 {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to read resource", err.Error())
 			return
 		}
@@ -482,8 +482,8 @@ func (a *resourceAdapter) Update(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.resource.RequireServiceReady != "" {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady); err != nil {
+	if len(a.resource.RequireServiceReady) > 0 {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to update resource", err.Error())
 			return
 		}

@@ -4,7 +4,7 @@ resource:
   description: Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user.
 datasource:
   description: Gets information about an Aiven for Valkey™ service user.
-requireServiceReady: valkey
+requireServiceReady: [valkey]
 expandModifier: true
 operations:
   - id: ServiceUserCredentialsModify

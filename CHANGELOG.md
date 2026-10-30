@@ -17,6 +17,11 @@ nav_order: 1
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
 
+## [4.65.1] - 2026-10-30
+
+- Fix `aiven_kafka_user` failing with `service type mismatch` on Aiven for Apache Kafka® Connect services since 4.65.0:
+  the resource and data source accept `kafka_connect` services again
+
 ## [4.65.0] - 2026-10-21
 
 - Add `aiven_service_list` datasource field `services.first_use_time`: Timestamp when the service was first used

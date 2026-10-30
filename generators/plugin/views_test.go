@@ -415,17 +415,24 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 	}
 
 	t.Run("resource emits the option when both service fields are present", func(t *testing.T) {
-		def := &Definition{Resource: &SchemaMeta{}, RequireServiceReady: "kafka"}
+		def := &Definition{Resource: &SchemaMeta{}, RequireServiceReady: []string{"kafka"}}
 		code, err := genNewResource(resourceType, def, serviceItem(nil), false)
 		require.NoError(t, err)
-		require.Contains(t, renderCode(t, code), `RequireServiceReady: "kafka"`)
+		require.Contains(t, renderCode(t, code), `RequireServiceReady: []string{"kafka"}`)
 	})
 
 	t.Run("datasource emits the option when both service fields are present", func(t *testing.T) {
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "pg"}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: []string{"pg"}}
 		code, err := genNewResource(datasourceType, def, serviceItem(nil), false)
 		require.NoError(t, err)
-		require.Contains(t, renderCode(t, code), `RequireServiceReady: "pg"`)
+		require.Contains(t, renderCode(t, code), `RequireServiceReady: []string{"pg"}`)
+	})
+
+	t.Run("resource emits multiple service types", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{}, RequireServiceReady: []string{"kafka", "kafka_connect"}}
+		code, err := genNewResource(resourceType, def, serviceItem(nil), false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), `RequireServiceReady: []string{"kafka", "kafka_connect"}`)
 	})
 
 	t.Run("omitted when the field is empty", func(t *testing.T) {
@@ -440,7 +447,7 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 			"service_name": {Name: "service_name", Type: SchemaTypeString, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: []string{"kafka"}}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `requireServiceReady requires "project" attribute in schema`)
@@ -451,7 +458,7 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 			"project": {Name: "project", Type: SchemaTypeString, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: []string{"kafka"}}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `requireServiceReady requires "service_name" attribute in schema`)
@@ -463,7 +470,7 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 			"service_name": {Name: "service_name", Type: SchemaTypeInteger, Required: true},
 		}}
 		setParents(item, nil)
-		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: "kafka"}
+		def := &Definition{Datasource: &SchemaMeta{}, RequireServiceReady: []string{"kafka"}}
 		_, err := genNewResource(datasourceType, def, item, false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `requireServiceReady requires "service_name" to be a string attribute`)

@@ -8,7 +8,7 @@ datasource:
 clientHandler: postgresql
 idAttributeComposed: [project, service_name, pool_name]
 legacyTimeouts: true
-requireServiceReady: pg
+requireServiceReady: [pg]
 rename:
   database: database_name
 operations:

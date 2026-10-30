@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=.schema.yml
 include: .service_user.yml
 resource:
-  description: Creates and manages an Aiven for Apache Kafka® service user.
+  description: Creates and manages an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
 datasource:
-  description: Gets information about an Aiven for Apache Kafka® service user.
-requireServiceReady: kafka
+  description: Gets information about an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
+requireServiceReady: [kafka, kafka_connect]
 remove:
   - authentication
   - mysql_grants # MySQL grants for the service user
