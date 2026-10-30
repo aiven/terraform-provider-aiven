@@ -21,6 +21,7 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationPermissionResource(rName, "developer"),
@@ -105,10 +106,13 @@ resource "aiven_organization_permission" "permission" {
 	return config
 }
 
+// TestAccAivenOrganizationPermission_conflict sets the project's billing group:
+// without one, the backend creates a default billing group that outlives the project.
 func TestAccAivenOrganizationPermission_conflict(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				ExpectError: regexp.MustCompile("already has permissions configured"),
@@ -118,8 +122,9 @@ data "aiven_organization" "org" {
 }
 
 resource "aiven_project" "project" {
-  parent_id = data.aiven_organization.org.id
-  project   = "test-acc-%[2]s"
+  parent_id     = data.aiven_organization.org.id
+  project       = "test-acc-%[2]s"
+  billing_group = %[3]q
 }
 
 resource "aiven_organization_user_group" "group" {
@@ -151,7 +156,7 @@ resource "aiven_organization_permission" "second_conflicting" {
     permissions    = ["developer"]
   }
 }
-`, acc.OrganizationName(), acc.RandStr()),
+`, acc.OrganizationName(), acc.RandStr(), acc.BillingGroupID()),
 			},
 		},
 	})
