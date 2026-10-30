@@ -30,6 +30,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnectcustompluginfile"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationaddress"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationapplicationusertoken"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationbillinggroup"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationusergroup"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationusergroupmember"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradestep"

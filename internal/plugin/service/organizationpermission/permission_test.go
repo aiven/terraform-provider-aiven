@@ -21,6 +21,7 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationPermissionResource(rName, "developer"),
@@ -105,31 +106,34 @@ resource "aiven_organization_permission" "permission" {
 	return config
 }
 
+// TestAccAivenOrganizationPermission_conflict uses a dedicated organization:
+// a project without a billing group gets a default one that outlives the project.
 func TestAccAivenOrganizationPermission_conflict(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckBillingGroupsDestroyed,
 		Steps: []resource.TestStep{
 			{
 				ExpectError: regexp.MustCompile("already has permissions configured"),
 				Config: fmt.Sprintf(`
-data "aiven_organization" "org" {
-  name = %[1]q
+resource "aiven_organization" "org" {
+  name = "test-acc-permissions-%[1]s"
 }
 
 resource "aiven_project" "project" {
-  parent_id = data.aiven_organization.org.id
-  project   = "test-acc-%[2]s"
+  parent_id = aiven_organization.org.id
+  project   = "test-acc-%[1]s"
 }
 
 resource "aiven_organization_user_group" "group" {
-  organization_id = data.aiven_organization.org.id
-  name            = "test-acc-%[2]s"
+  organization_id = aiven_organization.org.id
+  name            = "test-acc-%[1]s"
   description     = "test group description"
 }
 
 resource "aiven_organization_permission" "first" {
-  organization_id = data.aiven_organization.org.id
+  organization_id = aiven_organization.org.id
   resource_type   = "project"
   resource_id     = aiven_project.project.id
 
@@ -141,7 +145,7 @@ resource "aiven_organization_permission" "first" {
 }
 
 resource "aiven_organization_permission" "second_conflicting" {
-  organization_id = data.aiven_organization.org.id
+  organization_id = aiven_organization.org.id
   resource_type   = "project"
   resource_id     = aiven_project.project.id
 
@@ -151,7 +155,7 @@ resource "aiven_organization_permission" "second_conflicting" {
     permissions    = ["developer"]
   }
 }
-`, acc.OrganizationName(), acc.RandStr()),
+`, acc.RandStr()),
 			},
 		},
 	})
