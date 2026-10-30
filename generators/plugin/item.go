@@ -212,9 +212,9 @@ type Definition struct {
 	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
 	// RequireServiceReady gates Create/Read/Update via schemautil.CheckServiceReady when non-empty.
-	// Its value is the expected service type (e.g. "kafka"). Requires `project` and `service_name`
+	// Its value lists the accepted service types (e.g. ["kafka"]). Requires `project` and `service_name`
 	// in the schema. Delete is not gated.
-	RequireServiceReady string `yaml:"requireServiceReady,omitempty"`
+	RequireServiceReady []string `yaml:"requireServiceReady,omitempty"`
 
 	// prunedFields holds cross-group attributes dropped by
 	// pruneCrossGroupFields across the resource and datasource passes;

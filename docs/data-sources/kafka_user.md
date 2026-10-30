@@ -2,12 +2,12 @@
 page_title: "aiven_kafka_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Gets information about an Aiven for Apache Kafka® service user.
+  Gets information about an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
 ---
 
 # aiven_kafka_user (Data Source)
 
-Gets information about an Aiven for Apache Kafka® service user.
+Gets information about an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
 
 ## Example Usage
 

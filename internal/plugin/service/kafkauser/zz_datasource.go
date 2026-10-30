@@ -59,7 +59,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.Block(ctx)},
-		MarkdownDescription: "Gets information about an Aiven for Apache Kafka® service user.",
+		MarkdownDescription: "Gets information about an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.",
 	}
 }
 func datasourceSchemaInternal() *adapter.Schema {

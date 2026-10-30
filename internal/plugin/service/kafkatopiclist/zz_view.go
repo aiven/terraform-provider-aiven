@@ -22,7 +22,7 @@ func idFields() []string {
 var DataSourceOptions = adapter.DataSourceOptions{
 	IDFields:            idFields(),
 	Read:                readView,
-	RequireServiceReady: "kafka",
+	RequireServiceReady: []string{"kafka"},
 	Schema:              datasourceSchema,
 	SchemaInternal:      datasourceSchemaInternal(),
 	TypeName:            typeName,

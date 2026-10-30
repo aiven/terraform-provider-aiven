@@ -4,7 +4,7 @@ resource:
   description: Creates and manages an Aiven for OpenSearch® service user.
 datasource:
   description: Gets information about an Aiven for OpenSearch® service user.
-requireServiceReady: opensearch
+requireServiceReady: [opensearch]
 remove:
   - authentication
   - access_cert

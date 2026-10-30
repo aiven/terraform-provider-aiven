@@ -8,7 +8,7 @@ datasource:
 clientHandler: clickhouse
 idAttributeComposed: [project, service_name, uuid]
 legacyTimeouts: true
-requireServiceReady: clickhouse
+requireServiceReady: [clickhouse]
 flattenModifier: true
 expandModifier: true
 operations:
