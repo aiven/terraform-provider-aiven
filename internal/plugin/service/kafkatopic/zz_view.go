@@ -20,7 +20,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	ModifyPlan:            modifyPlan,
 	Read:                  readView,
 	RemoveMissing:         true,
-	RequireServiceReady:   "kafka",
+	RequireServiceReady:   []string{"kafka"},
 	Schema:                resourceSchema,
 	SchemaInternal:        resourceSchemaInternal(),
 	TerminationProtection: true,
@@ -32,7 +32,7 @@ var ResourceOptions = adapter.ResourceOptions{
 var DataSourceOptions = adapter.DataSourceOptions{
 	IDFields:            idFields(),
 	Read:                readView,
-	RequireServiceReady: "kafka",
+	RequireServiceReady: []string{"kafka"},
 	Schema:              datasourceSchema,
 	SchemaInternal:      datasourceSchemaInternal(),
 	TypeName:            typeName,

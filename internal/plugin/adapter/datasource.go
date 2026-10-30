@@ -40,7 +40,7 @@ type DataSourceOptions struct {
 	ConfigValidators func(ctx context.Context, client avngen.Client) []datasource.ConfigValidator
 
 	// RequireServiceReady gates Read. See ResourceOptions.RequireServiceReady.
-	RequireServiceReady string
+	RequireServiceReady []string
 }
 
 func NewDataSource(options DataSourceOptions) datasource.DataSource {
@@ -130,8 +130,8 @@ func (a *datasourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
-	if a.datasource.RequireServiceReady != "" {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.datasource.RequireServiceReady); err != nil {
+	if len(a.datasource.RequireServiceReady) > 0 {
+		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.datasource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to read datasource", err.Error())
 			return
 		}

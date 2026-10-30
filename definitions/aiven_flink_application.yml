@@ -9,7 +9,7 @@ datasource:
 clientHandler: flinkapplication
 idAttributeComposed: [project, service_name, application_id]
 legacyTimeouts: true
-requireServiceReady: flink
+requireServiceReady: [flink]
 rename:
   id: application_id
 remove:

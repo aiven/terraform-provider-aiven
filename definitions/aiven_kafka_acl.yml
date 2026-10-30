@@ -11,7 +11,7 @@ datasource:
 clientHandler: kafka
 idAttributeComposed: [project, service_name, acl_id]
 legacyTimeouts: true
-requireServiceReady: kafka
+requireServiceReady: [kafka]
 rename:
   id: acl_id
   kafka_acl_id: acl_id

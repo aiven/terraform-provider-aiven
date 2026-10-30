@@ -2,13 +2,13 @@
 resource:
   refreshStateExists: true
   removeMissing: true
-  description: Creates and manages an Aiven for Apache Kafka® service user.
+  description: Creates and manages an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
 datasource:
-  description: Gets information about an Aiven for Apache Kafka® service user.
+  description: Gets information about an Aiven for Apache Kafka® or Aiven for Apache Kafka® Connect service user.
 clientHandler: service
 idAttributeComposed: [project, service_name, username]
 legacyTimeouts: true
-requireServiceReady: kafka
+requireServiceReady: [kafka, kafka_connect]
 flattenModifier: true
 operations:
   - id: ServiceUserCreate

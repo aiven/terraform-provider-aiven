@@ -28,7 +28,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
 	RemoveMissing:         true,
-	RequireServiceReady:   "mysql",
+	RequireServiceReady:   []string{"mysql"},
 	Schema:                resourceSchema,
 	SchemaInternal:        resourceSchemaInternal(),
 	TerminationProtection: true,
@@ -38,7 +38,7 @@ var ResourceOptions = adapter.ResourceOptions{
 var DataSourceOptions = adapter.DataSourceOptions{
 	IDFields:            idFields(),
 	Read:                readView,
-	RequireServiceReady: "mysql",
+	RequireServiceReady: []string{"mysql"},
 	Schema:              datasourceSchema,
 	SchemaInternal:      datasourceSchemaInternal(),
 	TypeName:            typeName,

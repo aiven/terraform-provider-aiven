@@ -7,7 +7,7 @@ resource:
 clientHandler: flinkapplicationdeployment
 idAttributeComposed: [project, service_name, application_id, deployment_id]
 legacyTimeouts: true
-requireServiceReady: flink
+requireServiceReady: [flink]
 planModifier: true
 rename:
   id: deployment_id

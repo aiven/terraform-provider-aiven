@@ -26,7 +26,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
-	RequireServiceReady: "valkey",
+	RequireServiceReady: []string{"valkey"},
 	Schema:              resourceSchema,
 	SchemaInternal:      resourceSchemaInternal(),
 	TypeName:            typeName,
@@ -36,7 +36,7 @@ var ResourceOptions = adapter.ResourceOptions{
 var DataSourceOptions = adapter.DataSourceOptions{
 	IDFields:            idFields(),
 	Read:                readView,
-	RequireServiceReady: "valkey",
+	RequireServiceReady: []string{"valkey"},
 	Schema:              datasourceSchema,
 	SchemaInternal:      datasourceSchemaInternal(),
 	TypeName:            typeName,

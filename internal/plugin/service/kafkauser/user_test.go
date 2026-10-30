@@ -225,6 +225,62 @@ data "aiven_kafka_user" "user" {
 			}),
 		})
 	})
+
+	// Service users on Kafka Connect authenticate to its REST API.
+	t.Run("kafka_connect", func(t *testing.T) {
+		resourceName := "aiven_kafka_user.foo"
+		connectName := acc.RandName("kafka-connect")
+		userName := acc.RandName("user")
+
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaUserResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafkaUserOnKafkaConnect(projectName, connectName, userName, "acc-custom-Test$1234"),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_name", connectName),
+						resource.TestCheckResourceAttr(resourceName, "username", userName),
+						resource.TestCheckResourceAttr(resourceName, "password", "acc-custom-Test$1234"),
+						resource.TestCheckResourceAttr("data.aiven_kafka_user.user", "username", userName),
+					),
+				},
+				{
+					Config: testAccKafkaUserOnKafkaConnect(projectName, connectName, userName, "acc-custom-UpdatedP@ss5678"),
+					Check:  resource.TestCheckResourceAttr(resourceName, "password", "acc-custom-UpdatedP@ss5678"),
+				},
+				{
+					ResourceName:      resourceName,
+					ImportState:       true,
+					ImportStateVerify: true,
+				},
+			},
+		})
+	})
+}
+
+func testAccKafkaUserOnKafkaConnect(projectName, serviceName, userName, password string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_connect" "bar" {
+  project      = %[1]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = %[2]q
+}
+
+resource "aiven_kafka_user" "foo" {
+  project      = aiven_kafka_connect.bar.project
+  service_name = aiven_kafka_connect.bar.service_name
+  username     = %[3]q
+  password     = %[4]q
+}
+
+data "aiven_kafka_user" "user" {
+  project      = aiven_kafka_user.foo.project
+  service_name = aiven_kafka_user.foo.service_name
+  username     = aiven_kafka_user.foo.username
+}`, projectName, serviceName, userName, password)
 }
 
 // checkBackendPassword returns a TestCheckFunc that polls the Aiven backend until the

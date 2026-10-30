@@ -1361,14 +1361,19 @@ func ServiceReadyForget(project, serviceName string) {
 // 503 error when the service is powered off:
 // "503: An error occurred. Please try again later."
 // This function returns a clearer error by explicitly prechecking.
-// serviceType must be one of the known service type codes (see
-// validServiceTypes). An unknown code returns ErrInvalidServiceType; a
-// mismatch against ServiceGetOut.ServiceType returns
-// ErrServiceTypeMismatch; a service in POWEROFF returns
+// serviceTypes lists the accepted service type codes (see
+// validServiceTypes). An empty list or an unknown code returns
+// ErrInvalidServiceType; a ServiceGetOut.ServiceType outside the list
+// returns ErrServiceTypeMismatch; a service in POWEROFF returns
 // ErrServicePoweredOff.
-func CheckServiceReady(ctx context.Context, client avngen.Client, project, serviceName, serviceType string) error {
-	if !validServiceTypes()[serviceType] {
-		return fmt.Errorf("%w: %q", ErrInvalidServiceType, serviceType)
+func CheckServiceReady(ctx context.Context, client avngen.Client, project, serviceName string, serviceTypes ...string) error {
+	if len(serviceTypes) == 0 {
+		return fmt.Errorf("%w: no service type given", ErrInvalidServiceType)
+	}
+	for _, t := range serviceTypes {
+		if !validServiceTypes()[t] {
+			return fmt.Errorf("%w: %q", ErrInvalidServiceType, t)
+		}
 	}
 
 	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
@@ -1377,10 +1382,14 @@ func CheckServiceReady(ctx context.Context, client avngen.Client, project, servi
 	if err != nil {
 		return err
 	}
-	if s.ServiceType != serviceType {
+	if !slices.Contains(serviceTypes, s.ServiceType) {
+		expected := strings.Join(lo.Map(serviceTypes, func(t string, _ int) string { return strconv.Quote(t) }), ", ")
+		if len(serviceTypes) > 1 {
+			expected = "one of " + expected
+		}
 		return fmt.Errorf(
-			"%w: service %s/%s is of type %q, expected %q",
-			ErrServiceTypeMismatch, project, serviceName, s.ServiceType, serviceType,
+			"%w: service %s/%s is of type %q, expected %s",
+			ErrServiceTypeMismatch, project, serviceName, s.ServiceType, expected,
 		)
 	}
 	if s.State == service.ServiceStateTypePoweroff {
