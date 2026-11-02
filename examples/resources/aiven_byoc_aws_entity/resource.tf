@@ -1,6 +1,5 @@
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = "org1a23f456789" // Force new
-  cloud_provider   = "aws" // Force new
   cloud_region     = "eu-west-1" // Force new
   deployment_model = "standard" // Force new
   display_name     = "byoc-cloud-prod-eu-west-1"
@@ -25,7 +24,6 @@ resource "aiven_byoc_aws_entity" "example" {
   aiven_aws_object_storage_credentials_creator_arn = "foo"
   aiven_aws_object_storage_user_arn                = "foo"
   aiven_management_cidr_blocks                     = ["10.0.0.0/24"]
-  aiven_object_storage_credentials_creator_user    = "foo"
   aws_subnets_bastion = {
     foo = "foo"
   }

@@ -1,0 +1,1 @@
+terraform import aiven_byoc_azure_provision.example ORGANIZATION_ID/CUSTOM_CLOUD_ENVIRONMENT_ID

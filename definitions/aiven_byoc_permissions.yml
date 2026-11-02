@@ -8,8 +8,9 @@ resource:
     Note! The `accounts` and `projects` lists are authoritative. This differs from the `avn byoc cloud permissions add`,
     which merges into the existing set.
 
-    Create this resource after `aiven_byoc_aws_entity` and `aiven_byoc_aws_provision` so the custom cloud environment
-    is active before permissions are granted.
+    Create this resource after the entity and provision resources (`aiven_byoc_aws_entity` and `aiven_byoc_aws_provision`,
+    or `aiven_byoc_azure_entity` and `aiven_byoc_azure_provision`) so the custom cloud environment is active before
+    permissions are granted.
   refreshStateExists: true
   removeMissing: true
 clientHandler: byoc

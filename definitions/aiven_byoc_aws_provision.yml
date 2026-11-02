@@ -11,6 +11,7 @@ resource:
     (IAM role, VPC, subnets, security groups, buckets) has been defined.
   stateAttribute: state
   refreshStateDesired: [active]
+  refreshStateFailed: [creation_failed, deleted] # Checked after create/update only; delete polls deleteStateDesired
   deleteStateDesired: [deleted]
 clientHandler: byoc
 idAttributeComposed: [organization_id, custom_cloud_environment_id]
@@ -20,6 +21,9 @@ operations:
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentGet
     type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentDelete
     type: delete

@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=.schema.yml
+beta: true
+resource:
+  description: |
+    Creates and manages a BYOC custom cloud environment on Azure.
+clientHandler: byoc
+idAttributeComposed: [organization_id, custom_cloud_environment_id]
+operations:
+  - id: CustomCloudEnvironmentCreate
+    type: create
+    resultKey: custom_cloud_environment
+    fixedValues:
+      cloud_provider: azure
+  - id: CustomCloudEnvironmentGet
+    type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentDelete
+    type: delete
+remove:
+  - cloud_provider # Polymorphic endpoint discriminator, set by the create operation's fixedValues
+  - custom_cloud_names # Populated only after provisioning, exposed by aiven_byoc_azure_provision
+  - errors # Changes during provisioning, would cascade updates to dependent BYOC resources
+  - state # Changes during provisioning, exposed by aiven_byoc_azure_provision
+  - update_time # Changes during provisioning, would cascade updates to dependent BYOC resources
+  - azure_subscription_id # Provisioning input owned by aiven_byoc_azure_provision, create doesn't accept it
+  - azure_tenant_id # Provisioning input owned by aiven_byoc_azure_provision, create doesn't accept it
+  - aiven_object_storage_credentials_creator_user # Google service account, the name lacks a cloud token for the generator to prune
+  # Other clouds' fields, appended by the generator (pruneCrossGroupFields).
+  - aiven_aws_account_principal # Entity that assumes the IAM role for controlling the BYOC account
+  - aiven_aws_assume_role_external_id # External ID for assuming the IAM role for controlling the BYOC account
+  - aiven_aws_object_storage_credentials_creator_arn # Amazon Resource Name
+  - aiven_aws_object_storage_user_arn # Amazon Resource Name
+  - aiven_google_account_principal # Google account identifier
+  - aws_iam_role_arn # Amazon Resource Name
+  - aws_subnets_bastion # Subnets to build in the bastion VPC
+  - aws_subnets_workload # Subnets to build in the workload VPC
+  - google_bastion_cidr # Private IP address block for the workload VPC containing the bastion subnet
+  - google_privilege_bearing_service_account_id # Google account identifier
+  - google_workload_cidr # Private IP address block for the workload VPC containing the workload subnet
+  - oracle_compartment_id # Used to uniquely identify an asset in Oracle's cloud. May refer to a range of object types including instance, tenancy,...
+  - oracle_subnet_bastion # CIDR for the bastion subnet
+  - oracle_subnet_workload # CIDR for the private workload subnet
+schema:
+  organization_id:
+    ref: aiven_organization.id
+  cloud_region:
+    forceNew: true
+    example: westeurope
+  deployment_model:
+    forceNew: true
+    enum: [standard, standard_public] # The OpenAPI enum lists every cloud's models, Azure supports only these
+  display_name:
+    example: byoc-cloud-prod-westeurope
+  reserved_cidr:
+    forceNew: true

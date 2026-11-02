@@ -34,7 +34,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	req := new(byoc.CustomCloudEnvironmentCreateIn)
-	err := d.Expand(req)
+	err := d.Expand(req, adapter.SetFixedValues("cloud_provider", "aws"))
 	if err != nil {
 		return err
 	}

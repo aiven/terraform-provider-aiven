@@ -27,7 +27,6 @@ data "aiven_organization" "org" {
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.org.id
   display_name     = "test-byoc-provision-acc"
-  cloud_provider   = "aws"
   cloud_region     = "eu-west-1"
   deployment_model = "standard"
   reserved_cidr    = "10.0.0.0/16"

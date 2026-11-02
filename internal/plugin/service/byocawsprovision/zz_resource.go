@@ -31,8 +31,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"aws_iam_role_arn": schema.StringAttribute{
-				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
 			},
