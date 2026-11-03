@@ -1295,6 +1295,43 @@ func TestIsRefreshStateRetryable(t *testing.T) {
 	}
 }
 
+func TestRetryNotFound(t *testing.T) {
+	t.Parallel()
+
+	notFound := avngen.Error{Status: http.StatusNotFound}
+	tests := []struct {
+		name         string
+		errs         []error
+		wantErr      error
+		wantAttempts int
+	}{
+		{name: "succeeds first try", errs: []error{nil}, wantAttempts: 1},
+		{name: "succeeds after 404s", errs: []error{notFound, ErrNotFound, nil}, wantAttempts: 3},
+		{name: "gives up after retries", errs: []error{notFound, notFound, notFound, nil}, wantErr: notFound, wantAttempts: 3},
+		{name: "does not retry other errors", errs: []error{ErrMultiple, nil}, wantErr: ErrMultiple, wantAttempts: 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			attempts := 0
+			read := retryNotFound(func(context.Context, avngen.Client, ResourceData) error {
+				attempts++
+				return tt.errs[attempts-1]
+			}, time.Microsecond)
+
+			err := read(t.Context(), nil, nil)
+			if tt.wantErr == nil {
+				require.NoError(t, err)
+			} else {
+				require.ErrorIs(t, err, tt.wantErr)
+			}
+			require.Equal(t, tt.wantAttempts, attempts)
+		})
+	}
+}
+
 func TestEqual(t *testing.T) {
 	t.Parallel()
 
