@@ -16,6 +16,28 @@ nav_order: 1
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
+- **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
+  When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+- **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
+  and `aiven_service_integration_endpoint` that remove a user config block. This affects resources managed with an earlier
+  version whose configuration has no such block while the API returns one: SDKv2 stored it anyway, e.g.,
+  a `datadog_user_config` removed from the configuration after the create. Applying the plan is safe: the provider skips
+  the API call and updates only the state, so the settings in Aiven, including secrets such as the Datadog API key,
+  don't change. To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
+  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide.
+- Migrate `aiven_service_integration` and `aiven_service_integration_endpoint` resources and data sources to the Plugin Framework.
+- Add `aiven_service_integration` fields `active`, `description`, `source_service_type`, `destination_service_type`,
+  `source_endpoint_name` and `destination_endpoint_name`, and `aiven_service_integration_endpoint` field `endpoint_id`.
+- Change `aiven_service_integration` and `aiven_service_integration_endpoint`: validate the user config, names
+  and endpoint IDs at plan time; a user config block of another type fails the plan, and so does a create without
+  the block of a type with required options, e.g., `datadog_user_config`. After an import, the first plan adds
+  the configured user config blocks, and applying it sends them to the API.
+- Change `aiven_service_integration` and `aiven_service_integration_endpoint` data sources: look up by ID too, and fail
+  when several match.
+- Change `aiven_service_integration_endpoint`: an endpoint deleted outside Terraform is removed from the state.
+  `external_postgresql.ssl_mode` no longer accepts `allow`, `disable` and `prefer`, which the API rejects. The read
+  no longer fails on redacted credentials.
 
 ## [4.65.1] - 2026-10-30
 

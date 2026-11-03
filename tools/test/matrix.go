@@ -32,7 +32,7 @@ var DefaultSlowTests = []string{
 	"plugin-service-mirrormakerreplicationflow",
 	"sdk-service-kafka",
 	"sdk-service-pg",
-	"sdk-service-serviceintegration",
+	"plugin-service-serviceintegration",
 	"plugin-service-kafkaacl",
 	"plugin-service-kafkaschemaregistryacl",
 }

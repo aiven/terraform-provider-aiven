@@ -477,6 +477,77 @@ func TestGenNewResourceRequireServiceReady(t *testing.T) {
 	})
 }
 
+func TestGenNewResourceValidateUserConfig(t *testing.T) {
+	item := &Item{Properties: map[string]*Item{}}
+
+	t.Run("resource validates the user config blocks", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), `ValidateConfig: adapter.ValidateUserConfig("endpoint_type")`)
+	})
+
+	t.Run("datasource doesn't", func(t *testing.T) {
+		def := &Definition{Datasource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(datasourceType, def, item, false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "ValidateConfig")
+	})
+
+	t.Run("rejects validateConfig", func(t *testing.T) {
+		def := &Definition{Resource: &SchemaMeta{ValidateConfig: true}, UserConfigDiscriminator: "endpoint_type"}
+		_, err := genNewResource(resourceType, def, item, false)
+		require.EqualError(t, err, "validateConfig: call adapter.ValidateUserConfig from it, userConfigDiscriminator can't set it")
+	})
+}
+
+func TestGenNewResourceRequireUserConfig(t *testing.T) {
+	t.Parallel()
+
+	datadogBlock := func(required bool) *Item {
+		props := map[string]*Item{
+			"site": {Name: "site", Type: SchemaTypeString},
+		}
+		if required {
+			props["api_key"] = &Item{Name: "api_key", Type: SchemaTypeString, Required: true}
+		}
+		return &Item{
+			Name:           "datadog_user_config",
+			Type:           SchemaTypeObject,
+			UserConfigType: "datadog",
+			Properties:     props,
+		}
+	}
+
+	t.Run("sets ModifyPlan for required user config types", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{"datadog_user_config": datadogBlock(true)}}
+		setParents(item, nil)
+		def := &Definition{Resource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.Contains(t, got, "ModifyPlan:")
+		require.Contains(t, got, `adapter.RequireUserConfig("endpoint_type", "datadog")`)
+	})
+
+	t.Run("no ModifyPlan without required options", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{"datadog_user_config": datadogBlock(false)}}
+		setParents(item, nil)
+		def := &Definition{Resource: &SchemaMeta{}, UserConfigDiscriminator: "endpoint_type"}
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "ModifyPlan:")
+	})
+
+	t.Run("rejects modifyPlan with required user config types", func(t *testing.T) {
+		item := &Item{Properties: map[string]*Item{"datadog_user_config": datadogBlock(true)}}
+		setParents(item, nil)
+		def := &Definition{Resource: &SchemaMeta{ModifyPlan: true}, UserConfigDiscriminator: "endpoint_type"}
+		_, err := genNewResource(resourceType, def, item, false)
+		require.EqualError(t, err, "modifyPlan: userConfigDiscriminator sets it to adapter.RequireUserConfig for datadog")
+	})
+}
+
 func renderCode(t *testing.T, code ...jen.Code) string {
 	t.Helper()
 

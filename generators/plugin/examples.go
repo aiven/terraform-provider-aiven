@@ -468,7 +468,13 @@ func exampleScalarValue(def *Definition, item *Item, anyValue any) (cty.Value, e
 		if anyValue == nil {
 			anyValue = 3.14
 		}
-		return cty.NumberFloatVal(anyValue.(float64)), nil
+
+		// Minimum and maximum are integers
+		f, err := strconv.ParseFloat(fmt.Sprint(anyValue), 64)
+		if err != nil {
+			return cty.NilVal, fmt.Errorf(`invalid number "%v" for %q: %w`, anyValue, item.Path(), err)
+		}
+		return cty.NumberFloatVal(f), nil
 	}
 	return cty.NilVal, fmt.Errorf("unknown scalar type %q for %q", item.Type, item.Path())
 }

@@ -22,8 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
 )
 
 const (
@@ -34,46 +32,26 @@ const (
 type userConfigType string
 
 const (
-	ServiceUserConfig                    userConfigType = "service"
-	ServiceIntegrationUserConfig         userConfigType = "service integration"
-	ServiceIntegrationEndpointUserConfig userConfigType = "service integration endpoint"
+	ServiceUserConfig userConfigType = "service"
 )
 
 // userConfigKey provides a single source of truth for a field naming
-func userConfigKey(kind userConfigType, name string) string {
-	switch kind { //nolint:gocritic
-	case ServiceIntegrationEndpointUserConfig:
-		switch name {
-		case "external_google_cloud_bigquery", "external_postgresql":
-			// legacy fields
-			return name
-		}
-	}
+func userConfigKey(name string) string {
 	return name + userConfigSuffix
 }
 
 // getUserConfig returns user config for the given kind and name
 func getUserConfig(kind userConfigType, name string) *schema.Schema {
-	switch kind {
-	case ServiceUserConfig:
+	if kind == ServiceUserConfig {
 		return service.GetUserConfig(name)
-	case ServiceIntegrationUserConfig:
-		return serviceintegration.GetUserConfig(name)
-	case ServiceIntegrationEndpointUserConfig:
-		return serviceintegrationendpoint.GetUserConfig(name)
 	}
 	return nil
 }
 
 // getFieldMapping json field for tf field might be different, returns the mapping
 func getFieldMapping(kind userConfigType, name string) map[string]string {
-	switch kind {
-	case ServiceUserConfig:
+	if kind == ServiceUserConfig {
 		return service.GetFieldMapping(name)
-	case ServiceIntegrationUserConfig:
-		return serviceintegration.GetFieldMapping(name)
-	case ServiceIntegrationEndpointUserConfig:
-		return serviceintegrationendpoint.GetFieldMapping(name)
 	}
 	return nil
 }
@@ -84,7 +62,7 @@ func SetUserConfig(kind userConfigType, name string, s map[string]*schema.Schema
 	if userConfig == nil {
 		panic(fmt.Sprintf("unknown user config for %s type %q", kind, name))
 	}
-	s[userConfigKey(kind, name)] = userConfig
+	s[userConfigKey(name)] = userConfig
 }
 
 func Expand(kind userConfigType, name string, d resourceData) (map[string]any, error) {
@@ -103,7 +81,7 @@ func expand(kind userConfigType, name string, d resourceData) (map[string]any, e
 		return nil, nil
 	}
 
-	key := userConfigKey(kind, name)
+	key := userConfigKey(name)
 	state := &stateCompose{
 		key:      key,
 		path:     key + ".0", // starts from root user config
@@ -361,7 +339,7 @@ func flatten(kind userConfigType, name string, d resourceData, dto map[string]an
 		return nil
 	}
 
-	key := userConfigKey(kind, name)
+	key := userConfigKey(name)
 	prefix := fmt.Sprintf("%s.0.", key)
 
 	// Renames ip_filter to ip_filter_object

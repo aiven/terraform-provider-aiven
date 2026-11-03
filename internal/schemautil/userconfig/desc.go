@@ -2,6 +2,7 @@ package userconfig
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -57,6 +58,8 @@ type DescriptionBuilder struct {
 	withFormatHint string
 	// withDefaultValue is a flag that indicates if the default value should be included.
 	withDefaultValue any
+	// withExample is a sample value, shown only without a default value.
+	withExample any
 	// withUseReference is a flag that indicates if the reference should be used.
 	withUseReference bool
 	// withForceNew is a flag that indicates if the force new should be included.
@@ -175,6 +178,12 @@ func (db *DescriptionBuilder) DefaultValue(value any) *DescriptionBuilder {
 	return db
 }
 
+// Example sets a sample value, shown only without a default value.
+func (db *DescriptionBuilder) Example(value any) *DescriptionBuilder {
+	db.withExample = value
+	return db
+}
+
 // Referenced is a function that sets the withUseReference flag.
 func (db *DescriptionBuilder) Referenced() *DescriptionBuilder {
 	db.withUseReference = true
@@ -213,12 +222,13 @@ func (db *DescriptionBuilder) BuildPage() string {
 func (db *DescriptionBuilder) build(page bool) string {
 	builder := new(strings.Builder)
 
-	builder.WriteString(db.base)
+	base := db.base
 
 	// Add a trailing dot if it's missing.
-	if !strings.HasSuffix(db.base, ".") {
-		builder.WriteString(".")
+	if !strings.HasSuffix(base, ".") {
+		base += "."
 	}
+	builder.WriteString(base)
 
 	const availabilityCommonPart = `
 
@@ -337,9 +347,13 @@ func (db *DescriptionBuilder) build(page bool) string {
 		builder.WriteString(fmt.Sprintf("Must match pattern: `%s`.", db.withPattern))
 	}
 
-	if db.withDefaultValue != nil {
+	switch {
+	case db.withDefaultValue != nil:
 		builder.WriteRune(' ')
-		builder.WriteString(fmt.Sprintf("The default value is `%v`.", db.withDefaultValue))
+		builder.WriteString(fmt.Sprintf("The default value is `%s`.", fmtValue(db.withDefaultValue)))
+	case db.withExample != nil:
+		builder.WriteRune(' ')
+		builder.WriteString(fmt.Sprintf("Example: `%s`.", fmtValue(db.withExample)))
 	}
 
 	if db.withUseReference {
@@ -369,6 +383,11 @@ func (db *DescriptionBuilder) build(page bool) string {
 		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
 	}
 
+	// The sentences appended to a callout would be pulled into its box
+	if base = strings.TrimSpace(base); len(s) > len(base) && HasCallout(lastParagraph(base)) {
+		s = base + "\n\n" + strings.TrimSpace(s[len(base):])
+	}
+
 	// A callout is a single paragraph, so the warning goes last:
 	// anything appended after it would be pulled into the box.
 	if page {
@@ -377,6 +396,21 @@ func (db *DescriptionBuilder) build(page bool) string {
 		}
 	}
 
+	return s
+}
+
+// fmtValue renders a JSON number without the exponent, e.g., 1e+06 as 1000000.
+func fmtValue(v any) string {
+	if f, ok := v.(float64); ok {
+		return strconv.FormatFloat(f, 'f', -1, 64)
+	}
+	return fmt.Sprint(v)
+}
+
+func lastParagraph(s string) string {
+	if i := strings.LastIndex(s, "\n\n"); i >= 0 {
+		return s[i+2:]
+	}
 	return s
 }
 

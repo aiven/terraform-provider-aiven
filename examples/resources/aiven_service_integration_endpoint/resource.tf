@@ -3,6 +3,10 @@ resource "aiven_service_integration_endpoint" "example_endpoint" {
   project       = data.aiven_project.example_project.project
   endpoint_name = "Datadog endpoint"
   endpoint_type = "datadog"
+
+  datadog_user_config {
+    datadog_api_key = var.datadog_api_key
+  }
 }
 
 # Disk autoscaler endpoint

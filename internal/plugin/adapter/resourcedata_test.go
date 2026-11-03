@@ -195,7 +195,7 @@ func TestNormalizeAnyPreservesEmptyMapStringValues(t *testing.T) {
 		"labels":  map[string]string{"empty": "", "value": "present"},
 		"list":    []string{""},
 		"set":     []string{""},
-	}, false, true)
+	}, false, true, false)
 	require.NoError(t, err)
 	require.Equal(t, map[string]any{
 		"message": nil,
@@ -203,6 +203,33 @@ func TestNormalizeAnyPreservesEmptyMapStringValues(t *testing.T) {
 		"list":    []any{nil},
 		"set":     []any{nil},
 	}, got)
+}
+
+func TestResourceDataKeepsEmptyUserConfigStrings(t *testing.T) {
+	t.Parallel()
+
+	block := map[string]any{"site": "", "datadog_tags": []any{""}}
+	check := func(t *testing.T, d ResourceData) {
+		require.Nil(t, d.Get("endpoint_type"), "an empty string outside a user config is removed")
+		require.Equal(t, []any{block}, d.Get("datadog_user_config"))
+	}
+
+	t.Run("set", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(userConfigTestSchema(), nil, WithTestState(map[string]any{}))
+		require.NoError(t, err)
+		require.NoError(t, d.Set("endpoint_type", ""))
+		require.NoError(t, d.Set("datadog_user_config", block))
+		check(t, d)
+	})
+
+	t.Run("flatten", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(userConfigTestSchema(), nil, WithIsDataSource(), WithTestState(map[string]any{}))
+		require.NoError(t, err)
+		require.NoError(t, d.Flatten(map[string]any{"endpoint_type": "", "datadog_user_config": block}))
+		check(t, d)
+	})
 }
 
 func TestResourceDataGetConfigOkDoesNotFallBack(t *testing.T) {
