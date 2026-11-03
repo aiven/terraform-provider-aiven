@@ -1,8 +1,10 @@
 package kafkatopic
 
 import (
+	"context"
 	"testing"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/stretchr/testify/require"
 
@@ -159,4 +161,31 @@ func TestKafkaTopicFlattenNoConfigDoesNotPanic(t *testing.T) {
 		)
 	})
 	require.NoError(t, err)
+}
+
+// Removing the config block keeps the topic settings: the mock fails on any call.
+func TestUpdateWithoutConfig(t *testing.T) {
+	t.Parallel()
+
+	values := func() map[string]any {
+		return map[string]any{
+			"id":           "my-project/my-kafka/my-topic",
+			"project":      "my-project",
+			"service_name": "my-kafka",
+			"topic_name":   "my-topic",
+			"partitions":   3,
+			"replication":  2,
+		}
+	}
+	state := values()
+	state["config"] = []any{map[string]any{"retention_ms": "100"}}
+	d, err := adapter.NewResourceData(
+		resourceSchemaInternal(),
+		idFields(),
+		adapter.WithTestPlan(values()),
+		adapter.WithTestState(state),
+	)
+	require.NoError(t, err)
+	err = ResourceOptions.Update(context.Background(), avngen.NewMockClient(t), d)
+	require.ErrorIs(t, err, adapter.ErrNoChanges)
 }

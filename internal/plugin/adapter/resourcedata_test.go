@@ -3,7 +3,7 @@
 package adapter
 
 import (
-	"strings"
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -803,6 +803,7 @@ func TestResourceDataExpandWithoutChanges(t *testing.T) {
 			"enabled":     {Type: SchemaTypeBool},
 			"description": {Type: SchemaTypeString, Computed: true},
 			"password_wo": {Type: SchemaTypeString},
+			"version":     {Type: SchemaTypeInt},
 			"config": {
 				Type:     SchemaTypeList,
 				IsObject: true,
@@ -831,11 +832,15 @@ func TestResourceDataExpandWithoutChanges(t *testing.T) {
 			"name":        "foo",
 			"enabled":     true,
 			"description": "bar",
+			"version":     1,
 			"config":      []any{map[string]any{"retention": "1"}},
 		}
 	}
-	upperName := func(d ResourceData, dto map[string]any) error {
-		dto["name"] = strings.ToUpper(d.Get("name").(string))
+	// Like a lookup of a deleted billing group card
+	lookupName := func(d ResourceData, dto map[string]any) error {
+		if d.Get("name") == "foo" {
+			return errors.New("name not found")
+		}
 		return nil
 	}
 	writeOnly := func(d ResourceData, dto map[string]any) error {
@@ -862,9 +867,9 @@ func TestResourceDataExpandWithoutChanges(t *testing.T) {
 		{name: "changed field", plan: func(m map[string]any) { m["name"] = "baz" }, changed: true},
 		{name: "zero value", plan: func(m map[string]any) { m["enabled"] = false }, changed: true},
 		{name: "removed field", plan: func(m map[string]any) { delete(m, "name") }, changed: true},
-		{name: "write-only value", config: map[string]any{"password_wo": "secret"}, modifiers: []MapModifier{writeOnly}, changed: true},
-		{name: "modifier reads the state", modifiers: []MapModifier{upperName}},
-		{name: "modifier reads the plan", plan: func(m map[string]any) { m["name"] = "baz" }, modifiers: []MapModifier{upperName}, changed: true},
+		{name: "field outside the request", plan: func(m map[string]any) { m["version"] = 2 }, changed: true},
+		{name: "write-only value without its version", config: map[string]any{"password_wo": "secret"}, modifiers: []MapModifier{writeOnly}},
+		{name: "lookup of the old value fails", plan: func(m map[string]any) { m["name"] = "baz" }, modifiers: []MapModifier{lookupName}, changed: true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

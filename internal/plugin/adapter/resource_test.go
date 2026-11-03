@@ -260,6 +260,62 @@ func TestResourceAdapterUpdateWithoutChanges(t *testing.T) {
 	}
 }
 
+// Like the aiven_organization_permission permissions: the plan has unknown timestamps on a timeouts change.
+func TestUnchangedStateSet(t *testing.T) {
+	t.Parallel()
+
+	elemType := tftypes.Object{AttributeTypes: map[string]tftypes.Type{"name": tftypes.String, "create_time": tftypes.String}}
+	setType := tftypes.Set{ElementType: elemType}
+	typ := tftypes.Object{AttributeTypes: map[string]tftypes.Type{"permissions": setType, "timeouts": tftypes.String}}
+	str := func(v any) tftypes.Value { return tftypes.NewValue(tftypes.String, v) }
+	elem := func(name, createTime any) tftypes.Value {
+		return tftypes.NewValue(elemType, map[string]tftypes.Value{"name": str(name), "create_time": str(createTime)})
+	}
+	object := func(timeouts any, permissions tftypes.Value) tftypes.Value {
+		return tftypes.NewValue(typ, map[string]tftypes.Value{"permissions": permissions, "timeouts": str(timeouts)})
+	}
+	set := func(elems ...tftypes.Value) tftypes.Value { return tftypes.NewValue(setType, elems) }
+	unknown := tftypes.UnknownValue
+
+	tests := []struct {
+		name              string
+		plan, state, want tftypes.Value
+	}{
+		{
+			name:  "matches the elements by the known values",
+			plan:  object("20m", set(elem("admin", unknown), elem("read", unknown))),
+			state: object(nil, set(elem("read", "2"), elem("admin", "1"))),
+			want:  object("20m", set(elem("admin", "1"), elem("read", "2"))),
+		},
+		{
+			name:  "matches the fully known elements first",
+			plan:  object("20m", set(elem("admin", unknown), elem("admin", "1"))),
+			state: object(nil, set(elem("admin", "1"), elem("admin", "2"))),
+			want:  object("20m", set(elem("admin", "2"), elem("admin", "1"))),
+		},
+		{
+			name:  "sets null for an element without a pair",
+			plan:  object("20m", set(elem("write", unknown))),
+			state: object(nil, set(elem("admin", "1"))),
+			want:  object("20m", set(elem("write", nil))),
+		},
+		{
+			name:  "takes the unknown set from the state",
+			plan:  object("20m", tftypes.NewValue(setType, unknown)),
+			state: object(nil, set(elem("admin", "1"))),
+			want:  object("20m", set(elem("admin", "1"))),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := unchangedState(tt.plan, tt.state)
+			require.NoError(t, err)
+			require.True(t, tt.want.Equal(got), got.String())
+		})
+	}
+}
+
 func TestResourceAdapter_refreshState(t *testing.T) {
 	// Use short retry delays so retry-go's fixed delay stays in the microsecond range.
 	const fastRetryDelay = time.Microsecond
