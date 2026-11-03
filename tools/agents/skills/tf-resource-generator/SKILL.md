@@ -297,6 +297,9 @@ fails at generation time if either precondition is missing.
 Behavior:
 - Create, Read, and Update call `schemautil.CheckServiceReady` before issuing the resource's own
   API request.
+- Read (resource and data source) retries a 404 twice, 5s apart: right after creation, the API
+  may not return the resource yet due to eventual consistency. Post-Create/Update refresh and
+  delete polling are unaffected.
 - The precheck returns `schemautil.ErrServicePoweredOff` when the service is in `POWEROFF` state,
   `schemautil.ErrServiceTypeMismatch` when the service exists but matches none of the listed types, and
   `schemautil.ErrInvalidServiceType` when a listed type is not a known type code.

@@ -128,6 +128,7 @@ type ResourceOptions struct {
 
 	// RequireServiceReady, when non-empty, calls schemautil.CheckServiceReady with
 	// these accepted service types before Create/Read/Update. Delete is not gated.
+	// Read then retries 404s a few times, see retryNotFound.
 	// Requires `project` and `service_name` string attributes in the schema.
 	RequireServiceReady []string
 }
@@ -312,16 +313,18 @@ func (a *resourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
+	read := a.resource.Read
 	if len(a.resource.RequireServiceReady) > 0 {
 		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to read resource", err.Error())
 			return
 		}
+		read = retryNotFound(read, readNotFoundRetryDelay)
 	}
 
 	// When RemoveMissing is enabled, we remove the resource from the state if it's missing.
 	// See ResourceOptions.RemoveMissing for more details.
-	err = a.resource.Read(ctx, a.client, d)
+	err = read(ctx, a.client, d)
 	if a.resource.RemoveMissing && IsNotFound(err) {
 		// Ignores all the other diagnostics and removes the resource from the state.
 		rsp.State.RemoveResource(ctx)
@@ -334,6 +337,30 @@ func (a *resourceAdapter) Read(
 	}
 
 	rsp.State.Raw = d.tfValue()
+}
+
+const (
+	readNotFoundRetries    = 2
+	readNotFoundRetryDelay = 5 * time.Second
+)
+
+// retryNotFound retries read on 404 for RequireServiceReady resources: right after
+// creation, the API may not return them yet due to eventual consistency.
+func retryNotFound(
+	read func(ctx context.Context, client avngen.Client, d ResourceData) error,
+	delay time.Duration,
+) func(ctx context.Context, client avngen.Client, d ResourceData) error {
+	return func(ctx context.Context, client avngen.Client, d ResourceData) error {
+		return retry.Do(
+			func() error { return read(ctx, client, d) },
+			retry.Attempts(readNotFoundRetries+1),
+			retry.Delay(delay),
+			retry.DelayType(retry.FixedDelay),
+			retry.LastErrorOnly(true),
+			retry.Context(ctx),
+			retry.RetryIf(IsNotFound),
+		)
+	}
 }
 
 // ErrRefreshStateDesired indicates a refresh attribute did not match any configured desired value.

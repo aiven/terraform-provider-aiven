@@ -130,14 +130,16 @@ func (a *datasourceAdapter) Read(
 	ctx, drainWarnings := WithWarnings(ctx, diags)
 	defer drainWarnings()
 
+	read := a.datasource.Read
 	if len(a.datasource.RequireServiceReady) > 0 {
 		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.datasource.RequireServiceReady...); err != nil {
 			diags.AddError("failed to read datasource", err.Error())
 			return
 		}
+		read = retryNotFound(read, readNotFoundRetryDelay)
 	}
 
-	err = a.datasource.Read(ctx, a.client, d)
+	err = read(ctx, a.client, d)
 	if err != nil {
 		diags.AddError("failed to read datasource", err.Error())
 		return
