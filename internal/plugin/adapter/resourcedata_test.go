@@ -917,7 +917,8 @@ func TestResourceDataExpandWithoutChanges(t *testing.T) {
 		{name: "removed field", plan: func(m map[string]any) { delete(m, "name") }, changed: true},
 		{name: "field outside the request", plan: func(m map[string]any) { m["version"] = 2 }, changed: true},
 		{name: "write-only value without its version", config: map[string]any{"password_wo": "secret"}, modifiers: []MapModifier{writeOnly}},
-		{name: "lookup of the old value fails", plan: func(m map[string]any) { m["name"] = "baz" }, modifiers: []MapModifier{lookupName}, changed: true},
+		{name: "modifiers don't run for the state", plan: func(m map[string]any) { m["name"] = "baz" }, modifiers: []MapModifier{lookupName}, changed: true},
+		{name: "modifiers don't run without changes", modifiers: []MapModifier{lookupName}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
