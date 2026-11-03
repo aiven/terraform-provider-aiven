@@ -31,8 +31,9 @@ var ResourceOptions = adapter.ResourceOptions{
 		Attribute: "state",
 		Desired:   []string{"DELETED"},
 	},
-	IDFields: idFields(),
-	Read:     readView,
+	IDFields:       idFields(),
+	IdentityFields: []string{"project", "project_vpc_id"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"ACTIVE"},

@@ -186,6 +186,8 @@ resource:
   importIDFormats:                 # Optional docs-only override for resources with multiple import forms
     - PROJECT/RESOURCE_ID
     - PROJECT/RESOURCE_ID/REGION
+  identityFields: [project, resource_id] # Required fields for native identity import (Terraform 1.12+)
+  identityFieldsOptional: [region] # Additional fields that may be omitted during identity import
   terminationProtection: true # Check field before delete
   stateAttribute: state # Terraform attribute polled after Create/Update/Delete
   refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
@@ -198,6 +200,19 @@ resource:
 `importIDFormats` generates every listed form in both the resource's `Import` documentation and
 `examples/resources/<resource>/import.sh`. It does not change `IDFields` or runtime import parsing.
 Omit it when the single import form can be derived from `idAttributeComposed`.
+
+`identityFields` and `identityFieldsOptional` opt a resource into native resource identity.
+They must be disjoint lists of top-level string attributes that uniquely identify the remote
+object and stay stable throughout its lifecycle. The generator rejects missing, non-string,
+write-only, and duplicate fields, and explicit empty lists. Omit both settings to disable identity.
+Import optionality is independent of the resource attribute's required/optional/computed flags.
+
+The adapter copies identity fields into state during identity import; it does not build the
+string ID. `Read` must find the object from those fields, resolve omitted optional values,
+and populate the full state, including `id` (generated views do this through `Flatten`).
+The adapter returns identity from state after Create, Read, Update, and import. String-ID
+imports and Terraform versions before 1.12 remain supported; `idAttributeComposed` is unchanged.
+The generator also adds an identity import example to the resource documentation.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
 successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
@@ -587,6 +602,7 @@ Beyond basic CRUD, `ResourceOptions` supports:
 - `ModifyPlan` — implements `resource.ResourceWithModifyPlan` (separate from `planModifier` in YAML)
 - `ValidateConfig` — implements `resource.ResourceWithValidateConfig`
 - `ConfigValidators` — implements `resource.ResourceWithConfigValidators`
+- `IdentityFields` / `IdentityFieldsOptional` — generated from the corresponding resource YAML settings; prefer YAML so the generator validates the fields
 - `RefreshStateCheck` — post-Create/Update convergence check that `refreshState` can't express (see [Resource Configuration](#resource-configuration))
 
 ## ResourceData Interface

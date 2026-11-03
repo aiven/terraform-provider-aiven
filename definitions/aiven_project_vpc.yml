@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
+  identityFields: [project, project_vpc_id]
   refDepth: 1
   stateAttribute: state
   refreshStateDesired: [ACTIVE]

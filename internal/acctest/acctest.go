@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -50,6 +51,18 @@ var TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, 
 	"aiven": func() (tfprotov6.ProviderServer, error) {
 		return server.NewMuxServer(context.Background(), "test")
 	},
+}
+
+// IdentityImportVersionCheck skips identity import steps on Terraform versions before 1.12,
+// while keeping the rest of the acceptance test enabled.
+type IdentityImportVersionCheck struct{ supported bool }
+
+func (c *IdentityImportVersionCheck) CheckTerraformVersion(_ context.Context, req tfversion.CheckTerraformVersionRequest, _ *tfversion.CheckTerraformVersionResponse) {
+	c.supported = req.TerraformVersion.Core().GreaterThanOrEqual(tfversion.Version1_12_0)
+}
+
+func (c *IdentityImportVersionCheck) Skip() (bool, error) {
+	return !c.supported, nil
 }
 
 // getEnvVar returns environment variable value or empty string if not set

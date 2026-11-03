@@ -12,10 +12,83 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
+
+func TestResourceIdentityOptIn(t *testing.T) {
+	_, ok := NewResource(ResourceOptions{}).(resource.ResourceWithIdentity)
+	require.False(t, ok)
+
+	r := NewResource(ResourceOptions{IdentityFieldsOptional: []string{"region"}})
+	withIdentity, ok := r.(resource.ResourceWithIdentity)
+	require.True(t, ok)
+	var rsp resource.IdentitySchemaResponse
+	withIdentity.IdentitySchema(t.Context(), resource.IdentitySchemaRequest{}, &rsp)
+	require.True(t, rsp.IdentitySchema.Attributes["region"].IsOptionalForImport())
+	require.False(t, rsp.IdentitySchema.Attributes["region"].IsRequiredForImport())
+}
+
+func TestResourceIdentityCreateCheckpoint(t *testing.T) {
+	ctx := t.Context()
+	state := tfsdk.State{Schema: schema.Schema{
+		Attributes: map[string]schema.Attribute{"id": schema.StringAttribute{Computed: true}},
+		Blocks: map[string]schema.Block{"timeouts": schema.SingleNestedBlock{Attributes: map[string]schema.Attribute{
+			"create": schema.StringAttribute{Optional: true},
+		}}},
+	}}
+	state.Raw = tftypes.NewValue(state.Schema.Type().TerraformType(ctx), nil)
+	require.False(t, state.SetAttribute(ctx, path.Root("id"), types.StringUnknown()).HasError())
+	opts := ResourceOptions{
+		IDFields:       []string{"id"},
+		IdentityFields: []string{"id"},
+		SchemaInternal: &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
+			"id": {Type: SchemaTypeString, Computed: true},
+			"timeouts": {Type: SchemaTypeObject, Properties: map[string]*Schema{
+				"create": {Type: SchemaTypeString},
+			}},
+		}},
+		Create: func(_ context.Context, _ avngen.Client, d ResourceData) error { return d.SetID("created") },
+		Read: func(context.Context, avngen.Client, ResourceData) error {
+			return errors.New("readiness check failed")
+		},
+		RefreshState: &RefreshStateCondition{},
+	}
+	r := NewResource(opts)
+	var identitySchema resource.IdentitySchemaResponse
+	r.(resource.ResourceWithIdentity).IdentitySchema(ctx, resource.IdentitySchemaRequest{}, &identitySchema)
+	for _, tc := range []struct {
+		name     string
+		identity *tfsdk.ResourceIdentity
+	}{
+		{"without identity protocol", nil},
+		{"with identity protocol", &tfsdk.ResourceIdentity{
+			Schema: identitySchema.IdentitySchema,
+			Raw:    tftypes.NewValue(identitySchema.IdentitySchema.Type().TerraformType(ctx), nil),
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := resource.CreateRequest{
+				Plan:   tfsdk.Plan(state),
+				Config: tfsdk.Config(state),
+			}
+			rsp := resource.CreateResponse{State: tfsdk.State{Schema: state.Schema}, Identity: tc.identity}
+			r.Create(ctx, req, &rsp)
+			require.True(t, rsp.Diagnostics.HasError())
+			require.Contains(t, rsp.Diagnostics.Errors()[0].Detail(), "readiness check failed")
+			var id types.String
+			require.False(t, rsp.State.GetAttribute(ctx, path.Root("id"), &id).HasError())
+			require.Equal(t, "created", id.ValueString())
+			if rsp.Identity != nil {
+				require.False(t, rsp.Identity.GetAttribute(ctx, path.Root("id"), &id).HasError())
+				require.Equal(t, "created", id.ValueString())
+			}
+		})
+	}
+}
 
 func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	schema := &Schema{

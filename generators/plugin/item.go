@@ -188,6 +188,12 @@ type SchemaMeta struct {
 	ValidateConfig  bool     `yaml:"validateConfig,omitempty"`
 	ModifyPlan      bool     `yaml:"modifyPlan,omitempty"`
 
+	// IdentityFields opts the resource into identity using stable top-level string
+	// attributes from state. Each field is required for identity imports.
+	IdentityFields []string `yaml:"identityFields,omitempty"`
+	// IdentityFieldsOptional adds identity attributes that may be omitted during import.
+	IdentityFieldsOptional []string `yaml:"identityFieldsOptional,omitempty"`
+
 	// SchemaOverride is a datasource-only schema overlay merged on top of the
 	// base Definition.Schema when generating the datasource. Resource
 	// generation ignores this field. Only meaningful on Definition.Datasource.

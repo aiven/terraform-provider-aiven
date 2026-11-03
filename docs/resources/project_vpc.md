@@ -60,3 +60,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_project_vpc.example PROJECT/PROJECT_VPC_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_project_vpc.example
+  identity = {
+    project        = "PROJECT"
+    project_vpc_id = "PROJECT_VPC_ID"
+  }
+}
+```

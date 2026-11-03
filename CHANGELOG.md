@@ -12,6 +12,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add resource identity and identity-based import for `aiven_project_vpc` and `aiven_organization_vpc` on Terraform 1.12 or later.
 - Remove `aiven_dragonfly` resource and data source: reached end-of-life.
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`

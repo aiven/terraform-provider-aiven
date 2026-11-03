@@ -11,6 +11,111 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestGenNewResourceIdentityFields(t *testing.T) {
+	newDef := func(t *testing.T, config string) *Definition {
+		t.Helper()
+		var def Definition
+		decoder := yaml.NewDecoder(strings.NewReader("idAttributeComposed: [id]\ndatasource: {}\nresource: " + config))
+		decoder.KnownFields(true)
+		require.NoError(t, decoder.Decode(&def))
+		return &def
+	}
+	item := &Item{Properties: map[string]*Item{
+		"id":        {Type: SchemaTypeString, Computed: true},
+		"project":   {Type: SchemaTypeString, Required: true},
+		"remote_id": {Type: SchemaTypeString, Computed: true},
+		"region":    {Type: SchemaTypeString},
+		"count":     {Type: SchemaTypeInteger},
+		"token":     {Type: SchemaTypeString, WriteOnly: true},
+	}}
+
+	t.Run("generates identity independently of the string ID", func(t *testing.T) {
+		def := newDef(t, "{identityFields: [project, remote_id]}")
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), `IdentityFields: []string{"project", "remote_id"}`)
+	})
+
+	t.Run("generates optional import fields separately", func(t *testing.T) {
+		def := newDef(t, "{identityFields: [project, remote_id], identityFieldsOptional: [region]}")
+		code, err := genNewResource(resourceType, def, item, false)
+		require.NoError(t, err)
+		got := strings.Join(strings.Fields(renderCode(t, code)), " ")
+		require.Contains(t, got, `IdentityFields: []string{"project", "remote_id"}`)
+		require.Contains(t, got, `IdentityFieldsOptional: []string{"region"}`)
+	})
+
+	t.Run("allows only optional import fields", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(t, "{identityFieldsOptional: [remote_id]}"), item, false)
+		require.NoError(t, err)
+		require.Contains(t, renderCode(t, code), `IdentityFieldsOptional: []string{"remote_id"}`)
+	})
+
+	t.Run("rejects overlapping required and optional fields", func(t *testing.T) {
+		def := newDef(t, "{identityFields: [project], identityFieldsOptional: [project]}")
+		_, err := genNewResource(resourceType, def, item, false)
+		require.EqualError(t, err, `identityFieldsOptional contains duplicate field "project"`)
+	})
+
+	t.Run("validates optional import fields", func(t *testing.T) {
+		for _, tt := range []struct {
+			fields string
+			err    string
+		}{
+			{"[]", "identityFieldsOptional must not be empty; omit it when unused"},
+			{"[region, region]", `identityFieldsOptional contains duplicate field "region"`},
+			{"[missing]", `identityFieldsOptional requires "missing" attribute in schema`},
+			{"[count]", `identityFieldsOptional requires "count" to be a string attribute, got "integer"`},
+			{"[token]", `identityFieldsOptional cannot use write-only attribute "token"`},
+		} {
+			t.Run(tt.fields, func(t *testing.T) {
+				_, err := genNewResource(resourceType, newDef(t, "{identityFieldsOptional: "+tt.fields+"}"), item, false)
+				require.EqualError(t, err, tt.err)
+			})
+		}
+	})
+
+	t.Run("omitting identityFields keeps identity disabled", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(t, "{}"), item, false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "IdentityFields:")
+		require.NotContains(t, renderCode(t, code), "IdentityFieldsOptional:")
+	})
+
+	t.Run("does not add identity to the data source", func(t *testing.T) {
+		def := newDef(t, "{identityFields: [project, remote_id], identityFieldsOptional: [region]}")
+		code, err := genNewResource(datasourceType, def, item, false)
+		require.NoError(t, err)
+		require.NotContains(t, renderCode(t, code), "IdentityFields:")
+		require.NotContains(t, renderCode(t, code), "IdentityFieldsOptional:")
+	})
+
+	t.Run("rejects an empty list", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(t, "{identityFields: []}"), item, false)
+		require.EqualError(t, err, "identityFields must not be empty; omit it when unused")
+	})
+
+	t.Run("rejects duplicate fields", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(t, "{identityFields: [project, project]}"), item, false)
+		require.EqualError(t, err, `identityFields contains duplicate field "project"`)
+	})
+
+	t.Run("rejects missing fields", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(t, "{identityFields: [missing]}"), item, false)
+		require.EqualError(t, err, `identityFields requires "missing" attribute in schema`)
+	})
+
+	t.Run("rejects non-string fields", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(t, "{identityFields: [count]}"), item, false)
+		require.EqualError(t, err, `identityFields requires "count" to be a string attribute, got "integer"`)
+	})
+
+	t.Run("rejects write-only fields", func(t *testing.T) {
+		_, err := genNewResource(resourceType, newDef(t, "{identityFields: [token]}"), item, false)
+		require.EqualError(t, err, `identityFields cannot use write-only attribute "token"`)
+	})
+}
+
 func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 	newDef := func(meta SchemaMeta) *Definition {
 		return &Definition{Resource: &meta}

@@ -11,7 +11,9 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -20,11 +22,13 @@ import (
 func TestAccAivenProjectVPC_basic(t *testing.T) {
 	resourceName := "aiven_project_vpc.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	var identityImport acc.IdentityImportVersionCheck
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenProjectVPCResourceDestroy,
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		Steps: []resource.TestStep{
 			{
 				PlanOnly:    true,
@@ -63,11 +67,18 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName:    resourceName,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				SkipFunc:        identityImport.Skip,
+			},
 		},
 	})
 }
 
 func TestAccAivenProjectVPC_backwardCompat(t *testing.T) {
+	t.Parallel()
 	resourceName := "aiven_project_vpc.bar"
 	project := acc.ProjectName()
 	config := testAccProjectVPCResourceOnly(project, "google-europe-west4", "192.168.2.0/24")
@@ -82,24 +93,41 @@ func TestAccAivenProjectVPC_backwardCompat(t *testing.T) {
 		resource.TestCheckResourceAttrSet(resourceName, "project_vpc_id"),
 	)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() { acc.TestAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			{
-				ExternalProviders: map[string]resource.ExternalProvider{
-					"aiven": acc.ExternalAivenProvider(t, "4.56.0"),
+	testUpgrade := func(t *testing.T, oldVersion string) {
+		t.Helper()
+		var identityImport acc.IdentityImportVersionCheck
+		resource.Test(t, resource.TestCase{
+			PreCheck:               func() { acc.TestAccPreCheck(t) },
+			CheckDestroy:           testAccCheckAivenProjectVPCResourceDestroy,
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+			Steps: []resource.TestStep{
+				{
+					ExternalProviders: map[string]resource.ExternalProvider{
+						"aiven": acc.ExternalAivenProvider(t, oldVersion),
+					},
+					Config: config,
+					Check:  oldChecks,
 				},
-				Config: config,
-				Check:  oldChecks,
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					Config:                   config,
+					Check:                    newChecks,
+					ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					}},
+				},
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					ResourceName:             resourceName,
+					ImportState:              true,
+					ImportStateKind:          resource.ImportBlockWithResourceIdentity,
+					SkipFunc:                 identityImport.Skip,
+				},
 			},
-			{
-				ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-				Config:                   config,
-				ExpectNonEmptyPlan:       false,
-				Check:                    newChecks,
-			},
-		},
-	})
+		})
+	}
+	t.Run("SDK", func(t *testing.T) { testUpgrade(t, "4.56.0") })
+	t.Run("Framework", func(t *testing.T) { testUpgrade(t, "4.65.1") })
 }
 
 func testAccProjectVPCResource() string {

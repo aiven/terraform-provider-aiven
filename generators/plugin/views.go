@@ -99,6 +99,39 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 
 	if entity.isResource() {
 		res := def.Resource
+		identityFields := make(map[string]bool)
+		for _, setting := range []struct {
+			name   string
+			fields []string
+		}{
+			{"identityFields", res.IdentityFields},
+			{"identityFieldsOptional", res.IdentityFieldsOptional},
+		} {
+			if setting.fields == nil {
+				continue
+			}
+			if len(setting.fields) == 0 {
+				return nil, fmt.Errorf("%s must not be empty; omit it when unused", setting.name)
+			}
+			for _, name := range setting.fields {
+				if identityFields[name] {
+					return nil, fmt.Errorf("%s contains duplicate field %q", setting.name, name)
+				}
+				identityFields[name] = true
+				prop, ok := item.Properties[name]
+				if !ok {
+					return nil, fmt.Errorf("%s requires %q attribute in schema", setting.name, name)
+				}
+				if prop.Type != SchemaTypeString {
+					return nil, fmt.Errorf("%s requires %q to be a string attribute, got %q", setting.name, name, prop.Type)
+				}
+				if prop.WriteOnly {
+					return nil, fmt.Errorf("%s cannot use write-only attribute %q", setting.name, name)
+				}
+			}
+			values[firstUpper(setting.name)] = stringSliceLiteral(setting.fields)
+		}
+
 		if res.RefreshStateDesired != nil && len(res.RefreshStateDesired) == 0 {
 			return nil, errors.New("refreshStateDesired must not be empty; use refreshStateExists")
 		}

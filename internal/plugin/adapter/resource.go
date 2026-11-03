@@ -14,7 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
@@ -48,6 +51,14 @@ type ResourceOptions struct {
 	// IDFields are used to build the resource ID.
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
 	IDFields []string
+
+	// IdentityFields opts into resource identity using stable string attributes from state.
+	// These fields are required when importing by identity.
+	IdentityFields []string
+
+	// IdentityFieldsOptional adds identity attributes that may be omitted during import.
+	// Read must resolve omitted values before returning the complete identity.
+	IdentityFieldsOptional []string
 
 	// RefreshState enables Read after Create and Update when non-nil. 404/403 are retried until
 	// the resource exists. An empty condition then completes; otherwise Attribute must reach one
@@ -134,9 +145,13 @@ type ResourceOptions struct {
 }
 
 func NewResource(options ResourceOptions) resource.Resource {
-	return &resourceAdapter{
+	r := &resourceAdapter{
 		resource: options,
 	}
+	if len(options.IdentityFields)+len(options.IdentityFieldsOptional) != 0 {
+		return &resourceWithIdentity{resourceAdapter: r}
+	}
+	return r
 }
 
 // NewLazyResource creates a lazy resource constructor.
@@ -831,6 +846,70 @@ func (a *resourceAdapter) ImportState(
 
 	for i, v := range values {
 		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.resource.IDFields[i]), v)...)
+	}
+}
+
+// Only opted-in resources expose an identity schema. Existing resources keep their
+// string-ID import and lifecycle behavior.
+type resourceWithIdentity struct{ *resourceAdapter }
+
+var _ resource.ResourceWithIdentity = (*resourceWithIdentity)(nil)
+
+func (a *resourceWithIdentity) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, rsp *resource.IdentitySchemaResponse) {
+	rsp.IdentitySchema = identityschema.Schema{Attributes: make(map[string]identityschema.Attribute, len(a.resource.IdentityFields)+len(a.resource.IdentityFieldsOptional))}
+	for _, name := range a.resource.IdentityFields {
+		rsp.IdentitySchema.Attributes[name] = identityschema.StringAttribute{RequiredForImport: true}
+	}
+	for _, name := range a.resource.IdentityFieldsOptional {
+		rsp.IdentitySchema.Attributes[name] = identityschema.StringAttribute{OptionalForImport: true}
+	}
+}
+
+func (a *resourceWithIdentity) Create(ctx context.Context, req resource.CreateRequest, rsp *resource.CreateResponse) {
+	a.resourceAdapter.Create(ctx, req, rsp)
+	a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics)
+}
+
+func (a *resourceWithIdentity) Read(ctx context.Context, req resource.ReadRequest, rsp *resource.ReadResponse) {
+	a.resourceAdapter.Read(ctx, req, rsp)
+	if rsp.State.Raw.IsNull() {
+		// Framework still validates identity when Read removes a missing object.
+		a.setIdentity(ctx, req.State, rsp.Identity, &rsp.Diagnostics)
+		return
+	}
+	a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics)
+}
+
+func (a *resourceWithIdentity) Update(ctx context.Context, req resource.UpdateRequest, rsp *resource.UpdateResponse) {
+	a.resourceAdapter.Update(ctx, req, rsp)
+	a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics)
+}
+
+func (a *resourceWithIdentity) ImportState(ctx context.Context, req resource.ImportStateRequest, rsp *resource.ImportStateResponse) {
+	if req.Identity == nil || req.Identity.Raw.IsNull() {
+		a.resourceAdapter.ImportState(ctx, req, rsp)
+	} else {
+		for _, name := range slices.Concat(a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
+			var value types.String
+			rsp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root(name), &value)...)
+			rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(name), value)...)
+		}
+	}
+	if !rsp.Diagnostics.HasError() {
+		a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics)
+	}
+}
+
+func (a *resourceWithIdentity) setIdentity(ctx context.Context, state tfsdk.State, identity *tfsdk.ResourceIdentity, diags *diag.Diagnostics) {
+	if identity == nil || state.Raw.IsNull() {
+		return
+	}
+	// Also preserve identity when Create succeeded but its readiness check failed:
+	// the checkpointed state still represents a remote object that needs cleanup.
+	for _, name := range slices.Concat(a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
+		var value types.String
+		diags.Append(state.GetAttribute(ctx, path.Root(name), &value)...)
+		diags.Append(identity.SetAttribute(ctx, path.Root(name), value)...)
 	}
 }
 

@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
+  identityFields: [organization_id, organization_vpc_id]
   stateAttribute: state
   refreshStateDesired: [ACTIVE]
   deleteStateDesired: [DELETED]

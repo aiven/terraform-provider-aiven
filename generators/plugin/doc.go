@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/aiven/go-client-codegen/handler/accountteam"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -230,8 +231,23 @@ func docImport(def *Definition, entity entityType, root *Item) (string, bool) {
 	if len(formats) > 1 {
 		description = "Import is supported using one of the following formats:"
 	}
-	return fmt.Sprintf("## Import\n\n%s\n\n```shell\n%s```",
-		description, importCommands(def, formats)), true
+	var b strings.Builder
+	fmt.Fprintf(&b, "## Import\n\n%s\n\n```shell\n%s```", description, importCommands(def, formats))
+	if def.Resource != nil && len(def.Resource.IdentityFields)+len(def.Resource.IdentityFieldsOptional) > 0 {
+		b.WriteString("\n\nWith Terraform 1.12 or later, you can also import using resource identity:\n\n```terraform\n")
+		var example strings.Builder
+		fmt.Fprintf(&example, "import {\n  to = %s.example\n  identity = {\n", def.typeName)
+		for _, name := range def.Resource.IdentityFields {
+			fmt.Fprintf(&example, "    %s = %q\n", name, strings.ToUpper(name))
+		}
+		for _, name := range def.Resource.IdentityFieldsOptional {
+			fmt.Fprintf(&example, "    %s = %q # Optional\n", name, strings.ToUpper(name))
+		}
+		example.WriteString("  }\n}\n")
+		b.Write(hclwrite.Format([]byte(example.String())))
+		b.WriteString("```")
+	}
+	return b.String(), true
 }
 
 func docSchema(def *Definition, entity entityType, root *Item) (string, error) {

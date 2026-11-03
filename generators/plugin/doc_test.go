@@ -66,3 +66,25 @@ func TestSchemaMetaImportIDFormatsYAML(t *testing.T) {
 		def.Resource.ImportIDFormats,
 	)
 }
+
+func TestDocImportIdentity(t *testing.T) {
+	def := &Definition{
+		typeName: "aiven_example",
+		Resource: &SchemaMeta{
+			IdentityFields:         []string{"project", "example_id"},
+			IdentityFieldsOptional: []string{"region"},
+		},
+		IDAttributeComposed: []string{"project", "example_id"},
+	}
+	got, ok := docImport(def, resourceType, &Item{Name: "example"})
+	got = strings.Join(strings.Fields(got), " ")
+	require.True(t, ok)
+	require.Contains(t, got, "terraform import aiven_example.example PROJECT/EXAMPLE_ID")
+	require.Contains(t, got, "Terraform 1.12")
+	require.Contains(t, got, "identity = {")
+	require.Contains(t, got, `project = "PROJECT"`)
+	require.Contains(t, got, `example_id = "EXAMPLE_ID"`)
+	require.Contains(t, got, `region = "REGION" # Optional`)
+	_, ok = docImport(def, datasourceType, &Item{Name: "example"})
+	require.False(t, ok)
+}
