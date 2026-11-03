@@ -5,14 +5,23 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
+	"sync/atomic"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -62,7 +71,7 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceIntegrationLogs(rName, "2"),
+				Config: testAccServiceIntegrationLogs(rName, "2", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
@@ -77,7 +86,7 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccServiceIntegrationLogs(rName, "5"),
+				Config: testAccServiceIntegrationLogs(rName, "5", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
@@ -88,11 +97,24 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 				),
 			},
 			{
-				Config:                  testAccServiceIntegrationLogs(rName, "5"),
+				Config:                  testAccServiceIntegrationLogs(rName, "5", ""),
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"logs_user_config"},
+			},
+			{
+				// Only the timeouts change: the apply doesn't call the API
+				Config: testAccServiceIntegrationLogs(rName, "5", "20m"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "timeouts.update", "20m"),
+					resource.TestCheckResourceAttr(resourceName, "logs_user_config.0.elasticsearch_index_days_max", "5"),
+				),
 			},
 		},
 	})
@@ -531,7 +553,13 @@ resource "aiven_service_integration" "i2" {
 }`, acc.ProjectName(), name, name, name, name, name)
 }
 
-func testAccServiceIntegrationLogs(name, indexDaysMax string) string {
+func testAccServiceIntegrationLogs(name, indexDaysMax, updateTimeout string) string {
+	timeouts := ""
+	if updateTimeout != "" {
+		timeouts = fmt.Sprintf(`timeouts {
+    update = %q
+  }`, updateTimeout)
+	}
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -564,6 +592,7 @@ resource "aiven_service_integration" "bar" {
     elasticsearch_index_days_max = %q
     elasticsearch_index_prefix   = "logs"
   }
+  %s
 }
 
 data "aiven_service_integration" "int" {
@@ -573,7 +602,7 @@ data "aiven_service_integration" "int" {
   destination_service_name = aiven_service_integration.bar.destination_service_name
 
   depends_on = [aiven_service_integration.bar]
-}`, acc.ProjectName(), name, name, indexDaysMax)
+}`, acc.ProjectName(), name, name, indexDaysMax, timeouts)
 }
 
 func testAccServiceIntegrationBackwardCompat(name string) string {
@@ -1000,6 +1029,100 @@ resource "aiven_service_integration" "test" {
 			})
 		})
 	}
+}
+
+// An update that sends nothing new doesn't call the API, and doesn't wait for the integration to be active.
+func TestServiceIntegrationUpdateWithoutChanges(t *testing.T) {
+	var active atomic.Bool
+	active.Store(true)
+	integration := func() *service.ServiceIntegrationGetOut {
+		return &service.ServiceIntegrationGetOut{
+			Active:               active.Load(),
+			DestProject:          "my-project",
+			DestService:          lo.ToPtr("my-os"),
+			IntegrationType:      service.IntegrationTypeLogs,
+			ServiceIntegrationId: "integration-id",
+			SourceProject:        "my-project",
+			SourceService:        "my-pg",
+			UserConfig:           map[string]any{"elasticsearch_index_days_max": 5},
+		}
+	}
+
+	client := avngen.NewMockClient(t)
+	client.EXPECT().
+		ServiceIntegrationCreate(mock.Anything, "my-project", mock.Anything).
+		RunAndReturn(func(context.Context, string, *service.ServiceIntegrationCreateIn) (*service.ServiceIntegrationCreateOut, error) {
+			return (*service.ServiceIntegrationCreateOut)(integration()), nil
+		}).
+		Once()
+	client.EXPECT().
+		ServiceIntegrationGet(mock.Anything, "my-project", "integration-id").
+		RunAndReturn(func(context.Context, string, string) (*service.ServiceIntegrationGetOut, error) {
+			return integration(), nil
+		})
+	client.EXPECT().
+		ServiceIntegrationDelete(mock.Anything, "my-project", "integration-id").
+		Return(nil).
+		Once()
+	// An unexpected mock call would fail the test from the provider goroutine
+	client.EXPECT().
+		ServiceIntegrationUpdate(mock.Anything, "my-project", "integration-id", mock.Anything).
+		RunAndReturn(func(_ context.Context, _, _ string, in *service.ServiceIntegrationUpdateIn) (*service.ServiceIntegrationUpdateOut, error) {
+			return nil, fmt.Errorf("unexpected ServiceIntegrationUpdate call with user config %v", in.UserConfig)
+		}).
+		Maybe()
+
+	const userConfig = `logs_user_config {
+    elasticsearch_index_days_max = 5
+  }`
+	// Waiting for the integration to be active would fail the update on this timeout
+	const timeouts = `timeouts {
+    update = "1s"
+  }`
+	config := func(blocks ...string) string {
+		return fmt.Sprintf(`
+resource "aiven_service_integration" "test" {
+  project                  = "my-project"
+  integration_type         = "logs"
+  source_service_name      = "my-pg"
+  destination_service_name = "my-os"
+
+  %s
+}
+`, strings.Join(blocks, "\n  "))
+	}
+	expectUpdate := resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectResourceAction("aiven_service_integration.test", plancheck.ResourceActionUpdate),
+		},
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"aiven": providerserver.NewProtocol6WithError(&plugin.AivenProvider{GenClient: client}),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: config(userConfig),
+			},
+			{
+				// The timeouts are Terraform settings
+				Config:           config(userConfig, timeouts),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr("aiven_service_integration.test", "timeouts.update", "1s"),
+			},
+			{
+				// The API keeps the settings of a removed block
+				PreConfig:        func() { active.Store(false) },
+				Config:           config(timeouts),
+				ConfigPlanChecks: expectUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aiven_service_integration.test", "logs_user_config.#", "0"),
+					resource.TestCheckResourceAttr("aiven_service_integration.test", "active", "false"),
+				),
+			},
+		},
+	})
 }
 
 func TestServiceIntegrationRequiredUserConfig(t *testing.T) {

@@ -16,7 +16,6 @@ type operation = func(context.Context, avngen.Client, adapter.ResourceData) erro
 
 func init() {
 	ResourceOptions.Create = adoptReadReplica(ResourceOptions.Create)
-	ResourceOptions.Update = adapter.SkipUpdateWithoutUserConfig("integration_type", ResourceOptions.Update)
 }
 
 var endpointFields = map[string]string{

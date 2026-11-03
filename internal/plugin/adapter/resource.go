@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -105,6 +106,8 @@ type ResourceOptions struct {
 	// This design allows internal retry logic for operations that can fail transiently.
 	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState to trigger a post-operation Read.
 	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
+	// NOTE3: Update returns ErrNoChanges when there is nothing to send, see ResourceData.Expand.
+	// The state keeps its values then, without RefreshState.
 
 	Create func(ctx context.Context, client avngen.Client, d ResourceData) error
 	Update func(ctx context.Context, client avngen.Client, d ResourceData) error
@@ -494,6 +497,17 @@ func (a *resourceAdapter) Update(
 	// So we skip the Update call if it's not implemented.
 	if a.resource.Update != nil {
 		err = a.resource.Update(ctx, a.client, d)
+		if errors.Is(err, ErrNoChanges) {
+			// The API keeps the values: there is nothing to wait for, e.g., an inactive integration stays inactive
+			state, err := unchangedState(req.Plan.Raw, req.State.Raw)
+			if err != nil {
+				diags.AddError("failed to update resource", err.Error())
+				return
+			}
+			rsp.State.Raw = state
+			tflog.Info(ctx, fmt.Sprintf("Update of %q %q has no changes: the API wasn't called", a.resource.TypeName, d.ID()))
+			return
+		}
 		if err != nil {
 			diags.AddError("failed to update resource", err.Error())
 			return
@@ -509,6 +523,96 @@ func (a *resourceAdapter) Update(
 	}
 
 	rsp.State.Raw = d.tfValue()
+}
+
+// unchangedState returns the plan with the unknown values taken from the state, for an update that changes nothing
+// in the API. A set element takes them from the state element with the same known values.
+// A value missing in the state is null: the state after apply can't have unknown values.
+func unchangedState(plan, state tftypes.Value) (tftypes.Value, error) {
+	v, _, err := fillUnknowns(plan, state)
+	return v, err
+}
+
+// fillUnknowns returns the plan with the unknown values taken from the state,
+// and whether the state has the known values of the plan.
+func fillUnknowns(plan, state tftypes.Value) (tftypes.Value, bool, error) {
+	if !plan.IsKnown() {
+		return state, true, nil
+	}
+	if plan.IsFullyKnown() {
+		return plan, plan.Equal(state), nil
+	}
+
+	switch plan.Type().(type) {
+	case tftypes.Object, tftypes.Map:
+		var p, s map[string]tftypes.Value
+		if err := errors.Join(plan.As(&p), state.As(&s)); err != nil {
+			return plan, false, err
+		}
+		values := make(map[string]tftypes.Value, len(p))
+		same := len(p) == len(s)
+		for k, v := range p {
+			sv, ok := s[k]
+			if !ok {
+				sv = tftypes.NewValue(v.Type(), nil)
+			}
+			filled, match, err := fillUnknowns(v, sv)
+			if err != nil {
+				return plan, false, err
+			}
+			values[k], same = filled, same && ok && match
+		}
+		return tftypes.NewValue(plan.Type(), values), same, nil
+	case tftypes.List, tftypes.Tuple, tftypes.Set:
+		var p, s []tftypes.Value
+		if err := errors.Join(plan.As(&p), state.As(&s)); err != nil {
+			return plan, false, err
+		}
+		same := len(p) == len(s)
+		if _, ok := plan.Type().(tftypes.Set); ok {
+			s = pairElements(p, s)
+		}
+		values := make([]tftypes.Value, len(p))
+		for i, v := range p {
+			sv := tftypes.NewValue(v.Type(), nil)
+			if i < len(s) {
+				sv = s[i]
+			}
+			filled, match, err := fillUnknowns(v, sv)
+			if err != nil {
+				return plan, false, err
+			}
+			values[i], same = filled, same && match
+		}
+		return tftypes.NewValue(plan.Type(), values), same, nil
+	}
+	return plan, false, fmt.Errorf("unexpected partially known %s", plan.Type())
+}
+
+// pairElements orders the state set elements as the plan ones: each gets a distinct state element with its known
+// values, or null.
+func pairElements(plan, state []tftypes.Value) []tftypes.Value {
+	paired := make([]tftypes.Value, len(plan))
+	used := make([]bool, len(state))
+	// The fully known elements go first: an element with unknown values can match the state element of another
+	for _, fullyKnown := range []bool{true, false} {
+		for i, p := range plan {
+			if p.IsFullyKnown() != fullyKnown {
+				continue
+			}
+			paired[i] = tftypes.NewValue(p.Type(), nil)
+			for j, s := range state {
+				if used[j] {
+					continue
+				}
+				if _, match, _ := fillUnknowns(p, s); match {
+					used[j], paired[i] = true, s
+					break
+				}
+			}
+		}
+	}
+	return paired
 }
 
 func (a *resourceAdapter) Delete(

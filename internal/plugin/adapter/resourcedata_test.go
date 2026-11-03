@@ -3,6 +3,7 @@
 package adapter
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -788,5 +789,111 @@ func TestResourceDataSingletonObjectBlocks(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "expected at most one object, got 2")
+	})
+}
+
+func TestResourceDataExpandWithoutChanges(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":          {Type: SchemaTypeString, Computed: true},
+			"name":        {Type: SchemaTypeString},
+			"enabled":     {Type: SchemaTypeBool},
+			"description": {Type: SchemaTypeString, Computed: true},
+			"password_wo": {Type: SchemaTypeString},
+			"version":     {Type: SchemaTypeInt},
+			"config": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Computed: true,
+				Items: &Schema{
+					Type:       SchemaTypeObject,
+					Properties: map[string]*Schema{"retention": {Type: SchemaTypeString, Computed: true}},
+				},
+			},
+			"timeouts": {
+				Type:       SchemaTypeObject,
+				Properties: map[string]*Schema{"update": {Type: SchemaTypeString}},
+			},
+		},
+	}
+	type request struct {
+		Name        string         `json:"name,omitempty"`
+		Enabled     bool           `json:"enabled,omitempty"`
+		Description *string        `json:"description,omitempty"`
+		Password    *string        `json:"password,omitempty"`
+		Config      map[string]any `json:"config,omitempty"`
+	}
+	state := func() map[string]any {
+		return map[string]any{
+			"id":          "foo",
+			"name":        "foo",
+			"enabled":     true,
+			"description": "bar",
+			"version":     1,
+			"config":      []any{map[string]any{"retention": "1"}},
+		}
+	}
+	// Like a lookup of a deleted billing group card
+	lookupName := func(d ResourceData, dto map[string]any) error {
+		if d.Get("name") == "foo" {
+			return errors.New("name not found")
+		}
+		return nil
+	}
+	writeOnly := func(d ResourceData, dto map[string]any) error {
+		if v, ok := d.GetOk("password_wo"); ok {
+			dto["password"] = v
+		}
+		return nil
+	}
+
+	cases := []struct {
+		name      string
+		plan      func(map[string]any)
+		config    map[string]any
+		modifiers []MapModifier
+		changed   bool
+	}{
+		{name: "same values"},
+		{name: "timeouts", plan: func(m map[string]any) { m["timeouts"] = map[string]any{"update": "20m"} }},
+		{name: "computed field unknown until apply", plan: func(m map[string]any) { delete(m, "description") }},
+		{name: "removed computed block", plan: func(m map[string]any) { delete(m, "config") }},
+		{name: "changed computed block", plan: func(m map[string]any) {
+			m["config"] = []any{map[string]any{"retention": "2"}}
+		}, changed: true},
+		{name: "changed field", plan: func(m map[string]any) { m["name"] = "baz" }, changed: true},
+		{name: "zero value", plan: func(m map[string]any) { m["enabled"] = false }, changed: true},
+		{name: "removed field", plan: func(m map[string]any) { delete(m, "name") }, changed: true},
+		{name: "field outside the request", plan: func(m map[string]any) { m["version"] = 2 }, changed: true},
+		{name: "write-only value without its version", config: map[string]any{"password_wo": "secret"}, modifiers: []MapModifier{writeOnly}},
+		{name: "lookup of the old value fails", plan: func(m map[string]any) { m["name"] = "baz" }, modifiers: []MapModifier{lookupName}, changed: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			plan := state()
+			if tc.plan != nil {
+				tc.plan(plan)
+			}
+			d, err := NewResourceData(sch, nil, WithTestPlan(plan), WithTestState(state()), WithTestConfig(tc.config))
+			require.NoError(t, err)
+
+			err = d.Expand(new(request), tc.modifiers...)
+			if tc.changed {
+				require.NoError(t, err)
+				return
+			}
+			require.ErrorIs(t, err, ErrNoChanges)
+		})
+	}
+
+	t.Run("create", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(sch, nil, WithTestPlan(state()))
+		require.NoError(t, err)
+		require.NoError(t, d.Expand(new(request)))
 	})
 }

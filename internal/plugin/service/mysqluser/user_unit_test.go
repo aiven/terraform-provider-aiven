@@ -25,6 +25,7 @@ func TestResetPassword(t *testing.T) {
 		wantModifyCall     bool
 		wantAuthentication string
 		wantSetPassword    *string
+		wantErr            error
 	}{
 		{
 			name: "new resource without password and authentication does not call Modify",
@@ -95,6 +96,7 @@ func TestResetPassword(t *testing.T) {
 			wantModifyCall:     false,
 			wantAuthentication: "",
 			wantSetPassword:    nil,
+			wantErr:            adapter.ErrNoChanges,
 		},
 		{
 			name: "existing resource password changed calls Modify",
@@ -211,7 +213,7 @@ func TestResetPassword(t *testing.T) {
 			}
 
 			err = resetPassword(ctx, client, d)
-			require.NoError(t, err)
+			require.ErrorIs(t, err, tt.wantErr)
 		})
 	}
 }

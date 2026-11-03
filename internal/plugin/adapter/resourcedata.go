@@ -3,6 +3,7 @@ package adapter
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"reflect"
@@ -267,8 +268,27 @@ func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error 
 	return nil
 }
 
+// ErrNoChanges tells that the update has nothing to send, see ResourceData.Expand.
+var ErrNoChanges = errors.New("the update has no changes")
+
 // Expand converts the plan to Request.
+// On update, returns ErrNoChanges when the plan changes nothing but the timeouts, see isUnchanged.
+// A changed field outside the request still counts, e.g., password_wo_version, which triggers a password reset.
+// The write-only values aren't in the plan: their version fields trigger the update.
+// An update that sends several requests must not stop at the first one.
 func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
+	// Before the modifiers: they may change the plan values in place
+	unchanged := d.isUnchanged()
+	if err := d.expand(out, modifiers...); err != nil {
+		return err
+	}
+	if unchanged {
+		return ErrNoChanges
+	}
+	return nil
+}
+
+func (d *resourceData) expand(out any, modifiers ...MapModifier) error {
 	if d.plan == nil {
 		return fmt.Errorf("no plan provided")
 	}
@@ -306,6 +326,25 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 		}
 	}
 	return remarshal(&norm, out)
+}
+
+// isUnchanged tells if the plan matches the state, apart from the timeouts and the computed fields the plan doesn't set,
+// e.g., unknown until apply or a removed block: Expand doesn't send them.
+func (d *resourceData) isUnchanged() bool {
+	if d.state == nil {
+		return false
+	}
+
+	plan := maps.Clone(d.plan)
+	state := maps.Clone(d.state)
+	delete(plan, "timeouts")
+	delete(state, "timeouts")
+	for k, sch := range d.schema.Properties {
+		if _, ok := d.plan[k]; sch.Computed && !ok {
+			delete(state, k)
+		}
+	}
+	return reflect.DeepEqual(plan, state)
 }
 
 // Flatten converts the Response to State.

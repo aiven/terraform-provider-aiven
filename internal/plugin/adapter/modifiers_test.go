@@ -3,10 +3,8 @@
 package adapter
 
 import (
-	"context"
 	"testing"
 
-	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -187,34 +185,46 @@ func TestRequireUserConfig(t *testing.T) {
 	}
 }
 
-func TestSkipUpdateWithoutUserConfig(t *testing.T) {
+// An update without the block keeps the API settings: an empty user config would remove secrets,
+// e.g., the Datadog API key.
+func TestExpandUserConfigWithoutChanges(t *testing.T) {
 	t.Parallel()
 
 	block := []any{map[string]any{"server": "syslog.example.com"}}
 	cases := []struct {
 		name    string
 		plan    map[string]any
-		updated bool
+		state   map[string]any
+		changed bool
 	}{
-		{name: "block", plan: map[string]any{"endpoint_type": "rsyslog", "rsyslog_user_config": block}, updated: true},
-		{name: "empty block", plan: map[string]any{"endpoint_type": "rsyslog", "rsyslog_user_config": []any{map[string]any{}}}, updated: true},
-		{name: "removed block", plan: map[string]any{"endpoint_type": "rsyslog", "rsyslog_user_config": []any{}}},
-		{name: "no block", plan: map[string]any{"endpoint_type": "rsyslog"}},
-		{name: "type without a block", plan: map[string]any{"endpoint_type": "jolokia"}},
+		{name: "same block", plan: map[string]any{"rsyslog_user_config": block}},
+		{name: "changed block", plan: map[string]any{"rsyslog_user_config": []any{map[string]any{"server": "other.example.com"}}}, changed: true},
+		{name: "empty block", plan: map[string]any{"rsyslog_user_config": []any{map[string]any{}}}, changed: true},
+		{name: "removed block", plan: map[string]any{}},
+		{name: "new block", plan: map[string]any{"rsyslog_user_config": block}, state: map[string]any{}, changed: true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			d, err := NewResourceData(userConfigTestSchema(), nil, WithTestPlan(tc.plan))
+			if tc.state == nil {
+				tc.state = map[string]any{"rsyslog_user_config": block}
+			}
+			for _, m := range []map[string]any{tc.plan, tc.state} {
+				m["id"] = "my-endpoint"
+				m["endpoint_type"] = "rsyslog"
+			}
+			d, err := NewResourceData(userConfigTestSchema(), nil, WithTestPlan(tc.plan), WithTestState(tc.state))
 			require.NoError(t, err)
 
-			updated := false
-			update := SkipUpdateWithoutUserConfig("endpoint_type", func(context.Context, avngen.Client, ResourceData) error {
-				updated = true
-				return nil
-			})
-			require.NoError(t, update(t.Context(), nil, d))
-			assert.Equal(t, tc.updated, updated)
+			var req struct {
+				UserConfig map[string]any `json:"user_config"`
+			}
+			err = d.Expand(&req, ExpandUserConfig("endpoint_type"))
+			if tc.changed {
+				require.NoError(t, err)
+				return
+			}
+			require.ErrorIs(t, err, ErrNoChanges)
 		})
 	}
 }

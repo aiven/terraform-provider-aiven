@@ -23,7 +23,7 @@ func updateViewPasswordOnly(ctx context.Context, client avngen.Client, d adapter
 		return updateView(ctx, client, d)
 	}
 
-	return nil
+	return adapter.ErrNoChanges
 }
 
 func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {

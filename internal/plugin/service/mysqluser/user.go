@@ -38,7 +38,7 @@ func resetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 
 	if !d.HasChange("password") && !d.HasChange("password_wo_version") && !d.HasChange("authentication") {
 		// The authentication or password has not changed, so no need to reset it.
-		return nil
+		return adapter.ErrNoChanges
 	}
 
 	req := service.ServiceUserCredentialsModifyIn{

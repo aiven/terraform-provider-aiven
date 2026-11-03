@@ -169,6 +169,153 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	}
 }
 
+// An update without changes keeps the state values and doesn't wait for RefreshState.
+func TestResourceAdapterUpdateWithoutChanges(t *testing.T) {
+	schema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":     {Type: SchemaTypeString, Computed: true},
+			"name":   {Type: SchemaTypeString},
+			"active": {Type: SchemaTypeString, Computed: true},
+			"timeouts": {
+				Type:       SchemaTypeObject,
+				Properties: map[string]*Schema{"update": {Type: SchemaTypeString}},
+			},
+		},
+	}
+	empty, err := toTFValue(schema, map[string]any{})
+	require.NoError(t, err)
+	typ := empty.Type().(tftypes.Object)
+
+	str := func(v any) tftypes.Value { return tftypes.NewValue(tftypes.String, v) }
+	timeouts := func(update any) tftypes.Value {
+		if update == nil {
+			return tftypes.NewValue(typ.AttributeTypes["timeouts"], nil)
+		}
+		return tftypes.NewValue(typ.AttributeTypes["timeouts"], map[string]tftypes.Value{"update": str(update)})
+	}
+	object := func(name, active, timeouts tftypes.Value) tftypes.Value {
+		return tftypes.NewValue(typ, map[string]tftypes.Value{"id": str("example"), "name": name, "active": active, "timeouts": timeouts})
+	}
+
+	tests := []struct {
+		name    string
+		plan    tftypes.Value
+		state   tftypes.Value
+		want    tftypes.Value
+		updated bool
+	}{
+		{
+			name:  "takes the unknown values from the state",
+			plan:  object(str("foo"), str(tftypes.UnknownValue), timeouts("20m")),
+			state: object(str("foo"), str("false"), timeouts(nil)),
+			want:  object(str("foo"), str("false"), timeouts("20m")),
+		},
+		{
+			name:  "sets null for the unknown values the state doesn't have",
+			plan:  object(str("foo"), str(tftypes.UnknownValue), timeouts("20m")),
+			state: object(str("foo"), str(nil), timeouts(nil)),
+			want:  object(str("foo"), str(nil), timeouts("20m")),
+		},
+		{
+			name:    "updates a changed field",
+			plan:    object(str("bar"), str(tftypes.UnknownValue), timeouts("20m")),
+			state:   object(str("foo"), str("true"), timeouts(nil)),
+			want:    object(str("bar"), str("true"), timeouts("20m")),
+			updated: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			read := false
+			a := &resourceAdapter{
+				resource: ResourceOptions{
+					SchemaInternal: schema,
+					RefreshState:   &RefreshStateCondition{Attribute: "active", Desired: []string{"true"}},
+					Update: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						var req struct {
+							Name string `json:"name"`
+						}
+						return d.Expand(&req)
+					},
+					Read: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						read = true
+						return d.Set("active", "true")
+					},
+				},
+			}
+			req := resource.UpdateRequest{
+				Plan:   tfsdk.Plan{Raw: tt.plan},
+				State:  tfsdk.State{Raw: tt.state},
+				Config: tfsdk.Config{Raw: tt.plan},
+			}
+			rsp := resource.UpdateResponse{State: tfsdk.State{Raw: tt.plan}}
+
+			a.Update(t.Context(), req, &rsp)
+
+			require.False(t, rsp.Diagnostics.HasError(), rsp.Diagnostics)
+			require.Equal(t, tt.updated, read)
+			require.True(t, tt.want.Equal(rsp.State.Raw), rsp.State.Raw.String())
+		})
+	}
+}
+
+// Like the aiven_organization_permission permissions: the plan has unknown timestamps on a timeouts change.
+func TestUnchangedStateSet(t *testing.T) {
+	t.Parallel()
+
+	elemType := tftypes.Object{AttributeTypes: map[string]tftypes.Type{"name": tftypes.String, "create_time": tftypes.String}}
+	setType := tftypes.Set{ElementType: elemType}
+	typ := tftypes.Object{AttributeTypes: map[string]tftypes.Type{"permissions": setType, "timeouts": tftypes.String}}
+	str := func(v any) tftypes.Value { return tftypes.NewValue(tftypes.String, v) }
+	elem := func(name, createTime any) tftypes.Value {
+		return tftypes.NewValue(elemType, map[string]tftypes.Value{"name": str(name), "create_time": str(createTime)})
+	}
+	object := func(timeouts any, permissions tftypes.Value) tftypes.Value {
+		return tftypes.NewValue(typ, map[string]tftypes.Value{"permissions": permissions, "timeouts": str(timeouts)})
+	}
+	set := func(elems ...tftypes.Value) tftypes.Value { return tftypes.NewValue(setType, elems) }
+	unknown := tftypes.UnknownValue
+
+	tests := []struct {
+		name              string
+		plan, state, want tftypes.Value
+	}{
+		{
+			name:  "matches the elements by the known values",
+			plan:  object("20m", set(elem("admin", unknown), elem("read", unknown))),
+			state: object(nil, set(elem("read", "2"), elem("admin", "1"))),
+			want:  object("20m", set(elem("admin", "1"), elem("read", "2"))),
+		},
+		{
+			name:  "matches the fully known elements first",
+			plan:  object("20m", set(elem("admin", unknown), elem("admin", "1"))),
+			state: object(nil, set(elem("admin", "1"), elem("admin", "2"))),
+			want:  object("20m", set(elem("admin", "2"), elem("admin", "1"))),
+		},
+		{
+			name:  "sets null for an element without a pair",
+			plan:  object("20m", set(elem("write", unknown))),
+			state: object(nil, set(elem("admin", "1"))),
+			want:  object("20m", set(elem("write", nil))),
+		},
+		{
+			name:  "takes the unknown set from the state",
+			plan:  object("20m", tftypes.NewValue(setType, unknown)),
+			state: object(nil, set(elem("admin", "1"))),
+			want:  object("20m", set(elem("admin", "1"))),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := unchangedState(tt.plan, tt.state)
+			require.NoError(t, err)
+			require.True(t, tt.want.Equal(got), got.String())
+		})
+	}
+}
+
 func TestResourceAdapter_refreshState(t *testing.T) {
 	// Use short retry delays so retry-go's fixed delay stays in the microsecond range.
 	const fastRetryDelay = time.Microsecond

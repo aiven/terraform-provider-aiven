@@ -96,20 +96,27 @@ func TestCreateViewUserConfig(t *testing.T) {
 
 // An update without the user config would reset the settings: the mock fails on any call.
 func TestUpdateWithoutUserConfig(t *testing.T) {
-	d, err := adapter.NewResourceData(
-		resourceSchemaInternal(),
-		idFields(),
-		adapter.WithTestPlan(map[string]any{
+	values := func() map[string]any {
+		return map[string]any{
 			"id":                       "my-project/integration-id",
 			"project":                  "my-project",
 			"integration_id":           "integration-id",
 			"integration_type":         "logs",
 			"source_service_name":      "my-pg",
 			"destination_service_name": "my-os",
-		}),
+		}
+	}
+	state := values()
+	state["logs_user_config"] = []any{map[string]any{"elasticsearch_index_days_max": 5}}
+	d, err := adapter.NewResourceData(
+		resourceSchemaInternal(),
+		idFields(),
+		adapter.WithTestPlan(values()),
+		adapter.WithTestState(state),
 	)
 	require.NoError(t, err)
-	require.NoError(t, ResourceOptions.Update(context.Background(), avngen.NewMockClient(t), d))
+	err = ResourceOptions.Update(context.Background(), avngen.NewMockClient(t), d)
+	require.ErrorIs(t, err, adapter.ErrNoChanges)
 }
 
 func TestReadViewClearsEmptyStrings(t *testing.T) {
