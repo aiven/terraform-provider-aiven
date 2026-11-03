@@ -275,24 +275,16 @@ var ErrNoChanges = errors.New("the update has no changes")
 
 // Expand converts the plan to Request.
 // On update, returns ErrNoChanges when the plan changes nothing but the timeouts, see isUnchanged.
+// It doesn't run the modifiers then: they may look up the values in the API.
 // A changed field outside the request still counts, e.g., password_wo_version, which triggers a password reset.
 // The write-only values aren't in the plan: their version fields trigger the update.
 // An update that sends several requests must not stop at the first one.
 func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
-	// Before the modifiers: they may change the plan values in place
-	unchanged := d.isUnchanged()
-	if err := d.expand(out, modifiers...); err != nil {
-		return err
-	}
-	if unchanged {
-		return ErrNoChanges
-	}
-	return nil
-}
-
-func (d *resourceData) expand(out any, modifiers ...MapModifier) error {
 	if d.plan == nil {
 		return fmt.Errorf("no plan provided")
+	}
+	if d.isUnchanged() {
+		return ErrNoChanges
 	}
 
 	norm, err := normalizeTyped(d.schema, d.plan, false, false)
