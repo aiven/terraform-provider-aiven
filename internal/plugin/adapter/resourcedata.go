@@ -3,6 +3,7 @@ package adapter
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"reflect"
@@ -267,8 +268,40 @@ func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error 
 	return nil
 }
 
+// ErrNoChanges tells that the update request repeats the one built from the state, see ResourceData.Expand.
+var ErrNoChanges = errors.New("the update has no changes")
+
 // Expand converts the plan to Request.
+// On update, returns ErrNoChanges when the request repeats the one built from the state: there is nothing to send,
+// e.g., only the timeouts changed. An update that sends several requests must not stop at the first one.
+// The computed fields and blocks the plan doesn't set count as unchanged: Expand doesn't send them.
+// The state has no write-only values, so a request with one always has changes.
+// The modifiers run for the state too, so they must not change anything in the API.
 func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
+	if err := d.expand(out, modifiers...); err != nil {
+		return err
+	}
+	if d.state == nil {
+		return nil
+	}
+
+	current := &resourceData{
+		schema:   d.schema,
+		idFields: d.idFields,
+		plan:     d.unchangedPlan(),
+		state:    d.state,
+	}
+	currentOut := reflect.New(reflect.TypeOf(out).Elem()).Interface()
+	if err := current.expand(currentOut, modifiers...); err != nil {
+		return fmt.Errorf("failed to expand the state: %w", err)
+	}
+	if reflect.DeepEqual(out, currentOut) {
+		return ErrNoChanges
+	}
+	return nil
+}
+
+func (d *resourceData) expand(out any, modifiers ...MapModifier) error {
 	if d.plan == nil {
 		return fmt.Errorf("no plan provided")
 	}
@@ -306,6 +339,37 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 		}
 	}
 	return remarshal(&norm, out)
+}
+
+// unchangedPlan returns a copy of the state as if it were the plan: without the computed fields the plan doesn't set,
+// e.g., unknown until apply or a removed block.
+func (d *resourceData) unchangedPlan() map[string]any {
+	plan := deepCopy(d.state).(map[string]any)
+	for k, sch := range d.schema.Properties {
+		if _, ok := d.plan[k]; sch.Computed && !ok {
+			delete(plan, k)
+		}
+	}
+	return plan
+}
+
+func deepCopy(value any) any {
+	switch v := value.(type) {
+	case map[string]any:
+		m := make(map[string]any, len(v))
+		for k, item := range v {
+			m[k] = deepCopy(item)
+		}
+		return m
+	case []any:
+		list := make([]any, len(v))
+		for i, item := range v {
+			list[i] = deepCopy(item)
+		}
+		return list
+	default:
+		return value
+	}
 }
 
 // Flatten converts the Response to State.

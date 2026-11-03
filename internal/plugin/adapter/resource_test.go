@@ -169,6 +169,97 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	}
 }
 
+// An update without changes keeps the state values and doesn't wait for RefreshState.
+func TestResourceAdapterUpdateWithoutChanges(t *testing.T) {
+	schema := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":     {Type: SchemaTypeString, Computed: true},
+			"name":   {Type: SchemaTypeString},
+			"active": {Type: SchemaTypeString, Computed: true},
+			"timeouts": {
+				Type:       SchemaTypeObject,
+				Properties: map[string]*Schema{"update": {Type: SchemaTypeString}},
+			},
+		},
+	}
+	empty, err := toTFValue(schema, map[string]any{})
+	require.NoError(t, err)
+	typ := empty.Type().(tftypes.Object)
+
+	str := func(v any) tftypes.Value { return tftypes.NewValue(tftypes.String, v) }
+	timeouts := func(update any) tftypes.Value {
+		if update == nil {
+			return tftypes.NewValue(typ.AttributeTypes["timeouts"], nil)
+		}
+		return tftypes.NewValue(typ.AttributeTypes["timeouts"], map[string]tftypes.Value{"update": str(update)})
+	}
+	object := func(name, active, timeouts tftypes.Value) tftypes.Value {
+		return tftypes.NewValue(typ, map[string]tftypes.Value{"id": str("example"), "name": name, "active": active, "timeouts": timeouts})
+	}
+
+	tests := []struct {
+		name    string
+		plan    tftypes.Value
+		state   tftypes.Value
+		want    tftypes.Value
+		updated bool
+	}{
+		{
+			name:  "takes the unknown values from the state",
+			plan:  object(str("foo"), str(tftypes.UnknownValue), timeouts("20m")),
+			state: object(str("foo"), str("false"), timeouts(nil)),
+			want:  object(str("foo"), str("false"), timeouts("20m")),
+		},
+		{
+			name:  "sets null for the unknown values the state doesn't have",
+			plan:  object(str("foo"), str(tftypes.UnknownValue), timeouts("20m")),
+			state: object(str("foo"), str(nil), timeouts(nil)),
+			want:  object(str("foo"), str(nil), timeouts("20m")),
+		},
+		{
+			name:    "updates a changed field",
+			plan:    object(str("bar"), str(tftypes.UnknownValue), timeouts("20m")),
+			state:   object(str("foo"), str("true"), timeouts(nil)),
+			want:    object(str("bar"), str("true"), timeouts("20m")),
+			updated: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			read := false
+			a := &resourceAdapter{
+				resource: ResourceOptions{
+					SchemaInternal: schema,
+					RefreshState:   &RefreshStateCondition{Attribute: "active", Desired: []string{"true"}},
+					Update: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						var req struct {
+							Name string `json:"name"`
+						}
+						return d.Expand(&req)
+					},
+					Read: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						read = true
+						return d.Set("active", "true")
+					},
+				},
+			}
+			req := resource.UpdateRequest{
+				Plan:   tfsdk.Plan{Raw: tt.plan},
+				State:  tfsdk.State{Raw: tt.state},
+				Config: tfsdk.Config{Raw: tt.plan},
+			}
+			rsp := resource.UpdateResponse{State: tfsdk.State{Raw: tt.plan}}
+
+			a.Update(t.Context(), req, &rsp)
+
+			require.False(t, rsp.Diagnostics.HasError(), rsp.Diagnostics)
+			require.Equal(t, tt.updated, read)
+			require.True(t, tt.want.Equal(rsp.State.Raw), rsp.State.Raw.String())
+		})
+	}
+}
+
 func TestResourceAdapter_refreshState(t *testing.T) {
 	// Use short retry delays so retry-go's fixed delay stays in the microsecond range.
 	const fastRetryDelay = time.Microsecond

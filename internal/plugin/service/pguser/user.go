@@ -2,6 +2,7 @@ package pguser
 
 import (
 	"context"
+	"errors"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
@@ -20,7 +21,8 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	if d.HasChange("pg_allow_replication") {
+	aclChanged := d.HasChange("pg_allow_replication")
+	if aclChanged {
 		req := &service.ServiceUserCredentialsModifyIn{
 			Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
 			AccessControl: &service.AccessControlIn{
@@ -32,7 +34,12 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		}
 	}
 
-	return serviceuser.ResetPassword(ctx, client, d)
+	err := serviceuser.ResetPassword(ctx, client, d)
+	if aclChanged && errors.Is(err, adapter.ErrNoChanges) {
+		// The access control was sent
+		return nil
+	}
+	return err
 }
 
 // expandModifier moves pg_allow_replication into access_control for the API request.

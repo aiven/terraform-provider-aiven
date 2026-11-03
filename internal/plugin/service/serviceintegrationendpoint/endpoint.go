@@ -16,7 +16,6 @@ type operation = func(context.Context, avngen.Client, adapter.ResourceData) erro
 
 func init() {
 	ResourceOptions.Read = notFound(ResourceOptions.Read)
-	ResourceOptions.Update = adapter.SkipUpdateWithoutUserConfig("endpoint_type", ResourceOptions.Update)
 	ResourceOptions.Delete = notFound(ResourceOptions.Delete)
 	DataSourceOptions.Read = notFound(DataSourceOptions.Read)
 }

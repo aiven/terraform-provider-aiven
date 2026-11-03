@@ -614,10 +614,6 @@ func TestUpdateViewCIDRGuards(t *testing.T) {
 			Once()
 
 		err := updateView(ctx, client, d)
-		if wantErr == "" {
-			require.NoError(t, err)
-			return
-		}
 		require.ErrorContains(t, err, wantErr)
 	}
 
@@ -640,7 +636,14 @@ func TestUpdateViewCIDRGuards(t *testing.T) {
 		vpc.VpcPeeringConnectionStateTypeRejectedByPeer,
 		[]string{},
 		[]string{},
-		"",
+		adapter.ErrNoChanges.Error(),
+	)
+	f(
+		vpc.VpcPeeringConnectionTypeAWSTgwVpcAttachment,
+		vpc.VpcPeeringConnectionStateTypeActive,
+		[]string{"10.10.0.0/24"},
+		[]string{"10.10.0.0/24"},
+		adapter.ErrNoChanges.Error(),
 	)
 }
 

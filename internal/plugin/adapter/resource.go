@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
@@ -105,6 +106,8 @@ type ResourceOptions struct {
 	// This design allows internal retry logic for operations that can fail transiently.
 	// NOTE: Create and Update must NOT invoke Read themselves; set RefreshState to trigger a post-operation Read.
 	// NOTE2: Delete ignores 404 errors since resources may already be deleted after client retries.
+	// NOTE3: Update returns ErrNoChanges when there is nothing to send, see ResourceData.Expand.
+	// The state keeps its values then, without RefreshState.
 
 	Create func(ctx context.Context, client avngen.Client, d ResourceData) error
 	Update func(ctx context.Context, client avngen.Client, d ResourceData) error
@@ -494,6 +497,17 @@ func (a *resourceAdapter) Update(
 	// So we skip the Update call if it's not implemented.
 	if a.resource.Update != nil {
 		err = a.resource.Update(ctx, a.client, d)
+		if errors.Is(err, ErrNoChanges) {
+			// The API keeps the values: there is nothing to wait for, e.g., an inactive integration stays inactive
+			state, err := unchangedState(req.Plan.Raw, req.State.Raw)
+			if err != nil {
+				diags.AddError("failed to update resource", err.Error())
+				return
+			}
+			rsp.State.Raw = state
+			tflog.Info(ctx, fmt.Sprintf("Update of %q %q has no changes: the API wasn't called", a.resource.TypeName, d.ID()))
+			return
+		}
 		if err != nil {
 			diags.AddError("failed to update resource", err.Error())
 			return
@@ -509,6 +523,26 @@ func (a *resourceAdapter) Update(
 	}
 
 	rsp.State.Raw = d.tfValue()
+}
+
+// unchangedState returns the plan with the unknown values taken from the state, for an update that changes nothing
+// in the API. A value missing in the state is null: the state after apply can't have unknown values.
+func unchangedState(plan, state tftypes.Value) (tftypes.Value, error) {
+	return tftypes.Transform(plan, func(p *tftypes.AttributePath, v tftypes.Value) (tftypes.Value, error) {
+		if v.IsKnown() {
+			return v, nil
+		}
+		if s, ok := valueAt(state, p); ok {
+			return s, nil
+		}
+		return tftypes.NewValue(v.Type(), nil), nil
+	})
+}
+
+func valueAt(v tftypes.Value, p *tftypes.AttributePath) (tftypes.Value, bool) {
+	got, _, err := tftypes.WalkAttributePath(v, p)
+	val, ok := got.(tftypes.Value)
+	return val, err == nil && ok
 }
 
 func (a *resourceAdapter) Delete(

@@ -6,18 +6,25 @@ import (
 	"log"
 	"math"
 	"regexp"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	kafkatopichandler "github.com/aiven/go-client-codegen/handler/kafkatopic"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/kafkatopicrepository"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -911,6 +918,94 @@ resource "aiven_kafka_topic" "topic" {
 }`,
 				// AlsoRequires validator: "Attribute X must be specified when ..."
 				ExpectError: regexp.MustCompile(`retention_bytes.*must be specified when`),
+			},
+		},
+	})
+}
+
+// Removing the config block keeps the topic settings, so the apply doesn't call the API.
+func TestKafkaTopicRemoveConfig(t *testing.T) {
+	var partitions atomic.Int64
+	partitions.Store(3)
+
+	client := avngen.NewMockClient(t)
+	client.EXPECT().
+		ServiceGet(mock.Anything, "my-project", "my-kafka").
+		Return(&service.ServiceGetOut{State: service.ServiceStateTypeRunning, ServiceType: schemautil.ServiceTypeKafka}, nil)
+	client.EXPECT().
+		ServiceKafkaTopicList(mock.Anything, "my-project", "my-kafka").
+		Return(nil, nil).
+		Once()
+	client.EXPECT().
+		ServiceKafkaTopicCreate(mock.Anything, "my-project", "my-kafka", mock.Anything).
+		Return(nil).
+		Once()
+	client.EXPECT().
+		ServiceKafkaTopicListV2(mock.Anything, "my-project", "my-kafka", mock.Anything).
+		RunAndReturn(func(context.Context, string, string, *kafkatopichandler.ServiceKafkaTopicListV2In) ([]kafkatopichandler.ServiceKafkaTopicGetOut, error) {
+			topic := kafkatopichandler.ServiceKafkaTopicGetOut{
+				TopicName:   "my-topic",
+				Partitions:  make([]kafkatopichandler.PartitionOut, partitions.Load()),
+				Replication: 2,
+			}
+			topic.Config.RetentionMs = &kafkatopichandler.RetentionMsOut{Source: kafkatopichandler.SourceTypeTopicConfig, Value: 100}
+			return []kafkatopichandler.ServiceKafkaTopicGetOut{topic}, nil
+		})
+	// An unexpected mock call would fail the test from the provider goroutine
+	client.EXPECT().
+		ServiceKafkaTopicUpdate(mock.Anything, "my-project", "my-kafka", "my-topic", mock.Anything).
+		RunAndReturn(func(_ context.Context, _, _, _ string, in *kafkatopichandler.ServiceKafkaTopicUpdateIn) error {
+			if in.Config != nil || in.Partitions == nil || *in.Partitions != 4 {
+				return fmt.Errorf("unexpected ServiceKafkaTopicUpdate call: %+v", in)
+			}
+			partitions.Store(4)
+			return nil
+		}).
+		Once()
+	client.EXPECT().
+		ServiceKafkaTopicDelete(mock.Anything, "my-project", "my-kafka", "my-topic").
+		Return(nil).
+		Once()
+
+	config := func(partitions int, config string) string {
+		return fmt.Sprintf(`
+resource "aiven_kafka_topic" "test" {
+  project      = "my-project"
+  service_name = "my-kafka"
+  topic_name   = "my-topic"
+  partitions   = %d
+  replication  = 2
+
+  %s
+}
+`, partitions, config)
+	}
+	expectUpdate := resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectResourceAction("aiven_kafka_topic.test", plancheck.ResourceActionUpdate),
+		},
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"aiven": providerserver.NewProtocol6WithError(&plugin.AivenProvider{GenClient: client}),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: config(3, `config {
+    retention_ms = "100"
+  }`),
+			},
+			{
+				Config:           config(3, ""),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr("aiven_kafka_topic.test", "config.#", "0"),
+			},
+			{
+				// The update without the block doesn't send the config
+				Config:           config(4, ""),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr("aiven_kafka_topic.test", "partitions", "4"),
 			},
 		},
 	})

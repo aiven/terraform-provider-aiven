@@ -197,7 +197,8 @@ func updateView(ctx context.Context, cl avngen.Client, d adapter.ResourceData) e
 
 	desired := lo.Must(lo.FromAnySlice[string](d.Get("user_peer_network_cidrs").([]any)))
 	if lo.ElementsMatch(conn.UserPeerNetworkCidrs, desired) {
-		return nil
+		// Without the wait: a connection in a terminal state never passes refreshStateCheck
+		return adapter.ErrNoChanges
 	}
 	if conn.VpcPeeringConnectionType != vpc.VpcPeeringConnectionTypeAWSTgwVpcAttachment {
 		return fmt.Errorf("cannot update user_peer_network_cidrs for VPC peering connection type %q", conn.VpcPeeringConnectionType)

@@ -26,7 +26,7 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		)
 		return err
 	}
-	return nil
+	return adapter.ErrNoChanges
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

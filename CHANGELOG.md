@@ -38,6 +38,10 @@ nav_order: 1
 - Change `aiven_service_integration_endpoint`: an endpoint deleted outside Terraform is removed from the state.
   `external_postgresql.ssl_mode` no longer accepts `allow`, `disable` and `prefer`, which the API rejects. The read
   no longer fails on redacted credentials.
+- Change the Plugin Framework resources: an update with nothing to send skips the API call and the wait for the resource
+  state, e.g., a change of only `timeouts`, or a removed `aiven_kafka_topic` `config` block.
+- Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
+  for the connection state, and no longer fails when the peer rejected or deleted the connection.
 
 ## [4.65.1] - 2026-10-30
 

@@ -114,32 +114,8 @@ func ValidateUserConfig(discriminator string) func(context.Context, avngen.Clien
 	}
 }
 
-// getUserConfig returns the block of the discriminator value, or nil for a type without one.
-func getUserConfig(d ResourceData, discriminator string) any {
-	block := userConfigBlock(fmt.Sprint(d.Get(discriminator)))
-	if _, ok := d.Schema().Properties[block]; !ok {
-		return nil
-	}
-	return d.Get(block)
-}
-
-// SkipUpdateWithoutUserConfig doesn't call the update when the plan has no user config block.
-// This preserves the existing settings. An endpoint update with an empty user config would remove
-// stored secrets, e.g., the Datadog API key. SDKv2 preserved them too, as its block was computed.
-func SkipUpdateWithoutUserConfig(
-	discriminator string,
-	update func(context.Context, avngen.Client, ResourceData) error,
-) func(context.Context, avngen.Client, ResourceData) error {
-	return func(ctx context.Context, client avngen.Client, d ResourceData) error {
-		if list, _ := asAnySlice(getUserConfig(d, discriminator)); len(list) == 0 {
-			return nil
-		}
-		return update(ctx, client, d)
-	}
-}
-
 // RequireUserConfig fails the create plan without the block of a type with required options, which the API rejects.
-// An update without it keeps the API settings, see SkipUpdateWithoutUserConfig.
+// An update without it keeps the API settings, see ResourceData.Expand.
 func RequireUserConfig(discriminator string, kinds ...string) func(context.Context, avngen.Client, ResourceData) error {
 	return func(_ context.Context, _ avngen.Client, d ResourceData) error {
 		kind := fmt.Sprint(d.Get(discriminator))

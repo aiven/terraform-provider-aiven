@@ -2,6 +2,7 @@ package valkeyuser
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -54,7 +55,12 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		}
 	}
 
-	return serviceuser.ResetPassword(ctx, client, d)
+	err := serviceuser.ResetPassword(ctx, client, d)
+	if aclChanged && errors.Is(err, adapter.ErrNoChanges) {
+		// The access control was sent
+		return nil
+	}
+	return err
 }
 
 // expandModifier moves the top-level valkey_acl_* attributes into the

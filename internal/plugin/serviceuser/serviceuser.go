@@ -46,6 +46,7 @@ func Create(ctx context.Context, client avngen.Client, d adapter.ResourceData, e
 
 // ResetPassword resets a service user's password via a credentials reset.
 // A nil NewPassword tells the backend to auto-generate one.
+// Returns adapter.ErrNoChanges on update when the password hasn't changed.
 //
 // Resources that also manage authentication (e.g. aiven_mysql_user) implement
 // their own reset that additionally sets the Authentication field.
@@ -59,7 +60,7 @@ func ResetPassword(ctx context.Context, client avngen.Client, d adapter.Resource
 
 	if !d.HasChange("password") && !d.HasChange("password_wo_version") {
 		// The password has not changed, so no need to reset it.
-		return nil
+		return adapter.ErrNoChanges
 	}
 
 	req := &service.ServiceUserCredentialsModifyIn{
