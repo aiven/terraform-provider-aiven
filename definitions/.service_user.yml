@@ -2,7 +2,7 @@
 # A definition includes it and adds its descriptions, refs, removals and the fields of its service.
 # The lists add up, e.g. the removals and operations of a definition go after these.
 clientHandler: service
-idAttributeComposed: [project, service_name, username]
+identityFields: [project, service_name, username]
 legacyTimeouts: true
 flattenModifier: true
 resource:

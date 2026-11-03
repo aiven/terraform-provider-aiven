@@ -4,7 +4,7 @@ resource:
   description: |
     Creates and manages a BYOC custom cloud environment on AWS.
 clientHandler: byoc
-idAttributeComposed: [organization_id, custom_cloud_environment_id]
+identityFields: [organization_id, custom_cloud_environment_id]
 operations:
   - id: CustomCloudEnvironmentCreate
     type: create

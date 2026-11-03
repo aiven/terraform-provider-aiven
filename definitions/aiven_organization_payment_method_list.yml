@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 datasource:
   description: Lists payment methods for an organization.
-idAttributeComposed: [organization_id]
+identityFields: [organization_id]
 operations:
   - id: PaymentMethodsList
     type: read

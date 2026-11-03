@@ -4,7 +4,7 @@ datasource:
     Gets the AWS CMK accessor for an Aiven project.
     The accessor is used to authenticate Aiven to your AWS Key Management Service (KMS).
 clientHandler: cmk
-idAttributeComposed: [project]
+identityFields: [project]
 operations:
   - id: CMKAccessorsList
     type: read

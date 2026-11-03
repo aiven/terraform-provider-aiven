@@ -4,7 +4,7 @@ datasource:
     Gets the Azure CMK accessor for an Aiven project.
     The accessor is used to authenticate Aiven to your Azure Key Vault.
 clientHandler: cmk
-idAttributeComposed: [project]
+identityFields: [project]
 operations:
   - id: CMKAccessorsList
     type: read

@@ -14,17 +14,11 @@ import (
 
 const typeName = "aiven_aws_privatelink"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_aws_privatelink.foo PROJECT/SERVICE_NAME
-func idFields() []string {
-	return []string{"project", "service_name"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
+	Create:         createView,
+	Delete:         deleteView,
+	IdentityFields: []string{"project", "service_name"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"active"},
@@ -37,7 +31,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"project", "service_name"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

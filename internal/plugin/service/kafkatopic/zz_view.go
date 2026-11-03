@@ -7,16 +7,10 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 
 const typeName = "aiven_kafka_topic"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_topic.foo PROJECT/SERVICE_NAME/TOPIC_NAME
-func idFields() []string {
-	return []string{"project", "service_name", "topic_name"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:                createView,
 	Delete:                deleteView,
-	IDFields:              idFields(),
+	IdentityFields:        []string{"project", "service_name", "topic_name"},
 	ModifyPlan:            modifyPlan,
 	Read:                  readView,
 	RemoveMissing:         true,
@@ -30,7 +24,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "topic_name"},
 	Read:                readView,
 	RequireServiceReady: []string{"kafka"},
 	Schema:              datasourceSchema,

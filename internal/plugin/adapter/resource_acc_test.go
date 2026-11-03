@@ -55,39 +55,40 @@ func TestResourceIdentity(t *testing.T) {
 		if deleted {
 			return adapter.ErrNotFound
 		}
-		assert.Equal(t, "remote-id", d.ID())
+		assert.Equal(t, "remote-id", d.Get("remote_id"))
 		// The API resolves an optional identity field omitted during import.
-		return d.Flatten(map[string]any{"id": "remote-id", "region": "eu-west-1", "name": name})
+		return d.Flatten(map[string]any{"remote_id": "remote-id", "region": "eu-west-1", "name": name})
 	}
 	write := func(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
 		mu.Lock()
 		defer mu.Unlock()
 		name, deleted = d.Get("name").(string), false
-		return d.Flatten(map[string]any{"id": "remote-id", "region": "eu-west-1", "name": name})
+		return d.Flatten(map[string]any{"remote_id": "remote-id", "region": "eu-west-1", "name": name})
 	}
 	opts := adapter.ResourceOptions{
 		TypeName: "aiven_identity_test",
 		Schema: func(ctx context.Context) schema.Schema {
 			return schema.Schema{
 				Attributes: map[string]schema.Attribute{
-					"id":     schema.StringAttribute{Computed: true},
-					"region": schema.StringAttribute{Computed: true},
-					"name":   schema.StringAttribute{Required: true},
+					"id":        schema.StringAttribute{Computed: true},
+					"remote_id": schema.StringAttribute{Computed: true},
+					"region":    schema.StringAttribute{Computed: true},
+					"name":      schema.StringAttribute{Required: true},
 				},
 				Blocks: map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
 			}
 		},
 		SchemaInternal: &adapter.Schema{Type: adapter.SchemaTypeObject, Properties: map[string]*adapter.Schema{
-			"id":     {Type: adapter.SchemaTypeString, Computed: true},
-			"region": {Type: adapter.SchemaTypeString, Computed: true},
-			"name":   {Type: adapter.SchemaTypeString},
+			"id":        {Type: adapter.SchemaTypeString, Computed: true},
+			"remote_id": {Type: adapter.SchemaTypeString, Computed: true},
+			"region":    {Type: adapter.SchemaTypeString, Computed: true},
+			"name":      {Type: adapter.SchemaTypeString},
 			"timeouts": {Type: adapter.SchemaTypeObject, Properties: map[string]*adapter.Schema{
 				"create": {Type: adapter.SchemaTypeString}, "read": {Type: adapter.SchemaTypeString},
 				"update": {Type: adapter.SchemaTypeString}, "delete": {Type: adapter.SchemaTypeString},
 			}},
 		}},
-		IDFields:               []string{"id"},
-		IdentityFields:         []string{"id"},
+		IdentityFields:         []string{"remote_id", "region"},
 		IdentityFieldsOptional: []string{"region"},
 		RemoveMissing:          true,
 		Create:                 write,
@@ -96,7 +97,7 @@ func TestResourceIdentity(t *testing.T) {
 		Delete: func(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
 			mu.Lock()
 			defer mu.Unlock()
-			assert.Equal(t, "remote-id", d.ID())
+			assert.Equal(t, "remote-id", d.Get("remote_id"))
 			assert.Equal(t, "eu-west-1", d.Get("region"))
 			deleted = true
 			return nil
@@ -104,7 +105,7 @@ func TestResourceIdentity(t *testing.T) {
 	}
 	var identityImport acc.IdentityImportVersionCheck
 	identity := []statecheck.StateCheck{statecheck.ExpectIdentity(address, map[string]knownvalue.Check{
-		"id": knownvalue.StringExact("remote-id"), "region": knownvalue.StringExact("eu-west-1"),
+		"remote_id": knownvalue.StringExact("remote-id"), "region": knownvalue.StringExact("eu-west-1"),
 	})}
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
@@ -117,7 +118,10 @@ func TestResourceIdentity(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: `resource "aiven_identity_test" "example" { name = "initial" }`,
-				Check:  resource.TestCheckResourceAttr(address, "region", "eu-west-1"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(address, "region", "eu-west-1"),
+					resource.TestCheckResourceAttr(address, "id", "remote-id/eu-west-1"),
+				),
 			},
 			{
 				Config: config,
@@ -145,14 +149,14 @@ import {
   identity = { region = "eu-west-1" }
 }`,
 				SkipFunc:    identityImport.Skip,
-				ExpectError: regexp.MustCompile(`attribute "id" is required`),
+				ExpectError: regexp.MustCompile(`attribute "remote_id" is required`),
 			},
 			{
 				// Import without region must return the same complete identity as Create.
 				Config: config + `
 import {
   to = aiven_identity_test.example
-  identity = { id = "remote-id" }
+  identity = { remote_id = "remote-id" }
 }`,
 				SkipFunc:          identityImport.Skip,
 				ConfigStateChecks: identity,
@@ -212,19 +216,16 @@ resource "aiven_organization_vpc" "example" {
 )
 
 func TestResourceIdentityVPCs(t *testing.T) {
-	var identityEnabled atomic.Bool
 	var identityImport acc.IdentityImportVersionCheck
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"aiven": identityVPCProviderFactory(t, &identityEnabled),
+			"aiven": identityVPCProviderFactory(t),
 		},
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
 		Steps: []resource.TestStep{
 			{Config: identityVPCConfig},
 			{
-				// Adding identity to existing state must not change the plan or string IDs.
-				PreConfig: func() { identityEnabled.Store(true) },
-				Config:    identityVPCConfig,
+				Config: identityVPCConfig,
 				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
 					plancheck.ExpectEmptyPlan(),
 				}},
@@ -281,8 +282,7 @@ func TestAccResourceIdentityTerraformUpgrade(t *testing.T) {
 	}
 	oldTF := newCLI("1.11.4", "TF_ACC_TERRAFORM_111_PATH")
 	newTF := newCLI("1.12.2", "TF_ACC_TERRAFORM_112_PATH")
-	var identityEnabled atomic.Bool
-	factory := identityVPCProviderFactory(t, &identityEnabled)
+	factory := identityVPCProviderFactory(t)
 	startProvider := func() (*tfexec.ReattachOption, func()) {
 		t.Helper()
 		provider, err := factory()
@@ -330,7 +330,7 @@ terraform {
 		require.NoError(t, os.WriteFile(filepath.Join(dir, "main.tf"), []byte(requiredProvider+identityVPCConfig+extra), 0o600))
 	}
 	writeConfig("")
-	reattach, stop := startProvider()
+	reattach, _ := startProvider()
 	require.NoError(t, oldTF.Init(ctx, reattach))
 	require.NoError(t, oldTF.Apply(ctx, reattach))
 	state, err := oldTF.Show(ctx, reattach)
@@ -339,11 +339,7 @@ terraform {
 	for _, r := range state.Values.RootModule.Resources {
 		require.Empty(t, r.IdentityValues)
 	}
-	stop()
-	identityEnabled.Store(true)
-	reattach, _ = startProvider()
-
-	// Upgrading the provider on 1.11 and then Terraform itself must also work
+	// Terraform 1.11 doesn't store identity. Upgrading Terraform must also work
 	// without refresh: identity can be populated on a subsequent refresh.
 	for _, tf := range []*tfexec.Terraform{oldTF, newTF} {
 		hasChanges, err := tf.Plan(ctx, reattach, tfexec.Refresh(false))
@@ -411,7 +407,7 @@ import {
 	require.NoError(t, newTF.Destroy(ctx, reattach))
 }
 
-func identityVPCProviderFactory(t *testing.T, identityEnabled *atomic.Bool) func() (tfprotov6.ProviderServer, error) {
+func identityVPCProviderFactory(t *testing.T) func() (tfprotov6.ProviderServer, error) {
 	t.Helper()
 	client := avngen.NewMockClient(t)
 	var projectDeleted, orgDeleted atomic.Bool
@@ -462,11 +458,6 @@ func identityVPCProviderFactory(t *testing.T, identityEnabled *atomic.Bool) func
 	})
 	return func() (tfprotov6.ProviderServer, error) {
 		opts := []adapter.ResourceOptions{projectvpc.ResourceOptions, organizationvpc.ResourceOptions}
-		if !identityEnabled.Load() {
-			for i := range opts {
-				opts[i].IdentityFields = nil
-			}
-		}
 		return providerserver.NewProtocol6WithError(&identityTestProvider{
 			AivenProvider: plugin.AivenProvider{GenClient: client}, options: opts,
 		})()

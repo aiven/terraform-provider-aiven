@@ -12,9 +12,9 @@ func TestImportCommandsUsesComposedIDByDefault(t *testing.T) {
 	t.Parallel()
 
 	def := &Definition{
-		typeName:            "aiven_example",
-		Resource:            &SchemaMeta{},
-		IDAttributeComposed: []string{"project", "example_id"},
+		typeName:       "aiven_example",
+		Resource:       &SchemaMeta{},
+		IdentityFields: []string{"project", "example_id"},
 	}
 	root := &Item{Name: "example"}
 
@@ -69,14 +69,17 @@ func TestSchemaMetaImportIDFormatsYAML(t *testing.T) {
 
 func TestDocImportIdentity(t *testing.T) {
 	def := &Definition{
-		typeName: "aiven_example",
-		Resource: &SchemaMeta{
-			IdentityFields:         []string{"project", "example_id"},
-			IdentityFieldsOptional: []string{"region"},
-		},
-		IDAttributeComposed: []string{"project", "example_id"},
+		typeName:               "aiven_example",
+		Resource:               &SchemaMeta{},
+		IdentityFields:         []string{"project", "example_id", "region"},
+		IdentityFieldsOptional: []string{"region"},
 	}
-	got, ok := docImport(def, resourceType, &Item{Name: "example"})
+	root := &Item{Name: "example", Properties: map[string]*Item{
+		"project":    {Name: "project", IDAttribute: true},
+		"example_id": {Name: "example_id", IDAttribute: true, IDAttributePosition: 1},
+		"region":     {Name: "region", IDAttribute: true, IDAttributePosition: 2},
+	}}
+	got, ok := docImport(def, resourceType, root)
 	got = strings.Join(strings.Fields(got), " ")
 	require.True(t, ok)
 	require.Contains(t, got, "terraform import aiven_example.example PROJECT/EXAMPLE_ID")
@@ -85,6 +88,6 @@ func TestDocImportIdentity(t *testing.T) {
 	require.Contains(t, got, `project = "PROJECT"`)
 	require.Contains(t, got, `example_id = "EXAMPLE_ID"`)
 	require.Contains(t, got, `region = "REGION" # Optional`)
-	_, ok = docImport(def, datasourceType, &Item{Name: "example"})
+	_, ok = docImport(def, datasourceType, root)
 	require.False(t, ok)
 }

@@ -73,7 +73,7 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 		"TypeName":       jen.Id(typeName),
 		"Schema":         jen.Id(string(entity) + schemaSuffix),
 		"SchemaInternal": jen.Id(fmt.Sprintf(schemaInternalFmt, entity)).Call(),
-		"IDFields":       jen.Id(funcIDFields).Call(),
+		"IdentityFields": stringSliceLiteral(identityFieldNames(item)),
 	}
 
 	if lo.FromPtr(def.Beta) {
@@ -99,13 +99,12 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 
 	if entity.isResource() {
 		res := def.Resource
-		identityFields := make(map[string]bool)
 		for _, setting := range []struct {
 			name   string
 			fields []string
 		}{
-			{"identityFields", res.IdentityFields},
-			{"identityFieldsOptional", res.IdentityFieldsOptional},
+			{"identityFields", def.IdentityFields},
+			{"identityFieldsOptional", def.IdentityFieldsOptional},
 		} {
 			if setting.fields == nil {
 				continue
@@ -113,11 +112,19 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			if len(setting.fields) == 0 {
 				return nil, fmt.Errorf("%s must not be empty; omit it when unused", setting.name)
 			}
+			identityFields := make(map[string]bool)
 			for _, name := range setting.fields {
 				if identityFields[name] {
 					return nil, fmt.Errorf("%s contains duplicate field %q", setting.name, name)
 				}
 				identityFields[name] = true
+				if setting.name == "identityFieldsOptional" {
+					// Trailing, so a shorter string ID unambiguously omits the last fields.
+					if i := slices.Index(def.IdentityFields, name); i < 0 || i < len(def.IdentityFields)-len(setting.fields) {
+						return nil, fmt.Errorf("%s requires %q to be listed in identityFields after the required fields", setting.name, name)
+					}
+					continue
+				}
 				prop, ok := item.Properties[name]
 				if !ok {
 					return nil, fmt.Errorf("%s requires %q attribute in schema", setting.name, name)
@@ -129,7 +136,13 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 					return nil, fmt.Errorf("%s cannot use write-only attribute %q", setting.name, name)
 				}
 			}
-			values[firstUpper(setting.name)] = stringSliceLiteral(setting.fields)
+		}
+		if len(def.IdentityFieldsOptional) > 0 {
+			values["IdentityFieldsOptional"] = stringSliceLiteral(def.IdentityFieldsOptional)
+		}
+		// An updatable ID part changes identity in place; createRootItem drops UseStateForUnknown on id for the same reason.
+		if identityFieldsMutable(def, item) {
+			values["MutableIdentity"] = jen.True()
 		}
 
 		if res.RefreshStateDesired != nil && len(res.RefreshStateDesired) == 0 {
@@ -717,4 +730,28 @@ func humanizeCodeList(args []string, union string) string {
 		list.WriteString(fmt.Sprintf("`%s`", v))
 	}
 	return list.String()
+}
+
+func identityFieldNames(root *Item) []string {
+	fields := root.GetIDFields()
+	names := make([]string, len(fields))
+	for i, f := range fields {
+		names[i] = f.Name
+	}
+	return names
+}
+
+func identityFieldsMutable(def *Definition, item *Item) bool {
+	for _, names := range [][]string{def.IdentityFields, def.IdentityFieldsOptional} {
+		for _, name := range names {
+			prop, ok := item.Properties[name]
+			if !ok {
+				continue
+			}
+			if def.Operations.AppearsInHandler(prop.AppearsIn, OperationUpdate, RequestBody) {
+				return true
+			}
+		}
+	}
+	return false
 }

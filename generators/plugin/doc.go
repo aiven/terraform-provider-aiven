@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -68,7 +69,7 @@ func hasDocTemplateOverride(def *Definition, entity entityType) bool {
 }
 
 func importIDPath(def *Definition, root *Item) []string {
-	idPath := def.IDAttributeComposed
+	idPath := def.IdentityFields
 	if len(idPath) == 0 {
 		idPath = []string{root.Name + "_id"}
 	}
@@ -233,15 +234,23 @@ func docImport(def *Definition, entity entityType, root *Item) (string, bool) {
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "## Import\n\n%s\n\n```shell\n%s```", description, importCommands(def, formats))
-	if def.Resource != nil && len(def.Resource.IdentityFields)+len(def.Resource.IdentityFieldsOptional) > 0 {
+	// TODO: drop the importIDFormats check once that setting is removed.
+	// Its formats don't map onto the runtime identity, so the example would be invalid.
+	if def.Resource != nil && len(def.Resource.ImportIDFormats) == 0 {
 		b.WriteString("\n\nWith Terraform 1.12 or later, you can also import using resource identity:\n\n```terraform\n")
 		var example strings.Builder
 		fmt.Fprintf(&example, "import {\n  to = %s.example\n  identity = {\n", def.typeName)
-		for _, name := range def.Resource.IdentityFields {
-			fmt.Fprintf(&example, "    %s = %q\n", name, strings.ToUpper(name))
-		}
-		for _, name := range def.Resource.IdentityFieldsOptional {
-			fmt.Fprintf(&example, "    %s = %q # Optional\n", name, strings.ToUpper(name))
+		for _, name := range identityFieldNames(root) {
+			value := strings.ToUpper(name)
+			if len(def.IdentityFields) == 0 {
+				// The single "id" identity holds the whole import ID.
+				value = importID(def, root)
+			}
+			comment := ""
+			if slices.Contains(def.IdentityFieldsOptional, name) {
+				comment = " # Optional"
+			}
+			fmt.Fprintf(&example, "    %s = %q%s\n", name, value, comment)
 		}
 		example.WriteString("  }\n}\n")
 		b.Write(hclwrite.Format([]byte(example.String())))

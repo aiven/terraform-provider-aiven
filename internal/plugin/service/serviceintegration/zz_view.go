@@ -18,18 +18,12 @@ import (
 
 const typeName = "aiven_service_integration"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_service_integration.foo PROJECT/INTEGRATION_ID
-func idFields() []string {
-	return []string{"project", "integration_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
-	Create:     createView,
-	Delete:     deleteView,
-	IDFields:   idFields(),
-	ModifyPlan: adapter.RequireUserConfig("integration_type", "kafka_logs"),
-	Read:       readView,
+	Create:         createView,
+	Delete:         deleteView,
+	IdentityFields: []string{"project", "integration_id"},
+	ModifyPlan:     adapter.RequireUserConfig("integration_type", "kafka_logs"),
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "active",
 		Desired:   []string{"true"},
@@ -44,7 +38,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
-	IDFields:         idFields(),
+	IdentityFields:   []string{"project", "integration_id"},
 	Read:             readView,
 	Schema:           datasourceSchema,
 	SchemaInternal:   datasourceSchemaInternal(),

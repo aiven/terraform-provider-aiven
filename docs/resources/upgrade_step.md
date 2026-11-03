@@ -72,3 +72,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_upgrade_step.example ORGANIZATION_ID/STEP_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_upgrade_step.example
+  identity = {
+    organization_id = "ORGANIZATION_ID"
+    step_id         = "STEP_ID"
+  }
+}
+```

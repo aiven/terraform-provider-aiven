@@ -28,7 +28,7 @@ func TestUpdateWithoutPasswordChange(t *testing.T) {
 	state := values()
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(plan),
 		adapter.WithTestState(state),
 	)
@@ -51,7 +51,7 @@ func TestUpdateToGeneratedPassword(t *testing.T) {
 	state["password_wo_version"] = 2
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(values()),
 		adapter.WithTestState(state),
 	)

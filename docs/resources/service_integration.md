@@ -508,3 +508,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_service_integration.example PROJECT/INTEGRATION_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_service_integration.example
+  identity = {
+    project        = "PROJECT"
+    integration_id = "INTEGRATION_ID"
+  }
+}
+```

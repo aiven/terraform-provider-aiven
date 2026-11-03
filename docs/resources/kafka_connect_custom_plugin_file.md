@@ -125,3 +125,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_kafka_connect_custom_plugin_file.example ORGANIZATION_ID/PLUGIN_FILE_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_kafka_connect_custom_plugin_file.example
+  identity = {
+    organization_id = "ORGANIZATION_ID"
+    plugin_file_id  = "PLUGIN_FILE_ID"
+  }
+}
+```

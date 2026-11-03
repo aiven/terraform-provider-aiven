@@ -19,17 +19,42 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestResourceIdentityOptIn(t *testing.T) {
-	_, ok := NewResource(ResourceOptions{}).(resource.ResourceWithIdentity)
-	require.False(t, ok)
+func TestResourceAdapterMetadataMutableIdentity(t *testing.T) {
+	a := &resourceAdapter{resource: ResourceOptions{TypeName: "aiven_test", MutableIdentity: true}}
+	var rsp resource.MetadataResponse
+	a.Metadata(t.Context(), resource.MetadataRequest{}, &rsp)
+	require.Equal(t, "aiven_test", rsp.TypeName)
+	require.True(t, rsp.ResourceBehavior.MutableIdentity)
+}
 
-	r := NewResource(ResourceOptions{IdentityFieldsOptional: []string{"region"}})
+func TestResourceIdentitySchema(t *testing.T) {
+	r := NewResource(ResourceOptions{
+		IdentityFields:         []string{"project", "id", "region"},
+		IdentityFieldsOptional: []string{"region"},
+	})
 	withIdentity, ok := r.(resource.ResourceWithIdentity)
 	require.True(t, ok)
 	var rsp resource.IdentitySchemaResponse
 	withIdentity.IdentitySchema(t.Context(), resource.IdentitySchemaRequest{}, &rsp)
+	require.True(t, rsp.IdentitySchema.Attributes["project"].IsRequiredForImport())
+	require.True(t, rsp.IdentitySchema.Attributes["id"].IsRequiredForImport())
 	require.True(t, rsp.IdentitySchema.Attributes["region"].IsOptionalForImport())
 	require.False(t, rsp.IdentitySchema.Attributes["region"].IsRequiredForImport())
+}
+
+func TestSplitID(t *testing.T) {
+	fields, optional := []string{"foo", "bar", "baz"}, []string{"bar", "baz"}
+	for id, want := range map[string][]string{
+		"a/b/c": {"a", "b", "c"},
+		"a/b":   {"a", "b", ""},
+		"a":     {"a", "", ""},
+	} {
+		got, err := splitID(id, fields, optional)
+		require.NoError(t, err)
+		require.Equal(t, want, got, id)
+	}
+	_, err := splitID("a", fields, []string{"baz"})
+	require.Error(t, err)
 }
 
 func TestResourceIdentityCreateCheckpoint(t *testing.T) {
@@ -43,7 +68,6 @@ func TestResourceIdentityCreateCheckpoint(t *testing.T) {
 	state.Raw = tftypes.NewValue(state.Schema.Type().TerraformType(ctx), nil)
 	require.False(t, state.SetAttribute(ctx, path.Root("id"), types.StringUnknown()).HasError())
 	opts := ResourceOptions{
-		IDFields:       []string{"id"},
 		IdentityFields: []string{"id"},
 		SchemaInternal: &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
 			"id": {Type: SchemaTypeString, Computed: true},
@@ -194,7 +218,7 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 			a := &resourceAdapter{
 				resource: ResourceOptions{
 					SchemaInternal:      schema,
-					IDFields:            tt.idFields,
+					IdentityFields:      tt.idFields,
 					RefreshState:        refreshState,
 					IgnoreAlreadyExists: tt.ignoreAlreadyExists,
 					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
@@ -1305,7 +1329,7 @@ func TestResourceAdapterModifyPlanRequiresReplace(t *testing.T) {
 			a := &resourceAdapter{
 				resource: ResourceOptions{
 					SchemaInternal: schema,
-					IDFields:       []string{"id"},
+					IdentityFields: []string{"id"},
 					ModifyPlan: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						d.RequiresReplace(tt.replace...)
 						return d.Set("checksum", "new")

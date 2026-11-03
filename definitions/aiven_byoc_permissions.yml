@@ -13,7 +13,7 @@ resource:
   refreshStateExists: true
   removeMissing: true
 clientHandler: byoc
-idAttributeComposed: [organization_id, custom_cloud_environment_id]
+identityFields: [organization_id, custom_cloud_environment_id]
 operations:
   - id: CustomCloudEnvironmentPermissionsSet
     type: create

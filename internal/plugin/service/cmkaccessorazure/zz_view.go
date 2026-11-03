@@ -13,14 +13,8 @@ import (
 
 const typeName = "aiven_cmk_accessor_azure"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_cmk_accessor_azure.foo PROJECT
-func idFields() []string {
-	return []string{"project"}
-}
-
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"project"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

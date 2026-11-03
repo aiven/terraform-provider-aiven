@@ -4,9 +4,3 @@
 package organization
 
 const typeName = "aiven_organization"
-
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_organization.foo ID
-func idFields() []string {
-	return []string{"id"}
-}

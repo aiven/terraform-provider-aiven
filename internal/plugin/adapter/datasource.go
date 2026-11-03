@@ -24,9 +24,9 @@ type DataSourceOptions struct {
 	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
 	Beta bool
 
-	// IDFields are used to build the resource ID.
+	// IdentityFields are used to build the resource ID.
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
-	IDFields []string
+	IdentityFields []string
 
 	// Read is the only CRUD operation for datasource.
 	Read func(ctx context.Context, client avngen.Client, d ResourceData) error
@@ -111,7 +111,7 @@ func (a *datasourceAdapter) Read(
 ) {
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields,
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IdentityFields,
 		WithIsDataSource(),
 		WithConfig(req.Config),
 	)
@@ -161,7 +161,7 @@ func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.V
 		return
 	}
 
-	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IDFields,
+	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IdentityFields,
 		WithIsDataSource(),
 		WithConfig(req.Config),
 	)

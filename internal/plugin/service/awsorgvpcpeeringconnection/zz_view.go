@@ -15,12 +15,6 @@ import (
 
 const typeName = "aiven_aws_org_vpc_peering_connection"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_aws_org_vpc_peering_connection.foo ORGANIZATION_ID/ORGANIZATION_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION
-func idFields() []string {
-	return []string{"organization_id", "organization_vpc_id", "aws_account_id", "aws_vpc_id", "aws_vpc_region"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create: createView,
 	Delete: deleteView,
@@ -28,8 +22,8 @@ var ResourceOptions = adapter.ResourceOptions{
 		Attribute: "state",
 		Desired:   []string{"DELETED"},
 	},
-	IDFields: idFields(),
-	Read:     readView,
+	IdentityFields: []string{"organization_id", "organization_vpc_id", "aws_account_id", "aws_vpc_id", "aws_vpc_region"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"ACTIVE", "PENDING_PEER"},
@@ -43,7 +37,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "organization_vpc_id", "aws_account_id", "aws_vpc_id", "aws_vpc_region"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

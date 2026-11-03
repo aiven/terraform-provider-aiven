@@ -10,7 +10,7 @@ resource:
 datasource:
   description: Gets information about an Aiven for Apache Kafka® topic.
 clientHandler: kafkatopic
-idAttributeComposed: [project, service_name, topic_name]
+identityFields: [project, service_name, topic_name]
 legacyTimeouts: true
 requireServiceReady: [kafka]
 # All CRUD views are hand-written and delegate to the shared

@@ -7,7 +7,7 @@ resource:
 datasource:
   description: Gets information about an Aiven for PostgreSQL® database.
 clientHandler: service
-idAttributeComposed: [project, service_name, database_name]
+identityFields: [project, service_name, database_name]
 legacyTimeouts: true
 requireServiceReady: [pg]
 rename:

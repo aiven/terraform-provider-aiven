@@ -17,7 +17,7 @@ func TestCreateViewSendsEmptyPeeringConnections(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"project":      "example-project",
 			"cloud_name":   "google-europe-west2",

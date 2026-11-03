@@ -78,3 +78,18 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_azure_org_vpc_peering_connection.example ORGANIZATION_ID/ORGANIZATION_VPC_ID/AZURE_SUBSCRIPTION_ID/VNET_NAME/PEER_RESOURCE_GROUP
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_azure_org_vpc_peering_connection.example
+  identity = {
+    organization_id       = "ORGANIZATION_ID"
+    organization_vpc_id   = "ORGANIZATION_VPC_ID"
+    azure_subscription_id = "AZURE_SUBSCRIPTION_ID"
+    vnet_name             = "VNET_NAME"
+    peer_resource_group   = "PEER_RESOURCE_GROUP"
+  }
+}
+```

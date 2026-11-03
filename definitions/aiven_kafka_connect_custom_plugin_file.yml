@@ -10,7 +10,7 @@ resource:
     file is uploaded to the pre-signed URL the API returns, and the provider polls until the
     upload is verified.
 clientHandler: kafkaconnectcustomplugin
-idAttributeComposed: [organization_id, plugin_file_id]
+identityFields: [organization_id, plugin_file_id]
 legacyTimeouts: true
 operations:
   - id: KafkaConnectCustomPluginFileCreate

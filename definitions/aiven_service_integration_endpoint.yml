@@ -14,7 +14,7 @@ datasource:
   disableExample: true
   description: Gets information about an integration endpoint.
 clientHandler: service
-idAttributeComposed: [project, endpoint_id]
+identityFields: [project, endpoint_id]
 legacyTimeouts: true
 version: 1
 userConfigDiscriminator: endpoint_type

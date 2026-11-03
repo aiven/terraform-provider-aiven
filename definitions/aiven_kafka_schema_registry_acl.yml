@@ -6,7 +6,7 @@ resource:
 datasource:
   description: Gets information about an Aiven for Apache Kafka® Schema Registry ACL entry.
 clientHandler: kafkaschemaregistry
-idAttributeComposed: [project, service_name, acl_id]
+identityFields: [project, service_name, acl_id]
 legacyTimeouts: true
 requireServiceReady: [kafka]
 rename:

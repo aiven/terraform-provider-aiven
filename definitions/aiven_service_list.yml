@@ -3,7 +3,7 @@ beta: false
 datasource:
   description: A list of all services in a project.
   disableExample: true
-idAttributeComposed: [project]
+identityFields: [project]
 clientHandler: project
 remove:
   # Remove all complex nested objects - keep only essential flat attributes

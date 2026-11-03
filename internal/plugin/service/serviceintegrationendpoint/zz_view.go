@@ -18,16 +18,10 @@ import (
 
 const typeName = "aiven_service_integration_endpoint"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_service_integration_endpoint.foo PROJECT/ENDPOINT_ID
-func idFields() []string {
-	return []string{"project", "endpoint_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"project", "endpoint_id"},
 	ModifyPlan:     adapter.RequireUserConfig("endpoint_type", "autoscaler", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_aws_s3", "external_azure_blob_storage", "external_clickhouse", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_mysql", "external_object_storage_config", "external_opensearch_logs", "external_postgresql", "external_schema_registry", "opentelemetry", "rsyslog"),
 	Read:           readView,
 	RefreshState:   &adapter.RefreshStateCondition{},
@@ -41,7 +35,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
-	IDFields:         idFields(),
+	IdentityFields:   []string{"project", "endpoint_id"},
 	Read:             readView,
 	Schema:           datasourceSchema,
 	SchemaInternal:   datasourceSchemaInternal(),

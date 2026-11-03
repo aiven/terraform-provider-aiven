@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_mirrormaker_replication_flow"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_mirrormaker_replication_flow.foo PROJECT/SERVICE_NAME/SOURCE_CLUSTER/TARGET_CLUSTER
-func idFields() []string {
-	return []string{"project", "service_name", "source_cluster", "target_cluster"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "source_cluster", "target_cluster"},
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
@@ -35,7 +29,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "source_cluster", "target_cluster"},
 	Read:                readView,
 	RequireServiceReady: []string{"kafka_mirrormaker"},
 	Schema:              datasourceSchema,

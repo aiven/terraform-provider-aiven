@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_billing_group"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_billing_group.foo BILLING_GROUP_ID
-func idFields() []string {
-	return []string{"billing_group_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"billing_group_id"},
 	Read:           readView,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),
@@ -32,7 +26,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"billing_group_id"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

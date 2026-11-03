@@ -13,14 +13,8 @@ import (
 
 const typeName = "aiven_organization_payment_method_list"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_organization_payment_method_list.foo ORGANIZATION_ID
-func idFields() []string {
-	return []string{"organization_id"}
-}
-
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

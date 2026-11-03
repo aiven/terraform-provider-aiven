@@ -86,3 +86,16 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_connection_pool.example PROJECT/SERVICE_NAME/POOL_NAME
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_connection_pool.example
+  identity = {
+    project      = "PROJECT"
+    service_name = "SERVICE_NAME"
+    pool_name    = "POOL_NAME"
+  }
+}
+```

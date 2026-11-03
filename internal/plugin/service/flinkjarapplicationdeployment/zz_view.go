@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_flink_jar_application_deployment"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_flink_jar_application_deployment.foo PROJECT/SERVICE_NAME/APPLICATION_ID/DEPLOYMENT_ID
-func idFields() []string {
-	return []string{"project", "service_name", "application_id", "deployment_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Beta:                true,
 	Create:              createView,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "application_id", "deployment_id"},
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,

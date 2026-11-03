@@ -9,7 +9,7 @@ resource:
     Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled, which allows uploading and
     deploying custom JARs.
 clientHandler: flinkjarapplication
-idAttributeComposed: [project, service_name, application_id]
+identityFields: [project, service_name, application_id]
 legacyTimeouts: true
 requireServiceReady: [flink]
 rename:

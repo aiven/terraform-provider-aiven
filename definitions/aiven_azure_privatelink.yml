@@ -10,7 +10,7 @@ resource:
 datasource:
   description: Gets information about an Azure Private Link connection for an Aiven service.
 clientHandler: privatelink
-idAttributeComposed: [project, service_name]
+identityFields: [project, service_name]
 legacyTimeouts: true
 operations:
   - id: ServicePrivatelinkAzureCreate

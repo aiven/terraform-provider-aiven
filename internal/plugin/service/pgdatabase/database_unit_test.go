@@ -18,7 +18,7 @@ func newReadResourceData(t *testing.T, project, serviceName, databaseName string
 
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestState(map[string]any{
 			"project":       project,
 			"service_name":  serviceName,

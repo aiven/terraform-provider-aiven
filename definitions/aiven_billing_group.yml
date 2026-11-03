@@ -24,7 +24,7 @@ operations:
     resultKey: billing_group
 rename:
   billing_group_name: name
-idAttributeComposed: [billing_group_id]
+identityFields: [billing_group_id]
 remove:
   # Either deprecated or redundant
   - account_name

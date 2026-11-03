@@ -17,7 +17,7 @@ func TestCreateViewSendsCloudsAndEmptyPeeringConnections(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"organization_id": "example-org-id",
 			"cloud_name":      "aws-eu-west-1",
@@ -53,7 +53,7 @@ func TestFlattenModifierRequiresOneCloud(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestState(map[string]any{
 			"id":                  "example-org-id/example-vpc-id",
 			"organization_id":     "example-org-id",

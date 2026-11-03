@@ -4,7 +4,7 @@ resource:
   description: Creates and manages an organization billing group.
 datasource:
   description: Gets information about a billing group.
-idAttributeComposed: [organization_id, billing_group_id]
+identityFields: [organization_id, billing_group_id]
 clientHandler: organizationbilling
 operations:
   - id: OrganizationBillingGroupCreate

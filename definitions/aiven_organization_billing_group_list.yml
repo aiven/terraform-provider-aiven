@@ -2,7 +2,7 @@
 beta: false
 datasource:
   description: Lists billing groups for an organization.
-idAttributeComposed: [organization_id]
+identityFields: [organization_id]
 operations:
   - id: OrganizationBillingGroupList
     type: read

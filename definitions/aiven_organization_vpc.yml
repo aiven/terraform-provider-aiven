@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
-  identityFields: [organization_id, organization_vpc_id]
   stateAttribute: state
   refreshStateDesired: [ACTIVE]
   deleteStateDesired: [DELETED]
@@ -9,7 +8,7 @@ resource:
 datasource:
   description: Gets information about an existing VPC in an Aiven organization.
 clientHandler: organizationvpc
-idAttributeComposed: [organization_id, organization_vpc_id]
+identityFields: [organization_id, organization_vpc_id]
 legacyTimeouts: true
 expandModifier: true
 flattenModifier: true

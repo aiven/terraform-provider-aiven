@@ -13,14 +13,8 @@ import (
 
 const typeName = "aiven_organization_user_group_member_list"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_organization_user_group_member_list.foo ORGANIZATION_ID/USER_GROUP_ID
-func idFields() []string {
-	return []string{"organization_id", "user_group_id"}
-}
-
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "user_group_id"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

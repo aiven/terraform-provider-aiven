@@ -861,7 +861,7 @@ func TestApplySchemaOverride(t *testing.T) {
 			{ID: "VpcGet", Type: OperationRead},
 			{ID: "VpcDelete", Type: OperationDelete},
 		},
-		IDAttributeComposed: []string{"project", "project_vpc_id"},
+		IdentityFields: []string{"project", "project_vpc_id"},
 		Datasource: &SchemaMeta{
 			SchemaOverride: map[string]*Item{
 				"project": {

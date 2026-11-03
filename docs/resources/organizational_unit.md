@@ -65,3 +65,14 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_organizational_unit.example ORGANIZATIONAL_UNIT_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_organizational_unit.example
+  identity = {
+    id = "ORGANIZATIONAL_UNIT_ID"
+  }
+}
+```

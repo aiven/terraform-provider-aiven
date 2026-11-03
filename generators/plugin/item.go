@@ -188,12 +188,6 @@ type SchemaMeta struct {
 	ValidateConfig  bool     `yaml:"validateConfig,omitempty"`
 	ModifyPlan      bool     `yaml:"modifyPlan,omitempty"`
 
-	// IdentityFields opts the resource into identity using stable top-level string
-	// attributes from state. Each field is required for identity imports.
-	IdentityFields []string `yaml:"identityFields,omitempty"`
-	// IdentityFieldsOptional adds identity attributes that may be omitted during import.
-	IdentityFieldsOptional []string `yaml:"identityFieldsOptional,omitempty"`
-
 	// SchemaOverride is a datasource-only schema overlay merged on top of the
 	// base Definition.Schema when generating the datasource. Resource
 	// generation ignores this field. Only meaningful on Definition.Datasource.
@@ -206,23 +200,24 @@ type SchemaMeta struct {
 }
 
 type Definition struct {
-	fileName            string            // e.g. organization_address.yaml
-	typeName            string            // e.g. aiven_organization_address, aiven_kafka_topic
-	Beta                *bool             `yaml:"beta"` // Is figured as beta from `x-experimental` OpenAPI field
-	LimitedAvailability *bool             `yaml:"limitedAvailability"`
-	Schema              map[string]*Item  `yaml:"schema,omitempty"`
-	Remove              []string          `yaml:"remove,omitempty"`
-	Rename              map[string]string `yaml:"rename,omitempty"`
-	Resource            *SchemaMeta       `yaml:"resource,omitempty"`
-	Datasource          *SchemaMeta       `yaml:"datasource,omitempty"`
-	IDAttributeComposed []string          `yaml:"idAttributeComposed,omitempty"`
-	LegacyTimeouts      bool              `yaml:"legacyTimeouts,omitempty"`
-	Operations          Operations        `yaml:"operations"`
-	Version             *int              `yaml:"version"`
-	ClientHandler       string            `yaml:"clientHandler,omitempty"`
-	PlanModifier        bool              `yaml:"planModifier,omitempty"`
-	ExpandModifier      bool              `yaml:"expandModifier,omitempty"`
-	FlattenModifier     bool              `yaml:"flattenModifier,omitempty"`
+	fileName               string            // e.g. organization_address.yaml
+	typeName               string            // e.g. aiven_organization_address, aiven_kafka_topic
+	Beta                   *bool             `yaml:"beta"` // Is figured as beta from `x-experimental` OpenAPI field
+	LimitedAvailability    *bool             `yaml:"limitedAvailability"`
+	Schema                 map[string]*Item  `yaml:"schema,omitempty"`
+	Remove                 []string          `yaml:"remove,omitempty"`
+	Rename                 map[string]string `yaml:"rename,omitempty"`
+	Resource               *SchemaMeta       `yaml:"resource,omitempty"`
+	Datasource             *SchemaMeta       `yaml:"datasource,omitempty"`
+	IdentityFields         []string          `yaml:"identityFields,omitempty"`
+	IdentityFieldsOptional []string          `yaml:"identityFieldsOptional,omitempty"`
+	LegacyTimeouts         bool              `yaml:"legacyTimeouts,omitempty"`
+	Operations             Operations        `yaml:"operations"`
+	Version                *int              `yaml:"version"`
+	ClientHandler          string            `yaml:"clientHandler,omitempty"`
+	PlanModifier           bool              `yaml:"planModifier,omitempty"`
+	ExpandModifier         bool              `yaml:"expandModifier,omitempty"`
+	FlattenModifier        bool              `yaml:"flattenModifier,omitempty"`
 	// RequireServiceReady gates Create/Read/Update via schemautil.CheckServiceReady when non-empty.
 	// Its value lists the accepted service types (e.g. ["kafka"]). Requires `project` and `service_name`
 	// in the schema. Delete is not gated.
@@ -299,8 +294,8 @@ func (d *Definition) DatasourceLookupOp() *Operation {
 // identify a single resource via the data source. For composite IDs, this is the
 // most specific (leaf) segment; otherwise it falls back to Terraform's standard "id".
 func (d *Definition) DatasourceLookupID() string {
-	if n := len(d.IDAttributeComposed); n > 0 {
-		return d.IDAttributeComposed[n-1]
+	if n := len(d.IdentityFields); n > 0 {
+		return d.IdentityFields[n-1]
 	}
 	return "id"
 }

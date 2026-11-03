@@ -18,16 +18,10 @@ import (
 
 const typeName = "aiven_clickhouse_user"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_clickhouse_user.foo PROJECT/SERVICE_NAME/UUID
-func idFields() []string {
-	return []string{"project", "service_name", "uuid"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "uuid"},
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
@@ -40,7 +34,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators:    datasourceConfigValidators,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "uuid"},
 	Read:                readView,
 	RequireServiceReady: []string{"clickhouse"},
 	Schema:              datasourceSchema,

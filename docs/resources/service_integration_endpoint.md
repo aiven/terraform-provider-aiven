@@ -446,3 +446,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_service_integration_endpoint.example PROJECT/ENDPOINT_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_service_integration_endpoint.example
+  identity = {
+    project     = "PROJECT"
+    endpoint_id = "ENDPOINT_ID"
+  }
+}
+```

@@ -16,7 +16,7 @@ import (
 func newResourceData(t *testing.T) adapter.ResourceData {
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestState(map[string]any{
 			"id":          "my-project/endpoint-id",
 			"project":     "my-project",
@@ -91,7 +91,7 @@ func TestUserConfigEmptyString(t *testing.T) {
 		}
 	}
 
-	plan, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(), adapter.WithTestPlan(values()))
+	plan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(values()))
 	require.NoError(t, err)
 	req := new(service.ServiceIntegrationEndpointCreateIn)
 	require.NoError(t, plan.Expand(req, adapter.ExpandUserConfig("endpoint_type")))
@@ -111,7 +111,7 @@ func TestUserConfigEmptyString(t *testing.T) {
 		"read":   adapter.WithTestState,
 	} {
 		t.Run(name, func(t *testing.T) {
-			d, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(), opt(values()))
+			d, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, opt(values()))
 			require.NoError(t, err)
 			require.NoError(t, d.Flatten(rsp, adapter.FlattenUserConfig("endpoint_type")))
 			assert.Equal(t, values()["datadog_user_config"], d.Get("datadog_user_config"))
@@ -119,7 +119,7 @@ func TestUserConfigEmptyString(t *testing.T) {
 			// The next plan has the flattened block, and sends the same config
 			next := values()
 			next["datadog_user_config"] = d.Get("datadog_user_config")
-			nextPlan, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(), adapter.WithTestPlan(next))
+			nextPlan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(next))
 			require.NoError(t, err)
 			nextReq := new(service.ServiceIntegrationEndpointUpdateIn)
 			require.NoError(t, nextPlan.Expand(nextReq, adapter.ExpandUserConfig("endpoint_type")))
@@ -143,7 +143,7 @@ func TestUpdateWithoutUserConfig(t *testing.T) {
 	state["datadog_user_config"] = []any{map[string]any{"datadog_api_key": "11111111222233334444555555555555"}}
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(values()),
 		adapter.WithTestState(state),
 	)

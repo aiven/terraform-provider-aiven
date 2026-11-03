@@ -15,16 +15,10 @@ import (
 
 const typeName = "aiven_mysql_database"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_mysql_database.foo PROJECT/SERVICE_NAME/DATABASE_NAME
-func idFields() []string {
-	return []string{"project", "service_name", "database_name"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:                createView,
 	Delete:                deleteView,
-	IDFields:              idFields(),
+	IdentityFields:        []string{"project", "service_name", "database_name"},
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
 	RemoveMissing:         true,
@@ -36,7 +30,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "database_name"},
 	Read:                readView,
 	RequireServiceReady: []string{"mysql"},
 	Schema:              datasourceSchema,

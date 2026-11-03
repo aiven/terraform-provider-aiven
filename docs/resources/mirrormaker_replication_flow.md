@@ -100,3 +100,17 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_mirrormaker_replication_flow.example PROJECT/SERVICE_NAME/SOURCE_CLUSTER/TARGET_CLUSTER
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_mirrormaker_replication_flow.example
+  identity = {
+    project        = "PROJECT"
+    service_name   = "SERVICE_NAME"
+    source_cluster = "SOURCE_CLUSTER"
+    target_cluster = "TARGET_CLUSTER"
+  }
+}
+```

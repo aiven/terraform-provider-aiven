@@ -70,3 +70,16 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_kafka_acl.example PROJECT/SERVICE_NAME/ACL_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_kafka_acl.example
+  identity = {
+    project      = "PROJECT"
+    service_name = "SERVICE_NAME"
+    acl_id       = "ACL_ID"
+  }
+}
+```

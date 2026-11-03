@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_organization_application_user"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_organization_application_user.foo ORGANIZATION_ID/USER_ID
-func idFields() []string {
-	return []string{"organization_id", "user_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "user_id"},
 	Read:           readView,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),
@@ -32,7 +26,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "user_id"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

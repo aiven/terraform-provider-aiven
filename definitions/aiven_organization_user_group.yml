@@ -4,7 +4,7 @@ resource:
 datasource:
   description: Gets information about an existing user group in an organization.
 clientHandler: usergroup
-idAttributeComposed: [organization_id, group_id]
+identityFields: [organization_id, group_id]
 legacyTimeouts: true
 rename:
   user_group_name: name

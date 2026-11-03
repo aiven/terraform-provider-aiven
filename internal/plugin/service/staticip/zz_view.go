@@ -15,17 +15,11 @@ import (
 
 const typeName = "aiven_static_ip"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_static_ip.foo PROJECT/STATIC_IP_ADDRESS_ID
-func idFields() []string {
-	return []string{"project", "static_ip_address_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
-	Create:   createView,
-	Delete:   deleteView,
-	IDFields: idFields(),
-	Read:     readView,
+	Create:         createView,
+	Delete:         deleteView,
+	IdentityFields: []string{"project", "static_ip_address_id"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"created"},

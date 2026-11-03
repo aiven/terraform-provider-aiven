@@ -6,7 +6,7 @@ resource:
 datasource:
   description: Gets information about a connection pool in an Aiven for PostgreSQL® service.
 clientHandler: postgresql
-idAttributeComposed: [project, service_name, pool_name]
+identityFields: [project, service_name, pool_name]
 legacyTimeouts: true
 requireServiceReady: [pg]
 rename:

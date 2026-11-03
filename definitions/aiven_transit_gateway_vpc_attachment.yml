@@ -5,6 +5,7 @@ resource:
   refreshStateExists: true
   deleteStateGone: true
   removeMissing: true
+  # TODO: replace with identityFields and identityFieldsOptional, then remove importIDFormats.
   importIDFormats:
     - PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC
     - PROJECT/VPC_ID/PEER_CLOUD_ACCOUNT/PEER_VPC/PEER_REGION

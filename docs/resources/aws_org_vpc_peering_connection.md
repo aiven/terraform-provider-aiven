@@ -76,3 +76,18 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_aws_org_vpc_peering_connection.example ORGANIZATION_ID/ORGANIZATION_VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_aws_org_vpc_peering_connection.example
+  identity = {
+    organization_id     = "ORGANIZATION_ID"
+    organization_vpc_id = "ORGANIZATION_VPC_ID"
+    aws_account_id      = "AWS_ACCOUNT_ID"
+    aws_vpc_id          = "AWS_VPC_ID"
+    aws_vpc_region      = "AWS_VPC_REGION"
+  }
+}
+```
