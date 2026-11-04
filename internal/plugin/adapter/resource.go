@@ -303,13 +303,16 @@ func ensurePostCreateID(d ResourceData, idFields, optional []string) bool {
 	}
 
 	parts := make([]string, 0, len(idFields))
-	for _, field := range idFields {
+	for i, field := range idFields {
 		value, _ := d.GetOk(field)
 		part, _ := value.(string)
 		if part == "" {
 			if slices.Contains(optional, field) {
 				continue
 			}
+			return false
+		}
+		if i != len(parts) {
 			return false
 		}
 		parts = append(parts, part)

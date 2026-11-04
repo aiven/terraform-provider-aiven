@@ -382,13 +382,17 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 	maps.Copy(state, norm)
 
 	id := make([]string, 0, len(d.idFields))
-	for _, name := range d.idFields {
+	for i, name := range d.idFields {
 		v, ok := d.GetOk(name)
 		if !ok {
 			if slices.Contains(d.idFieldsOptional, name) {
 				continue
 			}
 			return fmt.Errorf("no value for id field %q", name)
+		}
+		// Omitting a middle field would shift later values when the ID is split.
+		if i != len(id) {
+			return fmt.Errorf("id field %q is set but preceding optional field %q is not", name, d.idFields[len(id)])
 		}
 		id = append(id, v.(string))
 	}

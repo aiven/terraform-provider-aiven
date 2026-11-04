@@ -137,6 +137,7 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	tests := []struct {
 		name                string
 		idFields            []string
+		idFieldsOptional    []string
 		plan                map[string]any
 		createID            string
 		createError         error
@@ -164,6 +165,32 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 			readError: refreshError,
 			wantError: true,
 			wantID:    "project/example",
+		},
+		{
+			name:             "omits an unset optional ID suffix",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project", "name": "example"},
+			readError:        refreshError,
+			wantError:        true,
+			wantID:           "project/example",
+		},
+		{
+			name:             "omits all optional ID fields",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project"},
+			readError:        refreshError,
+			wantError:        true,
+			wantID:           "project",
+		},
+		{
+			name:             "does not save state with a gap in optional ID fields",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project", "server_id": "server-id"},
+			readError:        refreshError,
+			wantError:        true,
 		},
 		{
 			name:      "does not save state without a complete ID",
@@ -217,10 +244,11 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 
 			a := &resourceAdapter{
 				resource: ResourceOptions{
-					SchemaInternal:      schema,
-					IdentityFields:      tt.idFields,
-					RefreshState:        refreshState,
-					IgnoreAlreadyExists: tt.ignoreAlreadyExists,
+					SchemaInternal:         schema,
+					IdentityFields:         tt.idFields,
+					IdentityFieldsOptional: tt.idFieldsOptional,
+					RefreshState:           refreshState,
+					IgnoreAlreadyExists:    tt.ignoreAlreadyExists,
 					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						if tt.createID != "" {
 							return d.SetID(tt.createID)
