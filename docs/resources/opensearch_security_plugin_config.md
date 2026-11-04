@@ -72,3 +72,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_opensearch_security_plugin_config.example PROJECT/SERVICE_NAME
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_opensearch_security_plugin_config.example
+  identity = {
+    project      = "PROJECT"
+    service_name = "SERVICE_NAME"
+  }
+}
+```

@@ -472,7 +472,7 @@ func TestModifyPlanCIDRs(t *testing.T) {
 
 		d, err := adapter.NewResourceData(
 			resourceSchemaInternal(),
-			idFields(),
+			ResourceOptions.IdentityFields,
 			adapter.WithTestPlan(map[string]any{
 				"user_peer_network_cidrs": lo.ToAnySlice(planned),
 			}),
@@ -513,7 +513,7 @@ func TestModifyPlanCIDRs(t *testing.T) {
 	)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"user_peer_network_cidrs": unknown,
 		}),
@@ -721,7 +721,7 @@ func newCreateResourceData(t *testing.T, plan map[string]any) adapter.ResourceDa
 
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(plan),
 		adapter.WithTestConfig(maps.Clone(plan)),
 	)
@@ -734,7 +734,7 @@ func newUpdateResourceData(t *testing.T, plan, state map[string]any) adapter.Res
 
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(plan),
 		adapter.WithTestState(state),
 		adapter.WithTestConfig(maps.Clone(plan)),
@@ -748,7 +748,7 @@ func newReadResourceData(t *testing.T, state map[string]any) adapter.ResourceDat
 
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestState(state),
 	)
 	require.NoError(t, err)
@@ -768,7 +768,7 @@ func newDatasourceData(t *testing.T, peerRegion *string) adapter.ResourceData {
 	}
 	d, err := adapter.NewResourceData(
 		datasourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithIsDataSource(),
 		adapter.WithTestConfig(config),
 	)

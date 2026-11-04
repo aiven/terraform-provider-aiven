@@ -24,7 +24,7 @@ func TestUpdateView(t *testing.T) {
 	newResourceData := func(t *testing.T, plan, state map[string]any) adapter.ResourceData {
 		d, err := adapter.NewResourceData(
 			resourceSchemaInternal(),
-			idFields(),
+			ResourceOptions.IdentityFields,
 			adapter.WithTestPlan(plan),
 			adapter.WithTestState(state),
 		)

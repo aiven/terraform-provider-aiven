@@ -6,7 +6,7 @@ resource:
 datasource:
   description: Gets information about an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven.io/docs/products/kafka/kafka-mirrormaker) replication flow.
 clientHandler: kafkamirrormaker
-idAttributeComposed: [project, service_name, source_cluster, target_cluster]
+identityFields: [project, service_name, source_cluster, target_cluster]
 legacyTimeouts: true
 requireServiceReady: [kafka_mirrormaker]
 expandModifier: true

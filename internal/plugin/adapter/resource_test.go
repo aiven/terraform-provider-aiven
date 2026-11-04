@@ -12,10 +12,107 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
+
+func TestResourceAdapterMetadataMutableIdentity(t *testing.T) {
+	a := &resourceAdapter{resource: ResourceOptions{TypeName: "aiven_test", MutableIdentity: true}}
+	var rsp resource.MetadataResponse
+	a.Metadata(t.Context(), resource.MetadataRequest{}, &rsp)
+	require.Equal(t, "aiven_test", rsp.TypeName)
+	require.True(t, rsp.ResourceBehavior.MutableIdentity)
+}
+
+func TestResourceIdentitySchema(t *testing.T) {
+	r := NewResource(ResourceOptions{
+		IdentityFields:         []string{"project", "id", "region"},
+		IdentityFieldsOptional: []string{"region"},
+	})
+	withIdentity, ok := r.(resource.ResourceWithIdentity)
+	require.True(t, ok)
+	var rsp resource.IdentitySchemaResponse
+	withIdentity.IdentitySchema(t.Context(), resource.IdentitySchemaRequest{}, &rsp)
+	require.True(t, rsp.IdentitySchema.Attributes["project"].IsRequiredForImport())
+	require.True(t, rsp.IdentitySchema.Attributes["id"].IsRequiredForImport())
+	require.True(t, rsp.IdentitySchema.Attributes["region"].IsOptionalForImport())
+	require.False(t, rsp.IdentitySchema.Attributes["region"].IsRequiredForImport())
+}
+
+func TestSplitID(t *testing.T) {
+	fields, optional := []string{"foo", "bar", "baz"}, []string{"bar", "baz"}
+	for id, want := range map[string][]string{
+		"a/b/c": {"a", "b", "c"},
+		"a/b":   {"a", "b", ""},
+		"a":     {"a", "", ""},
+	} {
+		got, err := splitID(id, fields, optional)
+		require.NoError(t, err)
+		require.Equal(t, want, got, id)
+	}
+	_, err := splitID("a", fields, []string{"baz"})
+	require.Error(t, err)
+}
+
+func TestResourceIdentityCreateCheckpoint(t *testing.T) {
+	ctx := t.Context()
+	state := tfsdk.State{Schema: schema.Schema{
+		Attributes: map[string]schema.Attribute{"id": schema.StringAttribute{Computed: true}},
+		Blocks: map[string]schema.Block{"timeouts": schema.SingleNestedBlock{Attributes: map[string]schema.Attribute{
+			"create": schema.StringAttribute{Optional: true},
+		}}},
+	}}
+	state.Raw = tftypes.NewValue(state.Schema.Type().TerraformType(ctx), nil)
+	require.False(t, state.SetAttribute(ctx, path.Root("id"), types.StringUnknown()).HasError())
+	opts := ResourceOptions{
+		IdentityFields: []string{"id"},
+		SchemaInternal: &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
+			"id": {Type: SchemaTypeString, Computed: true},
+			"timeouts": {Type: SchemaTypeObject, Properties: map[string]*Schema{
+				"create": {Type: SchemaTypeString},
+			}},
+		}},
+		Create: func(_ context.Context, _ avngen.Client, d ResourceData) error { return d.SetID("created") },
+		Read: func(context.Context, avngen.Client, ResourceData) error {
+			return errors.New("readiness check failed")
+		},
+		RefreshState: &RefreshStateCondition{},
+	}
+	r := NewResource(opts)
+	var identitySchema resource.IdentitySchemaResponse
+	r.(resource.ResourceWithIdentity).IdentitySchema(ctx, resource.IdentitySchemaRequest{}, &identitySchema)
+	for _, tc := range []struct {
+		name     string
+		identity *tfsdk.ResourceIdentity
+	}{
+		{"without identity protocol", nil},
+		{"with identity protocol", &tfsdk.ResourceIdentity{
+			Schema: identitySchema.IdentitySchema,
+			Raw:    tftypes.NewValue(identitySchema.IdentitySchema.Type().TerraformType(ctx), nil),
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := resource.CreateRequest{
+				Plan:   tfsdk.Plan(state),
+				Config: tfsdk.Config(state),
+			}
+			rsp := resource.CreateResponse{State: tfsdk.State{Schema: state.Schema}, Identity: tc.identity}
+			r.Create(ctx, req, &rsp)
+			require.True(t, rsp.Diagnostics.HasError())
+			require.Contains(t, rsp.Diagnostics.Errors()[0].Detail(), "readiness check failed")
+			var id types.String
+			require.False(t, rsp.State.GetAttribute(ctx, path.Root("id"), &id).HasError())
+			require.Equal(t, "created", id.ValueString())
+			if rsp.Identity != nil {
+				require.False(t, rsp.Identity.GetAttribute(ctx, path.Root("id"), &id).HasError())
+				require.Equal(t, "created", id.ValueString())
+			}
+		})
+	}
+}
 
 func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	schema := &Schema{
@@ -40,6 +137,7 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	tests := []struct {
 		name                string
 		idFields            []string
+		idFieldsOptional    []string
 		plan                map[string]any
 		createID            string
 		createError         error
@@ -67,6 +165,32 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 			readError: refreshError,
 			wantError: true,
 			wantID:    "project/example",
+		},
+		{
+			name:             "omits an unset optional ID suffix",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project", "name": "example"},
+			readError:        refreshError,
+			wantError:        true,
+			wantID:           "project/example",
+		},
+		{
+			name:             "omits all optional ID fields",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project"},
+			readError:        refreshError,
+			wantError:        true,
+			wantID:           "project",
+		},
+		{
+			name:             "does not save state with a gap in optional ID fields",
+			idFields:         []string{"project", "name", "server_id"},
+			idFieldsOptional: []string{"name", "server_id"},
+			plan:             map[string]any{"project": "project", "server_id": "server-id"},
+			readError:        refreshError,
+			wantError:        true,
 		},
 		{
 			name:      "does not save state without a complete ID",
@@ -120,10 +244,11 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 
 			a := &resourceAdapter{
 				resource: ResourceOptions{
-					SchemaInternal:      schema,
-					IDFields:            tt.idFields,
-					RefreshState:        refreshState,
-					IgnoreAlreadyExists: tt.ignoreAlreadyExists,
+					SchemaInternal:         schema,
+					IdentityFields:         tt.idFields,
+					IdentityFieldsOptional: tt.idFieldsOptional,
+					RefreshState:           refreshState,
+					IgnoreAlreadyExists:    tt.ignoreAlreadyExists,
 					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						if tt.createID != "" {
 							return d.SetID(tt.createID)
@@ -1232,7 +1357,7 @@ func TestResourceAdapterModifyPlanRequiresReplace(t *testing.T) {
 			a := &resourceAdapter{
 				resource: ResourceOptions{
 					SchemaInternal: schema,
-					IDFields:       []string{"id"},
+					IdentityFields: []string{"id"},
 					ModifyPlan: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						d.RequiresReplace(tt.replace...)
 						return d.Set("checksum", "new")

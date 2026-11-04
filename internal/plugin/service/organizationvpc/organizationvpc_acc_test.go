@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
@@ -22,6 +23,7 @@ const (
 )
 
 func TestAccAivenOrganizationVPC(t *testing.T) {
+	var identityImport acc.IdentityImportVersionCheck
 	var (
 		orgName = acc.OrganizationName()
 
@@ -39,6 +41,7 @@ func TestAccAivenOrganizationVPC(t *testing.T) {
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckOrganizationVPCResourceDestroy,
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		Steps: []resource.TestStep{
 			{
 				// invalid CIDR range
@@ -120,6 +123,12 @@ resource "aiven_organization_vpc" "test_validation" {
 				ImportStateVerify: true,
 			},
 			{
+				ResourceName:    resourceName,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				SkipFunc:        identityImport.Skip,
+			},
+			{
 				// test the data source
 				Config: templBuilder().
 					AddResource(organizationVPCResource, map[string]any{
@@ -149,6 +158,7 @@ resource "aiven_organization_vpc" "test_validation" {
 }
 
 func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
+	t.Parallel()
 	resourceName := "aiven_organization_vpc.test_org_vpc"
 	config := testAccOrganizationVPCResourceOnly(acc.OrganizationName(), "aws-eu-west-1", "10.2.0.0/24")
 	checks := resource.ComposeTestCheckFunc(
@@ -159,15 +169,41 @@ func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
 		resource.TestCheckResourceAttrSet(resourceName, "organization_vpc_id"),
 	)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: testAccCheckOrganizationVPCResourceDestroy,
-		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-			TFConfig:           config,
-			OldProviderVersion: "4.56.0",
-			Checks:             checks,
-		}),
-	})
+	testUpgrade := func(t *testing.T, oldVersion string) {
+		t.Helper()
+		var identityImport acc.IdentityImportVersionCheck
+		resource.Test(t, resource.TestCase{
+			PreCheck:               func() { acc.TestAccPreCheck(t) },
+			CheckDestroy:           testAccCheckOrganizationVPCResourceDestroy,
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+			Steps: []resource.TestStep{
+				{
+					ExternalProviders: map[string]resource.ExternalProvider{
+						"aiven": acc.ExternalAivenProvider(t, oldVersion),
+					},
+					Config: config,
+					Check:  checks,
+				},
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					Config:                   config,
+					Check:                    checks,
+					ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					}},
+				},
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					ResourceName:             resourceName,
+					ImportState:              true,
+					ImportStateKind:          resource.ImportBlockWithResourceIdentity,
+					SkipFunc:                 identityImport.Skip,
+				},
+			},
+		})
+	}
+	t.Run("SDK", func(t *testing.T) { testUpgrade(t, "4.56.0") })
+	t.Run("Framework", func(t *testing.T) { testUpgrade(t, "4.65.1") })
 }
 
 func testAccOrganizationVPCResourceOnly(orgName, cloud, cidr string) string {

@@ -19,7 +19,7 @@ resource:
 datasource:
   description: The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
 clientHandler: organizationvpc
-idAttributeComposed: [organization_id, organization_vpc_id, gcp_project_id, peer_vpc]
+identityFields: [organization_id, organization_vpc_id, gcp_project_id, peer_vpc]
 legacyTimeouts: true
 flattenModifier: true
 rename:

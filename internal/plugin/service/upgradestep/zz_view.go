@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_upgrade_step"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_upgrade_step.foo ORGANIZATION_ID/STEP_ID
-func idFields() []string {
-	return []string{"organization_id", "step_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "step_id"},
 	Read:           readView,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),

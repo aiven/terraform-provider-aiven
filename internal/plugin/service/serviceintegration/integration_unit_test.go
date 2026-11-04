@@ -20,7 +20,7 @@ func TestCreateViewEndpointIDs(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"project":                 "my-project",
 			"integration_type":        "autoscaler",
@@ -61,7 +61,7 @@ func TestCreateViewUserConfig(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"project":                  "my-project",
 			"integration_type":         "logs",
@@ -110,7 +110,7 @@ func TestUpdateWithoutUserConfig(t *testing.T) {
 	state["logs_user_config"] = []any{map[string]any{"elasticsearch_index_days_max": 5}}
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(values()),
 		adapter.WithTestState(state),
 	)
@@ -124,7 +124,7 @@ func TestReadViewClearsEmptyStrings(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestState(map[string]any{
 			"id":                       "my-project/integration-id",
 			"project":                  "my-project",
@@ -163,7 +163,7 @@ func TestAdoptReadReplica(t *testing.T) {
 	client := avngen.NewMockClient(t)
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(map[string]any{
 			"project":                  "my-project",
 			"integration_type":         "read_replica",

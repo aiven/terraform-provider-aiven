@@ -141,6 +141,7 @@ properties:
         $comment: |
           Import identifier formats to show in the generated resource documentation and import.sh.
           This is documentation metadata only and does not change runtime ID parsing.
+          TODO: remove once aiven_transit_gateway_vpc_attachment uses identityFields and identityFieldsOptional.
       validateConfig:
         type: boolean
         $comment: |
@@ -244,12 +245,26 @@ properties:
 
       Prefer globs over long explicit lists when the removed attributes share an obvious prefix,
       such as a cloud provider name that the resource does not support.
-  idAttributeComposed:
+  identityFields:
     type: array
     minItems: 1
+    uniqueItems: true
     items:
       type: string
-      $comment: A list of fields to compose the ID attribute from
+      minLength: 1
+    $comment: |
+      Fields that compose the string ID attribute. They are also the resource identity
+      (Terraform 1.12+), so each must be a top-level string attribute.
+  identityFieldsOptional:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+    $comment: |
+      Trailing identityFields omitted from resource and data source string IDs when unset.
+      For resources, these fields are also optional during identity import.
   operations:
     type: array
     $comment: |

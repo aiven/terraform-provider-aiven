@@ -43,7 +43,7 @@ func TestModifyPlan(t *testing.T) {
 			opts = append(opts, adapter.WithTestState(state))
 		}
 
-		d, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(), opts...)
+		d, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, opts...)
 		require.NoError(t, err)
 		return &replacementTrackingResourceData{ResourceData: d}
 	}

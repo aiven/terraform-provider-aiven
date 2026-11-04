@@ -21,7 +21,7 @@ import (
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions{
 		TypeName:       typeName,
-		IDFields:       idFields(),
+		IdentityFields: []string{"id"},
 		Schema:         resourceSchema,
 		SchemaInternal: resourceSchemaInternal(),
 		RefreshState:   &adapter.RefreshStateCondition{},
@@ -35,7 +35,7 @@ func NewResource() resource.Resource {
 func NewDataSource() datasource.DataSource {
 	return adapter.NewDataSource(adapter.DataSourceOptions{
 		TypeName:         typeName,
-		IDFields:         idFields(),
+		IdentityFields:   []string{"id"},
 		Schema:           datasourceSchema,
 		SchemaInternal:   datasourceSchemaInternal(),
 		Read:             readOrganization,

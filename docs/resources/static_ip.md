@@ -66,3 +66,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_static_ip.example PROJECT/STATIC_IP_ADDRESS_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_static_ip.example
+  identity = {
+    project              = "PROJECT"
+    static_ip_address_id = "STATIC_IP_ADDRESS_ID"
+  }
+}
+```

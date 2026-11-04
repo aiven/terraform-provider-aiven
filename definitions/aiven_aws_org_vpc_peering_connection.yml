@@ -19,7 +19,7 @@ resource:
 datasource:
   description: Gets information about an AWS VPC peering connection.
 clientHandler: organizationvpc
-idAttributeComposed: [organization_id, organization_vpc_id, aws_account_id, aws_vpc_id, aws_vpc_region]
+identityFields: [organization_id, organization_vpc_id, aws_account_id, aws_vpc_id, aws_vpc_region]
 legacyTimeouts: true
 flattenModifier: true
 rename:

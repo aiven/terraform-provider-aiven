@@ -7,7 +7,7 @@ resource:
 
     Kafka-native ACLs provide advanced resource-level access control with fine-grained permissions, including `ALLOW` and `DENY` rules. For simplified topic-level control you can use [Aiven ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_acl).
 clientHandler: kafka
-idAttributeComposed: [project, service_name, acl_id]
+identityFields: [project, service_name, acl_id]
 legacyTimeouts: true
 requireServiceReady: [kafka]
 rename:

@@ -85,7 +85,7 @@ grep -l "clientHandler: service" definitions/aiven_*.yml
 grep -l "expandModifier: true" definitions/aiven_*.yml
 
 # Find composite ID examples
-grep -l "idAttributeComposed:" definitions/aiven_*.yml
+grep -l "identityFields:" definitions/aiven_*.yml
 ```
 
 **Key files to reference:**
@@ -136,7 +136,7 @@ operations:
     type: create|read|update|delete
 resource:
   description: "..."
-idAttributeComposed: [field1, field2]
+identityFields: [field1, field2]
 clientHandler: project
 ```
 
@@ -164,7 +164,7 @@ Review generated `zz_*.go` files. Refine YAML definition as needed.
 Common fields:
 - `operations` - Array of CRUD operations (id, type, resultKey, etc.)
 - `resource` / `datasource` - Configuration metadata
-- `idAttributeComposed` - Fields that compose the ID (e.g., `[project, service_name]`)
+- `identityFields` - Fields that compose the ID (e.g., `[project, service_name]`)
 - `clientHandler` - API client type: `project`, `service`, `organization`, `organizationbilling`, etc.
 - `remove` - Fields to exclude from schema (exact paths or glob patterns)
 - `rename` - Field name mappings (API field -> Terraform field)
@@ -196,8 +196,14 @@ resource:
 ```
 
 `importIDFormats` generates every listed form in both the resource's `Import` documentation and
-`examples/resources/<resource>/import.sh`. It does not change `IDFields` or runtime import parsing.
-Omit it when the single import form can be derived from `idAttributeComposed`.
+`examples/resources/<resource>/import.sh`. It does not change `IdentityFields` or runtime import parsing.
+Omit it when the single import form can be derived from `identityFields`.
+
+`identityFields` fields compose the string ID and are also the resource identity
+(Terraform 1.12+). Each must be a top-level string attribute, and `Read` must rebuild state
+from them. `identityFieldsOptional` lists the trailing `identityFields` not required for identity import;
+unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
+identity import for every resource.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
 successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
@@ -543,15 +549,11 @@ The generator produces `zz_view.go` with this structure:
 ```go
 const typeName = "aiven_my_resource"
 
-func idFields() []string {
-    return []string{"project", "service_name", "resource_name"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
-    Create:   createView,
-    Delete:   deleteView,
-    IDFields: idFields(),
-    Read:     readView,
+    Create:         createView,
+    Delete:         deleteView,
+    IdentityFields: []string{"project", "service_name", "resource_name"},
+    Read:           readView,
     RefreshState: &adapter.RefreshStateCondition{
         Attribute: "state",
         Desired: []string{"ACTIVE", "PENDING_PEER"},
@@ -565,7 +567,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-    IDFields:       idFields(),
+    IdentityFields: []string{"project", "service_name", "resource_name"},
     Read:           readView,
     Schema:         datasourceSchema,
     SchemaInternal: datasourceSchemaInternal(),
@@ -587,6 +589,8 @@ Beyond basic CRUD, `ResourceOptions` supports:
 - `ModifyPlan` — implements `resource.ResourceWithModifyPlan` (separate from `planModifier` in YAML)
 - `ValidateConfig` — implements `resource.ResourceWithValidateConfig`
 - `ConfigValidators` — implements `resource.ResourceWithConfigValidators`
+- `IdentityFieldsOptional` — generated from top-level `identityFieldsOptional` in the definition YAML
+- `MutableIdentity` — inferred when an identity field is sent in the Update request body
 - `RefreshStateCheck` — post-Create/Update convergence check that `refreshState` can't express (see [Resource Configuration](#resource-configuration))
 
 ## ResourceData Interface
@@ -898,7 +902,7 @@ schema:
 
 ## Data Source with Alternative Lookup Key
 
-When a data source should look up by a field that's NOT in `idAttributeComposed` (e.g., lookup by `name` but resource ID uses `application_id`), add a second `read` operation marked `datasourceLookup: true` with `resultListLookupKeys`. The generator inlines the lookup body into `readView` as an id-empty branch:
+When a data source should look up by a field that's NOT in `identityFields` (e.g., lookup by `name` but resource ID uses `application_id`), add a second `read` operation marked `datasourceLookup: true` with `resultListLookupKeys`. The generator inlines the lookup body into `readView` as an id-empty branch:
 
 ```go
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
@@ -918,7 +922,7 @@ The data source uses the same `readView` directly — no separate `dataReadView`
 **YAML:**
 ```yaml
 clientHandler: flinkapplication
-idAttributeComposed: [project, service_name, application_id]
+identityFields: [project, service_name, application_id]
 rename:
   id: application_id
 operations:
@@ -1012,7 +1016,7 @@ Search the codebase for similar patterns:
 | Pattern | Search Command |
 |---------|---------------|
 | Data source (list) | `grep -l "datasource:" definitions/aiven_*.yml \| xargs grep -l "resultToKey"` |
-| Composite ID | `grep -l "idAttributeComposed:" definitions/aiven_*.yml \| head -3` |
+| Composite ID | `grep -l "identityFields:" definitions/aiven_*.yml \| head -3` |
 | Custom modifiers | `grep -l "expandModifier: true" definitions/aiven_*.yml` |
 | Field renaming | `grep -l "rename:" definitions/aiven_*.yml` |
 | Alt data source lookup key | `grep -l "datasourceLookup: true" definitions/aiven_*.yml` |
@@ -1024,10 +1028,10 @@ Search the codebase for similar patterns:
 | Error | Solution |
 |-------|----------|
 | `operationID X not found` | Search OpenAPI: `jq '.paths \| to_entries[] \| .value \| to_entries[] \| .value.operationId' openapi.json \| grep -i X` |
-| `no 'id' field found` | Add `idAttributeComposed: [field1, field2]` to YAML |
+| `no 'id' field found` | Add `identityFields: [field1, field2]` to YAML |
 | `ID field "X" not found` | Verify field exists in API response, check `rename` mappings |
 | Generation fails | Run `task get-spec`, validate YAML syntax, check operation IDs |
-| Infinite plan changes | Use `arrayOrdered` not `array`, ensure `idAttributeComposed` fields are stable |
+| Infinite plan changes | Use `arrayOrdered` not `array`, ensure `identityFields` fields are stable |
 | "was null, but now cty.X" | Add `computed: true` + `useStateForUnknown: true` to field |
 
 ## Reference Implementations

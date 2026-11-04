@@ -13,14 +13,8 @@ import (
 
 const typeName = "aiven_kafka_topic_list"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_topic_list.foo PROJECT/SERVICE_NAME
-func idFields() []string {
-	return []string{"project", "service_name"}
-}
-
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name"},
 	Read:                readView,
 	RequireServiceReady: []string{"kafka"},
 	Schema:              datasourceSchema,

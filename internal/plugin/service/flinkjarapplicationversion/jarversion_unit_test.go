@@ -25,7 +25,7 @@ func TestModifyPlanUnknownSource(t *testing.T) {
 	t.Run("new resource does not require replacement", func(t *testing.T) {
 		d, err := adapter.NewResourceData(
 			resourceSchemaInternal(),
-			idFields(),
+			ResourceOptions.IdentityFields,
 			adapter.WithTestPlan(map[string]any{
 				"source": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
 			}),
@@ -40,7 +40,7 @@ func TestModifyPlanUnknownSource(t *testing.T) {
 	t.Run("existing resource requires replacement", func(t *testing.T) {
 		d, err := adapter.NewResourceData(
 			resourceSchemaInternal(),
-			idFields(),
+			ResourceOptions.IdentityFields,
 			adapter.WithTestPlan(map[string]any{
 				"source": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
 			}),

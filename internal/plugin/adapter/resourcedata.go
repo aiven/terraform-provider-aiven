@@ -46,6 +46,7 @@ type resourceData struct {
 	schema              *Schema
 	plan, state, config map[string]any
 	idFields            []string
+	idFieldsOptional    []string
 	isDataSource        bool
 	preservePlanValues  bool
 	requiresReplace     []string
@@ -197,11 +198,12 @@ func (d *resourceData) GetOk(key string) (any, bool) {
 	// by splitting the composite id, e.g. "project/vpc_id" -> ["project", "vpc_id"].
 	if isIDComponent {
 		if idStr, _ := d.state[idField].(string); idStr != "" {
-			parts, err := schemautil.SplitResourceID(idStr, len(d.idFields))
+			parts, err := splitID(idStr, d.idFields, d.idFieldsOptional)
 			if err != nil {
 				panic(fmt.Errorf("failed to split id from state: %w", err))
 			}
-			return parts[slices.Index(d.idFields, key)], true
+			part := parts[slices.Index(d.idFields, key)]
+			return part, part != ""
 		}
 	}
 
@@ -379,13 +381,20 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 	d.pruneUnsetEmptyCollections(state, norm)
 	maps.Copy(state, norm)
 
-	id := make([]string, len(d.idFields))
+	id := make([]string, 0, len(d.idFields))
 	for i, name := range d.idFields {
 		v, ok := d.GetOk(name)
 		if !ok {
+			if slices.Contains(d.idFieldsOptional, name) {
+				continue
+			}
 			return fmt.Errorf("no value for id field %q", name)
 		}
-		id[i] = v.(string)
+		// Omitting a middle field would shift later values when the ID is split.
+		if i != len(id) {
+			return fmt.Errorf("id field %q is set but preceding optional field %q is not", name, d.idFields[len(id)])
+		}
+		id = append(id, v.(string))
 	}
 
 	return d.SetID(id...)
@@ -603,6 +612,25 @@ func WithPreservePlanValues() ResourceDataOpt {
 		d.preservePlanValues = true
 		return nil
 	}
+}
+
+// WithIdentityFieldsOptional marks id fields that are left out of the ID when unset.
+func WithIdentityFieldsOptional(fields []string) ResourceDataOpt {
+	return func(d *resourceData) error {
+		d.idFieldsOptional = fields
+		return nil
+	}
+}
+
+// splitID maps id onto idFields. Optional fields are trailing, so a shorter ID omits the last
+// ones, which get "".
+func splitID(id string, idFields, optional []string) ([]string, error) {
+	n := min(max(strings.Count(id, "/")+1, len(idFields)-len(optional)), len(idFields))
+	parts, err := schemautil.SplitResourceID(id, n)
+	if err != nil {
+		return nil, err
+	}
+	return append(parts, make([]string, len(idFields)-n)...), nil
 }
 
 // WithPlan decodes the Terraform plan into ResourceData.

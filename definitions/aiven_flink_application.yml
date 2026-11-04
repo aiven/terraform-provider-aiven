@@ -7,7 +7,7 @@ resource:
 datasource:
   description: Gets information about an Aiven for Apache Flink® application.
 clientHandler: flinkapplication
-idAttributeComposed: [project, service_name, application_id]
+identityFields: [project, service_name, application_id]
 legacyTimeouts: true
 requireServiceReady: [flink]
 rename:

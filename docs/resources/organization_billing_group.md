@@ -117,3 +117,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_organization_billing_group.example ORGANIZATION_ID/BILLING_GROUP_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_organization_billing_group.example
+  identity = {
+    organization_id  = "ORGANIZATION_ID"
+    billing_group_id = "BILLING_GROUP_ID"
+  }
+}
+```

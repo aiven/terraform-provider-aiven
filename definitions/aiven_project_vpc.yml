@@ -30,7 +30,7 @@ datasource:
       description: The ID of the VPC in `project/project_vpc_id` format.
       deprecationMessage: This attribute is deprecated and will be removed in a future version. Use `project_vpc_id` instead.
 clientHandler: vpc
-idAttributeComposed: [project, project_vpc_id]
+identityFields: [project, project_vpc_id]
 legacyTimeouts: true
 expandModifier: true
 operations:

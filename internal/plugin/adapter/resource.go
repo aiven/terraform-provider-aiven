@@ -14,7 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
@@ -45,9 +48,17 @@ type ResourceOptions struct {
 	// Requires the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to be set.
 	Beta bool
 
-	// IDFields are used to build the resource ID.
-	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
-	IDFields []string
+	// IdentityFields build the string ID and are the identity attributes for identity
+	// import (Terraform 1.12+). Example: ["project_id", "instance_name"] == "project-123/instance-456"
+	IdentityFields []string
+
+	// IdentityFieldsOptional are the trailing IdentityFields not required for identity import.
+	// Unset ones are left out of the string ID: "foo/bar" instead of "foo/bar/baz".
+	IdentityFieldsOptional []string
+
+	// MutableIdentity disables Terraform's identity-change validation when identity attributes
+	// may change in place (set by the generator from Update request-body membership).
+	MutableIdentity bool
 
 	// RefreshState enables Read after Create and Update when non-nil. 404/403 are retried until
 	// the resource exists. An empty condition then completes; otherwise Attribute must reach one
@@ -151,6 +162,7 @@ var (
 	_ resource.Resource                     = (*resourceAdapter)(nil)
 	_ resource.ResourceWithConfigure        = (*resourceAdapter)(nil)
 	_ resource.ResourceWithImportState      = (*resourceAdapter)(nil)
+	_ resource.ResourceWithIdentity         = (*resourceAdapter)(nil)
 	_ resource.ResourceWithValidateConfig   = (*resourceAdapter)(nil)
 	_ resource.ResourceWithConfigValidators = (*resourceAdapter)(nil)
 	_ resource.ResourceWithModifyPlan       = (*resourceAdapter)(nil)
@@ -186,6 +198,7 @@ func (a *resourceAdapter) Metadata(
 	rsp *resource.MetadataResponse,
 ) {
 	rsp.TypeName = a.resource.TypeName
+	rsp.ResourceBehavior.MutableIdentity = a.resource.MutableIdentity
 }
 
 func (a *resourceAdapter) Schema(
@@ -196,14 +209,30 @@ func (a *resourceAdapter) Schema(
 	rsp.Schema = a.resource.Schema(ctx)
 }
 
+func (a *resourceAdapter) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, rsp *resource.IdentitySchemaResponse) {
+	rsp.IdentitySchema = identityschema.Schema{
+		Attributes: make(map[string]identityschema.Attribute, len(a.resource.IdentityFields)),
+	}
+	for _, name := range a.resource.IdentityFields {
+		attr := identityschema.StringAttribute{RequiredForImport: true}
+		if slices.Contains(a.resource.IdentityFieldsOptional, name) {
+			attr = identityschema.StringAttribute{OptionalForImport: true}
+		}
+		rsp.IdentitySchema.Attributes[name] = attr
+	}
+}
+
 func (a *resourceAdapter) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	rsp *resource.CreateResponse,
 ) {
+	defer func() { a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics) }()
+
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithPlan(req.Plan),
 		WithConfig(req.Config),
 	)
@@ -241,7 +270,7 @@ func (a *resourceAdapter) Create(
 		// tainted. Checkpoint a successfully created resource before polling so it remains
 		// manageable when the post-Create refresh fails. Do not checkpoint a failed
 		// AlreadyExists adoption.
-		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IDFields)
+		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
 		if stateCheckpointed {
 			rsp.State.Raw = d.tfValue()
 		}
@@ -250,7 +279,7 @@ func (a *resourceAdapter) Create(
 		if err != nil {
 			// A successful Read may populate a server-assigned ID that was unavailable before
 			// polling. Preserve it without replacing an earlier, known-good checkpoint.
-			if createSucceeded && !stateCheckpointed && ensurePostCreateID(d, a.resource.IDFields) {
+			if createSucceeded && !stateCheckpointed && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
 				rsp.State.Raw = d.tfValue()
 			}
 			diags.AddError("failed to refresh state", err.Error())
@@ -265,7 +294,7 @@ func (a *resourceAdapter) Create(
 // Create operations without a response rely on the subsequent Read to set the ID, even when every
 // component is already known from configuration. Build that ID here so a refresh failure does not
 // lose an otherwise successful Create.
-func ensurePostCreateID(d ResourceData, idFields []string) bool {
+func ensurePostCreateID(d ResourceData, idFields, optional []string) bool {
 	if d.ID() != "" {
 		return true
 	}
@@ -273,16 +302,20 @@ func ensurePostCreateID(d ResourceData, idFields []string) bool {
 		return false
 	}
 
-	parts := make([]string, len(idFields))
+	parts := make([]string, 0, len(idFields))
 	for i, field := range idFields {
-		value, ok := d.GetOk(field)
-		if !ok {
+		value, _ := d.GetOk(field)
+		part, _ := value.(string)
+		if part == "" {
+			if slices.Contains(optional, field) {
+				continue
+			}
 			return false
 		}
-		parts[i], ok = value.(string)
-		if !ok || parts[i] == "" {
+		if i != len(parts) {
 			return false
 		}
+		parts = append(parts, part)
 	}
 
 	return d.SetID(parts...) == nil
@@ -293,9 +326,19 @@ func (a *resourceAdapter) Read(
 	req resource.ReadRequest,
 	rsp *resource.ReadResponse,
 ) {
+	defer func() {
+		state := rsp.State
+		if rsp.State.Raw.IsNull() {
+			// Framework still validates identity when Read removes a missing object.
+			state = req.State
+		}
+		a.setIdentity(ctx, state, rsp.Identity, &rsp.Diagnostics)
+	}()
+
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithState(req.State),
 	)
 	if err != nil {
@@ -490,9 +533,12 @@ func (a *resourceAdapter) Update(
 	req resource.UpdateRequest,
 	rsp *resource.UpdateResponse,
 ) {
+	defer func() { a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics) }()
+
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithPlan(req.Plan),
 		WithState(req.State),
 		WithConfig(req.Config),
@@ -654,7 +700,8 @@ func (a *resourceAdapter) Delete(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithState(req.State),
 	)
 	if err != nil {
@@ -818,19 +865,45 @@ func (a *resourceAdapter) ImportState(
 	req resource.ImportStateRequest,
 	rsp *resource.ImportStateResponse,
 ) {
-	// Set only ID fields here; Terraform runs Read afterward to populate full state.
-	values, err := schemautil.SplitResourceID(req.ID, len(a.resource.IDFields))
-	if err != nil {
-		importPath := schemautil.BuildResourceID(a.resource.IDFields...)
-		rsp.Diagnostics.AddError(
-			"Unexpected Read Identifier",
-			fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
-		)
+	if req.Identity != nil && !req.Identity.Raw.IsNull() {
+		for _, name := range a.resource.IdentityFields {
+			var value types.String
+			rsp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root(name), &value)...)
+			rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(name), value)...)
+		}
+	} else {
+		// Set only ID fields here; Terraform runs Read afterward to populate full state.
+		values, err := splitID(req.ID, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
+		if err != nil {
+			importPath := schemautil.BuildResourceID(a.resource.IdentityFields...)
+			rsp.Diagnostics.AddError(
+				"Unexpected Read Identifier",
+				fmt.Sprintf("Expected import identifier with format: %q. Got: %q", importPath, req.ID),
+			)
+			return
+		}
+
+		for i, v := range values {
+			if v != "" {
+				rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.resource.IdentityFields[i]), v)...)
+			}
+		}
+	}
+	if !rsp.Diagnostics.HasError() {
+		a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics)
+	}
+}
+
+func (a *resourceAdapter) setIdentity(ctx context.Context, state tfsdk.State, identity *tfsdk.ResourceIdentity, diags *diag.Diagnostics) {
+	if identity == nil || state.Raw.IsNull() {
 		return
 	}
-
-	for i, v := range values {
-		rsp.Diagnostics.Append(rsp.State.SetAttribute(ctx, path.Root(a.resource.IDFields[i]), v)...)
+	// Also preserve identity when Create succeeded but its readiness check failed:
+	// the checkpointed state still represents a remote object that needs cleanup.
+	for _, name := range a.resource.IdentityFields {
+		var value types.String
+		diags.Append(state.GetAttribute(ctx, path.Root(name), &value)...)
+		diags.Append(identity.SetAttribute(ctx, path.Root(name), value)...)
 	}
 }
 
@@ -866,7 +939,8 @@ func (a *resourceAdapter) ValidateConfig(
 
 	diags := &rsp.Diagnostics
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields,
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithConfig(req.Config),
 	)
 	if err != nil {
@@ -926,13 +1000,14 @@ func (a *resourceAdapter) ModifyPlan(
 
 	diags := &rsp.Diagnostics
 	opts := []ResourceDataOpt{
+		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
 		WithPreservePlanValues(),
 		WithPlan(req.Plan),
 		WithState(req.State),
 		WithConfig(req.Config),
 	}
 
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IDFields, opts...)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields, opts...)
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return

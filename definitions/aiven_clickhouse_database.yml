@@ -8,7 +8,7 @@ resource:
 datasource:
   description: Gets information about an Aiven for ClickHouse database.
 clientHandler: clickhouse
-idAttributeComposed: [project, service_name, name]
+identityFields: [project, service_name, name]
 legacyTimeouts: true
 requireServiceReady: [clickhouse]
 rename:

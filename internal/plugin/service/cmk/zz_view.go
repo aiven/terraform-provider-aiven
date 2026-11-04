@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_cmk"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_cmk.foo PROJECT/CMK_ID
-func idFields() []string {
-	return []string{"project", "cmk_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"project", "cmk_id"},
 	Read:           readView,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),

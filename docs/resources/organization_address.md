@@ -75,3 +75,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_organization_address.example ORGANIZATION_ID/ADDRESS_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_organization_address.example
+  identity = {
+    organization_id = "ORGANIZATION_ID"
+    address_id      = "ADDRESS_ID"
+  }
+}
+```

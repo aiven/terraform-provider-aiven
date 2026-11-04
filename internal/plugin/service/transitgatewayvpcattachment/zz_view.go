@@ -7,17 +7,11 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 
 const typeName = "aiven_transit_gateway_vpc_attachment"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_transit_gateway_vpc_attachment.foo ID
-func idFields() []string {
-	return []string{"id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:         createView,
 	Delete:         deleteView,
 	DeleteState:    &adapter.DeleteStateOptions{},
-	IDFields:       idFields(),
+	IdentityFields: []string{"id"},
 	Read:           readView,
 	RefreshState:   &adapter.RefreshStateCondition{},
 	RemoveMissing:  true,
@@ -28,7 +22,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"id"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

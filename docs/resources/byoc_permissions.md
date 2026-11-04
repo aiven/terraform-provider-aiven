@@ -80,3 +80,15 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_byoc_permissions.example ORGANIZATION_ID/CUSTOM_CLOUD_ENVIRONMENT_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_byoc_permissions.example
+  identity = {
+    organization_id             = "ORGANIZATION_ID"
+    custom_cloud_environment_id = "CUSTOM_CLOUD_ENVIRONMENT_ID"
+  }
+}
+```

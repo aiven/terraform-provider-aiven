@@ -19,7 +19,7 @@ resource:
 datasource:
   description: Gets information about an Azure VPC peering connection.
 clientHandler: organizationvpc
-idAttributeComposed: [organization_id, organization_vpc_id, azure_subscription_id, vnet_name, peer_resource_group]
+identityFields: [organization_id, organization_vpc_id, azure_subscription_id, vnet_name, peer_resource_group]
 legacyTimeouts: true
 flattenModifier: true
 rename:

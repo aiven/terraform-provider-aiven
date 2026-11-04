@@ -18,16 +18,10 @@ import (
 
 const typeName = "aiven_kafka_schema_registry_acl"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_schema_registry_acl.foo PROJECT/SERVICE_NAME/ACL_ID
-func idFields() []string {
-	return []string{"project", "service_name", "acl_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "acl_id"},
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
@@ -39,7 +33,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators:    datasourceConfigValidators,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "acl_id"},
 	Read:                readView,
 	RequireServiceReady: []string{"kafka"},
 	Schema:              datasourceSchema,

@@ -8,7 +8,7 @@ resource:
   stateAttribute: state
   refreshStateDesired: [created]
 clientHandler: staticip
-idAttributeComposed: [project, static_ip_address_id]
+identityFields: [project, static_ip_address_id]
 legacyTimeouts: true
 operations:
   - id: StaticIPCreate

@@ -181,7 +181,7 @@ func TestUpdateWithoutConfig(t *testing.T) {
 	state["config"] = []any{map[string]any{"retention_ms": "100"}}
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
-		idFields(),
+		ResourceOptions.IdentityFields,
 		adapter.WithTestPlan(values()),
 		adapter.WithTestState(state),
 	)

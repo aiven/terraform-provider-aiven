@@ -441,6 +441,54 @@ func TestResourceDataGetOkSplitsCompositeID(t *testing.T) {
 	}
 }
 
+func TestResourceDataFlattenOptionalIDFields(t *testing.T) {
+	t.Parallel()
+	sch := &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
+		"id":      {Type: SchemaTypeString, Computed: true},
+		"project": {Type: SchemaTypeString},
+		"name":    {Type: SchemaTypeString},
+		"region":  {Type: SchemaTypeString},
+	}}
+	newData := func(t *testing.T) ResourceData {
+		t.Helper()
+		d, err := NewResourceData(sch, []string{"project", "name", "region"},
+			WithIdentityFieldsOptional([]string{"name", "region"}), WithTestState(map[string]any{}))
+		require.NoError(t, err)
+		return d
+	}
+
+	t.Run("all fields present", func(t *testing.T) {
+		d := newData(t)
+		require.NoError(t, d.Flatten(map[string]any{"project": "project", "name": "example", "region": "region"}))
+		require.Equal(t, "project/example/region", d.ID())
+	})
+
+	t.Run("optional suffix omitted", func(t *testing.T) {
+		d := newData(t)
+		require.NoError(t, d.Flatten(map[string]any{"project": "project", "name": "example"}))
+		require.Equal(t, "project/example", d.ID())
+	})
+
+	t.Run("all optional fields omitted", func(t *testing.T) {
+		d := newData(t)
+		require.NoError(t, d.Flatten(map[string]any{"project": "project"}))
+		require.Equal(t, "project", d.ID())
+	})
+
+	t.Run("middle field omitted", func(t *testing.T) {
+		d := newData(t)
+		err := d.Flatten(map[string]any{"project": "project", "region": "region"})
+		require.ErrorContains(t, err, "preceding optional field")
+		require.Empty(t, d.ID())
+	})
+
+	t.Run("required field omitted", func(t *testing.T) {
+		d := newData(t)
+		require.ErrorContains(t, d.Flatten(map[string]any{"name": "example"}), `no value for id field "project"`)
+		require.Empty(t, d.ID())
+	})
+}
+
 // TestResourceDataFlattenRemovesEmptyComputedBlocks verifies that Flatten strips
 // unconfigured computed object blocks from resources but keeps them for data sources.
 func TestResourceDataFlattenRemovesEmptyComputedBlocks(t *testing.T) {

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 datasource:
   description: List all user groups within an organization
-idAttributeComposed: [organization_id]
+identityFields: [organization_id]
 operations:
   - id: UserGroupsList
     type: read

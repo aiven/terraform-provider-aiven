@@ -208,9 +208,6 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			// Renders the resourceName constant
 			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(def.typeName))
 
-			// Even datasources require to set ID
-			codes = append(codes, genIDFields(def.typeName, root))
-
 			// Generates views
 			if def.ClientHandler != "" {
 				views, err := genViews(def, root)
@@ -447,8 +444,8 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Adds the 'id' field if missing
 	idField, idExists := root.Properties["id"]
 	if !idExists {
-		if len(pkg.IDAttributeComposed) == 0 {
-			return nil, fmt.Errorf("no 'id' field found and no IDAttributeComposed defined")
+		if len(pkg.IdentityFields) == 0 {
+			return nil, fmt.Errorf("no 'id' field found and no identityFields defined")
 		}
 
 		idField = &Item{
@@ -464,11 +461,11 @@ func createRootItem(scope *Scope) (*Item, error) {
 	}
 
 	idField.IDAttribute = true
-	if idField.Description == "" && len(pkg.IDAttributeComposed) != 0 {
-		if len(pkg.IDAttributeComposed) > 1 {
-			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IDAttributeComposed...))
+	if idField.Description == "" && len(pkg.IdentityFields) != 0 {
+		if len(pkg.IdentityFields) > 1 {
+			idField.Description = fmt.Sprintf("Resource ID composed as: `%s`", filepath.Join(pkg.IdentityFields...))
 		} else {
-			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IDAttributeComposed[0])
+			idField.Description = fmt.Sprintf("Resource ID, equal to `%s`.", pkg.IdentityFields[0])
 		}
 	}
 
@@ -481,7 +478,7 @@ func createRootItem(scope *Scope) (*Item, error) {
 	// Marks ID fields.
 	// The virtual "id" is not inferred by UsesStateForUnknown, so it is set here.
 	idField.OverrideUseStateForUnknown = or(idField.OverrideUseStateForUnknown, new(true))
-	for i, v := range pkg.IDAttributeComposed {
+	for i, v := range pkg.IdentityFields {
 		if _, ok := root.Properties[v]; !ok {
 			keys := sortedKeys(root.Properties)
 			return nil, fmt.Errorf("ID field %q not found in: %s", v, strings.Join(keys, ", "))

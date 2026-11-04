@@ -13,14 +13,8 @@ import (
 
 const typeName = "aiven_service_plan_list"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_service_plan_list.foo PROJECT/SERVICE_TYPE
-func idFields() []string {
-	return []string{"project", "service_type"}
-}
-
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"project", "service_type"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

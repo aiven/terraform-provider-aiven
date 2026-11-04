@@ -18,12 +18,6 @@ import (
 
 const typeName = "aiven_project_vpc"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_project_vpc.foo PROJECT/PROJECT_VPC_ID
-func idFields() []string {
-	return []string{"project", "project_vpc_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create: createView,
 	Delete: deleteView,
@@ -31,8 +25,8 @@ var ResourceOptions = adapter.ResourceOptions{
 		Attribute: "state",
 		Desired:   []string{"DELETED"},
 	},
-	IDFields: idFields(),
-	Read:     readView,
+	IdentityFields: []string{"project", "project_vpc_id"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"ACTIVE"},
@@ -45,7 +39,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 var DataSourceOptions = adapter.DataSourceOptions{
 	ConfigValidators: datasourceConfigValidators,
-	IDFields:         idFields(),
+	IdentityFields:   []string{"project", "project_vpc_id"},
 	Read:             readView,
 	Schema:           datasourceSchema,
 	SchemaInternal:   datasourceSchemaInternal(),

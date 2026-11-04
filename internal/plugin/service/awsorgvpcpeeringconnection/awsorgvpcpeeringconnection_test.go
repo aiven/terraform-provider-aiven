@@ -111,7 +111,7 @@ func newTestResourceData(t *testing.T) adapter.ResourceData {
 		"peering_connection_id": testConnectionID,
 	}
 
-	d, err := adapter.NewResourceData(resourceSchemaInternal(), idFields(), adapter.WithTestState(values))
+	d, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestState(values))
 	require.NoError(t, err)
 	return d
 }

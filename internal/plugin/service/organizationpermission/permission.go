@@ -29,7 +29,7 @@ const (
 func NewResource() resource.Resource {
 	return adapter.NewResource(adapter.ResourceOptions{
 		TypeName:       typeName,
-		IDFields:       idFields(),
+		IdentityFields: []string{"organization_id", "resource_type", "resource_id"},
 		Schema:         patchedSchema,
 		SchemaInternal: resourceSchemaInternal(),
 		Read:           readPermission,

@@ -4,7 +4,7 @@ datasource:
     Gets the OCI CMK accessor for an Aiven project.
     The accessor is used to authenticate Aiven to your Oracle Cloud Infrastructure (OCI) Vault.
 clientHandler: cmk
-idAttributeComposed: [project]
+identityFields: [project]
 operations:
   - id: CMKAccessorsList
     type: read

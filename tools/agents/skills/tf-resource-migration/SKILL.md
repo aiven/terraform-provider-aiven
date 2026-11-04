@@ -187,7 +187,7 @@ grep -B 5 "buildResourceID\|parseResourceID" internal/sdkprovider/service/resour
 
 **Set in YAML:**
 ```yaml
-idAttributeComposed: [project, service_name, database_name]
+identityFields: [project, service_name, database_name]
 ```
 
 ### 5. Handle Custom Logic
@@ -356,7 +356,7 @@ Before marking migration complete:
 | Issue | Solution |
 |-------|----------|
 | Sensitive field no longer marked sensitive | Set `sensitive: true` on the attribute (and nested fields if applicable); match SDK `Sensitive: true` exactly |
-| ID format changed accidentally | Verify `idAttributeComposed` matches SDK's ID builder |
+| ID format changed accidentally | Verify `identityFields` matches SDK's ID builder |
 | Set ordering causes diffs | Use `arrayOrdered` instead of `array` |
 | Read-only list of objects diffs on every plan | It must render as a computed attribute; check nothing inside it is `optional` (see Read-Only Nested Collections) |
 | Computed field becomes required | Keep as `computed: true` if API provides it |

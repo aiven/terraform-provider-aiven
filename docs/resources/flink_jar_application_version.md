@@ -105,3 +105,17 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_flink_jar_application_version.example PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_flink_jar_application_version.example
+  identity = {
+    project                = "PROJECT"
+    service_name           = "SERVICE_NAME"
+    application_id         = "APPLICATION_ID"
+    application_version_id = "APPLICATION_VERSION_ID"
+  }
+}
+```

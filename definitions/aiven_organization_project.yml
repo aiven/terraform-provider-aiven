@@ -20,7 +20,7 @@ operations:
   - id: ProjectKmsGetCA
     type: read
     resultToKey: certificate
-idAttributeComposed: [organization_id, project_id]
+identityFields: [organization_id, project_id]
 remove:
   - end_of_life_extension
   - features

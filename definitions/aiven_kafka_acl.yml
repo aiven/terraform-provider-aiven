@@ -9,7 +9,7 @@ resource:
 datasource:
   description: Gets information about an ACL entry for an Aiven for Apache Kafka® service.
 clientHandler: kafka
-idAttributeComposed: [project, service_name, acl_id]
+identityFields: [project, service_name, acl_id]
 legacyTimeouts: true
 requireServiceReady: [kafka]
 rename:

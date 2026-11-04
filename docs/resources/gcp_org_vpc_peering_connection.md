@@ -72,3 +72,17 @@ Import is supported using the following syntax:
 ```shell
 terraform import aiven_gcp_org_vpc_peering_connection.example ORGANIZATION_ID/ORGANIZATION_VPC_ID/GCP_PROJECT_ID/PEER_VPC
 ```
+
+With Terraform 1.12 or later, you can also import using resource identity:
+
+```terraform
+import {
+  to = aiven_gcp_org_vpc_peering_connection.example
+  identity = {
+    organization_id     = "ORGANIZATION_ID"
+    organization_vpc_id = "ORGANIZATION_VPC_ID"
+    gcp_project_id      = "GCP_PROJECT_ID"
+    peer_vpc            = "PEER_VPC"
+  }
+}
+```

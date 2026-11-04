@@ -14,17 +14,11 @@ import (
 
 const typeName = "aiven_byoc_aws_entity"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_byoc_aws_entity.foo ORGANIZATION_ID/CUSTOM_CLOUD_ENVIRONMENT_ID
-func idFields() []string {
-	return []string{"organization_id", "custom_cloud_environment_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Beta:           true,
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "custom_cloud_environment_id"},
 	Read:           readView,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),

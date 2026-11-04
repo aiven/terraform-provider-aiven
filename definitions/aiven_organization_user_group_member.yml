@@ -7,7 +7,7 @@ resource:
     Organization users must be [managed in the Aiven Console](https://aiven.io/docs/platform/howto/manage-org-users).
     Application users can be created and managed using the `aiven_organization_application_user` resource.
     Groups are granted roles and permissions using the `aiven_organization_permission` resource.
-idAttributeComposed: [organization_id, group_id, user_id]
+identityFields: [organization_id, group_id, user_id]
 operations:
   - id: UserGroupMembersUpdate
     type: create

@@ -14,17 +14,11 @@ import (
 
 const typeName = "aiven_kafka_connect_custom_plugin_file"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_connect_custom_plugin_file.foo ORGANIZATION_ID/PLUGIN_FILE_ID
-func idFields() []string {
-	return []string{"organization_id", "plugin_file_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Beta:           true,
 	Create:         createView,
 	Delete:         deleteView,
-	IDFields:       idFields(),
+	IdentityFields: []string{"organization_id", "plugin_file_id"},
 	ModifyPlan:     modifyPlan,
 	Read:           readView,
 	RefreshState:   &adapter.RefreshStateCondition{},

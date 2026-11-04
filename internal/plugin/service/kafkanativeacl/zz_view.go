@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_kafka_native_acl"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_native_acl.foo PROJECT/SERVICE_NAME/ACL_ID
-func idFields() []string {
-	return []string{"project", "service_name", "acl_id"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:              createView,
 	Delete:              deleteView,
-	IDFields:            idFields(),
+	IdentityFields:      []string{"project", "service_name", "acl_id"},
 	Read:                readView,
 	RefreshState:        &adapter.RefreshStateCondition{},
 	RemoveMissing:       true,
