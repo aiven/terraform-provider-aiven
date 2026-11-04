@@ -1,7 +1,7 @@
 # The schema every service shares, in the shape SDKv2 stored it.
 # A service definition includes it and adds its operations, user config and connection info,
 # see internal/plugin/util/serviceutil for the fields mapped by hand.
-idAttributeComposed: [project, service_name]
+identityFields: [project, service_name]
 legacyTimeouts: true
 clientHandler: service
 userConfigDiscriminator: service_type
@@ -61,6 +61,8 @@ schema:
     ref: aiven_organization_project.project_id
   cloud_name:
     computed: true
+    # Unset, the API keeps the cloud: an unknown would reset the outputs, see serviceutil.Service.Wrap
+    useStateForUnknown: true
     example: google-europe-west1
     description: "The cloud provider and region the service is hosted in. The format is `provider-region`, for example: `google-europe-west1`. The [available cloud regions](https://aiven.io/docs/platform/reference/list_of_clouds) can differ per project and service. Changing this value [migrates the service to another cloud provider or region](https://aiven.io/docs/platform/howto/migrate-services-cloud-region). The migration runs in the background and includes a DNS update to redirect traffic to the new region. Most services experience no downtime, but some databases may have a brief interruption during DNS propagation."
   plan:
@@ -125,6 +127,8 @@ schema:
     type: string
     optional: true
     computed: true
+    # serviceutil.Service.ModifyPlan resets it on a removal, Wrap marks it unknown on a disk change
+    useStateForUnknown: true
     example: 30GiB
     pattern: ^[1-9][0-9]*(GiB|G)$
     conflictsWith: [disk_space]

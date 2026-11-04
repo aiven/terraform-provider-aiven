@@ -34,12 +34,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) to the default disk space defined by the `plan`. The increment size depends on the service type, cloud provider and plan; see the `disk_space_step` attribute for the value that applies to your service. The maximum value also depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes. The field conflicts with `disk_space`. Must match pattern: `^[1-9][0-9]*(GiB|G)$`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[1-9][0-9]*(GiB|G)$"), "must match pattern \"^[1-9][0-9]*(GiB|G)$\""), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("disk_space"))},
 			},
 			"cloud_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The cloud provider and region the service is hosted in. The format is `provider-region`, for example: `google-europe-west1`. The [available cloud regions](https://aiven.io/docs/platform/reference/list_of_clouds) can differ per project and service. Changing this value [migrates the service to another cloud provider or region](https://aiven.io/docs/platform/howto/migrate-services-cloud-region). The migration runs in the background and includes a DNS update to redirect traffic to the new region. Most services experience no downtime, but some databases may have a brief interruption during DNS propagation. Maximum length: `256`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 			},
 			"cmk_id": schema.StringAttribute{
@@ -517,6 +519,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 									Optional:            true,
 									PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 								},
+								"collation_server": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "The default collation for databases created without one, which their new tables then inherit. Only collations of the utf8mb4 character set are accepted. Databases Aiven creates, defaultdb and those added through the API or Console, keep utf8mb4_0900_ai_ci. Changing it leaves existing databases as they are. A change applies to new connections at once. After the next server restart, for example at maintenance, an upgrade, a plan change or a node replacement, sessions reset with COM_RESET_CONNECTION also compare strings with this collation, which a change without a restart does not do. Every 0900 collation except utf8mb4_0900_ai_ci has an id above 255, so after that restart MySQL announces a wrong character set to connecting clients. Clients that take their character set from the server, such as PHP mysqli and PDO without a charset option and MySQL Connector/NET (MySql.Data) without CharSet, must then set utf8mb4 themselves. Default is utf8mb4_0900_ai_ci. The possible values are `utf8mb4_0900_ai_ci`, `utf8mb4_0900_as_ci`, `utf8mb4_0900_as_cs`, `utf8mb4_0900_bin`, `utf8mb4_bg_0900_ai_ci`, `utf8mb4_bg_0900_as_cs`, `utf8mb4_bin`, `utf8mb4_bs_0900_ai_ci`, `utf8mb4_bs_0900_as_cs`, `utf8mb4_croatian_ci`, `utf8mb4_cs_0900_ai_ci`, `utf8mb4_cs_0900_as_cs`, `utf8mb4_czech_ci`, `utf8mb4_da_0900_ai_ci`, `utf8mb4_da_0900_as_cs`, `utf8mb4_danish_ci`, `utf8mb4_de_pb_0900_ai_ci`, `utf8mb4_de_pb_0900_as_cs`, `utf8mb4_eo_0900_ai_ci`, `utf8mb4_eo_0900_as_cs`, `utf8mb4_es_0900_ai_ci`, `utf8mb4_es_0900_as_cs`, `utf8mb4_es_trad_0900_ai_ci`, `utf8mb4_es_trad_0900_as_cs`, `utf8mb4_esperanto_ci`, `utf8mb4_estonian_ci`, `utf8mb4_et_0900_ai_ci`, `utf8mb4_et_0900_as_cs`, `utf8mb4_general_ci`, `utf8mb4_german2_ci`, `utf8mb4_gl_0900_ai_ci`, `utf8mb4_gl_0900_as_cs`, `utf8mb4_hr_0900_ai_ci`, `utf8mb4_hr_0900_as_cs`, `utf8mb4_hu_0900_ai_ci`, `utf8mb4_hu_0900_as_cs`, `utf8mb4_hungarian_ci`, `utf8mb4_icelandic_ci`, `utf8mb4_is_0900_ai_ci`, `utf8mb4_is_0900_as_cs`, `utf8mb4_ja_0900_as_cs`, `utf8mb4_ja_0900_as_cs_ks`, `utf8mb4_la_0900_ai_ci`, `utf8mb4_la_0900_as_cs`, `utf8mb4_latvian_ci`, `utf8mb4_lithuanian_ci`, `utf8mb4_lt_0900_ai_ci`, `utf8mb4_lt_0900_as_cs`, `utf8mb4_lv_0900_ai_ci`, `utf8mb4_lv_0900_as_cs`, `utf8mb4_mn_cyrl_0900_ai_ci`, `utf8mb4_mn_cyrl_0900_as_cs`, `utf8mb4_nb_0900_ai_ci`, `utf8mb4_nb_0900_as_cs`, `utf8mb4_nn_0900_ai_ci`, `utf8mb4_nn_0900_as_cs`, `utf8mb4_persian_ci`, `utf8mb4_pl_0900_ai_ci`, `utf8mb4_pl_0900_as_cs`, `utf8mb4_polish_ci`, `utf8mb4_ro_0900_ai_ci`, `utf8mb4_ro_0900_as_cs`, `utf8mb4_roman_ci`, `utf8mb4_romanian_ci`, `utf8mb4_ru_0900_ai_ci`, `utf8mb4_ru_0900_as_cs`, `utf8mb4_sinhala_ci`, `utf8mb4_sk_0900_ai_ci`, `utf8mb4_sk_0900_as_cs`, `utf8mb4_sl_0900_ai_ci`, `utf8mb4_sl_0900_as_cs`, `utf8mb4_slovak_ci`, `utf8mb4_slovenian_ci`, `utf8mb4_spanish2_ci`, `utf8mb4_spanish_ci`, `utf8mb4_sr_latn_0900_ai_ci`, `utf8mb4_sr_latn_0900_as_cs`, `utf8mb4_sv_0900_ai_ci`, `utf8mb4_sv_0900_as_cs`, `utf8mb4_swedish_ci`, `utf8mb4_tr_0900_ai_ci`, `utf8mb4_tr_0900_as_cs`, `utf8mb4_turkish_ci`, `utf8mb4_unicode_520_ci`, `utf8mb4_unicode_ci`, `utf8mb4_vi_0900_ai_ci`, `utf8mb4_vi_0900_as_cs`, `utf8mb4_vietnamese_ci` and `utf8mb4_zh_0900_as_cs`.",
+									Optional:            true,
+									PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+									Validators:          []validator.String{stringvalidator.OneOf("utf8mb4_0900_ai_ci", "utf8mb4_0900_as_ci", "utf8mb4_0900_as_cs", "utf8mb4_0900_bin", "utf8mb4_bg_0900_ai_ci", "utf8mb4_bg_0900_as_cs", "utf8mb4_bin", "utf8mb4_bs_0900_ai_ci", "utf8mb4_bs_0900_as_cs", "utf8mb4_croatian_ci", "utf8mb4_cs_0900_ai_ci", "utf8mb4_cs_0900_as_cs", "utf8mb4_czech_ci", "utf8mb4_da_0900_ai_ci", "utf8mb4_da_0900_as_cs", "utf8mb4_danish_ci", "utf8mb4_de_pb_0900_ai_ci", "utf8mb4_de_pb_0900_as_cs", "utf8mb4_eo_0900_ai_ci", "utf8mb4_eo_0900_as_cs", "utf8mb4_es_0900_ai_ci", "utf8mb4_es_0900_as_cs", "utf8mb4_es_trad_0900_ai_ci", "utf8mb4_es_trad_0900_as_cs", "utf8mb4_esperanto_ci", "utf8mb4_estonian_ci", "utf8mb4_et_0900_ai_ci", "utf8mb4_et_0900_as_cs", "utf8mb4_general_ci", "utf8mb4_german2_ci", "utf8mb4_gl_0900_ai_ci", "utf8mb4_gl_0900_as_cs", "utf8mb4_hr_0900_ai_ci", "utf8mb4_hr_0900_as_cs", "utf8mb4_hu_0900_ai_ci", "utf8mb4_hu_0900_as_cs", "utf8mb4_hungarian_ci", "utf8mb4_icelandic_ci", "utf8mb4_is_0900_ai_ci", "utf8mb4_is_0900_as_cs", "utf8mb4_ja_0900_as_cs", "utf8mb4_ja_0900_as_cs_ks", "utf8mb4_la_0900_ai_ci", "utf8mb4_la_0900_as_cs", "utf8mb4_latvian_ci", "utf8mb4_lithuanian_ci", "utf8mb4_lt_0900_ai_ci", "utf8mb4_lt_0900_as_cs", "utf8mb4_lv_0900_ai_ci", "utf8mb4_lv_0900_as_cs", "utf8mb4_mn_cyrl_0900_ai_ci", "utf8mb4_mn_cyrl_0900_as_cs", "utf8mb4_nb_0900_ai_ci", "utf8mb4_nb_0900_as_cs", "utf8mb4_nn_0900_ai_ci", "utf8mb4_nn_0900_as_cs", "utf8mb4_persian_ci", "utf8mb4_pl_0900_ai_ci", "utf8mb4_pl_0900_as_cs", "utf8mb4_polish_ci", "utf8mb4_ro_0900_ai_ci", "utf8mb4_ro_0900_as_cs", "utf8mb4_roman_ci", "utf8mb4_romanian_ci", "utf8mb4_ru_0900_ai_ci", "utf8mb4_ru_0900_as_cs", "utf8mb4_sinhala_ci", "utf8mb4_sk_0900_ai_ci", "utf8mb4_sk_0900_as_cs", "utf8mb4_sl_0900_ai_ci", "utf8mb4_sl_0900_as_cs", "utf8mb4_slovak_ci", "utf8mb4_slovenian_ci", "utf8mb4_spanish2_ci", "utf8mb4_spanish_ci", "utf8mb4_sr_latn_0900_ai_ci", "utf8mb4_sr_latn_0900_as_cs", "utf8mb4_sv_0900_ai_ci", "utf8mb4_sv_0900_as_cs", "utf8mb4_swedish_ci", "utf8mb4_tr_0900_ai_ci", "utf8mb4_tr_0900_as_cs", "utf8mb4_turkish_ci", "utf8mb4_unicode_520_ci", "utf8mb4_unicode_ci", "utf8mb4_vi_0900_ai_ci", "utf8mb4_vi_0900_as_cs", "utf8mb4_vietnamese_ci", "utf8mb4_zh_0900_as_cs")},
+								},
 								"connect_timeout": schema.Int64Attribute{
 									Computed:            true,
 									MarkdownDescription: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Value must be between `2` and `3600`. Example: `10`.",
@@ -865,6 +874,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 									PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 									Validators:          []validator.Int64{int64validator.Between(134217728, 9223372036854775807)},
 								},
+								"schema_definition_cache": schema.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of schema definition objects the data dictionary object cache can hold. Raise it above the number of schemas on the service to keep their definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own schemas, so a high value costs nothing extra on a service with few schemas. Default is 256. Value must be between `256` and `524288`. Example: `4000`.",
+									Optional:            true,
+									PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+									Validators:          []validator.Int64{int64validator.Between(256, 524288)},
+								},
 								"slow_query_log": schema.BoolAttribute{
 									Computed:            true,
 									MarkdownDescription: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
@@ -890,6 +906,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 									MarkdownDescription: "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
 									Optional:            true,
 									PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+								},
+								"tablespace_definition_cache": schema.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of tablespace definition objects the data dictionary object cache can hold. Each InnoDB table stored in its own file is a separate tablespace, so raise it above the number of tables on the service to keep their tablespace definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own tables, so a high value costs nothing extra on a service with few tables. Default is 256. Value must be between `256` and `524288`. Example: `10000`.",
+									Optional:            true,
+									PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+									Validators:          []validator.Int64{int64validator.Between(256, 524288)},
 								},
 								"tmp_table_size": schema.Int64Attribute{
 									Computed:            true,
@@ -1364,6 +1387,10 @@ func resourceSchemaInternal() *adapter.Schema {
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
 									},
+									"collation_server": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
 									"connect_timeout": &adapter.Schema{
 										Computed:       true,
 										Type:           adapter.SchemaTypeInt,
@@ -1593,6 +1620,11 @@ func resourceSchemaInternal() *adapter.Schema {
 										Type:           adapter.SchemaTypeInt,
 										ZeroNotAllowed: true,
 									},
+									"schema_definition_cache": &adapter.Schema{
+										Computed:       true,
+										Type:           adapter.SchemaTypeInt,
+										ZeroNotAllowed: true,
+									},
 									"slow_query_log": &adapter.Schema{
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
@@ -1609,6 +1641,11 @@ func resourceSchemaInternal() *adapter.Schema {
 									"sql_require_primary_key": &adapter.Schema{
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
+									},
+									"tablespace_definition_cache": &adapter.Schema{
+										Computed:       true,
+										Type:           adapter.SchemaTypeInt,
+										ZeroNotAllowed: true,
 									},
 									"tmp_table_size": &adapter.Schema{
 										Computed:       true,

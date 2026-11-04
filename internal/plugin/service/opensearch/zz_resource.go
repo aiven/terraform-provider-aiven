@@ -34,12 +34,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) to the default disk space defined by the `plan`. The increment size depends on the service type, cloud provider and plan; see the `disk_space_step` attribute for the value that applies to your service. The maximum value also depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes. The field conflicts with `disk_space`. Must match pattern: `^[1-9][0-9]*(GiB|G)$`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[1-9][0-9]*(GiB|G)$"), "must match pattern \"^[1-9][0-9]*(GiB|G)$\""), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("disk_space"))},
 			},
 			"cloud_name": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "The cloud provider and region the service is hosted in. The format is `provider-region`, for example: `google-europe-west1`. The [available cloud regions](https://aiven.io/docs/platform/reference/list_of_clouds) can differ per project and service. Changing this value [migrates the service to another cloud provider or region](https://aiven.io/docs/platform/howto/migrate-services-cloud-region). The migration runs in the background and includes a DNS update to redirect traffic to the new region. Most services experience no downtime, but some databases may have a brief interruption during DNS propagation. Maximum length: `256`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 			},
 			"cmk_id": schema.StringAttribute{
@@ -1108,6 +1110,20 @@ func resourceSchema(ctx context.Context) schema.Schema {
 										Optional:            true,
 										PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 										Validators:          []validator.String{stringvalidator.LengthAtMost(1024), stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+									},
+									"search_cancel_after_time_interval": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Must match pattern: `^\\d+\\s*(?:[dhms]|ms|micros|nanos)$`. Example: `5m`.",
+										Optional:            true,
+										PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+										Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^\\d+\\s*(?:[dhms]|ms|micros|nanos)$"), "must match pattern \"^\\\\d+\\\\s*(?:[dhms]|ms|micros|nanos)$\"")},
+									},
+									"search_default_search_timeout": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Must match pattern: `^\\d+\\s*(?:[dhms]|ms|micros|nanos)$`. Example: `30s`.",
+										Optional:            true,
+										PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+										Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^\\d+\\s*(?:[dhms]|ms|micros|nanos)$"), "must match pattern \"^\\\\d+\\\\s*(?:[dhms]|ms|micros|nanos)$\"")},
 									},
 									"search_max_buckets": schema.Int64Attribute{
 										Computed:            true,
@@ -3056,6 +3072,14 @@ func resourceSchemaInternal() *adapter.Schema {
 											Type: adapter.SchemaTypeObject,
 										},
 										Type: adapter.SchemaTypeList,
+									},
+									"search_cancel_after_time_interval": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"search_default_search_timeout": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
 									},
 									"search_insights_top_queries": &adapter.Schema{
 										Computed: true,

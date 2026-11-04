@@ -377,6 +377,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 									Computed:            true,
 									MarkdownDescription: "When enabled, the server automatically grants the EXECUTE and ALTER ROUTINE privileges to the creator of a stored routine and drops them when the routine is dropped.",
 								},
+								"collation_server": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "The default collation for databases created without one, which their new tables then inherit. Only collations of the utf8mb4 character set are accepted. Databases Aiven creates, defaultdb and those added through the API or Console, keep utf8mb4_0900_ai_ci. Changing it leaves existing databases as they are. A change applies to new connections at once. After the next server restart, for example at maintenance, an upgrade, a plan change or a node replacement, sessions reset with COM_RESET_CONNECTION also compare strings with this collation, which a change without a restart does not do. Every 0900 collation except utf8mb4_0900_ai_ci has an id above 255, so after that restart MySQL announces a wrong character set to connecting clients. Clients that take their character set from the server, such as PHP mysqli and PDO without a charset option and MySQL Connector/NET (MySql.Data) without CharSet, must then set utf8mb4 themselves. Default is utf8mb4_0900_ai_ci. The possible values are `utf8mb4_0900_ai_ci`, `utf8mb4_0900_as_ci`, `utf8mb4_0900_as_cs`, `utf8mb4_0900_bin`, `utf8mb4_bg_0900_ai_ci`, `utf8mb4_bg_0900_as_cs`, `utf8mb4_bin`, `utf8mb4_bs_0900_ai_ci`, `utf8mb4_bs_0900_as_cs`, `utf8mb4_croatian_ci`, `utf8mb4_cs_0900_ai_ci`, `utf8mb4_cs_0900_as_cs`, `utf8mb4_czech_ci`, `utf8mb4_da_0900_ai_ci`, `utf8mb4_da_0900_as_cs`, `utf8mb4_danish_ci`, `utf8mb4_de_pb_0900_ai_ci`, `utf8mb4_de_pb_0900_as_cs`, `utf8mb4_eo_0900_ai_ci`, `utf8mb4_eo_0900_as_cs`, `utf8mb4_es_0900_ai_ci`, `utf8mb4_es_0900_as_cs`, `utf8mb4_es_trad_0900_ai_ci`, `utf8mb4_es_trad_0900_as_cs`, `utf8mb4_esperanto_ci`, `utf8mb4_estonian_ci`, `utf8mb4_et_0900_ai_ci`, `utf8mb4_et_0900_as_cs`, `utf8mb4_general_ci`, `utf8mb4_german2_ci`, `utf8mb4_gl_0900_ai_ci`, `utf8mb4_gl_0900_as_cs`, `utf8mb4_hr_0900_ai_ci`, `utf8mb4_hr_0900_as_cs`, `utf8mb4_hu_0900_ai_ci`, `utf8mb4_hu_0900_as_cs`, `utf8mb4_hungarian_ci`, `utf8mb4_icelandic_ci`, `utf8mb4_is_0900_ai_ci`, `utf8mb4_is_0900_as_cs`, `utf8mb4_ja_0900_as_cs`, `utf8mb4_ja_0900_as_cs_ks`, `utf8mb4_la_0900_ai_ci`, `utf8mb4_la_0900_as_cs`, `utf8mb4_latvian_ci`, `utf8mb4_lithuanian_ci`, `utf8mb4_lt_0900_ai_ci`, `utf8mb4_lt_0900_as_cs`, `utf8mb4_lv_0900_ai_ci`, `utf8mb4_lv_0900_as_cs`, `utf8mb4_mn_cyrl_0900_ai_ci`, `utf8mb4_mn_cyrl_0900_as_cs`, `utf8mb4_nb_0900_ai_ci`, `utf8mb4_nb_0900_as_cs`, `utf8mb4_nn_0900_ai_ci`, `utf8mb4_nn_0900_as_cs`, `utf8mb4_persian_ci`, `utf8mb4_pl_0900_ai_ci`, `utf8mb4_pl_0900_as_cs`, `utf8mb4_polish_ci`, `utf8mb4_ro_0900_ai_ci`, `utf8mb4_ro_0900_as_cs`, `utf8mb4_roman_ci`, `utf8mb4_romanian_ci`, `utf8mb4_ru_0900_ai_ci`, `utf8mb4_ru_0900_as_cs`, `utf8mb4_sinhala_ci`, `utf8mb4_sk_0900_ai_ci`, `utf8mb4_sk_0900_as_cs`, `utf8mb4_sl_0900_ai_ci`, `utf8mb4_sl_0900_as_cs`, `utf8mb4_slovak_ci`, `utf8mb4_slovenian_ci`, `utf8mb4_spanish2_ci`, `utf8mb4_spanish_ci`, `utf8mb4_sr_latn_0900_ai_ci`, `utf8mb4_sr_latn_0900_as_cs`, `utf8mb4_sv_0900_ai_ci`, `utf8mb4_sv_0900_as_cs`, `utf8mb4_swedish_ci`, `utf8mb4_tr_0900_ai_ci`, `utf8mb4_tr_0900_as_cs`, `utf8mb4_turkish_ci`, `utf8mb4_unicode_520_ci`, `utf8mb4_unicode_ci`, `utf8mb4_vi_0900_ai_ci`, `utf8mb4_vi_0900_as_cs`, `utf8mb4_vietnamese_ci` and `utf8mb4_zh_0900_as_cs`.",
+								},
 								"connect_timeout": schema.Int64Attribute{
 									Computed:            true,
 									MarkdownDescription: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.",
@@ -581,6 +585,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 									Computed:            true,
 									MarkdownDescription: "The maximum amount of space in bytes to use for all relay logs while replicating from an external migration source. When the limit is reached, the replication I/O thread stops fetching relay log events until the SQL thread has caught up. Raise this to give a large migration a bigger relay-log budget; ensure the service disk is sized accordingly. The setting applies only on the node replicating from the external source; standby nodes always use the Aiven-managed default (the smaller of 5 GiB and 30% of the service disk), which is also used when this option is left unset. Changing this parameter will lead to a restart of the MySQL service. Example: `5368709120`.",
 								},
+								"schema_definition_cache": schema.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of schema definition objects the data dictionary object cache can hold. Raise it above the number of schemas on the service to keep their definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own schemas, so a high value costs nothing extra on a service with few schemas. Default is 256. Example: `4000`.",
+								},
 								"slow_query_log": schema.BoolAttribute{
 									Computed:            true,
 									MarkdownDescription: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
@@ -596,6 +604,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								"sql_require_primary_key": schema.BoolAttribute{
 									Computed:            true,
 									MarkdownDescription: "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
+								},
+								"tablespace_definition_cache": schema.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of tablespace definition objects the data dictionary object cache can hold. Each InnoDB table stored in its own file is a separate tablespace, so raise it above the number of tables on the service to keep their tablespace definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own tables, so a high value costs nothing extra on a service with few tables. Default is 256. Example: `10000`.",
 								},
 								"tmp_table_size": schema.Int64Attribute{
 									Computed:            true,
@@ -1031,6 +1043,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
 									},
+									"collation_server": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
 									"connect_timeout": &adapter.Schema{
 										Computed: true,
 										Type:     adapter.SchemaTypeInt,
@@ -1236,6 +1252,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 										Computed: true,
 										Type:     adapter.SchemaTypeInt,
 									},
+									"schema_definition_cache": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeInt,
+									},
 									"slow_query_log": &adapter.Schema{
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
@@ -1251,6 +1271,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 									"sql_require_primary_key": &adapter.Schema{
 										Computed: true,
 										Type:     adapter.SchemaTypeBool,
+									},
+									"tablespace_definition_cache": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeInt,
 									},
 									"tmp_table_size": &adapter.Schema{
 										Computed: true,

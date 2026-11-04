@@ -753,6 +753,14 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 										Computed:            true,
 										MarkdownDescription: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.",
 									},
+									"search_cancel_after_time_interval": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Example: `5m`.",
+									},
+									"search_default_search_timeout": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Example: `30s`.",
+									},
 									"search_max_buckets": schema.Int64Attribute{
 										Computed:            true,
 										MarkdownDescription: "Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.",
@@ -2402,6 +2410,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 											Type: adapter.SchemaTypeObject,
 										},
 										Type: adapter.SchemaTypeList,
+									},
+									"search_cancel_after_time_interval": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"search_default_search_timeout": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
 									},
 									"search_insights_top_queries": &adapter.Schema{
 										Computed: true,

@@ -359,6 +359,8 @@ Read-Only:
 - `remote_store` (Block List) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--remote_store))
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
 - `search_backpressure` (Block List) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
+- `search_cancel_after_time_interval` (String) Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Example: `5m`.
+- `search_default_search_timeout` (String) Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Example: `30s`.
 - `search_insights_top_queries` (Block List) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
 - `segrep` (Block List) Segment Replication Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--segrep))

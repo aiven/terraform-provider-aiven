@@ -203,7 +203,7 @@ Read-Only:
 - `valkey_active_defrag_threshold_lower` (Number) Minimum percentage of fragmentation before active defragmentation starts. Only takes effect when `valkey_activedefrag` is enabled. The default value is `10`.
 - `valkey_active_expire_effort` (Number) Valkey reclaims expired keys both when accessed and in the background. The background process scans for expired keys to free memory. Increasing the active-expire-effort setting (default 1, max 10) uses more CPU to reclaim expired keys faster, reducing memory usage but potentially increasing latency. The default value is `1`.
 - `valkey_activedefrag` (Boolean) Enable active memory defragmentation. When enabled, Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system. Defragmentation runs on the main thread and consumes CPU, so it may increase latency under load. The default value is `false`.
-- `valkey_io_threads` (Number) Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.
+- `valkey_io_threads` (Number) Set Valkey IO thread count. On Valkey 9.0 and later, changes are applied without a restart. On Valkey 8.1, changing this replaces the service nodes. Example: `1`.
 - `valkey_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. The default value is `1`.
 - `valkey_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.
 - `valkey_maxmemory_policy` (String) Valkey maxmemory-policy. The possible values are `allkeys-lfu`, `allkeys-lru`, `allkeys-random`, `noeviction`, `volatile-lfu`, `volatile-lru`, `volatile-random` and `volatile-ttl`. The default value is `noeviction`.
@@ -214,7 +214,7 @@ Read-Only:
 - `valkey_ssl` (Boolean) Require SSL to access Valkey. The default value is `true`.
 - `valkey_ssl_ca` (String) Select the certificate authority used by the Valkey TLS endpoint. The possible values are `letsencrypt` and `project_ca`.
 - `valkey_timeout` (Number) Valkey idle connection timeout in seconds. The default value is `300`.
-- `valkey_version` (String) Valkey major version. The possible values are `8.1`, `9.0` and `9.1`.
+- `valkey_version` (String) Valkey major version. The possible values are `8.1` and `9.1`.
 
 <a id="nestedblock--valkey_user_config--ip_filter_object"></a>
 ### Nested Schema for `valkey_user_config.ip_filter_object`

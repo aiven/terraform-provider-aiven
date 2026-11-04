@@ -14,16 +14,10 @@ import (
 
 const typeName = "aiven_kafka_mirrormaker"
 
-// idFields the ID attribute fields, i.e.:
-// terraform import aiven_kafka_mirrormaker.foo PROJECT/SERVICE_NAME
-func idFields() []string {
-	return []string{"project", "service_name"}
-}
-
 var ResourceOptions = adapter.ResourceOptions{
 	Create:                createView,
 	Delete:                deleteView,
-	IDFields:              idFields(),
+	IdentityFields:        []string{"project", "service_name"},
 	ModifyPlan:            modifyPlan,
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
@@ -36,7 +30,7 @@ var ResourceOptions = adapter.ResourceOptions{
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IDFields:       idFields(),
+	IdentityFields: []string{"project", "service_name"},
 	Read:           readView,
 	Schema:         datasourceSchema,
 	SchemaInternal: datasourceSchemaInternal(),

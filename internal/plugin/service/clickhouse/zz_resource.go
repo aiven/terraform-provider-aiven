@@ -34,6 +34,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) to the default disk space defined by the `plan`. The increment size depends on the service type, cloud provider and plan; see the `disk_space_step` attribute for the value that applies to your service. The maximum value also depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart, and there might be a short downtime for services without an autoscaler integration or high availability capabilities. The field can be safely removed when autoscaler is enabled without causing any changes. The field conflicts with `disk_space`. Must match pattern: `^[1-9][0-9]*(GiB|G)$`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[1-9][0-9]*(GiB|G)$"), "must match pattern \"^[1-9][0-9]*(GiB|G)$\""), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("disk_space"))},
 			},
 			"clickhouse": schema.ListNestedAttribute{
@@ -52,6 +53,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "The cloud provider and region the service is hosted in. The format is `provider-region`, for example: `google-europe-west1`. The [available cloud regions](https://aiven.io/docs/platform/reference/list_of_clouds) can differ per project and service. Changing this value [migrates the service to another cloud provider or region](https://aiven.io/docs/platform/howto/migrate-services-cloud-region). The migration runs in the background and includes a DNS update to redirect traffic to the new region. Most services experience no downtime, but some databases may have a brief interruption during DNS propagation. Maximum length: `256`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
 			},
 			"cmk_id": schema.StringAttribute{

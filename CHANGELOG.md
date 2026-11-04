@@ -18,8 +18,10 @@ nav_order: 1
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
-- **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
-  When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+- **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_service_integration`
+  and `aiven_service_integration_endpoint`. When upgrading from v3, run `terraform apply -refresh-only` with
+  v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
   and `aiven_service_integration_endpoint` that remove a user config block. This affects resources managed with an earlier
   version whose configuration has no such block while the API returns one: SDKv2 stored it anyway, e.g.,
@@ -29,13 +31,6 @@ nav_order: 1
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
 - Migrate `aiven_service_integration` and `aiven_service_integration_endpoint` resources and data sources to the Plugin Framework.
-- **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_service_integration`
-  and `aiven_service_integration_endpoint`. When upgrading from v3, run `terraform apply -refresh-only` with
-  v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
-- Migrate `aiven_service_integration` and `aiven_service_integration_endpoint` resources and data sources to the Plugin
-  Framework. `integration_type` and `endpoint_type` accept every type the API supports, except `kafka_inkless_postgresql`,
-  which Aiven manages.
 - Add `aiven_service_integration` fields `active`, `description`, `source_service_type`, `destination_service_type`,
   `source_endpoint_name` and `destination_endpoint_name`, and `aiven_service_integration_endpoint` field `endpoint_id`.
 - Change `aiven_service_integration` and `aiven_service_integration_endpoint`: validate the user config, names

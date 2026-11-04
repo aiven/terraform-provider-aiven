@@ -327,7 +327,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"valkey_io_threads": schema.Int64Attribute{
 							Computed:            true,
-							MarkdownDescription: "Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.",
+							MarkdownDescription: "Set Valkey IO thread count. On Valkey 9.0 and later, changes are applied without a restart. On Valkey 8.1, changing this replaces the service nodes. Example: `1`.",
 						},
 						"valkey_lfu_decay_time": schema.Int64Attribute{
 							Computed:            true,
@@ -371,7 +371,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"valkey_version": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Valkey major version. The possible values are `8.1`, `9.0` and `9.1`.",
+							MarkdownDescription: "Valkey major version. The possible values are `8.1` and `9.1`.",
 						},
 					},
 					Blocks: map[string]schema.Block{

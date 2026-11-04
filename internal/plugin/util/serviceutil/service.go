@@ -68,7 +68,13 @@ func (s Service) Wrap(r *adapter.ResourceOptions, ds *adapter.DataSourceOptions)
 		if !changed {
 			return nil
 		}
-		return d.SetUnknown(computed...)
+
+		// The read sets it from the disk and the plan default
+		keys := computed
+		if _, ok := d.GetConfigOk("additional_disk_space"); !ok {
+			keys = append(slices.Clone(computed), "additional_disk_space")
+		}
+		return d.SetUnknown(keys...)
 	}
 
 	create, update, del := r.Create, r.Update, r.Delete

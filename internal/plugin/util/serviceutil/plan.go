@@ -69,15 +69,16 @@ func (s Service) ModifyPlan(ctx context.Context, client avngen.Client, d adapter
 
 	_, diskSet := d.GetConfigOk("disk_space")
 	_, additionalSet := d.GetConfigOk("additional_disk_space")
-	additional := d.Get("additional_disk_space").(string)
-	if diskSet || additional != "" {
+	// SDKv2 stored "0B" for no additional disk
+	additional := toMB(d.Get("additional_disk_space").(string)) > 0
+	if diskSet || additional {
 		if err := s.checkDiskSpace(ctx, client, d); err != nil {
 			return err
 		}
 	}
 
 	// additional_disk_space is either set, or the disk is larger than the plan default
-	if !d.IsNewResource() && additional != "" {
+	if !d.IsNewResource() && additional {
 		rsp, err := client.ServiceGet(ctx, project, name)
 		if err != nil && !avngen.IsNotFound(err) {
 			return err
