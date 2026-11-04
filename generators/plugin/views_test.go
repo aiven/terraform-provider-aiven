@@ -29,6 +29,11 @@ func TestGenNewResourceIdentityFields(t *testing.T) {
 		"count":     {Type: SchemaTypeInteger},
 		"token":     {Type: SchemaTypeString, WriteOnly: true},
 	}}
+	optionalItem := &Item{Properties: map[string]*Item{
+		"project":   item.Properties["project"],
+		"remote_id": item.Properties["remote_id"],
+		"region":    {Name: "region", Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 2},
+	}}
 
 	t.Run("generates identity fields from ID attributes", func(t *testing.T) {
 		def := newDef(t, "{identityFields: [project, remote_id]}")
@@ -39,7 +44,7 @@ func TestGenNewResourceIdentityFields(t *testing.T) {
 
 	t.Run("generates optional import fields separately", func(t *testing.T) {
 		def := newDef(t, "{identityFields: [project, remote_id, region], identityFieldsOptional: [region]}")
-		code, err := genNewResource(resourceType, def, item, false)
+		code, err := genNewResource(resourceType, def, optionalItem, false)
 		require.NoError(t, err)
 		got := strings.Join(strings.Fields(renderCode(t, code)), " ")
 		require.Contains(t, got, `IdentityFieldsOptional: []string{"region"}`)
@@ -50,20 +55,29 @@ func TestGenNewResourceIdentityFields(t *testing.T) {
 		require.EqualError(t, err, `identityFieldsOptional requires "remote_id" to be listed in identityFields after the required fields`)
 	})
 
-	t.Run("validates optional import fields", func(t *testing.T) {
-		for _, tt := range []struct {
-			fields string
-			err    string
-		}{
-			{"[]", "identityFieldsOptional must not be empty; omit it when unused"},
-			{"[region, region]", `identityFieldsOptional contains duplicate field "region"`},
-			{"[remote_id]", `identityFieldsOptional requires "remote_id" to be listed in identityFields after the required fields`},
-		} {
-			t.Run(tt.fields, func(t *testing.T) {
-				_, err := genNewResource(resourceType, newDef(t, "{identityFields: [project, remote_id, region], identityFieldsOptional: "+tt.fields+"}"), item, false)
-				require.EqualError(t, err, tt.err)
-			})
+	t.Run("validates optional ID fields", func(t *testing.T) {
+		testValidation := func(t *testing.T, entity entityType) {
+			t.Helper()
+			for _, tt := range []struct {
+				fields string
+				err    string
+			}{
+				{"[]", "identityFieldsOptional must not be empty; omit it when unused"},
+				{"[region, region]", `identityFieldsOptional contains duplicate field "region"`},
+				{"[remote_id]", `identityFieldsOptional requires "remote_id" to be listed in identityFields after the required fields`},
+			} {
+				t.Run(tt.fields, func(t *testing.T) {
+					def := newDef(t, "{identityFields: [project, remote_id, region], identityFieldsOptional: "+tt.fields+"}")
+					if entity.IsDataSource() {
+						def.Resource = nil
+					}
+					_, err := genNewResource(entity, def, optionalItem, false)
+					require.EqualError(t, err, tt.err)
+				})
+			}
 		}
+		t.Run("resource", func(t *testing.T) { testValidation(t, resourceType) })
+		t.Run("data source", func(t *testing.T) { testValidation(t, datasourceType) })
 	})
 
 	t.Run("omitting identityFieldsOptional keeps import fields required", func(t *testing.T) {
@@ -72,12 +86,15 @@ func TestGenNewResourceIdentityFields(t *testing.T) {
 		require.NotContains(t, renderCode(t, code), "IdentityFieldsOptional:")
 	})
 
-	t.Run("does not add identity to the data source", func(t *testing.T) {
-		def := newDef(t, "{identityFields: [project, remote_id], identityFieldsOptional: [region]}")
-		code, err := genNewResource(datasourceType, def, item, false)
+	t.Run("generates optional ID fields for the data source", func(t *testing.T) {
+		def := newDef(t, "{identityFields: [project, remote_id, region], identityFieldsOptional: [region]}")
+		def.Resource = nil
+		code, err := genNewResource(datasourceType, def, optionalItem, false)
 		require.NoError(t, err)
-		require.NotContains(t, renderCode(t, code), "IdentityFieldsOptional:")
-		require.NotContains(t, renderCode(t, code), "MutableIdentity:")
+		got := strings.Join(strings.Fields(renderCode(t, code)), " ")
+		require.Contains(t, got, `IdentityFields: []string{"project", "remote_id", "region"}`)
+		require.Contains(t, got, `IdentityFieldsOptional: []string{"region"}`)
+		require.NotContains(t, got, "MutableIdentity:")
 	})
 
 	t.Run("infers MutableIdentity from the Update request body", func(t *testing.T) {

@@ -97,49 +97,50 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 		values[firstUpper(v.Type)] = jen.Id(fmt.Sprintf("%s%s", v.Type, viewSuffix))
 	}
 
-	if entity.isResource() {
-		res := def.Resource
-		for _, setting := range []struct {
-			name   string
-			fields []string
-		}{
-			{"identityFields", def.IdentityFields},
-			{"identityFieldsOptional", def.IdentityFieldsOptional},
-		} {
-			if setting.fields == nil {
+	for _, setting := range []struct {
+		name   string
+		fields []string
+	}{
+		{"identityFields", def.IdentityFields},
+		{"identityFieldsOptional", def.IdentityFieldsOptional},
+	} {
+		if setting.fields == nil {
+			continue
+		}
+		if len(setting.fields) == 0 {
+			return nil, fmt.Errorf("%s must not be empty; omit it when unused", setting.name)
+		}
+		identityFields := make(map[string]bool)
+		for _, name := range setting.fields {
+			if identityFields[name] {
+				return nil, fmt.Errorf("%s contains duplicate field %q", setting.name, name)
+			}
+			identityFields[name] = true
+			if setting.name == "identityFieldsOptional" {
+				// Trailing, so a shorter string ID unambiguously omits the last fields.
+				if i := slices.Index(def.IdentityFields, name); i < 0 || i < len(def.IdentityFields)-len(setting.fields) {
+					return nil, fmt.Errorf("%s requires %q to be listed in identityFields after the required fields", setting.name, name)
+				}
 				continue
 			}
-			if len(setting.fields) == 0 {
-				return nil, fmt.Errorf("%s must not be empty; omit it when unused", setting.name)
+			prop, ok := item.Properties[name]
+			if !ok {
+				return nil, fmt.Errorf("%s requires %q attribute in schema", setting.name, name)
 			}
-			identityFields := make(map[string]bool)
-			for _, name := range setting.fields {
-				if identityFields[name] {
-					return nil, fmt.Errorf("%s contains duplicate field %q", setting.name, name)
-				}
-				identityFields[name] = true
-				if setting.name == "identityFieldsOptional" {
-					// Trailing, so a shorter string ID unambiguously omits the last fields.
-					if i := slices.Index(def.IdentityFields, name); i < 0 || i < len(def.IdentityFields)-len(setting.fields) {
-						return nil, fmt.Errorf("%s requires %q to be listed in identityFields after the required fields", setting.name, name)
-					}
-					continue
-				}
-				prop, ok := item.Properties[name]
-				if !ok {
-					return nil, fmt.Errorf("%s requires %q attribute in schema", setting.name, name)
-				}
-				if prop.Type != SchemaTypeString {
-					return nil, fmt.Errorf("%s requires %q to be a string attribute, got %q", setting.name, name, prop.Type)
-				}
-				if prop.WriteOnly {
-					return nil, fmt.Errorf("%s cannot use write-only attribute %q", setting.name, name)
-				}
+			if prop.Type != SchemaTypeString {
+				return nil, fmt.Errorf("%s requires %q to be a string attribute, got %q", setting.name, name, prop.Type)
+			}
+			if prop.WriteOnly {
+				return nil, fmt.Errorf("%s cannot use write-only attribute %q", setting.name, name)
 			}
 		}
-		if len(def.IdentityFieldsOptional) > 0 {
-			values["IdentityFieldsOptional"] = stringSliceLiteral(def.IdentityFieldsOptional)
-		}
+	}
+	if len(def.IdentityFieldsOptional) > 0 {
+		values["IdentityFieldsOptional"] = stringSliceLiteral(def.IdentityFieldsOptional)
+	}
+
+	if entity.isResource() {
+		res := def.Resource
 		// An updatable ID part changes identity in place; createRootItem drops UseStateForUnknown on id for the same reason.
 		if identityFieldsMutable(def, item) {
 			values["MutableIdentity"] = jen.True()

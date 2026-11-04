@@ -28,6 +28,9 @@ type DataSourceOptions struct {
 	// Example: ["project_id", "instance_name"] == "project-123/instance-456"
 	IdentityFields []string
 
+	// IdentityFieldsOptional are trailing ID fields omitted from the string ID when unset.
+	IdentityFieldsOptional []string
+
 	// Read is the only CRUD operation for datasource.
 	Read func(ctx context.Context, client avngen.Client, d ResourceData) error
 
@@ -112,6 +115,7 @@ func (a *datasourceAdapter) Read(
 	diags := &rsp.Diagnostics
 
 	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IdentityFields,
+		WithIdentityFieldsOptional(a.datasource.IdentityFieldsOptional),
 		WithIsDataSource(),
 		WithConfig(req.Config),
 	)
@@ -162,6 +166,7 @@ func (a *datasourceAdapter) ValidateConfig(ctx context.Context, req datasource.V
 	}
 
 	d, err := NewResourceData(a.datasource.SchemaInternal, a.datasource.IdentityFields,
+		WithIdentityFieldsOptional(a.datasource.IdentityFieldsOptional),
 		WithIsDataSource(),
 		WithConfig(req.Config),
 	)

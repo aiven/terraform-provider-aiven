@@ -263,7 +263,8 @@ properties:
       type: string
       minLength: 1
     $comment: |
-      Trailing identityFields not required for identity import; unset ones are left out of the string ID.
+      Trailing identityFields omitted from resource and data source string IDs when unset.
+      For resources, these fields are also optional during identity import.
   operations:
     type: array
     $comment: |

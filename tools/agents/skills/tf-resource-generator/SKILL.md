@@ -202,7 +202,7 @@ Omit it when the single import form can be derived from `identityFields`.
 `identityFields` fields compose the string ID and are also the resource identity
 (Terraform 1.12+). Each must be a top-level string attribute, and `Read` must rebuild state
 from them. `identityFieldsOptional` lists the trailing `identityFields` not required for identity import;
-unset ones are left out of the string ID (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
+unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
 identity import for every resource.
 
 `refreshStateExists: true` enables a post-Create/Update Read that completes on the first
