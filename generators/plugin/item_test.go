@@ -299,6 +299,21 @@ func TestAutoComputed(t *testing.T) {
 	})
 }
 
+func TestDatasourceLookupID(t *testing.T) {
+	for _, tt := range []struct {
+		fields, optional []string
+		want             string
+	}{
+		{nil, nil, "id"},
+		{[]string{"project", "name"}, nil, "name"},
+		{[]string{"project", "name", "region"}, []string{"region"}, "name"},
+		{[]string{"region"}, []string{"region"}, "id"},
+	} {
+		def := &Definition{IdentityFields: tt.fields, IdentityFieldsOptional: tt.optional}
+		assert.Equal(t, tt.want, def.DatasourceLookupID(), "%v optional %v", tt.fields, tt.optional)
+	}
+}
+
 func TestItemPath(t *testing.T) {
 	items := &Item{
 		Name: "array",
