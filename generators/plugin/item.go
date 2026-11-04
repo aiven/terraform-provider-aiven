@@ -292,9 +292,10 @@ func (d *Definition) DatasourceLookupOp() *Operation {
 
 // DatasourceLookupID returns the name of the primary lookup attribute used to
 // identify a single resource via the data source. For composite IDs, this is the
-// most specific (leaf) segment; otherwise it falls back to Terraform's standard "id".
+// most specific (leaf) required segment; otherwise it falls back to Terraform's standard "id".
+// Optional fields are trailing and may be unset, so they can't be the lookup key.
 func (d *Definition) DatasourceLookupID() string {
-	if n := len(d.IdentityFields); n > 0 {
+	if n := len(d.IdentityFields) - len(d.IdentityFieldsOptional); n > 0 {
 		return d.IdentityFields[n-1]
 	}
 	return "id"
