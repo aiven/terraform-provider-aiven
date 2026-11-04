@@ -2,6 +2,7 @@ package adapter_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/organizationprojects"
 	orgvpc "github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/aiven/go-client-codegen/handler/vpc"
 	"github.com/hashicorp/go-hclog"
@@ -38,6 +40,7 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationproject"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationvpc"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/projectvpc"
 )
@@ -196,6 +199,90 @@ func (p *identityTestProvider) Resources(context.Context) []func() frameworkreso
 		result[i] = adapter.NewLazyResource(opts)
 	}
 	return result
+}
+
+func TestResourceIdentityProjectMove(t *testing.T) {
+	const address = "aiven_organization_project.example"
+	source := organizationprojects.OrganizationProjectsGetOut{
+		OrganizationId: "org1111111111", ProjectId: "identity-test-project",
+		ParentId: "a1111111111", BillingGroupId: new("11111111-1111-4111-8111-111111111111"),
+		BasePort: new(10000), Tags: map[string]string{},
+		TechEmails: []organizationprojects.TechEmailOut{},
+	}
+	target := source
+	target.OrganizationId = "org2222222222"
+	target.ParentId = "a2222222222"
+	target.BillingGroupId = new("22222222-2222-4222-8222-222222222222")
+	config := func(project organizationprojects.OrganizationProjectsGetOut) string {
+		return fmt.Sprintf(`
+resource "aiven_organization_project" "example" {
+  project_id       = %q
+  organization_id  = %q
+  parent_id        = %q
+  billing_group_id = %q
+}
+`, project.ProjectId, project.OrganizationId, project.ParentId, *project.BillingGroupId)
+	}
+	identity := func(organizationID string) []statecheck.StateCheck {
+		return []statecheck.StateCheck{statecheck.ExpectIdentity(address, map[string]knownvalue.Check{
+			"organization_id": knownvalue.StringExact(organizationID),
+			"project_id":      knownvalue.StringExact(source.ProjectId),
+		})}
+	}
+
+	client := avngen.NewMockClient(t)
+	var moved atomic.Bool
+	created := organizationprojects.OrganizationProjectsCreateOut(source)
+	client.EXPECT().OrganizationProjectsCreate(mock.Anything, source.OrganizationId, mock.Anything).
+		Return(&created, nil).Once()
+	client.EXPECT().OrganizationProjectsGet(mock.Anything, mock.Anything, source.ProjectId).
+		RunAndReturn(func(_ context.Context, organizationID, _ string) (*organizationprojects.OrganizationProjectsGetOut, error) {
+			project := source
+			if moved.Load() {
+				project = target
+			}
+			assert.Equal(t, project.OrganizationId, organizationID)
+			return &project, nil
+		})
+	client.EXPECT().ProjectKmsGetCA(mock.Anything, source.ProjectId).Return("test-certificate", nil)
+	updated := organizationprojects.OrganizationProjectsUpdateOut(target)
+	client.EXPECT().OrganizationProjectsUpdate(mock.Anything, source.OrganizationId, source.ProjectId, mock.Anything).
+		Run(func(_ context.Context, _, _ string, req *organizationprojects.OrganizationProjectsUpdateIn) {
+			assert.Equal(t, &target.OrganizationId, req.OrganizationId)
+			assert.Equal(t, &target.ParentId, req.ParentId)
+			assert.Equal(t, target.BillingGroupId, req.BillingGroupId)
+			moved.Store(true)
+		}).Return(&updated, nil).Once()
+	client.EXPECT().OrganizationProjectsDelete(mock.Anything, target.OrganizationId, target.ProjectId).
+		Return(nil).Once()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"aiven": providerserver.NewProtocol6WithError(&identityTestProvider{
+				AivenProvider: plugin.AivenProvider{GenClient: client},
+				options:       []adapter.ResourceOptions{organizationproject.ResourceOptions},
+			}),
+		},
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{tfversion.SkipBelow(tfversion.Version1_12_0)},
+		Steps: []resource.TestStep{
+			{
+				Config:            config(source),
+				ConfigStateChecks: identity(source.OrganizationId),
+			},
+			{
+				Config: config(target),
+				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction(address, plancheck.ResourceActionUpdate),
+				}},
+				ConfigStateChecks: identity(target.OrganizationId),
+				Check:             resource.TestCheckResourceAttr(address, "id", target.OrganizationId+"/"+target.ProjectId),
+			},
+			{
+				ResourceName: address, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
 }
 
 const (
