@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/samber/lo"
@@ -26,8 +28,12 @@ type ResourceData interface {
 	GetOk(key string) (any, bool)
 	GetConfigOk(key string) (any, bool)
 	GetState(key string) any
+	GetStateOk(key string) (any, bool)
+	GetPrivate(ctx context.Context, key string) ([]byte, error)
+	SetPrivate(ctx context.Context, key string, value []byte) error
 	HasChange(key string) bool
 	Set(key string, value any) error
+	SetUnknown(key string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -50,9 +56,47 @@ type resourceData struct {
 	isDataSource        bool
 	preservePlanValues  bool
 	requiresReplace     []string
+	private             privateState
+	privateValues       map[string][]byte
+}
+
+// Framework's private state type is internal, so depend only on its public methods.
+type privateState interface {
+	GetKey(context.Context, string) ([]byte, diag.Diagnostics)
+	SetKey(context.Context, string, []byte) diag.Diagnostics
 }
 
 var _ ResourceData = (*resourceData)(nil)
+
+// GetPrivate reads a provider-private value.
+func (d *resourceData) GetPrivate(ctx context.Context, key string) ([]byte, error) {
+	if d.private != nil {
+		value, diags := d.private.GetKey(ctx, key)
+		return value, privateStateError(diags)
+	}
+	return bytes.Clone(d.privateValues[key]), nil
+}
+
+// SetPrivate persists a JSON value through Framework when a response is available.
+// Standalone view tests keep writes local to this ResourceData instead.
+func (d *resourceData) SetPrivate(ctx context.Context, key string, value []byte) error {
+	if d.private != nil {
+		return privateStateError(d.private.SetKey(ctx, key, value))
+	}
+	if d.privateValues == nil {
+		d.privateValues = make(map[string][]byte)
+	}
+	d.privateValues[key] = bytes.Clone(value)
+	return nil
+}
+
+func privateStateError(diags diag.Diagnostics) error {
+	var result error
+	for _, diagnostic := range diags.Errors() {
+		result = errors.Join(result, fmt.Errorf("%s: %s", diagnostic.Summary(), diagnostic.Detail()))
+	}
+	return result
+}
 
 // GetConfigOk looks up a value in the original Terraform configuration. Unlike GetOk,
 // it never falls back to plan or state. This is useful during a post-operation Read when
@@ -217,11 +261,18 @@ func (d *resourceData) GetState(key string) any {
 	if d.state == nil {
 		panic(fmt.Errorf("state is nil"))
 	}
-	v, _, _, err := getOk(d.schema, d.state, key)
+	v, _ := d.GetStateOk(key)
+	return v
+}
+
+// GetStateOk reads only prior state. During Create there is no prior state,
+// even after the new resource's ID has been checkpointed in the plan.
+func (d *resourceData) GetStateOk(key string) (any, bool) {
+	v, _, ok, err := getOk(d.schema, d.state, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get value for %q from state: %w", key, err))
 	}
-	return v
+	return v, ok
 }
 
 func (d *resourceData) HasChange(key string) bool {
@@ -248,6 +299,27 @@ func (d *resourceData) HasChange(key string) bool {
 // Returns an error if the key is not found in the schema.
 func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
+}
+
+// SetUnknown marks a computed attribute as unknown during ModifyPlan so Read can
+// determine its value during apply. Unknown values cannot be written to state.
+func (d *resourceData) SetUnknown(key string) error {
+	if d.plan == nil || !d.preservePlanValues {
+		return fmt.Errorf("SetUnknown is only supported during ModifyPlan")
+	}
+	prop, ok := d.schema.Properties[key]
+	if !ok {
+		return fmt.Errorf("key %q not found in schema", key)
+	}
+	if !prop.Computed {
+		return fmt.Errorf("attribute %q is not computed", key)
+	}
+	value, err := toTFValue(prop, nil)
+	if err != nil {
+		return err
+	}
+	d.plan[key] = tftypes.NewValue(value.Type(), tftypes.UnknownValue)
+	return nil
 }
 
 func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {

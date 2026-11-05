@@ -3,6 +3,7 @@ package vpc
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -180,12 +181,35 @@ func resourceAzurePrivatelinkConnectionApprovalRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
-	plConnection, err := client.AzurePrivatelink.ConnectionGet(ctx, project, service, plConnectionID)
+	plConnections, err := client.AzurePrivatelink.ConnectionsList(ctx, project, service)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
+	// Import supplies only project/service_name; the connection ID is discovered on Read.
+	plConnectionID := d.Get("privatelink_connection_id").(string)
+	if plConnectionID == "" && len(plConnections.Connections) > 1 {
+		return diag.Errorf("multiple Azure Private Link connections found; cannot identify one from project/service_name alone")
+	}
+	var plConnection *aiven.AzurePrivatelinkConnectionResponse
+	for _, connection := range plConnections.Connections {
+		if plConnectionID == "" || connection.PrivatelinkConnectionID == plConnectionID {
+			plConnection = &connection
+			break
+		}
+	}
+	if plConnection == nil {
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(aiven.Error{
+			Status: http.StatusNotFound, Message: "Azure Private Link connection not found",
+		}, d))
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("service_name", service); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("privatelink_connection_id", plConnection.PrivatelinkConnectionID); err != nil {
 		return diag.FromErr(err)
 	}

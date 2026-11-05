@@ -135,13 +135,16 @@ resource "aiven_organization_vpc" "test_validation" {
 						"resource_name":   "test_org_vpc",
 						"organization_id": template.Reference("data.aiven_organization.foo.id"),
 						"cloud_name":      "aws-eu-west-1",
-						"network_cidr":    "10.0.0.0/24",
+						"network_cidr":    "10.1.0.0/24",
 					}).
 					AddDataSource(organizationVPCResource, map[string]any{
 						"resource_name":       "vpc_ds",
 						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
 						"organization_vpc_id": template.Reference(fmt.Sprintf("%s.organization_vpc_id", resourceName)),
 					}).MustRender(t),
+				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionNoop),
+				}},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "organization_id", resourceName, "organization_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "cloud_name", resourceName, "cloud_name"),

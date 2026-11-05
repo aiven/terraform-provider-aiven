@@ -80,19 +80,8 @@ func importID(def *Definition, root *Item) string {
 	return strings.ToUpper(filepath.Join(importIDPath(def, root)...))
 }
 
-func importIDFormats(def *Definition, root *Item) []string {
-	if def.Resource != nil && len(def.Resource.ImportIDFormats) > 0 {
-		return def.Resource.ImportIDFormats
-	}
-	return []string{importID(def, root)}
-}
-
-func importCommands(def *Definition, formats []string) string {
-	var b strings.Builder
-	for _, format := range formats {
-		fmt.Fprintf(&b, "terraform import %s.example %s\n", def.typeName, format)
-	}
-	return b.String()
+func importCommand(def *Definition, root *Item) string {
+	return fmt.Sprintf("terraform import %s.example %s\n", def.typeName, importID(def, root))
 }
 
 func genDoc(def *Definition, entity entityType, renderRoot *Item, resDat *SchemaMeta) ([]byte, error) {
@@ -227,16 +216,9 @@ func docImport(def *Definition, entity entityType, root *Item) (string, bool) {
 		return "", false
 	}
 
-	formats := importIDFormats(def, root)
-	description := "Import is supported using the following syntax:"
-	if len(formats) > 1 {
-		description = "Import is supported using one of the following formats:"
-	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "## Import\n\n%s\n\n```shell\n%s```", description, importCommands(def, formats))
-	// TODO: drop the importIDFormats check once that setting is removed.
-	// Its formats don't map onto the runtime identity, so the example would be invalid.
-	if def.Resource != nil && len(def.Resource.ImportIDFormats) == 0 {
+	fmt.Fprintf(&b, "## Import\n\nImport is supported using the following syntax:\n\n```shell\n%s```", importCommand(def, root))
+	if def.Resource != nil {
 		b.WriteString("\n\nWith Terraform 1.12 or later, you can also import using resource identity:\n\n```terraform\n")
 		var example strings.Builder
 		fmt.Fprintf(&example, "import {\n  to = %s.example\n  identity = {\n", def.typeName)
