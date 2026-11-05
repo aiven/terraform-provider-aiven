@@ -44,6 +44,10 @@ nav_order: 1
   state, e.g., a change of only `timeouts`, or a removed `aiven_kafka_topic` `config` block.
 - Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
   for the connection state, and no longer fails when the peer rejected or deleted the connection.
+- Add `aiven_organization_billing_group_list` datasource field `next`: Cursor for the next page. Only set when limit
+  or cursor was given and more results exist.
+- Add `aiven_organization_billing_group_list` datasource field `prev`: Cursor for the previous page. Only set when limit
+  or cursor was given and an earlier page exists.
 
 ## [4.65.1] - 2026-10-30
 

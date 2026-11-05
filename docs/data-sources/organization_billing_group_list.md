@@ -36,6 +36,8 @@ data "aiven_organization_billing_group_list" "example" {
       payment_method_type = "aws_subscription"
     }
   }
+  next = "foo"
+  prev = "foo"
   */
 }
 ```
@@ -54,6 +56,8 @@ data "aiven_organization_billing_group_list" "example" {
 
 - `billing_groups` (Block Set) A list of all billing groups belonging to the organization (see [below for nested schema](#nestedblock--billing_groups))
 - `id` (String) Resource ID, equal to `organization_id`.
+- `next` (String) Cursor for the next page. Only set when limit or cursor was given and more results exist.
+- `prev` (String) Cursor for the previous page. Only set when limit or cursor was given and an earlier page exists.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
