@@ -1128,6 +1128,15 @@ func TestMergeItemDropDefault(t *testing.T) {
 	require.Nil(t, got.Default)
 }
 
+func TestMergeItemEmptyCollectionDefault(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{Name: "static_ips", Type: SchemaTypeArray}, &Item{Default: []any{}})
+	require.NoError(t, err)
+	require.Equal(t, []any{}, got.Default)
+}
+
 func TestMergeItemEnum(t *testing.T) {
 	t.Parallel()
 

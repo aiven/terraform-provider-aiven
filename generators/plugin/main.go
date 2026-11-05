@@ -1156,7 +1156,8 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.Format = or(b.Format, a.Format)
 	a.Pattern = or(b.Pattern, a.Pattern)
 
-	if !isEmpty(b.Default) {
+	// An empty collection is a default too, e.g., "default: []"
+	if _, ok := b.Default.([]any); ok || !isEmpty(b.Default) {
 		a.Default = b.Default
 	}
 

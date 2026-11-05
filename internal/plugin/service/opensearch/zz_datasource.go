@@ -118,7 +118,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"static_ips": schema.SetAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again.",
+				MarkdownDescription: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again. The default value is `[]`.",
 			},
 			"termination_protection": schema.BoolAttribute{
 				Computed:            true,

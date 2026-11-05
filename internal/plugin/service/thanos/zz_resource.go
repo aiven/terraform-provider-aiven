@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -19,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	mapplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -48,6 +50,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "UUID of the Customer Managed Key (CMK) used to apply [bring your own key (BYOK) encryption](https://aiven.io/docs/platform/howto/bring-your-own-key) to this service's data at rest. You can register a CMK for an Aiven project using the `aiven_cmk` resource. Removing this attribute doesn't remove the CMK association. To remove it from this service, set this attribute to the all-zero UUID `00000000-0000-0000-0000-000000000000`. Length must be exactly `36`.",
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthBetween(36, 36)},
 			},
 			"components": schema.ListNestedAttribute{
@@ -105,6 +108,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 				}},
+				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown()},
 			},
 			"disk_space": schema.StringAttribute{
 				MarkdownDescription: "Service disk space to set. Possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing. The field conflicts with `additional_disk_space`. Must match pattern: `^[1-9][0-9]*(GiB|G)$`.",
@@ -146,6 +150,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"maintenance_window_enabled": schema.BoolAttribute{
 				Computed:            true,
 				MarkdownDescription: "Indicates whether the maintenance window is currently enabled for this service.",
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"maintenance_window_time": schema.StringAttribute{
 				Computed:            true,
@@ -212,8 +217,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Service state. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle). The possible values are `POWEROFF`, `REBALANCING`, `REBUILDING` and `RUNNING`.",
 			},
 			"static_ips": schema.SetAttribute{
+				Computed:            true,
+				Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				ElementType:         types.StringType,
-				MarkdownDescription: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again.",
+				MarkdownDescription: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again. The default value is `[]`.",
 				Optional:            true,
 				Validators:          []validator.Set{setvalidator.SizeAtMost(128)},
 			},
@@ -254,7 +261,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Sensitive:           true,
 					},
 				}},
-				Sensitive: true,
+				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown()},
+				Sensitive:     true,
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -690,8 +698,12 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"static_ips": &adapter.Schema{
-				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
-				Type:  adapter.SchemaTypeSet,
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeSet,
 			},
 			"tag": &adapter.Schema{
 				Items: &adapter.Schema{

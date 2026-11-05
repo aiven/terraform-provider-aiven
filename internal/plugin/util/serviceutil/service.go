@@ -61,10 +61,8 @@ func (s Service) Wrap(r *adapter.ResourceOptions, ds *adapter.DataSourceOptions)
 		_, vpcSet := d.GetConfigOk("project_vpc_id")
 		changed = changed || d.HasChange("project_vpc_id") && (vpcSet || d.GetState("project_vpc_id") != "")
 
-		// Removing the whole block sends nothing, e.g., the SDKv2 state has the block the config doesn't
-		v, _ := d.GetConfigOk(s.userConfig())
-		userConfig, _ := v.([]any)
-		changed = changed || len(userConfig) > 0 && d.HasChange(s.userConfig())
+		// Removed options and blocks keep the API value, e.g., the defaults SDKv2 stored.
+		changed = changed || d.HasConfiguredChange(s.userConfig())
 		if !changed {
 			return nil
 		}

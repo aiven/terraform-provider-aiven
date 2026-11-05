@@ -20,8 +20,8 @@ var ipFilterDefaults = [][]string{
 }
 
 // IPFilterPlanModifier plans an IP filter removed from the config as SDKv2 did:
-// a default list keeps the state value, any other is cleared, which sends "ip_filter": [].
-// Skipped when another option sets the field, e.g., ip_filter_string replaces ip_filter.
+// a default list or null keeps the state value, any other is cleared, which sends "ip_filter": [].
+// Skipped on create, when the config sets the field, or another of ipFilterOptions replaces a state value.
 func IPFilterPlanModifier() planmodifier.Set {
 	return ipFilterPlanModifier{}
 }
@@ -29,7 +29,7 @@ func IPFilterPlanModifier() planmodifier.Set {
 type ipFilterPlanModifier struct{}
 
 func (ipFilterPlanModifier) Description(context.Context) string {
-	return "Clears the IP filter removed from the config, unless the state has a default list."
+	return "Clears the IP filter removed from the config, unless the state has a default list or none."
 }
 
 func (m ipFilterPlanModifier) MarkdownDescription(ctx context.Context) string {
@@ -37,7 +37,13 @@ func (m ipFilterPlanModifier) MarkdownDescription(ctx context.Context) string {
 }
 
 func (ipFilterPlanModifier) PlanModifySet(ctx context.Context, req planmodifier.SetRequest, rsp *planmodifier.SetResponse) {
-	if !req.ConfigValue.IsNull() || req.StateValue.IsNull() {
+	if !req.ConfigValue.IsNull() || req.State.Raw.IsNull() {
+		return
+	}
+
+	// The read sets only the options in the plan or the state, e.g., not ip_filter_string for ip_filter
+	if req.StateValue.IsNull() {
+		rsp.PlanValue = req.StateValue
 		return
 	}
 
@@ -64,7 +70,9 @@ func (ipFilterPlanModifier) PlanModifySet(ctx context.Context, req planmodifier.
 
 	if len(list) > 0 && !slices.ContainsFunc(ipFilterDefaults, func(d []string) bool { return slices.Equal(d, list) }) {
 		rsp.PlanValue = types.SetValueMust(req.StateValue.ElementType(ctx), []attr.Value{})
+		return
 	}
+	rsp.PlanValue = req.StateValue
 }
 
 // isSetValue tells if the config sets a value: unknown, or a collection with items.

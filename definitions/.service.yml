@@ -81,6 +81,7 @@ schema:
     description: Specifies the VPC the service should run in. If the value is not set, the service runs on the Public Internet. When set, the value should be given as a reference to set up dependencies correctly, and the VPC must be in the same cloud and region as the service itself. The service can be freely moved to and from VPC after creation, but doing so triggers migration to new servers, so the operation can take a significant amount of time to complete if the service has a lot of data.
   cmk_id:
     computed: true
+    useStateForUnknown: true
     minLength: 36
     maxLength: 36
     description: UUID of the Customer Managed Key (CMK) used to apply [bring your own key (BYOK) encryption](https://aiven.io/docs/platform/howto/bring-your-own-key) to this service's data at rest. You can register a CMK for an Aiven project using the `aiven_cmk` resource. Removing this attribute doesn't remove the CMK association. To remove it from this service, set this attribute to the all-zero UUID `00000000-0000-0000-0000-000000000000`.
@@ -103,6 +104,7 @@ schema:
   maintenance_window_enabled:
     type: boolean
     computed: true
+    useStateForUnknown: true
     description: Indicates whether the maintenance window is currently enabled for this service.
   termination_protection:
     default: false
@@ -168,6 +170,7 @@ schema:
     useStateForUnknown: true
     description: Username used for connecting to the service, if applicable
   state:
+    # Unknown on an update, which can rebuild the service or power it on, and doesn't wait for it to run
     description: Service state. Services cannot be powered on or off with Terraform. To power a service on or off, [use the Aiven Console or Aiven CLI](https://aiven.io/docs/platform/concepts/service-power-cycle).
   service_integrations:
     type: array
@@ -188,6 +191,8 @@ schema:
           description: Type of the service integration
   static_ips:
     forceNew: false
+    # SDKv2 stored an empty set, and a null fails length() and for expressions
+    default: []
     description: Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
   components:
     type: arrayOrdered
