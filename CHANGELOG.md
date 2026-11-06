@@ -42,6 +42,12 @@ nav_order: 1
   no longer fails on redacted credentials.
 - Change the Plugin Framework resources: an update with nothing to send skips the API call and the wait for the resource
   state, e.g., a change of only `timeouts`, or a removed `aiven_kafka_topic` `config` block.
+- Change `aiven_connection_pool`, `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`, `aiven_pg_user`,
+  `aiven_valkey_user` and the `aiven_service_list` data source: the read requests secrets with `include_secrets=true`.
+  Starting 1 March 2027, the API [redacts secrets](https://aiven.io/changelog/3bed4789-e2ec-410b-afc5-28029b994371)
+  without it.
+- Add the `AIVEN_INCLUDE_SECRETS` environment variable: set it to `false` to read the resources above
+  and `aiven_service_integration_endpoint` without secrets, e.g., when the token's role can't read them.
 - Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
   for the connection state, and no longer fails when the peer rejected or deleted the connection.
 

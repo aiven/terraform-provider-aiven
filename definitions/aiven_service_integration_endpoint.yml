@@ -30,8 +30,7 @@ operations:
   - id: ServiceIntegrationEndpointGet
     type: read
     resultKey: service_integration_endpoint
-    queryParams:
-      include_secrets: "true"
+    includeSecrets: true
   - id: ServiceIntegrationEndpointList
     type: read
     datasourceLookup: true

@@ -79,8 +79,11 @@ type Operation struct {
 	// When the API response is not an object (e.g., a primitive or array), wrap it into a map using this key.
 	ResultToKey string `yaml:"resultToKey"`
 
-	// QueryParams are sent with every call, e.g. include_secrets: "true".
+	// QueryParams are sent with every call.
 	QueryParams map[string]string `yaml:"queryParams"`
+
+	// IncludeSecrets sends include_secrets with common.IncludeSecrets.
+	IncludeSecrets bool `yaml:"includeSecrets"`
 
 	Request  *OASchema
 	Response *OASchema

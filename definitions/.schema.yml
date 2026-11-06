@@ -406,8 +406,12 @@ definitions:
         additionalProperties:
           type: string
         $comment: |
-          Query parameters sent with every call, e.g. `include_secrets: "true"`.
+          Query parameters sent with every call. Use `includeSecrets` for `include_secrets`.
           The keys must be query parameters of the operation.
+      includeSecrets:
+        type: boolean
+        $comment: |
+          Sends `include_secrets=true`, or false when `AIVEN_INCLUDE_SECRETS` is false, see `common.IncludeSecrets`.
     required:
       - id
       - type

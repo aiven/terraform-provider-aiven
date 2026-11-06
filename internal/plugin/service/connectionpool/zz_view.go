@@ -10,6 +10,7 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/postgresql"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
@@ -48,7 +49,7 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	rsp, err := client.ServiceGet(ctx, d.Get("project").(string), d.Get("service_name").(string))
+	rsp, err := client.ServiceGet(ctx, d.Get("project").(string), d.Get("service_name").(string), common.IncludeSecrets())
 	if err != nil {
 		return err
 	}

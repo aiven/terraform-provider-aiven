@@ -24,6 +24,7 @@ operations:
     resultKeyField: ConnectionPools
     resultListLookupKeys:
       PoolName: pool_name
+    includeSecrets: true
 schema:
   project:
     ref: aiven_pg.project

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -419,7 +420,7 @@ func fetchRemotePassword(rs *terraform.ResourceState) (string, error) {
 	var password string
 	err = retry.Do(
 		func() error {
-			user, err := genClient.ServiceUserGet(context.Background(), info.projectName, info.serviceName, info.username)
+			user, err := genClient.ServiceUserGet(context.Background(), info.projectName, info.serviceName, info.username, service.ServiceUserGetIncludeSecrets(true))
 			if err != nil {
 				return fmt.Errorf("error getting %s user from API: %w", info.username, err)
 			}
