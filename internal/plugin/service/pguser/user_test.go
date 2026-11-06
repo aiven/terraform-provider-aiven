@@ -118,7 +118,7 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "username", userName),
 						acc.TestAccPasswordHasWOPassword(resourceName),
 						func(state *terraform.State) error {
-							rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+							rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName, service.ServiceUserGetIncludeSecrets(true))
 							require.NoError(t, err)
 							require.Equal(t, "WriteOnlyPass$1", rsp.Password)
 							return nil
@@ -131,7 +131,7 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						acc.TestAccPasswordHasWOPassword(resourceName),
 						func(state *terraform.State) error {
-							rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+							rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName, service.ServiceUserGetIncludeSecrets(true))
 							require.NoError(t, err)
 							require.Equal(t, "WriteOnlyPass$2", rsp.Password)
 							return nil
@@ -376,7 +376,7 @@ func TestAccAivenPGUser_OutOfBandPasswordRotation(t *testing.T) {
 
 	// apiPassword fetches the user's password from the Aiven API
 	apiPassword := func(userName string) (string, error) {
-		rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+		rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName, service.ServiceUserGetIncludeSecrets(true))
 		if err != nil {
 			return "", err
 		}
@@ -544,7 +544,7 @@ func TestAccAivenPGUser_OutOfBandPasswordRotation(t *testing.T) {
 			ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 			defer cancel()
 
-			s, err := client.ServiceGet(ctx, projectName, serviceName)
+			s, err := client.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
 			if err != nil {
 				return err
 			}

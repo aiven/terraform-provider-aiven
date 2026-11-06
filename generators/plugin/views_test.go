@@ -11,6 +11,67 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestGenGenericView_IncludeSecrets(t *testing.T) {
+	t.Parallel()
+
+	projectProp := &Item{
+		Name:                "project",
+		Type:                SchemaTypeString,
+		Required:            true,
+		IDAttribute:         true,
+		IDAttributePosition: 0,
+		AppearsIn:           Operations{{ID: "ServiceUserGet", Type: OperationRead}}.AppearsInID("ServiceUserGet", OperationRead, PathParameter),
+	}
+	serviceProp := &Item{
+		Name:                "service_name",
+		Type:                SchemaTypeString,
+		Required:            true,
+		IDAttribute:         true,
+		IDAttributePosition: 1,
+		AppearsIn:           projectProp.AppearsIn,
+	}
+	userProp := &Item{
+		Name:                "username",
+		Type:                SchemaTypeString,
+		Required:            true,
+		IDAttribute:         true,
+		IDAttributePosition: 2,
+		AppearsIn:           projectProp.AppearsIn,
+	}
+	passwordProp := &Item{
+		Name:      "password",
+		Type:      SchemaTypeString,
+		Computed:  true,
+		Sensitive: true,
+		AppearsIn: Operations{{ID: "ServiceUserGet", Type: OperationRead}}.AppearsInID("ServiceUserGet", OperationRead, ResponseBody),
+	}
+
+	item := &Item{Properties: map[string]*Item{
+		"project":      projectProp,
+		"service_name": serviceProp,
+		"username":     userProp,
+		"password":     passwordProp,
+	}}
+	setParents(item, nil)
+
+	def := &Definition{
+		Resource:      &SchemaMeta{},
+		ClientHandler: "service",
+		Operations: []*Operation{{
+			ID:             "ServiceUserGet",
+			Type:           OperationRead,
+			ResultKey:      "user",
+			IncludeSecrets: true,
+			Response:       &OASchema{Properties: map[string]*OASchema{"password": {}}},
+		}},
+	}
+
+	code, err := genGenericView(def, item, OperationRead)
+	require.NoError(t, err)
+	got := renderCode(t, code)
+	require.Contains(t, got, "client.ServiceUserGet(ctx, d.Get(\"project\").(string), d.Get(\"service_name\").(string), d.Get(\"username\").(string), common.IncludeSecrets())")
+}
+
 func TestGenNewResourceIdentityFields(t *testing.T) {
 	newDef := func(t *testing.T, config string) *Definition {
 		t.Helper()

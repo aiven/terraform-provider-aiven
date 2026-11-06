@@ -60,6 +60,7 @@ const (
 	validatorPackage        = "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	utilPackage             = "github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	adapterPackage          = "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	commonPackage           = "github.com/aiven/terraform-provider-aiven/internal/common"
 	customValidatorsPackage = "github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 	legacyTimeoutsPackage   = "github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
 	avnGenPackage           = "github.com/aiven/go-client-codegen"
@@ -76,6 +77,7 @@ func getUntypedImports() []string {
 		validatorPackage,
 		utilPackage,
 		adapterPackage,
+		commonPackage,
 		customValidatorsPackage,
 		legacyTimeoutsPackage,
 		errMsgPackage,

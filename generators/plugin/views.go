@@ -513,6 +513,9 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			for _, k := range sortedKeys(operation.QueryParams) {
 				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
 			}
+			if operation.IncludeSecrets {
+				params.Qual(commonPackage, "IncludeSecrets").Call()
+			}
 		}),
 	)
 

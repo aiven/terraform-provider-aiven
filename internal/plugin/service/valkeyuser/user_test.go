@@ -385,7 +385,7 @@ func checkBackendPassword(
 ) resource.TestCheckFunc {
 	return func(*terraform.State) error {
 		require.Eventually(t, func() bool {
-			rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+			rsp, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName, service.ServiceUserGetIncludeSecrets(true))
 			return err == nil && pred(rsp.Password)
 		}, 2*time.Minute, time.Second, msg)
 		return nil

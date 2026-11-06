@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
@@ -71,7 +72,7 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 			return err
 		}
 	}
-	rsp, err := client.ServiceIntegrationEndpointGet(ctx, d.Get("project").(string), d.Get("endpoint_id").(string), [2]string{"include_secrets", "true"})
+	rsp, err := client.ServiceIntegrationEndpointGet(ctx, d.Get("project").(string), d.Get("endpoint_id").(string), common.IncludeSecrets())
 	if err != nil {
 		return err
 	}

@@ -828,6 +828,12 @@ func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPat
 			return fmt.Errorf("queryParams: %q is not a query parameter", k)
 		}
 	}
+	if _, ok := operation.QueryParams["include_secrets"]; ok {
+		return fmt.Errorf("queryParams: use includeSecrets instead of include_secrets")
+	}
+	if operation.IncludeSecrets && !queryParams["include_secrets"] {
+		return fmt.Errorf("includeSecrets: the operation has no include_secrets query parameter")
+	}
 	return nil
 }
 
