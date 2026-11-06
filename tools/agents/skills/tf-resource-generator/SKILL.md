@@ -347,6 +347,13 @@ operations:
       APIField: terraform_field      # Match items by field
     queryParams:                     # Query parameters sent with every call of the operation,
       include_secrets: "true"        # rendered as [2]string{"include_secrets", "true"} client args
+    pagination:                      # Read only: follow nextField until it's empty, merge the pages.
+                                     # The response must have one list besides nextField;
+                                     # put other cursor fields, e.g. `prev`, in `remove`.
+      nextField: next                # The response field with the next page cursor
+      cursorParam: cursor            # The query parameter that takes nextField
+      pageSizeParam: limit           # Optional: omit when the API rejects it
+      pageSize: 100                  # Optional: defaults to the param's maximum, else its default
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`

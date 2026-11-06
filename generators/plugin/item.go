@@ -87,6 +87,17 @@ type Operation struct {
 
 	Request  *OASchema
 	Response *OASchema
+
+	// Pagination follows the next page cursor and reads all pages, see resolvePagination.
+	Pagination *Pagination `yaml:"pagination"`
+}
+
+type Pagination struct {
+	ItemsKey      string `yaml:"-"`             // The only response field besides NextField and the remove list, e.g. billing_groups
+	NextField     string `yaml:"nextField"`     // The response field with the next page cursor, e.g. next
+	CursorParam   string `yaml:"cursorParam"`   // The query parameter that takes NextField, e.g. cursor
+	PageSizeParam string `yaml:"pageSizeParam"` // Optional, e.g. limit
+	PageSize      int    `yaml:"pageSize"`      // Sent in pageSizeParam, see resolvePageSize
 }
 
 type Operations []*Operation

@@ -13,9 +13,9 @@ import (
 
 func init() {
 	ResourceOptions.Create = create
-	ResourceOptions.Read = read
+	ResourceOptions.Read = readView
 	ResourceOptions.Delete = delete
-	DataSourceOptions.Read = read
+	DataSourceOptions.Read = readView
 }
 
 func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
@@ -35,26 +35,6 @@ func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 		return nil
 	}
 	return err
-}
-
-// read the database list is fetched with cursor pagination. The powered-on precheck
-// runs in the adapter via the `requireServiceReady` schema flag.
-func read(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	project := d.Get("project").(string)
-	serviceName := d.Get("service_name").(string)
-
-	databases, err := schemautil.ListServiceDatabases(ctx, client, project, serviceName)
-	if err != nil {
-		return err
-	}
-
-	match, err := adapter.FindOne(databases, func(i int) bool {
-		return adapter.Equal(databases[i].DatabaseName, d.Get("database_name"))
-	})
-	if err != nil {
-		return fmt.Errorf("lookup `%s` by `database_name`: %w", typeName, err)
-	}
-	return d.Flatten(&match)
 }
 
 func delete(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {

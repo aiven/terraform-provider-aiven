@@ -6,6 +6,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -485,51 +486,46 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		clientCall = jen.List(jen.Id(rspName), jen.Err()).Op(":=")
 	}
 
-	g.Add(clientCall.
-		Id("client").Dot(string(operation.ID)).
-		CallFunc(func(params *jen.Group) {
-			idFields := filterAppearsIn(properties, inPath)
-			sort.Slice(idFields, func(i, j int) bool {
-				return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
-			})
+	idFields := filterAppearsIn(properties, inPath)
+	sort.Slice(idFields, func(i, j int) bool {
+		return idFields[i].IDAttributePosition < idFields[j].IDAttributePosition
+	})
 
-			// Some resources might change the ID fields during Update operation,
-			// so we need to use get values from the state instead of the plan.
-			method := "Get"
-			if operation.Type == OperationUpdate && !item.Properties["id"].UsesStateForUnknown() {
-				method = "GetState"
-			}
-
-			// Gathers parameters: ctx and path parameters to call the client method
-			params.Id("ctx")
-			for _, v := range idFields {
-				params.Id("d").Dot(method).Call(jen.Lit(v.Name)).Op(".").Parens(jen.Id(v.GoType()))
-			}
-
-			if hasRequest {
-				params.Id("req")
-			}
-
-			for _, k := range sortedKeys(operation.QueryParams) {
-				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
-			}
-			if operation.IncludeSecrets {
-				params.Qual(commonPackage, "IncludeSecrets").Call()
-			}
-		}),
-	)
-
-	if mustReturnResult {
-		return nil
+	// Some resources might change the ID fields during Update operation,
+	// so we need to use get values from the state instead of the plan.
+	method := "Get"
+	if operation.Type == OperationUpdate && !item.Properties["id"].UsesStateForUnknown() {
+		method = "GetState"
 	}
 
-	if !hasResponse || operation.Type == OperationDelete {
-		g.Return().Err()
-		return nil
+	// Gathers parameters: ctx and path parameters to call the client method
+	positionalArgs := func(params *jen.Group) {
+		params.Id("ctx")
+		for _, v := range idFields {
+			params.Id("d").Dot(method).Call(jen.Lit(v.Name)).Op(".").Parens(jen.Id(v.GoType()))
+		}
+		if hasRequest {
+			params.Id("req")
+		}
+	}
+	// lookupMatch matches the element against the state by resultListLookupKeys,
+	// e.g. adapter.Equal(rsp[i].Foo, d.Get("foo")) && ...
+	lookupMatch := func(elem *jen.Statement) (*jen.Statement, error) {
+		match := jen.Null()
+		for i, key := range sortedKeys(operation.ResultListLookupKeys) {
+			fieldName := operation.ResultListLookupKeys[key]
+			field, ok := item.Properties[fieldName]
+			if !ok {
+				return nil, fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
+			}
+			if i > 0 {
+				match.Op("&&")
+			}
+			match.Qual(adapterPackage, "Equal").Call(elem.Clone().Dot(key), jen.Id("d").Dot("Get").Call(jen.Lit(field.Name)))
+		}
+		return match, nil
 	}
 
-	// Reads the response from the previous call
-	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	flatten := func(rsp jen.Code) jen.Code {
 		v := jen.Id("d").Dot("Flatten").CallFunc(func(g *jen.Group) {
 			g.Add(rsp)
@@ -557,6 +553,82 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		return v
 	}
 
+	// flattenMatch wraps the lookup error and flattens the match found by resultListLookupKeys.
+	const matchName = "match"
+	flattenMatch := func() {
+		g.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return().Qual("fmt", "Errorf").Call(
+				jen.Lit(fmt.Sprintf("lookup `%s` by %s: %%w", def.typeName, lookupFieldsList(operation))),
+				jen.Err(),
+			),
+		)
+
+		// resultIDField: the lookup endpoint only resolves the primary id; control then
+		// falls through to the canonical read body (emitted right after the lookup block
+		// in readView). Used when the lookup response shape differs from the read response.
+		if operation.DatasourceLookup && operation.ResultIDField != "" {
+			g.If(
+				jen.Err().Op(":=").Id("d").Dot("Set").Call(
+					jen.Lit(def.DatasourceLookupID()),
+					jen.Id(matchName).Dot(operation.ResultIDField),
+				),
+				jen.Err().Op("!=").Nil(),
+			).Block(jen.Return().Err())
+			return
+		}
+
+		g.Add(flatten(jen.Op("&").Id(matchName)))
+	}
+
+	// Paginated reads fetch the pages with adapter.Paginate, or stop at the match with adapter.PaginateFind
+	if pg := operation.Pagination; pg != nil {
+		fetch, itemType := genPageFetch(def, operation, positionalArgs)
+		if len(operation.ResultListLookupKeys) == 0 {
+			itemsVar := rspName + "Items"
+			if funcIndex == 0 {
+				itemsVar = "items"
+			}
+			g.List(jen.Id(itemsVar), jen.Err()).Op(":=").Qual(adapterPackage, "Paginate").Call(fetch)
+			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+			g.Add(flatten(jen.Op("&").Map(jen.String()).Any().Values(jen.Dict{jen.Lit(pg.ItemsKey): jen.Id(itemsVar)})))
+			return nil
+		}
+
+		match, err := lookupMatch(jen.Id("item"))
+		if err != nil {
+			return err
+		}
+		found := jen.Func().Params(jen.Id("item").Add(itemType)).Bool().Block(jen.Return(match))
+		g.List(jen.Id(matchName), jen.Err()).Op(":=").Qual(adapterPackage, "PaginateFind").Call(fetch, found)
+		flattenMatch()
+		return nil
+	}
+
+	g.Add(clientCall.
+		Id("client").Dot(string(operation.ID)).
+		CallFunc(func(params *jen.Group) {
+			positionalArgs(params)
+			for _, k := range sortedKeys(operation.QueryParams) {
+				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
+			}
+			if operation.IncludeSecrets {
+				params.Qual(commonPackage, "IncludeSecrets").Call()
+			}
+		}),
+	)
+
+	if mustReturnResult {
+		return nil
+	}
+
+	if !hasResponse || operation.Type == OperationDelete {
+		g.Return().Err()
+		return nil
+	}
+
+	// Reads the response from the previous call
+	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+
 	// rspCode is the response expression, optionally traversed by
 	// ResultKeyField (e.g. rsp.Aws or rsp.ConnectionPools) when the Go
 	// client doesn't strip an extra wrapper exposed by the API.
@@ -580,56 +652,50 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 
 	// Finds a match in the list.
 	// E.g. rsp[0].foo == state.Foo && rsp[0].bar == state.Bar ...
-
-	var fieldsMatch jen.Statement
-	for i, key := range sortedKeys(operation.ResultListLookupKeys) {
-		fieldName := operation.ResultListLookupKeys[key]
-		if i > 0 {
-			fieldsMatch.Op("&&")
-		}
-
-		field, ok := item.Properties[fieldName]
-		if !ok {
-			return fmt.Errorf("unknown lookup key %q in result list for operation %q", fieldName, operation.ID)
-		}
-
-		fieldsMatch.Qual(adapterPackage, "Equal").Call(
-			rspCode.Clone().Index(jen.Id("i")).Dot(key),
-			jen.Id("d").Dot("Get").Call(jen.Lit(field.Name)),
-		)
+	fieldsMatch, err := lookupMatch(rspCode.Clone().Index(jen.Id("i")))
+	if err != nil {
+		return err
 	}
-
-	const matchName = "match"
 	g.List(jen.Id(matchName), jen.Err()).Op(":=").
 		Qual(adapterPackage, "FindOne").
 		CallFunc(func(g *jen.Group) {
 			g.Add(rspCode)
-			g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(&fieldsMatch))
+			g.Func().Params(jen.Id("i").Int()).Bool().Block(jen.Return(fieldsMatch))
 		})
-	g.If(jen.Err().Op("!=").Nil()).Block(
-		jen.Return().Qual("fmt", "Errorf").Call(
-			jen.Lit(fmt.Sprintf("lookup `%s` by %s: %%w", def.typeName, lookupFieldsList(operation))),
-			jen.Err(),
-		),
-	)
+	flattenMatch()
+	return nil
+}
 
-	// resultIDField: the lookup endpoint only resolves the primary id; control then
-	// falls through to the canonical read body (emitted right after the lookup block
-	// in readView). Used when the lookup response shape differs from the read response.
-	if operation.DatasourceLookup && operation.ResultIDField != "" {
-		g.If(
-			jen.Err().Op(":=").Id("d").Dot("Set").Call(
-				jen.Lit(def.DatasourceLookupID()),
-				jen.Id(matchName).Dot(operation.ResultIDField),
-			),
-			jen.Err().Op("!=").Nil(),
-		).Block(jen.Return().Err())
-		return nil
+// genPageFetch renders the adapter.Paginate fetch function and the client's list item type.
+func genPageFetch(def *Definition, operation *Operation, positionalArgs func(*jen.Group)) (fetch, itemType *jen.Statement) {
+	pg := operation.Pagination
+	query := jen.Qual(adapterPackage, "QueryParams").CallFunc(func(params *jen.Group) {
+		if pg.PageSizeParam != "" {
+			params.Lit(pg.PageSizeParam)
+			params.Lit(strconv.Itoa(pg.PageSize))
+		}
+		for _, k := range sortedKeys(operation.QueryParams) {
+			params.Lit(k)
+			params.Lit(operation.QueryParams[k])
+		}
+		params.Lit(pg.CursorParam)
+		params.Id("cursor")
+	})
+	if operation.IncludeSecrets {
+		query = jen.Append(query, jen.Qual(commonPackage, "IncludeSecrets").Call())
 	}
 
-	g.Add(flatten(jen.Op("&").Id(matchName)))
-
-	return nil
+	// The client names list items by trimming "s", e.g. BillingGroups -> BillingGroupOut
+	itemType = jen.Qual(avnGenHandlerPackage+def.ClientHandler, strings.TrimSuffix(pascalCase(pg.ItemsKey), "s")+"Out")
+	fetch = jen.Func().Params(jen.Id("cursor").String()).Params(jen.Index().Add(itemType.Clone()), jen.Op("*").String(), jen.Error()).Block(
+		jen.List(jen.Id("rsp"), jen.Err()).Op(":=").Id("client").Dot(string(operation.ID)).CallFunc(func(params *jen.Group) {
+			positionalArgs(params)
+			params.Add(query).Op("...")
+		}),
+		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Nil(), jen.Err())),
+		jen.Return(jen.Id("rsp").Dot(pascalCase(pg.ItemsKey)), jen.Id("rsp").Dot(pascalCase(pg.NextField)), jen.Nil()),
+	)
+	return fetch, itemType
 }
 
 // lookupFieldsList renders an op's ResultListLookupKeys tf-attribute values as a

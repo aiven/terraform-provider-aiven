@@ -70,7 +70,7 @@ func TestRead_Pagination(t *testing.T) {
 
 	d := newReadResourceData(t, project, serviceName, target)
 
-	err := read(ctx, mockClient, d)
+	err := readView(ctx, mockClient, d)
 	require.NoError(t, err)
 
 	// The ID proves the page-2-only element was matched and flattened; lc_collate is a
@@ -104,7 +104,7 @@ func TestRead_SinglePage(t *testing.T) {
 
 	d := newReadResourceData(t, project, serviceName, target)
 
-	err := read(ctx, mockClient, d)
+	err := readView(ctx, mockClient, d)
 	require.NoError(t, err)
 	require.Equal(t, target, d.Get("database_name"))
 }
@@ -142,7 +142,7 @@ func TestRead_ErrorOnSecondPage(t *testing.T) {
 
 	d := newReadResourceData(t, project, serviceName, "some-db")
 
-	err := read(ctx, mockClient, d)
+	err := readView(ctx, mockClient, d)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "boom")
 }
@@ -185,7 +185,7 @@ func TestRead_NotFoundAfterPagination(t *testing.T) {
 	// The target is present on no page: FindOne over the accumulated slice must not match.
 	d := newReadResourceData(t, project, serviceName, "missing-db")
 
-	err := read(ctx, mockClient, d)
+	err := readView(ctx, mockClient, d)
 	require.ErrorIs(t, err, adapter.ErrNotFound)
 }
 
@@ -227,7 +227,7 @@ func TestRead_EmptyFirstPage(t *testing.T) {
 
 	d := newReadResourceData(t, project, serviceName, target)
 
-	err := read(ctx, mockClient, d)
+	err := readView(ctx, mockClient, d)
 	require.NoError(t, err)
 	require.Equal(t, fmt.Sprintf("%s/%s/%s", project, serviceName, target), d.ID())
 }

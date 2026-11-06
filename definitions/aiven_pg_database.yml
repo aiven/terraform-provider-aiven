@@ -21,9 +21,12 @@ operations:
   - id: ServiceDatabaseList
     type: read
     resultKey: databases
-    resultKeyField: Databases
     resultListLookupKeys:
       DatabaseName: database_name
+    pagination:
+      nextField: next
+      cursorParam: after
+      pageSizeParam: maxItems
 schema:
   project:
     ref: aiven_pg.project
