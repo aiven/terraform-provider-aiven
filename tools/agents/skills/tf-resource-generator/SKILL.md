@@ -340,6 +340,13 @@ operations:
       APIField: terraform_field      # Match items by field
     queryParams:                     # Query parameters sent with every call of the operation,
       include_secrets: "true"        # rendered as [2]string{"include_secrets", "true"} client args
+    pagination:                      # Read only: follow nextField until it's empty, merge the pages.
+                                     # The response must have one list besides nextField;
+                                     # put other cursor fields, e.g. `prev`, in `remove`.
+      nextField: next                # The response field with the next page cursor
+      cursorParam: cursor            # The query parameter that takes nextField
+      pageSizeParam: limit           # Optional: omit when the API rejects it
+      pageSize: 100                  # Optional: defaults to the param's maximum, else its default
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
@@ -830,15 +837,12 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 
 ### Paginated list reads
 
-The generator does **not** follow cursor pagination: a generated `readView` issues a single
-list call, so a resource whose read op is a cursor-paginated list silently misses items past
-the first page. For such endpoints provide a handwritten read — either override
-`ResourceOptions.Read` / `DataSourceOptions.Read` in `init()`, or set `disableView: true` on the
-read op and name the function `readView` (see Custom View Overrides) — and fetch the full list
-through a shared helper that follows the cursor and aggregates every page.
+Set `pagination` on the read op (see Operations Configuration). The generator emits
+`pageView(ctx, client, d)`, which returns the fetch for `adapter.Paginate`, and, when
+`resultListLookupKeys` is set, `pageMatch(d)`, which returns the predicate for
+`adapter.PaginateFind`. Only one operation per definition can be paginated.
 
-**Reference**: `schemautil.ListServiceDatabases` in `internal/schemautil/database.go`, used by the
-`read` override in `internal/plugin/service/pgdatabase/database.go`.
+**Reference**: `definitions/aiven_pg_database.yml`.
 
 ## Write-Only Fields
 

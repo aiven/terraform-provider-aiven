@@ -7,6 +7,7 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/organizationbilling"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -22,9 +23,19 @@ var DataSourceOptions = adapter.DataSourceOptions{
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	rsp, err := client.OrganizationBillingGroupList(ctx, d.Get("organization_id").(string))
+	items, err := adapter.Paginate(pageView(ctx, client, d))
 	if err != nil {
 		return err
 	}
-	return d.Flatten(&map[string]any{"billing_groups": rsp})
+	return d.Flatten(&map[string]any{"billing_groups": items})
+}
+
+func pageView(ctx context.Context, client avngen.Client, d adapter.ResourceData) func(cursor string) ([]organizationbilling.BillingGroupOut, *string, error) {
+	return func(cursor string) ([]organizationbilling.BillingGroupOut, *string, error) {
+		rsp, err := client.OrganizationBillingGroupList(ctx, d.Get("organization_id").(string), adapter.QueryParams("limit", "999", "cursor", cursor)...)
+		if err != nil {
+			return nil, nil, err
+		}
+		return rsp.BillingGroups, rsp.Next, nil
+	}
 }

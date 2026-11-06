@@ -571,6 +571,18 @@ func persistPrunedRemoves(def *Definition) error {
 	})
 }
 
+// validateResultToKey fails when the client returns the response as an object:
+// it unwraps single-property responses only.
+func validateResultToKey(operation *Operation, response *OASchema) error {
+	if operation.ResultToKey == "" {
+		return nil
+	}
+	if n := len(response.Properties); n != 1 {
+		return fmt.Errorf("resultToKey: the response has %d properties, the client returns it as an object; remove resultToKey", n)
+	}
+	return nil
+}
+
 func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 	path, err := getOperationPath(scope, operation.ID)
 	if err != nil {
@@ -617,6 +629,16 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 		// These fields are reserved for errors
 		delete(response.Properties, "message")
 		delete(response.Properties, "errors")
+
+		response, err = resolvePagination(scope, path, operation, response)
+		if err != nil {
+			return err
+		}
+
+		err = validateResultToKey(operation, response)
+		if err != nil {
+			return err
+		}
 
 		if operation.ResultKey != "" {
 			for _, key := range strings.Split(operation.ResultKey, "/") {
