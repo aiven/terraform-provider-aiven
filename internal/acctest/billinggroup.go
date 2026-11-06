@@ -78,7 +78,7 @@ func checkDefaultBillingGroupDestroyed(ctx context.Context, c avngen.Client, pro
 		orgID = account.OrganizationId
 	}
 
-	billingGroups, err := c.OrganizationBillingGroupList(ctx, orgID)
+	listOut, err := c.OrganizationBillingGroupList(ctx, orgID)
 	if isGone(err) {
 		return nil
 	}
@@ -87,7 +87,7 @@ func checkDefaultBillingGroupDestroyed(ctx context.Context, c avngen.Client, pro
 	}
 
 	name := defaultBillingGroupPrefix + project.ID
-	for _, bg := range billingGroups {
+	for _, bg := range listOut.BillingGroups {
 		if bg.BillingGroupName == name {
 			return fmt.Errorf("billing group %q (%s) of project %s still exists", name, bg.BillingGroupId, project.ID)
 		}
