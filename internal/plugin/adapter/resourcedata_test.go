@@ -342,6 +342,51 @@ func TestResourceDataPreservedUnknownAndNullPlan(t *testing.T) {
 	}
 }
 
+// TestResourceDataHasChangeNestedNulls ModifyPlan keeps the nulls of the plan, which the state has none of,
+// e.g., {"foo": "a", "bar": null} is {"foo": "a"} in the state.
+func TestResourceDataHasChangeNestedNulls(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id": {Type: SchemaTypeString, Computed: true},
+			"config": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"foo": {Type: SchemaTypeString},
+						"bar": {Type: SchemaTypeString},
+					},
+				},
+			},
+		},
+	}
+
+	cases := []struct {
+		name string
+		bar  any
+		want bool
+	}{
+		{name: "null", bar: tftypes.NewValue(tftypes.String, nil), want: false},
+		{name: "unknown", bar: tftypes.NewValue(tftypes.String, tftypes.UnknownValue), want: true},
+		{name: "value", bar: "b", want: true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rd, err := NewResourceData(sch, []string{"id"},
+				WithTestPlan(map[string]any{"id": "x", "config": []any{map[string]any{"foo": "a", "bar": tc.bar}}}),
+				WithTestState(map[string]any{"id": "x", "config": []any{map[string]any{"foo": "a"}}}),
+			)
+			require.NoError(t, err)
+			require.Equal(t, tc.want, rd.HasChange("config"))
+		})
+	}
+}
+
 // TestResourceDataGetOkSplitsCompositeID verifies that GetOk derives id-field
 // component values by splitting the composite "id" string from state when the
 // components are not stored as their own top-level fields (e.g. legacy state
@@ -769,6 +814,204 @@ func TestResourceDataEmptyCollections(t *testing.T) {
 		require.Equal(t, []any{}, rd.Get("keys"))
 		require.Equal(t, map[string]any{}, rd.Get("tags"))
 	})
+
+	t.Run("computed optional set kept when unset", func(t *testing.T) {
+		computedSch := &Schema{
+			Type: SchemaTypeObject,
+			Properties: map[string]*Schema{
+				"id":         {Type: SchemaTypeString, Computed: true},
+				"name":       {Type: SchemaTypeString},
+				"static_ips": {Type: SchemaTypeSet, Computed: true, IsAttribute: true, Items: &Schema{Type: SchemaTypeString}},
+			},
+		}
+		rd, err := NewResourceData(computedSch, []string{"name"},
+			WithTestPlan(map[string]any{"name": "my-resource"}),
+			WithTestConfig(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{"name": "my-resource", "static_ips": []any{}}))
+
+		got, ok := rd.GetOk("static_ips")
+		require.True(t, ok)
+		require.Equal(t, []any{}, got)
+		require.False(t, stateValue(t, rd, "static_ips").IsNull())
+	})
+
+	t.Run("optional set pruned when unset", func(t *testing.T) {
+		optionalSch := &Schema{
+			Type: SchemaTypeObject,
+			Properties: map[string]*Schema{
+				"id":        {Type: SchemaTypeString, Computed: true},
+				"name":      {Type: SchemaTypeString},
+				"allowlist": {Type: SchemaTypeSet, Items: &Schema{Type: SchemaTypeString}},
+			},
+		}
+		rd, err := NewResourceData(optionalSch, []string{"name"},
+			WithTestPlan(map[string]any{"name": "my-resource"}),
+			WithTestConfig(map[string]any{"name": "my-resource"}),
+		)
+		require.NoError(t, err)
+		require.NoError(t, rd.Flatten(map[string]any{"name": "my-resource", "allowlist": []any{}}))
+
+		_, ok := rd.GetOk("allowlist")
+		require.False(t, ok)
+		require.True(t, stateValue(t, rd, "allowlist").IsNull())
+	})
+}
+
+func TestHasConfiguredChange(t *testing.T) {
+	t.Parallel()
+
+	userBlock := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"backup_hour": {Type: SchemaTypeInt},
+			"pg_version":  {Type: SchemaTypeString},
+			"ip_filter":   {Type: SchemaTypeSet, Items: &Schema{Type: SchemaTypeString}},
+			"pglookout": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"max_failover_replication_time_lag": {Type: SchemaTypeInt},
+					},
+				},
+			},
+		},
+	}
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":              {Type: SchemaTypeString, Computed: true},
+			"foo_user_config": {Type: SchemaTypeList, IsObject: true, Items: userBlock},
+		},
+	}
+
+	fullStateBlock := map[string]any{
+		"backup_hour": 16,
+		"pg_version":  "16",
+		"ip_filter":   []any{"0.0.0.0/0"},
+		"pglookout":   []any{map[string]any{"max_failover_replication_time_lag": 60}},
+	}
+
+	cases := []struct {
+		name   string
+		config map[string]any
+		state  map[string]any
+		want   bool
+	}{
+		{
+			name:   "config omits user config block",
+			config: map[string]any{"id": "svc"},
+			state:  map[string]any{"id": "svc", "foo_user_config": []any{fullStateBlock}},
+			want:   false,
+		},
+		{
+			name: "configured option matches state",
+			config: map[string]any{
+				"id":              "svc",
+				"foo_user_config": []any{map[string]any{"backup_hour": 16}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{fullStateBlock}},
+			want:  false,
+		},
+		{
+			name: "configured int differs",
+			config: map[string]any{
+				"id":              "svc",
+				"foo_user_config": []any{map[string]any{"backup_hour": 10}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{map[string]any{"backup_hour": 16}}},
+			want:  true,
+		},
+		{
+			name: "configured int unknown",
+			config: map[string]any{
+				"id": "svc",
+				"foo_user_config": []any{map[string]any{
+					"backup_hour": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+				}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{map[string]any{"backup_hour": 16}}},
+			want:  true,
+		},
+		{
+			name: "null option is not a configured change",
+			config: map[string]any{
+				"id": "svc",
+				"foo_user_config": []any{map[string]any{
+					"pg_version": tftypes.NewValue(tftypes.String, nil),
+				}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{map[string]any{"pg_version": "16"}}},
+			want:  false,
+		},
+		{
+			name: "configured set differs",
+			config: map[string]any{
+				"id":              "svc",
+				"foo_user_config": []any{map[string]any{"ip_filter": []any{"10.0.0.0/8"}}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{map[string]any{"ip_filter": []any{"0.0.0.0/0"}}}},
+			want:  true,
+		},
+		{
+			name: "empty nested block is not a change",
+			config: map[string]any{
+				"id": "svc",
+				"foo_user_config": []any{map[string]any{
+					"pglookout": []any{map[string]any{
+						"max_failover_replication_time_lag": tftypes.NewValue(tftypes.Number, nil),
+					}},
+				}},
+			},
+			state: map[string]any{
+				"id":              "svc",
+				"foo_user_config": []any{map[string]any{"backup_hour": 16}},
+			},
+			want: false,
+		},
+		{
+			name: "nested block option differs",
+			config: map[string]any{
+				"id": "svc",
+				"foo_user_config": []any{map[string]any{
+					"pglookout": []any{map[string]any{"max_failover_replication_time_lag": 30}},
+				}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{fullStateBlock}},
+			want:  true,
+		},
+		{
+			name: "block with only null placeholders",
+			config: map[string]any{
+				"id": "svc",
+				"foo_user_config": []any{map[string]any{
+					"backup_hour": tftypes.NewValue(tftypes.Number, nil),
+					"pg_version":  tftypes.NewValue(tftypes.String, nil),
+					"ip_filter":   tftypes.NewValue(tftypes.Set{ElementType: tftypes.String}, nil),
+					"pglookout": []any{map[string]any{
+						"max_failover_replication_time_lag": tftypes.NewValue(tftypes.Number, nil),
+					}},
+				}},
+			},
+			state: map[string]any{"id": "svc", "foo_user_config": []any{fullStateBlock}},
+			want:  false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rd, err := NewResourceData(sch, []string{"id"},
+				WithTestState(tc.state),
+				WithTestConfig(tc.config),
+			)
+			require.NoError(t, err)
+			require.Equal(t, tc.want, rd.HasConfiguredChange("foo_user_config"))
+		})
+	}
 }
 
 func TestResourceDataSingletonObjectBlocks(t *testing.T) {

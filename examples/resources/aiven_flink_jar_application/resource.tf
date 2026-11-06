@@ -1,6 +1,6 @@
 resource "aiven_flink_jar_application" "example" {
   project      = "my-project" // Force new
-  service_name = "my-application" // Force new
+  service_name = "my-flink" // Force new
   name         = "TestJob"
 
   /* COMPUTED FIELDS

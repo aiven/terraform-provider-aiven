@@ -1,34 +1,71 @@
-resource "aiven_pg" "example_postgres" {
-  project                 = data.aiven_project.example_project.project
+resource "aiven_pg" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-pg" // Force new
+  plan         = "startup-4"
+
+  // OPTIONAL FIELDS
+  cmk_id                  = "12345678-1234-1234-1234-12345678abcd"
+  project_vpc_id          = "my-project/1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  additional_disk_space   = "30GiB"
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "example-postgres-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-
-  static_ips = toset([
-    aiven_static_ip.ips[0].static_ip_address_id,
-    aiven_static_ip.ips[1].static_ip_address_id,
-    aiven_static_ip.ips[2].static_ip_address_id,
-    aiven_static_ip.ips[3].static_ip_address_id,
-  ])
-
-  pg_user_config {
-    static_ips = true
-
-    public_access {
-      pg         = true
-      prometheus = false
-    }
-
-    pg {
-      idle_in_transaction_session_timeout = 900
-      log_min_duration_statement          = -1
-    }
+  static_ips              = ["ip350351b76da"]
+  tag {
+    key   = "foo"
+    value = "foo"
   }
-
-  timeouts {
-    create = "20m"
-    update = "15m"
+  tech_emails {
+    email = "jane@example.com"
   }
+  termination_protection = false
+
+  /* COMPUTED FIELDS
+  components = [{
+    component                   = "foo"
+    connection_uri              = "foo"
+    host                        = "foo"
+    kafka_authentication_method = "certificate"
+    kafka_ssl_ca                = "letsencrypt"
+    port                        = 42
+    privatelink_connection_id   = "foo"
+    route                       = "dynamic"
+    ssl                         = true
+    usage                       = "disaster_recovery"
+  }]
+  disk_space_cap             = "foo"
+  disk_space_default         = "foo"
+  disk_space_step            = "foo"
+  disk_space_used            = "foo"
+  maintenance_window_enabled = true
+  pg = [{
+    dbname          = "foo"
+    host            = "foo"
+    max_connections = 42
+    params = [{
+      database_name = "foo"
+      host          = "foo"
+      password      = "password123"
+      port          = 42
+      sslmode       = "foo"
+      user          = "foo"
+    }]
+    password     = "password123"
+    port         = 42
+    replica_uri  = "foo"
+    sslmode      = "foo"
+    standby_uris = ["foo"]
+    syncing_uris = ["foo"]
+    uri          = "foo"
+    uris         = ["foo"]
+    user         = "foo"
+  }]
+  service_host     = "foo"
+  service_password = "password123"
+  service_port     = 42
+  service_type     = "pg"
+  service_uri      = "foo"
+  service_username = "foo"
+  state            = "POWEROFF"
+  */
 }

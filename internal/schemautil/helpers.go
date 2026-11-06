@@ -6,14 +6,9 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
-	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/organization"
-	"github.com/aiven/go-client-codegen/handler/service"
-	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/samber/lo"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
@@ -21,11 +16,6 @@ type ResourceStateOrResourceDiff interface {
 	GetRawConfig() cty.Value
 	GetOk(key string) (any, bool)
 	Get(key string) any
-}
-
-func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
-	c := d.GetRawConfig()
-	return !c.IsNull() && !c.AsValueMap()[key].IsNull()
 }
 
 // PlanParameters service plan aparameters
@@ -40,114 +30,6 @@ type PlanParameters struct {
 // In such cases, calculations are performed with zero values as placeholders.
 func (p PlanParameters) IsEmpty() bool {
 	return p.DiskSizeMBDefault == 0
-}
-
-func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceIntegrationIn {
-	tfServiceIntegrations := d.Get("service_integrations").(*schema.Set).List()
-	apiServiceIntegrations := make([]service.ServiceIntegrationIn, 0, len(tfServiceIntegrations))
-	for _, definition := range tfServiceIntegrations {
-		definitionMap := definition.(map[string]any)
-		sourceService := definitionMap["source_service_name"].(string)
-		userConfig := make(map[string]any)
-		integrationType := definitionMap["integration_type"].(string)
-		apiIntegration := service.ServiceIntegrationIn{
-			IntegrationType: service.IntegrationType(integrationType),
-			SourceService:   &sourceService,
-			UserConfig:      &userConfig,
-		}
-		apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
-	}
-	return apiServiceIntegrations
-}
-
-func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
-	vpcID := d.Get("project_vpc_id").(string)
-	if len(vpcID) == 0 {
-		return nil, nil
-	}
-
-	var vpcIDPointer *string
-
-	parts := strings.SplitN(vpcID, "/", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}")
-	}
-
-	p1 := parts[1]
-	vpcIDPointer = &p1
-	return vpcIDPointer, nil
-}
-
-func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *service.MaintenanceIn {
-	dow := d.Get("maintenance_window_dow").(string)
-	if dow == "never" {
-		// `never` is not available in the API, but can be set on the backend
-		// Sending this back to the backend will fail the validation
-		return nil
-	}
-	t := d.Get("maintenance_window_time").(string)
-	if len(dow) > 0 && len(t) > 0 {
-		return &service.MaintenanceIn{Dow: service.DowType(dow), Time: &t}
-	}
-	return nil
-}
-
-func ConvertToDiskSpaceMB(b string) int {
-	diskSizeMB, _ := units.RAMInBytes(b)
-	return int(diskSizeMB / units.MiB)
-}
-
-func GetServicePlanParametersFromSchema(ctx context.Context, client avngen.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
-	project := d.Get("project").(string)
-	serviceType := d.Get("service_type").(string)
-	servicePlan := d.Get("plan").(string)
-
-	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
-}
-
-func getServicePlanParametersInternal(ctx context.Context, client avngen.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
-	servicePlanResponse, err := client.ProjectServicePlanSpecsGet(ctx, project, serviceType, servicePlan)
-	if avngen.IsNotFound(err) {
-		// It might be a new plan type, it's not available in ProjectServicePlanSpecsGet
-		return PlanParameters{}, nil
-	}
-
-	if err != nil {
-		return PlanParameters{}, err
-	}
-	return PlanParameters{
-		DiskSizeMBDefault: servicePlanResponse.DiskSpaceMb,
-		DiskSizeMBMax:     lo.FromPtr(servicePlanResponse.DiskSpaceCapMb),
-		DiskSizeMBStep:    lo.FromPtr(servicePlanResponse.DiskSpaceStepMb),
-	}, nil
-}
-
-func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client avngen.Client, d ResourceStateOrResourceDiff) (bool, error) {
-	// to check if dynamic disk space is allowed, we currently have to check
-	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
-
-	project := d.Get("project").(string)
-	serviceType := d.Get("service_type").(string)
-	servicePlan := d.Get("plan").(string)
-	cloudName := d.Get("cloud_name").(string)
-
-	servicePlanPricingResponse, err := client.ProjectServicePlanPriceGet(ctx, project, serviceType, servicePlan, cloudName)
-	if err != nil {
-		return false, fmt.Errorf("unable to get service plan pricing from api: %w", err)
-	}
-	return lo.FromPtr(servicePlanPricingResponse.ExtraDiskPricePerGbUsd) != "", nil
-}
-
-func humanReadableByteSize(s int) string {
-	// we only allow GiB as unit and show decimal places to MiB precision, this should fix rounding issues
-	// when converting from mb to human readable and back
-	suffixes := []string{"B", "KiB", "MiB", "GiB"}
-
-	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
-}
-
-func HumanReadableByteSizeMB(s int) string {
-	return humanReadableByteSize(s * units.MiB)
 }
 
 // IsOrganizationID is a helper function that returns true if the string is an organization ID.
@@ -201,16 +83,4 @@ func StringToDiagWarning(msg string) diag.Diagnostics {
 // ErrorToDiagWarning is a function that converts an error to a diag warning.
 func ErrorToDiagWarning(err error) diag.Diagnostics {
 	return StringToDiagWarning(err.Error())
-}
-
-// NilIfZero returns a pointer to the value, or nil if the value equals its zero value
-// Note: duplicated to avoid circular imports
-func NilIfZero[T comparable](args ...T) *T {
-	var zero T
-	for _, v := range args {
-		if v != zero {
-			return &v
-		}
-	}
-	return nil
 }

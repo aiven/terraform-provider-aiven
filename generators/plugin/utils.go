@@ -302,7 +302,7 @@ func itemEnumValues(item *Item) []any {
 	if item.Items != nil && len(item.Items.Enum) > 0 {
 		return item.Items.Enum
 	}
-	return nil
+	return item.DocEnum
 }
 
 func firstUpper[T ~string](s T) string {

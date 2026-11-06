@@ -161,6 +161,13 @@ func genSetNestedAttribute(def *Definition, entity entityType, item *Item) (jen.
 		t = "ListNestedAttribute"
 	}
 
+	// An update plans the whole collection unknown, the nested modifiers can't keep it
+	if entity.isResource() && item.UsesStateForUnknown() {
+		typedPlanmodifier := fmt.Sprintf(string(planmodifierTypedImport), item.GoType())
+		values["PlanModifiers"] = jen.Index().Qual(entity.Import(planmodifierPackageFmt), item.TFType()).
+			Values(jen.Qual(typedPlanmodifier, "UseStateForUnknown").Call())
+	}
+
 	values["Computed"] = jen.True()
 	values["NestedObject"] = jen.Qual(pkg, "NestedAttributeObject").Values(nested)
 	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
@@ -189,6 +196,8 @@ func genSetNestedBlock(def *Definition, entity entityType, item *Item) (jen.Code
 		t = "ListNestedBlock"
 	}
 
+	// Blocks can't be sensitive, their attributes are (see recalcDeep)
+	delete(values, "Sensitive")
 	values["NestedObject"] = jen.Qual(pkg, "NestedBlockObject").Values(nested)
 	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
 }
@@ -217,12 +226,20 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 			// By TFType, as maps are objects too
 			typedPlanmodifier := fmt.Sprintf(string(planmodifierTypedImport), item.GoType())
 			planModifiers := make([]jen.Code, 0)
-			if item.ForceNew {
+			switch {
+			case item.ForceNew && item.InUserConfig():
+				// An option is unknown when not configured, e.g., admin_password of a new user config block
+				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplaceIfConfigured").Call())
+			case item.ForceNew:
 				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "RequiresReplace").Call())
 			}
 
 			if item.UsesStateForUnknown() {
 				planModifiers = append(planModifiers, jen.Qual(typedPlanmodifier, "UseStateForUnknown").Call())
+			}
+
+			if isUserConfigSet(item) {
+				planModifiers = append(planModifiers, jen.Qual(adapterPackage, "IPFilterPlanModifier").Call())
 			}
 
 			if len(planModifiers) > 0 {
@@ -263,11 +280,30 @@ func genAttributeValues(def *Definition, entity entityType, item *Item) (map[str
 		}
 
 		if entity.isResource() && item.Default != nil {
-			values["Default"] = jen.Qual(getTypedImport(item.Type, defaultsTypedImport), "Static"+item.TFType()).Call(jen.Lit(item.Default))
+			value, err := genDefault(item)
+			if err != nil {
+				return nil, err
+			}
+			values["Default"] = value
 		}
 	}
 
 	return values, nil
+}
+
+// genDefault renders a static default. A collection of scalars can only default to empty, e.g., "default: []".
+func genDefault(item *Item) (jen.Code, error) {
+	pkg := getTypedImport(item.Type, defaultsTypedImport)
+	if !item.IsArray() {
+		return jen.Qual(pkg, "Static"+item.TFType()).Call(jen.Lit(item.Default)), nil
+	}
+
+	if !isEmpty(item.Default) || item.Items.IsNested() {
+		return nil, fmt.Errorf("%s: only an empty default of scalars is supported, got %v", item.Name, item.Default)
+	}
+	elem := jen.Qual(typesPackage, item.Items.TFType()+"Type")
+	value := jen.Qual(typesPackage, item.TFType()+"ValueMust").Call(elem, jen.Index().Qual(attrPackage, "Value").Values())
+	return jen.Qual(pkg, "StaticValue").Call(value), nil
 }
 
 const schemaInternalFmt = "%sSchemaInternal"
@@ -368,6 +404,16 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 
 		if item.RendersAsAttribute(def, entity) {
 			params[jen.Id("IsAttribute")] = jen.True()
+		}
+	}
+
+	// See adapter.ExpandUserConfig
+	if item.InUserConfig() && item.UserConfigType == "" && item.Parent.Items != item {
+		if item.JSONName != item.Name {
+			params[jen.Id("JSONName")] = jen.Lit(item.JSONName)
+		}
+		if item.ForceNew {
+			params[jen.Id("CreateOnly")] = jen.True()
 		}
 	}
 

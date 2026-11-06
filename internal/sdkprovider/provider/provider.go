@@ -16,17 +16,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
@@ -47,13 +42,10 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// grafana
-			"aiven_grafana": grafana.DatasourceGrafana(),
 
 			// mysql
-			"aiven_mysql": mysql.DatasourceMySQL(),
 
 			// pg
-			"aiven_pg": pg.DatasourcePG(),
 
 			// account
 			"aiven_account":                account.DatasourceAccount(),
@@ -75,41 +67,30 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_vpc_peering_connection":   vpc.DatasourceGCPVPCPeeringConnection(),
 
 			// flink
-			"aiven_flink":                     flink.DatasourceFlink(),
 			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.DatasourceOpenSearch(),
 			"aiven_opensearch_acl_config": opensearch.DatasourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpenSearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                      kafka.DatasourceKafka(),
 			"aiven_kafka_schema":               kafkaschema.DatasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration": kafkaschema.DatasourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":            kafka.DatasourceKafkaConnector(),
-			"aiven_kafka_connect":              kafka.DatasourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":          kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse": clickhouse.DatasourceClickhouse(),
 
 			// thanos
-			"aiven_thanos": thanos.DatasourceThanos(),
 
 			// valkey
-			"aiven_valkey": valkey.DatasourceValkey(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			// grafana
-			"aiven_grafana": grafana.ResourceGrafana(),
 
 			// mysql
-			"aiven_mysql": mysql.ResourceMySQL(),
 
 			// pg
-			"aiven_pg": pg.ResourcePG(),
 
 			// account
 			"aiven_account":                account.ResourceAccount(),
@@ -133,33 +114,25 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 
 			// flink
-			"aiven_flink":                     flink.ResourceFlink(),
 			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.ResourceOpenSearch(),
 			"aiven_opensearch_acl_config": opensearch.ResourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.ResourceOpenSearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                      kafka.ResourceKafka(),
 			"aiven_kafka_schema":               kafkaschema.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration": kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":            kafka.ResourceKafkaConnector(),
-			"aiven_kafka_connect":              kafka.ResourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":          kafka.ResourceKafkaMirrormaker(),
 			"aiven_kafka_quota":                kafka.ResourceKafkaQuota(),
 
 			// clickhouse
-			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),
 			"aiven_clickhouse_role":  clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
 
 			// thanos
-			"aiven_thanos": thanos.ResourceThanos(),
 
 			// valkey
-			"aiven_valkey": valkey.ResourceValkey(),
 		},
 	}
 

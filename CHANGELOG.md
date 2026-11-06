@@ -18,8 +18,10 @@ nav_order: 1
 - Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
 - Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
   and `grafana_stat_totals_*` metrics, which require periodic database queries
-- **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
-  When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+- **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_service_integration`
+  and `aiven_service_integration_endpoint`. When upgrading from v3, run `terraform apply -refresh-only` with
+  v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
   and `aiven_service_integration_endpoint` that remove a user config block. This affects resources managed with an earlier
   version whose configuration has no such block while the API returns one: SDKv2 stored it anyway, e.g.,
@@ -50,6 +52,24 @@ nav_order: 1
   and `aiven_service_integration_endpoint` without secrets, e.g., when the token's role can't read them.
 - Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
   for the connection state, and no longer fails when the peer rejected or deleted the connection.
+- Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos` and `aiven_valkey` resources
+  and data sources to the Plugin Framework. Changes:
+  - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
+    the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the whole block shows a change, which
+    sends no options: the API keeps them, including a custom `ip_filter` that SDKv2 cleared.
+  - The first plan after the upgrade might show an in-place change that removes the user config blocks SDKv2 stored
+    but the configuration doesn't have, e.g., `pg_user_config` or its `pg` block. The Plugin Framework can't keep a block
+    missing in the configuration. It's safe to apply: the update sends only the configured values, which the service
+    already has, so its settings, hosts and credentials stay the same.
+  - An empty string is null in the state, e.g., `project_vpc_id` without a VPC.
+  - The user config options are validated at plan time, e.g., `email_sender_username = ""` fails its pattern.
+  - The connection blocks, e.g., `pg` and `kafka`, are read-only.
+  - Changing `aiven_kafka` field `default_acl` after the creation shows an in-place change, which sends nothing.
+  - Remove the deprecated options the API no longer has: `additional_backup_regions` of `aiven_clickhouse`, `aiven_flink`,
+    `aiven_kafka`, `aiven_kafka_connect` and `aiven_kafka_mirrormaker`, `pg_user_config.pg_qualstats`,
+    `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`,
+    `kafka_user_config.tiered_storage.local_cache` and `thanos_user_config.env`.
 
 ## [4.65.1] - 2026-10-30
 

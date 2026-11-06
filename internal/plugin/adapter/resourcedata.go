@@ -27,7 +27,9 @@ type ResourceData interface {
 	GetConfigOk(key string) (any, bool)
 	GetState(key string) any
 	HasChange(key string) bool
+	HasConfiguredChange(key string) bool
 	Set(key string, value any) error
+	SetUnknown(keys ...string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -43,13 +45,13 @@ type ResourceData interface {
 }
 
 type resourceData struct {
-	schema              *Schema
-	plan, state, config map[string]any
-	idFields            []string
-	idFieldsOptional    []string
-	isDataSource        bool
-	preservePlanValues  bool
-	requiresReplace     []string
+	schema                         *Schema
+	plan, state, config, configRaw map[string]any
+	idFields                       []string
+	idFieldsOptional               []string
+	isDataSource                   bool
+	preservePlanValues             bool
+	requiresReplace                []string
 }
 
 var _ ResourceData = (*resourceData)(nil)
@@ -241,13 +243,111 @@ func (d *resourceData) HasChange(key string) bool {
 	if pOK != sOK {
 		return true
 	}
-	return !cmp.Equal(planVal, stateVal)
+	return !cmp.Equal(withoutNulls(planVal), stateVal)
+}
+
+// HasConfiguredChange tells if a value the config sets differs from the state, for a top-level key.
+// An unset value is no change, as the update doesn't send it, e.g., a removed user config option.
+func (d *resourceData) HasConfiguredChange(key string) bool {
+	v, ok := d.configRaw[key]
+	return ok && configured(v, d.state[key])
+}
+
+// configured tells if cfg sets a value that differs from state, see HasConfiguredChange.
+func configured(cfg, state any) bool {
+	switch c := cfg.(type) {
+	case tftypes.Value:
+		// A null or an unknown placeholder
+		return !c.IsKnown()
+	case map[string]any:
+		st, _ := state.(map[string]any)
+		for k, v := range c {
+			if configured(v, st[k]) {
+				return true
+			}
+		}
+		return false
+	case []any:
+		if !isBlockList(c) {
+			return !cmp.Equal(withoutNulls(c), state)
+		}
+
+		// A block is compared by index, unless the number of blocks changes
+		st, _ := state.([]any)
+		for i, item := range c {
+			var s any
+			if len(st) == len(c) {
+				s = st[i]
+			}
+			if configured(item, s) {
+				return true
+			}
+		}
+		return false
+	}
+	return !cmp.Equal(cfg, state)
+}
+
+func isBlockList(list []any) bool {
+	if len(list) == 0 {
+		return false
+	}
+	for _, item := range list {
+		if _, ok := item.(map[string]any); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// withoutNulls drops the null placeholders of ModifyPlan, as the state has no nulls, e.g.,
+// {"foo": 1, "bar": tftypes.String<null>} → {"foo": 1}. An unknown value is a change, so it stays.
+func withoutNulls(v any) any {
+	switch v := v.(type) {
+	case map[string]any:
+		result := make(map[string]any, len(v))
+		for k, item := range v {
+			if tv, ok := item.(tftypes.Value); !ok || !tv.IsNull() {
+				result[k] = withoutNulls(item)
+			}
+		}
+		return result
+	case []any:
+		result := make([]any, len(v))
+		for i, item := range v {
+			result[i] = withoutNulls(item)
+		}
+		return result
+	}
+	return v
 }
 
 // Set sets a value by a path.
 // Returns an error if the key is not found in the schema.
 func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
+}
+
+// SetUnknown plans the attributes as "(known after apply)", e.g., the computed values a plan change resets.
+// ModifyPlan only: the other operations must store known values.
+func (d *resourceData) SetUnknown(keys ...string) error {
+	if !d.preservePlanValues {
+		return fmt.Errorf("unknown values can be set by ModifyPlan only")
+	}
+
+	for _, key := range keys {
+		prop, ok := d.schema.Properties[key]
+		if !ok {
+			return fmt.Errorf("key %q not found in schema", key)
+		}
+
+		null, err := toTFValue(prop, nil)
+		if err != nil {
+			return err
+		}
+		d.plan[key] = tftypes.NewValue(null.Type(), tftypes.UnknownValue)
+	}
+	return nil
 }
 
 func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {
@@ -450,7 +550,7 @@ func (d *resourceData) pruneUnsetEmptyCollections(state, norm map[string]any) {
 
 		// A computed attribute has no configured shape to preserve. Its explicit API
 		// value is authoritative, even when that value is an empty collection.
-		if sch.Computed && sch.IsAttribute {
+		if sch.Computed && (sch.IsAttribute || !sch.IsObject) {
 			continue
 		}
 
@@ -657,6 +757,12 @@ func WithConfig(config tfsdk.Config) ResourceDataOpt {
 			return fmt.Errorf("failed to decode config: %w", err)
 		}
 		d.config = configMap
+
+		configRaw, err := fromTFValue(d.schema, config.Raw, true)
+		if err != nil {
+			return fmt.Errorf("failed to decode raw config: %w", err)
+		}
+		d.configRaw = configRaw
 		return nil
 	}
 }
@@ -689,6 +795,7 @@ func WithTestState(state map[string]any) ResourceDataOpt {
 func WithTestConfig(config map[string]any) ResourceDataOpt {
 	return func(d *resourceData) error {
 		d.config = config
+		d.configRaw = config
 		return nil
 	}
 }

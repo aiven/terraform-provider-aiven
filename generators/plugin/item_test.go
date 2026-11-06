@@ -1128,6 +1128,15 @@ func TestMergeItemDropDefault(t *testing.T) {
 	require.Nil(t, got.Default)
 }
 
+func TestMergeItemEmptyCollectionDefault(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{Name: "static_ips", Type: SchemaTypeArray}, &Item{Default: []any{}})
+	require.NoError(t, err)
+	require.Equal(t, []any{}, got.Default)
+}
+
 func TestMergeItemEnum(t *testing.T) {
 	t.Parallel()
 
@@ -1197,4 +1206,38 @@ func TestExampleNestedAttributeUsesAssignment(t *testing.T) {
 	s := string(got)
 	require.Contains(t, s, "file_info = [{")
 	require.NotRegexp(t, `(?m)^\s*file_info \{`, s)
+}
+
+func TestExampleDisabledAndMinimal(t *testing.T) {
+	t.Parallel()
+
+	minimal := func(name string, props ...*Item) *Item {
+		block := &Item{Name: name, Type: SchemaTypeObject, Optional: true, MinimalExample: true, Properties: map[string]*Item{}}
+		for _, p := range props {
+			p.JSONName, p.Parent = p.Name, block
+			block.Properties[p.Name] = p
+		}
+		return block
+	}
+	root := refTestRoot(
+		&Item{Name: "service_name", Type: SchemaTypeString, Required: true, Example: "my-pg"},
+		&Item{Name: "service_integrations", Type: SchemaTypeString, Optional: true, DisableExample: true},
+		minimal("pg_user_config",
+			&Item{Name: "pg_version", Type: SchemaTypeString, Required: true, Example: "17"},
+			&Item{Name: "backup_hour", Type: SchemaTypeInteger, Optional: true},
+		),
+		// Sorts first, so the title stays above the next field
+		minimal("access_control", &Item{Name: "pg", Type: SchemaTypeBoolean, Optional: true}),
+	)
+	got, err := exampleRoot(&Definition{typeName: "aiven_pg"}, resourceType, root)
+	require.NoError(t, err)
+	assert.Equal(t, `resource "aiven_pg" "example" {
+  service_name = "my-pg"
+
+  // OPTIONAL FIELDS
+  pg_user_config {
+    pg_version = "17"
+  }
+}
+`, string(got))
 }
