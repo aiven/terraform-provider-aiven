@@ -4,7 +4,7 @@ limitedAvailability: true
 resource:
   removeMissing: true
   modifyPlan: true
-  refreshStateExists: true
+  refreshState: true
   description: |
     Creates and manages an Aiven Kafka Connect custom plugin file at the organization level. The
     file is uploaded to the pre-signed URL the API returns, and the provider polls until the

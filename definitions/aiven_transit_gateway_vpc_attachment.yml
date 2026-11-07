@@ -2,8 +2,8 @@
 resource:
   description: Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC.
   refDepth: 2
-  refreshStateExists: true
-  deleteStateGone: true
+  refreshState: true
+  deleteState: true
   removeMissing: true
   # TODO: replace with identityFields and identityFieldsOptional, then remove importIDFormats.
   importIDFormats:

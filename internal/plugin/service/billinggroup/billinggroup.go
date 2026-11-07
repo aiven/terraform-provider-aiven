@@ -10,7 +10,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+func readModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	// SDK provider stored the ID only in the "id" field, not "billing_group_id"
 	// we need to fall back to id for backward compatibility
 	if d.Get("billing_group_id") == "" {

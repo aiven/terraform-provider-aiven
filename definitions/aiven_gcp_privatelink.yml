@@ -1,8 +1,9 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   stateAttribute: state
-  refreshStateDesired: [active]
-  deleteStateGone: true
+  refreshState:
+    desired: [active]
+  deleteState: true
   removeMissing: true
   description: Creates and manages a Google Private Service Connect for an Aiven service in a VPC.
 datasource:

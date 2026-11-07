@@ -2,7 +2,7 @@
 beta: true
 limitedAvailability: true
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   description: |
     Creates and manages the deployment of an
