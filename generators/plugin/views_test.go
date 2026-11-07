@@ -464,7 +464,7 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 				AlreadyExists: AlreadyExists("yes"),
 			},
 		}, stringItem(), false)
-		require.EqualError(t, err, `alreadyExists must be "adopt", got "yes"`)
+		require.EqualError(t, err, `alreadyExists must be "adopt" or "check", got "yes"`)
 	})
 }
 

@@ -115,13 +115,17 @@ properties:
           Set to true to remove the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
           Useful for resources that Aiven may automatically delete, such as users or databases when a service has been turned off and then on again.
       alreadyExists:
-        enum: [adopt]
+        enum: [adopt, check]
         $comment: |
           What Create does when the resource exists. Omit it to fail on 409 Conflict. Requires `refreshState`,
           so the state is populated by the subsequent Read.
           `adopt` treats 409 as success, e.g. for one-shot provisioning actions that should adopt an existing entity on re-run.
           Does NOT work for resources whose ID is returned only in the Create response (e.g. server-assigned IDs):
           on conflict there is no response to read the ID from and the subsequent Read has nothing to look up.
+          `check` fails when the resource exists in the API or another resource in this run has the same keys.
+          The paginated read operation lists the scope once: its path parameters are the scope, its
+          `resultListLookupKeys` match the items, the same way `readView` finds the resource.
+          Then a 409 means the client retried a request the API applied, so it's treated as success.
       disableExample:
         type: boolean
         $comment: |

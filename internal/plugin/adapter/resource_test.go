@@ -1555,3 +1555,171 @@ func TestIsNotFound(t *testing.T) {
 		})
 	}
 }
+
+func conflictResourceSchema() *Schema {
+	return &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":      {Type: SchemaTypeString, Computed: true},
+			"project": {Type: SchemaTypeString},
+			"name":    {Type: SchemaTypeString},
+			"timeouts": {
+				Type: SchemaTypeObject,
+				Properties: map[string]*Schema{
+					"create": {Type: SchemaTypeString},
+					"delete": {Type: SchemaTypeString},
+				},
+			},
+		},
+	}
+}
+
+func TestResourceAdapterCreateConflict(t *testing.T) {
+	t.Parallel()
+
+	schema := conflictResourceSchema()
+	plan := map[string]any{"project": "p1", "name": "taken"}
+	raw, err := toTFValue(schema, plan)
+	require.NoError(t, err)
+
+	createCalled := false
+	a := &resourceAdapter{
+		resource: ResourceOptions{
+			TypeName:       "aiven_test_conflict",
+			SchemaInternal: schema,
+			IdentityFields: []string{"project", "name"},
+			Conflict: &ConflictOptions{
+				Parent: []string{"project"},
+				Keys:   []string{"name"},
+				Load: func(_ context.Context, _ avngen.Client, _ ResourceData) (func(ResourceData) bool, error) {
+					return func(d ResourceData) bool {
+						return fmt.Sprint(d.Get("name")) == "taken"
+					}, nil
+				},
+			},
+			Create: func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				createCalled = true
+				return nil
+			},
+		},
+	}
+
+	req := resource.CreateRequest{
+		Plan:   tfsdk.Plan{Raw: raw},
+		Config: tfsdk.Config{Raw: raw},
+	}
+	rsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(raw.Type(), nil)}}
+
+	a.Create(t.Context(), req, &rsp)
+
+	require.True(t, rsp.Diagnostics.HasError())
+	require.False(t, createCalled)
+	require.Contains(t, rsp.Diagnostics.Errors()[0].Detail(), "already exists")
+}
+
+func TestResourceAdapterCreateReleasesConflictOnFailure(t *testing.T) {
+	t.Parallel()
+
+	schema := conflictResourceSchema()
+	plan := map[string]any{"project": "p1", "name": "new"}
+	raw, err := toTFValue(schema, plan)
+	require.NoError(t, err)
+
+	createErr := errors.New("create failed")
+	createCalls := 0
+	a := &resourceAdapter{
+		resource: ResourceOptions{
+			TypeName:       "aiven_test_conflict_release",
+			SchemaInternal: schema,
+			IdentityFields: []string{"project", "name"},
+			Conflict: &ConflictOptions{
+				Parent: []string{"project"},
+				Keys:   []string{"name"},
+				Load: func(_ context.Context, _ avngen.Client, _ ResourceData) (func(ResourceData) bool, error) {
+					return func(ResourceData) bool { return false }, nil
+				},
+			},
+			Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+				createCalls++
+				if createCalls == 1 {
+					return createErr
+				}
+				return d.SetID("p1", "new")
+			},
+		},
+	}
+
+	req := resource.CreateRequest{
+		Plan:   tfsdk.Plan{Raw: raw},
+		Config: tfsdk.Config{Raw: raw},
+	}
+
+	rsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(raw.Type(), nil)}}
+	a.Create(t.Context(), req, &rsp)
+	require.True(t, rsp.Diagnostics.HasError())
+	require.Contains(t, rsp.Diagnostics.Errors()[0].Detail(), createErr.Error())
+
+	rsp = resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(raw.Type(), nil)}}
+	a.Create(t.Context(), req, &rsp)
+	require.False(t, rsp.Diagnostics.HasError())
+	require.Equal(t, 2, createCalls)
+}
+
+func TestResourceAdapterDeleteReleasesConflictName(t *testing.T) {
+	t.Parallel()
+
+	schema := conflictResourceSchema()
+	statePlan := map[string]any{"project": "p1", "name": "db1", "id": "p1/db1"}
+	raw, err := toTFValue(schema, statePlan)
+	require.NoError(t, err)
+
+	createPlan := map[string]any{"project": "p1", "name": "db1"}
+	createRaw, err := toTFValue(schema, createPlan)
+	require.NoError(t, err)
+
+	a := &resourceAdapter{
+		resource: ResourceOptions{
+			TypeName:       "aiven_test_conflict_delete",
+			SchemaInternal: schema,
+			IdentityFields: []string{"project", "name"},
+			Conflict: &ConflictOptions{
+				Parent: []string{"project"},
+				Keys:   []string{"name"},
+				Load: func(_ context.Context, _ avngen.Client, _ ResourceData) (func(ResourceData) bool, error) {
+					return func(ResourceData) bool { return false }, nil
+				},
+			},
+			Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+				return d.SetID("p1", "db1")
+			},
+			Delete: func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				return nil
+			},
+		},
+	}
+
+	createReq := resource.CreateRequest{
+		Plan:   tfsdk.Plan{Raw: createRaw},
+		Config: tfsdk.Config{Raw: createRaw},
+	}
+	createRsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(createRaw.Type(), nil)}}
+	a.Create(t.Context(), createReq, &createRsp)
+	require.False(t, createRsp.Diagnostics.HasError())
+
+	conflictReq := resource.CreateRequest{
+		Plan:   tfsdk.Plan{Raw: createRaw},
+		Config: tfsdk.Config{Raw: createRaw},
+	}
+	conflictRsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(createRaw.Type(), nil)}}
+	a.Create(t.Context(), conflictReq, &conflictRsp)
+	require.True(t, conflictRsp.Diagnostics.HasError())
+
+	deleteReq := resource.DeleteRequest{State: tfsdk.State{Raw: raw}}
+	deleteRsp := resource.DeleteResponse{}
+	a.Delete(t.Context(), deleteReq, &deleteRsp)
+	require.False(t, deleteRsp.Diagnostics.HasError())
+
+	reclaimRsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(createRaw.Type(), nil)}}
+	a.Create(t.Context(), conflictReq, &reclaimRsp)
+	require.False(t, reclaimRsp.Diagnostics.HasError())
+}
