@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -205,7 +206,7 @@ func TestAccAivenPGDatabase(t *testing.T) {
 						require.NoError(t, err)
 						// The provider caches the initial list of databases per service.
 						// Clear it to mimic a fresh provider process after an out-of-band delete.
-						schemautil.ForgetDatabase(projectName, serviceName, dbName)
+						adapter.ForgetConflict("aiven_pg_database", []string{projectName, serviceName}, dbName)
 					},
 					PlanOnly:           true,
 					ExpectNonEmptyPlan: true,

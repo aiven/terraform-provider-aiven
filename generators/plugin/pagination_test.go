@@ -391,6 +391,50 @@ func pagedDefinition() *Definition {
 	}}}
 }
 
+func TestGenConflictOptions(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name    string
+		setup   func(def *Definition)
+		wantErr string
+	}{
+		{
+			name:    "no pagination",
+			setup:   func(def *Definition) { def.Operations[0].Pagination = nil },
+			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+		},
+		{
+			name:    "disabled view",
+			setup:   func(def *Definition) { def.Operations[0].DisableView = true },
+			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+		},
+		{
+			name:    "no lookup keys",
+			setup:   func(def *Definition) { def.Operations[0].ResultListLookupKeys = nil },
+			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+		},
+		{
+			name: "two paginated operations",
+			setup: func(def *Definition) {
+				dup := *def.Operations[0]
+				dup.ID = "ServiceDatabaseList2"
+				def.Operations = append(def.Operations, &dup)
+			},
+			wantErr: "only one paginated operation is supported",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			def := pagedDefinition()
+			tc.setup(def)
+			_, err := genConflictOptions(def, &Item{})
+			require.ErrorContains(t, err, tc.wantErr)
+		})
+	}
+}
+
 func TestGenPageMatch_UnknownLookupAttribute(t *testing.T) {
 	t.Parallel()
 
