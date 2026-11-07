@@ -6,5 +6,10 @@ identityFields: [organization_id]
 operations:
   - id: OrganizationBillingGroupList
     type: read
-    resultToKey: billing_groups
+    pagination:
+      nextField: next
+      cursorParam: cursor
+      pageSizeParam: limit
+remove:
+  - prev
 clientHandler: organizationbilling

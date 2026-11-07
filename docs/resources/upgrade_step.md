@@ -53,7 +53,7 @@ resource "aiven_organization" "example" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `organization_id/step_id`.
-- `step_id` (String) Upgrade step ID.
+- `step_id` (String) Upgrade step ID (UUIDv4, e.g. 550e8400-e29b-41d4-a716-446655440000).
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

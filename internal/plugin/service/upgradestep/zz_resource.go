@@ -59,7 +59,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"step_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Upgrade step ID.",
+				MarkdownDescription: "Upgrade step ID (UUIDv4, e.g. 550e8400-e29b-41d4-a716-446655440000).",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
