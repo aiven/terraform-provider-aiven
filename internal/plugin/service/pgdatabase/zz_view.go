@@ -16,10 +16,16 @@ import (
 const typeName = "aiven_pg_database"
 
 var ResourceOptions = adapter.ResourceOptions{
+	Conflict: &adapter.ConflictOptions{
+		Keys:   []string{"database_name"},
+		Load:   adapter.ConflictList(pageView, pageMatch),
+		Parent: []string{"project", "service_name"},
+	},
 	Create:                createView,
 	Delete:                deleteView,
 	DeleteState:           &adapter.DeleteStateOptions{},
 	IdentityFields:        []string{"project", "service_name", "database_name"},
+	IgnoreAlreadyExists:   true,
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
 	RemoveMissing:         true,

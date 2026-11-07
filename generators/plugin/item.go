@@ -271,6 +271,9 @@ type AlreadyExists string
 const (
 	// AlreadyExistsAdopt treats 409 as success, e.g. for one-shot provisioning actions.
 	AlreadyExistsAdopt AlreadyExists = "adopt"
+	// AlreadyExistsCheck fails when the paginated read finds the resource, see adapter.ConflictOptions.
+	// Then a 409 means the client retried a request the API applied, so it's treated as success.
+	AlreadyExistsCheck AlreadyExists = "check"
 )
 
 type Definition struct {

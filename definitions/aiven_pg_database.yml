@@ -3,6 +3,7 @@ resource:
   refreshState: true
   deleteState: true
   removeMissing: true
+  alreadyExists: check
   terminationProtection: true
   description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.
 datasource:
