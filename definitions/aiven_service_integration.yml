@@ -4,7 +4,8 @@ resource:
   # (ServiceKafkaConnectList), so connectors could be created right after.
   # aiven_kafka_connector retries its create on 404.
   stateAttribute: active
-  refreshStateDesired: ["true"]
+  refreshState:
+    desired: ["true"]
   removeMissing: true
   # A generated example has every user config block, but an integration takes one
   disableExample: true

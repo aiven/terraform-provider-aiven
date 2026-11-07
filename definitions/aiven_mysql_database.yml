@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   terminationProtection: true
   description: Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.

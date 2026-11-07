@@ -9,8 +9,8 @@ resource:
     The provider saves its region for subsequent refresh and deletion, including replacement cleanup.
     Use `aiven_aws_vpc_peering_connection` for new AWS VPC peerings.
   refDepth: 2
-  refreshStateExists: true
-  deleteStateGone: true
+  refreshState: true
+  deleteState: true
   removeMissing: true
 datasource:
   description: Gets information about an AWS Transit Gateway VPC attachment for an Aiven project VPC.

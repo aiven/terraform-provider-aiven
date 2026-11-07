@@ -7,8 +7,8 @@ resource:
     If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement.
     To retry with the same peer identifiers, use destroy-before-create for the recovery apply.
     With `create_before_destroy`, the existing connection prevents creation of its replacement.
-  refreshStateExists: true
-  deleteStateGone: true
+  refreshState: true
+  deleteState: true
   removeMissing: true
   modifyPlan: true
 datasource:

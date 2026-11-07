@@ -1,19 +1,21 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   stateAttribute: state
-  refreshStateDesired:
-    - ACTIVE
-    - PENDING_PEER
-  refreshStateFailed:
-    - DELETED
-    - DELETED_BY_PEER
-    - DELETING
-    - ERROR
-    - INVALID_SPECIFICATION
-    - REJECTED_BY_PEER
-  refreshStateDelay: 1s
-  deleteStateDesired:
-    - DELETED
+  refreshState:
+    desired:
+      - ACTIVE
+      - PENDING_PEER
+    failed:
+      - DELETED
+      - DELETED_BY_PEER
+      - DELETING
+      - ERROR
+      - INVALID_SPECIFICATION
+      - REJECTED_BY_PEER
+    delay: 1s
+  deleteState:
+    desired:
+      - DELETED
   removeMissing: true
   description: Creates and manages an AWS VPC peering connection with an Aiven Organization VPC.
 datasource:

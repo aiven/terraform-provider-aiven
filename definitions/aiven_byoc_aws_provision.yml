@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
 resource:
-  ignoreAlreadyExists: true
+  alreadyExists: adopt
   description: |
     Provisions a BYOC custom cloud environment by handing Aiven the IAM role
     ARN created in the customer AWS account. Transitions the environment from
@@ -10,8 +10,10 @@ resource:
     Create this resource after the customer-side AWS infrastructure
     (IAM role, VPC, subnets, security groups, buckets) has been defined.
   stateAttribute: state
-  refreshStateDesired: [active]
-  deleteStateDesired: [deleted]
+  refreshState:
+    desired: [active]
+  deleteState:
+    desired: [deleted]
 clientHandler: byoc
 identityFields: [organization_id, custom_cloud_environment_id]
 operations:

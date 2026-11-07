@@ -1,8 +1,10 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   stateAttribute: state
-  refreshStateDesired: [ACTIVE]
-  deleteStateDesired: [DELETED]
+  refreshState:
+    desired: [ACTIVE]
+  deleteState:
+    desired: [DELETED]
   removeMissing: true
   description: Creates and manages a VPC for an Aiven organization.
 datasource:

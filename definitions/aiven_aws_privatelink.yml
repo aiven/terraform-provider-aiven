@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   stateAttribute: state
-  refreshStateDesired: [active]
+  refreshState:
+    desired: [active]
   removeMissing: true
   description: Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC.
 datasource:

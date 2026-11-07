@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maps"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"sort"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/ettle/strcase"
+	"gopkg.in/yaml.v3"
 )
 
 // AppearsIn is a bitmask for the field appearance (request, response, etc.)
@@ -172,27 +174,17 @@ type SchemaMeta struct {
 	Description           string `yaml:"description"`
 	DeprecationMessage    string `yaml:"deprecationMessage,omitempty"`
 	TerminationProtection bool   `yaml:"terminationProtection,omitempty"`
-	// StateAttribute is the Terraform attribute polled by refreshStateDesired and
-	// deleteStateDesired. Required when either list is set.
+	// StateAttribute is the Terraform attribute polled by RefreshState.Desired and
+	// DeleteState.Desired. Required when either list is set.
 	StateAttribute string `yaml:"stateAttribute,omitempty"`
-	// RefreshStateExists enables a post-Create/Update Read that completes on the first
-	// successful Read. Implied by RefreshStateDesired; omit this when waiting for an attribute value.
-	RefreshStateExists bool `yaml:"refreshStateExists,omitempty"`
-	// RefreshStateDesired enables a post-Create/Update Read that waits until StateAttribute
-	// matches any value. Transient 404/403 errors are retried until the resource exists.
-	// See adapter.RefreshStateCondition.
-	RefreshStateDesired []string      `yaml:"refreshStateDesired,omitempty"`
-	RefreshStateFailed  []string      `yaml:"refreshStateFailed,omitempty"`
-	RefreshStateDelay   time.Duration `yaml:"refreshStateDelay,omitempty"`
-	// DeleteStateGone enables the delete poller and completes when Read returns 404.
-	// Implied by DeleteStateDesired (a 404 also completes); omit this when waiting for an attribute value.
-	DeleteStateGone bool `yaml:"deleteStateGone,omitempty"`
-	// DeleteStateDesired enables the delete poller and waits until StateAttribute matches any
-	// value. A 404 also completes. See adapter.DeleteStateOptions.
-	DeleteStateDesired  []string `yaml:"deleteStateDesired,omitempty"`
-	RemoveMissing       bool     `yaml:"removeMissing,omitempty"`
-	IgnoreAlreadyExists bool     `yaml:"ignoreAlreadyExists,omitempty"`
-	DisableExample      bool     `yaml:"disableExample,omitempty"`
+	// RefreshState enables the post-Create/Update Read, see adapter.RefreshStateCondition.
+	RefreshState *RefreshState `yaml:"refreshState,omitempty"`
+	// DeleteState enables the delete poller, see adapter.DeleteStateOptions.
+	DeleteState   *DeleteState  `yaml:"deleteState,omitempty"`
+	RemoveMissing bool          `yaml:"removeMissing,omitempty"`
+	AlreadyExists AlreadyExists `yaml:"alreadyExists,omitempty"`
+	// DisableExample skips the Terraform example file.
+	DisableExample bool `yaml:"disableExample,omitempty"`
 	// RefDepth limits the doc example to this many blocks along each ref chain, the resource included.
 	// The last block renders its refs as literals. It also caps the block in dependents' examples.
 	// Zero means unlimited.
@@ -211,6 +203,76 @@ type SchemaMeta struct {
 	ExactlyOneOf []string `yaml:"exactlyOneOf,omitempty"`
 }
 
+// RefreshState is "true", which completes on the first successful Read, or a block.
+type RefreshState struct {
+	// Desired waits until StateAttribute matches any value.
+	Desired []string `yaml:"desired,omitempty"`
+	// Failed fails the refresh when StateAttribute matches any value. Requires Desired.
+	Failed []string `yaml:"failed,omitempty"`
+	// Delay sleeps before the first Read.
+	Delay time.Duration `yaml:"delay,omitempty"`
+}
+
+func (r *RefreshState) UnmarshalYAML(node *yaml.Node) error {
+	type plain RefreshState
+	return decodeTrueOrBlock(node, "refreshState", (*plain)(r))
+}
+
+// DeleteState is "true", which completes when Read returns 404, or a block.
+type DeleteState struct {
+	// Desired also completes when StateAttribute matches any value.
+	Desired []string `yaml:"desired,omitempty"`
+}
+
+func (d *DeleteState) UnmarshalYAML(node *yaml.Node) error {
+	type plain DeleteState
+	return decodeTrueOrBlock(node, "deleteState", (*plain)(d))
+}
+
+// decodeTrueOrBlock decodes a block into v, or accepts "true" for an empty block.
+// An empty block is rejected, so waiting for the resource to exist stays explicit.
+func decodeTrueOrBlock(node *yaml.Node, name string, v any) error {
+	if node.Kind == yaml.AliasNode {
+		node = node.Alias
+	}
+	if node.Kind == yaml.MappingNode {
+		if len(node.Content) == 0 {
+			return fmt.Errorf("line %d: use true instead of an empty block", node.Line)
+		}
+		// Node.Decode ignores the decoder's KnownFields.
+		known := yamlFieldNames(reflect.TypeOf(v).Elem())
+		for i := 0; i < len(node.Content); i += 2 {
+			if key := node.Content[i]; !known[key.Value] {
+				return fmt.Errorf("line %d: field %s not found in %s", key.Line, key.Value, name)
+			}
+		}
+	}
+	if node.Kind != yaml.ScalarNode {
+		return node.Decode(v)
+	}
+	var enabled bool
+	if err := node.Decode(&enabled); err != nil || !enabled {
+		return fmt.Errorf("line %d: want true or a block, omit it to disable", node.Line)
+	}
+	return nil
+}
+
+func yamlFieldNames(t reflect.Type) map[string]bool {
+	names := make(map[string]bool, t.NumField())
+	for i := range t.NumField() {
+		names[strings.Split(t.Field(i).Tag.Get("yaml"), ",")[0]] = true
+	}
+	return names
+}
+
+// AlreadyExists is what Create does when the resource exists. The empty value fails on 409.
+type AlreadyExists string
+
+const (
+	// AlreadyExistsAdopt treats 409 as success, e.g. for one-shot provisioning actions.
+	AlreadyExistsAdopt AlreadyExists = "adopt"
+)
+
 type Definition struct {
 	fileName               string            // e.g. organization_address.yaml
 	typeName               string            // e.g. aiven_organization_address, aiven_kafka_topic
@@ -227,7 +289,7 @@ type Definition struct {
 	Operations             Operations        `yaml:"operations"`
 	Version                *int              `yaml:"version"`
 	ClientHandler          string            `yaml:"clientHandler,omitempty"`
-	PlanModifier           bool              `yaml:"planModifier,omitempty"`
+	ReadModifier           bool              `yaml:"readModifier,omitempty"`
 	ExpandModifier         bool              `yaml:"expandModifier,omitempty"`
 	FlattenModifier        bool              `yaml:"flattenModifier,omitempty"`
 	// RequireServiceReady gates Create/Read/Update via schemautil.CheckServiceReady when non-empty.

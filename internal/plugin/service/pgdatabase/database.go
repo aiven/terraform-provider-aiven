@@ -36,7 +36,7 @@ func create(ctx context.Context, client avngen.Client, d adapter.ResourceData) e
 }
 
 // deleteAndForget forgets the database, so CheckDbConflict doesn't report it when it's created again.
-// deleteStateGone polls readView until it's gone.
+// deleteState polls readView until it's gone.
 func deleteAndForget(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	err := deleteView(ctx, client, d)
 	if err == nil || avngen.IsNotFound(err) {
