@@ -6,7 +6,7 @@ identityFields: [project, service_name, username]
 legacyTimeouts: true
 flattenModifier: true
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
 operations:
   - id: ServiceUserCreate

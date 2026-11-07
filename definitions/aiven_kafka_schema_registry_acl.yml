@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   description: Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry.
 datasource:

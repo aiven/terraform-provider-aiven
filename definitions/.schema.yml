@@ -52,73 +52,74 @@ properties:
         type: string
         minLength: 1
         $comment: |
-          Terraform attribute polled by refreshStateDesired and deleteStateDesired.
-          Required when either list is set. Must be computed-only when used with refreshStateDesired.
-      refreshStateExists:
-        type: boolean
-        const: true
+          Terraform attribute polled by `refreshState.desired` and `deleteState.desired`.
+          Required when either is set. Must be computed-only when used with `refreshState.desired`.
+      refreshState:
         $comment: |
-          Enables a post-Create/Update Read that completes on the first successful Read,
-          retrying transient 404/403 errors. Omit this when refreshStateDesired is set: desired
-          already retries those errors until the resource exists, then waits for the attribute value.
-      refreshStateDesired:
-        type: array
-        minItems: 1
-        uniqueItems: true
-        items:
-          type: string
+          Enables a post-Create/Update Read. `true` completes on the first successful Read,
+          retrying transient 404/403 errors.
+        oneOf:
+          - const: true
+          - type: object
+            additionalProperties: false
+            minProperties: 1
+            properties:
+              desired:
+                type: array
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: string
+                $comment: |
+                  Waits until `stateAttribute` matches any of these values. Transient 404/403 errors are retried
+                  until the resource exists. Values in neither this list nor `failed` are treated as pending
+                  and retried until the operation timeout.
+              failed:
+                type: array
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: string
+                $comment: Terminal failure values for `stateAttribute`. A match fails the refresh immediately.
+              delay:
+                type: string
+                example: 10s
+                $comment: |
+                  The duration to sleep before the first Read, to avoid race conditions with the backend.
+                  For instance, when a new user is created, the backend might hit a read-replica.
+            dependentRequired:
+              failed: [desired]
+      deleteState:
         $comment: |
-          Enables a post-Create/Update Read that waits until `stateAttribute` matches any of
-          these values. Transient 404/403 errors are retried until the resource exists
-          (refreshStateExists is implied). Values in neither this list nor refreshStateFailed
-          are treated as pending and retried until the operation timeout.
-      refreshStateFailed:
-        type: array
-        minItems: 1
-        uniqueItems: true
-        items:
-          type: string
-        $comment: |
-          Terminal failure values for `stateAttribute`. A match against any value fails refresh
-          immediately. Requires refreshStateDesired.
-      refreshStateDelay:
-        type: string
-        example: 10s
-        $comment: |
-          The duration to sleep after the resource is created/updated, before the first refresh Read.
-          This is useful to avoid race conditions with the backend.
-          For instance, when a new user is created, the backend might hit a read-replica.
-          So we sleep for a few seconds to give the backend time to catch up.
-          Requires refreshStateExists or refreshStateDesired.
-      deleteStateGone:
-        type: boolean
-        const: true
-        $comment: |
-          Enables the delete poller and completes when Read returns 404. Delete is re-issued while
+          Enables the delete poller. `true` completes when Read returns 404. Delete is re-issued while
           it errors (for example 409 from dependents still detaching); once Delete succeeds, only
-          Read is polled. Omit this when deleteStateDesired is set: a 404 already completes desired.
-      deleteStateDesired:
-        type: array
-        minItems: 1
-        uniqueItems: true
-        items:
-          type: string
-        $comment: |
-          Enables the delete poller and completes when `stateAttribute` matches any value here, or
-          when Read returns 404 (deleteStateGone is implied). Delete is re-issued while it errors
-          (for example 409); once Delete succeeds, only Read is polled. Values are validated against
-          the field's enum when one is declared. Omit both to delete without polling.
+          Read is polled. Omit it to delete without polling.
+        oneOf:
+          - const: true
+          - type: object
+            additionalProperties: false
+            minProperties: 1
+            properties:
+              desired:
+                type: array
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: string
+                $comment: |
+                  Also completes when `stateAttribute` matches any value here. Values are validated against
+                  the field's enum when one is declared.
       removeMissing:
         type: boolean
         $comment: |
           Set to true to remove the resource from the state if it's missing (i.e., if Read() returns an avngen.IsNotFound error).
           Useful for resources that Aiven may automatically delete, such as users or databases when a service has been turned off and then on again.
-      ignoreAlreadyExists:
-        type: boolean
+      alreadyExists:
+        enum: [adopt]
         $comment: |
-          Set to true to treat a 409 Conflict ("already exists") response from Create as success.
-          Useful for one-shot provisioning actions that should adopt an existing entity rather than fail on re-run.
-          Requires `refreshStateExists` or `refreshStateDesired` so the state is populated by the subsequent Read.
+          What Create does when the resource exists. Omit it to fail on 409 Conflict. Requires `refreshState`,
+          so the state is populated by the subsequent Read.
+          `adopt` treats 409 as success, e.g. for one-shot provisioning actions that should adopt an existing entity on re-run.
           Does NOT work for resources whose ID is returned only in the Create response (e.g. server-assigned IDs):
           on conflict there is no response to read the ID from and the subsequent Read has nothing to look up.
       disableExample:
@@ -161,34 +162,24 @@ properties:
           attributes whose computed value forces a replacement.
           https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
     dependentRequired:
-      refreshStateFailed:
-        - refreshStateDesired
-        - stateAttribute
-      refreshStateDesired:
-        - stateAttribute
-      deleteStateDesired:
-        - stateAttribute
-    dependentSchemas:
-      refreshStateDelay:
-        anyOf:
-          - required: [refreshStateExists]
-          - required: [refreshStateDesired]
-      ignoreAlreadyExists:
-        anyOf:
-          - required: [refreshStateExists]
-          - required: [refreshStateDesired]
-      stateAttribute:
-        anyOf:
-          - required: [refreshStateDesired]
-          - required: [deleteStateDesired]
-      refreshStateExists:
-        not:
-          anyOf:
-            - required: [refreshStateDesired]
-            - required: [refreshStateFailed]
-      deleteStateGone:
-        not:
-          required: [deleteStateDesired]
+      alreadyExists: [refreshState]
+    allOf:
+      - if:
+          required: [refreshState]
+          properties:
+            refreshState:
+              type: object
+              required: [desired]
+        then:
+          required: [stateAttribute]
+      - if:
+          required: [deleteState]
+          properties:
+            deleteState:
+              type: object
+              required: [desired]
+        then:
+          required: [stateAttribute]
     $comment: |
       Documentation and configuration specific to this resource type.
       Use this to provide clear descriptions for your resource in the Terraform registry.
@@ -288,11 +279,10 @@ properties:
     $comment: |
       The name of the client package to use for this resource/datasource.
       Example: clientHandler: "organization"
-  planModifier:
+  readModifier:
     type: boolean
     $comment: |
-      Set to true to use the plan modifier for this resource/datasource. 
-      Plan modifier is called before expandModifier and has access to the plan client
+      Set to true to call `readModifier(ctx, client, d)` at the start of readView, e.g. to fill an attribute from the ID.
   expandModifier:
     type: boolean
   flattenModifier:

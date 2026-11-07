@@ -169,7 +169,7 @@ Common fields:
 - `remove` - Fields to exclude from schema (exact paths or glob patterns)
 - `rename` - Field name mappings (API field -> Terraform field)
 - `schema` - Schema customizations (types, validation, behavior)
-- `expandModifier` / `flattenModifier` / `planModifier` - Enable custom Go modifiers
+- `expandModifier` / `flattenModifier` / `readModifier` - Enable custom Go modifiers
 - `version` - Schema version, the SDK `SchemaVersion` of a migrated resource (no state upgraders)
 - `beta` - Mark resource as beta (requires `PROVIDER_AIVEN_ENABLE_BETA` env var)
 - `limitedAvailability` - Mark resource as limited availability
@@ -188,11 +188,13 @@ resource:
     - PROJECT/RESOURCE_ID/REGION
   terminationProtection: true # Check field before delete
   stateAttribute: state # Terraform attribute polled after Create/Update/Delete
-  refreshStateDesired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
-  refreshStateFailed: [ERROR, DELETED]
-  refreshStateDelay: "15s" # Wait before Read
+  refreshState:
+    desired: [ACTIVE, PENDING_PEER] # Call Read after Create/Update and wait for state convergence
+    failed: [ERROR, DELETED]
+    delay: "15s" # Wait before Read
   removeMissing: true # Remove from state on 404
-  deleteStateDesired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
+  deleteState:
+    desired: [DELETED] # Poll Read after Delete until the resource reaches its terminal state
 ```
 
 `importIDFormats` generates every listed form in both the resource's `Import` documentation and
@@ -205,17 +207,17 @@ from them. `identityFieldsOptional` lists the trailing `identityFields` not requ
 unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
 identity import for every resource.
 
-`refreshStateExists: true` enables a post-Create/Update Read that completes on the first
-successful Read, retrying transient 404/403 errors. To also wait for an attribute value, set
-`stateAttribute` plus `refreshStateDesired` and optional `refreshStateFailed` instead — desired
-already includes that exists retry. Values within each list use OR semantics. A desired value
-completes the refresh, and any failed value stops it immediately. Values in neither list are
-treated as pending and retried until the operation timeout.
+`refreshState: true` enables a post-Create/Update Read that completes on the first successful Read,
+retrying transient 404/403 errors. To also wait for an attribute value, set `stateAttribute` and a
+`refreshState` block with `desired` and optional `failed` instead — desired already includes that
+exists retry. Values within each list use OR semantics. A desired value completes the refresh, and
+any failed value stops it immediately. Values in neither list are treated as pending and retried
+until the operation timeout.
 
 `stateAttribute` names a **top-level** computed-only attribute; the generator rejects anything else.
 When the value to wait for lives elsewhere — nested in a collection, spread over several attributes,
-or derived — keep `refreshStateExists: true` and set `ResourceOptions.RefreshStateCheck` in
-`init()`. It runs after each Read of the post-Create/Update refresh only (never during plain Read,
+or derived — keep `refreshState: true` and set `ResourceOptions.RefreshStateCheck` in `init()`. It
+runs after each Read of the post-Create/Update refresh only (never during plain Read,
 import, or a data source read), and its error decides what happens next:
 `adapter.ErrRefreshStateFailed` stops the refresh, and any other error means "not converged yet" and
 is retried with the same backoff as a transient Read error.
@@ -249,30 +251,33 @@ expressed as desired/failed values of one top-level attribute. See
 `internal/plugin/service/flinkjarapplicationversion/jarversion.go` and `internal/plugin/serviceuser` for
 reference implementations.
 
-`deleteStateGone: true` enables the delete poller and completes when Read returns 404.
-`deleteStateDesired` waits until `stateAttribute` matches any listed value; a 404 also
-completes (gone is implied). Delete is re-issued while it errors (for example 409 from
-dependents still detaching); once Delete succeeds, only Read is polled. Omit both to delete
-without polling.
+`deleteState: true` enables the delete poller and completes when Read returns 404. A `deleteState`
+block with `desired` waits until `stateAttribute` matches any listed value; a 404 also completes
+(gone is implied). Delete is re-issued while it errors (for example 409 from dependents still
+detaching); once Delete succeeds, only Read is polled. Omit it to delete without polling.
 
 Values are validated against the field's enum when one is declared. `stateAttribute` is required
-when `refreshStateDesired` or `deleteStateDesired` is set.
+when `refreshState.desired` or `deleteState.desired` is set.
 
 Examples:
 
 ```yaml
 # Wait until the API 404s; no observable terminal state (e.g. aiven_azure_privatelink).
-deleteStateGone: true
+deleteState: true
 ```
 
 ```yaml
 # Soft-delete API reports state: DELETED, and dependents may still be detaching
 # (e.g. aiven_project_vpc, aiven_organization_vpc).
 stateAttribute: state
-deleteStateDesired: [DELETED]
+deleteState:
+  desired: [DELETED]
 ```
 
-Prefer `deleteStateGone` or `deleteStateDesired` over a hand-written delete `disableView` + custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value. Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state machine).
+Prefer `deleteState: true` or `deleteState.desired` over a hand-written delete `disableView` +
+custom poller whenever the terminal condition is "gone (404)" and/or a fixed attribute value.
+Keep a custom delete view only for genuinely bespoke flows (e.g. a cancel-then-delete state
+machine).
 
 ### Datasource Configuration
 
@@ -593,7 +598,7 @@ func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 ### ResourceOptions Additional Fields
 
 Beyond basic CRUD, `ResourceOptions` supports:
-- `ModifyPlan` — implements `resource.ResourceWithModifyPlan` (separate from `planModifier` in YAML)
+- `ModifyPlan` — implements `resource.ResourceWithModifyPlan`
 - `ValidateConfig` — implements `resource.ResourceWithValidateConfig`
 - `ConfigValidators` — implements `resource.ResourceWithConfigValidators`
 - `IdentityFieldsOptional` — generated from top-level `identityFieldsOptional` in the definition YAML
@@ -640,7 +645,7 @@ For complex data transformations, enable modifiers in YAML:
 ```yaml
 expandModifier: true      # TF state -> API request
 flattenModifier: true     # API response -> TF state
-planModifier: true        # Pre-process state before read API call
+readModifier: true        # Pre-process state before read API call
 ```
 
 Then implement functions in a `.go` file in the resource package.
@@ -699,13 +704,13 @@ func expandModifier(ctx context.Context, client avngen.Client) adapter.MapModifi
 
 **Find examples**: `grep -l "flattenModifier\|expandModifier" internal/plugin/service/**/*.go`
 
-### planModifier
+### readModifier
 
 Runs at the start of the generated `readView`, **before** the API call. Use it to pre-process or fix up state so the read has all the data it needs.
 
 **Signature:**
 ```go
-func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error
+func readModifier(ctx context.Context, client avngen.Client, d adapter.ResourceData) error
 ```
 
 **When to use:**
@@ -713,11 +718,11 @@ func planModifier(ctx context.Context, client avngen.Client, d adapter.ResourceD
 - A field needs to be resolved before the read (e.g., name -> ID lookup via API)
 - Any state pre-processing required before the generated read API call
 
-**How it works:** Setting `planModifier: true` in YAML causes the generator to insert `planModifier(ctx, client, d)` at the top of `readView`:
+**How it works:** Setting `readModifier: true` in YAML causes the generator to insert `readModifier(ctx, client, d)` at the top of `readView`:
 ```go
 // generated readView
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-    err := planModifier(ctx, client, d)  // <-- inserted by generator
+    err := readModifier(ctx, client, d)  // <-- inserted by generator
     if err != nil {
         return err
     }
@@ -729,11 +734,11 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 - `internal/plugin/service/billinggroup/billinggroup.go` — extracts `billing_group_id` from composite `id` for SDK backward compat
 - `internal/plugin/service/flinkapplicationdeployment/deployment.go` — extracts `deployment_id` from composite `id` for SDK backward compat
 
-For name -> ID resolution in data sources, use the generated `datasourceLookup` pattern instead of a hand-written `planModifier`. See [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key).
+For name -> ID resolution in data sources, use the generated `datasourceLookup` pattern instead of a hand-written `readModifier`. See [Data Source with Alternative Lookup Key](#data-source-with-alternative-lookup-key).
 
 ### modifyPlan
 
-Despite the similar name, `resource.modifyPlan: true` has nothing to do with `planModifier`: it wires the package's `modifyPlan` function as the resource's `ResourceWithModifyPlan` handler, which the framework calls on **every** plan (except a destroy plan).
+`resource.modifyPlan: true` wires the package's `modifyPlan` function as the resource's `ResourceWithModifyPlan` handler, which the framework calls on **every** plan (except a destroy plan).
 
 **Signature:**
 ```go
@@ -910,7 +915,7 @@ When a data source should look up by a field that's NOT in `identityFields` (e.g
 
 ```go
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-    // planModifier (if enabled) runs first
+    // readModifier (if enabled) runs first
     if d.Get("<id-attr>").(string) == "" {
         // ... datasourceLookup list call + FindOne by resultListLookupKeys ...
         return d.Flatten(&match, ...)         // default: flatten match into state and return
@@ -985,7 +990,7 @@ rename:
   organization_id: id
 ```
 
-**No `planModifier` needed**: both patterns fully replace the previous `datasource.exactlyOneOf` + custom `planModifier` approach.
+**No `readModifier` needed**: both patterns fully replace the previous `datasource.exactlyOneOf` + custom `readModifier` approach.
 
 **Reference implementations**:
 - `definitions/aiven_flink_application.yml` — single-field name lookup (flatten match into state)
@@ -1044,9 +1049,9 @@ Search the codebase for similar patterns:
 |----------|----------------------|
 | `pg_user` | Nested API fields, computed+optional, custom create/update, write-only fields, expand/flatten modifiers |
 | `mysql_database` | Simple CRUD, list-based read with lookup, termination protection |
-| `billing_group` | planModifier, `ComposeMapModifiers`, card ID resolution, organization ID conversion |
+| `billing_group` | readModifier, `ComposeMapModifiers`, card ID resolution, organization ID conversion |
 | `flink_application` | Alt data source lookup key via `datasourceLookup` read op, field rename |
-| `flink_application_deployment` | Renamed ID field, planModifier for backward compat, custom delete with state machine |
+| `flink_application_deployment` | Renamed ID field, readModifier for backward compat, custom delete with state machine |
 | `kafka_schema_registry_acl` | Composite alt data source lookup (multi-field `datasourceLookup` + `resultListLookupKeys`) |
 | `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
 | `service_integration_endpoint` | `oneOf` user config split by `userConfigDiscriminator`, `queryParams`, Read wrapped in `init()` |

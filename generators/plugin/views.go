@@ -17,7 +17,7 @@ const (
 	viewSuffix                 = "View"
 	optionsSuffix              = "Options"
 	configValidatorsFuncSuffix = "ConfigValidators"
-	planModifier               = "planModifier"
+	readModifier               = "readModifier"
 	validateConfig             = "validateConfig"
 	modifyPlan                 = "modifyPlan"
 	resourceData               = "ResourceData"
@@ -162,39 +162,32 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			values["MutableIdentity"] = jen.True()
 		}
 
-		if res.RefreshStateDesired != nil && len(res.RefreshStateDesired) == 0 {
-			return nil, errors.New("refreshStateDesired must not be empty; use refreshStateExists")
+		refresh, del := lo.FromPtr(res.RefreshState), lo.FromPtr(res.DeleteState)
+		if refresh.Desired != nil && len(refresh.Desired) == 0 {
+			return nil, errors.New("refreshState.desired must not be empty; use refreshState: true")
 		}
-		if res.RefreshStateFailed != nil && len(res.RefreshStateFailed) == 0 {
-			return nil, errors.New("refreshStateFailed must not be empty")
+		if refresh.Failed != nil && len(refresh.Failed) == 0 {
+			return nil, errors.New("refreshState.failed must not be empty")
 		}
-		if res.DeleteStateDesired != nil && len(res.DeleteStateDesired) == 0 {
-			return nil, errors.New("deleteStateDesired must not be empty; use deleteStateGone")
+		if del.Desired != nil && len(del.Desired) == 0 {
+			return nil, errors.New("deleteState.desired must not be empty; use deleteState: true")
 		}
-		if res.RefreshStateExists && len(res.RefreshStateDesired) > 0 {
-			return nil, errors.New("refreshStateExists is implied by refreshStateDesired; omit refreshStateExists")
-		}
-		if res.DeleteStateGone && len(res.DeleteStateDesired) > 0 {
-			return nil, errors.New("deleteStateGone is implied by deleteStateDesired; omit deleteStateGone")
+		if len(refresh.Failed) > 0 && len(refresh.Desired) == 0 {
+			return nil, errors.New("refreshState.failed requires refreshState.desired")
 		}
 
-		hasRefresh := res.RefreshStateExists || len(res.RefreshStateDesired) > 0
-		hasDelete := res.DeleteStateGone || len(res.DeleteStateDesired) > 0
-		if len(res.RefreshStateFailed) > 0 && len(res.RefreshStateDesired) == 0 {
-			return nil, errors.New("refreshStateFailed requires refreshStateDesired")
+		switch res.AlreadyExists {
+		case "", AlreadyExistsAdopt:
+		default:
+			return nil, fmt.Errorf("alreadyExists must be %q, got %q", AlreadyExistsAdopt, res.AlreadyExists)
 		}
-		if !hasRefresh {
-			if res.RefreshStateDelay != 0 {
-				return nil, errors.New("refreshStateDelay requires refreshStateExists or refreshStateDesired")
-			}
-			if res.IgnoreAlreadyExists {
-				return nil, errors.New("ignoreAlreadyExists requires refreshStateExists or refreshStateDesired")
-			}
+		if res.AlreadyExists != "" && res.RefreshState == nil {
+			return nil, errors.New("alreadyExists requires refreshState")
 		}
 
-		needsStateAttribute := len(res.RefreshStateDesired) > 0 || len(res.RefreshStateFailed) > 0 || len(res.DeleteStateDesired) > 0
+		needsStateAttribute := len(refresh.Desired) > 0 || len(del.Desired) > 0
 		if res.StateAttribute != "" && !needsStateAttribute {
-			return nil, errors.New("stateAttribute requires refreshStateDesired or deleteStateDesired")
+			return nil, errors.New("stateAttribute requires refreshState.desired or deleteState.desired")
 		}
 		if needsStateAttribute && res.StateAttribute == "" {
 			return nil, errors.New("stateAttribute is required")
@@ -209,22 +202,22 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			}
 		}
 
-		if hasRefresh {
+		if res.RefreshState != nil {
 			fields := jen.Dict{}
-			if len(res.RefreshStateDesired) > 0 {
+			if len(refresh.Desired) > 0 {
 				if !stateProp.IsComputed(def, entity) || !stateProp.IsReadOnly(def, entity) {
 					return nil, fmt.Errorf("stateAttribute %q must be computed-only", res.StateAttribute)
 				}
-				if err := validateStateAttributeValues(res.StateAttribute, "refreshStateDesired", res.RefreshStateDesired, stateProp); err != nil {
+				if err := validateStateAttributeValues(res.StateAttribute, "refreshState.desired", refresh.Desired, stateProp); err != nil {
 					return nil, err
 				}
-				if err := validateStateAttributeValues(res.StateAttribute, "refreshStateFailed", res.RefreshStateFailed, stateProp); err != nil {
+				if err := validateStateAttributeValues(res.StateAttribute, "refreshState.failed", refresh.Failed, stateProp); err != nil {
 					return nil, err
 				}
-				for _, failed := range res.RefreshStateFailed {
-					if slices.Contains(res.RefreshStateDesired, failed) {
+				for _, failed := range refresh.Failed {
+					if slices.Contains(refresh.Desired, failed) {
 						return nil, fmt.Errorf(
-							"stateAttribute %q value %q cannot be both refreshStateDesired and refreshStateFailed",
+							"stateAttribute %q value %q cannot be both refreshState.desired and refreshState.failed",
 							res.StateAttribute,
 							failed,
 						)
@@ -233,10 +226,10 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 
 				fields = jen.Dict{
 					jen.Id("Attribute"): jen.Lit(res.StateAttribute),
-					jen.Id("Desired"):   stringSliceLiteral(res.RefreshStateDesired),
+					jen.Id("Desired"):   stringSliceLiteral(refresh.Desired),
 				}
-				if len(res.RefreshStateFailed) > 0 {
-					fields[jen.Id("Failed")] = stringSliceLiteral(res.RefreshStateFailed)
+				if len(refresh.Failed) > 0 {
+					fields[jen.Id("Failed")] = stringSliceLiteral(refresh.Failed)
 				}
 			}
 
@@ -244,19 +237,19 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 				Qual(adapterPackage, "RefreshStateCondition").
 				Values(fields)
 
-			if res.RefreshStateDelay != 0 {
-				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(res.RefreshStateDelay.String()))
+			if refresh.Delay != 0 {
+				values["RefreshStateDelay"] = jen.Qual(adapterPackage, "MustParseDuration").Call(jen.Lit(refresh.Delay.String()))
 			}
 		}
 
-		if hasDelete {
+		if res.DeleteState != nil {
 			fields := jen.Dict{}
-			if len(res.DeleteStateDesired) > 0 {
-				if err := validateStateAttributeValues(res.StateAttribute, "deleteStateDesired", res.DeleteStateDesired, stateProp); err != nil {
+			if len(del.Desired) > 0 {
+				if err := validateStateAttributeValues(res.StateAttribute, "deleteState.desired", del.Desired, stateProp); err != nil {
 					return nil, err
 				}
 				fields[jen.Id("Attribute")] = jen.Lit(res.StateAttribute)
-				fields[jen.Id("Desired")] = stringSliceLiteral(res.DeleteStateDesired)
+				fields[jen.Id("Desired")] = stringSliceLiteral(del.Desired)
 			}
 			values["DeleteState"] = jen.Op("&").Qual(adapterPackage, "DeleteStateOptions").Values(fields)
 		}
@@ -265,7 +258,7 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			values["RemoveMissing"] = jen.True()
 		}
 
-		if def.Resource.IgnoreAlreadyExists {
+		if res.AlreadyExists != "" {
 			values["IgnoreAlreadyExists"] = jen.True()
 		}
 
@@ -393,7 +386,7 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	var errs []error
 	view.BlockFunc(func(g *jen.Group) {
 		if operation == OperationRead {
-			emitPlanModifier(g, def)
+			emitReadModifier(g, def)
 		}
 
 		if lookupOp != nil {
@@ -419,13 +412,13 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	return view, errors.Join(errs...)
 }
 
-// emitPlanModifier prepends the planModifier call to a Read-style view body.
-// No-op when the definition does not opt in via planModifier: true.
-func emitPlanModifier(g *jen.Group, def *Definition) {
-	if !def.PlanModifier {
+// emitReadModifier prepends the readModifier call to a Read-style view body.
+// No-op when the definition does not opt in via readModifier: true.
+func emitReadModifier(g *jen.Group, def *Definition) {
+	if !def.ReadModifier {
 		return
 	}
-	g.Err().Op(":=").Id(planModifier).Call(
+	g.Err().Op(":=").Id(readModifier).Call(
 		jen.Id("ctx"),
 		jen.Id("client"),
 		jen.Id("d"),

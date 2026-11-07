@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   description: Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service.
 datasource:

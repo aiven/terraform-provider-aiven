@@ -2,7 +2,7 @@
 beta: true
 limitedAvailability: true
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   description: |
     Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).

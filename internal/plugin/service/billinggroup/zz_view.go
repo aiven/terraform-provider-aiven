@@ -47,7 +47,7 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	err := planModifier(ctx, client, d)
+	err := readModifier(ctx, client, d)
 	if err != nil {
 		return err
 	}
