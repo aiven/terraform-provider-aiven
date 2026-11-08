@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 var (
@@ -135,4 +136,22 @@ func BackwardCompatibilitySteps(t *testing.T, config BackwardCompatConfig) []res
 			Check:                    config.Checks,
 		},
 	}
+}
+
+// ProviderRollbackSteps returns a rollback to the published provider followed by
+// another upgrade, both with an empty plan. Append them after the initial upgrade.
+// The current configuration must also be valid for the published provider.
+// Callers must run serially: the provider namespace is process-wide.
+func ProviderRollbackSteps(t *testing.T, published, current resource.TestStep, version *IdentityImportVersionCheck) []resource.TestStep {
+	t.Helper()
+	// Local and published providers must keep the same address in state.
+	t.Setenv(resource.EnvTfAccProviderNamespace, "aiven")
+	published.Config = current.Config
+	published.PreConfig = nil
+	published.ExpectNonEmptyPlan = false
+	published.SkipFunc = version.SkipProviderRollback
+	published.ConfigPlanChecks = resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}}
+	current.PreConfig = nil
+	current.ConfigPlanChecks = resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}}
+	return []resource.TestStep{published, current}
 }

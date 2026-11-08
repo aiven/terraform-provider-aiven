@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/require"
 
@@ -34,7 +36,9 @@ func TestAccAivenAzurePrivatelinkConnectionApproval_basic(t *testing.T) {
 	}
 
 	prefix := "test-tf-acc-plapproval-" + acctest.RandString(7)
-	resource.ParallelTest(t, resource.TestCase{
+	var identityImport acc.IdentityImportVersionCheck
+	testCase := resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -62,20 +66,42 @@ func TestAccAivenAzurePrivatelinkConnectionApproval_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("azurerm_private_endpoint.private_endpoint", "id"),
 				),
 			},
-			importStateByName("aiven_project_vpc.project_vpc"),
-			importStateByName("aiven_pg.pg"),
 			importStateByName("aiven_azure_privatelink.private_link"),
 			{
 				ResourceName:      "aiven_azure_privatelink_connection_approval.approval",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			importStateByName("azurerm_resource_group.resource_group"),
-			importStateByName("azurerm_virtual_network.virtual_network"),
-			importStateByName("azurerm_subnet.subnet"),
-			importStateByName("azurerm_private_endpoint.private_endpoint"),
+			{
+				ResourceName: "aiven_azure_privatelink.private_link", ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
+			},
 		},
-	})
+	}
+	current := testCase.Steps[0]
+	current.ProtoV6ProviderFactories = acc.TestProtoV6ProviderFactories
+	current.ExternalProviders = testCase.ExternalProviders
+	published := current
+	published.ProtoV6ProviderFactories = nil
+	published.ExternalProviders = map[string]resource.ExternalProvider{
+		"aiven":   acc.ExternalAivenProvider(t, "4.65.1"),
+		"azurerm": testCase.ExternalProviders["azurerm"],
+	}
+	// Exercise rollback and re-upgrade without creating another service or endpoint.
+	imports := testCase.Steps[1:]
+	testCase.Steps = append([]resource.TestStep{current}, acc.ProviderRollbackSteps(t, published, current, &identityImport)...)
+	testCase.Steps = append(testCase.Steps, imports...)
+	testCase.ProtoV6ProviderFactories = nil
+	testCase.ExternalProviders = nil
+	for i := 3; i < len(testCase.Steps); i++ {
+		testCase.Steps[i].ProtoV6ProviderFactories = acc.TestProtoV6ProviderFactories
+		testCase.Steps[i].ExternalProviders = current.ExternalProviders
+	}
+	// Import steps with per-step providers leave an empty azurerm provider block
+	// in the main working directory. Restore the full provider configuration before destroy.
+	current.ConfigPlanChecks = resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}}
+	testCase.Steps = append(testCase.Steps, current)
+	resource.Test(t, testCase)
 }
 
 func TestAzurePrivatelinkConnectionApprovalRead(t *testing.T) {

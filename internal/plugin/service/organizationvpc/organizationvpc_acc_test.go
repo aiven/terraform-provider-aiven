@@ -135,13 +135,16 @@ resource "aiven_organization_vpc" "test_validation" {
 						"resource_name":   "test_org_vpc",
 						"organization_id": template.Reference("data.aiven_organization.foo.id"),
 						"cloud_name":      "aws-eu-west-1",
-						"network_cidr":    "10.0.0.0/24",
+						"network_cidr":    "10.1.0.0/24",
 					}).
 					AddDataSource(organizationVPCResource, map[string]any{
 						"resource_name":       "vpc_ds",
 						"organization_id":     template.Reference("data.aiven_organization.foo.id"),
 						"organization_vpc_id": template.Reference(fmt.Sprintf("%s.organization_vpc_id", resourceName)),
 					}).MustRender(t),
+				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionNoop),
+				}},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "organization_id", resourceName, "organization_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "cloud_name", resourceName, "cloud_name"),
@@ -158,7 +161,6 @@ resource "aiven_organization_vpc" "test_validation" {
 }
 
 func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
-	t.Parallel()
 	resourceName := "aiven_organization_vpc.test_org_vpc"
 	config := testAccOrganizationVPCResourceOnly(acc.OrganizationName(), "aws-eu-west-1", "10.2.0.0/24")
 	checks := resource.ComposeTestCheckFunc(
@@ -172,7 +174,7 @@ func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
 	testUpgrade := func(t *testing.T, oldVersion string) {
 		t.Helper()
 		var identityImport acc.IdentityImportVersionCheck
-		resource.Test(t, resource.TestCase{
+		testCase := resource.TestCase{
 			PreCheck:               func() { acc.TestAccPreCheck(t) },
 			CheckDestroy:           testAccCheckOrganizationVPCResourceDestroy,
 			TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
@@ -200,7 +202,11 @@ func TestAccAivenOrganizationVPC_backwardCompat(t *testing.T) {
 					SkipFunc:                 identityImport.Skip,
 				},
 			},
-		})
+		}
+		identityImportStep := testCase.Steps[2]
+		testCase.Steps = append(testCase.Steps[:2], acc.ProviderRollbackSteps(t, testCase.Steps[0], testCase.Steps[1], &identityImport)...)
+		testCase.Steps = append(testCase.Steps, identityImportStep)
+		resource.Test(t, testCase)
 	}
 	t.Run("SDK", func(t *testing.T) { testUpgrade(t, "4.56.0") })
 	t.Run("Framework", func(t *testing.T) { testUpgrade(t, "4.65.1") })

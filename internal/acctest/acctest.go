@@ -55,14 +55,24 @@ var TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, 
 
 // IdentityImportVersionCheck skips identity import steps on Terraform versions before 1.12,
 // while keeping the rest of the acceptance test enabled.
-type IdentityImportVersionCheck struct{ supported bool }
+type IdentityImportVersionCheck struct {
+	supported   bool
+	canRollback bool
+}
 
 func (c *IdentityImportVersionCheck) CheckTerraformVersion(_ context.Context, req tfversion.CheckTerraformVersionRequest, _ *tfversion.CheckTerraformVersionResponse) {
 	c.supported = req.TerraformVersion.Core().GreaterThanOrEqual(tfversion.Version1_12_0)
+	c.canRollback = !c.supported || req.TerraformVersion.Core().GreaterThanOrEqual(tfversion.Version1_14_0)
 }
 
 func (c *IdentityImportVersionCheck) Skip() (bool, error) {
 	return !c.supported, nil
+}
+
+// Terraform 1.12 and 1.13 cannot discard stored identity when returning to a
+// provider without identity support. Terraform 1.14 fixes that Core limitation.
+func (c *IdentityImportVersionCheck) SkipProviderRollback() (bool, error) {
+	return !c.canRollback, nil
 }
 
 // getEnvVar returns environment variable value or empty string if not set

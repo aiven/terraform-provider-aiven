@@ -9,7 +9,9 @@ import (
 
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
@@ -69,21 +71,6 @@ func TestAccAivenAWSOrgVPCPeeringConnection(t *testing.T) {
 	})
 }
 
-// TestAccAivenAWSOrgVPCPeeringConnectionFull tests the complete AWS VPC peering connection workflow
-// with real AWS resources. This test:
-// 1. Creates an AWS VPC and route table
-// 2. Creates an Aiven Organization VPC
-// 3. Establishes VPC peering between AWS and Aiven VPCs
-// 4. Accepts the peering connection on AWS side
-// 5. Sets up routing for the peered VPCs
-//
-// Note: The test will be skipped in CI environments since it requires real AWS credentials
-// and resources. This test is meant for local development and verification for now.
-// Prerequisites:
-// - Valid AWS credentials with permissions to create/delete VPC resources
-// - AWS_PROFILE or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-// - AWS_DEFAULT_REGION for both the AWS resources and the Aiven VPC
-// - Required permissions: VPC creation/deletion, VPC peering, route table management
 func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 	var (
 		orgName   = acc.OrganizationName()
@@ -95,7 +82,9 @@ func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 		config       = testAccAWSOrgVPCPeeringConnectionConfig(t, orgName, awsRegion)
 	)
 
+	var identityImport acc.IdentityImportVersionCheck
 	resource.ParallelTest(t, resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		CheckDestroy:             testAccCheckAWSOrgVPCPeeringResourceDestroy,
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -121,6 +110,10 @@ func TestAccAivenAWSOrgVPCPeeringConnectionFull(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName: resourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
 			},
 		},
 	})
@@ -152,10 +145,14 @@ func TestAccAivenAWSOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
 		steps[i].ExternalProviders["aws"] = awsExternalProvider()["aws"]
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: testAccCheckAWSOrgVPCPeeringResourceDestroy,
-		Steps:        steps,
+	var identityImport acc.IdentityImportVersionCheck
+	steps[1].ConfigPlanChecks.PreApply = []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}
+	steps = append(steps, acc.ProviderRollbackSteps(t, steps[0], steps[1], &identityImport)...)
+	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+		PreCheck:               func() { acc.TestAccPreCheck(t) },
+		CheckDestroy:           testAccCheckAWSOrgVPCPeeringResourceDestroy,
+		Steps:                  steps,
 	})
 }
 
@@ -271,7 +268,7 @@ func testAccCheckAWSOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 			}
 		}
 
-		if pc != nil {
+		if pc != nil && pc.State != "DELETED" {
 			connectionID := "<missing>"
 			if pc.PeeringConnectionId != nil {
 				connectionID = *pc.PeeringConnectionId
