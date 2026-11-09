@@ -3,7 +3,7 @@ beta: true
 limitedAvailability: true
 resource:
   # Create returns the version before the jar file is uploaded, so the read waits for the upload.
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   modifyPlan: true
   description: |

@@ -197,12 +197,12 @@ identityFields: [project, service_name, database_name]
 | SDK Pattern | Generator Feature |
 |-------------|------------------|
 | `StateUpgraders` | Not ported, keep `SchemaVersion` as `version` in YAML (see [State Compatibility Verification](#8-state-compatibility-verification)) |
-| `CustomizeDiff` | `modifyPlan: true` (writes plan values, `d.RequiresReplace` for replacement) — not `planModifier`, which runs inside Read |
+| `CustomizeDiff` | `modifyPlan: true` (writes plan values, `d.RequiresReplace` for replacement) — not `readModifier`, which runs inside Read |
 | Flatten/Expand functions | `expandModifier: true` / `flattenModifier: true` |
 | `DiffSuppressFunc` | No equivalent, see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
-| Post-Create/Update waiter (poll Read until the resource converges) | `refreshStateExists`, or `stateAttribute` with `refreshStateDesired`/`refreshStateFailed`, or `ResourceOptions.RefreshStateCheck` when the value is nested (see tf-resource-generator) |
+| Post-Create/Update waiter (poll Read until the resource converges) | `refreshState: true`, or `stateAttribute` with `refreshState.desired`/`refreshState.failed`, or `ResourceOptions.RefreshStateCheck` when the value is nested (see tf-resource-generator) |
 | Multiple API calls in Update | Custom `updateView` via `init()` override |
-| Delete waiter (poll until gone/terminal state; conflicts clear as Delete is re-issued) | `deleteStateDesired` (see tf-resource-generator); avoid a custom `deleteView` |
+| Delete waiter (poll until gone/terminal state; conflicts clear as Delete is re-issued) | `deleteState` (see tf-resource-generator); avoid a custom `deleteView` |
 | Complex delete (cancel + delete state machine) | Custom `deleteView` via `init()` override |
 | Data source looks up by alt key (e.g. name) | A second `read` op with `datasourceLookup: true` + `resultListLookupKeys`; add `resultIDField: <GoField>` when the lookup endpoint differs in shape from the canonical read and should only resolve the id |
 | Sensitive field not stored in state | `writeOnly: true` |
@@ -366,9 +366,9 @@ Before marking migration complete:
 | Field the API accepts but never returns | Fill it in a `readView` override only when the state has no value, so imports don't keep a null and existing state stays untouched |
 | OpenAPI default would plan a change against SDKv2 state | Workaround: `dropDefault: true` plus `useStateForUnknown: true`, and send the API default from the create view. Goes away in v5.0.0 with SDKv2 state support |
 | Computed value must force replacement | Compute it in `modifyPlan` and call `d.RequiresReplace(name)`; schema `forceNew` runs too early to see it |
-| Post-create waiter polls a nested attribute | `refreshStateExists: true` plus `ResourceOptions.RefreshStateCheck`; `stateAttribute` only accepts top-level attributes |
-| Renamed ID field missing in old state | Use `planModifier: true` to extract from composite ID |
-| Read fails with 404 after migration | Likely a renamed ID field is empty — use `planModifier` |
+| Post-create waiter polls a nested attribute | `refreshState: true` plus `ResourceOptions.RefreshStateCheck`; `stateAttribute` only accepts top-level attributes |
+| Renamed ID field missing in old state | Use `readModifier: true` to extract from composite ID |
+| Read fails with 404 after migration | Likely a renamed ID field is empty — use `readModifier` |
 | "was null, but now cty.X" error | Add `computed: true` + `useStateForUnknown: true` (see generator skill) |
 | Field nested differently in API | Use `expandModifier` and `flattenModifier` (see generator skill) |
 | Multiple update operations needed | Override `updateView` via `init()` (see generator skill) |

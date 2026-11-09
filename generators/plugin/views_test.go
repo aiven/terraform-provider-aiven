@@ -227,8 +227,8 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		require.NotContains(t, renderCode(t, code), "RefreshState:")
 	})
 
-	t.Run("refreshStateExists enables refresh without conditions", func(t *testing.T) {
-		code, err := genNewResource(resourceType, newDef(SchemaMeta{RefreshStateExists: true}), newItem(nil), false)
+	t.Run("refreshState true enables refresh without conditions", func(t *testing.T) {
+		code, err := genNewResource(resourceType, newDef(SchemaMeta{RefreshState: &RefreshState{}}), newItem(nil), false)
 		require.NoError(t, err)
 		require.Contains(t, renderCode(t, code), "&adapter.RefreshStateCondition{}")
 	})
@@ -244,9 +244,11 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		})
 
 		code, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE", "PENDING_PEER"},
-			RefreshStateFailed:  []string{"ERROR"},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE", "PENDING_PEER"},
+				Failed:  []string{"ERROR"},
+			},
 		}), item, false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
@@ -264,8 +266,8 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		})
 
 		code, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "status",
-			RefreshStateDesired: []string{"ACTIVE"},
+			StateAttribute: "status",
+			RefreshState:   &RefreshState{Desired: []string{"ACTIVE"}},
 		}), item, false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
@@ -276,15 +278,15 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 
 	t.Run("rejects conditions without stateAttribute", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			RefreshStateDesired: []string{"ACTIVE"},
+			RefreshState: &RefreshState{Desired: []string{"ACTIVE"}},
 		}), stringItem(), false)
 		require.EqualError(t, err, "stateAttribute is required")
 	})
 
 	t.Run("rejects an unknown stateAttribute", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
+			StateAttribute: "state",
+			RefreshState:   &RefreshState{Desired: []string{"ACTIVE"}},
 		}), newItem(nil), false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `stateAttribute "state" is not present in schema`)
@@ -307,8 +309,8 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				item := newItem(map[string]*Item{"state": field})
 				_, err := genNewResource(resourceType, newDef(SchemaMeta{
-					StateAttribute:      "state",
-					RefreshStateDesired: []string{"ACTIVE"},
+					StateAttribute: "state",
+					RefreshState:   &RefreshState{Desired: []string{"ACTIVE"}},
 				}), item, false)
 				require.EqualError(t, err, `stateAttribute "state" must be computed-only`)
 			})
@@ -317,43 +319,36 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 
 	t.Run("rejects an unused stateAttribute", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:     "state",
-			RefreshStateExists: true,
+			StateAttribute: "state",
+			RefreshState:   &RefreshState{},
 		}), stringItem(), false)
-		require.EqualError(t, err, "stateAttribute requires refreshStateDesired or deleteStateDesired")
+		require.EqualError(t, err, "stateAttribute requires refreshState.desired or deleteState.desired")
 	})
 
 	t.Run("rejects a condition without desired values", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:     "state",
-			RefreshStateFailed: []string{"ERROR"},
+			StateAttribute: "state",
+			RefreshState:   &RefreshState{Failed: []string{"ERROR"}},
 		}), stringItem(), false)
-		require.EqualError(t, err, "refreshStateFailed requires refreshStateDesired")
+		require.EqualError(t, err, "refreshState.failed requires refreshState.desired")
 	})
 
 	t.Run("rejects an empty desired list", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			RefreshStateDesired: []string{},
+			RefreshState: &RefreshState{Desired: []string{}},
 		}), stringItem(), false)
-		require.EqualError(t, err, "refreshStateDesired must not be empty; use refreshStateExists")
-	})
-
-	t.Run("rejects combining exists with desired", func(t *testing.T) {
-		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateExists:  true,
-			RefreshStateDesired: []string{"ACTIVE"},
-		}), stringItem(), false)
-		require.EqualError(t, err, "refreshStateExists is implied by refreshStateDesired; omit refreshStateExists")
+		require.EqualError(t, err, "refreshState.desired must not be empty; use refreshState: true")
 	})
 
 	t.Run("rejects an explicitly empty failed list", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
-			RefreshStateFailed:  []string{},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE"},
+				Failed:  []string{},
+			},
 		}), stringItem(), false)
-		require.EqualError(t, err, "refreshStateFailed must not be empty")
+		require.EqualError(t, err, "refreshState.failed must not be empty")
 	})
 
 	t.Run("rejects desired and failed values outside the field enum", func(t *testing.T) {
@@ -367,46 +362,52 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		})
 
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"PENDING"},
+			StateAttribute: "state",
+			RefreshState:   &RefreshState{Desired: []string{"PENDING"}},
 		}), item, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `refreshStateDesired: "state"`)
+		require.Contains(t, err.Error(), `refreshState.desired: "state"`)
 		require.Contains(t, err.Error(), `value "PENDING" is not allowed`)
 
 		_, err = genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
-			RefreshStateFailed:  []string{"ERROR"},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE"},
+				Failed:  []string{"ERROR"},
+			},
 		}), item, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `refreshStateFailed: "state"`)
+		require.Contains(t, err.Error(), `refreshState.failed: "state"`)
 		require.Contains(t, err.Error(), `value "ERROR" is not allowed`)
 	})
 
 	t.Run("rejects duplicate and overlapping values", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE", "ACTIVE"},
+			StateAttribute: "state",
+			RefreshState:   &RefreshState{Desired: []string{"ACTIVE", "ACTIVE"}},
 		}), stringItem(), false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `duplicate value "ACTIVE"`)
 
 		_, err = genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
-			RefreshStateFailed:  []string{"ERROR", "ERROR"},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE"},
+				Failed:  []string{"ERROR", "ERROR"},
+			},
 		}), stringItem(), false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `duplicate value "ERROR"`)
 
 		_, err = genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
-			RefreshStateFailed:  []string{"ACTIVE"},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE"},
+				Failed:  []string{"ACTIVE"},
+			},
 		}), stringItem(), false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `value "ACTIVE" cannot be both refreshStateDesired and refreshStateFailed`)
+		require.Contains(t, err.Error(), `value "ACTIVE" cannot be both refreshState.desired and refreshState.failed`)
 	})
 
 	t.Run("compares enum values via fmt.Sprint so non-string enums match string desired", func(t *testing.T) {
@@ -421,9 +422,11 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		})
 
 		code, err := genNewResource(resourceType, newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"7"},
-			RefreshStateFailed:  []string{"42"},
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"7"},
+				Failed:  []string{"42"},
+			},
 		}), item, false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
@@ -433,11 +436,13 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		require.Contains(t, got, `[]string{"42"}`)
 	})
 
-	t.Run("generates refreshStateDelay with refreshStateDesired", func(t *testing.T) {
+	t.Run("generates refreshState delay", func(t *testing.T) {
 		def := newDef(SchemaMeta{
-			StateAttribute:      "state",
-			RefreshStateDesired: []string{"ACTIVE"},
-			RefreshStateDelay:   15 * time.Second,
+			StateAttribute: "state",
+			RefreshState: &RefreshState{
+				Desired: []string{"ACTIVE"},
+				Delay:   15 * time.Second,
+			},
 		})
 
 		code, err := genNewResource(resourceType, def, stringItem(), false)
@@ -445,16 +450,21 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		require.Contains(t, renderCode(t, code), `RefreshStateDelay: adapter.MustParseDuration("15s")`)
 	})
 
-	t.Run("rejects dependent settings without a refresh", func(t *testing.T) {
+	t.Run("rejects alreadyExists without refreshState", func(t *testing.T) {
 		_, err := genNewResource(resourceType, &Definition{
-			Resource: &SchemaMeta{RefreshStateDelay: 10},
+			Resource: &SchemaMeta{AlreadyExists: AlreadyExistsAdopt},
 		}, stringItem(), false)
-		require.EqualError(t, err, "refreshStateDelay requires refreshStateExists or refreshStateDesired")
+		require.EqualError(t, err, "alreadyExists requires refreshState")
+	})
 
-		_, err = genNewResource(resourceType, &Definition{
-			Resource: &SchemaMeta{IgnoreAlreadyExists: true},
+	t.Run("rejects invalid alreadyExists", func(t *testing.T) {
+		_, err := genNewResource(resourceType, &Definition{
+			Resource: &SchemaMeta{
+				RefreshState:  &RefreshState{},
+				AlreadyExists: AlreadyExists("yes"),
+			},
 		}, stringItem(), false)
-		require.EqualError(t, err, "ignoreAlreadyExists requires refreshStateExists or refreshStateDesired")
+		require.EqualError(t, err, `alreadyExists must be "adopt", got "yes"`)
 	})
 }
 
@@ -470,36 +480,67 @@ func TestSchemaMetaRefreshStateYAML(t *testing.T) {
 	t.Run("omitted", func(t *testing.T) {
 		def, err := decode(t, "resource: {}\n")
 		require.NoError(t, err)
-		require.False(t, def.Resource.RefreshStateExists)
-		require.Nil(t, def.Resource.RefreshStateDesired)
-		require.Nil(t, def.Resource.RefreshStateFailed)
+		require.Nil(t, def.Resource.RefreshState)
+		require.Nil(t, def.Resource.DeleteState)
 		require.Empty(t, def.Resource.StateAttribute)
 	})
 
-	t.Run("exists", func(t *testing.T) {
-		def, err := decode(t, "resource:\n  refreshStateExists: true\n")
+	t.Run("refreshState true", func(t *testing.T) {
+		def, err := decode(t, "resource:\n  refreshState: true\n")
 		require.NoError(t, err)
-		require.True(t, def.Resource.RefreshStateExists)
-		require.Nil(t, def.Resource.RefreshStateDesired)
+		require.NotNil(t, def.Resource.RefreshState)
+		require.Empty(t, def.Resource.RefreshState.Desired)
+		require.Empty(t, def.Resource.RefreshState.Failed)
+		require.Zero(t, def.Resource.RefreshState.Delay)
 	})
 
-	t.Run("configured", func(t *testing.T) {
-		def, err := decode(t, "resource:\n  stateAttribute: state\n  refreshStateDesired: [ACTIVE]\n  refreshStateFailed: [ERROR]\n")
+	t.Run("refreshState block", func(t *testing.T) {
+		def, err := decode(t, "resource:\n  stateAttribute: state\n  refreshState:\n    desired: [ACTIVE]\n    failed: [ERROR]\n")
 		require.NoError(t, err)
 		require.Equal(t, "state", def.Resource.StateAttribute)
-		require.Equal(t, []string{"ACTIVE"}, def.Resource.RefreshStateDesired)
-		require.Equal(t, []string{"ERROR"}, def.Resource.RefreshStateFailed)
+		require.Equal(t, []string{"ACTIVE"}, def.Resource.RefreshState.Desired)
+		require.Equal(t, []string{"ERROR"}, def.Resource.RefreshState.Failed)
+	})
+
+	t.Run("refreshState block with delay", func(t *testing.T) {
+		def, err := decode(t, "resource:\n  stateAttribute: state\n  refreshState:\n    desired: [a]\n    delay: 1s\n")
+		require.NoError(t, err)
+		require.Equal(t, time.Second, def.Resource.RefreshState.Delay)
+	})
+
+	t.Run("refreshState false", func(t *testing.T) {
+		_, err := decode(t, "resource:\n  refreshState: false\n")
+		require.Error(t, err)
+		require.ErrorContains(t, err, "want true or a block")
+	})
+
+	t.Run("rejects an empty block", func(t *testing.T) {
+		_, err := decode(t, "resource:\n  refreshState: {}\n")
+		require.ErrorContains(t, err, "use true instead of an empty block")
+	})
+
+	t.Run("rejects an unknown key", func(t *testing.T) {
+		_, err := decode(t, "resource:\n  stateAttribute: state\n  refreshState:\n    desired: [ACTIVE]\n    faild: [ERROR]\n")
+		require.ErrorContains(t, err, "line 5: field faild not found in refreshState")
+	})
+
+	t.Run("resolves an alias", func(t *testing.T) {
+		def, err := decode(t, "resource:\n  stateAttribute: state\n  refreshState: &wait\n    desired: [ACTIVE]\n  deleteState: *wait\n")
+		require.NoError(t, err)
+		require.Equal(t, []string{"ACTIVE"}, def.Resource.DeleteState.Desired)
+	})
+
+	t.Run("deleteState true", func(t *testing.T) {
+		def, err := decode(t, "resource:\n  deleteState: true\n")
+		require.NoError(t, err)
+		require.NotNil(t, def.Resource.DeleteState)
+		require.Empty(t, def.Resource.DeleteState.Desired)
 	})
 
 	t.Run("custom state field", func(t *testing.T) {
-		def, err := decode(t, "resource:\n  stateAttribute: status\n  refreshStateDesired: [ACTIVE]\n")
+		def, err := decode(t, "resource:\n  stateAttribute: status\n  refreshState:\n    desired: [ACTIVE]\n")
 		require.NoError(t, err)
 		require.Equal(t, "status", def.Resource.StateAttribute)
-	})
-
-	t.Run("rejects the old nested form", func(t *testing.T) {
-		_, err := decode(t, "resource:\n  refreshState:\n    attribute: state\n    desired: [ACTIVE]\n")
-		require.ErrorContains(t, err, "field refreshState not found")
 	})
 }
 
@@ -513,7 +554,7 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 		}}
 	}
 	newDef := func(desired []string) *Definition {
-		meta := SchemaMeta{DeleteStateDesired: desired}
+		meta := SchemaMeta{DeleteState: &DeleteState{Desired: desired}}
 		if len(desired) > 0 {
 			meta.StateAttribute = "state"
 		}
@@ -529,8 +570,8 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 		require.Contains(t, got, `[]string{"DELETED"}`)
 	})
 
-	t.Run("deleteStateGone enables the poller (404-only)", func(t *testing.T) {
-		code, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{DeleteStateGone: true}}, stringItem(), false)
+	t.Run("deleteState true enables the poller (404-only)", func(t *testing.T) {
+		code, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{DeleteState: &DeleteState{}}}, stringItem(), false)
 		require.NoError(t, err)
 		got := renderCode(t, code)
 		require.Contains(t, got, "&adapter.DeleteStateOptions{}")
@@ -554,14 +595,14 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 	t.Run("rejects a desired value outside the field's enum", func(t *testing.T) {
 		_, err := genNewResource(resourceType, newDef([]string{"deleted"}), enumItem("active", "creating", "deleting"), false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `deleteStateDesired: "state"`)
+		require.Contains(t, err.Error(), `deleteState.desired: "state"`)
 		require.Contains(t, err.Error(), `value "deleted" is not allowed`)
 	})
 
 	t.Run("rejects a stateAttribute that does not exist in the schema", func(t *testing.T) {
 		_, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{
-			StateAttribute:     "missing",
-			DeleteStateDesired: []string{"DELETED"},
+			StateAttribute: "missing",
+			DeleteState:    &DeleteState{Desired: []string{"DELETED"}},
 		}}, stringItem(), false)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), `stateAttribute "missing" is not present in schema`)
@@ -569,25 +610,16 @@ func TestGenNewResourceDeleteStateValidation(t *testing.T) {
 
 	t.Run("rejects delete values without stateAttribute", func(t *testing.T) {
 		_, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{
-			DeleteStateDesired: []string{"DELETED"},
+			DeleteState: &DeleteState{Desired: []string{"DELETED"}},
 		}}, stringItem(), false)
 		require.EqualError(t, err, "stateAttribute is required")
 	})
 
 	t.Run("rejects an empty desired list", func(t *testing.T) {
 		_, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{
-			DeleteStateDesired: []string{},
+			DeleteState: &DeleteState{Desired: []string{}},
 		}}, stringItem(), false)
-		require.EqualError(t, err, "deleteStateDesired must not be empty; use deleteStateGone")
-	})
-
-	t.Run("rejects combining gone with desired", func(t *testing.T) {
-		_, err := genNewResource(resourceType, &Definition{Resource: &SchemaMeta{
-			StateAttribute:     "state",
-			DeleteStateGone:    true,
-			DeleteStateDesired: []string{"DELETED"},
-		}}, stringItem(), false)
-		require.EqualError(t, err, "deleteStateGone is implied by deleteStateDesired; omit deleteStateGone")
+		require.EqualError(t, err, "deleteState.desired must not be empty; use deleteState: true")
 	})
 }
 

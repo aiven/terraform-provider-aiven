@@ -15,8 +15,8 @@ resource:
     To retry with the same peer identifiers, use destroy-before-create for the recovery apply.
     With `create_before_destroy`, the existing connection prevents creation of its replacement.
   refDepth: 2
-  refreshStateExists: true
-  deleteStateGone: true
+  refreshState: true
+  deleteState: true
   removeMissing: true
   modifyPlan: true
 datasource:

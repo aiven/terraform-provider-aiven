@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
-  refreshStateExists: true
+  refreshState: true
   removeMissing: true
   # A generated example has every user config block, but an endpoint takes one
   disableExample: true

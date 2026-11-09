@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 beta: false # Endpoints are still Experimental in Aiven API
 resource:
-  refreshStateExists: true
+  refreshState: true
   description: Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 datasource:
   description: Gets information about an Aiven project.

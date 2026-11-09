@@ -15,9 +15,9 @@ func init() {
 	ResourceOptions.Delete = deleteView
 }
 
-// planModifier extracts deployment_id from the composite ID if it's not set,
+// readModifier extracts deployment_id from the composite ID if it's not set,
 // which happens during migration from the SDK provider that didn't store deployment_id as a separate attribute.
-func planModifier(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
+func readModifier(_ context.Context, _ avngen.Client, d adapter.ResourceData) error {
 	if d.Get("deployment_id").(string) == "" && d.ID() != "" {
 		parts := strings.SplitN(d.ID(), "/", 4)
 		if len(parts) == 4 {
