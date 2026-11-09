@@ -19,9 +19,17 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Resource ID, equal to `organization_id`.",
 			},
+			"next": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Cursor for the next page. Only set when limit or cursor was given and more results exist.",
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "ID of an organization.",
 				Required:            true,
+			},
+			"prev": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Cursor for the previous page. Only set when limit or cursor was given and an earlier page exists.",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -190,7 +198,15 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Computed: true,
 				Type:     adapter.SchemaTypeString,
 			},
+			"next": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"organization_id": &adapter.Schema{Type: adapter.SchemaTypeString},
+			"prev": &adapter.Schema{
+				Computed: true,
+				Type:     adapter.SchemaTypeString,
+			},
 			"timeouts": &adapter.Schema{
 				Properties: map[string]*adapter.Schema{"read": &adapter.Schema{Type: adapter.SchemaTypeString}},
 				Type:       adapter.SchemaTypeObject,

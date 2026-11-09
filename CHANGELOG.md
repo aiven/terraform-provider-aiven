@@ -64,6 +64,10 @@ nav_order: 1
 - Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
   For `aiven_transit_gateway_vpc_attachment`, set `peer_region` when another regional match exists.
 - Fix deletion and replacement cleanup of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment`.
+- Add `aiven_organization_billing_group_list` datasource field `next`: Cursor for the next page. Only set when limit
+  or cursor was given and more results exist.
+- Add `aiven_organization_billing_group_list` datasource field `prev`: Cursor for the previous page. Only set when limit
+  or cursor was given and an earlier page exists.
 
 ## [4.65.1] - 2026-10-30
 

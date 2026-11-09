@@ -22,5 +22,7 @@ data "aiven_organization_billing_group_list" "example" {
       payment_method_type = "aws_subscription"
     }
   }
+  next = "foo"
+  prev = "foo"
   */
 }
