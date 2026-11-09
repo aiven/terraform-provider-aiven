@@ -13,9 +13,7 @@ Gets information about an AWS VPC peering connection.
 
 ```terraform
 data "aiven_aws_vpc_peering_connection" "example" {
-  project = "my-project"
-
-  // OPTIONAL FIELDS
+  project        = "my-project"
   project_vpc_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   aws_account_id = "123456789012"
   aws_vpc_id     = "vpc-0123456789abcdef0"

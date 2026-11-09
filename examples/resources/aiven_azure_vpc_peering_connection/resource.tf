@@ -1,7 +1,5 @@
 resource "aiven_azure_vpc_peering_connection" "example" {
-  project = "example-project"
-
-  // OPTIONAL FIELDS
+  project               = "example-project"
   project_vpc_id        = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   azure_subscription_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d" // Force new
   vnet_name             = "my-vnet" // Force new

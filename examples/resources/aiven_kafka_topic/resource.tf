@@ -8,9 +8,8 @@ resource "aiven_kafka_topic" "example" {
   // OPTIONAL FIELDS
   owner_user_group_id = "ug22ba494e096"
   config {
-    cleanup_policy = "delete"
-
     // OPTIONAL FIELDS
+    cleanup_policy                      = "delete"
     compression_type                    = "zstd"
     delete_retention_ms                 = "86400000"
     diskless_enable                     = false

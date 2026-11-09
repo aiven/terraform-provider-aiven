@@ -15,13 +15,13 @@ Legacy configurations using an AWS VPC ID (`vpc-*`) as `peer_vpc` create ordinar
 
 ```terraform
 resource "aiven_transit_gateway_vpc_attachment" "example" {
-  project = aiven_project_vpc.example.project // e.g. "my-project"
+  project            = aiven_project_vpc.example.project        // e.g. "my-project"
+  project_vpc_id     = aiven_project_vpc.example.project_vpc_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
+  peer_cloud_account = "123456789012"                           // Force new
+  peer_vpc           = "tgw-0123456789abcdef0"                  // Force new
 
   // OPTIONAL FIELDS
-  project_vpc_id          = aiven_project_vpc.example.project_vpc_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
-  peer_cloud_account      = "123456789012"                           // Force new
-  peer_vpc                = "tgw-0123456789abcdef0"                  // Force new
-  peer_region             = "us-east-1"                              // Force new
+  peer_region             = "us-east-1" // Force new
   user_peer_network_cidrs = ["192.168.6.0/24"]
 
   /* COMPUTED FIELDS

@@ -13,13 +13,13 @@ Gets information about an AWS Transit Gateway VPC attachment for an Aiven projec
 
 ```terraform
 data "aiven_transit_gateway_vpc_attachment" "example" {
-  project = "my-project"
-
-  // OPTIONAL FIELDS
+  project            = "my-project"
   project_vpc_id     = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
   peer_cloud_account = "123456789012"
   peer_vpc           = "tgw-0123456789abcdef0"
-  peer_region        = "us-east-1"
+
+  // OPTIONAL FIELDS
+  peer_region = "us-east-1"
 
   /* COMPUTED FIELDS
   peering_connection_id = "pcx-0123456789abcdef0"
