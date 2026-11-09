@@ -102,6 +102,9 @@ type ResourceOptions struct {
 	// the subsequent Read has nothing to look up.
 	IgnoreAlreadyExists bool
 
+	// Conflict, when non-nil, fails Create if the resource exists. Delete releases its keys.
+	Conflict *ConflictOptions
+
 	// Returns an error on "plan" if the resource is marked for deletion and the `termination_protection` field is set to true.
 	// There are two types of resources with a `termination_protection` field in our provider:
 	// 1. API-level termination protection: defined in the API schema and prevents deletion through the API.
@@ -264,9 +267,19 @@ func (a *resourceAdapter) Create(
 		}
 	}
 
+	if a.resource.Conflict != nil {
+		if err := claimConflict(ctx, a.client, a.resource.TypeName, a.resource.Conflict, d); err != nil {
+			diags.AddError("failed to create resource", err.Error())
+			return
+		}
+	}
+
 	err = a.resource.Create(ctx, a.client, d)
 	createSucceeded := err == nil
 	if err != nil && !(a.resource.IgnoreAlreadyExists && avngen.IsAlreadyExists(err)) {
+		if a.resource.Conflict != nil {
+			releaseConflict(a.resource.TypeName, a.resource.Conflict, d)
+		}
 		diags.AddError("failed to create resource", err.Error())
 		return
 	}
@@ -746,6 +759,10 @@ func (a *resourceAdapter) Delete(
 	}
 	if err != nil && (errors.Is(err, ErrDeleteStateFailed) || !IsNotFound(err)) {
 		diags.AddError("failed to delete resource", err.Error())
+		return
+	}
+	if a.resource.Conflict != nil {
+		releaseConflict(a.resource.TypeName, a.resource.Conflict, d)
 	}
 }
 

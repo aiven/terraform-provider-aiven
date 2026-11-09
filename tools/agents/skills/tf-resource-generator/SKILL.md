@@ -847,6 +847,15 @@ Set `pagination` on the read op (see Operations Configuration). The generator em
 `resultListLookupKeys` is set, `pageMatch(d)`, which returns the predicate for
 `adapter.PaginateFind`. Only one operation per definition can be paginated.
 
+Set `resource.alreadyExists: check` to fail Create when the resource exists, in the API or as
+another resource with the same keys in the same run. The adapter lists the scope with `pageView`
+once and matches it with `pageMatch`, where the scope is the read op's path parameters and the
+keys are its `resultListLookupKeys`. Delete releases the keys. The API might create the resource
+and still fail, so the client's retry gets 409: `alreadyExists: check` sets `IgnoreAlreadyExists`
+so a 409 is adopted. Requires `refreshState`. Use `alreadyExists: adopt` to adopt a 409 without
+the conflict check.
+Tests that delete a resource outside Terraform call `adapter.ForgetConflict`.
+
 **Reference**: `definitions/aiven_pg_database.yml`.
 
 ## Write-Only Fields

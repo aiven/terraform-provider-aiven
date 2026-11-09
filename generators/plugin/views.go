@@ -177,9 +177,9 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 		}
 
 		switch res.AlreadyExists {
-		case "", AlreadyExistsAdopt:
+		case "", AlreadyExistsAdopt, AlreadyExistsCheck:
 		default:
-			return nil, fmt.Errorf("alreadyExists must be %q, got %q", AlreadyExistsAdopt, res.AlreadyExists)
+			return nil, fmt.Errorf("alreadyExists must be %q or %q, got %q", AlreadyExistsAdopt, AlreadyExistsCheck, res.AlreadyExists)
 		}
 		if res.AlreadyExists != "" && res.RefreshState == nil {
 			return nil, errors.New("alreadyExists requires refreshState")
@@ -260,6 +260,14 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 
 		if res.AlreadyExists != "" {
 			values["IgnoreAlreadyExists"] = jen.True()
+		}
+
+		if res.AlreadyExists == AlreadyExistsCheck {
+			v, err := genConflictOptions(def, item)
+			if err != nil {
+				return nil, fmt.Errorf("alreadyExists: check: %w", err)
+			}
+			values["Conflict"] = v
 		}
 
 		if def.Resource.TerminationProtection {
@@ -680,7 +688,7 @@ func genLookupMatch(item *Item, operation *Operation, elem *jen.Statement) (*jen
 }
 
 // pageViewName returns the fetch for adapter.Paginate, pageMatchName returns the predicate for
-// adapter.PaginateFind.
+// adapter.PaginateFind. Both are shared by readView and ConflictOptions.Load.
 const (
 	pageViewName  = "pageView"
 	pageMatchName = "pageMatch"
@@ -699,6 +707,26 @@ func pagedOperation(def *Definition) (*Operation, error) {
 		found = op
 	}
 	return found, nil
+}
+
+// genConflictOptions renders adapter.ConflictOptions that list the scope with pageView and match it with pageMatch.
+// The scope is the paginated read's path, the keys are its resultListLookupKeys.
+func genConflictOptions(def *Definition, item *Item) (jen.Code, error) {
+	op, err := pagedOperation(def)
+	if err != nil {
+		return nil, err
+	}
+	if op == nil || len(op.ResultListLookupKeys) == 0 {
+		return nil, errors.New("requires a read operation with pagination and resultListLookupKeys")
+	}
+
+	keys := lo.Map(sortedKeys(op.ResultListLookupKeys), func(k string, _ int) string { return op.ResultListLookupKeys[k] })
+	parent := lo.Map(pathFields(def, item, op), func(v *Item, _ int) string { return v.Name })
+	return jen.Op("&").Qual(adapterPackage, "ConflictOptions").Values(jen.Dict{
+		jen.Id("Parent"): stringSliceLiteral(parent),
+		jen.Id("Keys"):   stringSliceLiteral(keys),
+		jen.Id("Load"):   jen.Qual(adapterPackage, "ConflictList").Call(jen.Id(pageViewName), jen.Id(pageMatchName)),
+	}), nil
 }
 
 // genPageMatch renders the pageMatch function:
