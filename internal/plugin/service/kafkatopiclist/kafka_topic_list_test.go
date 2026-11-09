@@ -3,8 +3,12 @@ package kafkatopiclist_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -67,6 +71,36 @@ data "aiven_kafka_topic_list" "all" {
 				Config: topicsConfig,
 			},
 			{
+				// ServiceKafkaTopicList is cached by the backend and may not return fresh topics yet
+				PreConfig: func() {
+					client, err := acc.GetTestGenAivenClient()
+					require.NoError(t, err)
+
+					err = retry.Do(
+						func() error {
+							list, err := client.ServiceKafkaTopicList(t.Context(), projectName, kafkaName)
+							if err != nil {
+								return retry.Unrecoverable(err)
+							}
+
+							active := make(map[string]bool, len(list))
+							for _, topic := range list {
+								active[topic.TopicName] = topic.State == kafkatopic.TopicStateTypeActive
+							}
+
+							if !active[topicName1] || !active[topicName2] {
+								return fmt.Errorf("topics %q and %q are not listed as active yet", topicName1, topicName2)
+							}
+							return nil
+						},
+						retry.Context(t.Context()),
+						retry.Delay(10*time.Second),
+						retry.DelayType(retry.FixedDelay),
+						retry.Attempts(30),
+						retry.LastErrorOnly(true),
+					)
+					require.NoError(t, err)
+				},
 				Config: topicsConfig + dataSourceConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(dataSourceName, "id"),

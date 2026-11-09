@@ -2,9 +2,11 @@ package kafkatopic_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math"
+	"net/http"
 	"regexp"
 	"testing"
 	"time"
@@ -21,6 +23,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/kafkatopicrepository"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
+
+// isTopicNotReady matches 404 and 409 "Topic is not yet available" returned while the topic is being created
+func isTopicNotReady(err error) bool {
+	var e avngen.Error
+	return errors.As(err, &e) && (e.Status == http.StatusNotFound || e.Status == http.StatusConflict)
+}
 
 func TestAccAivenKafkaTopic(t *testing.T) {
 	orgName := acc.OrganizationName()
@@ -278,8 +286,9 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 							},
 							retry.Context(ctx),
 							retry.Delay(5*time.Second),
+							retry.DelayType(retry.FixedDelay),
 							retry.Attempts(20),
-							retry.RetryIf(avngen.IsNotFound),
+							retry.RetryIf(isTopicNotReady),
 							retry.LastErrorOnly(true),
 						)
 						require.NoError(t, err)
@@ -306,8 +315,9 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 								},
 								retry.Context(ctx),
 								retry.Delay(5*time.Second),
+								retry.DelayType(retry.FixedDelay),
 								retry.Attempts(20),
-								retry.RetryIf(avngen.IsNotFound),
+								retry.RetryIf(isTopicNotReady),
 								retry.LastErrorOnly(true),
 							)
 						},
