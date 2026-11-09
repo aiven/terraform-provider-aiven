@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strconv"
@@ -116,31 +117,36 @@ func getExampleItemPriority(def *Definition, entity entityType, item *Item) int 
 	return score
 }
 
-// object renders an object item into the body.
-// inComputedBlock - true if the current block is a computed block, so we don't add "Computed" title within a computed block.
-func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock bool) error {
+// exampleSection groups example fields. Optional and computed sections start with a heading.
+type exampleSection int
+
+const (
+	sectionRequired exampleSection = iota
+	sectionOptional
+	sectionComputed
+)
+
+type exampleField struct {
+	name    string
+	item    *Item
+	section exampleSection
+}
+
+// fields returns the fields to render, grouped by section, in priority order within each.
+func (w *exampleWriter) fields(item *Item, alternatives map[string]bool) []exampleField {
 	def, entity := w.def, w.entity
-	var seenComputed, seenOptional bool
+	keys := sortedKeysPriority(def, entity, item)
+	fields := make([]exampleField, 0, len(keys))
 	conflictsWith := make(map[string]bool)
-	alternatives, err := datasourceAlternativeAttrs(def, entity, item)
-	if err != nil {
-		return err
-	}
-
-	for i, k := range sortedKeysPriority(def, entity, item) {
+	for _, k := range keys {
 		v := item.Properties[k]
+		// Don't expose internal virtual properties, like "id", or deprecated properties.
 		if v.Virtual || v.DeprecationMessage != "" {
-			// Don't expose internal virtual properties, like "id"
-			// or deprecated properties.
 			continue
 		}
 
-		if w.requiredOnly && !v.IsRequired(def, entity) {
-			continue
-		}
-
-		// Lookup alternatives are exempt: they surface as commented hints below.
-		if conflictsWith[v.Name] && !alternatives[v.Name] {
+		// Lookup alternatives are exempt: they surface as commented hints.
+		if conflictsWith[k] && !alternatives[k] {
 			continue
 		}
 
@@ -153,41 +159,76 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 				conflictsWith[sub] = true
 			}
 		}
+		fields = append(fields, exampleField{name: k, item: v})
+	}
 
-		// Starts new block: optional or computed.
-		// Doesn't add title if it's the first item, except for lookup.
-		// Doesn't add title if the block is in a computed block.
-		var comment string
-		hasLookup := !entity.isResource() && def.DatasourceLookupOp() != nil
-		if !inComputedBlock && (i > 0 || hasLookup) {
-			if !seenOptional && v.IsOptional(def, entity) {
-				seenOptional = true
+	chosen := chosenAlternatives(item, fields)
+	for i, f := range fields {
+		switch {
+		case f.item.IsRequired(def, entity) || chosen[f.name]:
+			fields[i].section = sectionRequired
+		case f.item.IsOptional(def, entity):
+			fields[i].section = sectionOptional
+		default:
+			fields[i].section = sectionComputed
+		}
+	}
+	if w.requiredOnly {
+		fields = slices.DeleteFunc(fields, func(f exampleField) bool { return f.section != sectionRequired })
+	}
+	slices.SortStableFunc(fields, func(a, b exampleField) int { return cmp.Compare(a.section, b.section) })
+	return fields
+}
+
+// chosenAlternatives returns the first rendered member of each `exactlyOneOf` group and the fields it
+// requires. Configurations must set one member, so the example shows it with the required fields.
+func chosenAlternatives(item *Item, fields []exampleField) map[string]bool {
+	chosen := make(map[string]bool)
+	for _, p := range item.Properties {
+		if len(p.ExactlyOneOf) == 0 {
+			continue
+		}
+		i := slices.IndexFunc(fields, func(f exampleField) bool { return slices.Contains(p.ExactlyOneOf, f.name) })
+		if i < 0 {
+			continue
+		}
+		chosen[fields[i].name] = true
+		for _, name := range fields[i].item.AlsoRequires {
+			chosen[name] = true
+		}
+	}
+	return chosen
+}
+
+// object renders an object item into the body.
+// inComputedBlock - true if the current block is a computed block, so we don't add "Computed" title within a computed block.
+func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock bool) error {
+	def, entity := w.def, w.entity
+	alternatives, err := datasourceAlternativeAttrs(def, entity, item)
+	if err != nil {
+		return err
+	}
+
+	hasLookup := !entity.isResource() && def.DatasourceLookupOp() != nil
+	section := sectionRequired
+	for i, f := range w.fields(item, alternatives) {
+		k, v := f.name, f.item
+		if !inComputedBlock && f.section != section {
+			section = f.section
+			comment := "/* COMPUTED FIELDS"
+			if section == sectionOptional {
 				comment = "// OPTIONAL FIELDS"
-
 				if hasLookup {
 					comment = lookupExampleHint(def, item)
 				}
-
-			} else if !seenComputed && v.IsReadOnly(def, entity) {
-				// Renders COMPUTED FIELDS title before the first computed field
-				seenComputed = true
-				comment = "/* COMPUTED FIELDS"
 			}
-		}
-
-		if comment != "" {
-			comment := hclwrite.Tokens{
-				&hclwrite.Token{
-					Type:         hclsyntax.TokenComment,
-					Bytes:        []byte(comment),
-					SpacesBefore: 0,
-				},
-			}
-			if i > 0 {
+			if comment != "" {
+				if i > 0 {
+					body.AppendNewline()
+				}
+				body.AppendUnstructuredTokens(hclwrite.Tokens{{Type: hclsyntax.TokenComment, Bytes: []byte(comment)}})
 				body.AppendNewline()
 			}
-			body.AppendUnstructuredTokens(comment)
-			body.AppendNewline()
 		}
 
 		if v.IsNested() && !v.RendersAsAttribute(def, entity) {
@@ -196,7 +237,7 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 			}
 
 			valBlock := body.AppendNewBlock(k, nil)
-			err := w.object(v, valBlock.Body(), seenComputed || inComputedBlock)
+			err := w.object(v, valBlock.Body(), section == sectionComputed || inComputedBlock)
 			if err != nil {
 				return fmt.Errorf("example items error: %w", err)
 			}
@@ -241,7 +282,7 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 		body.SetAttributeRaw(fieldName, tokens)
 	}
 
-	if !inComputedBlock && seenComputed {
+	if !inComputedBlock && section == sectionComputed {
 		comment := hclwrite.Tokens{
 			&hclwrite.Token{
 				Type:         hclsyntax.TokenComment,

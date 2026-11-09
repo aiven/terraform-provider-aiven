@@ -1198,3 +1198,71 @@ func TestExampleNestedAttributeUsesAssignment(t *testing.T) {
 	require.Contains(t, s, "file_info = [{")
 	require.NotRegexp(t, `(?m)^\s*file_info \{`, s)
 }
+
+func TestExampleSections(t *testing.T) {
+	t.Parallel()
+
+	newRoot := func(exactlyOneOf []string) *Item {
+		root := &Item{Name: "root", Type: SchemaTypeObject}
+		root.Properties = map[string]*Item{
+			"project":        {Name: "project", Type: SchemaTypeString, Optional: true, AlsoRequires: []string{"project_vpc_id"}, IDAttribute: true, IDAttributePosition: 0, Example: "my-project"},
+			"project_vpc_id": {Name: "project_vpc_id", Type: SchemaTypeString, Optional: true, ConflictsWith: []string{"vpc_id"}, IDAttribute: true, IDAttributePosition: 1, Example: "vpc"},
+			"peer_vpc":       {Name: "peer_vpc", Type: SchemaTypeString, Required: true, IDAttribute: true, IDAttributePosition: 2, Example: "peer"},
+			"peer_region":    {Name: "peer_region", Type: SchemaTypeString, Optional: true, IDAttribute: true, IDAttributePosition: 3, Example: "us-east-1"},
+			"vpc_id":         {Name: "vpc_id", Type: SchemaTypeString, Optional: true, ExactlyOneOf: exactlyOneOf, Example: "my-project/vpc"},
+			"state":          {Name: "state", Type: SchemaTypeString, Computed: true, Example: "ACTIVE"},
+		}
+		for _, p := range root.Properties {
+			p.Parent = root
+		}
+		return root
+	}
+
+	cases := []struct {
+		name         string
+		exactlyOneOf []string
+		want         string
+	}{
+		{
+			name:         "chosen exactlyOneOf member is required",
+			exactlyOneOf: []string{"vpc_id", "project"},
+			want: `resource "aiven_test" "example" {
+  project        = "my-project"
+  project_vpc_id = "vpc"
+  peer_vpc       = "peer"
+
+  // OPTIONAL FIELDS
+  peer_region = "us-east-1"
+
+  /* COMPUTED FIELDS
+  state = "ACTIVE"
+  */
+}
+`,
+		},
+		{
+			name: "optional identity fields follow required ones",
+			want: `resource "aiven_test" "example" {
+  peer_vpc = "peer"
+
+  // OPTIONAL FIELDS
+  project        = "my-project"
+  project_vpc_id = "vpc"
+  peer_region    = "us-east-1"
+
+  /* COMPUTED FIELDS
+  state = "ACTIVE"
+  */
+}
+`,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := exampleRoot(&Definition{typeName: "aiven_test"}, resourceType, newRoot(tc.exactlyOneOf))
+			require.NoError(t, err)
+			require.Equal(t, tc.want, string(got))
+		})
+	}
+}
