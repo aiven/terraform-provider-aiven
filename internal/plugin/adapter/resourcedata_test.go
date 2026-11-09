@@ -3,12 +3,68 @@
 package adapter
 
 import (
+	"context"
 	"errors"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/require"
 )
+
+func TestResourceDataPrivateState(t *testing.T) {
+	t.Parallel()
+	ctx := t.Context()
+
+	t.Run("standalone data retains private values", func(t *testing.T) {
+		d, err := NewResourceData(&Schema{Type: SchemaTypeObject}, nil)
+		require.NoError(t, err)
+		value, err := d.GetPrivate(ctx, "region")
+		require.NoError(t, err)
+		require.Nil(t, value)
+		for _, want := range [][]byte{[]byte(`"eu-west-1"`), []byte(`""`), nil} {
+			require.NoError(t, d.SetPrivate(ctx, "region", want))
+			value, err = d.GetPrivate(ctx, "region")
+			require.NoError(t, err)
+			require.Equal(t, want, value)
+		}
+	})
+
+	t.Run("response private state receives writes", func(t *testing.T) {
+		private := &privateStateStub{values: map[string][]byte{"region": []byte(`"eu-west-1"`)}}
+		d := &resourceData{private: private}
+		require.NoError(t, d.SetPrivate(ctx, "region", []byte(`"us-east-1"`)))
+		require.Equal(t, []byte(`"us-east-1"`), private.values["region"])
+		value, err := d.GetPrivate(ctx, "region")
+		require.NoError(t, err)
+		require.Equal(t, private.values["region"], value)
+	})
+
+	t.Run("Framework diagnostics are returned as errors", func(t *testing.T) {
+		private := &privateStateStub{diagnostics: diag.Diagnostics{diag.NewErrorDiagnostic("Private state error", "detail")}}
+		d := &resourceData{private: private}
+		_, err := d.GetPrivate(ctx, "region")
+		require.EqualError(t, err, "Private state error: detail")
+		require.EqualError(t, d.SetPrivate(ctx, "region", []byte(`"eu-west-1"`)), "Private state error: detail")
+	})
+}
+
+type privateStateStub struct {
+	values      map[string][]byte
+	diagnostics diag.Diagnostics
+}
+
+func (p *privateStateStub) GetKey(_ context.Context, key string) ([]byte, diag.Diagnostics) {
+	return p.values[key], p.diagnostics
+}
+
+func (p *privateStateStub) SetKey(_ context.Context, key string, value []byte) diag.Diagnostics {
+	if p.diagnostics.HasError() {
+		return p.diagnostics
+	}
+	p.values[key] = value
+	return nil
+}
 
 func TestResourceDataRequiresReplace(t *testing.T) {
 	t.Parallel()
@@ -29,6 +85,40 @@ func TestResourceDataRequiresReplace(t *testing.T) {
 
 	// A typo in the attribute name is a bug in the resource, not a user error.
 	require.Panics(t, func() { d.RequiresReplace("nope") })
+}
+
+func TestResourceDataSetUnknown(t *testing.T) {
+	t.Parallel()
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id":   {Type: SchemaTypeString, Computed: true},
+			"tags": {Type: SchemaTypeMap, Items: &Schema{Type: SchemaTypeString}, Computed: true},
+			"name": {Type: SchemaTypeString},
+		},
+	}
+	t.Run("unknown values survive plan serialization", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"}, WithPreservePlanValues(), WithTestPlan(map[string]any{"id": "old"}))
+		require.NoError(t, err)
+		require.NoError(t, d.SetUnknown("id"))
+		require.NoError(t, d.SetUnknown("tags"))
+		var attributes map[string]tftypes.Value
+		require.NoError(t, d.tfValue().As(&attributes))
+		require.False(t, attributes["id"].IsKnown())
+		require.True(t, attributes["id"].Type().Equal(tftypes.String))
+		require.False(t, attributes["tags"].IsKnown())
+		require.True(t, attributes["tags"].Type().Equal(tftypes.Map{ElementType: tftypes.String}))
+		require.ErrorContains(t, d.SetUnknown("missing"), "not found in schema")
+		require.ErrorContains(t, d.SetUnknown("name"), "not computed")
+	})
+	t.Run("unknown values cannot be written outside ModifyPlan", func(t *testing.T) {
+		for _, opt := range []ResourceDataOpt{WithTestState(map[string]any{"id": "old"}), WithTestPlan(map[string]any{"id": "old"})} {
+			d, err := NewResourceData(sch, []string{"id"}, opt)
+			require.NoError(t, err)
+			require.ErrorContains(t, d.SetUnknown("id"), "only supported during ModifyPlan")
+			require.Equal(t, "old", d.ID())
+		}
+	})
 }
 
 // TestGetOkFalseIsAValue pins down that a stored false is a value, not a missing one.
@@ -281,6 +371,33 @@ func TestResourceDataGetConfigOkWithoutConfig(t *testing.T) {
 
 	_, ok := rd.GetConfigOk("value")
 	require.False(t, ok, "state-only reads must not treat state as configuration")
+}
+
+func TestResourceDataGetStateOk(t *testing.T) {
+	sch := &Schema{Type: SchemaTypeObject, Properties: map[string]*Schema{
+		"id": {Type: SchemaTypeString, Computed: true},
+	}}
+
+	t.Run("create with checkpointed ID has no prior state", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"}, WithTestPlan(map[string]any{}))
+		require.NoError(t, err)
+		require.NoError(t, d.SetID("new-id"))
+		require.Equal(t, "new-id", d.ID())
+		_, ok := d.GetStateOk("id")
+		require.False(t, ok)
+	})
+
+	t.Run("update retains prior ID after migration", func(t *testing.T) {
+		d, err := NewResourceData(sch, []string{"id"},
+			WithTestState(map[string]any{"id": "legacy-id"}),
+			WithTestPlan(map[string]any{"id": "new-id"}),
+		)
+		require.NoError(t, err)
+		id, ok := d.GetStateOk("id")
+		require.True(t, ok)
+		require.Equal(t, "legacy-id", id)
+		require.Equal(t, "legacy-id", d.GetState("id"))
+	})
 }
 
 // TestResourceDataPreservedUnknownAndNullPlan verifies that preserved
