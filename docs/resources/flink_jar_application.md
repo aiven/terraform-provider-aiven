@@ -119,8 +119,8 @@ Read-Only:
 - `file_size` (Number) The size of the file in bytes.
 - `file_status` (String) Indicates whether the uploaded .jar file has been verified by the system and deployment ready. The possible values are `FAILED`, `INITIAL` and `READY`.
 - `url` (String) The pre-signed url of the bucket where the .jar file is uploaded. Becomes null when the JarApplicationVersion is ready or failed.
-- `verify_error_code` (Number) In the case file_status is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.
-- `verify_error_message` (String) In the case file_status is FAILED, may contain details about the failure.
+- `verify_error_code` (Number) In the case `file_status` is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.
+- `verify_error_message` (String) In the case `file_status` is FAILED, may contain details about the failure.
 
 
 
@@ -136,7 +136,7 @@ Read-Only:
 - `id` (String) Deployment ID.
 - `job_id` (String) Job ID.
 - `last_savepoint` (String) Job savepoint.
-- `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.
+- `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x `number_of_task_slots`), or every new job created will fail.
 - `program_args` (Set of String) Arguments to pass during Flink job submission through the programArgsList parameter.
 - `starting_savepoint` (String) Job savepoint.
 - `status` (String) Deployment status. The possible values are `CANCELED`, `CANCELLING`, `CANCELLING_REQUESTED`, `CREATED`, `DELETE_REQUESTED`, `DELETING`, `FAILED`, `FAILING`, `FINISHED`, `INITIALIZING`, `RECONCILING`, `RESTARTING`, `RUNNING`, `SAVING`, `SAVING_AND_STOP`, `SAVING_AND_STOP_REQUESTED` and `SUSPENDED`.

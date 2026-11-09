@@ -739,6 +739,12 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		}
 	}
 
+	// A user config description might be the title already
+	if description, deprecation, ok := cutDeprecated(s.Description, s.Title); ok {
+		item.Description = description
+		item.DeprecationMessage = deprecation
+	}
+
 	return item
 }
 
@@ -1125,7 +1131,11 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.Computed = a.Computed || b.Computed
 	a.ForceNew = a.ForceNew || b.ForceNew
 	a.Sensitive = a.Sensitive || b.Sensitive
-	a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
+	if b.DeprecationMessage != "" && b.AppearsIn == 0 {
+		a.DeprecationMessage = b.DeprecationMessage
+	} else {
+		a.DeprecationMessage = orLonger(a.DeprecationMessage, b.DeprecationMessage)
+	}
 	if len(b.Enum) > 0 && b.AppearsIn == 0 {
 		// User defined values in definition.yml replace the OpenAPI enum
 		a.Enum = b.Enum

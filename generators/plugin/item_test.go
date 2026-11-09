@@ -398,6 +398,17 @@ func TestNormalizeDescription(t *testing.T) {
 		normalizeDescription(src, false),
 		"non-root: everything collapses to one line",
 	)
+
+	// JSON objects stay verbatim
+	for in, want := range map[string]string{
+		`Set {"key_name":"value_name"} for key_name.`:           "Set {\"key_name\":\"value_name\"} for `key_name`.",
+		`{"a_b":1,"sep":"."}`:                                   `{"a_b":1,"sep":"."}`,
+		`{&quot;key_name&quot;:&quot;value_name&quot;}`:         `{&quot;key_name&quot;:&quot;value_name&quot;}`,
+		`{"outer": {"key_name": "value_name"}}`:                 `{"outer": {"key_name": "value_name"}}`,
+		"referenced with ${<provider_name>:<key_name>} and '.'": "referenced with `${<provider_name>:<key_name>}` and `.`",
+	} {
+		assert.Equal(t, want, normalizeDescription(in, false), "input: %q", in)
+	}
 }
 
 func TestDescriptionExample(t *testing.T) {
@@ -1161,6 +1172,23 @@ func TestMergeItemEnumExclude(t *testing.T) {
 	require.ErrorContains(t, err, `enumExclude value "d" is not in the enum`)
 }
 
+func TestMergeItemDeprecationMessage(t *testing.T) {
+	t.Parallel()
+
+	openAPI := func() *Item {
+		return &Item{Name: "max_index_count", Type: SchemaTypeInteger, AppearsIn: RequestBody, DeprecationMessage: "Use `index_patterns` instead."}
+	}
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+
+	got, err := mergeItem(parent, openAPI(), &Item{Name: "max_index_count", Type: SchemaTypeInteger, DeprecationMessage: "Use `foo`."})
+	require.NoError(t, err)
+	assert.Equal(t, "Use `foo`.", got.DeprecationMessage, "a shorter definition message overrides")
+
+	got, err = mergeItem(parent, openAPI(), &Item{Name: "max_index_count", Type: SchemaTypeInteger})
+	require.NoError(t, err)
+	assert.Equal(t, "Use `index_patterns` instead.", got.DeprecationMessage, "the OpenAPI message is the fallback")
+}
+
 func TestExampleNestedAttributeUsesAssignment(t *testing.T) {
 	t.Parallel()
 
@@ -1263,6 +1291,108 @@ func TestExampleSections(t *testing.T) {
 			got, err := exampleRoot(&Definition{typeName: "aiven_test"}, resourceType, newRoot(tc.exactlyOneOf))
 			require.NoError(t, err)
 			require.Equal(t, tc.want, string(got))
+		})
+	}
+}
+
+// TestBacktickIdentifiers pins lowercase snake_case words (and dotted paths)
+// wrapped in backticks, with quotes stripped and verbatim spans left alone.
+func TestBacktickIdentifiers(t *testing.T) {
+	cases := map[string]string{
+		// bare identifier mid-sentence
+		"One of key or sas_token should be specified": "One of key or `sas_token` should be specified",
+		// identifier at sentence start
+		"user_operations records calls": "`user_operations` records calls",
+		// identifier before sentence end
+		"set preferred_zones.": "set `preferred_zones`.",
+		// dotted path
+		"a table's pg_class.relfrozenxid field": "a table's `pg_class.relfrozenxid` field",
+		// quoted identifiers become backticks
+		`options are 'mysql_native_password' and "caching_sha2_password"`: "options are `mysql_native_password` and `caching_sha2_password`",
+		// &quot; entity quotes
+		`&quot;read_committed&quot; level`: "`read_committed` level",
+		// possessive after identifier
+		"pg_partman's role": "`pg_partman`'s role",
+		// a setting is wrapped with its value
+		"for io_method=worker.":        "for `io_method=worker`.",
+		"adds a diskless_az= hint":     "adds a `diskless_az=` hint",
+		"set 'ssl_mode=require' first": "set `ssl_mode=require` first",
+		"use log_level=debug_all here": "use `log_level=debug_all` here",
+		// colon after identifier (not a JSON key)
+		"provider: aws, auth_method: credentials": "provider: aws, `auth_method`: credentials",
+		// JSON keys and string values stay quoted
+		`{"key_name": "value"}`:                             `{"key_name": "value"}`,
+		`{"key_name": "value_with_underscore"}`:             `{"key_name": "value_with_underscore"}`,
+		`{&quot;error_code&quot;: &quot;not_powered&quot;}`: `{&quot;error_code&quot;: &quot;not_powered&quot;}`,
+		"Example: 'foo_bar'":                                "Example: `foo_bar`",
+		// ${...} placeholder wrapped whole
+		"referenced with ${<provider_name>:<secret_path>:<key_name>}.": "referenced with `${<provider_name>:<secret_path>:<key_name>}`.",
+		// already backtick-wrapped
+		"already " + "`sas_token`" + " wrapped": "already `sas_token` wrapped",
+		// markdown link with URL in target
+		"see [ACLs](https://registry.terraform.io/docs/resources/kafka_acl).": "see [ACLs](https://registry.terraform.io/docs/resources/kafka_acl).",
+		// bare URL
+		"https://docs.datadoghq.com/getting_started/tagging": "https://docs.datadoghq.com/getting_started/tagging",
+		// relative markdown link
+		"[aiven_kafka_acl](../kafka_acl.md)": "[`aiven_kafka_acl`](../kafka_acl.md)",
+		// mixed case not wrapped
+		"Max_size stays": "Max_size stays",
+		// uppercase words with "_"
+		"set AIVEN_TOKEN first":                     "set `AIVEN_TOKEN` first",
+		"from PERFORMANCE_SCHEMA.EVENT_WAITS.":      "from `PERFORMANCE_SCHEMA.EVENT_WAITS`.",
+		"responds with 'UNSUPPORTED_VERSION' error": "responds with `UNSUPPORTED_VERSION` error",
+		"(Long.MAX_VALUE) and SO_RCVBUF-like":       "(Long.MAX_VALUE) and SO_RCVBUF-like",
+		"FOO_bar and aFOO_BAR":                      "FOO_bar and aFOO_BAR",
+		// uppercase words without "_" are mostly acronyms
+		"Run server_reset_query (DISCARD ALL) in the VPC": "Run `server_reset_query` (DISCARD ALL) in the VPC",
+		// an uppercase setting value stays in its code span
+		"use log_level=DEBUG_ALL here": "use `log_level=DEBUG_ALL` here",
+		// glued to other token characters
+		"a-b_c, path/to_file, my_user@host, $foo_bar, _italic_": "a-b_c, path/to_file, my_user@host, $foo_bar, _italic_",
+		// no underscore → not an identifier target
+		"no underscore here": "no underscore here",
+	}
+
+	for in, want := range cases {
+		assert.Equal(t, want, backtickIdentifiers(in), "input: %q", in)
+	}
+}
+
+func TestCutDeprecated(t *testing.T) {
+	cases := []struct {
+		name, description, title string
+		wantDescription, wantMsg string
+		wantOK                   bool
+	}{
+		{
+			name:            "title describes the field",
+			description:     "DEPRECATED: use index_patterns instead",
+			title:           "(DEPRECATED) Maximum index count",
+			wantDescription: "Maximum index count",
+			wantMsg:         "Use `index_patterns` instead.",
+			wantOK:          true,
+		},
+		{
+			name:            "without a title",
+			description:     "DEPRECATED: setting has no effect.",
+			wantDescription: "Setting has no effect.",
+			wantMsg:         "Setting has no effect.",
+			wantOK:          true,
+		},
+		{
+			name:            "not deprecated",
+			description:     "Maximum index count.",
+			title:           "Index count",
+			wantDescription: "Maximum index count.",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			description, msg, ok := cutDeprecated(tc.description, tc.title)
+			assert.Equal(t, tc.wantDescription, description)
+			assert.Equal(t, tc.wantMsg, msg)
+			assert.Equal(t, tc.wantOK, ok)
 		})
 	}
 }

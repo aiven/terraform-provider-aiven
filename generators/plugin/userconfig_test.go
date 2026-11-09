@@ -190,6 +190,11 @@ func TestAddUserConfigs(t *testing.T) {
 				"access_key": {Type: SchemaTypeString},
 				"api_key":    {Type: SchemaTypeString, SensitiveExt: true},
 				"tags":       {Type: SchemaTypeArray, Items: &OASchema{Type: SchemaTypeString}},
+				"region": {
+					Type:        SchemaTypeString,
+					Description: "DEPRECATED: use site",
+					Title:       "(DEPRECATED) The region of the Datadog account",
+				},
 			},
 		},
 		"IntegrationEndpointRsyslogUserConfig": {
@@ -241,6 +246,8 @@ func TestAddUserConfigs(t *testing.T) {
 	assert.Equal(t, SchemaTypeArrayOrdered, datadog.Properties["tags"].Type, "arrays are lists")
 	assert.False(t, datadog.Properties["access_key"].Sensitive, "only x-_secure is sensitive")
 	assert.True(t, datadog.Properties["api_key"].Sensitive)
+	assert.Equal(t, "The region of the Datadog account", datadog.Properties["region"].Description)
+	assert.Equal(t, "Use site.", datadog.Properties["region"].DeprecationMessage, "a longer title doesn't hide the deprecation")
 
 	rsyslog := root.Properties["rsyslog_user_config"]
 	require.NotNil(t, rsyslog)

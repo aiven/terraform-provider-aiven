@@ -71,7 +71,7 @@ resource "aiven_flink" "example_flink" {
 ### Optional
 
 - `entry_class` (String) The fully qualified name of the entry class to pass during Flink job submission through the entryClass parameter. Length must be between `1` and `128`. Changing this property forces recreation of the resource.
-- `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail. Value must be between `1` and `128`. Changing this property forces recreation of the resource.
+- `parallelism` (Number) Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x `number_of_task_slots`), or every new job created will fail. Value must be between `1` and `128`. Changing this property forces recreation of the resource.
 - `program_args` (Set of String) Arguments to pass during Flink job submission through the programArgsList parameter. Changing this property forces recreation of the resource.
 - `restart_enabled` (Boolean) Specifies whether a Flink Job is restarted in case it fails. Changing this property forces recreation of the resource.
 - `starting_savepoint` (String) Job savepoint. Length must be between `1` and `2048`. Changing this property forces recreation of the resource.

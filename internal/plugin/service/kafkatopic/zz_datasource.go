@@ -110,7 +110,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"message_downconversion_enable": schema.BoolAttribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. When set to false, broker will not perform down-conversion for consumers expecting an older message format. The broker responds with UNSUPPORTED_VERSION error for consume requests from such older clients. This configuration does not apply to any message format conversion that might be required for replication to followers.",
+						MarkdownDescription: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. When set to false, broker will not perform down-conversion for consumers expecting an older message format. The broker responds with `UNSUPPORTED_VERSION` error for consume requests from such older clients. This configuration does not apply to any message format conversion that might be required for replication to followers.",
 					},
 					"message_format_version": schema.StringAttribute{
 						Computed:            true,

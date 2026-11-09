@@ -33,7 +33,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"created_manually": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "True for tokens explicitly created via the access_tokens API, false for tokens created via login.",
+				MarkdownDescription: "True for tokens explicitly created via the `access_tokens` API, false for tokens created via login.",
 			},
 			"currently_active": schema.BoolAttribute{
 				Computed:            true,
@@ -52,7 +52,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"extend_when_used": schema.BoolAttribute{
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
-				MarkdownDescription: "Extend token expiration time when token is used. Only applicable if max_age_seconds is specified. The default value is `false`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Extend token expiration time when token is used. Only applicable if `max_age_seconds` is specified. The default value is `false`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
 			},
@@ -90,7 +90,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Human readable user agent string of the client that last used the token in case user agent is known.",
 			},
 			"max_age_seconds": schema.Int64Attribute{
-				MarkdownDescription: "Time the token remains valid since creation (or since last use if extend_when_used is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Time the token remains valid since creation (or since last use if `extend_when_used` is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
 				Validators:          []validator.Int64{int64validator.Between(600, 315360000)},

@@ -113,7 +113,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"auto_offset_reset_by_duration_ms": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - auto_offset_reset_by_duration_ms). This overrides auto_offset_reset when set. Requires ClickHouse >= 25.8. The default value is `0`.",
+								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= 25.8. The default value is `0`.",
 							},
 							"data_format": schema.StringAttribute{
 								Computed:            true,
@@ -129,7 +129,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"handle_error_mode": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to system.dead_letter_queue (requires ClickHouse 25.8+). The possible values are `dead_letter_queue`, `default` and `stream`. The default value is `default`.",
+								MarkdownDescription: "Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to `system.dead_letter_queue` (requires ClickHouse 25.8+). The possible values are `dead_letter_queue`, `default` and `stream`. The default value is `default`.",
 							},
 							"max_block_size": schema.Int64Attribute{
 								Computed:            true,
@@ -153,7 +153,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"poll_max_timeout_ms": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). The default value is `0`.",
+								MarkdownDescription: "Timeout in milliseconds for a single poll from Kafka. Takes the value of the `stream_flush_interval_ms` server setting by default (500ms). The default value is `0`.",
 							},
 							"producer_batch_num_messages": schema.Int64Attribute{
 								Computed:            true,
@@ -228,7 +228,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 									},
 									"local_disk_ttl_days": schema.Int64Attribute{
 										Computed:            true,
-										MarkdownDescription: "Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with ttl_column. Example: `7`.",
+										MarkdownDescription: "Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with `ttl_column`. Example: `7`.",
 									},
 									"order_by": schema.ListAttribute{
 										Computed:            true,
@@ -237,11 +237,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 									},
 									"ttl_column": schema.StringAttribute{
 										Computed:            true,
-										MarkdownDescription: "Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when ttl_days or local_disk_ttl_days is set. Example: `created_at`.",
+										MarkdownDescription: "Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when `ttl_days` or `local_disk_ttl_days` is set. Example: `created_at`.",
 									},
 									"ttl_days": schema.Int64Attribute{
 										Computed:            true,
-										MarkdownDescription: "Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with ttl_column. Example: `30`.",
+										MarkdownDescription: "Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with `ttl_column`. Example: `30`.",
 									},
 									"view_name": schema.StringAttribute{
 										Computed:            true,
@@ -286,7 +286,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"datadog_function_metrics_enabled": schema.BoolAttribute{
 							Computed:            true,
-							MarkdownDescription: "Enable collection of PL/pgSQL function metrics from pg_stat_user_functions. Requires `track_functions` to be set to `pl` or `all` in the service configuration.",
+							MarkdownDescription: "Enable collection of PL/pgSQL function metrics from `pg_stat_user_functions`. Requires `track_functions` to be set to `pl` or `all` in the service configuration.",
 						},
 						"datadog_pg_dbname": schema.StringAttribute{
 							Computed:            true,
@@ -393,7 +393,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Datadog Redis Options.",
 							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"command_stats_enabled": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Enable command_stats option in the agent's configuration. The default value is `false`.",
+								MarkdownDescription: "Enable `command_stats` option in the agent's configuration. The default value is `false`.",
 							}}},
 						},
 					},
@@ -411,7 +411,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later.",
 				NestedObject: schema.NestedBlockObject{Blocks: map[string]schema.Block{
 					"dropped_metrics": schema.ListNestedBlock{
-						MarkdownDescription: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics).",
+						MarkdownDescription: "Metrics to not send to AWS CloudWatch (takes precedence over `extra_metrics`).",
 						NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 							"field": schema.StringAttribute{
 								Computed:            true,
@@ -468,7 +468,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 						"config_storage_topic": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id. Example: `__connect_configs`.",
+							MarkdownDescription: "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same `group_id`. Example: `__connect_configs`.",
 						},
 						"group_id": schema.StringAttribute{
 							Computed:            true,
@@ -476,11 +476,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"offset_storage_topic": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id. Example: `__connect_offsets`.",
+							MarkdownDescription: "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same `group_id`. Example: `__connect_offsets`.",
 						},
 						"status_storage_topic": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id. Example: `__connect_status`.",
+							MarkdownDescription: "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same `group_id`. Example: `__connect_status`.",
 						},
 					}},
 				}}},
@@ -535,7 +535,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"consumer_receive_buffer_bytes": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The size of the TCP receive buffer (SO_RCVBUF) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default.",
+								MarkdownDescription: "The size of the TCP receive buffer (`SO_RCVBUF`) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default.",
 							},
 							"consumer_request_timeout_ms": schema.Int64Attribute{
 								Computed:            true,
@@ -567,7 +567,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"producer_send_buffer_bytes": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The size of the TCP send buffer (SO_SNDBUF) to use when sending data. Default is `131072` (128KiB). `-1` uses the OS default.",
+								MarkdownDescription: "The size of the TCP send buffer (`SO_SNDBUF`) to use when sending data. Default is `131072` (128KiB). `-1` uses the OS default.",
 							},
 						}},
 					}},
@@ -619,31 +619,31 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 								"gather_event_waits": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.",
 								},
 								"gather_file_events_stats": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
+									MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 								},
 								"gather_index_io_waits": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.",
 								},
 								"gather_info_schema_auto_inc": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather auto_increment columns and max values from information schema.",
+									MarkdownDescription: "Gather `auto_increment` columns and max values from information schema.",
 								},
 								"gather_innodb_metrics": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
+									MarkdownDescription: "Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.",
 								},
 								"gather_perf_events_statements": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST`.",
 								},
 								"gather_process_list": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
+									MarkdownDescription: "Gather thread state counts from `INFORMATION_SCHEMA.PROCESSLIST`.",
 								},
 								"gather_replica_status": schema.BoolAttribute{
 									Computed:            true,
@@ -655,27 +655,27 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								},
 								"gather_table_io_waits": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE`.",
 								},
 								"gather_table_lock_waits": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS`.",
 								},
 								"gather_table_schema": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
+									MarkdownDescription: "Gather metrics from `INFORMATION_SCHEMA.TABLES`.",
 								},
 								"perf_events_statements_digest_text_limit": schema.Int64Attribute{
 									Computed:            true,
-									MarkdownDescription: "Truncates digest text from perf_events_statements into this many characters. Example: `120`.",
+									MarkdownDescription: "Truncates digest text from `perf_events_statements` into this many characters. Example: `120`.",
 								},
 								"perf_events_statements_limit": schema.Int64Attribute{
 									Computed:            true,
-									MarkdownDescription: "Limits metrics from perf_events_statements. Example: `250`.",
+									MarkdownDescription: "Limits metrics from `perf_events_statements`. Example: `250`.",
 								},
 								"perf_events_statements_time_limit": schema.Int64Attribute{
 									Computed:            true,
-									MarkdownDescription: "Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.",
+									MarkdownDescription: "Only include `perf_events_statements` whose last seen is less than this many seconds. Example: `86400`.",
 								},
 							}},
 						}}},
@@ -691,31 +691,31 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 							"gather_event_waits": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.",
 							},
 							"gather_file_events_stats": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
+								MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 							},
 							"gather_index_io_waits": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.",
 							},
 							"gather_info_schema_auto_inc": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather auto_increment columns and max values from information schema.",
+								MarkdownDescription: "Gather `auto_increment` columns and max values from information schema.",
 							},
 							"gather_innodb_metrics": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
+								MarkdownDescription: "Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.",
 							},
 							"gather_perf_events_statements": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST`.",
 							},
 							"gather_process_list": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
+								MarkdownDescription: "Gather thread state counts from `INFORMATION_SCHEMA.PROCESSLIST`.",
 							},
 							"gather_replica_status": schema.BoolAttribute{
 								Computed:            true,
@@ -727,27 +727,27 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"gather_table_io_waits": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE`.",
 							},
 							"gather_table_lock_waits": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS`.",
 							},
 							"gather_table_schema": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
+								MarkdownDescription: "Gather metrics from `INFORMATION_SCHEMA.TABLES`.",
 							},
 							"perf_events_statements_digest_text_limit": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Truncates digest text from perf_events_statements into this many characters. Example: `120`.",
+								MarkdownDescription: "Truncates digest text from `perf_events_statements` into this many characters. Example: `120`.",
 							},
 							"perf_events_statements_limit": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Limits metrics from perf_events_statements. Example: `250`.",
+								MarkdownDescription: "Limits metrics from `perf_events_statements`. Example: `250`.",
 							},
 							"perf_events_statements_time_limit": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.",
+								MarkdownDescription: "Only include `perf_events_statements` whose last seen is less than this many seconds. Example: `86400`.",
 							},
 						}},
 					}}},
