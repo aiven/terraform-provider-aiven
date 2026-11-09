@@ -30,7 +30,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"authentication": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Service specific authentication details. Currently only used for MySQL where accepted options are 'mysql_native_password' and 'caching_sha2_password', latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.",
+				MarkdownDescription: "Service specific authentication details. Currently only used for MySQL where accepted options are `mysql_native_password` and `caching_sha2_password`, latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.",
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,

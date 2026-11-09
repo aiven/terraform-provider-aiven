@@ -95,8 +95,8 @@ Read-Only:
 - `file_size` (Number) The size of the file in bytes.
 - `file_status` (String) Indicates whether the uploaded .jar file has been verified by the system and deployment ready. The possible values are `FAILED`, `INITIAL` and `READY`.
 - `url` (String) The pre-signed url of the bucket where the .jar file is uploaded. Becomes null when the JarApplicationVersion is ready or failed.
-- `verify_error_code` (Number) In the case file_status is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.
-- `verify_error_message` (String) In the case file_status is FAILED, may contain details about the failure.
+- `verify_error_code` (Number) In the case `file_status` is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.
+- `verify_error_message` (String) In the case `file_status` is FAILED, may contain details about the failure.
 
 ## Import
 

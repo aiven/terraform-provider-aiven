@@ -65,7 +65,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"plugin_classes": schema.SetNestedAttribute{
 				Computed:            true,
-				MarkdownDescription: "Plugin classes discovered within this JAR after successful verification. Empty until file_status is READY.",
+				MarkdownDescription: "Plugin classes discovered within this JAR after successful verification. Empty until `file_status` is READY.",
 				NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
 					"author": schema.StringAttribute{
 						Computed:            true,
@@ -151,11 +151,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"verify_error_code": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "Machine-readable error code when file_status is FAILED.",
+				MarkdownDescription: "Machine-readable error code when `file_status` is FAILED.",
 			},
 			"verify_error_message": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Human-readable error message when file_status is FAILED.",
+				MarkdownDescription: "Human-readable error message when `file_status` is FAILED.",
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},

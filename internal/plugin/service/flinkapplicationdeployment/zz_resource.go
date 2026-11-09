@@ -54,7 +54,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"parallelism": schema.Int64Attribute{
 				Computed:            true,
 				Default:             int64default.StaticInt64(1),
-				MarkdownDescription: "Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail. Value must be between `1` and `128`. The default value is `1`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x `number_of_task_slots`), or every new job created will fail. Value must be between `1` and `128`. The default value is `1`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
 				Validators:          []validator.Int64{int64validator.Between(1, 128)},

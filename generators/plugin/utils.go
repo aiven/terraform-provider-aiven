@@ -123,15 +123,102 @@ func applyDescModifiers(s string) string {
 	return s
 }
 
+// reVerbatim matches what backtickIdentifiers keeps: code spans, URLs, Markdown link targets
+// and "${...}" placeholders, which it wraps whole.
+var reVerbatim = regexp.MustCompile("`[^`]*`" + `|https?://\S+|\]\([^)]*\)|\$\{[^}\s]*\}`)
+
+// reIdentifier matches a lowercase or uppercase word or dotted path,
+// e.g., "pg_stat_monitor.pgsm_max_buckets" or "PERFORMANCE_SCHEMA.EVENT_WAITS".
+var reIdentifier = regexp.MustCompile(`[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*|[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*)*`)
+
+// reSettingValue matches the value after an identifier, e.g., "=worker" of "io_method=worker".
+var reSettingValue = regexp.MustCompile(`^=[^\s,;)'"&]*`)
+
+// backtickIdentifiers wraps the lowercase and uppercase words with "_" in backticks, e.g., sas_token
+// and AIVEN_TOKEN, replacing the quotes around them.
+func backtickIdentifiers(s string) string {
+	var b strings.Builder
+	last := 0
+	for _, m := range reVerbatim.FindAllStringIndex(s, -1) {
+		b.WriteString(backtickProse(s[last:m[0]]))
+		if v := s[m[0]:m[1]]; strings.HasPrefix(v, "${") {
+			b.WriteString("`" + v + "`")
+		} else {
+			b.WriteString(v)
+		}
+		last = m[1]
+	}
+	b.WriteString(backtickProse(s[last:]))
+	return b.String()
+}
+
+func backtickProse(s string) string {
+	// Part of a longer token, e.g., "Max_size", "a-b_c", "path/to_file", "my_user@host" or "Long.MAX_VALUE"
+	glued := func(c byte, symbols string) bool {
+		return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' || strings.IndexByte(symbols, c) >= 0
+	}
+
+	var b strings.Builder
+	last := 0
+	for _, m := range reIdentifier.FindAllStringIndex(s, -1) {
+		start, end := m[0], m[1]
+		switch {
+		case start < last, // In the value of a setting
+			!strings.Contains(s[start:end], "_"),
+			start > 0 && glued(s[start-1], `_-/@.$\`),
+			end < len(s) && glued(s[end], `-/@\`):
+			continue
+		}
+
+		// A setting, e.g., "io_method=worker"
+		if v := reSettingValue.FindString(s[end:]); v != "" {
+			end += len(strings.TrimRight(v, "."))
+		}
+
+		before, after := start, end
+		for _, q := range []string{"'", `"`, "&quot;"} {
+			if strings.HasSuffix(s[:start], q) && strings.HasPrefix(s[end:], q) {
+				before, after = start-len(q), end+len(q)
+				break
+			}
+		}
+		// A JSON key or string value, e.g., {"key_name": "value_name"}
+		quoted := after > end
+		jsonKey := quoted && strings.HasPrefix(s[after:], ":")
+		jsonValue := quoted && s[before] != '\'' && strings.HasSuffix(strings.TrimRight(s[:before], " "), ":")
+		if jsonKey || jsonValue {
+			continue
+		}
+
+		b.WriteString(s[last:before])
+		b.WriteString("`" + s[start:end] + "`")
+		last = after
+	}
+	b.WriteString(s[last:])
+	return b.String()
+}
+
+// reJSONObject matches a JSON object without nested ones, e.g., {"key_name":"value"}.
+var reJSONObject = regexp.MustCompile(`\{\s*(?:"|&quot;)[^{}]*\}`)
+
 // normalizeDescription unwraps hard-wrapped lines into single spaces and runs
-// descModifiers over the result. When preserveParagraphs is true (root
-// entity descriptions), blank lines in the source are kept as Markdown
-// paragraph breaks; otherwise every newline collapses to a space so attribute
-// descriptions stay on one line (docs render them as list/table entries).
+// descModifiers and backtickIdentifiers over the result, except in JSON objects.
+// When preserveParagraphs is true (root entity descriptions), blank lines in the
+// source are kept as Markdown paragraph breaks; otherwise every newline collapses
+// to a space so attribute descriptions stay on one line (docs render them as
+// list/table entries).
 func normalizeDescription(s string, preserveParagraphs bool) string {
 	collapse := func(p string) string {
 		p = strings.TrimSpace(reNewline.ReplaceAllString(p, " "))
-		return applyDescModifiers(p)
+		var b strings.Builder
+		last := 0
+		for _, m := range reJSONObject.FindAllStringIndex(p, -1) {
+			b.WriteString(backtickIdentifiers(applyDescModifiers(p[last:m[0]])))
+			b.WriteString(p[m[0]:m[1]])
+			last = m[1]
+		}
+		b.WriteString(backtickIdentifiers(applyDescModifiers(p[last:])))
+		return b.String()
 	}
 
 	if !preserveParagraphs {
@@ -146,6 +233,24 @@ func normalizeDescription(s string, preserveParagraphs bool) string {
 		}
 	}
 	return strings.Join(out, "\n\n")
+}
+
+// cutDeprecated splits a description with the "DEPRECATED:" prefix, e.g., "DEPRECATED: use index_patterns instead",
+// into the title, which describes the field then, e.g., "(DEPRECATED) Maximum index count", and the deprecation message.
+func cutDeprecated(description, title string) (string, string, bool) {
+	msg, ok := strings.CutPrefix(description, "DEPRECATED:")
+	if !ok {
+		return description, "", false
+	}
+
+	msg = firstUpper(strings.TrimSpace(msg))
+	if !strings.HasSuffix(msg, ".") {
+		msg += "."
+	}
+	title = strings.TrimSpace(strings.TrimPrefix(title, "(DEPRECATED)"))
+
+	// The docs render the message as is
+	return or(title, msg), normalizeDescription(msg, false), true
 }
 
 // isValidRegex reports whether pattern is a non-empty regular expression

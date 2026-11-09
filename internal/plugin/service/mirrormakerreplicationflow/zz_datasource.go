@@ -25,7 +25,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"diskless_az_enabled": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "Adds a diskless_az= hint to the replication flow's Kafka client.id so that diskless Kafka clusters serve the flow from brokers in the same availability zone.",
+				MarkdownDescription: "Adds a `diskless_az=` hint to the replication flow's Kafka client.id so that diskless Kafka clusters serve the flow from brokers in the same availability zone.",
 			},
 			"emit_backward_heartbeats_enabled": schema.BoolAttribute{
 				Computed:            true,

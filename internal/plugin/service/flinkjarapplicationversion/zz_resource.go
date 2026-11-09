@@ -62,11 +62,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"verify_error_code": schema.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "In the case file_status is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.",
+						MarkdownDescription: "In the case `file_status` is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.",
 					},
 					"verify_error_message": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "In the case file_status is FAILED, may contain details about the failure.",
+						MarkdownDescription: "In the case `file_status` is FAILED, may contain details about the failure.",
 					},
 				}},
 			},

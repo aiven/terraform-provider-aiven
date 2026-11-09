@@ -53,16 +53,16 @@ resource "aiven_organization_application_user" "example" {
 ### Optional
 
 - `description` (String) Description. Maximum length: `1000`. Changing this property forces recreation of the resource.
-- `extend_when_used` (Boolean) Extend token expiration time when token is used. Only applicable if max_age_seconds is specified. The default value is `false`. Changing this property forces recreation of the resource.
+- `extend_when_used` (Boolean) Extend token expiration time when token is used. Only applicable if `max_age_seconds` is specified. The default value is `false`. Changing this property forces recreation of the resource.
 - `ip_allowlist` (Set of String) List of allowed IP ranges. Changing this property forces recreation of the resource.
-- `max_age_seconds` (Number) Time the token remains valid since creation (or since last use if extend_when_used is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.
+- `max_age_seconds` (Number) Time the token remains valid since creation (or since last use if `extend_when_used` is true). Value must be between `600` and `315360000`. Changing this property forces recreation of the resource.
 - `scopes` (Set of String) Scopes this token is restricted to if specified. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `create_time` (String) Create Time.
-- `created_manually` (Boolean) True for tokens explicitly created via the access_tokens API, false for tokens created via login.
+- `created_manually` (Boolean) True for tokens explicitly created via the `access_tokens` API, false for tokens created via login.
 - `currently_active` (Boolean) true if API request was made with this access token.
 - `expiry_time` (String) Timestamp when the access token will expire unless extended, if ever.
 - `full_token` (String, Sensitive) Full Token.

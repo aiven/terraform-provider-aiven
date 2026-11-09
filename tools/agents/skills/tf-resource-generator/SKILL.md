@@ -456,7 +456,7 @@ schema:
     alsoRequires: [other_field]
     default: value
     dropDefault: true              # Migration workaround, see tf-resource-migration. Drops the OpenAPI default
-    deprecationMessage: "..."
+    deprecationMessage: "..."      # Also set by a "DEPRECATED: ..." OpenAPI description, its title becomes the description
     ref: aiven_kafka.service_name  # Docs only, see Field References
 ```
 

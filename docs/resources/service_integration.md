@@ -133,15 +133,15 @@ Required:
 Optional:
 
 - `auto_offset_reset` (String) Determines where to start reading from Kafka when no offset is stored or the stored offset is out of range. `earliest` starts from the beginning, `latest` starts from the end. The possible values are `beginning`, `earliest`, `end`, `largest`, `latest` and `smallest`. The default value is `earliest`.
-- `auto_offset_reset_by_duration_ms` (Number) When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - auto_offset_reset_by_duration_ms). This overrides auto_offset_reset when set. Requires ClickHouse >= 25.8. Maximum value: `2147483647`. The default value is `0`.
+- `auto_offset_reset_by_duration_ms` (Number) When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= 25.8. Maximum value: `2147483647`. The default value is `0`.
 - `date_time_input_format` (String) Specifies how ClickHouse should parse DateTime values from text-based input formats. `basic` uses simple parsing, `best_effort` attempts more flexible parsing. The possible values are `basic`, `best_effort` and `best_effort_us`. The default value is `basic`.
-- `handle_error_mode` (String) Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to system.dead_letter_queue (requires ClickHouse 25.8+). The possible values are `dead_letter_queue`, `default` and `stream`. The default value is `default`.
+- `handle_error_mode` (String) Defines how ClickHouse should handle errors when processing Kafka messages. `default` stops on errors, `stream` continues processing and logs errors, `dead_letter_queue` saves error data to `system.dead_letter_queue` (requires ClickHouse 25.8+). The possible values are `dead_letter_queue`, `default` and `stream`. The default value is `default`.
 - `materialized_view` (Block List, Max: 1) Optional materialized view that persists data from the Kafka engine table into a MergeTree-family table. When specified, a ClickHouse materialized view is created that automatically reads from the Kafka table and inserts into a durable target table (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--materialized_view))
 - `max_block_size` (Number) Maximum number of rows to collect before flushing data between Kafka and ClickHouse. Maximum value: `1000000000`. The default value is `0`.
 - `max_rows_per_message` (Number) Maximum number of rows that can be processed from a single Kafka message for row-based formats. Useful for controlling memory usage. Value must be between `1` and `1000000000`. The default value is `1`.
 - `num_consumers` (Number) Number of Kafka consumers to run per table per replica. Increasing this can improve throughput but may increase resource usage. Value must be between `1` and `10`. The default value is `1`.
 - `poll_max_batch_size` (Number) Maximum number of messages to fetch in a single Kafka poll operation for reading. Maximum value: `1000000000`. The default value is `0`.
-- `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Maximum value: `30000`. The default value is `0`.
+- `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the `stream_flush_interval_ms` server setting by default (500ms). Maximum value: `30000`. The default value is `0`.
 - `producer_batch_num_messages` (Number) The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. Value must be between `1` and `1000000`. The default value is `10000`.
 - `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. Maximum value: `2147483647`. The default value is `1000000`.
 - `producer_compression_codec` (String) The compression codec to use when sending a batch of messages to Kafka. The possible values are `gzip`, `lz4`, `none`, `snappy` and `zstd`. The default value is `none`.
@@ -183,9 +183,9 @@ Optional:
 - `database_name` (String) The database to create the materialized view in. Must not be the Kafka integration database as it is not replicated and may be dropped. Length must be between `1` and `40`. The default value is `default`.
 - `engine` (String) The MergeTree-family engine for the materialized view's target table. The possible values are `AggregatingMergeTree`, `CollapsingMergeTree`, `MergeTree`, `ReplacingMergeTree`, `SummingMergeTree` and `VersionedCollapsingMergeTree`. The default value is `MergeTree`.
 - `engine_params` (List of String) Column names passed as engine arguments, e.g. the sign column for CollapsingMergeTree or the sign and version columns for VersionedCollapsingMergeTree.
-- `local_disk_ttl_days` (Number) Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with ttl_column. Value must be between `1` and `36500`. Example: `7`.
-- `ttl_column` (String) Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when ttl_days or local_disk_ttl_days is set. Length must be between `1` and `40`. Example: `created_at`.
-- `ttl_days` (Number) Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with ttl_column. Value must be between `1` and `36500`. Example: `30`.
+- `local_disk_ttl_days` (Number) Number of days after which data is moved from local disk to remote storage (tiered storage). Must be specified together with `ttl_column`. Value must be between `1` and `36500`. Example: `7`.
+- `ttl_column` (String) Date or DateTime column used for both row deletion TTL and local disk tiered storage TTL. Must be specified when `ttl_days` or `local_disk_ttl_days` is set. Length must be between `1` and `40`. Example: `created_at`.
+- `ttl_days` (Number) Number of days after which rows are deleted, calculated from the TTL column value. Must be specified together with `ttl_column`. Value must be between `1` and `36500`. Example: `30`.
 
 
 
@@ -213,7 +213,7 @@ Optional:
 Optional:
 
 - `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring.
-- `datadog_function_metrics_enabled` (Boolean) Enable collection of PL/pgSQL function metrics from pg_stat_user_functions. Requires `track_functions` to be set to `pl` or `all` in the service configuration.
+- `datadog_function_metrics_enabled` (Boolean) Enable collection of PL/pgSQL function metrics from `pg_stat_user_functions`. Requires `track_functions` to be set to `pl` or `all` in the service configuration.
 - `datadog_pg_dbname` (String) Database the Datadog PostgreSQL check connects to. Relation metrics are collected only from this database. The main service database is used when unset. Database Monitoring collects query statistics from every database regardless of this option. Maximum length: `63`. Must match pattern: `^[_A-Za-z0-9][-_A-Za-z0-9]{0,62}$`. Example: `defaultdb`.
 - `datadog_pg_relations` (Block List, Max: 32) Relations to collect PostgreSQL relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks. No relation metrics are collected when unset (see [below for nested schema](#nestedblock--datadog_user_config--datadog_pg_relations))
 - `datadog_pgbouncer_enabled` (Boolean) Enable Datadog PgBouncer Metric Tracking.
@@ -267,7 +267,7 @@ Optional:
 
 Optional:
 
-- `command_stats_enabled` (Boolean) Enable command_stats option in the agent's configuration. The default value is `false`.
+- `command_stats_enabled` (Boolean) Enable `command_stats` option in the agent's configuration. The default value is `false`.
 
 
 
@@ -284,7 +284,7 @@ Optional:
 
 Optional:
 
-- `dropped_metrics` (Block List, Max: 1024) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
+- `dropped_metrics` (Block List, Max: 1024) Metrics to not send to AWS CloudWatch (takes precedence over `extra_metrics`) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
 - `extra_metrics` (Block List, Max: 1024) Metrics to allow through to AWS CloudWatch (in addition to default metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
@@ -342,10 +342,10 @@ Optional:
 
 Optional:
 
-- `config_storage_topic` (String) The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id. Maximum length: `249`. Example: `__connect_configs`.
+- `config_storage_topic` (String) The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same `group_id`. Maximum length: `249`. Example: `__connect_configs`.
 - `group_id` (String) A unique string that identifies the Connect cluster group this worker belongs to. Maximum length: `249`. Example: `connect`.
-- `offset_storage_topic` (String) The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id. Maximum length: `249`. Example: `__connect_offsets`.
-- `status_storage_topic` (String) The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id. Maximum length: `249`. Example: `__connect_status`.
+- `offset_storage_topic` (String) The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same `group_id`. Maximum length: `249`. Example: `__connect_offsets`.
+- `status_storage_topic` (String) The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same `group_id`. Maximum length: `249`. Example: `__connect_status`.
 
 
 
@@ -380,7 +380,7 @@ Optional:
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Default is `1`. Value must be between `1` and `5242880`. Example: `1024`.
 - `consumer_max_partition_fetch_bytes` (Number) The maximum amount of data per partition the server will return. Default is `1048576` (1MiB). Maximum value: `104857600`.
 - `consumer_max_poll_records` (Number) Set consumer max.poll.records. Default is `500`. Value must be between `100` and `20000`.
-- `consumer_receive_buffer_bytes` (Number) The size of the TCP receive buffer (SO_RCVBUF) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default. Maximum value: `104857600`.
+- `consumer_receive_buffer_bytes` (Number) The size of the TCP receive buffer (`SO_RCVBUF`) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default. Maximum value: `104857600`.
 - `consumer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Default is `30000` (30s). Maximum value: `600000`.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Default is `16384` (16KiB). Maximum value: `5242880`.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Default is `33554432` (32MiB). Value must be between `5242880` and `134217728`.
@@ -388,7 +388,7 @@ Optional:
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Default is `0`. Maximum value: `5000`. Example: `100`.
 - `producer_max_request_size` (Number) The maximum request size in bytes. Default is `1048576` (1MiB). Maximum value: `268435456`.
 - `producer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Default is `30000` (30s). Maximum value: `600000`.
-- `producer_send_buffer_bytes` (Number) The size of the TCP send buffer (SO_SNDBUF) to use when sending data. Default is `131072` (128KiB). `-1` uses the OS default. Maximum value: `104857600`.
+- `producer_send_buffer_bytes` (Number) The size of the TCP send buffer (`SO_SNDBUF`) to use when sending data. Default is `131072` (128KiB). `-1` uses the OS default. Maximum value: `104857600`.
 
 
 
@@ -425,21 +425,21 @@ Optional:
 
 Optional:
 
-- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
-- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
-- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
-- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
-- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
-- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
-- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_event_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.
+- `gather_file_events_stats` (Boolean) gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
+- `gather_index_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.
+- `gather_info_schema_auto_inc` (Boolean) Gather `auto_increment` columns and max values from information schema.
+- `gather_innodb_metrics` (Boolean) Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.
+- `gather_perf_events_statements` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST`.
+- `gather_process_list` (Boolean) Gather thread state counts from `INFORMATION_SCHEMA.PROCESSLIST`.
 - `gather_replica_status` (Boolean) Gather metrics from SHOW REPLICA STATUS command output.
 - `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
-- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
-- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
-- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
-- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters. Value must be between `1` and `2048`. Example: `120`.
-- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements. Value must be between `1` and `4000`. Example: `250`.
-- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds. Value must be between `1` and `2592000`. Example: `86400`.
+- `gather_table_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE`.
+- `gather_table_lock_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS`.
+- `gather_table_schema` (Boolean) Gather metrics from `INFORMATION_SCHEMA.TABLES`.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from `perf_events_statements` into this many characters. Value must be between `1` and `2048`. Example: `120`.
+- `perf_events_statements_limit` (Number) Limits metrics from `perf_events_statements`. Value must be between `1` and `4000`. Example: `250`.
+- `perf_events_statements_time_limit` (Number) Only include `perf_events_statements` whose last seen is less than this many seconds. Value must be between `1` and `2592000`. Example: `86400`.
 
 
 
@@ -463,21 +463,21 @@ Optional:
 
 Optional:
 
-- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
-- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
-- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
-- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
-- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
-- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
-- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_event_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.
+- `gather_file_events_stats` (Boolean) gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
+- `gather_index_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.
+- `gather_info_schema_auto_inc` (Boolean) Gather `auto_increment` columns and max values from information schema.
+- `gather_innodb_metrics` (Boolean) Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.
+- `gather_perf_events_statements` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST`.
+- `gather_process_list` (Boolean) Gather thread state counts from `INFORMATION_SCHEMA.PROCESSLIST`.
 - `gather_replica_status` (Boolean) Gather metrics from SHOW REPLICA STATUS command output.
 - `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
-- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
-- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
-- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
-- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters. Value must be between `1` and `2048`. Example: `120`.
-- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements. Value must be between `1` and `4000`. Example: `250`.
-- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds. Value must be between `1` and `2592000`. Example: `86400`.
+- `gather_table_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE`.
+- `gather_table_lock_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS`.
+- `gather_table_schema` (Boolean) Gather metrics from `INFORMATION_SCHEMA.TABLES`.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from `perf_events_statements` into this many characters. Value must be between `1` and `2048`. Example: `120`.
+- `perf_events_statements_limit` (Number) Limits metrics from `perf_events_statements`. Value must be between `1` and `4000`. Example: `250`.
+- `perf_events_statements_time_limit` (Number) Only include `perf_events_statements` whose last seen is less than this many seconds. Value must be between `1` and `2592000`. Example: `86400`.
 
 
 

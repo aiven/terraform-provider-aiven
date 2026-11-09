@@ -45,7 +45,7 @@ data "aiven_mysql_user" "example" {
 
 - `access_cert` (String, Sensitive) Access certificate for TLS client authentication.
 - `access_key` (String, Sensitive) Access key for TLS client authentication.
-- `authentication` (String) Service specific authentication details. Currently only used for MySQL where accepted options are 'mysql_native_password' and 'caching_sha2_password', latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `authentication` (String) Service specific authentication details. Currently only used for MySQL where accepted options are `mysql_native_password` and `caching_sha2_password`, latter being default when this is not explicitly set. The possible values are `caching_sha2_password` and `mysql_native_password`.
 - `id` (String) Resource ID composed as: `project/service_name/username`.
 - `mysql_grants` (Set of String) MySQL grants for the service user.
 - `password` (String, Sensitive) The password of the service user (auto-generated if not provided). The field conflicts with `password_wo`.

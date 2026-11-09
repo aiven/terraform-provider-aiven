@@ -59,11 +59,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"verify_error_code": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "In the case file_status is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.",
+								MarkdownDescription: "In the case `file_status` is FAILED, the error code of the failure. The possible values are `1`, `2`, `3` and `4`.",
 							},
 							"verify_error_message": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "In the case file_status is FAILED, may contain details about the failure.",
+								MarkdownDescription: "In the case `file_status` is FAILED, may contain details about the failure.",
 							},
 						}},
 					},
@@ -121,7 +121,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"parallelism": schema.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.",
+						MarkdownDescription: "Reading of Flink parallel execution documentation is recommended before setting this value to other than 1. Please do not set this value higher than (total number of nodes x `number_of_task_slots`), or every new job created will fail.",
 					},
 					"program_args": schema.SetAttribute{
 						Computed:            true,
