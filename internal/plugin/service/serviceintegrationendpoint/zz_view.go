@@ -73,6 +73,11 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 		}
 	}
 	rsp, err := client.ServiceIntegrationEndpointGet(ctx, d.Get("project").(string), d.Get("endpoint_id").(string), common.IncludeSecrets())
+	err = adapter.MapError(err, adapter.ErrorRule{
+		As:       adapter.ErrNotFound,
+		Contains: "does not exist",
+		Status:   400,
+	})
 	if err != nil {
 		return err
 	}
@@ -93,7 +98,12 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	return client.ServiceIntegrationEndpointDelete(ctx, d.Get("project").(string), d.Get("endpoint_id").(string))
+	err := client.ServiceIntegrationEndpointDelete(ctx, d.Get("project").(string), d.Get("endpoint_id").(string))
+	return adapter.MapError(err, adapter.ErrorRule{
+		As:       adapter.ErrNotFound,
+		Contains: "does not exist",
+		Status:   400,
+	})
 }
 
 func datasourceConfigValidators(ctx context.Context, client avngen.Client) []datasource.ConfigValidator {

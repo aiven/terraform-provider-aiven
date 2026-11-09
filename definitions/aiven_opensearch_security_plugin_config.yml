@@ -14,7 +14,6 @@ resource:
     [contact Aiven support](https://aiven.io/support-services).
 datasource:
   description: Gets information about OpenSearch Security configuration for an Aiven for OpenSearch® service.
-clientHandler: opensearch
 identityFields: [project, service_name]
 legacyTimeouts: true
 requireServiceReady: [opensearch]

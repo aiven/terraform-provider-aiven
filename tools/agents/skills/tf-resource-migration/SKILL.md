@@ -71,13 +71,7 @@ grep -A 5 "client\." internal/sdkprovider/service/resource_name_data_source.go
 
 Then find corresponding OpenAPI operation IDs. See **tf-resource-generator** for OpenAPI search patterns.
 
-**Determine `clientHandler`**: The `clientHandler` YAML value is the Go package name under `github.com/aiven/go-client-codegen/handler/`. Find it by searching for the operation ID in the client source, at the version pinned in `go.mod`:
-```bash
-go mod download github.com/aiven/go-client-codegen   # no-op once built; ensures {{.Dir}} is populated
-grep -rl "OperationID: \"<OperationID>\"" "$(go list -m -f '{{.Dir}}' github.com/aiven/go-client-codegen)/handler/"
-```
-A local checkout of `go-client-codegen` next to this repo works as well, and is easier to read than the module cache.
-For example, `ServiceFlinkCreateApplication` lives in `handler/flinkapplication/`, so `clientHandler: flinkapplication`.
+The generator finds each operation's client package in the `config.yaml` of `go-client-codegen`, so definitions don't name it.
 
 ### 3. Map SDK Schema to YAML
 

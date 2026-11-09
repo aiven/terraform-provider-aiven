@@ -9,7 +9,6 @@ resource:
   modifyPlan: true
 datasource:
   description: Gets information about an Aiven for Apache Kafka® topic.
-clientHandler: kafkatopic
 identityFields: [project, service_name, topic_name]
 legacyTimeouts: true
 requireServiceReady: [kafka]

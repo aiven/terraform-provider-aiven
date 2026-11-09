@@ -3,7 +3,6 @@ resource:
   description: Creates and manages an organization address.
 datasource:
   description: Gets information about an organization address.
-clientHandler: organization
 identityFields: [organization_id, address_id]
 operations:
   - id: OrganizationAddressCreate

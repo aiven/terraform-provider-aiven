@@ -5,7 +5,6 @@ resource:
   description: Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service.
 datasource:
   description: Gets information about a connection pool in an Aiven for PostgreSQL® service.
-clientHandler: postgresql
 identityFields: [project, service_name, pool_name]
 legacyTimeouts: true
 requireServiceReady: [pg]

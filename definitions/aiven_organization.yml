@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
+# CRUD is hand-written, see the package.
+schemaOnly: true
 operations:
   - id: AccountCreate
     type: create

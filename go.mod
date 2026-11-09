@@ -26,6 +26,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.35.1
 	github.com/samber/lo v1.53.0
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stoewer/go-strcase v1.3.1
 	github.com/stretchr/testify v1.12.1
@@ -205,7 +206,6 @@ require (
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.1.0 // indirect
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
 	github.com/sashamelentyev/interfacebloat v1.1.0 // indirect
 	github.com/sashamelentyev/usestdlibvars v1.28.0 // indirect
 	github.com/securego/gosec/v2 v2.22.3 // indirect

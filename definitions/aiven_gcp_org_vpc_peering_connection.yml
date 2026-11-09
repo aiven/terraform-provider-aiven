@@ -20,7 +20,6 @@ resource:
   description: Creates and manages a Google Cloud VPC peering connection.
 datasource:
   description: The GCP VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.
-clientHandler: organizationvpc
 identityFields: [organization_id, organization_vpc_id, gcp_project_id, peer_vpc]
 legacyTimeouts: true
 flattenModifier: true

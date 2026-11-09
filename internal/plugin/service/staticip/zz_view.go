@@ -72,6 +72,11 @@ func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	_, err := client.StaticIPDelete(ctx, d.Get("project").(string), d.Get("static_ip_address_id").(string))
+	_, err := client.ProjectStaticIPDissociate(ctx, d.Get("project").(string), d.Get("static_ip_address_id").(string))
+	err = adapter.MapError(err, adapter.ErrorRule{As: nil})
+	if err != nil {
+		return err
+	}
+	_, err = client.StaticIPDelete(ctx, d.Get("project").(string), d.Get("static_ip_address_id").(string))
 	return err
 }

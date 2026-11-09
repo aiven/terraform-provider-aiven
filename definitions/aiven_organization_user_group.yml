@@ -3,7 +3,6 @@ resource:
   description: Creates and manages a [user group](https://aiven.io/docs/platform/howto/list-groups) in an organization.
 datasource:
   description: Gets information about an existing user group in an organization.
-clientHandler: usergroup
 identityFields: [organization_id, group_id]
 legacyTimeouts: true
 rename:

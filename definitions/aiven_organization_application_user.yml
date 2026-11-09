@@ -9,7 +9,6 @@ datasource:
   description: Gets information about an application user.
   disableExample: true
 identityFields: [organization_id, user_id]
-clientHandler: applicationuser
 operations:
   - id: ApplicationUserCreate
     type: create

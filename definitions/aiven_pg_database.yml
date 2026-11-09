@@ -8,7 +8,6 @@ resource:
   description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.
 datasource:
   description: Gets information about an Aiven for PostgreSQL® database.
-clientHandler: service
 identityFields: [project, service_name, database_name]
 legacyTimeouts: true
 requireServiceReady: [pg]

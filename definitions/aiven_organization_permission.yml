@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=.schema.yml
+# CRUD is hand-written, see the package.
+schemaOnly: true
 resource:
   description: |
     Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions)

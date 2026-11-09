@@ -26,7 +26,6 @@ resource:
 datasource:
   disableExample: true
   description: Gets information about an Aiven service integration.
-clientHandler: service
 identityFields: [project, integration_id]
 legacyTimeouts: true
 version: 1

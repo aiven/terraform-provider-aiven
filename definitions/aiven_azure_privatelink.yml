@@ -10,7 +10,6 @@ resource:
   description: Creates and manages an Azure Private Link for [selected Aiven services](https://aiven.io/docs/platform/howto/use-azure-privatelink) in a VPC.
 datasource:
   description: Gets information about an Azure Private Link connection for an Aiven service.
-clientHandler: privatelink
 identityFields: [project, service_name]
 legacyTimeouts: true
 operations:

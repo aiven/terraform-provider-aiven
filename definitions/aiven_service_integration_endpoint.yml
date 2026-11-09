@@ -13,7 +13,6 @@ resource:
 datasource:
   disableExample: true
   description: Gets information about an integration endpoint.
-clientHandler: service
 identityFields: [project, endpoint_id]
 legacyTimeouts: true
 version: 1
@@ -31,6 +30,8 @@ operations:
     type: read
     resultKey: service_integration_endpoint
     includeSecrets: true
+    # The API responds with 400 for a missing endpoint, not 404.
+    errors: [{status: 400, contains: does not exist, as: notFound}]
   - id: ServiceIntegrationEndpointList
     type: read
     datasourceLookup: true
@@ -43,6 +44,7 @@ operations:
     resultKey: service_integration_endpoint
   - id: ServiceIntegrationEndpointDelete
     type: delete
+    errors: [{status: 400, contains: does not exist, as: notFound}]
 schema:
   project:
     ref: aiven_organization_project.project_id

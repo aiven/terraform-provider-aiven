@@ -87,12 +87,41 @@ type Operation struct {
 	// IncludeSecrets sends include_secrets with common.IncludeSecrets.
 	IncludeSecrets bool `yaml:"includeSecrets"`
 
-	Request  *OASchema
-	Response *OASchema
+	Request  *OASchema `yaml:"-"`
+	Response *OASchema `yaml:"-"`
+
+	// Package is the go-client-codegen handler package of the operation, see setHandlerPackages.
+	Package string `yaml:"-"`
 
 	// Pagination follows the next page cursor and reads all pages, see resolvePagination.
 	Pagination *Pagination `yaml:"pagination"`
+
+	// Fn calls `func(ctx, client, d) error` from the resource package instead of an API operation.
+	Fn string `yaml:"fn"`
+
+	// Errors map the operation's errors, the first matching rule applies.
+	Errors []ErrorRule `yaml:"errors"`
 }
+
+// ErrorRule maps an operation error, see adapter.ErrorRule.
+type ErrorRule struct {
+	// Status matches the API status code, zero matches any.
+	Status int `yaml:"status"`
+	// Contains matches a substring of the API error message.
+	Contains string  `yaml:"contains"`
+	As       ErrorAs `yaml:"as"`
+}
+
+// ErrorAs is what a matched error becomes.
+type ErrorAs string
+
+const (
+	ErrorAsIgnore   ErrorAs = "ignore"
+	ErrorAsNotFound ErrorAs = "notFound"
+	ErrorAsPending  ErrorAs = "pending"
+)
+
+var errorAsValues = []ErrorAs{ErrorAsIgnore, ErrorAsNotFound, ErrorAsPending}
 
 type Pagination struct {
 	ItemsKey      string `yaml:"-"`             // The only response field besides NextField and the remove list, e.g. billing_groups
@@ -138,7 +167,7 @@ func (o Operations) AppearsInID(operationID OperationID, handler OperationType, 
 func (o Operations) handlerMask(handler OperationType, source AppearsIn) AppearsIn {
 	var mask AppearsIn
 	for _, op := range o {
-		if op.Type == handler {
+		if op.Type == handler && op.Fn == "" {
 			mask |= o.AppearsInID(op.ID, handler, source)
 		}
 	}
@@ -291,10 +320,11 @@ type Definition struct {
 	LegacyTimeouts         bool              `yaml:"legacyTimeouts,omitempty"`
 	Operations             Operations        `yaml:"operations"`
 	Version                *int              `yaml:"version"`
-	ClientHandler          string            `yaml:"clientHandler,omitempty"`
-	ReadModifier           bool              `yaml:"readModifier,omitempty"`
-	ExpandModifier         bool              `yaml:"expandModifier,omitempty"`
-	FlattenModifier        bool              `yaml:"flattenModifier,omitempty"`
+	// SchemaOnly generates the schema only: CRUD and provider registration are hand-written.
+	SchemaOnly      bool `yaml:"schemaOnly,omitempty"`
+	ReadModifier    bool `yaml:"readModifier,omitempty"`
+	ExpandModifier  bool `yaml:"expandModifier,omitempty"`
+	FlattenModifier bool `yaml:"flattenModifier,omitempty"`
 	// RequireServiceReady gates Create/Read/Update via schemautil.CheckServiceReady when non-empty.
 	// Its value lists the accepted service types (e.g. ["kafka"]). Requires `project` and `service_name`
 	// in the schema. Delete is not gated.

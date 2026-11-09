@@ -96,6 +96,16 @@ func exec() error {
 		return fmt.Errorf("no definitions found in %s", definitionsPath)
 	}
 
+	packages, err := readHandlerPackages()
+	if err != nil {
+		return err
+	}
+
+	err = setHandlerPackages(definitions, packages)
+	if err != nil {
+		return err
+	}
+
 	// Ref targets are generated first, so their examples are cached for the dependents.
 	ordered, err := resolveRefs(definitions)
 	if err != nil {
@@ -209,7 +219,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 			codes = append(codes, jen.Const().Id(typeName).Op("=").Lit(def.typeName))
 
 			// Generates views
-			if def.ClientHandler != "" {
+			if !def.SchemaOnly {
 				views, err := genViews(def, root)
 				if err != nil {
 					return fmt.Errorf("could not generate views: %w", err)
@@ -218,11 +228,7 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 				codes = append(codes, views...)
 			}
 
-			viewFile := newFile(
-				pkgName,
-				avnGenHandlerPackage+def.ClientHandler,
-				entity.Import(entityValidatorPkgFmt),
-			)
+			viewFile := newFile(pkgName, append(def.Operations.packages(), entity.Import(entityValidatorPkgFmt))...)
 			for _, v := range codes {
 				viewFile.Add(v).Line()
 			}
@@ -384,6 +390,9 @@ func createRootItem(scope *Scope) (*Item, error) {
 
 	// Initializes the map
 	for _, op := range pkg.Operations {
+		if op.Fn != "" {
+			continue
+		}
 		err := fromOperationID(scope, op, root)
 		if err != nil {
 			return nil, fmt.Errorf("operationID %s: %w", op.ID, err)
@@ -909,33 +918,9 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 			continue
 		}
 
-		data, err := os.ReadFile(filepath.Join(dir, name))
+		data, err := readDefinition(dir, name)
 		if err != nil {
-			return nil, fmt.Errorf("could not open definition file %q: %w", name, err)
-		}
-
-		// "include: .service_user.yml" puts the definition on top of the shared one, see mergeYAML
-		var doc map[string]any
-		if err := yaml.Unmarshal(data, &doc); err != nil {
-			return nil, fmt.Errorf("could not parse definition file %q: %w", name, err)
-		}
-		if include, ok := doc["include"].(string); ok {
-			delete(doc, "include")
-			baseData, err := os.ReadFile(filepath.Join(dir, include))
-			if err != nil {
-				return nil, fmt.Errorf("definition %q: could not open include %q: %w", name, include, err)
-			}
-			var base map[string]any
-			if err := yaml.Unmarshal(baseData, &base); err != nil {
-				return nil, fmt.Errorf("definition %q: could not parse include %q: %w", name, include, err)
-			}
-			if base == nil {
-				return nil, fmt.Errorf("definition %q: include %q must contain a YAML map", name, include)
-			}
-			data, err = yaml.Marshal(mergeYAML(base, doc))
-			if err != nil {
-				return nil, err
-			}
+			return nil, err
 		}
 
 		// Marshals yaml files with a little validation
@@ -948,6 +933,9 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 		}
 		def.fileName = name
 		def.typeName = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+		if err := validateSteps(def.Operations); err != nil {
+			return nil, fmt.Errorf("definition %q: %w", name, err)
+		}
 
 		// At most one datasourceLookup read op so DatasourceLookupOp stays a single-op getter.
 		var lookupOp *Operation
@@ -968,6 +956,36 @@ func listDefinitionFiles(dir string) ([]*Definition, error) {
 	}
 
 	return defs, nil
+}
+
+// readDefinition returns the definition with its include merged, see mergeYAML.
+func readDefinition(dir, name string) ([]byte, error) {
+	data, err := os.ReadFile(filepath.Join(dir, name))
+	if err != nil {
+		return nil, fmt.Errorf("could not open definition file %q: %w", name, err)
+	}
+
+	var doc map[string]any
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return nil, fmt.Errorf("could not parse definition file %q: %w", name, err)
+	}
+	include, ok := doc["include"].(string)
+	if !ok {
+		return data, nil
+	}
+	delete(doc, "include")
+	baseData, err := os.ReadFile(filepath.Join(dir, include))
+	if err != nil {
+		return nil, fmt.Errorf("definition %q: could not open include %q: %w", name, include, err)
+	}
+	var base map[string]any
+	if err := yaml.Unmarshal(baseData, &base); err != nil {
+		return nil, fmt.Errorf("definition %q: could not parse include %q: %w", name, include, err)
+	}
+	if base == nil {
+		return nil, fmt.Errorf("definition %q: include %q must contain a YAML map", name, include)
+	}
+	return yaml.Marshal(mergeYAML(base, doc))
 }
 
 // mergeYAML puts src on top of dst: maps are merged, lists appended, other values replaced, e.g.

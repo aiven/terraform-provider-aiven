@@ -33,7 +33,6 @@ datasource:
       required: true
     peer_vpc:
       required: true
-clientHandler: vpc
 identityFields: [project, project_vpc_id, gcp_project_id, peer_vpc]
 legacyTimeouts: true
 rename:

@@ -78,9 +78,6 @@ Always summarize what you're about to create before proceeding.
 # Find all YAML definitions
 ls definitions/aiven_*.yml
 
-# Find resources with similar client handlers
-grep -l "clientHandler: service" definitions/aiven_*.yml
-
 # Find resources with custom modifiers
 grep -l "expandModifier: true" definitions/aiven_*.yml
 
@@ -137,7 +134,6 @@ operations:
 resource:
   description: "..."
 identityFields: [field1, field2]
-clientHandler: project
 ```
 
 ### 5. Reference Fields
@@ -165,7 +161,7 @@ Common fields:
 - `operations` - Array of CRUD operations (id, type, resultKey, etc.)
 - `resource` / `datasource` - Configuration metadata
 - `identityFields` - Fields that compose the ID (e.g., `[project, service_name]`)
-- `clientHandler` - API client type: `project`, `service`, `organization`, `organizationbilling`, etc.
+- `schemaOnly` - Generate the schema only, CRUD is hand-written (e.g. `aiven_organization`)
 - `remove` - Fields to exclude from schema (exact paths or glob patterns)
 - `rename` - Field name mappings (API field -> Terraform field)
 - `schema` - Schema customizations (types, validation, behavior)
@@ -316,12 +312,21 @@ helper that mirrors the YAML enum. When adding a new service type, update both t
 
 ### Operations Configuration
 
-Each operation maps a Terraform action to an OpenAPI operation ID:
+Each operation is a step of the `<type>View`: an OpenAPI operation ID (`id`) or a Go function (`fn`).
+The steps of a type run in YAML order, and the first error stops the view.
 
 ```yaml
 operations:
+  - fn: requirePasswordChange       # Calls requirePasswordChange(ctx, client, d) error from the
+    type: update                    # package. Takes only type. Return adapter.ErrNoChanges to skip.
   - id: OperationIDFromOpenAPI
     type: create|read|update|delete
+    errors:                         # Maps the operation's errors, the first matching rule applies.
+      - status: 400                 # Optional: the API status code
+        contains: does not exist    # Optional: a substring of the API error message
+        as: notFound                # notFound | pending | ignore. `ignore` drops the error, only
+                                    # when the response isn't read. Without status and contains
+                                    # only ignore, which matches any error. Not with pagination.
     disableView: true               # Don't generate view function (for custom override)
     datasourceLookup: true          # Inline this read op as readView's id-empty branch on
                                     # the data source (requires resultListLookupKeys).
@@ -355,6 +360,11 @@ operations:
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
+
+Prefer a step over a handwritten view (see Custom View Overrides) when the generated call only needs
+something before or after it, or an error mapped. **Reference**: `definitions/aiven_static_ip.yml`
+(dissociate before delete), `aiven_clickhouse_user.yml` (`fn`) and
+`aiven_service_integration_endpoint.yml` (`errors`).
 
 ### User Configs
 
@@ -935,7 +945,6 @@ The data source uses the same `readView` directly — no separate `dataReadView`
 
 **YAML:**
 ```yaml
-clientHandler: flinkapplication
 identityFields: [project, service_name, application_id]
 rename:
   id: application_id

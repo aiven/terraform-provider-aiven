@@ -83,8 +83,12 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	err := requirePasswordChange(ctx, client, d)
+	if err != nil {
+		return err
+	}
 	req := new(clickhouse.ServiceClickHousePasswordResetIn)
-	err := d.Expand(req, expandModifier(ctx, client))
+	err = d.Expand(req, expandModifier(ctx, client))
 	if err != nil {
 		return err
 	}

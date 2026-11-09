@@ -5,7 +5,6 @@ resource:
 datasource:
   description: Gets information about a billing group.
 identityFields: [organization_id, billing_group_id]
-clientHandler: organizationbilling
 operations:
   - id: OrganizationBillingGroupCreate
     type: create

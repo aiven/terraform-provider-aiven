@@ -44,7 +44,6 @@ datasource:
     aws_vpc_region:
       required: true
 identityFields: [project, project_vpc_id, aws_account_id, aws_vpc_id, aws_vpc_region]
-clientHandler: vpc
 legacyTimeouts: true
 rename:
   peer_cloud_account: aws_account_id

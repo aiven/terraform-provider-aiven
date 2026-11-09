@@ -20,7 +20,6 @@ resource:
   description: Creates and manages an AWS VPC peering connection with an Aiven Organization VPC.
 datasource:
   description: Gets information about an AWS VPC peering connection.
-clientHandler: organizationvpc
 identityFields: [organization_id, organization_vpc_id, aws_account_id, aws_vpc_id, aws_vpc_region]
 legacyTimeouts: true
 flattenModifier: true

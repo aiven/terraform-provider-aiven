@@ -2,7 +2,6 @@
 limitedAvailability: true
 resource:
   description: Creates and manages an Aiven Upgrade Pipeline step between source and destination services.
-clientHandler: upgradepipeline
 identityFields: [organization_id, step_id]
 operations:
   - id: UpgradePipelineStepCreate

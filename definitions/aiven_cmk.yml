@@ -5,7 +5,6 @@ resource:
     Creates and manages [customer managed keys](https://aiven.io/docs/platform/howto/bring-your-own-key) (CMKs) for encrypting service data.
     Use your own CMKs from your cloud provider's key management service (KMS) to encrypt data for all services in an Aiven project. This gives you complete control over your encryption keys,
     meaning you can independently manage the key lifecycle and access policies.
-clientHandler: cmk
 identityFields: [project, cmk_id]
 operations:
   - id: CMKCreate

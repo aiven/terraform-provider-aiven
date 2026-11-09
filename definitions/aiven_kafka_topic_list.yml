@@ -4,7 +4,6 @@ datasource:
     Lists Kafka topics for a service.
 requireServiceReady: [kafka]
 identityFields: [project, service_name]
-clientHandler: kafkatopic
 operations:
   - id: ServiceKafkaTopicList
     type: read

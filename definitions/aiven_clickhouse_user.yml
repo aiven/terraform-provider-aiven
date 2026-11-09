@@ -5,7 +5,6 @@ resource:
   description: Creates and manages an Aiven for ClickHouse user.
 datasource:
   description: Gets information about an Aiven for ClickHouse user.
-clientHandler: clickhouse
 identityFields: [project, service_name, uuid]
 legacyTimeouts: true
 requireServiceReady: [clickhouse]
@@ -17,6 +16,8 @@ operations:
     resultKey: user
   - id: ServiceClickHouseUserDelete
     type: delete
+  - fn: requirePasswordChange
+    type: update
   - id: ServiceClickHousePasswordReset
     type: update
     resultToKey: password

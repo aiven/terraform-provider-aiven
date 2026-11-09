@@ -12,7 +12,6 @@ resource:
     is active before permissions are granted.
   refreshState: true
   removeMissing: true
-clientHandler: byoc
 identityFields: [organization_id, custom_cloud_environment_id]
 operations:
   - id: CustomCloudEnvironmentPermissionsSet

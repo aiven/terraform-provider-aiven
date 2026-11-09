@@ -154,6 +154,7 @@ properties:
           `modifyPlan` may also write plan values, and `d.RequiresReplace(name)` marks the
           attributes whose computed value forces a replacement.
           https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#resource-plan-modification
+    additionalProperties: false
     dependentRequired:
       alreadyExists: [refreshState]
     allOf:
@@ -209,6 +210,7 @@ properties:
           `datasourcevalidator.ExactlyOneOf(...)` in datasourceConfigValidators
           and drives the example LOOKUP hint. Supersedes the legacy
           lookup-contract validator when set.
+    additionalProperties: false
     $comment: |
       Documentation and configuration specific to this datasource.
       Use this to provide clear descriptions for your datasource in the Terraform registry.
@@ -257,21 +259,24 @@ properties:
     items:
       $ref: '#/definitions/Operation'
   rename:
-    $ref: '#/definitions/Rename'
+    type: object
+    additionalProperties:
+      type: string
     $comment: |
       List of attributes to rename in the resource/datasource.
       Example: rename: {"old_openapi_name": "new_terraform_name"}
   schema:
-    $ref: '#/definitions/Schema'
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/Schema'
     $comment: |
       Configuration for the resource/datasource schema.
       Use this to override the schema from the OpenAPI spec or add new fields.
 
-  clientHandler:
-    type: string
+  schemaOnly:
+    type: boolean
     $comment: |
-      The name of the client package to use for this resource/datasource.
-      Example: clientHandler: "organization"
+      Set to true to generate the schema only. CRUD and the provider registration are hand-written.
   readModifier:
     type: boolean
     $comment: |
@@ -324,7 +329,8 @@ definitions:
   Operation:
     type: object
     $comment: |
-      Aiven OperationID and CRUD operation pairs.
+      A step of the view of its type: an API operation (id) or a Go function (fn).
+      The steps of a type run in order, the first error stops the view.
     properties:
       id:
         type: string
@@ -333,6 +339,39 @@ definitions:
         type: string
         enum: ["create", "read", "update", "delete"]
         $comment: The type of operation (create, read, etc.)
+      fn:
+        type: string
+        $comment: |
+          Calls `fn(ctx, client, d) error` from the resource package instead of an API operation.
+          Takes only `type`.
+      errors:
+        type: array
+        $comment: Maps the operation's errors, the first matching rule applies.
+        items:
+          type: object
+          properties:
+            status:
+              type: integer
+              $comment: The API status code, omit to match any.
+            contains:
+              type: string
+              $comment: A substring of the API error message.
+            as:
+              enum: [ignore, notFound, pending]
+              $comment: |
+                `ignore` drops the error, only when the response isn't read. The others require status or contains.
+                `notFound` is a missing resource, `pending` retries the post-Create/Update Read.
+          required: [as]
+          additionalProperties: false
+          if:
+            properties:
+              as:
+                not:
+                  const: ignore
+          then:
+            anyOf:
+              - required: [status]
+              - required: [contains]
       disableView:
         type: boolean
         $comment: Set to true to disable view generation for this specific operation
@@ -344,8 +383,6 @@ definitions:
           composedOf lookup attributes, driving the data source's validators, schema
           flags, example hint and the id-empty branch inlined into the data source's
           readView.
-        dependencies:
-          - resultListLookupKeys
       resultIDField:
         type: string
         $comment: |
@@ -354,9 +391,6 @@ definitions:
           generator emits `d.Set(id, match.<resultIDField>)` and lets control fall through
           to the canonical read body in the same readView. Use this when the lookup
           endpoint returns a different shape than the canonical read endpoint.
-        dependencies:
-          - datasourceLookup
-          - resultListLookupKeys
       resultKey:
         type: string
         $comment: |
@@ -422,17 +456,14 @@ definitions:
           pageSize: [pageSizeParam]
         additionalProperties: false
     required:
-      - id
       - type
+    oneOf:
+      - required: [id]
+      - required: [fn]
+    dependentRequired:
+      datasourceLookup: [resultListLookupKeys]
+      resultIDField: [datasourceLookup, resultListLookupKeys]
     additionalProperties: false
-
-  Rename:
-    type: object
-    $comment: Configuration for renaming OpenAPI schema attributes
-    properties:
-      rename:
-        type: string
-        $comment: New name for the attribute
 
   Schema:
     type: object
@@ -453,7 +484,6 @@ definitions:
           Computed-only "*_id", "uuid", "created_at", "created_by" and "create_time" root attributes get
           this automatically. Set it to false to opt them out.
       default:
-        type: any
         $comment: Default value for this attribute
       dropDefault:
         type: boolean
@@ -474,7 +504,6 @@ definitions:
           Updated description for the attribute.
           Example: "The size of the instance in GB"
       example:
-        type: any
         $comment: |
           Example value rendered into the generated example .tf files (and surfaced
           in the docs). The literal type should match the attribute's `type` (string
@@ -500,13 +529,9 @@ definitions:
         $comment: Additional properties for object types
       enum:
         type: array
-        items:
-          type: any
         $comment: List of allowed values for this attribute, replaces the OpenAPI enum
       enumExclude:
         type: array
-        items:
-          type: any
         $comment: Values removed from the OpenAPI enum, e.g., the internal types. Each must be in the enum
       forceNew:
         type: boolean
@@ -548,9 +573,6 @@ definitions:
           8-4-4-4-12 hex form).
           Guessed when unset: `uuid` for fields named `uuid`, `cidr` for fields named `*cidr*`,
           `ipv4-cidr` when such a field also has `maxLength: 18`.
-      nullable:
-        type: boolean
-        $comment: Set to true if this attribute can be null. It can't be both nullable and optional.
       optional:
         type: boolean
         $comment: Set to true if this attribute is optional

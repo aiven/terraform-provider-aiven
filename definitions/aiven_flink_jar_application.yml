@@ -8,7 +8,6 @@ resource:
     Creates and manages an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application).
     Requires the `aiven_flink` service to have `flink_user_config.custom_code` enabled, which allows uploading and
     deploying custom JARs.
-clientHandler: flinkjarapplication
 identityFields: [project, service_name, application_id]
 legacyTimeouts: true
 requireServiceReady: [flink]

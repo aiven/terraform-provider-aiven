@@ -8,7 +8,6 @@ resource:
   stateAttribute: state
   refreshState:
     desired: [created]
-clientHandler: staticip
 identityFields: [project, static_ip_address_id]
 legacyTimeouts: true
 operations:
@@ -16,6 +15,10 @@ operations:
     type: create
   - id: ProjectStaticIPPatch
     type: update
+  # Dissociates the IP first. It's deleted regardless, so the errors are ignored.
+  - id: ProjectStaticIPDissociate
+    type: delete
+    errors: [{as: ignore}]
   - id: StaticIPDelete
     type: delete
   - id: StaticIPList

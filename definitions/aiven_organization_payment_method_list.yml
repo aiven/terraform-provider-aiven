@@ -6,4 +6,3 @@ operations:
   - id: PaymentMethodsList
     type: read
     resultToKey: payment_methods
-clientHandler: organization

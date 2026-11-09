@@ -20,7 +20,6 @@ operations:
     resultKey: members
     resultListLookupKeys:
       UserId: user_id
-clientHandler: usergroup
 rename:
   user_group_id: group_id
 remove: [members, operation, member_ids, user_info] # user_info — is a computed block, which is not supported by the Plugin Framework

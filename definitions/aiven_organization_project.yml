@@ -5,7 +5,6 @@ resource:
   description: Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 datasource:
   description: Gets information about an Aiven project.
-clientHandler: organizationprojects
 expandModifier: true
 flattenModifier: true
 operations:

@@ -4,7 +4,6 @@ resource:
   removeMissing: true
   disableExample: true
   description: Creates and manages the deployment of an Aiven for Apache Flink® application.
-clientHandler: flinkapplicationdeployment
 identityFields: [project, service_name, application_id, deployment_id]
 legacyTimeouts: true
 requireServiceReady: [flink]

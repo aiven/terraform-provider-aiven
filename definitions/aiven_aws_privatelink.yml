@@ -7,7 +7,6 @@ resource:
   description: Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC.
 datasource:
   description: Gets information about an AWS PrivateLink connection for an Aiven service.
-clientHandler: privatelink
 identityFields: [project, service_name]
 legacyTimeouts: true
 operations:

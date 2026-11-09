@@ -6,7 +6,6 @@ datasource:
 identityFields: [project, service_type]
 remove:
   - service_plans/backup_config
-clientHandler: project
 operations:
   - id: ProjectServicePlanList
     type: read

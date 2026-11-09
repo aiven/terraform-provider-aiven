@@ -393,8 +393,9 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 	// The function block
 	var errs []error
 	view.BlockFunc(func(g *jen.Group) {
+		state := new(viewState)
 		if operation == OperationRead {
-			emitReadModifier(g, def)
+			emitReadModifier(g, def, state)
 		}
 
 		if lookupOp != nil {
@@ -402,7 +403,7 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 			g.If(
 				jen.Id("d").Dot("Get").Call(jen.Lit(def.DatasourceLookupID())).Op(".").Parens(jen.String()).Op("==").Lit(""),
 			).BlockFunc(func(g *jen.Group) {
-				lookupErr = genGenericViewOperation(g, 0, 1, def, item, lookupOp)
+				lookupErr = genGenericViewOperation(g, 0, 1, def, item, lookupOp, new(viewState))
 			})
 			if lookupErr != nil {
 				errs = append(errs, fmt.Errorf("%s view error: %w", lookupOp.ID, lookupErr))
@@ -410,7 +411,7 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 		}
 
 		for i, op := range operations {
-			err := genGenericViewOperation(g, i, len(operations), def, item, op)
+			err := genGenericViewOperation(g, i, len(operations), def, item, op, state)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s view error: %w", op.ID, err))
 			}
@@ -422,11 +423,11 @@ func genGenericView(def *Definition, item *Item, operation OperationType) (jen.C
 
 // emitReadModifier prepends the readModifier call to a Read-style view body.
 // No-op when the definition does not opt in via readModifier: true.
-func emitReadModifier(g *jen.Group, def *Definition) {
+func emitReadModifier(g *jen.Group, def *Definition, state *viewState) {
 	if !def.ReadModifier {
 		return
 	}
-	g.Err().Op(":=").Id(readModifier).Call(
+	g.Err().Op(state.errOp()).Id(readModifier).Call(
 		jen.Id("ctx"),
 		jen.Id("client"),
 		jen.Id("d"),
@@ -434,9 +435,55 @@ func emitReadModifier(g *jen.Group, def *Definition) {
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 }
 
-func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Definition, item *Item, operation *Operation) error {
+// viewState tracks the variables a view has declared.
+type viewState struct {
+	errDeclared bool
+	requests    int
+	responses   int
+}
+
+// errOp returns ":=" for the first assignment of err in the view, then "=".
+func (s *viewState) errOp() string {
+	if s.errDeclared {
+		return "="
+	}
+	s.errDeclared = true
+	return ":="
+}
+
+// reqName returns a new request variable: req, req2, ...
+func (s *viewState) reqName() string {
+	s.requests++
+	if s.requests == 1 {
+		return "req"
+	}
+	return fmt.Sprintf("req%d", s.requests)
+}
+
+// rspName returns a new response variable: rsp, rsp2, ...
+func (s *viewState) rspName() string {
+	s.responses++
+	if s.responses == 1 {
+		return "rsp"
+	}
+	return fmt.Sprintf("rsp%d", s.responses)
+}
+
+func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Definition, item *Item, operation *Operation, state *viewState) error {
 	if operation.DatasourceLookup && len(operation.ResultListLookupKeys) == 0 {
 		return fmt.Errorf("datasourceLookup operation %q must declare resultListLookupKeys for filtering", operation.ID)
+	}
+
+	last := funcIndex == funcCount-1
+	if operation.Fn != "" {
+		call := jen.Id(operation.Fn).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
+		if last {
+			g.Return(call)
+			return nil
+		}
+		g.Err().Op(state.errOp()).Add(call)
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+		return nil
 	}
 
 	inRequest := def.Operations.AppearsInID(operation.ID, operation.Type, RequestBody)
@@ -454,12 +501,12 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	hasResponse := len(filterAppearsIn(properties, inResponse)) > 0 || (operation.ResultIDField != "" && operation.Response != nil)
 
 	// Generates the code that converts the TF model into the Client request struct
+	reqName := ""
 	if hasRequest {
-		// Creates the request var
-		pkgName := avnGenHandlerPackage + def.ClientHandler
-		g.Id("req").Op(":=").New(jen.Qual(pkgName, string(operation.ID)+"In"))
-		g.Err().Op(":=").Id("d").Dot("Expand").CallFunc(func(g *jen.Group) {
-			g.Id("req")
+		reqName = state.reqName()
+		g.Id(reqName).Op(":=").New(jen.Qual(operation.Package, string(operation.ID)+"In"))
+		g.Err().Op(state.errOp()).Id("d").Dot("Expand").CallFunc(func(g *jen.Group) {
+			g.Id(reqName)
 			if def.ExpandModifier {
 				g.Id(expandModifier).Call(jen.Id("ctx"), jen.Id("client"))
 			}
@@ -473,8 +520,18 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 	}
 
+	discardResponse := !hasResponse || operation.Type == OperationDelete
+	if !discardResponse && slices.ContainsFunc(operation.Errors, func(r ErrorRule) bool { return r.As == ErrorAsIgnore }) {
+		return errors.New("errors.as ignore can't be used when the response is read")
+	}
+
 	// If this is the last function without response, just return the error
-	mustReturnResult := funcIndex == funcCount-1 && !hasResponse
+	mustReturnResult := last && !hasResponse && len(operation.Errors) == 0
+
+	rspName := ""
+	if !discardResponse || operation.Pagination != nil {
+		rspName = state.rspName()
+	}
 
 	// Generates the Client request block
 	// If there is a response for Delete operation, then renders "_, err :="
@@ -483,22 +540,13 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	switch {
 	case mustReturnResult:
 		clientCall = jen.Return()
-	case funcIndex == 0:
-		clientCall = jen.Err().Op(":=")
-	default:
-		clientCall = jen.Err().Op("=")
-	}
-
-	rspName := "rsp"
-	if funcIndex > 0 {
-		rspName = fmt.Sprintf("rsp%d", funcIndex+1)
-	}
-
-	switch {
-	case operation.Type == OperationDelete && hasResponse:
-		clientCall = jen.List(jen.Id("_"), jen.Err()).Op(":=")
+	case hasResponse && operation.Type == OperationDelete:
+		clientCall = jen.List(jen.Id("_"), jen.Err()).Op(state.errOp())
 	case hasResponse:
+		state.errDeclared = true
 		clientCall = jen.List(jen.Id(rspName), jen.Err()).Op(":=")
+	default:
+		clientCall = jen.Err().Op(state.errOp())
 	}
 
 	idFields := pathFields(def, item, operation)
@@ -517,7 +565,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			params.Id("d").Dot(method).Call(jen.Lit(v.Name)).Op(".").Parens(jen.Id(v.GoType()))
 		}
 		if hasRequest {
-			params.Id("req")
+			params.Id(reqName)
 		}
 	}
 	flatten := func(rsp jen.Code) jen.Code {
@@ -537,7 +585,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			}
 		})
 
-		if funcCount == 1 || funcIndex == funcCount-1 {
+		if last {
 			v = jen.Return(v)
 		} else {
 			v = jen.Err().Op("=").Add(v).
@@ -578,10 +626,11 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 	if pg := operation.Pagination; pg != nil {
 		fetch := jen.Id(pageViewName).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
 		if len(operation.ResultListLookupKeys) == 0 {
-			itemsVar := rspName + "Items"
-			if funcIndex == 0 {
-				itemsVar = "items"
+			itemsVar := "items"
+			if rspName != "rsp" {
+				itemsVar = rspName + "Items"
 			}
+			state.errDeclared = true
 			g.List(jen.Id(itemsVar), jen.Err()).Op(":=").Qual(adapterPackage, "Paginate").Call(fetch)
 			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 			g.Add(flatten(jen.Op("&").Map(jen.String()).Any().Values(jen.Dict{jen.Lit(pg.ItemsKey): jen.Id(itemsVar)})))
@@ -589,6 +638,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		}
 
 		found := jen.Id(pageMatchName).Call(jen.Id("d"))
+		state.errDeclared = true
 		g.List(jen.Id(matchName), jen.Err()).Op(":=").Qual(adapterPackage, "PaginateFind").Call(fetch, found)
 		flattenMatch()
 		return nil
@@ -611,12 +661,21 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		return nil
 	}
 
-	if !hasResponse || operation.Type == OperationDelete {
-		g.Return().Err()
+	if discardResponse {
+		switch {
+		case last && len(operation.Errors) > 0:
+			g.Return(genMapError(operation.Errors))
+		case last:
+			g.Return().Err()
+		default:
+			emitMapError(g, operation)
+			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
+		}
 		return nil
 	}
 
 	// Reads the response from the previous call
+	emitMapError(g, operation)
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
 
 	// rspCode is the response expression, optionally traversed by
@@ -654,6 +713,13 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		})
 	flattenMatch()
 	return nil
+}
+
+// emitMapError maps err with the operation's error rules.
+func emitMapError(g *jen.Group, operation *Operation) {
+	if len(operation.Errors) > 0 {
+		g.Err().Op("=").Add(genMapError(operation.Errors))
+	}
 }
 
 // pathFields returns the operation's path parameters in the client's argument order.
@@ -738,7 +804,7 @@ func genPageMatch(def *Definition, item *Item, operation *Operation) (jen.Code, 
 		return nil, err
 	}
 	predicate := func() *jen.Statement {
-		return jen.Func().Params(jen.Id("item").Add(pageItemType(def, operation.Pagination))).Bool()
+		return jen.Func().Params(jen.Id("item").Add(pageItemType(operation))).Bool()
 	}
 	return jen.Func().Id(pageMatchName).
 		Params(jen.Id("d").Qual(adapterPackage, resourceData)).
@@ -747,8 +813,8 @@ func genPageMatch(def *Definition, item *Item, operation *Operation) (jen.Code, 
 }
 
 // pageItemType is the client's list item type, which trims "s", e.g. BillingGroups -> BillingGroupOut.
-func pageItemType(def *Definition, pg *Pagination) *jen.Statement {
-	return jen.Qual(avnGenHandlerPackage+def.ClientHandler, strings.TrimSuffix(pascalCase(pg.ItemsKey), "s")+"Out")
+func pageItemType(operation *Operation) *jen.Statement {
+	return jen.Qual(operation.Package, strings.TrimSuffix(pascalCase(operation.Pagination.ItemsKey), "s")+"Out")
 }
 
 // genPageView renders the pageView function:
@@ -761,7 +827,7 @@ func genPageView(def *Definition, item *Item, operation *Operation) jen.Code {
 			params.Id("d").Dot("Get").Call(jen.Lit(v.Name)).Op(".").Parens(jen.Id(v.GoType()))
 		}
 	}
-	fetch, itemType := genPageFetch(def, operation, positionalArgs)
+	fetch, itemType := genPageFetch(operation, positionalArgs)
 	return jen.Func().Id(pageViewName).
 		Params(
 			jen.Id("ctx").Qual("context", "Context"),
@@ -773,7 +839,7 @@ func genPageView(def *Definition, item *Item, operation *Operation) jen.Code {
 }
 
 // genPageFetch renders the adapter.Paginate fetch function and the client's list item type.
-func genPageFetch(def *Definition, operation *Operation, positionalArgs func(*jen.Group)) (fetch, itemType *jen.Statement) {
+func genPageFetch(operation *Operation, positionalArgs func(*jen.Group)) (fetch, itemType *jen.Statement) {
 	pg := operation.Pagination
 	query := jen.Qual(adapterPackage, "QueryParams").CallFunc(func(params *jen.Group) {
 		if pg.PageSizeParam != "" {
@@ -791,7 +857,7 @@ func genPageFetch(def *Definition, operation *Operation, positionalArgs func(*je
 		query = jen.Append(query, jen.Qual(commonPackage, "IncludeSecrets").Call())
 	}
 
-	itemType = pageItemType(def, pg)
+	itemType = pageItemType(operation)
 	fetch = jen.Func().Params(jen.Id("cursor").String()).Params(jen.Index().Add(itemType.Clone()), jen.Op("*").String(), jen.Error()).Block(
 		jen.List(jen.Id("rsp"), jen.Err()).Op(":=").Id("client").Dot(string(operation.ID)).CallFunc(func(params *jen.Group) {
 			positionalArgs(params)

@@ -5,7 +5,6 @@ datasource:
   description: >
     Gets detailed information about a specific service plan, including specifications and pricing for a cloud region.
 identityFields: [project, service_type, service_plan, cloud_name]
-clientHandler: project
 operations:
   - id: ProjectServicePlanPriceGet
     type: read

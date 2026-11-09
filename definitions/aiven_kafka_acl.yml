@@ -8,7 +8,6 @@ resource:
     Aiven ACLs provide simplified topic-level control with basic permissions and wildcard support. For more advanced access control, you can use [Kafka-native ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_native_acl).
 datasource:
   description: Gets information about an ACL entry for an Aiven for Apache Kafka® service.
-clientHandler: kafka
 identityFields: [project, service_name, acl_id]
 legacyTimeouts: true
 requireServiceReady: [kafka]

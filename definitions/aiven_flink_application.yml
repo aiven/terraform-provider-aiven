@@ -6,7 +6,6 @@ resource:
     Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).
 datasource:
   description: Gets information about an Aiven for Apache Flink® application.
-clientHandler: flinkapplication
 identityFields: [project, service_name, application_id]
 legacyTimeouts: true
 requireServiceReady: [flink]

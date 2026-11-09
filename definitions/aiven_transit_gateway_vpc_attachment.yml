@@ -39,7 +39,6 @@ datasource:
     peer_region:
       computed: true
       description: AWS region of the Transit Gateway. When omitted, the data source searches all regions and requires a single matching attachment.
-clientHandler: vpc
 identityFields: [project, project_vpc_id, peer_cloud_account, peer_vpc, peer_region]
 identityFieldsOptional: [peer_region]
 legacyTimeouts: true

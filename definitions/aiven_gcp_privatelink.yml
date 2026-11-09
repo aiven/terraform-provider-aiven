@@ -8,7 +8,6 @@ resource:
   description: Creates and manages a Google Private Service Connect for an Aiven service in a VPC.
 datasource:
   description: Gets information about a Google Private Service Connect connection for an Aiven service.
-clientHandler: privatelink
 identityFields: [project, service_name]
 legacyTimeouts: true
 operations:

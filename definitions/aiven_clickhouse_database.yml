@@ -7,7 +7,6 @@ resource:
     Creates and manages an [Aiven for ClickHouse](https://aiven.io/docs/products/clickhouse) database.
 datasource:
   description: Gets information about an Aiven for ClickHouse database.
-clientHandler: clickhouse
 identityFields: [project, service_name, name]
 legacyTimeouts: true
 requireServiceReady: [clickhouse]

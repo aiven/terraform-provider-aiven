@@ -6,7 +6,6 @@ resource:
   description: Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database.
 datasource:
   description: Gets information about an Aiven for MySQL® database.
-clientHandler: service
 identityFields: [project, service_name, database_name]
 legacyTimeouts: true
 requireServiceReady: [mysql]

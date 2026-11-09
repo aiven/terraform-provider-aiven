@@ -12,4 +12,3 @@ operations:
       pageSizeParam: limit
 remove:
   - prev
-clientHandler: organizationbilling

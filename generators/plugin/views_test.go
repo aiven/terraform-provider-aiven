@@ -55,10 +55,10 @@ func TestGenGenericView_IncludeSecrets(t *testing.T) {
 	setParents(item, nil)
 
 	def := &Definition{
-		Resource:      &SchemaMeta{},
-		ClientHandler: "service",
+		Resource: &SchemaMeta{},
 		Operations: []*Operation{{
 			ID:             "ServiceUserGet",
+			Package:        avnGenHandlerPackage + "service",
 			Type:           OperationRead,
 			ResultKey:      "user",
 			IncludeSecrets: true,
@@ -70,6 +70,33 @@ func TestGenGenericView_IncludeSecrets(t *testing.T) {
 	require.NoError(t, err)
 	got := renderCode(t, code)
 	require.Contains(t, got, "client.ServiceUserGet(ctx, d.Get(\"project\").(string), d.Get(\"service_name\").(string), d.Get(\"username\").(string), common.IncludeSecrets())")
+}
+
+func TestGenGenericView_StepsWithRequests(t *testing.T) {
+	t.Parallel()
+
+	ops := Operations{
+		{ID: "FooUpdate", Package: avnGenHandlerPackage + "foo", Type: OperationUpdate},
+		{ID: "FooConfigUpdate", Package: avnGenHandlerPackage + "foo", Type: OperationUpdate},
+	}
+	item := &Item{Properties: map[string]*Item{
+		"id": {Name: "id", Type: SchemaTypeString, Computed: true},
+		"name": {
+			Name:      "name",
+			Type:      SchemaTypeString,
+			Optional:  true,
+			AppearsIn: ops.AppearsInID("FooUpdate", OperationUpdate, RequestBody) | ops.AppearsInID("FooConfigUpdate", OperationUpdate, RequestBody),
+		},
+	}}
+	setParents(item, nil)
+
+	def := &Definition{Resource: &SchemaMeta{}, Operations: ops}
+	code, err := genGenericView(def, item, OperationUpdate)
+	require.NoError(t, err)
+	got := renderCode(t, code)
+	require.Contains(t, got, "req := new(foo.FooUpdateIn)")
+	require.Contains(t, got, "req2 := new(foo.FooConfigUpdateIn)")
+	require.Contains(t, got, "client.FooConfigUpdate(ctx, req2)")
 }
 
 func TestGenNewResourceIdentityFields(t *testing.T) {

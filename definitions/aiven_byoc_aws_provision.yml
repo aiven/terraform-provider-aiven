@@ -14,7 +14,6 @@ resource:
     desired: [active]
   deleteState:
     desired: [deleted]
-clientHandler: byoc
 identityFields: [organization_id, custom_cloud_environment_id]
 operations:
   - id: CustomCloudEnvironmentProvision

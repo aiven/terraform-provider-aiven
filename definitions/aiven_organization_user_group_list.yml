@@ -6,4 +6,3 @@ operations:
   - id: UserGroupsList
     type: read
     resultToKey: user_groups
-clientHandler: usergroup

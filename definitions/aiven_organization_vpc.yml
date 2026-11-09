@@ -9,7 +9,6 @@ resource:
   description: Creates and manages a VPC for an Aiven organization.
 datasource:
   description: Gets information about an existing VPC in an Aiven organization.
-clientHandler: organizationvpc
 identityFields: [organization_id, organization_vpc_id]
 legacyTimeouts: true
 expandModifier: true

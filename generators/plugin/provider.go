@@ -14,7 +14,7 @@ func genEntityProvider(file *jen.File, entity entityType, definitions []*Definit
 			continue
 		}
 
-		if def.ClientHandler == "" {
+		if def.SchemaOnly {
 			continue
 		}
 

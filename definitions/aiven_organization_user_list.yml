@@ -12,7 +12,6 @@ operations:
     resultKey: organizations
     resultListLookupKeys:
       OrganizationName: name
-clientHandler: organizationuser
 rename:
   organization_id: id
 schema:

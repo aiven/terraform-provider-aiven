@@ -4,7 +4,6 @@ datasource:
   description: A list of all services in a project.
   disableExample: true
 identityFields: [project]
-clientHandler: project
 remove:
   # Remove all complex nested objects - keep only essential flat attributes
   - services/acl

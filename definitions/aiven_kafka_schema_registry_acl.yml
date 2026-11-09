@@ -5,7 +5,6 @@ resource:
   description: Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry.
 datasource:
   description: Gets information about an Aiven for Apache Kafka® Schema Registry ACL entry.
-clientHandler: kafkaschemaregistry
 identityFields: [project, service_name, acl_id]
 legacyTimeouts: true
 requireServiceReady: [kafka]

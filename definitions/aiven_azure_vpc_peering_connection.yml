@@ -42,7 +42,6 @@ datasource:
       required: true
     peer_azure_tenant_id:
       required: true
-clientHandler: vpc
 identityFields: [project, project_vpc_id, azure_subscription_id, vnet_name]
 legacyTimeouts: true
 rename:
