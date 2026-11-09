@@ -401,6 +401,32 @@ definitions:
         type: boolean
         $comment: |
           Sends `include_secrets=true`, or false when `AIVEN_INCLUDE_SECRETS` is false, see `common.IncludeSecrets`.
+      pagination:
+        type: object
+        $comment: |
+          Read only: follows nextField until it's empty and merges the pages.
+          The response must have one list besides nextField and the `remove` list.
+          Can't be combined with resultKeyField or resultToKey.
+        properties:
+          nextField:
+            type: string
+            $comment: The response field with the next page cursor, e.g. next.
+          cursorParam:
+            type: string
+            $comment: The query parameter that takes nextField, e.g. cursor.
+          pageSizeParam:
+            type: string
+            $comment: Optional, omit when the API rejects it.
+          pageSize:
+            type: integer
+            minimum: 1
+            $comment: Defaults to the parameter's maximum, else its default.
+        required:
+          - nextField
+          - cursorParam
+        dependentRequired:
+          pageSize: [pageSizeParam]
+        additionalProperties: false
     required:
       - id
       - type

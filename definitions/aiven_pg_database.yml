@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
   refreshStateExists: true
+  deleteStateGone: true
   removeMissing: true
   terminationProtection: true
   description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.
@@ -21,9 +22,12 @@ operations:
   - id: ServiceDatabaseList
     type: read
     resultKey: databases
-    resultKeyField: Databases
     resultListLookupKeys:
       DatabaseName: database_name
+    pagination:
+      nextField: next
+      cursorParam: after
+      pageSizeParam: maxItems
 schema:
   project:
     ref: aiven_pg.project
