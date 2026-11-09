@@ -8,7 +8,9 @@ import (
 
 	"github.com/aiven/go-client-codegen/handler/organizationvpc"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/acctest/template"
@@ -62,19 +64,6 @@ func TestAccAivenGCPOrgVPCPeeringConnection(t *testing.T) {
 	})
 }
 
-// TestAccAivenGCPOrgVPCPeeringConnectionFull tests the complete GCP VPC peering connection workflow
-// with real GCP resources. This test:
-// 1. Creates a GCP VPC and route
-// 2. Creates an Aiven Organization VPC
-// 3. Establishes VPC peering between GCP and Aiven VPCs
-// 4. Sets up routing for the peered VPCs
-//
-// Note: The test will be skipped in CI environments since it requires real GCP credentials
-// and resources. This test is meant for local development and verification for now.
-// Prerequisites:
-// - Valid GCP credentials with permissions to create/delete VPC resources
-// - GCP project with VPC API enabled
-// - Required permissions: VPC creation/deletion, VPC peering, route management
 func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 	var (
 		orgName   = acc.OrganizationName()
@@ -91,7 +80,9 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 		templBuilder = template.InitializeTemplateStore(t).NewBuilder()
 	)
 
+	var identityImport acc.IdentityImportVersionCheck
 	resource.ParallelTest(t, resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		CheckDestroy:             testAccCheckGCPOrgVPCPeeringResourceDestroy,
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -145,6 +136,10 @@ func TestAccAivenGCPOrgVPCPeeringConnectionFull(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName: resourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
+			},
 		},
 	})
 }
@@ -162,14 +157,17 @@ func TestAccAivenGCPOrgVPCPeeringConnection_backwardCompat(t *testing.T) {
 		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
 	)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: testAccCheckGCPOrgVPCPeeringResourceDestroy,
-		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-			TFConfig:           config,
-			OldProviderVersion: "4.60.0",
-			Checks:             checks,
-		}),
+	steps := acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+		TFConfig: config, OldProviderVersion: "4.60.0", Checks: checks,
+	})
+	var identityImport acc.IdentityImportVersionCheck
+	steps[1].ConfigPlanChecks.PreApply = []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}
+	steps = append(steps, acc.ProviderRollbackSteps(t, steps[0], steps[1], &identityImport)...)
+	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+		PreCheck:               func() { acc.TestAccPreCheck(t) },
+		CheckDestroy:           testAccCheckGCPOrgVPCPeeringResourceDestroy,
+		Steps:                  steps,
 	})
 }
 
@@ -230,7 +228,7 @@ func testAccCheckGCPOrgVPCPeeringResourceDestroy(s *terraform.State) error {
 			}
 		}
 
-		if pc != nil {
+		if pc != nil && pc.State != "DELETED" {
 			connectionID := "<missing>"
 			if pc.PeeringConnectionId != nil {
 				connectionID = *pc.PeeringConnectionId

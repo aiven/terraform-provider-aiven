@@ -5,12 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -19,17 +24,37 @@ import (
 
 func TestAccAivenGCPPrivatelink_basic(t *testing.T) {
 	skipGCPPrivatelinkTests(t)
+	gcpProject := acc.RequireEnvVars(t, "GOOGLE_PROJECT")["GOOGLE_PROJECT"]
 
 	resourceName := "aiven_gcp_privatelink.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
+	config := testAccGCPPrivatelinkResource(rName) + fmt.Sprintf(`
+provider "google" {
+  project = %q
+  region  = "europe-west1"
+}
+`, gcpProject)
+	approvalConfig := config + testAccGCPPrivatelinkEndpoint(rName)
+	const approvalName = "aiven_gcp_privatelink_connection_approval.endpoint"
+	approvalChecks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(approvalName, "privatelink_connection_id"),
+		resource.TestCheckResourceAttrPair(approvalName, "psc_connection_id", "google_compute_forwarding_rule.endpoint", "psc_connection_id"),
+		resource.TestCheckResourceAttrPair(approvalName, "user_ip_address", "google_compute_address.endpoint", "address"),
+		resource.TestMatchResourceAttr(approvalName, "state", regexp.MustCompile("^(user-approved|connected|active)$")),
+	)
+	var identityImport acc.IdentityImportVersionCheck
 	resource.ParallelTest(t, resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckAivenGCPPrivatelinkResourceDestroy,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"google": {Source: "hashicorp/google", VersionConstraint: "=6.15.0"},
+		},
+		CheckDestroy: testAccCheckAivenGCPPrivatelinkResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGCPPrivatelinkResource(rName),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenGCPPrivatelinkAttributes("data.aiven_gcp_privatelink.pr"),
 					resource.TestCheckResourceAttr(resourceName, "state", "active"),
@@ -41,6 +66,64 @@ func TestAccAivenGCPPrivatelink_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName: resourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
+			},
+			// Reuse the service and VPC for a real consumer endpoint and approval.
+			{
+				Config: approvalConfig,
+				Check: resource.ComposeTestCheckFunc(
+					approvalChecks,
+					func(state *terraform.State) error {
+						// The SDK returns at user-approved. Wait for active, then let
+						// the next step refresh Terraform state before verifying imports.
+						attrs := state.RootModule().Resources[approvalName].Primary.Attributes
+						connectionID := attrs["privatelink_connection_id"]
+						client := acc.GetTestAivenClient().GCPPrivatelink
+						ctx, cancel := context.WithTimeout(t.Context(), 10*time.Minute)
+						defer cancel()
+						wait := &retry.StateChangeConf{
+							Pending: []string{"pending-user-approval", "user-approved", "connected"},
+							Target:  []string{"active"},
+							Refresh: func() (any, string, error) {
+								if err := client.Refresh(ctx, attrs["project"], attrs["service_name"]); err != nil {
+									return nil, "", err
+								}
+								connection, err := client.ConnectionGet(ctx, attrs["project"], attrs["service_name"], &connectionID)
+								if err != nil {
+									return nil, "", err
+								}
+								return connection, connection.State, nil
+							},
+							Timeout:      10 * time.Minute,
+							PollInterval: 5 * time.Second,
+						}
+						if _, err := wait.WaitForStateContext(ctx); err != nil {
+							return fmt.Errorf("wait for active GCP PrivateLink connection %q: %w", connectionID, err)
+						}
+						return nil
+					},
+				),
+			},
+			{
+				Config:           approvalConfig,
+				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}},
+				Check: resource.ComposeTestCheckFunc(
+					approvalChecks,
+					resource.TestCheckResourceAttr(approvalName, "state", "active"),
+				),
+			},
+			{ResourceName: approvalName, ImportState: true, ImportStateVerify: true},
+			{
+				ResourceName: approvalName, ImportState: true, ImportStateVerify: true,
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
+					attrs := state.RootModule().Resources[approvalName].Primary.Attributes
+					return schemautil.BuildResourceID(attrs["project"], attrs["service_name"], attrs["psc_connection_id"]), nil
+				},
+			},
+			// Approval deletion is state-only; the consumer owns the connection.
+			{Config: config, Check: resource.TestCheckResourceAttr(resourceName, "state", "active")},
 		},
 	})
 }
@@ -54,9 +137,11 @@ func TestAccAivenGCPPrivatelink_backwardCompat(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	config := testAccGCPPrivatelinkResource(rName)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: testAccCheckAivenGCPPrivatelinkResourceDestroy,
+	var identityImport acc.IdentityImportVersionCheck
+	testCase := resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+		PreCheck:               func() { acc.TestAccPreCheck(t) },
+		CheckDestroy:           testAccCheckAivenGCPPrivatelinkResourceDestroy,
 		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
 			TFConfig:           config,
 			OldProviderVersion: "4.60.0",
@@ -71,7 +156,10 @@ func TestAccAivenGCPPrivatelink_backwardCompat(t *testing.T) {
 				resource.TestCheckResourceAttrPair(dataSourceName, "google_service_attachment", resourceName, "google_service_attachment"),
 			),
 		}),
-	})
+	}
+	testCase.Steps[1].ConfigPlanChecks.PreApply = []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}
+	testCase.Steps = append(testCase.Steps, acc.ProviderRollbackSteps(t, testCase.Steps[0], testCase.Steps[1], &identityImport)...)
+	resource.Test(t, testCase)
 }
 
 func skipGCPPrivatelinkTests(t *testing.T) {
@@ -166,4 +254,40 @@ func testAccCheckAivenGCPPrivatelinkAttributes(name string) resource.TestCheckFu
 
 		return nil
 	}
+}
+
+// Consumer endpoint pattern: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule#example-usage---forwarding-rule-vpc-psc
+func testAccGCPPrivatelinkEndpoint(name string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "consumer" {
+  name                    = "test-acc-psc-%[1]s"
+  auto_create_subnetworks = false
+}
+resource "google_compute_subnetwork" "consumer" {
+  name          = "test-acc-psc-%[1]s"
+  network       = google_compute_network.consumer.id
+  region        = "europe-west1"
+  ip_cidr_range = "10.80.0.0/24"
+}
+resource "google_compute_address" "endpoint" {
+  name         = "test-acc-psc-%[1]s"
+  address_type = "INTERNAL"
+  subnetwork   = google_compute_subnetwork.consumer.id
+  region       = "europe-west1"
+}
+resource "google_compute_forwarding_rule" "endpoint" {
+  name                  = "test-acc-psc-%[1]s"
+  region                = "europe-west1"
+  network               = google_compute_network.consumer.id
+  ip_address            = google_compute_address.endpoint.id
+  target                = aiven_gcp_privatelink.foo.google_service_attachment
+  load_balancing_scheme = ""
+}
+resource "aiven_gcp_privatelink_connection_approval" "endpoint" {
+  project           = aiven_gcp_privatelink.foo.project
+  service_name      = aiven_gcp_privatelink.foo.service_name
+  user_ip_address   = google_compute_address.endpoint.address
+  psc_connection_id = google_compute_forwarding_rule.endpoint.psc_connection_id
+}
+`, name)
 }

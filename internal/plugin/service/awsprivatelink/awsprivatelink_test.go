@@ -7,7 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/kelseyhightower/envconfig"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -30,7 +32,9 @@ func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 	resourceName := "aiven_aws_privatelink.privatelink"
 	dataSourceName := "data.aiven_aws_privatelink.privatelink"
 
+	var identityImport acc.IdentityImportVersionCheck
 	resource.ParallelTest(t, resource.TestCase{
+		TerraformVersionChecks:   []tfversion.TerraformVersionCheck{&identityImport},
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
@@ -64,11 +68,11 @@ func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("aws_vpc_endpoint.endpoint", "state", "available"),
 				),
 			},
-			importStateByName("aiven_project_vpc.aiven_vpc"),
-			importStateByName("aiven_pg.pg"),
 			importStateByName(resourceName),
-			importStateByName("aws_vpc.aws_vpc"),
-			importStateByName("aws_vpc_endpoint.endpoint"),
+			{
+				ResourceName: resourceName, ImportState: true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity, SkipFunc: identityImport.Skip,
+			},
 		},
 	})
 }
@@ -93,9 +97,11 @@ func TestAccAivenAWSPrivatelink_backwardCompat(t *testing.T) {
 		resource.TestCheckResourceAttr(resourceName, "state", "active"),
 	)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		CheckDestroy: acc.TestAccCheckAivenServiceResourceDestroy,
+	var identityImport acc.IdentityImportVersionCheck
+	testCase := resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
+		PreCheck:               func() { acc.TestAccPreCheck(t) },
+		CheckDestroy:           acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -111,7 +117,10 @@ func TestAccAivenAWSPrivatelink_backwardCompat(t *testing.T) {
 				Check:                    newChecks,
 			},
 		},
-	})
+	}
+	testCase.Steps[1].ConfigPlanChecks.PreApply = []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}
+	testCase.Steps = append(testCase.Steps, acc.ProviderRollbackSteps(t, testCase.Steps[0], testCase.Steps[1], &identityImport)...)
+	resource.Test(t, testCase)
 }
 
 func testAccAWSPrivatelinkResource(prefix, project, principal, region string, includeAWSEndpoint bool) string {

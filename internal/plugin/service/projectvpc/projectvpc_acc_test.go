@@ -78,7 +78,6 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 }
 
 func TestAccAivenProjectVPC_backwardCompat(t *testing.T) {
-	t.Parallel()
 	resourceName := "aiven_project_vpc.bar"
 	project := acc.ProjectName()
 	config := testAccProjectVPCResourceOnly(project, "google-europe-west4", "192.168.2.0/24")
@@ -96,7 +95,7 @@ func TestAccAivenProjectVPC_backwardCompat(t *testing.T) {
 	testUpgrade := func(t *testing.T, oldVersion string) {
 		t.Helper()
 		var identityImport acc.IdentityImportVersionCheck
-		resource.Test(t, resource.TestCase{
+		testCase := resource.TestCase{
 			PreCheck:               func() { acc.TestAccPreCheck(t) },
 			CheckDestroy:           testAccCheckAivenProjectVPCResourceDestroy,
 			TerraformVersionChecks: []tfversion.TerraformVersionCheck{&identityImport},
@@ -124,7 +123,11 @@ func TestAccAivenProjectVPC_backwardCompat(t *testing.T) {
 					SkipFunc:                 identityImport.Skip,
 				},
 			},
-		})
+		}
+		identityImportStep := testCase.Steps[2]
+		testCase.Steps = append(testCase.Steps[:2], acc.ProviderRollbackSteps(t, testCase.Steps[0], testCase.Steps[1], &identityImport)...)
+		testCase.Steps = append(testCase.Steps, identityImportStep)
+		resource.Test(t, testCase)
 	}
 	t.Run("SDK", func(t *testing.T) { testUpgrade(t, "4.56.0") })
 	t.Run("Framework", func(t *testing.T) { testUpgrade(t, "4.65.1") })

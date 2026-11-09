@@ -482,10 +482,12 @@ import {
 	writeConfig("")
 	// A rollback to 1.11 must remain usable after 1.12 has written identity.
 	// Returning to 1.12 must restore identity from the unchanged resource fields.
-	hasChanges, err = oldTF.Plan(ctx, reattach)
-	require.NoError(t, err)
-	require.False(t, hasChanges)
-	require.NoError(t, oldTF.Apply(ctx, reattach))
+	for _, refresh := range []bool{false, true} {
+		hasChanges, err = oldTF.Plan(ctx, reattach, tfexec.Refresh(refresh))
+		require.NoError(t, err)
+		require.False(t, hasChanges)
+		require.NoError(t, oldTF.Apply(ctx, reattach, tfexec.Refresh(refresh)))
+	}
 	require.NoError(t, newTF.Apply(ctx, reattach))
 	checkIdentity()
 	hasChanges, err = newTF.Plan(ctx, reattach)
