@@ -32,6 +32,29 @@ func TestDocImport(t *testing.T) {
 		require.Contains(t, got, "## Import\n\nImport is supported using the following syntax:\n\n```shell\n"+
 			"terraform import aiven_example.example PROJECT/EXAMPLE_ID/REGION/ZONE\n```")
 	})
+
+	t.Run("custom example preserves resource identity", func(t *testing.T) {
+		const example = `terraform import aiven_example.example PROJECT/SERVICE_NAME
+# For multiple connections, run this instead:
+# terraform import aiven_example.example PROJECT/SERVICE_NAME/CONNECTION_ID`
+		def := &Definition{
+			typeName:       "aiven_example",
+			Resource:       &SchemaMeta{ImportExample: example},
+			IdentityFields: []string{"project", "service_name"},
+		}
+		root := &Item{Name: "example", Properties: map[string]*Item{
+			"project":       {Name: "project", IDAttribute: true},
+			"service_name":  {Name: "service_name", IDAttribute: true, IDAttributePosition: 1},
+			"connection_id": {Name: "connection_id"},
+		}}
+		require.Equal(t, example+"\n", importCommand(def, root))
+		got, ok := docImport(def, resourceType, root)
+		require.True(t, ok)
+		require.Contains(t, got, "```shell\n"+example+"\n```")
+		require.Equal(t, "PROJECT/SERVICE_NAME", importID(def, root))
+		require.Contains(t, strings.Join(strings.Fields(got), " "),
+			`identity = { project = "PROJECT" service_name = "SERVICE_NAME" }`)
+	})
 }
 
 func TestDocImportIdentity(t *testing.T) {

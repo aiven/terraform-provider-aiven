@@ -81,6 +81,11 @@ func importID(def *Definition, root *Item) string {
 }
 
 func importCommand(def *Definition, root *Item) string {
+	if def.Resource != nil {
+		if example := strings.TrimSpace(def.Resource.ImportExample); example != "" {
+			return example + "\n"
+		}
+	}
 	return fmt.Sprintf("terraform import %s.example %s\n", def.typeName, importID(def, root))
 }
 

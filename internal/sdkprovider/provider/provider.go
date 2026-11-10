@@ -122,7 +122,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 			// vpc
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
-			"aiven_gcp_privatelink_connection_approval":   vpc.ResourceGCPPrivatelinkConnectionApproval(),
 
 			// flink
 			"aiven_flink":                     flink.ResourceFlink(),
