@@ -852,8 +852,9 @@ another resource with the same keys in the same run. The adapter lists the scope
 once and matches it with `pageMatch`, where the scope is the read op's path parameters and the
 keys are its `resultListLookupKeys`. Delete releases the keys. The API might create the resource
 and still fail, so the client's retry gets 409: `alreadyExists: check` sets `IgnoreAlreadyExists`
-so a 409 is adopted. Requires `refreshState`. Use `alreadyExists: adopt` to adopt a 409 without
-the conflict check.
+so that 409 counts as success. A resource that existed before Create is not adopted: the check
+fails first. Requires `refreshState`. Use `alreadyExists: adopt` to adopt an existing resource
+on 409 without the conflict check.
 Tests that delete a resource outside Terraform call `adapter.ForgetConflict`.
 
 **Reference**: `definitions/aiven_pg_database.yml`.

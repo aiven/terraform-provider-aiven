@@ -12,58 +12,62 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Fix importing `aiven_azure_privatelink_connection_approval` when the service has a single Private Link connection.
-- Add resource identity to all resources migrated to the Plugin Framework, enabling identity-based `import` blocks
-  on Terraform 1.12 or later. Earlier Terraform versions and import by ID remain supported.
-- Remove `aiven_dragonfly` resource and data source: reached end-of-life.
-- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
-- Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
-  and `grafana_stat_totals_*` metrics, which require periodic database queries
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
   When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
-  and `aiven_service_integration_endpoint` that remove a user config block. This affects resources managed with an earlier
-  version whose configuration has no such block while the API returns one: SDKv2 stored it anyway, e.g.,
-  a `datadog_user_config` removed from the configuration after the create. Applying the plan is safe: the provider skips
-  the API call and updates only the state, so the settings in Aiven, including secrets such as the Datadog API key,
-  don't change. To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
+  and `aiven_service_integration_endpoint` that remove a user config block. This happens when the configuration
+  has no such block but the API returns one, e.g., a `datadog_user_config` removed from the configuration after
+  the create, which SDKv2 kept in the state. Applying the plan is safe: the provider updates only the state
+  and doesn't call the API, so the settings in Aiven, including secrets such as the Datadog API key, don't change.
+  To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
-- Migrate `aiven_service_integration` and `aiven_service_integration_endpoint` resources and data sources to the Plugin Framework.
-- Add `aiven_service_integration` fields `active`, `description`, `source_service_type`, `destination_service_type`,
-  `source_endpoint_name` and `destination_endpoint_name`, and `aiven_service_integration_endpoint` field `endpoint_id`.
+- **IMPORTANT**: `aiven_aws_vpc_peering_connection` resource and data source require a nonempty `aws_vpc_region`. Before
+  upgrading, replace `""` with the connection's region from the state. Changing the region replaces the connection.
+  Resource IDs don't change.
+- **IMPORTANT**: `aiven_connection_pool`, `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`,
+  `aiven_pg_user`, `aiven_service_integration_endpoint`, `aiven_valkey_user` and the `aiven_service_list` data source
+  request secrets with `include_secrets=true`, which needs a token with a [role that can read
+  them](https://aiven.io/docs/tools/api/secret-redaction). Starting 1 March 2027, the API [redacts
+  secrets](https://aiven.io/changelog/3bed4789-e2ec-410b-afc5-28029b994371) without this parameter. To read these
+  resources without secrets, set the `AIVEN_INCLUDE_SECRETS` environment variable to `false`.
+- Add resource identity to all resources migrated to the Plugin Framework, enabling identity-based `import` blocks
+  on Terraform 1.12 or later. Import by ID and earlier Terraform versions remain supported.
+- Change the Plugin Framework resources: when an update has nothing to send, e.g., only `timeouts` changed
+  or an `aiven_kafka_topic` `config` block was removed, the provider skips the API call and doesn't wait for the resource state.
+- Remove `aiven_dragonfly` resource and data source: reached end-of-life.
+- Migrate `aiven_service_integration` and `aiven_service_integration_endpoint` resources and data sources to the Plugin
+  Framework. Add `aiven_service_integration` fields `active`, `description`, `source_service_type`,
+  `destination_service_type`, `source_endpoint_name` and `destination_endpoint_name`,
+  and `aiven_service_integration_endpoint` field `endpoint_id`.
 - Change `aiven_service_integration` and `aiven_service_integration_endpoint`: validate the user config, names
-  and endpoint IDs at plan time; a user config block of another type fails the plan, and so does a create without
-  the block of a type with required options, e.g., `datadog_user_config`. After an import, the first plan adds
-  the configured user config blocks, and applying it sends them to the API.
-- Change `aiven_service_integration` and `aiven_service_integration_endpoint` data sources: look up by ID too, and fail
-  when several match.
+  and endpoint IDs at plan time. The plan fails when a user config block doesn't match `integration_type`
+  or `endpoint_type`, and when a create omits the user config block of a type with required options, e.g.,
+  `datadog_user_config`. After an import, the first plan adds the configured user config blocks, and applying it sends
+  them to the API.
+- Change `aiven_service_integration` and `aiven_service_integration_endpoint` data sources: also look up by ID, and fail
+  when more than one integration or endpoint matches.
 - Change `aiven_service_integration_endpoint`: an endpoint deleted outside Terraform is removed from the state.
   `external_postgresql.ssl_mode` no longer accepts `allow`, `disable` and `prefer`, which the API rejects. The read
   no longer fails on redacted credentials.
-- Change the Plugin Framework resources: an update with nothing to send skips the API call and the wait for the resource
-  state, e.g., a change of only `timeouts`, or a removed `aiven_kafka_topic` `config` block.
-- Change `aiven_connection_pool`, `aiven_kafka_user`, `aiven_mysql_user`, `aiven_opensearch_user`, `aiven_pg_user`,
-  `aiven_valkey_user` and the `aiven_service_list` data source: the read requests secrets with `include_secrets=true`.
-  Starting 1 March 2027, the API [redacts secrets](https://aiven.io/changelog/3bed4789-e2ec-410b-afc5-28029b994371)
-  without it.
-- Add the `AIVEN_INCLUDE_SECRETS` environment variable: set it to `false` to read the resources above
-  and `aiven_service_integration_endpoint` without secrets, e.g., when the token's role can't read them.
-- Fix `aiven_transit_gateway_vpc_attachment`: an update without CIDR changes, e.g., of only `timeouts`, doesn't wait
-  for the connection state, and no longer fails when the peer rejected or deleted the connection.
-- **IMPORTANT**: `aiven_aws_vpc_peering_connection` resources and data sources now require a nonempty `aws_vpc_region`.
-  Before upgrading, replace `""` with the existing connection's region from state. Changing the region replaces
-  the connection. Existing resource IDs remain unchanged.
-- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, and `aiven_gcp_vpc_peering_connection`
-  resources and data sources to the Plugin Framework and add `create_time`. They
-  and `aiven_transit_gateway_vpc_attachment` also accept `project` and `project_vpc_id` as alternatives to `vpc_id`.
-  Switching forms for the same VPC does not recreate the connection.
-- Keep created AWS, Azure and GCP VPC peering connections in Terraform state when readiness checks fail, so they
-  can be destroyed or replaced. For these resources and `aiven_transit_gateway_vpc_attachment`, `create_before_destroy`
-  replacements with the same peer identifiers are rejected while the old connection exists; use destroy-before-create.
-- Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
-  For `aiven_transit_gateway_vpc_attachment`, set `peer_region` when another regional match exists.
-- Fix deletion and replacement cleanup of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment`.
+- Migrate `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection` and `aiven_gcp_vpc_peering_connection`
+  resources and data sources to the Plugin Framework, and add `create_time`. These
+  and `aiven_transit_gateway_vpc_attachment` accept `project` and `project_vpc_id` as an alternative to `vpc_id`.
+  Switching between the two for the same VPC doesn't recreate the connection.
+- Change `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection` and `aiven_gcp_vpc_peering_connection`:
+  a created connection stays in the state when the readiness check fails, so it can be destroyed or replaced. A lookup
+  that matches more than one connection fails instead of using the first match.
+- Change `aiven_aws_vpc_peering_connection`, `aiven_azure_vpc_peering_connection`, `aiven_gcp_vpc_peering_connection`
+  and `aiven_transit_gateway_vpc_attachment`: a `create_before_destroy` replacement with the same peer identifiers fails
+  while the old connection exists; use destroy-before-create.
+- Change `aiven_transit_gateway_vpc_attachment`: a create without `peer_region` fails when another connection to the same
+  peer account and VPC exists; set `peer_region`.
+- Fix `aiven_transit_gateway_vpc_attachment`: deleting and replacing an attachment imported for a cross-region
+  AWS VPC peering. An update without CIDR changes no longer fails when the peer rejected or deleted the connection.
+- Fix importing `aiven_azure_privatelink_connection_approval` when the service has a single Private Link connection.
+- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`
+- Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the `grafana_stat_total_*`
+  and `grafana_stat_totals_*` metrics, which require periodic database queries
 
 ## [4.65.1] - 2026-10-30
 

@@ -3,7 +3,6 @@ package flink
 import (
 	"context"
 	"regexp"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -191,7 +190,8 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 
 	var r *aiven.DetailedFlinkApplicationVersionResponse
 
-	if err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
+	// A new integration might not be known to Flink yet, even when it's active.
+	if err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
 		var err error
 
 		r, err = client.FlinkApplicationVersions.Create(

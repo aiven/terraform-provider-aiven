@@ -3,6 +3,7 @@ resource:
   # SDKv2 also waited until the destination of a kafka_connect integration could list its connectors
   # (ServiceKafkaConnectList), so connectors could be created right after.
   # aiven_kafka_connector retries its create on 404.
+  # SDKv2 also required 10 consecutive active reads; aiven_flink_application_version retries "Integration not found".
   stateAttribute: active
   refreshState:
     desired: ["true"]
