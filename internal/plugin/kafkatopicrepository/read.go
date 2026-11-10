@@ -20,6 +20,7 @@ func (rep *repository) Read(ctx context.Context, project, service, topic string)
 	// Adds request to the queue
 	c := make(chan *response, 1)
 	r := &request{
+		ctx:     ctx,
 		project: project,
 		service: service,
 		topic:   topic,
@@ -98,12 +99,22 @@ func (rep *repository) exists(ctx context.Context, project, service, topic strin
 	return errNotFound
 }
 
+// laterDeadline returns true if a ends after b. No deadline is the latest.
+func laterDeadline(a, b context.Context) bool {
+	da, okA := a.Deadline()
+	db, okB := b.Deadline()
+	if !okA || !okB {
+		return !okA && okB
+	}
+	return da.After(db)
+}
+
 // fetch fetches requested topics configuration
 // 1. groups topics by service
 // 2. requests topics (in chunks)
 // Warning: if we call V2List with at least one "not found" topic, it will return 404 for all topics
 // Should be certain that all topics in queue do exist. Call repository.exists first to do so
-func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
+func (rep *repository) fetch(queue []*request) {
 	// Groups topics by service
 	byService := make(map[string][]*request, 0)
 	for i := range queue {
@@ -114,24 +125,24 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 
 	// Fetches topics configuration
 	for _, reqs := range byService {
-		topicNames := make([]string, 0, len(reqs))
-		for _, r := range reqs {
-			topicNames = append(topicNames, r.topic)
-		}
-
 		// Topics are grouped by service
 		// We can share this values
 		project := reqs[0].project
 		service := reqs[0].service
 
-		// Slices topic names by repository.v2ListBatchSize
+		// Uses the caller ctx with the latest deadline
+		ctx := lo.MaxBy(reqs, func(a, b *request) bool { return laterDeadline(a.ctx, b.ctx) }).ctx
+
+		// Slices requests by repository.v2ListBatchSize
 		// because V2List has a limit
-		for _, chunk := range lo.Chunk(topicNames, rep.v2ListBatchSize) {
+		for _, chunk := range lo.Chunk(reqs, rep.v2ListBatchSize) {
+			topicNames := lo.Uniq(lo.Map(chunk, func(r *request, _ int) string { return r.topic }))
+
 			// V2List() and Get() do not get info immediately
 			// Some retries should be applied if result is not equal to requested values
 			var list []kafkatopic.ServiceKafkaTopicGetOut
 			err := retry.Do(func() error {
-				rspList, err := rep.client.ServiceKafkaTopicListV2(ctx, project, service, &kafkatopic.ServiceKafkaTopicListV2In{TopicNames: chunk})
+				rspList, err := rep.client.ServiceKafkaTopicListV2(ctx, project, service, &kafkatopic.ServiceKafkaTopicListV2In{TopicNames: topicNames})
 
 				// A 404 means that the "chunk" contains a topic not found on the backend,
 				// even though repository.exists confirmed the topic exists.
@@ -141,6 +152,12 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 					return fmt.Errorf("topic list is inconsistent: %w", err)
 				}
 
+				// A 409 "Topic is not yet available" means the topic is still being created.
+				// Keeps retrying until the ctx deadline.
+				if isConflict(err) {
+					return fmt.Errorf("topic is not available yet: %w", err)
+				}
+
 				// Something else happened
 				// We have retries in the client, so this is bad
 				if err != nil {
@@ -148,8 +165,8 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 				}
 
 				// This is an old cache, we need to retry it until succeed
-				if len(rspList) != len(chunk) {
-					return fmt.Errorf("got %d topics, expected %d. Retrying", len(rspList), len(chunk))
+				if len(rspList) != len(topicNames) {
+					return fmt.Errorf("got %d topics, expected %d. Retrying", len(rspList), len(topicNames))
 				}
 
 				list = rspList
@@ -159,15 +176,21 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 				// Flatten the error to a string because the retry-wrapped form
 				// is too convoluted to assert against in tests.
 				err = fmt.Errorf("topic read error: %w", err)
-				for _, r := range reqs {
+				for _, r := range chunk {
 					r.send(nil, err)
 				}
 				continue
 			}
 
 			// Sends topics
-			for _, t := range list {
-				queue[newKey(project, service, t.TopicName)].send(&t, nil)
+			topics := lo.KeyBy(list, func(t kafkatopic.ServiceKafkaTopicGetOut) string { return t.TopicName })
+			for _, r := range chunk {
+				t, ok := topics[r.topic]
+				if !ok {
+					r.send(nil, errNotFound)
+					continue
+				}
+				r.send(&t, nil)
 			}
 		}
 	}

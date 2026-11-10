@@ -3,14 +3,17 @@ package kafkatopicrepository
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepositoryContextWithDeadline(t *testing.T) {
@@ -40,6 +43,7 @@ func TestRepositoryRead(t *testing.T) {
 		v1ListErr       error
 		v1ListCalled    int32
 		v2ListErr       error
+		v2ListErrs      []error
 		v2ListCalled    int32
 		v2ListBatchSize int
 	}{
@@ -66,6 +70,40 @@ func TestRepositoryRead(t *testing.T) {
 			},
 			storage: map[string]kafkatopic.TopicOut{
 				"a/b/c": {TopicName: "c"},
+			},
+			v1ListCalled:    1,
+			v2ListCalled:    1,
+			v2ListBatchSize: defaultV2ListBatchSize,
+		},
+		{
+			name: "same topic requested twice",
+			requests: []request{
+				{project: "a", service: "b", topic: "c"},
+				{project: "a", service: "b", topic: "c"},
+			},
+			responses: []response{
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+			},
+			storage: map[string]kafkatopic.TopicOut{
+				"a/b/c": {TopicName: "c"},
+			},
+			v1ListCalled:    1,
+			v2ListCalled:    1,
+			v2ListBatchSize: defaultV2ListBatchSize,
+		},
+		{
+			name: "v2List returns another topic",
+			requests: []request{
+				{project: "a", service: "b", topic: "c"},
+			},
+			responses: []response{
+				{err: errNotFound},
+			},
+			// v1List lists "c", but v2List returns "x" for it
+			storage: map[string]kafkatopic.TopicOut{
+				"a/b/x": {TopicName: "c"},
+				"a/b/c": {TopicName: "x"},
 			},
 			v1ListCalled:    1,
 			v2ListCalled:    1,
@@ -195,19 +233,37 @@ func TestRepositoryRead(t *testing.T) {
 			v2ListCalled:    1,
 			v2ListBatchSize: defaultV2ListBatchSize,
 		},
+		{
+			name: "retries v2List 409 topic is not yet available",
+			requests: []request{
+				{project: "a", service: "b", topic: "c"},
+			},
+			responses: []response{
+				{topic: &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}},
+			},
+			storage: map[string]kafkatopic.TopicOut{
+				"a/b/c": {TopicName: "c"},
+			},
+			v2ListErrs:      []error{errConflict},
+			v1ListCalled:    1,
+			v2ListCalled:    2,
+			v2ListBatchSize: defaultV2ListBatchSize,
+		},
 	}
 
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
 			client := &fakeTopicClient{
-				storage:   opt.storage,
-				v1ListErr: opt.v1ListErr,
-				v2ListErr: opt.v2ListErr,
+				storage:    opt.storage,
+				v1ListErr:  opt.v1ListErr,
+				v2ListErr:  opt.v2ListErr,
+				v2ListErrs: opt.v2ListErrs,
 			}
 
 			ctx := context.Background()
 			rep := newRepository(client)
 			rep.workerCallInterval = time.Millisecond
+			rep.v2ListRetryDelay = time.Millisecond
 			rep.v2ListBatchSize = opt.v2ListBatchSize
 
 			// We must run all calls in parallel
@@ -237,6 +293,53 @@ func TestRepositoryRead(t *testing.T) {
 	}
 }
 
+// TestRepositoryReadFreesWorker tests that the worker stops retrying at the caller's deadline
+func TestRepositoryReadFreesWorker(t *testing.T) {
+	client := &fakeTopicClient{
+		storage: map[string]kafkatopic.TopicOut{
+			"a/b/c": {TopicName: "c"},
+			"a/d/e": {TopicName: "e"},
+		},
+		// The first V2List call makes the worker sleep for an hour
+		v2ListErrs: []error{errConflict},
+	}
+
+	rep := newRepository(client)
+	rep.workerCallInterval = time.Millisecond
+	rep.v2ListRetryDelay = time.Hour
+	go rep.worker()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	_, err := rep.Read(ctx, "a", "b", "c")
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	topic, err := rep.Read(ctx, "a", "d", "e")
+	require.NoError(t, err)
+	assert.Equal(t, &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "e"}, topic)
+	assert.EqualValues(t, 2, atomic.LoadInt32(&client.v2ListCalled))
+}
+
+func TestLaterDeadline(t *testing.T) {
+	now := time.Now()
+	early, cancelEarly := context.WithDeadline(context.Background(), now.Add(time.Minute))
+	defer cancelEarly()
+	late, cancelLate := context.WithDeadline(context.Background(), now.Add(time.Hour))
+	defer cancelLate()
+	never := context.Background()
+
+	assert.True(t, laterDeadline(late, early))
+	assert.False(t, laterDeadline(early, late))
+	assert.False(t, laterDeadline(late, late))
+	assert.True(t, laterDeadline(never, late))
+	assert.False(t, laterDeadline(late, never))
+	assert.False(t, laterDeadline(never, never))
+}
+
+var errConflict = avngen.Error{Status: http.StatusConflict, Message: "Topic is not yet available"}
+
 var _ topicsClient = &fakeTopicClient{}
 
 // fakeTopicClient fake Aiven client topic handler
@@ -249,6 +352,8 @@ type fakeTopicClient struct {
 	deleteErr error
 	v1ListErr error
 	v2ListErr error
+	// returned by v2List one per call before falling back to v2ListErr
+	v2ListErrs []error
 	// counters per method
 	createCalled int32
 	deleteCalled int32
@@ -287,7 +392,11 @@ func (f *fakeTopicClient) ServiceKafkaTopicList(_ context.Context, project, serv
 }
 
 func (f *fakeTopicClient) ServiceKafkaTopicListV2(_ context.Context, project, service string, in *kafkatopic.ServiceKafkaTopicListV2In) ([]kafkatopic.ServiceKafkaTopicGetOut, error) {
-	atomic.AddInt32(&f.v2ListCalled, 1)
+	attempt := atomic.AddInt32(&f.v2ListCalled, 1) - 1
+	if int(attempt) < len(f.v2ListErrs) {
+		return nil, f.v2ListErrs[attempt]
+	}
+
 	result := make([]kafkatopic.ServiceKafkaTopicGetOut, 0)
 	for _, n := range in.TopicNames {
 		v, ok := f.storage[newKey(project, service, n)]

@@ -2,6 +2,7 @@ package kafkatopicrepository
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -100,13 +101,13 @@ func (rep *repository) worker() {
 		<-ticker.C
 		b := rep.withdraw()
 		if b != nil {
-			rep.fetch(context.Background(), b)
+			rep.fetch(b)
 		}
 	}
 }
 
 // withdraw returns the queue and cleans it
-func (rep *repository) withdraw() map[string]*request {
+func (rep *repository) withdraw() []*request {
 	rep.Lock()
 	defer rep.Unlock()
 
@@ -114,11 +115,7 @@ func (rep *repository) withdraw() map[string]*request {
 		return nil
 	}
 
-	q := make(map[string]*request, len(rep.queue))
-	for _, r := range rep.queue {
-		q[r.key()] = r
-	}
-
+	q := rep.queue
 	rep.queue = make([]*request, 0)
 	return q
 }
@@ -159,14 +156,11 @@ type response struct {
 }
 
 type request struct {
+	ctx     context.Context
 	project string
 	service string
 	topic   string
 	rsp     chan *response
-}
-
-func (r *request) key() string {
-	return newKey(r.project, r.service, r.topic)
 }
 
 func (r *request) send(topic *kafkatopic.ServiceKafkaTopicGetOut, err error) {
@@ -176,6 +170,12 @@ func (r *request) send(topic *kafkatopic.ServiceKafkaTopicGetOut, err error) {
 // newKey build path-like "key" from given strings.
 func newKey(parts ...string) string {
 	return strings.Join(parts, "/")
+}
+
+// isConflict returns true if the error has status 409
+func isConflict(err error) bool {
+	var e avngen.Error
+	return errors.As(err, &e) && e.Status == http.StatusConflict
 }
 
 // ForgetTopic see repository.forgetTopic
