@@ -64,6 +64,11 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`. The field is required with `valkey_acl_categories` and `valkey_acl_keys`.",
 			},
+			"valkey_acl_databases": schema.ListAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
+			},
 			"valkey_acl_keys": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -117,6 +122,14 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"valkey_acl_commands": &adapter.Schema{
+				Computed: true,
+				Items: &adapter.Schema{
+					Computed: true,
+					Type:     adapter.SchemaTypeString,
+				},
+				Type: adapter.SchemaTypeList,
+			},
+			"valkey_acl_databases": &adapter.Schema{
 				Computed: true,
 				Items: &adapter.Schema{
 					Computed: true,

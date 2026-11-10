@@ -23,6 +23,7 @@ resource "aiven_valkey_user" "example" {
   valkey_acl_categories = ["+@write", "+@keyspace"]
   valkey_acl_channels   = ["some*chan"]
   valkey_acl_commands   = ["+set", "+del", "+expire", "-flushall", "-flushdb"]
+  valkey_acl_databases  = ["0"]
   valkey_acl_keys       = ["session:*"]
 
   /* COMPUTED FIELDS
@@ -57,6 +58,7 @@ resource "aiven_valkey" "example_valkey" {
 - `valkey_acl_categories` (List of String) Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature. The field is required with `valkey_acl_commands` and `valkey_acl_keys`.
 - `valkey_acl_channels` (List of String) Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.
 - `valkey_acl_commands` (List of String) Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`. The field is required with `valkey_acl_categories` and `valkey_acl_keys`.
+- `valkey_acl_databases` (List of String) Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
 - `valkey_acl_keys` (List of String) Key access rules. Entries are defined as standard glob patterns. The field is required with `valkey_acl_categories` and `valkey_acl_commands`.
 
 ### Read-Only

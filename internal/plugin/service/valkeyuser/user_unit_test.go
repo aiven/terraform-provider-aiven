@@ -6,6 +6,7 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -59,6 +60,29 @@ func TestUpdateView(t *testing.T) {
 			Return(&service.ServiceUserCredentialsModifyOut{}, nil).
 			Once()
 		d := newResourceData(t, values([]any{"-@all"}), values([]any{"+@all"}))
+		require.NoError(t, ResourceOptions.Update(ctx, client, d))
+	})
+
+	t.Run("databases change", func(t *testing.T) {
+		ctx := context.Background()
+		client := avngen.NewMockClient(t)
+		client.EXPECT().
+			ServiceUserCredentialsModify(
+				mock.Anything,
+				"my-project",
+				"my-valkey",
+				"myuser",
+				mock.MatchedBy(func(in *service.ServiceUserCredentialsModifyIn) bool {
+					return in.AccessControl != nil &&
+						in.AccessControl.ValkeyAclDatabases != nil &&
+						assert.ObjectsAreEqual([]string{"0", "3"}, *in.AccessControl.ValkeyAclDatabases)
+				}),
+			).
+			Return(&service.ServiceUserCredentialsModifyOut{}, nil).
+			Once()
+		plan := values([]any{"+@all"})
+		plan["valkey_acl_databases"] = []any{"0", "3"}
+		d := newResourceData(t, plan, values([]any{"+@all"}))
 		require.NoError(t, ResourceOptions.Update(ctx, client, d))
 	})
 }

@@ -56,3 +56,10 @@ schema:
       type: string
       example: "some*chan"
     description: Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.
+  valkey_acl_databases:
+    type: arrayOrdered
+    optional: true
+    items:
+      type: string
+      example: "0"
+    description: Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
