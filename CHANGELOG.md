@@ -64,6 +64,28 @@ nav_order: 1
 - Reject ambiguous AWS, Azure and GCP VPC peering lookups instead of selecting the first match.
   For `aiven_transit_gateway_vpc_attachment`, set `peer_region` when another regional match exists.
 - Fix deletion and replacement cleanup of cross-region AWS VPC peerings imported into `aiven_transit_gateway_vpc_attachment`.
+- Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.kafka_mirrormaker_version` (enum): , and newer. Kafka
+  MirrorMaker major version.
+- Add `aiven_mysql` field `mysql_user_config.mysql.collation_server` (enum): The default collation for databases created
+  without one, which their new tables then inherit
+- Add `aiven_mysql` field `mysql_user_config.mysql.event_scheduler` (enum): Whether the event scheduler runs the events
+  created with CREATE EVENT
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_cache_size`: The size in bytes of the InnoDB FULLTEXT index
+  cache for each table
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_sort_pll_degree`: The number of parallel threads used
+  to tokenize and index text when building an InnoDB FULLTEXT index
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_total_cache_size`: The combined memory limit in bytes
+  for InnoDB FULLTEXT index caches across all tables
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_sort_buffer_size`: The size in bytes of the sort buffer used
+  when creating InnoDB indexes
+- Add `aiven_mysql` field `mysql_user_config.mysql.schema_definition_cache`: The number of schema definition objects
+  the data dictionary object cache can hold
+- Add `aiven_mysql` field `mysql_user_config.mysql.tablespace_definition_cache`: The number of tablespace definition
+  objects the data dictionary object cache can hold
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.search_cancel_after_time_interval`: Hard limit
+  for search requests
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.search_default_search_timeout`: Soft timeout for search
+  requests that don't set their own timeout
 
 ## [4.65.1] - 2026-10-30
 

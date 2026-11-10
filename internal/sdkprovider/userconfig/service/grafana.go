@@ -343,12 +343,12 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"dashboard_previews_enabled": {
-				Description: "Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
+				Description: "Dashboard previews were removed from Grafana upstream, so this setting no longer enables browsing of dashboards in grid (pictures) mode. On Grafana 11 and 12 it only enables the bundled image renderer plugin, which is not shipped with Grafana 13 and onward.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"dashboard_scenes_enabled": {
-				Description: "Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.",
+				Description: "Setting has no effect with Grafana 11 and onward. Grafana renders dashboards with the Scenes Library by default.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
