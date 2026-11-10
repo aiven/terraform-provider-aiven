@@ -96,7 +96,9 @@ type ResourceOptions struct {
 	// IgnoreAlreadyExists treats a 409 Conflict ("already exists") response from Create as success.
 	// This is useful when the resource being managed is a one-shot provisioning action whose effect is
 	// idempotent from Terraform's perspective — re-running it should adopt the existing entity rather
-	// than fail. Requires non-nil RefreshState so the full state is populated by the subsequent Read.
+	// than fail. With Conflict, an existing resource fails Create instead, and a 409 only comes from
+	// the client retrying a Create the API applied.
+	// Requires non-nil RefreshState so the full state is populated by the subsequent Read.
 	// NOTE: This does NOT work for resources whose ID is returned only in the Create response
 	// (e.g. server-assigned IDs), because on conflict there is no response to read the ID from and
 	// the subsequent Read has nothing to look up.
@@ -287,8 +289,7 @@ func (a *resourceAdapter) Create(
 	if a.resource.RefreshState != nil {
 		// Terraform persists state returned with an error diagnostic and marks the resource as
 		// tainted. Checkpoint a successfully created resource before polling so it remains
-		// manageable when the post-Create refresh fails. Do not checkpoint a failed
-		// AlreadyExists adoption.
+		// manageable when the post-Create refresh fails. Do not checkpoint after an ignored 409.
 		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
 		if stateCheckpointed {
 			rsp.State.Raw = d.tfValue()

@@ -248,7 +248,12 @@ func servicePowerOn(t *testing.T, projectName, serviceName string, on bool) erro
 
 	ctx := t.Context()
 	req := &service.ServiceUpdateIn{Powered: new(on)}
-	_, err = client.ServiceUpdate(ctx, projectName, serviceName, req)
+	var query [][2]string
+	if !on {
+		// The latest backup might fail, the test doesn't need the data.
+		query = append(query, service.ServiceUpdateAllowUncleanPoweroff(true))
+	}
+	_, err = client.ServiceUpdate(ctx, projectName, serviceName, req, query...)
 	if err != nil || !on {
 		// Powering off happens immediately, so we don't need to wait.
 		return err
