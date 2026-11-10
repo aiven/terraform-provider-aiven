@@ -451,7 +451,7 @@ schema:
     enumExclude: [val3]            # Removes values from the OpenAPI enum; each must be in it
     minimum: 1
     maximum: 100
-    format: uuid|cidr|ipv4-cidr    # String validator, see Formats
+    format: uuid|cidr|ipv4|ipv4-cidr # String validator, see Formats
     example: value                 # Doc example; ignored with a declared format
     conflictsWith: [other_field]
     exactlyOneOf: [field_a, field_b]
@@ -474,6 +474,8 @@ Skip prefixed IDs (`org…`, `u…`, `ug…`, `acl…`, `addr…`, `pm…`), com
 fields, which get no validators. `format: cidr` emits `validators.CIDR()`; resource docs get a CIDR example hint unless
 the description has an IP example.
 `format: ipv4-cidr` emits `validators.IPv4CIDR()`, which rejects IPv6.
+`format: ipv4` emits `validators.IPv4()`, which accepts dotted-quad IPv4 addresses, including public
+addresses, and rejects IPv6 and CIDR notation. Prefer the API's `format` over a resource override when available.
 When unset, the format is guessed: `uuid` for fields named `uuid`, `cidr` for fields named `*cidr*`, `ipv4-cidr` when
 such a field also has `maxLength: 18`. A guessed format keeps the field's own example and only fills in a missing one;
 declare it to replace a bad one.

@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  refreshState: true
+  removeMissing: true
+  # Keep SDK upgrades with an empty PSC selector from replacing the Terraform resource.
+  modifyPlan: true
+clientHandler: privatelink
+identityFields: [project, service_name]
+legacyTimeouts: true
+operations:
+  - id: ServicePrivatelinkGoogleConnectionCreate
+    type: create
+    disableView: true
+  - id: ServicePrivatelinkGoogleConnectionList
+    type: read
+    # Unwrap the connection schema even though readView performs the lookup.
+    resultKey: connections
+    disableView: true
+  - id: ServicePrivatelinkGoogleConnectionCreate
+    # Applying an imported pending connection uses the same approval endpoint.
+    type: update
+    disableView: true
+schema:
+  project:
+    ref: aiven_gcp_privatelink.project
+  service_name:
+    ref: aiven_gcp_privatelink.service_name
+  user_ip_address:
+    # The API accepts only IPv4, but the published schema omits the format.
+    format: ipv4
+  privatelink_connection_id:
+    # Required in the approve URL, but discovered by the Terraform resource.
+    required: false
+    computed: true
+    forceNew: false
+    # Rediscovering the same PSC endpoint can assign a new Aiven connection ID.
+    useStateForUnknown: false
+  psc_connection_id:
+    # A Terraform lookup selector, absent from the API request body.
+    optional: true
+    # SDKv2 stored the discovered PSC ID even when configuration used "".
+    # ForceNew would replace the Terraform resource and discard its saved connection selection.
+    # modifyPlan allows a state-only update to "", changed nonempty or unknown IDs still require replacement.
+    forceNew: false
+    # Optional+Computed IDs do not retain their state automatically.
+    useStateForUnknown: true
+    description: |
+      Google Private Service Connect connection ID for this connection.
+      Changing to a different nonempty ID forces recreation of the resource.
+      An empty string keeps the currently managed connection.

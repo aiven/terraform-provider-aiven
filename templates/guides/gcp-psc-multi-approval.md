@@ -61,6 +61,23 @@ Notes:
 - You don't need an explicit `depends_on`. Referencing `google_compute_forwarding_rule.psc[each.key].psc_connection_id` already creates the dependency.
 - `user_ip_address` should be the internal IP address used for that PSC endpoint.
 
+## Approval lifecycle
+
+Creation completes when Aiven has saved the approval and endpoint IP (`user-approved`). GCP acceptance,
+DNS updates, and service configuration happen asynchronously. Terraform reads Aiven's saved connection
+state; a read does not request a cloud refresh, which requires write permissions.
+
+The Google API cannot change an endpoint IP after approval or set the IP of a connection already accepted
+by GCP without an Aiven approval. To change the IP, recreate the consumer forwarding rule and pass its new
+`psc_connection_id` to the approval resource. Replacing only the approval resource is insufficient.
+
+Destroying the approval resource removes it from Terraform state. To remove the actual connection,
+delete the consumer forwarding rule or its parent `aiven_gcp_privatelink` resource.
+
+GCP acceptance is scoped to the consumer project. If several endpoints from the same project are pending,
+GCP can accept a different endpoint from the one approved in Aiven. Such a connection can appear as
+`connected` without an IP; recreating its consumer forwarding rule is necessary to approve it with an IP.
+
 ## Importing existing approvals
 
 If your service has **multiple** PSC connections, importing the approval requires a selector.
@@ -76,6 +93,12 @@ Example:
 ```bash
 terraform import aiven_gcp_privatelink_connection_approval.approval "<project>/<service_name>/<psc_connection_id>"
 ```
+
+For a single connection, `<project>/<service_name>` is also accepted. Both import forms normalize the
+Terraform resource ID to `<project>/<service_name>` and save the selected PSC ID separately.
+
+Identity-based imports use `project` and `service_name` and require a single connection. When multiple
+connections exist, use the string import ID with `psc_connection_id` shown above.
 
 ## Troubleshooting
 

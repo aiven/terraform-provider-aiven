@@ -148,6 +148,7 @@ type StringFormat string
 
 const (
 	StringFormatCIDR     StringFormat = "cidr"
+	StringFormatIPv4     StringFormat = "ipv4"
 	StringFormatIPv4CIDR StringFormat = "ipv4-cidr"
 	StringFormatUUID     StringFormat = "uuid"
 )

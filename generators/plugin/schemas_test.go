@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -171,6 +172,59 @@ func TestGenSchemaAddsCIDRValidatorForCIDRFormat(t *testing.T) {
 	require.NotContains(t, got, "length")
 }
 
+func TestGenSchemaIPv4FromOpenAPI(t *testing.T) {
+	// Only the request declares the format. The read response must not erase it,
+	// and no field override in the resource definition should be necessary.
+	var doc OpenAPIDoc
+	require.NoError(t, json.Unmarshal([]byte(`{
+		"paths": {
+			"/project/{project}/connection": {
+				"post": {
+					"operationId": "ConnectionCreate",
+					"parameters": [{"$ref":"#/components/parameters/project"}],
+					"requestBody": {"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Request"}}}}
+				},
+				"get": {
+					"operationId": "ConnectionGet",
+					"parameters": [{"$ref":"#/components/parameters/project"}],
+					"responses": {"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Response"}}}}}
+				}
+			}
+		},
+		"components": {
+			"parameters": {"project":{"in":"path","name":"project","required":true,"schema":{"type":"string"}}},
+			"schemas": {
+				"Request": {
+					"type":"object", "required":["user_ip_address"],
+					"properties":{"user_ip_address":{"type":"string","format":"ipv4","maxLength":15,"description":"Endpoint address."}}
+				},
+				"Response": {
+					"type":"object",
+					"properties":{"user_ip_address":{"type":"string","description":"Endpoint address."}}
+				}
+			}
+		}
+	}`), &doc))
+	def := &Definition{
+		Resource:       &SchemaMeta{},
+		IdentityFields: []string{"project"},
+		Operations: Operations{
+			{ID: "ConnectionCreate", Type: OperationCreate},
+			{ID: "ConnectionGet", Type: OperationRead},
+		},
+	}
+	root, err := createRootItem(&Scope{OpenAPI: &doc, Definition: def, CurrentMeta: def.Resource})
+	require.NoError(t, err)
+	require.Equal(t, StringFormatIPv4, root.Properties["user_ip_address"].Format)
+	got := genResourceSchemaCode(t, root)
+	require.Contains(t, got, `[]validator.String{validators.IPv4()}`)
+	require.Contains(t, got, "Endpoint address. Must be a valid IPv4 address.")
+	require.NotContains(t, got, "LengthAtMost")
+	value, err := exampleScalarItem(def, root.Properties["user_ip_address"])
+	require.NoError(t, err)
+	require.Equal(t, "10.20.30.40", value.AsString())
+}
+
 func TestItemFormat(t *testing.T) {
 	t.Parallel()
 
@@ -185,6 +239,8 @@ func TestItemFormat(t *testing.T) {
 		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString, MaxLength: 18}, want: StringFormatIPv4CIDR},
 		{item: &Item{Name: "reserved_cidr", Type: SchemaTypeString, MaxLength: 43}, want: StringFormatCIDR},
 		{item: &Item{Name: "network_cidr", Type: SchemaTypeString, Format: StringFormatUUID}, want: StringFormatUUID},
+		{item: &Item{Name: "address", Type: SchemaTypeString, Format: StringFormatIPv4}, want: StringFormatIPv4},
+		{item: &Item{Name: "user_ip_address", Type: SchemaTypeString, MaxLength: 15}, want: ""},
 		{item: &Item{Name: "network", Type: SchemaTypeString}, want: ""},
 		{item: &Item{Name: "uuid", Type: SchemaTypeString}, want: StringFormatUUID},
 		{item: &Item{Name: "peering_connection_id", Type: SchemaTypeString, MinLength: 36, MaxLength: 36}, want: ""},
