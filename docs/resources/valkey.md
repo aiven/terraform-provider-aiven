@@ -150,7 +150,7 @@ Optional:
 - `valkey_active_defrag_threshold_lower` (Number) Minimum percentage of fragmentation before active defragmentation starts. Only takes effect when `valkey_activedefrag` is enabled. Default: `10`.
 - `valkey_active_expire_effort` (Number) Valkey reclaims expired keys both when accessed and in the background. The background process scans for expired keys to free memory. Increasing the active-expire-effort setting (default 1, max 10) uses more CPU to reclaim expired keys faster, reducing memory usage but potentially increasing latency. Default: `1`.
 - `valkey_activedefrag` (Boolean) Enable active memory defragmentation. When enabled, Valkey relocates objects off sparsely-used memory pages to reduce fragmentation and return memory to the operating system. Defragmentation runs on the main thread and consumes CPU, so it may increase latency under load. Default: `false`.
-- `valkey_io_threads` (Number) Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.
+- `valkey_io_threads` (Number) Set Valkey IO thread count. On Valkey 9.0 and later, changes are applied without a restart. On Valkey 8.1, changing this replaces the service nodes. Example: `1`.
 - `valkey_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. Default: `1`.
 - `valkey_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.
 - `valkey_maxmemory_policy` (String) Enum: `allkeys-lfu`, `allkeys-lru`, `allkeys-random`, `noeviction`, `volatile-lfu`, `volatile-lru`, `volatile-random`, `volatile-ttl`. Valkey maxmemory-policy. Default: `noeviction`.
@@ -187,7 +187,7 @@ Optional:
 - `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
 - `ignore_roles` (String) Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.
-- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
 - `username` (String) User name for authentication with the server where to migrate data from. Example: `myname`.
