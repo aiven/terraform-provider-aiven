@@ -36,7 +36,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"destination_service_name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Destination service name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.",
+				MarkdownDescription: "Destination service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.",
 				Optional:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
@@ -77,7 +77,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"source_service_name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Source service name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.",
+				MarkdownDescription: "Source service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.",
 				Optional:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},

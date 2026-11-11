@@ -15,13 +15,20 @@ nav_order: 1
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
   When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
-  and `aiven_service_integration_endpoint` that remove a user config block. This happens when the configuration
-  has no such block but the API returns one, e.g., a `datadog_user_config` removed from the configuration after
-  the create, which SDKv2 kept in the state. Applying the plan is safe: the provider updates only the state
-  and doesn't call the API, so the settings in Aiven, including secrets such as the Datadog API key, don't change.
-  To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
+  and `aiven_service_integration_endpoint` that remove a user config block, including nested blocks. This happens when
+  the configuration has no such block but the API returns one, e.g., a `datadog_user_config` removed from
+  the configuration after the create, which SDKv2 kept in the state. When these are the only changes, the provider updates
+  only the state and doesn't call the API, so the settings in Aiven, including secrets such as the Datadog API key,
+  don't change. To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
+- Keep SDKv2 compatibility for empty `source_service_name` and `destination_service_name` in `aiven_service_integration`.
+  Switching between an unset name and `""` can update the state in place, without recreating the integration, calling
+  the update API, or waiting for the integration to become active. Changing an actual service name still requires replacement.
+- Detect externally added objects in configured service integration and endpoint user config lists, such
+  as `datadog_tags`. When removing all blocks of a list is the only user config change, the provider updates only
+  Terraform state and sends no update request. Removing individual objects from a list that remains configured,
+  or changing other configured values, still uses the normal API update operation.
 - **IMPORTANT**: `aiven_aws_vpc_peering_connection` resource and data source require a nonempty `aws_vpc_region`. Before
   upgrading, replace `""` with the connection's region from the state. Changing the region replaces the connection.
   Resource IDs don't change.

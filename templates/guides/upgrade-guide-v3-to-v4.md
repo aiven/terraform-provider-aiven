@@ -168,6 +168,48 @@ The migrated resources also handle values differently:
     For example, `project_vpc_id` of a service without a VPC is null, so compare it with `null` instead of `""`:
     `aiven_pg.example.project_vpc_id == null`.
 
+### Service integrations and endpoints
+
+When upgrading `aiven_service_integration` and `aiven_service_integration_endpoint` from an SDKv2 release such as v4.65.1:
+
+| Configuration | First plan with the migrated provider |
+| --- | --- |
+| Every block stored in state is declared in the configuration | No migration-only change |
+| SDKv2 stored a block that the configuration omits, including a nested block | An in-place update removes that block from Terraform state |
+| An unused service name changes between `null` and `""` | At most an in-place state update; the integration is not replaced |
+| An expression reads an omitted block using `[0]` | The plan can fail with `Invalid index`; declare the block or read it from a data source |
+
+If the only changes are removed blocks, unused empty service names, or timeouts, applying the plan does not
+call the update API or wait for the integration to become active. Existing API settings and secrets stay unchanged.
+The next plan is empty. An actual change to an integration's service name, endpoint ID, type, or project still
+requires replacement. Changes to configured user config values still call the API.
+
+For example, `clickhouse_postgresql_user_config {}` may have a `databases` block in SDKv2 state because the API
+returned its default database. When no configured values change, the migrated provider removes that nested
+block from state without changing the databases exposed by the integration.
+
+To read settings that you do not manage in the resource configuration, use a data source:
+
+```hcl
+data "aiven_service_integration_endpoint" "datadog" {
+  project       = aiven_service_integration_endpoint.datadog.project
+  endpoint_name = aiven_service_integration_endpoint.datadog.endpoint_name
+}
+
+output "extra_tags_prefix" {
+  value = data.aiven_service_integration_endpoint.datadog.datadog_user_config[0].extra_tags_prefix
+}
+```
+
+For lists of blocks such as `datadog_tags` or `databases`, removing every block stops managing the list. When
+this is the only user config change, the provider sends no update request and keeps the remote settings.
+Changing remaining configured values still uses the normal API update operation. Keeping at least one block
+means Terraform manages the list: removing an individual entry updates the API, and externally added entries
+appear in the next plan. Scalar list attributes such as
+`exclude_topics` can be cleared explicitly with `exclude_topics = []`.
+
+States still using the v3 schema need the intermediate v4.65.1 refresh described in [Upgrade to v4](#upgrade-to-v4).
+
 ### Why it happens
 
 The Plugin Framework has no computed blocks, and Terraform requires the planned number of blocks to match the

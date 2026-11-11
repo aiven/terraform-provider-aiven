@@ -66,7 +66,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 - `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Integration destination endpoint ID. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.
-- `destination_service_name` (String) Destination service name. Maximum length: `64`. Changing this property forces recreation of the resource.
+- `destination_service_name` (String) Destination service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Maximum length: `64`.
 - `destination_service_project` (String) Destination service project name. Defaults to `project`. Maximum length: `63`. Changing this property forces recreation of the resource.
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
@@ -81,7 +81,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `rsyslog_user_config` (Block List, Max: 1) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--rsyslog_user_config))
 - `source_endpoint_id` (String) Integration source endpoint ID. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.
-- `source_service_name` (String) Source service name. Maximum length: `64`. Changing this property forces recreation of the resource.
+- `source_service_name` (String) Source service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Maximum length: `64`.
 - `source_service_project` (String) Source service project name. Defaults to `project`. Maximum length: `63`. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 

@@ -28,10 +28,10 @@ data "aiven_service_integration" "example_integration" {
 
 ### Optional
 
-- `destination_service_name` (String) Destination service name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
+- `destination_service_name` (String) Destination service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
 - `integration_id` (String) Integration ID. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
 - `integration_type` (String) Service integration type. The possible values are `alert_triage_kafka`, `alertmanager`, `autoscaler`, `caching`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datahub_metadata_ingestion`, `datasource`, `disaster_recovery`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `flink_external_postgresql`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_connect_postgresql`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `opentelemetry`, `pg_for_analytics_credentials`, `postgresql_clickhouse_cdc`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `service_composition`, `stresstester`, `thanos_distributed_query`, `thanos_migrate`, `thanos_object_storage`, `thanoscompactor`, `thanosquery`, `thanosruler`, `thanosstore`, `vector` and `vmalert`. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
-- `source_service_name` (String) Source service name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
+- `source_service_name` (String) Source service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Provide either `integration_id`, or all of `destination_service_name`, `integration_type` and `source_service_name` together.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

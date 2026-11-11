@@ -511,27 +511,27 @@ func TestKeepSetValues(t *testing.T) {
 
 	t.Run("nested block not set", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{"site": "datadoghq.com"}, got)
 	})
 
 	t.Run("no known value", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(sch, rsp, nil)
+		_, ok := keepSetValues(sch, rsp, nil, false)
 		assert.False(t, ok)
 	})
 
 	t.Run("nil response value", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{}, got)
 	})
 
 	t.Run("no schema", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(nil, rsp, rsp)
+		_, ok := keepSetValues(nil, rsp, rsp, false)
 		assert.False(t, ok)
 	})
 
@@ -541,8 +541,37 @@ func TestKeepSetValues(t *testing.T) {
 		got, ok := keepSetValues(tables, []any{
 			map[string]any{"name": "foo", "auto_offset_reset": "earliest"},
 			map[string]any{"name": "bar", "auto_offset_reset": "earliest"},
-		}, []any{map[string]any{"name": "foo"}})
+		}, []any{map[string]any{"name": "foo"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, []any{map[string]any{"name": "foo"}}, got)
 	})
+}
+
+func TestUnchangedUserConfig(t *testing.T) {
+	t.Parallel()
+	scalarList := &Schema{Type: SchemaTypeList, Computed: true, Items: &Schema{Type: SchemaTypeString}}
+	scalar := &Schema{Type: SchemaTypeBool, Computed: true}
+	objects := userConfigTestSchema().Properties["datadog_user_config"].Items.Properties["tables"]
+	foo := map[string]any{"name": "foo"}
+	bar := map[string]any{"name": "bar"}
+	for _, tc := range []struct {
+		name        string
+		sch         *Schema
+		plan, state any
+		unchanged   bool
+	}{
+		{"remove computed scalar", scalar, nil, true, true},
+		{"explicit false", scalar, false, true, false},
+		{"remove whole object list", objects, []any{}, []any{foo}, true},
+		{"remove one object", objects, []any{foo}, []any{foo, bar}, false},
+		{"reorder objects", objects, []any{bar, foo}, []any{foo, bar}, false},
+		{"clear scalar list", scalarList, []any{}, []any{"foo"}, false},
+		{"new explicit empty scalar list", scalarList, []any{}, nil, false},
+		{"keep empty scalar list", scalarList, []any{}, []any{}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.unchanged, unchangedUserConfig(tc.sch, tc.plan, tc.state))
+		})
+	}
 }

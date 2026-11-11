@@ -6,6 +6,9 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -16,6 +19,27 @@ type operation = func(context.Context, avngen.Client, adapter.ResourceData) erro
 
 func init() {
 	ResourceOptions.Create = adoptReadReplica(ResourceOptions.Create)
+	ResourceOptions.Update = adapter.UpdateUserConfig("integration_type", ResourceOptions.Update)
+	ResourceOptions.Schema = integrationSchema
+}
+
+// SDKv2 treated an unused null service name and "" as equivalent. Keep that
+// compatibility while replacing integrations whose actual service name changes.
+func integrationSchema(ctx context.Context) schema.Schema {
+	s := resourceSchema(ctx)
+	for _, name := range endpointFields {
+		attr := s.Attributes[name].(schema.StringAttribute)
+		// Resolve an unconfigured computed name before deciding replacement.
+		attr.PlanModifiers = append(attr.PlanModifiers, stringplanmodifier.RequiresReplaceIf(
+			func(_ context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
+				resp.RequiresReplace = req.PlanValue.IsUnknown() || req.StateValue.IsUnknown() ||
+					req.PlanValue.ValueString() != req.StateValue.ValueString()
+			}, "Changing the service name requires replacement; null and an empty string are equivalent.",
+			"Changing the service name requires replacement; null and an empty string are equivalent.",
+		))
+		s.Attributes[name] = attr
+	}
+	return s
 }
 
 var endpointFields = map[string]string{
@@ -26,6 +50,11 @@ var endpointFields = map[string]string{
 // expandModifier sends the endpoint IDs without the project.
 func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 	return func(_ adapter.ResourceData, dto map[string]any) error {
+		for _, name := range endpointFields {
+			if dto[name] == "" {
+				delete(dto, name)
+			}
+		}
 		for k := range endpointFields {
 			v, ok := dto[k].(string)
 			if !ok {
@@ -43,7 +72,7 @@ func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 }
 
 // flattenModifier sets either the endpoint ID ("project/endpoint_id") or the service name of each side.
-// The other field keeps its state value, unless it is empty.
+// Keep an unused service name's representation: a configured "" must stay "".
 func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 	return func(d adapter.ResourceData, dto map[string]any) error {
 		project := d.Get("project").(string)
@@ -60,7 +89,7 @@ func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
 
 			// An empty string would plan a replacement against a config without the field
 			for _, k := range []string{endpoint, svc} {
-				if _, ok := dto[k]; ok || d.Get(k) != "" {
+				if _, ok := dto[k]; ok || k == svc || d.Get(k) != "" {
 					continue
 				}
 				if err := d.Set(k, nil); err != nil {

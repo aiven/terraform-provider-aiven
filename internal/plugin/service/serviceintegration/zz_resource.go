@@ -47,9 +47,8 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"destination_service_name": schema.StringAttribute{
-				MarkdownDescription: "Destination service name. Maximum length: `64`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Destination service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Maximum length: `64`.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
 			"destination_service_project": schema.StringAttribute{
@@ -98,9 +97,9 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"source_service_name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Source service name. Maximum length: `64`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Source service name. Changing the service name forces recreation. An empty string is equivalent to an unset name. Maximum length: `64`.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},
 			"source_service_project": schema.StringAttribute{
