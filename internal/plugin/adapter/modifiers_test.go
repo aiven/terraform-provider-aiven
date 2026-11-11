@@ -234,12 +234,17 @@ func userConfigTestSchema() *Schema {
 	object := func(props map[string]*Schema) *Schema {
 		return &Schema{Type: SchemaTypeList, IsObject: true, Computed: true, Items: &Schema{Type: SchemaTypeObject, Properties: props}}
 	}
+	userConfig := func(props map[string]*Schema) *Schema {
+		s := object(props)
+		s.IsUserConfig = true
+		return s
+	}
 	return &Schema{
 		Type: SchemaTypeObject,
 		Properties: map[string]*Schema{
 			"id":            {Type: SchemaTypeString, Computed: true},
 			"endpoint_type": {Type: SchemaTypeString},
-			"datadog_user_config": object(map[string]*Schema{
+			"datadog_user_config": userConfig(map[string]*Schema{
 				"site":            {Type: SchemaTypeString, Computed: true},
 				"max_jmx_metrics": {Type: SchemaTypeInt, Computed: true},
 				"datadog_tags":    {Type: SchemaTypeList, Computed: true, Items: &Schema{Type: SchemaTypeString}},
@@ -265,7 +270,7 @@ func userConfigTestSchema() *Schema {
 					"pshard_stats_enabled": {Type: SchemaTypeBool, Computed: true},
 				}),
 			}),
-			"rsyslog_user_config": object(map[string]*Schema{
+			"rsyslog_user_config": userConfig(map[string]*Schema{
 				"server": {Type: SchemaTypeString, Computed: true},
 			}),
 		},

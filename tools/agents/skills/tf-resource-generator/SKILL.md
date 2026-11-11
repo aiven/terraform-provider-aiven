@@ -379,8 +379,8 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
   or the state are dropped, e.g. a default list item. On Read, a nonempty list keeps them, so the plan shows
   the objects added outside of Terraform. Data sources keep all the options. Import sets no user config.
 - The blocks are computed: the API keeps the options removed from the config, so the options are
-  Optional + Computed with `UseStateForUnknown`. Removing every block of an option changes only the state,
-  see `withoutRemovedBlocks`. The options of list objects don't keep their state:
+  Optional + Computed with `UseStateForUnknown`. The resource blocks get `IsUserConfig`, so removing every block
+  of an option changes only the state, see `withoutRemovedBlocks`. The options of list objects don't keep their state:
   the framework matches list objects by index, so removing one would pass its state to the next one.
   API defaults go to the docs only.
 - Field names and types match SDKv2, so its state still decodes:

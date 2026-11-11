@@ -369,6 +369,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 		if item.RendersAsAttribute(def, entity) {
 			params[jen.Id("IsAttribute")] = jen.True()
 		}
+
+		if entity.isResource() && item.UserConfigType != "" {
+			params[jen.Id("IsUserConfig")] = jen.True()
+		}
 	}
 
 	sch := s.Clone().Values(params)

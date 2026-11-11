@@ -416,7 +416,7 @@ func (d *resourceData) isUnchanged() bool {
 		switch {
 		case sch.Computed && !ok:
 			delete(state, k)
-		case ok && isUserConfigBlock(k):
+		case ok && sch.IsUserConfig:
 			state[k] = withoutRemovedBlocks(sch, v, state[k])
 		}
 	}

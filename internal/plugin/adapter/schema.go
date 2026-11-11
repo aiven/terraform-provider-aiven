@@ -47,4 +47,8 @@ type Schema struct {
 	// Because we can't distinguish between zero values and missing values in the SDKv2 state,
 	// this flag allows such cases to be ignored.
 	ZeroNotAllowed bool
+
+	// IsUserConfig marks a user config block of a resource. The API merges it on update: the options missing
+	// in the request keep their values, so removing its nested blocks changes only the state, see withoutRemovedBlocks.
+	IsUserConfig bool
 }

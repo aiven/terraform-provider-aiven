@@ -84,6 +84,37 @@ func TestGenSchemaInternalMarksReadOnlyCollectionsAsAttributes(t *testing.T) {
 	require.Contains(t, got, `"application_versions": &adapter.Schema{ Computed: true, IsAttribute: true,`)
 }
 
+// Only the resource's user config block is marked, not its nested blocks or the data source's block.
+func TestGenSchemaInternalMarksUserConfig(t *testing.T) {
+	userConfig := &Item{
+		Name:           "datadog_user_config",
+		Type:           SchemaTypeObject,
+		UserConfigType: "datadog",
+		Computed:       true,
+		Properties: map[string]*Item{
+			"opensearch": {
+				Name:       "opensearch",
+				Type:       SchemaTypeObject,
+				Computed:   true,
+				Properties: map[string]*Item{"enabled": {Name: "enabled", Type: SchemaTypeBoolean, Computed: true}},
+			},
+		},
+	}
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{"datadog_user_config": userConfig}}
+	setParents(root, nil)
+
+	for _, entity := range []entityType{resourceType, datasourceType} {
+		code, err := genSchemaInternal(&Definition{Resource: &SchemaMeta{}, Datasource: &SchemaMeta{}}, entity, root)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		if entity == resourceType {
+			require.Equal(t, 1, strings.Count(got, "IsUserConfig: true"))
+		} else {
+			require.NotContains(t, got, "IsUserConfig")
+		}
+	}
+}
+
 // A configurable object stays a block, and keeps the singleton validator.
 func TestGenSchemaAddsSingletonValidatorForOptionalObjectBlocks(t *testing.T) {
 	got := genResourceSchemaCode(t, rootWithObject(&Item{

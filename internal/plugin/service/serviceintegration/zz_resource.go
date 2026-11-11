@@ -1117,8 +1117,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeBool,
 			},
 			"clickhouse_credentials_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"grants": &adapter.Schema{
@@ -1139,8 +1140,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"clickhouse_kafka_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"tables": &adapter.Schema{
@@ -1330,8 +1332,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"clickhouse_postgresql_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"databases": &adapter.Schema{
@@ -1359,8 +1362,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"datadog_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1552,8 +1556,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:     adapter.SchemaTypeString,
 			},
 			"external_aws_cloudwatch_logs_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"selected_log_fields": &adapter.Schema{
@@ -1569,8 +1574,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"external_aws_cloudwatch_metrics_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1604,8 +1610,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"external_elasticsearch_logs_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"selected_log_fields": &adapter.Schema{
@@ -1621,8 +1628,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"external_opensearch_logs_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"selected_log_fields": &adapter.Schema{
@@ -1638,8 +1646,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"flink_external_postgresql_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"stringtype": &adapter.Schema{
@@ -1660,8 +1669,9 @@ func resourceSchemaInternal() *adapter.Schema {
 			},
 			"integration_type": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"kafka_connect_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"kafka_connect": &adapter.Schema{
@@ -1696,8 +1706,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"kafka_logs_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1719,8 +1730,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"kafka_mirrormaker_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1808,8 +1820,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"logs_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1837,8 +1850,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"metrics_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{
@@ -1948,8 +1962,9 @@ func resourceSchemaInternal() *adapter.Schema {
 			},
 			"project": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"prometheus_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"source_mysql": &adapter.Schema{
@@ -2040,8 +2055,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"rsyslog_user_config": &adapter.Schema{
-				Computed: true,
-				IsObject: true,
+				Computed:     true,
+				IsObject:     true,
+				IsUserConfig: true,
 				Items: &adapter.Schema{
 					Computed: true,
 					Properties: map[string]*adapter.Schema{"escape_newlines": &adapter.Schema{

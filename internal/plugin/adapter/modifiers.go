@@ -256,8 +256,7 @@ func keepSetItems(sch *Schema, rsp, known any, grow bool) []any {
 
 // withoutRemovedBlocks returns the state of a user config block with the plan's value of each option
 // that is a block or a list of blocks the plan leaves empty, e.g., the default clickhouse_postgresql databases.
-// Expand doesn't send these options, and the API keeps the options missing in the request,
-// so removing them changes only the state, as in SDKv2.
+// Expand doesn't send these options, and the API keeps them, so removing them changes only the state, as in SDKv2.
 // The nested blocks aren't checked: Expand sends their option whole.
 func withoutRemovedBlocks(sch *Schema, plan, state any) any {
 	p, _ := asAnySlice(plan)
