@@ -174,7 +174,7 @@ func FlattenUserConfig(discriminator string) MapModifier {
 		}
 
 		if d.IsResource() {
-			if v, ok := keepSetValues(sch, config, d.Get(name)); ok {
+			if v, ok := keepSetValues(sch, config, d.Get(name), d.(*resourceData).plan == nil); ok {
 				dto[name] = v
 			}
 			return nil
@@ -190,7 +190,7 @@ func FlattenUserConfig(discriminator string) MapModifier {
 // keepSetValues returns the response value with only the object fields set in known,
 // the plan or the state value of the same schema. The objects of a list are matched by index.
 // Other lists, sets and maps are kept whole. Returns false when known is not set.
-func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
+func keepSetValues(sch *Schema, rsp, known any, reading bool) (any, bool) {
 	if sch == nil {
 		return nil, false
 	}
@@ -209,7 +209,7 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 
 	switch {
 	case sch.Type == SchemaTypeList && sch.Items != nil && sch.Items.Type == SchemaTypeObject:
-		return keepSetItems(sch.Items, rsp, known), true
+		return keepSetItems(sch.Items, rsp, known, reading), true
 	case sch.Type != SchemaTypeObject:
 		return rsp, true
 	}
@@ -221,7 +221,7 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 		if v == nil {
 			continue
 		}
-		if v, ok := keepSetValues(sch.Properties[k], v, knownObj[k]); ok {
+		if v, ok := keepSetValues(sch.Properties[k], v, knownObj[k], reading); ok {
 			result[k] = v
 		}
 	}
@@ -229,14 +229,23 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 }
 
 // keepSetItems filters each response object by the known object of the same index.
-// The response objects without a known one are dropped, e.g. the default clickhouse_postgresql databases.
-func keepSetItems(sch *Schema, rsp, known any) []any {
+// An absent list stays absent, e.g. the default clickhouse_postgresql databases.
+// On Read, keep additions to a managed list so Terraform can detect external changes.
+// During apply, only the planned blocks may be written to state.
+func keepSetItems(sch *Schema, rsp, known any, reading bool) []any {
 	rspList, _ := asAnySlice(rsp)
 	knownList, _ := asAnySlice(known)
-	result := make([]any, min(len(rspList), len(knownList)))
+	n := min(len(rspList), len(knownList))
+	if reading && len(knownList) > 0 {
+		n = len(rspList)
+	}
+	result := make([]any, n)
 	for i := range result {
 		result[i] = rspList[i]
-		if kept, ok := keepSetValues(sch, rspList[i], knownList[i]); ok {
+		if i >= len(knownList) {
+			continue
+		}
+		if kept, ok := keepSetValues(sch, rspList[i], knownList[i], reading); ok {
 			result[i] = kept
 		}
 	}

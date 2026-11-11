@@ -511,27 +511,27 @@ func TestKeepSetValues(t *testing.T) {
 
 	t.Run("nested block not set", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{"site": "datadoghq.com"}, got)
 	})
 
 	t.Run("no known value", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(sch, rsp, nil)
+		_, ok := keepSetValues(sch, rsp, nil, false)
 		assert.False(t, ok)
 	})
 
 	t.Run("nil response value", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{}, got)
 	})
 
 	t.Run("no schema", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(nil, rsp, rsp)
+		_, ok := keepSetValues(nil, rsp, rsp, false)
 		assert.False(t, ok)
 	})
 
@@ -541,8 +541,77 @@ func TestKeepSetValues(t *testing.T) {
 		got, ok := keepSetValues(tables, []any{
 			map[string]any{"name": "foo", "auto_offset_reset": "earliest"},
 			map[string]any{"name": "bar", "auto_offset_reset": "earliest"},
-		}, []any{map[string]any{"name": "foo"}})
+		}, []any{map[string]any{"name": "foo"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, []any{map[string]any{"name": "foo"}}, got)
 	})
+}
+
+// An explicitly managed list must expose external additions on refresh, while
+// apply still writes only the planned blocks and unconfigured lists stay absent.
+func TestFlattenUserConfigListDrift(t *testing.T) {
+	t.Parallel()
+	foo := map[string]any{"name": "foo"}
+	bar := map[string]any{"name": "bar", "auto_offset_reset": "earliest"}
+	apiTables := []any{map[string]any{"name": "foo", "auto_offset_reset": "earliest"}, bar}
+	for _, tc := range []struct {
+		name                  string
+		applying              bool
+		known, response, want map[string]any
+	}{
+		{
+			name:     "refresh exposes extra list objects",
+			known:    map[string]any{"tables": []any{foo}},
+			response: map[string]any{"tables": apiTables},
+			want:     map[string]any{"tables": []any{foo, bar}},
+		},
+		{
+			name:     "refresh exposes extra nested list objects",
+			known:    map[string]any{"tables": []any{map[string]any{"name": "foo", "topics": []any{foo}}}},
+			response: map[string]any{"tables": []any{map[string]any{"name": "foo", "topics": []any{foo, map[string]any{"name": "bar", "partition": 1}}}}},
+			want:     map[string]any{"tables": []any{map[string]any{"name": "foo", "topics": []any{foo, map[string]any{"name": "bar", "partition": 1}}}}},
+		},
+		{
+			name:     "apply preserves the planned list length",
+			applying: true,
+			known:    map[string]any{"tables": []any{foo}},
+			response: map[string]any{"tables": apiTables},
+			want:     map[string]any{"tables": []any{foo}},
+		},
+		{
+			name:     "refresh leaves an empty list empty",
+			known:    map[string]any{"tables": []any{}},
+			response: map[string]any{"tables": apiTables},
+			want:     map[string]any{"tables": []any{}},
+		},
+		{
+			name:     "refresh leaves an absent list absent",
+			known:    map[string]any{},
+			response: map[string]any{"tables": apiTables},
+			want:     map[string]any{},
+		},
+		{
+			name:     "refresh exposes removed list objects",
+			known:    map[string]any{"tables": []any{foo, bar}},
+			response: map[string]any{"tables": []any{foo}},
+			want:     map[string]any{"tables": []any{foo}},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			known := map[string]any{
+				"endpoint_type":       "datadog",
+				"datadog_user_config": []any{tc.known},
+			}
+			option := WithTestState(known)
+			if tc.applying {
+				option = WithTestPlan(known)
+			}
+			d, err := NewResourceData(userConfigTestSchema(), nil, option)
+			require.NoError(t, err)
+			dto := map[string]any{"endpoint_type": "datadog", "user_config": tc.response}
+			require.NoError(t, FlattenUserConfig("endpoint_type")(d, dto))
+			assert.Equal(t, tc.want, dto["datadog_user_config"])
+		})
+	}
 }
