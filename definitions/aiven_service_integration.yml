@@ -86,6 +86,10 @@ schema:
     pattern: ^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$
   destination_endpoint_name:
     useStateForUnknown: true
+  destination_service_name:
+    description: Destination service name. Changing the service name forces recreation. An empty string is equivalent to an unset name.
+    # Handwritten schema modifier preserves SDKv2 null/empty equivalence.
+    forceNew: false
   # The API defaults the projects to the integration project
   destination_service_project:
     description: Destination service project name. Defaults to `project`.
@@ -103,6 +107,8 @@ schema:
     computed: true
     useStateForUnknown: true
   source_service_name:
+    description: Source service name. Changing the service name forces recreation. An empty string is equivalent to an unset name.
+    forceNew: false
     # Required by the data source lookup only
     required: false
     optional: true

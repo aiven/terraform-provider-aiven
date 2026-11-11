@@ -168,6 +168,17 @@ The migrated resources also handle values differently:
     For example, `project_vpc_id` of a service without a VPC is null, so compare it with `null` instead of `""`:
     `aiven_pg.example.project_vpc_id == null`.
 
+### Empty service integration names
+
+An `aiven_service_integration` connected to an endpoint may set the unused `source_service_name` or
+`destination_service_name` to `""`. SDKv2 can store that name as `null` even when the configuration sets `""`.
+After upgrading, the first plan may show an in-place update to store the configured empty string. When this
+is the only change, applying the plan updates only Terraform state, without calling the update API or waiting
+for the integration to become active. The next plan is empty.
+
+An empty unused service name does not force replacement. Changing an actual service name still does,
+and changes to configured user config values still call the API.
+
 ### Why it happens
 
 The Plugin Framework has no computed blocks, and Terraform requires the planned number of blocks to match the

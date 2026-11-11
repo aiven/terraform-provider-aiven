@@ -22,6 +22,10 @@ nav_order: 1
   To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
+- Preserve SDKv2 compatibility for empty `source_service_name` and `destination_service_name`
+  in `aiven_service_integration`. When only an unused name changes between unset and `""`, the provider updates Terraform
+  state without recreating the integration, calling the update API, or waiting for the integration to become active.
+  Changing an actual service name still requires replacement.
 - **IMPORTANT**: `aiven_aws_vpc_peering_connection` resource and data source require a nonempty `aws_vpc_region`. Before
   upgrading, replace `""` with the connection's region from the state. Changing the region replaces the connection.
   Resource IDs don't change.
