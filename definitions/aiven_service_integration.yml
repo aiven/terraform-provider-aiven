@@ -84,6 +84,7 @@ schema:
   destination_endpoint_id:
     maxLength: 100
     pattern: ^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$
+    conflictsWith: [destination_service_name]
   destination_endpoint_name:
     useStateForUnknown: true
   # The API defaults the projects to the integration project
@@ -96,6 +97,7 @@ schema:
   source_endpoint_id:
     maxLength: 100
     pattern: ^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$
+    conflictsWith: [source_service_name]
   source_endpoint_name:
     useStateForUnknown: true
   source_service_project:

@@ -22,6 +22,9 @@ nav_order: 1
   To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
+- **IMPORTANT**: `aiven_service_integration` fails the plan when one side sets both an endpoint ID and a service name,
+  e.g., `destination_endpoint_id` with `destination_service_name = ""`. Before upgrading, remove the service name from
+  that side.
 - **IMPORTANT**: `aiven_aws_vpc_peering_connection` resource and data source require a nonempty `aws_vpc_region`. Before
   upgrading, replace `""` with the connection's region from the state. Changing the region replaces the connection.
   Resource IDs don't change.

@@ -28,7 +28,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"destination_endpoint_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Integration destination endpoint ID.",
+				MarkdownDescription: "Integration destination endpoint ID. The field conflicts with `destination_service_name`.",
 			},
 			"destination_endpoint_name": schema.StringAttribute{
 				Computed:            true,
@@ -69,7 +69,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"source_endpoint_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Integration source endpoint ID.",
+				MarkdownDescription: "Integration source endpoint ID. The field conflicts with `source_service_name`.",
 			},
 			"source_endpoint_name": schema.StringAttribute{
 				Computed:            true,

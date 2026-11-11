@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -36,10 +37,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"destination_endpoint_id": schema.StringAttribute{
-				MarkdownDescription: "Integration destination endpoint ID. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Integration destination endpoint ID. The field conflicts with `destination_service_name`. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Validators:          []validator.String{stringvalidator.LengthAtMost(100), stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$\"")},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(100), stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$\""), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("destination_service_name"))},
 			},
 			"destination_endpoint_name": schema.StringAttribute{
 				Computed:            true,
@@ -86,10 +87,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 			},
 			"source_endpoint_id": schema.StringAttribute{
-				MarkdownDescription: "Integration source endpoint ID. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Integration source endpoint ID. The field conflicts with `source_service_name`. Maximum length: `100`. Must match pattern: `^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
-				Validators:          []validator.String{stringvalidator.LengthAtMost(100), stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$\"")},
+				Validators:          []validator.String{stringvalidator.LengthAtMost(100), stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$\""), stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("source_service_name"))},
 			},
 			"source_endpoint_name": schema.StringAttribute{
 				Computed:            true,
