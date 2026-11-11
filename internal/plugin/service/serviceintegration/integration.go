@@ -15,6 +15,7 @@ import (
 type operation = func(context.Context, avngen.Client, adapter.ResourceData) error
 
 func init() {
+	ResourceOptions.Update = adapter.UpdateUserConfig("integration_type", ResourceOptions.Update)
 	ResourceOptions.Create = adoptReadReplica(ResourceOptions.Create)
 }
 

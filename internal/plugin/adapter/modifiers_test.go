@@ -546,3 +546,32 @@ func TestKeepSetValues(t *testing.T) {
 		assert.Equal(t, []any{map[string]any{"name": "foo"}}, got)
 	})
 }
+
+func TestUnchangedUserConfig(t *testing.T) {
+	t.Parallel()
+	scalarList := &Schema{Type: SchemaTypeList, Computed: true, Items: &Schema{Type: SchemaTypeString}}
+	scalar := &Schema{Type: SchemaTypeBool, Computed: true}
+	objects := userConfigTestSchema().Properties["datadog_user_config"].Items.Properties["tables"]
+	foo := map[string]any{"name": "foo"}
+	bar := map[string]any{"name": "bar"}
+	for _, tc := range []struct {
+		name        string
+		sch         *Schema
+		plan, state any
+		unchanged   bool
+	}{
+		{"remove computed scalar", scalar, nil, true, true},
+		{"explicit false", scalar, false, true, false},
+		{"remove whole object list", objects, []any{}, []any{foo}, true},
+		{"remove one object", objects, []any{foo}, []any{foo, bar}, false},
+		{"reorder objects", objects, []any{bar, foo}, []any{foo, bar}, false},
+		{"clear scalar list", scalarList, []any{}, []any{"foo"}, false},
+		{"new explicit empty scalar list", scalarList, []any{}, nil, false},
+		{"keep empty scalar list", scalarList, []any{}, []any{}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.unchanged, unchangedUserConfig(tc.sch, tc.plan, tc.state))
+		})
+	}
+}

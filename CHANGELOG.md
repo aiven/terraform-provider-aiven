@@ -15,11 +15,12 @@ nav_order: 1
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
   When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
-  and `aiven_service_integration_endpoint` that remove a user config block. This happens when the configuration
-  has no such block but the API returns one, e.g., a `datadog_user_config` removed from the configuration after
-  the create, which SDKv2 kept in the state. Applying the plan is safe: the provider updates only the state
-  and doesn't call the API, so the settings in Aiven, including secrets such as the Datadog API key, don't change.
-  To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
+  and `aiven_service_integration_endpoint` that remove user config blocks, including nested blocks. This happens when
+  the configuration omits blocks that SDKv2 stored from an API response. When these are the only changes, applying
+  the plan updates only Terraform state and skips the update API and readiness wait. Settings in Aiven, including secrets
+  such as the Datadog API key, stay unchanged. To manage these settings in Terraform, declare the blocks
+  in the configuration. Removing individual entries from a list that remains configured, or changing configured values,
+  still uses the normal API update operation. See [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.
 - **IMPORTANT**: `aiven_aws_vpc_peering_connection` resource and data source require a nonempty `aws_vpc_region`. Before

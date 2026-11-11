@@ -3,6 +3,7 @@ package adapter
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -10,6 +11,63 @@ import (
 )
 
 type MapModifier func(d ResourceData, dto map[string]any) error
+
+// UpdateUserConfig wraps an Update whose only mutable API field is user_config.
+// Removing a computed block only changes Terraform state, including nested SDKv2
+// defaults. ErrNoChanges also skips the post-update readiness waiter.
+func UpdateUserConfig(discriminator string, update func(context.Context, avngen.Client, ResourceData) error) func(context.Context, avngen.Client, ResourceData) error {
+	return func(ctx context.Context, client avngen.Client, d ResourceData) error {
+		block := userConfigBlock(fmt.Sprint(d.Get(discriminator)))
+		sch, ok := d.Schema().Properties[block]
+		if !ok || unchangedUserConfig(sch, d.Get(block), d.GetState(block)) {
+			return ErrNoChanges
+		}
+		return update(ctx, client, d)
+	}
+}
+
+// unchangedUserConfig ignores absent computed values and wholly removed blocks.
+// A retained list must still match in full: deleting one of its objects is an API
+// change, as is an explicit empty scalar list. Do not truncate lists to compare them.
+func unchangedUserConfig(sch *Schema, plan, state any) bool {
+	if sch == nil {
+		return reflect.DeepEqual(plan, state)
+	}
+	if sch.Computed && plan == nil {
+		return true
+	}
+	switch sch.Type {
+	case SchemaTypeObject:
+		p, _ := asAnyMap(plan)
+		s, _ := asAnyMap(state)
+		for name, prop := range sch.Properties {
+			if !unchangedUserConfig(prop, p[name], s[name]) {
+				return false
+			}
+		}
+		return true
+	case SchemaTypeList:
+		p, _ := asAnySlice(plan)
+		s, _ := asAnySlice(state)
+		if len(p) == 0 && sch.Computed && !sch.IsAttribute && sch.Items != nil && sch.Items.Type == SchemaTypeObject {
+			return true
+		}
+		if (plan == nil) != (state == nil) {
+			return false
+		}
+		if len(p) != len(s) {
+			return false
+		}
+		for i := range p {
+			if !unchangedUserConfig(sch.Items, p[i], s[i]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(plan, state)
+	}
+}
 
 func ComposeMapModifiers(modifiers ...MapModifier) MapModifier {
 	return func(d ResourceData, dto map[string]any) error {

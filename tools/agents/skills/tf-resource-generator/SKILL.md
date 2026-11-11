@@ -377,6 +377,11 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
 - The API returns the defaults too. For resources, Flatten keeps only the options set in the plan or the state,
   and no block when none is set. The objects of a list are matched by index, the objects beyond the plan
   or the state are dropped, e.g. a default list item. Data sources keep all the options. Import sets no user config.
+- For an Update whose only mutable API field is `user_config`, wrap `ResourceOptions.Update` with
+  `adapter.UpdateUserConfig(discriminator, ResourceOptions.Update)` in handwritten code. This skips API writes
+  and readiness waits when only top-level or nested blocks are removed from state. It still sends genuine
+  value changes, individual object-list removals, and explicit empty scalar lists. Do not use the wrapper on
+  an Update that also changes other API fields.
 - The blocks are computed: the API keeps the options removed from the config, so the options are
   Optional + Computed with `UseStateForUnknown`. The options of list objects don't keep their state:
   the framework matches list objects by index, so removing one would pass its state to the next one.

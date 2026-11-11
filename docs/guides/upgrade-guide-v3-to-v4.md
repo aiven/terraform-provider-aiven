@@ -168,6 +168,24 @@ The migrated resources also handle values differently:
     For example, `project_vpc_id` of a service without a VPC is null, so compare it with `null` instead of `""`:
     `aiven_pg.example.project_vpc_id == null`.
 
+### Nested service integration configuration blocks
+
+When upgrading `aiven_service_integration` or `aiven_service_integration_endpoint` from an SDKv2 release such
+as v4.65.1, the first plan can remove nested user config blocks that are absent from the configuration.
+For example, `clickhouse_postgresql_user_config {}` can have a `databases` block in SDKv2 state because the
+API returned the default `defaultdb` database and `public` schema.
+
+When these removed blocks are the only changes, applying the plan updates Terraform state without calling
+the update API or waiting for the integration to become active. The settings in Aiven stay unchanged,
+and the next plan is empty. Declare the nested blocks explicitly to keep managing those settings in Terraform.
+
+Removing every block of a list such as `databases` or `datadog_tags` stops managing that list. When this is
+the only user config change, the provider keeps the remote settings and sends no update request. This rule
+also applies to blocks that were previously configured explicitly, because the state does not distinguish
+them from API defaults. Removing individual entries while keeping at least one block, or changing other
+configured values, still uses the normal API update operation. Scalar list attributes such as `exclude_topics`
+can be cleared explicitly with `exclude_topics = []`.
+
 ### Why it happens
 
 The Plugin Framework has no computed blocks, and Terraform requires the planned number of blocks to match the
