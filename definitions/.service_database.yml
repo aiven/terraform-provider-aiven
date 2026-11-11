@@ -1,0 +1,20 @@
+# The schema the service databases share, except aiven_clickhouse_database, which has its own API.
+# A definition includes it and adds its descriptions, refs, removals and the read operation,
+# because `ServiceDatabaseList` paginates PostgreSQL only.
+clientHandler: service
+identityFields: [project, service_name, database_name]
+legacyTimeouts: true
+resource:
+  refreshState: true
+  deleteState: true
+  removeMissing: true
+  alreadyExists: check
+  terminationProtection: true
+rename:
+  dbname: database_name # ServiceDatabaseDelete path param is "dbname"
+  database: database_name
+operations:
+  - id: ServiceDatabaseCreate
+    type: create
+  - id: ServiceDatabaseDelete
+    type: delete

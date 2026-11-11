@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -394,25 +395,69 @@ func pagedDefinition() *Definition {
 func TestGenConflictOptions(t *testing.T) {
 	t.Parallel()
 
+	unpaged := func(def *Definition) {
+		def.Resource = &SchemaMeta{AlreadyExists: AlreadyExistsCheck}
+		def.Operations[0].Pagination = nil
+		def.Operations[0].ResultKey = "databases"
+	}
 	cases := []struct {
 		name    string
 		setup   func(def *Definition)
 		wantErr string
 	}{
 		{
-			name:    "no pagination",
-			setup:   func(def *Definition) { def.Operations[0].Pagination = nil },
-			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+			name:  "paginated",
+			setup: func(*Definition) {},
+		},
+		{
+			name:  "no pagination",
+			setup: unpaged,
+		},
+		{
+			name: "no pagination without resultKey",
+			setup: func(def *Definition) {
+				unpaged(def)
+				def.Operations[0].ResultKey = ""
+			},
+			wantErr: `"ServiceDatabaseList" needs resultKey`,
+		},
+		{
+			name: "two list reads without pagination",
+			setup: func(def *Definition) {
+				unpaged(def)
+				dup := *def.Operations[0]
+				dup.ID = "ServiceDatabaseList2"
+				def.Operations = append(def.Operations, &dup)
+			},
+			wantErr: "only one read operation with resultListLookupKeys is supported",
+		},
+		{
+			name: "skips datasource lookup",
+			setup: func(def *Definition) {
+				unpaged(def)
+				dup := *def.Operations[0]
+				dup.ID = "ServiceDatabaseList2"
+				dup.DatasourceLookup = true
+				def.Operations = append(def.Operations, &dup)
+			},
 		},
 		{
 			name:    "disabled view",
 			setup:   func(def *Definition) { def.Operations[0].DisableView = true },
-			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+			wantErr: "requires a read operation with resultListLookupKeys",
 		},
 		{
 			name:    "no lookup keys",
 			setup:   func(def *Definition) { def.Operations[0].ResultListLookupKeys = nil },
-			wantErr: "requires a read operation with pagination and resultListLookupKeys",
+			wantErr: "requires a read operation with resultListLookupKeys",
+		},
+		{
+			name: "no lookup keys without pagination",
+			setup: func(def *Definition) {
+				unpaged(def)
+				def.Operations[0].ResultListLookupKeys = nil
+			},
+			wantErr: "requires a read operation with resultListLookupKeys",
 		},
 		{
 			name: "two paginated operations",
@@ -429,10 +474,32 @@ func TestGenConflictOptions(t *testing.T) {
 			t.Parallel()
 			def := pagedDefinition()
 			tc.setup(def)
-			_, err := genConflictOptions(def, &Item{})
-			require.ErrorContains(t, err, tc.wantErr)
+			got, err := genConflictOptions(def, &Item{})
+			if tc.wantErr != "" {
+				require.ErrorContains(t, err, tc.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			require.Contains(t, fmt.Sprintf("%#v", got), "ConflictList(pageView, pageMatch)")
 		})
 	}
+}
+
+func TestGenPageView_SinglePage(t *testing.T) {
+	t.Parallel()
+
+	def := pagedDefinition()
+	def.ClientHandler = "service"
+	op := def.Operations[0]
+	op.Pagination = nil
+	op.ResultKey = "databases"
+	op.ResultKeyField = "Databases"
+
+	got := fmt.Sprintf("%#v", genPageView(def, &Item{}, op))
+	require.Contains(t, got, "func(string) ([]service.DatabaseOut, *string, error)")
+	require.Contains(t, got, "client.ServiceDatabaseList(ctx)")
+	require.Contains(t, got, "return rsp.Databases, nil, nil")
+	require.NotContains(t, got, "QueryParams")
 }
 
 func TestGenPageMatch_UnknownLookupAttribute(t *testing.T) {
