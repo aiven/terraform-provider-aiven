@@ -26,6 +26,10 @@ var (
 
 	// ErrTemplateHeaderNotFound indicates that template header is missing in the file.
 	ErrTemplateHeaderNotFound = fmt.Errorf("template header '%s' not found", changelogHeader)
+
+	// continuationRegex matches an indented line that isn't a list item: GitHub renders newlines
+	// in PR bodies and release notes as hard breaks, so wrapped lines are joined.
+	continuationRegex = regexp.MustCompile(`\n[ \t]+([^-*+\s]|[-*+]\S)`)
 )
 
 // Update adds a new version entry to the specified file, inserting it below the template header.
@@ -147,7 +151,7 @@ func Extract(filePath, version string) error {
 	}
 
 	// print the final content directly to stdout
-	fmt.Println(trimmedContent)
+	fmt.Println(continuationRegex.ReplaceAllString(trimmedContent, " $1"))
 
 	return nil
 }
