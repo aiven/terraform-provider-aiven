@@ -124,7 +124,13 @@ func TestExtract(t *testing.T) {
 
 ### Features
 
-- Added a major new feature.
+- Added a major new feature
+  that wraps onto
+  three lines.
+  - A nested item
+    that wraps too.
+- Pass the
+  --verbose flag.
 
 ## [1.1.0] - 2025-04-15
 
@@ -147,7 +153,7 @@ func TestExtract(t *testing.T) {
 		errContains      string
 	}{
 		{
-			name:             "extract top version with multiple sections",
+			name:             "extract top version with multiple sections and wrapped lines",
 			versionToExtract: "2.0.0",
 			expectedOutput: `### BREAKING CHANGES
 
@@ -155,7 +161,9 @@ func TestExtract(t *testing.T) {
 
 ### Features
 
-- Added a major new feature.`,
+- Added a major new feature that wraps onto three lines.
+  - A nested item that wraps too.
+- Pass the --verbose flag.`,
 		},
 		{
 			name:             "extract middle version",
