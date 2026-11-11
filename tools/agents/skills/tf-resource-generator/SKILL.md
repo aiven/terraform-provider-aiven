@@ -376,9 +376,11 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
   `adapter.ValidateUserConfig`.
 - The API returns the defaults too. For resources, Flatten keeps only the options set in the plan or the state,
   and no block when none is set. The objects of a list are matched by index, the objects beyond the plan
-  or the state are dropped, e.g. a default list item. Data sources keep all the options. Import sets no user config.
+  or the state are dropped, e.g. a default list item. On Read, a nonempty list keeps them, so the plan shows
+  the objects added outside of Terraform. Data sources keep all the options. Import sets no user config.
 - The blocks are computed: the API keeps the options removed from the config, so the options are
-  Optional + Computed with `UseStateForUnknown`. The options of list objects don't keep their state:
+  Optional + Computed with `UseStateForUnknown`. Removing every block of an option changes only the state,
+  see `withoutRemovedBlocks`. The options of list objects don't keep their state:
   the framework matches list objects by index, so removing one would pass its state to the next one.
   API defaults go to the docs only.
 - Field names and types match SDKv2, so its state still decodes:

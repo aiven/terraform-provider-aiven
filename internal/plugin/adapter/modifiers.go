@@ -3,6 +3,7 @@ package adapter
 import (
 	"context"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -174,7 +175,7 @@ func FlattenUserConfig(discriminator string) MapModifier {
 		}
 
 		if d.IsResource() {
-			if v, ok := keepSetValues(sch, config, d.Get(name)); ok {
+			if v, ok := keepSetValues(sch, config, d.Get(name), !d.hasPlan()); ok {
 				dto[name] = v
 			}
 			return nil
@@ -190,7 +191,8 @@ func FlattenUserConfig(discriminator string) MapModifier {
 // keepSetValues returns the response value with only the object fields set in known,
 // the plan or the state value of the same schema. The objects of a list are matched by index.
 // Other lists, sets and maps are kept whole. Returns false when known is not set.
-func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
+// With grow, a nonempty list keeps the response objects beyond known, see keepSetItems.
+func keepSetValues(sch *Schema, rsp, known any, grow bool) (any, bool) {
 	if sch == nil {
 		return nil, false
 	}
@@ -209,7 +211,7 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 
 	switch {
 	case sch.Type == SchemaTypeList && sch.Items != nil && sch.Items.Type == SchemaTypeObject:
-		return keepSetItems(sch.Items, rsp, known), true
+		return keepSetItems(sch.Items, rsp, known, grow), true
 	case sch.Type != SchemaTypeObject:
 		return rsp, true
 	}
@@ -221,7 +223,7 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 		if v == nil {
 			continue
 		}
-		if v, ok := keepSetValues(sch.Properties[k], v, knownObj[k]); ok {
+		if v, ok := keepSetValues(sch.Properties[k], v, knownObj[k], grow); ok {
 			result[k] = v
 		}
 	}
@@ -229,16 +231,61 @@ func keepSetValues(sch *Schema, rsp, known any) (any, bool) {
 }
 
 // keepSetItems filters each response object by the known object of the same index.
-// The response objects without a known one are dropped, e.g. the default clickhouse_postgresql databases.
-func keepSetItems(sch *Schema, rsp, known any) []any {
+// The response objects without a known one are dropped, e.g. the default clickhouse_postgresql databases,
+// unless grow is set and known isn't empty: on Read, the objects added outside of Terraform show up in the plan.
+// On apply, the state must have the planned number of objects.
+func keepSetItems(sch *Schema, rsp, known any, grow bool) []any {
 	rspList, _ := asAnySlice(rsp)
 	knownList, _ := asAnySlice(known)
-	result := make([]any, min(len(rspList), len(knownList)))
+	n := min(len(rspList), len(knownList))
+	if grow && len(knownList) > 0 {
+		n = len(rspList)
+	}
+	result := make([]any, n)
 	for i := range result {
 		result[i] = rspList[i]
-		if kept, ok := keepSetValues(sch, rspList[i], knownList[i]); ok {
+		if i >= len(knownList) {
+			continue
+		}
+		if kept, ok := keepSetValues(sch, rspList[i], knownList[i], grow); ok {
 			result[i] = kept
 		}
 	}
 	return result
+}
+
+// withoutRemovedBlocks returns the state of a user config block with the plan's value of each option
+// that is a block or a list of blocks the plan leaves empty, e.g., the default clickhouse_postgresql databases.
+// Expand doesn't send these options, and the API keeps the options missing in the request,
+// so removing them changes only the state, as in SDKv2.
+// The nested blocks aren't checked: Expand sends their option whole.
+func withoutRemovedBlocks(sch *Schema, plan, state any) any {
+	p, _ := asAnySlice(plan)
+	s, _ := asAnySlice(state)
+	if sch.Items == nil || len(p) != 1 || len(s) != 1 {
+		return state
+	}
+	planObj, _ := asAnyMap(p[0])
+	stateObj, ok := asAnyMap(s[0])
+	if !ok {
+		return state
+	}
+
+	result := maps.Clone(stateObj)
+	for k, prop := range sch.Items.Properties {
+		v, inPlan := planObj[k]
+		if list, _ := asAnySlice(v); !isBlockList(prop) || len(list) > 0 {
+			continue
+		}
+		if inPlan {
+			result[k] = v
+		} else {
+			delete(result, k)
+		}
+	}
+	return []any{result}
+}
+
+func isBlockList(sch *Schema) bool {
+	return sch != nil && sch.Type == SchemaTypeList && !sch.IsAttribute && sch.Items != nil && sch.Items.Type == SchemaTypeObject
 }

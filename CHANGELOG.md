@@ -15,10 +15,11 @@ nav_order: 1
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.
   When upgrading from v3, run `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: the first plan after upgrading might show in-place updates to `aiven_service_integration`
-  and `aiven_service_integration_endpoint` that remove a user config block. This happens when the configuration
-  has no such block but the API returns one, e.g., a `datadog_user_config` removed from the configuration after
-  the create, which SDKv2 kept in the state. Applying the plan is safe: the provider updates only the state
-  and doesn't call the API, so the settings in Aiven, including secrets such as the Datadog API key, don't change.
+  and `aiven_service_integration_endpoint` that remove a user config block, or blocks inside it. This happens when
+  the configuration has no such block but the API returns one, e.g., a `datadog_user_config` removed from
+  the configuration after the create, or the default `databases` of an empty `clickhouse_postgresql_user_config`, which
+  SDKv2 kept in the state. Applying the plan is safe: the settings in Aiven, including secrets such as the Datadog
+  API key, don't change. When these are the only changes, the provider updates only the state and doesn't call the API.
   To manage these settings in Terraform, add the block to the configuration instead, see [Plugin Framework
   migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
   in the upgrade guide.

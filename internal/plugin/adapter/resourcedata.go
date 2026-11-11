@@ -46,6 +46,7 @@ type ResourceData interface {
 	tfValue() tftypes.Value
 	requiresReplaceKeys() []string
 	isUnknown(key string) bool
+	hasPlan() bool
 }
 
 type resourceData struct {
@@ -163,6 +164,11 @@ func (d *resourceData) requiresReplaceKeys() []string {
 func (d *resourceData) isUnknown(key string) bool {
 	v, ok := d.plan[key].(tftypes.Value)
 	return ok && !v.IsKnown()
+}
+
+// hasPlan is false on Read.
+func (d *resourceData) hasPlan() bool {
+	return d.plan != nil
 }
 
 // Schema returns the schema of the resource.
@@ -395,7 +401,7 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 }
 
 // isUnchanged tells if the plan matches the state, apart from the timeouts and the computed fields the plan doesn't set,
-// e.g., unknown until apply or a removed block: Expand doesn't send them.
+// e.g., unknown until apply, a removed block, or blocks removed from a user config: Expand doesn't send them.
 func (d *resourceData) isUnchanged() bool {
 	if d.state == nil {
 		return false
@@ -406,8 +412,12 @@ func (d *resourceData) isUnchanged() bool {
 	delete(plan, "timeouts")
 	delete(state, "timeouts")
 	for k, sch := range d.schema.Properties {
-		if _, ok := d.plan[k]; sch.Computed && !ok {
+		v, ok := d.plan[k]
+		switch {
+		case sch.Computed && !ok:
 			delete(state, k)
+		case ok && isUserConfigBlock(k):
+			state[k] = withoutRemovedBlocks(sch, v, state[k])
 		}
 	}
 	return reflect.DeepEqual(plan, state)
