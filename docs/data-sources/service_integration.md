@@ -42,7 +42,7 @@ data "aiven_service_integration" "example_integration" {
 - `clickhouse_postgresql_user_config` (Block List) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
 - `datadog_user_config` (Block List) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--datadog_user_config))
 - `description` (String) Description of the integration.
-- `destination_endpoint_id` (String) Integration destination endpoint ID.
+- `destination_endpoint_id` (String) Integration destination endpoint ID. The field conflicts with `destination_service_name`.
 - `destination_endpoint_name` (String) Destination endpoint name.
 - `destination_service_project` (String) Destination service project name. Defaults to `project`.
 - `destination_service_type` (String) Service type code.
@@ -59,7 +59,7 @@ data "aiven_service_integration" "example_integration" {
 - `metrics_user_config` (Block List) Metrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--metrics_user_config))
 - `prometheus_user_config` (Block List) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `rsyslog_user_config` (Block List) Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--rsyslog_user_config))
-- `source_endpoint_id` (String) Integration source endpoint ID.
+- `source_endpoint_id` (String) Integration source endpoint ID. The field conflicts with `source_service_name`.
 - `source_endpoint_name` (String) Source endpoint name.
 - `source_service_project` (String) Source service project name. Defaults to `project`.
 - `source_service_type` (String) Service type code.

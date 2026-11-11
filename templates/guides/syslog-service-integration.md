@@ -63,7 +63,6 @@ resource "aiven_service_integration_endpoint" "rsys" {
 resource "aiven_service_integration" "rsys_int" {
     project = data.aiven_project.my_proj.project
     destination_endpoint_id = aiven_service_integration_endpoint.rsys.id
-    destination_service_name = ""
     integration_type = "rsyslog"
     source_service_name = data.aiven_kafka.kfk1.service_name
 }

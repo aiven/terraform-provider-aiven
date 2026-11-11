@@ -40,6 +40,72 @@ func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
 	})
 }
 
+// The mock fails on any API call: the config is rejected at validation, or only planned.
+func TestServiceIntegrationEndpointConflictsWithService(t *testing.T) {
+	config := func(fields string) string {
+		return fmt.Sprintf(`
+resource "aiven_service_integration" "test" {
+  project          = "my-project"
+  integration_type = "prometheus"
+  %s
+}
+
+resource "terraform_data" "name" {
+  input = "my-service"
+}
+`, fields)
+	}
+	conflict := regexp.MustCompile("Invalid Attribute Combination")
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"aiven": providerserver.NewProtocol6WithError(&plugin.AivenProvider{GenClient: avngen.NewMockClient(t)}),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: config(`
+  source_service_name      = "my-pg"
+  destination_endpoint_id  = "my-project/endpoint-id"
+  destination_service_name = "my-service"`),
+				PlanOnly:    true,
+				ExpectError: conflict,
+			},
+			{
+				// SDKv2 ignored an empty service name next to an endpoint ID
+				Config: config(`
+  source_service_name      = "my-pg"
+  destination_endpoint_id  = "my-project/endpoint-id"
+  destination_service_name = ""`),
+				PlanOnly:    true,
+				ExpectError: conflict,
+			},
+			{
+				Config: config(`
+  source_endpoint_id       = "my-project/endpoint-id"
+  source_service_name      = "my-pg"
+  destination_service_name = "my-service"`),
+				PlanOnly:    true,
+				ExpectError: conflict,
+			},
+			{
+				// An unknown name can't be checked at validation
+				Config: config(`
+  source_service_name      = "my-pg"
+  destination_endpoint_id  = "my-project/endpoint-id"
+  destination_service_name = terraform_data.name.output`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: config(`
+  source_service_name     = "my-pg"
+  destination_endpoint_id = "my-project/endpoint-id"`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestAccAivenServiceIntegration_preexisting_read_replica(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
