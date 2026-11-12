@@ -3,6 +3,7 @@
 package adapter
 
 import (
+	"maps"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -233,12 +234,17 @@ func userConfigTestSchema() *Schema {
 	object := func(props map[string]*Schema) *Schema {
 		return &Schema{Type: SchemaTypeList, IsObject: true, Computed: true, Items: &Schema{Type: SchemaTypeObject, Properties: props}}
 	}
+	userConfig := func(props map[string]*Schema) *Schema {
+		s := object(props)
+		s.IsUserConfig = true
+		return s
+	}
 	return &Schema{
 		Type: SchemaTypeObject,
 		Properties: map[string]*Schema{
 			"id":            {Type: SchemaTypeString, Computed: true},
 			"endpoint_type": {Type: SchemaTypeString},
-			"datadog_user_config": object(map[string]*Schema{
+			"datadog_user_config": userConfig(map[string]*Schema{
 				"site":            {Type: SchemaTypeString, Computed: true},
 				"max_jmx_metrics": {Type: SchemaTypeInt, Computed: true},
 				"datadog_tags":    {Type: SchemaTypeList, Computed: true, Items: &Schema{Type: SchemaTypeString}},
@@ -264,7 +270,7 @@ func userConfigTestSchema() *Schema {
 					"pshard_stats_enabled": {Type: SchemaTypeBool, Computed: true},
 				}),
 			}),
-			"rsyslog_user_config": object(map[string]*Schema{
+			"rsyslog_user_config": userConfig(map[string]*Schema{
 				"server": {Type: SchemaTypeString, Computed: true},
 			}),
 		},
@@ -511,27 +517,27 @@ func TestKeepSetValues(t *testing.T) {
 
 	t.Run("nested block not set", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, rsp, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{"site": "datadoghq.com"}, got)
 	})
 
 	t.Run("no known value", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(sch, rsp, nil)
+		_, ok := keepSetValues(sch, rsp, nil, false)
 		assert.False(t, ok)
 	})
 
 	t.Run("nil response value", func(t *testing.T) {
 		t.Parallel()
-		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}})
+		got, ok := keepSetValues(sch, map[string]any{"site": nil}, []any{map[string]any{"site": "x"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, map[string]any{}, got)
 	})
 
 	t.Run("no schema", func(t *testing.T) {
 		t.Parallel()
-		_, ok := keepSetValues(nil, rsp, rsp)
+		_, ok := keepSetValues(nil, rsp, rsp, false)
 		assert.False(t, ok)
 	})
 
@@ -541,8 +547,81 @@ func TestKeepSetValues(t *testing.T) {
 		got, ok := keepSetValues(tables, []any{
 			map[string]any{"name": "foo", "auto_offset_reset": "earliest"},
 			map[string]any{"name": "bar", "auto_offset_reset": "earliest"},
-		}, []any{map[string]any{"name": "foo"}})
+		}, []any{map[string]any{"name": "foo"}}, false)
 		require.True(t, ok)
 		assert.Equal(t, []any{map[string]any{"name": "foo"}}, got)
 	})
+
+	t.Run("grow keeps the list objects added outside of Terraform", func(t *testing.T) {
+		t.Parallel()
+		tables := sch.Items.Properties["tables"]
+		topic := map[string]any{"name": "t2", "partition": 1}
+		got, ok := keepSetValues(tables, []any{
+			map[string]any{"name": "foo", "auto_offset_reset": "earliest", "topics": []any{map[string]any{"name": "t1"}, topic}},
+			map[string]any{"name": "bar", "auto_offset_reset": "earliest"},
+		}, []any{map[string]any{"name": "foo", "topics": []any{map[string]any{"name": "t1"}}}}, true)
+		require.True(t, ok)
+		assert.Equal(t, []any{
+			map[string]any{"name": "foo", "topics": []any{map[string]any{"name": "t1"}, topic}},
+			map[string]any{"name": "bar", "auto_offset_reset": "earliest"},
+		}, got)
+	})
+
+	t.Run("grow keeps an empty list empty", func(t *testing.T) {
+		t.Parallel()
+		tables := sch.Items.Properties["tables"]
+		got, ok := keepSetValues(tables, []any{map[string]any{"name": "foo"}}, []any{}, true)
+		require.True(t, ok)
+		assert.Equal(t, []any{}, got)
+	})
+}
+
+// The API keeps the options missing in the request: removing a block option changes only the state.
+func TestExpandUserConfigRemovedBlocks(t *testing.T) {
+	t.Parallel()
+
+	table := func(topics ...any) map[string]any {
+		return map[string]any{"name": "foo", "topics": topics}
+	}
+	block := func(opts map[string]any) []any {
+		v := map[string]any{"site": "datadoghq.com"}
+		maps.Copy(v, opts)
+		return []any{v}
+	}
+	state := block(map[string]any{
+		"tables":       []any{table(map[string]any{"name": "t1"}), map[string]any{"name": "bar"}},
+		"opensearch":   []any{map[string]any{"index_stats_enabled": true}},
+		"datadog_tags": []any{"a"},
+	})
+	cases := []struct {
+		name    string
+		plan    []any
+		changed bool
+	}{
+		{name: "removed list of blocks", plan: block(map[string]any{"opensearch": state[0].(map[string]any)["opensearch"], "datadog_tags": []any{"a"}})},
+		{name: "empty list of blocks and block", plan: block(map[string]any{"tables": []any{}, "opensearch": []any{}, "datadog_tags": []any{"a"}})},
+		{name: "removed one block", plan: block(map[string]any{"tables": []any{table(map[string]any{"name": "t1"})}, "datadog_tags": []any{"a"}}), changed: true},
+		{name: "removed nested list of blocks", plan: block(map[string]any{"tables": []any{table(), map[string]any{"name": "bar"}}, "datadog_tags": []any{"a"}}), changed: true},
+		{name: "cleared list of strings", plan: block(map[string]any{"datadog_tags": []any{}}), changed: true},
+		{name: "changed option", plan: block(map[string]any{"site": "datadoghq.eu", "datadog_tags": []any{"a"}}), changed: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			plan := map[string]any{"id": "my-endpoint", "endpoint_type": "datadog", "datadog_user_config": tc.plan}
+			st := map[string]any{"id": "my-endpoint", "endpoint_type": "datadog", "datadog_user_config": state}
+			d, err := NewResourceData(userConfigTestSchema(), nil, WithTestPlan(plan), WithTestState(st))
+			require.NoError(t, err)
+
+			var req struct {
+				UserConfig map[string]any `json:"user_config"`
+			}
+			err = d.Expand(&req, ExpandUserConfig("endpoint_type"))
+			if tc.changed {
+				require.NoError(t, err)
+				return
+			}
+			require.ErrorIs(t, err, ErrNoChanges)
+		})
+	}
 }
