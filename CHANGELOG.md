@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
+  Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
+
 ## [4.66.0] - 2026-11-12
 
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_service_integration` and `aiven_service_integration_endpoint`.

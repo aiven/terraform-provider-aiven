@@ -9,6 +9,7 @@ resource "aiven_valkey_user" "example" {
   valkey_acl_categories = ["+@write", "+@keyspace"]
   valkey_acl_channels   = ["some*chan"]
   valkey_acl_commands   = ["+set", "+del", "+expire", "-flushall", "-flushdb"]
+  valkey_acl_databases  = ["0"]
   valkey_acl_keys       = ["session:*"]
 
   /* COMPUTED FIELDS

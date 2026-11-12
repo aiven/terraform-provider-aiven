@@ -89,6 +89,11 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Optional:            true,
 				Validators:          []validator.List{listvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("valkey_acl_categories"), path.MatchRelative().AtParent().AtName("valkey_acl_keys"))},
 			},
+			"valkey_acl_databases": schema.ListAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
+				Optional:            true,
+			},
 			"valkey_acl_keys": schema.ListAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Key access rules. Entries are defined as standard glob patterns. The field is required with `valkey_acl_categories` and `valkey_acl_commands`.",
@@ -150,6 +155,10 @@ func resourceSchemaInternal() *adapter.Schema {
 				Type:  adapter.SchemaTypeList,
 			},
 			"valkey_acl_commands": &adapter.Schema{
+				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
+				Type:  adapter.SchemaTypeList,
+			},
+			"valkey_acl_databases": &adapter.Schema{
 				Items: &adapter.Schema{Type: adapter.SchemaTypeString},
 				Type:  adapter.SchemaTypeList,
 			},

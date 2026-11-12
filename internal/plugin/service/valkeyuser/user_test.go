@@ -327,6 +327,70 @@ resource "aiven_valkey_user" "foo" {
 		})
 	})
 
+	// Per-database ACLs need Valkey 9.1 or later, the default version of new services.
+	t.Run("acl_databases", func(t *testing.T) {
+		resourceName := "aiven_valkey_user.foo"
+		userName := acc.RandName("user")
+		databasesInAiven := func(expected ...string) resource.TestCheckFunc {
+			return func(*terraform.State) error {
+				user, err := client.ServiceUserGet(t.Context(), projectName, serviceName, userName)
+				require.NoError(t, err, "retrieving valkey user")
+				require.NotNil(t, user.AccessControl)
+				require.ElementsMatch(t, expected, user.AccessControl.ValkeyAclDatabases)
+				return nil
+			}
+		}
+
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenValkeyUserResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					PreConfig: func() {
+						require.NoError(t, <-serviceIsReady)
+					},
+					Config: testAccValkeyUserACL(projectName, serviceName, userName, `
+  valkey_acl_databases = ["0", "3"]`),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "valkey_acl_databases.#", "2"),
+						resource.TestCheckResourceAttr(resourceName, "valkey_acl_databases.0", "0"),
+						resource.TestCheckResourceAttr(resourceName, "valkey_acl_databases.1", "3"),
+						databasesInAiven("0", "3"),
+					),
+				},
+				{
+					// updated in place
+					Config: testAccValkeyUserACL(projectName, serviceName, userName, `
+  valkey_acl_databases = ["resetdbs"]`),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+						},
+					},
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "valkey_acl_databases.#", "1"),
+						resource.TestCheckResourceAttr(resourceName, "valkey_acl_databases.0", "resetdbs"),
+						databasesInAiven("resetdbs"),
+					),
+				},
+				{
+					// dropping the attribute grants all databases again
+					Config: testAccValkeyUserACL(projectName, serviceName, userName, ""),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckNoResourceAttr(resourceName, "valkey_acl_databases.#"),
+						databasesInAiven(),
+					),
+				},
+				{
+					Config:             testAccValkeyUserACL(projectName, serviceName, userName, ""),
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: false,
+				},
+			},
+		})
+	})
+
 	// Verifies that state created by the previous SDK-based provider version is
 	// compatible with the Plugin Framework version.
 	t.Run("backward_compat", func(t *testing.T) {
