@@ -131,7 +131,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),

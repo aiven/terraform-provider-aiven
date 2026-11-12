@@ -102,8 +102,8 @@ Optional:
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the `public-*` hostname and the custom domain. Example: `grafana.example.org`.
-- `dashboard_previews_enabled` (Boolean) Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
-- `dashboard_scenes_enabled` (Boolean) Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.
+- `dashboard_previews_enabled` (Boolean) Dashboard previews were removed from Grafana upstream, so this setting no longer enables browsing of dashboards in grid (pictures) mode. On Grafana 11 and 12 it only enables the bundled image renderer plugin, which is not shipped with Grafana 13 and onward.
+- `dashboard_scenes_enabled` (Boolean) Setting has no effect with Grafana 11 and onward. Grafana renders dashboards with the Scenes Library by default.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
 - `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard. Example: `20`.
 - `dataproxy_send_user_header` (Boolean) Send `X-Grafana-User` header to data source.
