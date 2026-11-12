@@ -32,6 +32,7 @@ type ResourceData interface {
 	GetPrivate(ctx context.Context, key string) ([]byte, error)
 	SetPrivate(ctx context.Context, key string, value []byte) error
 	HasChange(key string) bool
+	HasChangeHoisted(object string) bool
 	Set(key string, value any) error
 	SetUnknown(key string) error
 	SetID(parts ...string) error
@@ -281,6 +282,16 @@ func (d *resourceData) GetStateOk(key string) (any, bool) {
 	return v, ok
 }
 
+// HasChangeHoisted reports whether any field hoisted from the object has changed, see Schema.HoistedFrom.
+func (d *resourceData) HasChangeHoisted(object string) bool {
+	for name, sch := range d.schema.Properties {
+		if sch.HoistedFrom == object && d.HasChange(name) {
+			return true
+		}
+	}
+	return false
+}
+
 func (d *resourceData) HasChange(key string) bool {
 	if (d.plan == nil) && (d.state == nil) {
 		return false
@@ -397,7 +408,44 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 			return err
 		}
 	}
+	expandHoisted(d.schema, norm)
 	return remarshal(&norm, out)
+}
+
+// expandHoisted nests the root fields under their API objects, see Schema.HoistedFrom.
+func expandHoisted(sch *Schema, dto map[string]any) {
+	for name, prop := range sch.Properties {
+		v, ok := dto[name]
+		if !ok || prop.HoistedFrom == "" {
+			continue
+		}
+		nested, _ := dto[prop.HoistedFrom].(map[string]any)
+		if nested == nil {
+			nested = make(map[string]any)
+			dto[prop.HoistedFrom] = nested
+		}
+		nested[name] = v
+		delete(dto, name)
+	}
+}
+
+// flattenHoisted lifts the fields out of their API objects, see Schema.HoistedFrom.
+// A field the API omits keeps its state, like a root field.
+func flattenHoisted(sch *Schema, dto map[string]any) {
+	for name, prop := range sch.Properties {
+		if prop.HoistedFrom == "" {
+			continue
+		}
+		nested, _ := dto[prop.HoistedFrom].(map[string]any)
+		if v, ok := nested[name]; ok {
+			dto[name] = v
+		}
+	}
+	for _, prop := range sch.Properties {
+		if prop.HoistedFrom != "" {
+			delete(dto, prop.HoistedFrom)
+		}
+	}
 }
 
 // isUnchanged tells if the plan matches the state, apart from the timeouts and the computed fields the plan doesn't set,
@@ -431,6 +479,7 @@ func (d *resourceData) Flatten(in any, modifiers ...MapModifier) error {
 		return err
 	}
 
+	flattenHoisted(d.schema, m)
 	for _, modifier := range modifiers {
 		if err := modifier(d, m); err != nil {
 			return err

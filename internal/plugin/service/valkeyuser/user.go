@@ -2,100 +2,45 @@ package valkeyuser
 
 import (
 	"context"
-	"errors"
-	"strings"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/aiven/go-client-codegen/handler/service"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/serviceuser"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func init() {
 	ResourceOptions.RefreshStateCheck = serviceuser.PasswordIsReady
 }
 
-// valkeyACLPrefix marks the ACL attributes that the API nests under
-// access_control but which the resource exposes as top-level list attributes.
-const valkeyACLPrefix = "valkey_acl_"
-
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	return serviceuser.Create(ctx, client, d, expandModifier(ctx, client))
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	aclChanged := false
-	accessControl := make(map[string]any)
-	for key := range d.Schema().Properties {
-		if strings.HasPrefix(key, valkeyACLPrefix) {
-			accessControl[key] = forceSlice(d.Get(key))
-			if d.HasChange(key) {
-				aclChanged = true
-			}
-		}
-	}
-
-	if aclChanged {
-		var ac service.AccessControlIn
-		err := schemautil.Remarshal(accessControl, &ac)
-		if err != nil {
-			return err
-		}
-
-		req := &service.ServiceUserCredentialsModifyIn{
-			Operation:     service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
-			AccessControl: &ac,
-		}
-
-		_, err = client.ServiceUserCredentialsModify(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string), req)
-		if err != nil {
-			return err
-		}
-	}
-
-	err := serviceuser.ResetPassword(ctx, client, d)
-	if aclChanged && errors.Is(err, adapter.ErrNoChanges) {
-		// The access control was sent
-		return nil
-	}
-	return err
+	return serviceuser.Update(ctx, client, d, expandModifier(ctx, client))
 }
 
-// expandModifier moves the top-level valkey_acl_* attributes into the
-// access_control object expected by the create request.
+// expandModifier sends [] for the unset ACLs rather than omitting them.
+// Expand nests them under access_control afterwards.
 func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
-	return func(d adapter.ResourceData, dto map[string]any) error {
-		accessControl := make(map[string]any)
-		for key := range d.Schema().Properties {
-			if strings.HasPrefix(key, valkeyACLPrefix) {
-				accessControl[key] = forceSlice(d.Get(key))
-				delete(dto, key)
-			}
-		}
-		if len(accessControl) > 0 {
-			dto["access_control"] = accessControl
-		}
-		return nil
-	}
+	return forceACLSlices
 }
 
-// flattenModifier lifts the valkey_acl_* lists out of access_control, then runs
-// the shared password reconciliation.
+// flattenModifier sets the ACLs the API omits to [].
+// Otherwise an ACL dropped in Aiven would keep its stale value instead of drifting.
+// Flatten lifts them out of access_control beforehand.
 func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
-	return adapter.ComposeMapModifiers(flattenACL, serviceuser.PasswordFlatten)
+	return adapter.ComposeMapModifiers(forceACLSlices, serviceuser.PasswordFlatten)
 }
 
-func flattenACL(d adapter.ResourceData, dto map[string]any) error {
-	accessControl, _ := dto["access_control"].(map[string]any)
-	delete(dto, "access_control")
-
-	// The API omits the ACLs it has no values for, so each one is set explicitly.
-	// Otherwise an ACL dropped in Aiven would keep its stale value instead of drifting.
-	for key := range d.Schema().Properties {
-		if strings.HasPrefix(key, valkeyACLPrefix) {
-			dto[key] = forceSlice(accessControl[key])
+// forceACLSlices applies forceSlice to the list ACLs hoisted from access_control.
+// On expand, the API applies the default policy to an omitted ACL, and none to [].
+func forceACLSlices(d adapter.ResourceData, dto map[string]any) error {
+	for key, sch := range d.Schema().Properties {
+		isList := sch.Type == adapter.SchemaTypeList || sch.Type == adapter.SchemaTypeSet
+		if isList && sch.HoistedFrom == serviceuser.AccessControlField {
+			dto[key] = forceSlice(dto[key])
 		}
 	}
 	return nil

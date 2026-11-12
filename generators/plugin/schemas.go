@@ -297,7 +297,6 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 	params := jen.Dict{
 		jen.Id("Type"): jen.Qual(adapterPackage, kind),
 	}
-
 	if item.Items != nil {
 		items, err := genSchemaInternal(def, entity, item.Items)
 		if err != nil {
@@ -325,6 +324,10 @@ func genSchemaInternal(def *Definition, entity entityType, item *Item) (jen.Code
 
 	if item.RendersAsAttribute(def, entity) {
 		params[jen.Id("IsAttribute")] = jen.True()
+	}
+
+	if item.HoistedFrom != "" {
+		params[jen.Id("HoistedFrom")] = jen.Lit(item.HoistedFrom)
 	}
 
 	s := jen.Op("&").Qual(adapterPackage, "Schema")

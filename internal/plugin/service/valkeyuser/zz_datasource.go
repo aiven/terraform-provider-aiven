@@ -106,7 +106,8 @@ func datasourceSchemaInternal() *adapter.Schema {
 			},
 			"username": &adapter.Schema{Type: adapter.SchemaTypeString},
 			"valkey_acl_categories": &adapter.Schema{
-				Computed: true,
+				Computed:    true,
+				HoistedFrom: "access_control",
 				Items: &adapter.Schema{
 					Computed: true,
 					Type:     adapter.SchemaTypeString,
@@ -114,7 +115,8 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"valkey_acl_channels": &adapter.Schema{
-				Computed: true,
+				Computed:    true,
+				HoistedFrom: "access_control",
 				Items: &adapter.Schema{
 					Computed: true,
 					Type:     adapter.SchemaTypeString,
@@ -122,7 +124,8 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"valkey_acl_commands": &adapter.Schema{
-				Computed: true,
+				Computed:    true,
+				HoistedFrom: "access_control",
 				Items: &adapter.Schema{
 					Computed: true,
 					Type:     adapter.SchemaTypeString,
@@ -130,7 +133,8 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"valkey_acl_databases": &adapter.Schema{
-				Computed: true,
+				Computed:    true,
+				HoistedFrom: "access_control",
 				Items: &adapter.Schema{
 					Computed: true,
 					Type:     adapter.SchemaTypeString,
@@ -138,7 +142,8 @@ func datasourceSchemaInternal() *adapter.Schema {
 				Type: adapter.SchemaTypeList,
 			},
 			"valkey_acl_keys": &adapter.Schema{
-				Computed: true,
+				Computed:    true,
+				HoistedFrom: "access_control",
 				Items: &adapter.Schema{
 					Computed: true,
 					Type:     adapter.SchemaTypeString,

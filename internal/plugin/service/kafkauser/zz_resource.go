@@ -74,7 +74,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Account type.",
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "Account username. Maximum length: `64`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Service username. Maximum length: `64`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},

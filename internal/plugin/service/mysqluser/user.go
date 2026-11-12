@@ -12,7 +12,6 @@ import (
 )
 
 func init() {
-	ResourceOptions.Update = resetPassword
 	ResourceOptions.RefreshStateCheck = serviceuser.PasswordIsReady
 }
 
@@ -22,6 +21,10 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 	}
 
 	return resetPassword(ctx, client, d)
+}
+
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	return serviceuser.UpdateWith(ctx, client, d, resetPassword)
 }
 
 // resetPassword resets the MySQL service user credentials. Unlike the shared

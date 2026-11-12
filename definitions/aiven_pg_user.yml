@@ -5,10 +5,14 @@ resource:
 datasource:
   description: Gets information about an Aiven for PostgreSQL® service user.
 requireServiceReady: [pg]
-expandModifier: true
 remove:
   - authentication
   - mysql_grants # MySQL grants for the service user
+  - access_control/valkey_acl_categories # Command category rules
+  - access_control/valkey_acl_channels # Glob-style patterns defining which pub/sub channels can be accessed. If array is not defined, the default policy is used...
+  - access_control/valkey_acl_commands # Rules for individual commands
+  - access_control/valkey_acl_databases # Database ids the user can access, Valkey 9.1 and later only. An empty array or 'alldbs' grants all databases, 'resetdbs'...
+  - access_control/valkey_acl_keys # Key access rules
 schema:
   project:
     ref: aiven_pg.project
@@ -19,11 +23,5 @@ schema:
     description: The name of the service.
   username:
     description: The name of the service user for this service.
-  # Hoisted out of access_control (which the resource removes) and reshaped at the root. The
-  # spec has no entry at this level, so the schema shape has to be spelled out in full here.
   pg_allow_replication:
-    type: boolean
-    optional: true
-    computed: true
-    useStateForUnknown: true
     description: Allows replication. For the default avnadmin user this attribute is required and is always `true`.

@@ -43,7 +43,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Account type.",
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "Account username.",
+				MarkdownDescription: "Service username.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(64)},
 			},

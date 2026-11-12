@@ -6,18 +6,12 @@ datasource:
   description: Gets information about an Aiven for Valkey™ service user.
 requireServiceReady: [valkey]
 expandModifier: true
-operations:
-  - id: ServiceUserCredentialsModify
-    type: update
-    disableView: true
 remove:
   - access_cert
   - access_key
   - authentication
-  - new_password
-  - operation
-  - service
   - mysql_grants # MySQL grants for the service user
+  - access_control/pg_allow_replication # Enable REPLICATION role option
 schema:
   project:
     ref: aiven_valkey.project
@@ -27,39 +21,26 @@ schema:
     pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
   valkey_acl_categories:
     type: arrayOrdered
-    optional: true
     alsoRequires: [valkey_acl_commands, valkey_acl_keys]
     example: ["+@write", "+@keyspace"]
-    items:
-      type: string
     description: Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.
   valkey_acl_commands:
     type: arrayOrdered
-    optional: true
     alsoRequires: [valkey_acl_categories, valkey_acl_keys]
     example: ["+set", "+del", "+expire", "-flushall", "-flushdb"]
-    items:
-      type: string
     description: Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.
   valkey_acl_keys:
     type: arrayOrdered
-    optional: true
     alsoRequires: [valkey_acl_categories, valkey_acl_commands]
     example: ["session:*"]
-    items:
-      type: string
     description: Key access rules. Entries are defined as standard glob patterns.
   valkey_acl_channels:
     type: arrayOrdered
-    optional: true
     items:
-      type: string
       example: "some*chan"
     description: Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.
   valkey_acl_databases:
     type: arrayOrdered
-    optional: true
     items:
-      type: string
       example: "0"
     description: Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.

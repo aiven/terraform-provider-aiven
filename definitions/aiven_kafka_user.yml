@@ -8,6 +8,12 @@ requireServiceReady: [kafka, kafka_connect]
 remove:
   - authentication
   - mysql_grants # MySQL grants for the service user
+  - access_control/pg_allow_replication # Enable REPLICATION role option
+  - access_control/valkey_acl_categories # Command category rules
+  - access_control/valkey_acl_channels # Glob-style patterns defining which pub/sub channels can be accessed. If array is not defined, the default policy is used...
+  - access_control/valkey_acl_commands # Rules for individual commands
+  - access_control/valkey_acl_databases # Database ids the user can access, Valkey 9.1 and later only. An empty array or 'alldbs' grants all databases, 'resetdbs'...
+  - access_control/valkey_acl_keys # Key access rules
 schema:
   project:
     ref: aiven_kafka.project

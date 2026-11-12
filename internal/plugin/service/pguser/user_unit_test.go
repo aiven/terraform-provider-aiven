@@ -12,6 +12,32 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
+func TestCreateView(t *testing.T) {
+	ctx := context.Background()
+	client := avngen.NewMockClient(t)
+	client.EXPECT().
+		ServiceUserCreate(mock.Anything, "my-project", "my-pg", &service.ServiceUserCreateIn{
+			Username: "myuser",
+			AccessControl: &service.AccessControlIn{
+				PGAllowReplication: new(true),
+			},
+		}).
+		Return(&service.ServiceUserCreateOut{}, nil).
+		Once()
+	d, err := adapter.NewResourceData(
+		resourceSchemaInternal(),
+		ResourceOptions.IdentityFields,
+		adapter.WithTestPlan(map[string]any{
+			"project":              "my-project",
+			"service_name":         "my-pg",
+			"username":             "myuser",
+			"pg_allow_replication": true,
+		}),
+	)
+	require.NoError(t, err)
+	require.NoError(t, ResourceOptions.Create(ctx, client, d))
+}
+
 func TestUpdateView(t *testing.T) {
 	values := func() map[string]any {
 		return map[string]any{

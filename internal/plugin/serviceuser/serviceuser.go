@@ -1,11 +1,11 @@
 // Package serviceuser holds logic shared by the Aiven service user resources
-// (aiven_kafka_user, aiven_pg_user, aiven_mysql_user, aiven_opensearch_user).
+// (aiven_kafka_user, aiven_pg_user, aiven_mysql_user, aiven_opensearch_user, aiven_valkey_user).
 //
 // All of them are backed by the same generic service-user API
 // (ServiceUserCreate/Get/Delete + ServiceUserCredentialsModify), so the create
-// flow and password/credentials handling are identical. Resource-specific
-// extras (e.g. pg_allow_replication, authentication) are layered on top by the
-// individual packages.
+// flow and password/credentials handling are identical. Update also sets the
+// access control hoisted from access_control (e.g. pg_allow_replication).
+// Other extras (e.g. authentication) are layered on top by the individual packages.
 package serviceuser
 
 import (
@@ -43,6 +43,56 @@ func Create(ctx context.Context, client avngen.Client, d adapter.ResourceData, e
 
 	return ResetPassword(ctx, client, d)
 }
+
+// Update runs SetAccessControl, then the default ResetPassword.
+func Update(ctx context.Context, client avngen.Client, d adapter.ResourceData, expandMods ...adapter.MapModifier) error {
+	return UpdateWith(ctx, client, d, ResetPassword, expandMods...)
+}
+
+// UpdateWith runs SetAccessControl, then the given password reset, e.g. one that also sets authentication.
+func UpdateWith(
+	ctx context.Context,
+	client avngen.Client,
+	d adapter.ResourceData,
+	reset func(context.Context, avngen.Client, adapter.ResourceData) error,
+	expandMods ...adapter.MapModifier,
+) error {
+	sent, err := SetAccessControl(ctx, client, d, expandMods...)
+	if err != nil {
+		return err
+	}
+
+	err = reset(ctx, client, d)
+	if sent && errors.Is(err, adapter.ErrNoChanges) {
+		// The access control was sent
+		return nil
+	}
+	return err
+}
+
+// SetAccessControl sends the whole access_control object if any field hoisted from it changed.
+// Reports whether it was sent.
+func SetAccessControl(ctx context.Context, client avngen.Client, d adapter.ResourceData, expandMods ...adapter.MapModifier) (bool, error) {
+	if !d.HasChangeHoisted(AccessControlField) {
+		return false, nil
+	}
+
+	var plan service.ServiceUserCredentialsModifyIn
+	if err := d.Expand(&plan, expandMods...); err != nil {
+		return false, err
+	}
+
+	// The plan may hold other request fields, e.g. MySQL authentication
+	req := service.ServiceUserCredentialsModifyIn{
+		Operation:     service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
+		AccessControl: plan.AccessControl,
+	}
+	_, err := client.ServiceUserCredentialsModify(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("username").(string), &req)
+	return err == nil, err
+}
+
+// AccessControlField is the API object whose children the definitions hoist, e.g. "pg_allow_replication".
+const AccessControlField = "access_control"
 
 // ResetPassword resets a service user's password via a credentials reset.
 // A nil NewPassword tells the backend to auto-generate one.
