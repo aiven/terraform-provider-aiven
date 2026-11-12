@@ -123,8 +123,9 @@ properties:
           Does NOT work for resources whose ID is returned only in the Create response (e.g. server-assigned IDs):
           on conflict there is no response to read the ID from and the subsequent Read has nothing to look up.
           `check` fails when the resource exists in the API or another resource in this run has the same keys.
-          The paginated read operation lists the scope once: its path parameters are the scope, its
+          The list read operation lists the scope once: its path parameters are the scope, its
           `resultListLookupKeys` match the items, the same way `readView` finds the resource.
+          It's the paginated read, else the only read with `resultListLookupKeys` and `resultKey`.
           Then a 409 means the client retried a request the API applied, so it's treated as success.
       disableExample:
         type: boolean

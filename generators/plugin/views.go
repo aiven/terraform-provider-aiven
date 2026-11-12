@@ -39,16 +39,16 @@ func genViews(def *Definition, item *Item) ([]jen.Code, error) {
 		}
 	}
 
-	paged, err := pagedOperation(def)
+	list, err := listOperation(def)
 	if err != nil {
 		return nil, err
 	}
-	if paged != nil {
-		codes = append(codes, genPageView(def, item, paged))
-		if len(paged.ResultListLookupKeys) > 0 {
-			v, err := genPageMatch(def, item, paged)
+	if list != nil {
+		codes = append(codes, genPageView(def, item, list))
+		if len(list.ResultListLookupKeys) > 0 {
+			v, err := genPageMatch(def, item, list)
 			if err != nil {
-				return nil, fmt.Errorf("%s page match error: %w", paged.ID, err)
+				return nil, fmt.Errorf("%s page match error: %w", list.ID, err)
 			}
 			codes = append(codes, v)
 		}
@@ -574,8 +574,12 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		g.Add(flatten(jen.Op("&").Id(matchName)))
 	}
 
-	// Paginated reads fetch the pages with adapter.Paginate, or stop at the match with adapter.PaginateFind
-	if pg := operation.Pagination; pg != nil {
+	// The pageView read fetches the pages with adapter.Paginate, or stops at the match with adapter.PaginateFind
+	list, err := listOperation(def)
+	if err != nil {
+		return err
+	}
+	if operation == list {
 		fetch := jen.Id(pageViewName).Call(jen.Id("ctx"), jen.Id("client"), jen.Id("d"))
 		if len(operation.ResultListLookupKeys) == 0 {
 			itemsVar := rspName + "Items"
@@ -584,7 +588,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 			}
 			g.List(jen.Id(itemsVar), jen.Err()).Op(":=").Qual(adapterPackage, "Paginate").Call(fetch)
 			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return().Err())
-			g.Add(flatten(jen.Op("&").Map(jen.String()).Any().Values(jen.Dict{jen.Lit(pg.ItemsKey): jen.Id(itemsVar)})))
+			g.Add(flatten(jen.Op("&").Map(jen.String()).Any().Values(jen.Dict{jen.Lit(operation.Pagination.ItemsKey): jen.Id(itemsVar)})))
 			return nil
 		}
 
@@ -598,12 +602,7 @@ func genGenericViewOperation(g *jen.Group, funcIndex, funcCount int, def *Defini
 		Id("client").Dot(string(operation.ID)).
 		CallFunc(func(params *jen.Group) {
 			positionalArgs(params)
-			for _, k := range sortedKeys(operation.QueryParams) {
-				params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
-			}
-			if operation.IncludeSecrets {
-				params.Qual(commonPackage, "IncludeSecrets").Call()
-			}
+			queryArgs(params, operation)
 		}),
 	)
 
@@ -688,7 +687,7 @@ func genLookupMatch(item *Item, operation *Operation, elem *jen.Statement) (*jen
 }
 
 // pageViewName returns the fetch for adapter.Paginate, pageMatchName returns the predicate for
-// adapter.PaginateFind. Both are shared by readView and ConflictOptions.Load.
+// adapter.PaginateFind. Both are shared by readView and ConflictOptions.Load, see listOperation.
 const (
 	pageViewName  = "pageView"
 	pageMatchName = "pageMatch"
@@ -709,15 +708,37 @@ func pagedOperation(def *Definition) (*Operation, error) {
 	return found, nil
 }
 
+// listOperation returns the read that pageView and pageMatch wrap: the paginated one, else, for
+// alreadyExists: check, the only read with resultListLookupKeys, which is a single page.
+func listOperation(def *Definition) (*Operation, error) {
+	found, err := pagedOperation(def)
+	if err != nil || found != nil || def.Resource == nil || def.Resource.AlreadyExists != AlreadyExistsCheck {
+		return found, err
+	}
+	for _, op := range def.Operations {
+		if op.Type != OperationRead || op.DisableView || op.DatasourceLookup || len(op.ResultListLookupKeys) == 0 {
+			continue
+		}
+		if found != nil {
+			return nil, fmt.Errorf("only one read operation with resultListLookupKeys is supported, got %q and %q", found.ID, op.ID)
+		}
+		found = op
+	}
+	if found != nil && found.ResultKey == "" {
+		return nil, fmt.Errorf("%q needs resultKey to name the list item type", found.ID)
+	}
+	return found, nil
+}
+
 // genConflictOptions renders adapter.ConflictOptions that list the scope with pageView and match it with pageMatch.
-// The scope is the paginated read's path, the keys are its resultListLookupKeys.
+// The scope is the list read's path, the keys are its resultListLookupKeys.
 func genConflictOptions(def *Definition, item *Item) (jen.Code, error) {
-	op, err := pagedOperation(def)
+	op, err := listOperation(def)
 	if err != nil {
 		return nil, err
 	}
 	if op == nil || len(op.ResultListLookupKeys) == 0 {
-		return nil, errors.New("requires a read operation with pagination and resultListLookupKeys")
+		return nil, errors.New("requires a read operation with resultListLookupKeys")
 	}
 
 	keys := lo.Map(sortedKeys(op.ResultListLookupKeys), func(k string, _ int) string { return op.ResultListLookupKeys[k] })
@@ -738,7 +759,7 @@ func genPageMatch(def *Definition, item *Item, operation *Operation) (jen.Code, 
 		return nil, err
 	}
 	predicate := func() *jen.Statement {
-		return jen.Func().Params(jen.Id("item").Add(pageItemType(def, operation.Pagination))).Bool()
+		return jen.Func().Params(jen.Id("item").Add(listItemType(def, operation))).Bool()
 	}
 	return jen.Func().Id(pageMatchName).
 		Params(jen.Id("d").Qual(adapterPackage, resourceData)).
@@ -746,9 +767,14 @@ func genPageMatch(def *Definition, item *Item, operation *Operation) (jen.Code, 
 		Block(jen.Return(predicate().Block(jen.Return(match)))), nil
 }
 
-// pageItemType is the client's list item type, which trims "s", e.g. BillingGroups -> BillingGroupOut.
-func pageItemType(def *Definition, pg *Pagination) *jen.Statement {
-	return jen.Qual(avnGenHandlerPackage+def.ClientHandler, strings.TrimSuffix(pascalCase(pg.ItemsKey), "s")+"Out")
+// listItemType is the client's list item type, which trims "s", e.g. BillingGroups -> BillingGroupOut.
+// The list is the pagination items, else resultKey.
+func listItemType(def *Definition, operation *Operation) *jen.Statement {
+	key := operation.ResultKey
+	if operation.Pagination != nil {
+		key = operation.Pagination.ItemsKey
+	}
+	return jen.Qual(avnGenHandlerPackage+def.ClientHandler, strings.TrimSuffix(pascalCase(key), "s")+"Out")
 }
 
 // genPageView renders the pageView function:
@@ -773,7 +799,35 @@ func genPageView(def *Definition, item *Item, operation *Operation) jen.Code {
 }
 
 // genPageFetch renders the adapter.Paginate fetch function and the client's list item type.
+// An unpaginated list is one page with no next cursor.
 func genPageFetch(def *Definition, operation *Operation, positionalArgs func(*jen.Group)) (fetch, itemType *jen.Statement) {
+	pg := operation.Pagination
+	cursor, items, next := jen.String(), jen.Id("rsp"), jen.Nil()
+	if pg != nil {
+		cursor = jen.Id("cursor").String()
+		items, next = jen.Id("rsp").Dot(pascalCase(pg.ItemsKey)), jen.Id("rsp").Dot(pascalCase(pg.NextField))
+	} else if operation.ResultKeyField != "" {
+		items.Dot(operation.ResultKeyField)
+	}
+
+	itemType = listItemType(def, operation)
+	fetch = jen.Func().Params(cursor).Params(jen.Index().Add(itemType.Clone()), jen.Op("*").String(), jen.Error()).Block(
+		jen.List(jen.Id("rsp"), jen.Err()).Op(":=").Id("client").Dot(string(operation.ID)).CallFunc(func(params *jen.Group) {
+			positionalArgs(params)
+			if pg != nil {
+				params.Add(pageQuery(operation)).Op("...")
+			} else {
+				queryArgs(params, operation)
+			}
+		}),
+		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Nil(), jen.Err())),
+		jen.Return(items, next, jen.Nil()),
+	)
+	return fetch, itemType
+}
+
+// pageQuery renders adapter.QueryParams with the page size, the query params and the cursor.
+func pageQuery(operation *Operation) *jen.Statement {
 	pg := operation.Pagination
 	query := jen.Qual(adapterPackage, "QueryParams").CallFunc(func(params *jen.Group) {
 		if pg.PageSizeParam != "" {
@@ -790,17 +844,17 @@ func genPageFetch(def *Definition, operation *Operation, positionalArgs func(*je
 	if operation.IncludeSecrets {
 		query = jen.Append(query, jen.Qual(commonPackage, "IncludeSecrets").Call())
 	}
+	return query
+}
 
-	itemType = pageItemType(def, pg)
-	fetch = jen.Func().Params(jen.Id("cursor").String()).Params(jen.Index().Add(itemType.Clone()), jen.Op("*").String(), jen.Error()).Block(
-		jen.List(jen.Id("rsp"), jen.Err()).Op(":=").Id("client").Dot(string(operation.ID)).CallFunc(func(params *jen.Group) {
-			positionalArgs(params)
-			params.Add(query).Op("...")
-		}),
-		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Nil(), jen.Err())),
-		jen.Return(jen.Id("rsp").Dot(pascalCase(pg.ItemsKey)), jen.Id("rsp").Dot(pascalCase(pg.NextField)), jen.Nil()),
-	)
-	return fetch, itemType
+// queryArgs renders the query params and include_secrets of an unpaginated client call.
+func queryArgs(params *jen.Group, operation *Operation) {
+	for _, k := range sortedKeys(operation.QueryParams) {
+		params.Index(jen.Lit(2)).String().Values(jen.Lit(k), jen.Lit(operation.QueryParams[k]))
+	}
+	if operation.IncludeSecrets {
+		params.Qual(commonPackage, "IncludeSecrets").Call()
+	}
 }
 
 // lookupFieldsList renders an op's ResultListLookupKeys tf-attribute values as a

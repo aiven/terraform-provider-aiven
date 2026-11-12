@@ -16,9 +16,16 @@ import (
 const typeName = "aiven_mysql_database"
 
 var ResourceOptions = adapter.ResourceOptions{
+	Conflict: &adapter.ConflictOptions{
+		Keys:   []string{"database_name"},
+		Load:   adapter.ConflictList(pageView, pageMatch),
+		Parent: []string{"project", "service_name"},
+	},
 	Create:                createView,
 	Delete:                deleteView,
+	DeleteState:           &adapter.DeleteStateOptions{},
 	IdentityFields:        []string{"project", "service_name", "database_name"},
+	IgnoreAlreadyExists:   true,
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
 	RemoveMissing:         true,
@@ -48,13 +55,7 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 }
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	rsp, err := client.ServiceDatabaseList(ctx, d.Get("project").(string), d.Get("service_name").(string))
-	if err != nil {
-		return err
-	}
-	match, err := adapter.FindOne(rsp.Databases, func(i int) bool {
-		return adapter.Equal(rsp.Databases[i].DatabaseName, d.Get("database_name"))
-	})
+	match, err := adapter.PaginateFind(pageView(ctx, client, d), pageMatch(d))
 	if err != nil {
 		return fmt.Errorf("lookup `aiven_mysql_database` by `database_name`: %w", err)
 	}
@@ -63,4 +64,20 @@ func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData)
 
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	return client.ServiceDatabaseDelete(ctx, d.Get("project").(string), d.Get("service_name").(string), d.Get("database_name").(string))
+}
+
+func pageView(ctx context.Context, client avngen.Client, d adapter.ResourceData) func(cursor string) ([]service.DatabaseOut, *string, error) {
+	return func(string) ([]service.DatabaseOut, *string, error) {
+		rsp, err := client.ServiceDatabaseList(ctx, d.Get("project").(string), d.Get("service_name").(string))
+		if err != nil {
+			return nil, nil, err
+		}
+		return rsp.Databases, nil, nil
+	}
+}
+
+func pageMatch(d adapter.ResourceData) func(item service.DatabaseOut) bool {
+	return func(item service.DatabaseOut) bool {
+		return adapter.Equal(item.DatabaseName, d.Get("database_name"))
+	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -155,6 +156,9 @@ func TestAccAivenMySQLDatabase(t *testing.T) {
 					PreConfig: func() {
 						err := client.ServiceDatabaseDelete(t.Context(), projectName, serviceName, dbName)
 						require.NoError(t, err)
+						// The provider caches the initial list of databases per service.
+						// Clear it to mimic a fresh provider process after an out-of-band delete.
+						adapter.ForgetConflict("aiven_mysql_database", []string{projectName, serviceName}, dbName)
 					},
 					PlanOnly:           true,
 					ExpectNonEmptyPlan: true,

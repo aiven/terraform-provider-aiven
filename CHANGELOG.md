@@ -14,6 +14,8 @@ nav_order: 1
 
 - Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
   Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
+- Change `aiven_mysql_database`: like `aiven_pg_database`, a create retried by the client no longer fails with 409,
+  two resources with the same name fail before the create, and a replacement waits until the old database is deleted.
 
 ## [4.66.0] - 2026-11-12
 

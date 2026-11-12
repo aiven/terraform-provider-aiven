@@ -1,25 +1,11 @@
 # yaml-language-server: $schema=.schema.yml
+include: .service_database.yml
 resource:
-  refreshState: true
-  deleteState: true
-  removeMissing: true
-  alreadyExists: check
-  terminationProtection: true
   description: Creates and manages an [Aiven for PostgreSQL®](https://aiven.io/docs/products/postgresql) database.
 datasource:
   description: Gets information about an Aiven for PostgreSQL® database.
-clientHandler: service
-identityFields: [project, service_name, database_name]
-legacyTimeouts: true
 requireServiceReady: [pg]
-rename:
-  dbname: database_name
-  database: database_name
 operations:
-  - id: ServiceDatabaseCreate
-    type: create
-  - id: ServiceDatabaseDelete
-    type: delete
   - id: ServiceDatabaseList
     type: read
     resultKey: databases
