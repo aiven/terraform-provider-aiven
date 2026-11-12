@@ -303,11 +303,13 @@ type Definition struct {
 	// Splits the "oneOf" user config field into a "<type>_user_config" block per schema,
 	// e.g. "datadog_user_config" when "endpoint_type" is "datadog".
 	UserConfigDiscriminator string `yaml:"userConfigDiscriminator,omitempty"`
+	// Hoist lists the root objects whose children become root attributes, by glob, e.g. {"access_control": ["*"]}.
+	Hoist map[string][]string `yaml:"hoist,omitempty"`
 
 	// prunedFields holds cross-group attributes dropped by
 	// pruneCrossGroupFields across the resource and datasource passes;
 	// written back to the YAML's `remove:` list at end of generation.
-	// Keyed by name, value is the first non-empty description seen.
+	// Keyed by JSONPath(), value is the first non-empty description seen.
 	prunedFields map[string]string
 
 	// refTargets are the YAML definitions referenced by `ref` fields, keyed by type name.
@@ -345,6 +347,20 @@ func (d *Definition) IsRemoved(jsonPath string) (bool, error) {
 			return false, fmt.Errorf("invalid remove pattern %q: %w", pattern, err)
 		}
 
+		if match {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// IsHoisted reports whether the `hoist` patterns of the parent object match the child name.
+func (d *Definition) IsHoisted(parent, child string) (bool, error) {
+	for _, pattern := range d.Hoist[parent] {
+		match, err := doublestar.Match(pattern, child)
+		if err != nil {
+			return false, fmt.Errorf("invalid hoist pattern %q: %w", pattern, err)
+		}
 		if match {
 			return true, nil
 		}
@@ -465,6 +481,7 @@ type Item struct {
 	AlsoRequires  []string `yaml:"alsoRequires,omitempty"`
 
 	JSONName           string       `yaml:"jsonName,omitempty"`
+	HoistedFrom        string       `yaml:"_hoistedFrom,omitempty"`
 	Type               SchemaType   `yaml:"type,omitempty"`
 	Description        string       `yaml:"description,omitempty"`
 	DeprecationMessage string       `yaml:"deprecationMessage,omitempty"`
@@ -591,7 +608,11 @@ func (item *Item) ancestors() []*Item {
 func (item *Item) JSONPath() string {
 	chunks := make([]string, 0)
 	for _, v := range item.ancestors() {
-		chunks = append(chunks, v.JSONName)
+		if v.HoistedFrom != "" {
+			chunks = append(chunks, v.HoistedFrom, v.JSONName)
+		} else {
+			chunks = append(chunks, v.JSONName)
+		}
 	}
 	return strings.Join(chunks, "/")
 }

@@ -124,8 +124,9 @@ func resourceSchemaInternal() *adapter.Schema {
 				ZeroNotAllowed: true,
 			},
 			"pg_allow_replication": &adapter.Schema{
-				Computed: true,
-				Type:     adapter.SchemaTypeBool,
+				Computed:    true,
+				HoistedFrom: "access_control",
+				Type:        adapter.SchemaTypeBool,
 			},
 			"project":      &adapter.Schema{Type: adapter.SchemaTypeString},
 			"service_name": &adapter.Schema{Type: adapter.SchemaTypeString},

@@ -25,6 +25,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Schema:              resourceSchema,
 	SchemaInternal:      resourceSchemaInternal(),
 	TypeName:            typeName,
+	Update:              updateView,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{

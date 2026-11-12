@@ -19,13 +19,21 @@ operations:
     type: read
     resultKey: user
     includeSecrets: true
+  - id: ServiceUserCredentialsModify
+    type: update
+    disableView: true
 rename:
   service_username: username
+hoist:
+  access_control: ["*"]
 remove:
   - access_cert_not_valid_after_time
-  - access_control
+  - access_control/redis_*
   - expiring_cert_not_valid_after_time
+  - new_password
+  - operation
   - password_updated_time
+  - service
 schema:
   password:
     type: string

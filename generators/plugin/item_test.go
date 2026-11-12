@@ -1396,3 +1396,14 @@ func TestCutDeprecated(t *testing.T) {
 		})
 	}
 }
+
+func TestItemJSONPathHoisted(t *testing.T) {
+	t.Parallel()
+	root := &Item{Name: "root", JSONName: "root", Type: SchemaTypeObject}
+	child := &Item{
+		Parent:      root,
+		JSONName:    "pg_allow_replication",
+		HoistedFrom: "access_control",
+	}
+	assert.Equal(t, "access_control/pg_allow_replication", child.JSONPath())
+}

@@ -261,6 +261,18 @@ properties:
     $comment: |
       List of attributes to rename in the resource/datasource.
       Example: rename: {"old_openapi_name": "new_terraform_name"}
+  hoist:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        type: string
+    $comment: |
+      Root objects whose children become root attributes, matched by glob, e.g. {"access_control": ["*"]}.
+      Children of other services are pruned as usual. Hoisted fields keep their API path, e.g. "remove: [access_control/redis_*]".
+      They can't be renamed. Expand nests them back, Flatten lifts them out.
+      Only root objects can be hoisted. A hoisted array is a set unless its schema sets "type: arrayOrdered".
+      A child that no update operation accepts is force-new, like any other field.
   schema:
     $ref: '#/definitions/Schema'
     $comment: |

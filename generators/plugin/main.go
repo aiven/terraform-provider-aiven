@@ -543,8 +543,8 @@ func pruneCrossGroupFields(def *Definition, root *Item, groups [][]string) bool 
 				if def.prunedFields == nil {
 					def.prunedFields = map[string]string{}
 				}
-				if def.prunedFields[name] == "" {
-					def.prunedFields[name] = item.Description
+				if def.prunedFields[item.JSONPath()] == "" {
+					def.prunedFields[item.JSONPath()] = item.Description
 				}
 				delete(root.Properties, name)
 				pruned = true
@@ -676,7 +676,7 @@ func fromOperationID(scope *Scope, operation *Operation, root *Item) error {
 // reTFName allows only TF acceptable characters
 var reTFName = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 
-func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool, appearsIn AppearsIn) *Item {
+func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool, appearsIn AppearsIn, hoistedFrom string) (*Item, error) {
 	// Item bounds are ints. Integer bounds round inward, which is exact,
 	// number bounds round outward, so no valid value is rejected.
 	isInteger := s.Type == SchemaTypeInteger
@@ -690,6 +690,7 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		// Keeps TF names consistent
 		Name:        reTFName.ReplaceAllString(name, "_"),
 		JSONName:    name,
+		HoistedFrom: hoistedFrom,
 		Type:        s.Type,
 		Description: s.Description,
 		Default:     s.Default,
@@ -718,7 +719,10 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 
 	// Renames it to match the definition.
 	newName, ok := scope.Definition.Rename[item.JSONPath()]
-	if ok {
+	switch {
+	case ok && hoistedFrom != "":
+		return nil, fmt.Errorf("rename: hoisted field %q can't be renamed", item.JSONPath())
+	case ok:
 		item.Name = newName
 	}
 
@@ -745,7 +749,61 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		item.DeprecationMessage = deprecation
 	}
 
-	return item
+	return item, nil
+}
+
+func fromSchemaProperty(scope *Scope, operation *Operation, parent *Item, thisName string, thisSchema *OASchema, appearsIn AppearsIn, hoistedFrom string, required bool) error {
+	thisItem, err := newItem(scope, parent, thisName, thisSchema, required, appearsIn, hoistedFrom)
+	if err != nil {
+		return err
+	}
+
+	// With the patching workaround we have,
+	// it is important to not rely on the schema,
+	// but on the type explicitly.
+	var thisItemsSchema *OASchema
+	switch thisSchema.Type {
+	case SchemaTypeArray, SchemaTypeArrayOrdered:
+		thisItemsSchema = thisSchema.Items
+	case SchemaTypeObject:
+		additional := thisSchema.AdditionalProperties
+		if additional != nil && additional.Schema != nil {
+			// If additional properties for maps
+			thisItemsSchema = additional.Schema
+		} else if v, ok := thisSchema.Properties[anyField]; ok {
+			// ANY is a special case is additional properties
+			thisItemsSchema = v
+		} else if len(thisSchema.Properties) > 0 {
+			// A regular object with properties
+			err := fromSchema(scope, operation, thisItem, thisSchema, appearsIn)
+			if err != nil {
+				return err
+			}
+		} else if additional == nil || additional.Allowed {
+			// A free-form map, or a map with invalid schema
+			thisItemsSchema = &OASchema{Type: SchemaTypeString}
+		}
+		// Otherwise, "additionalProperties: false" leaves an object without fields
+	}
+
+	// Either array item or additional properties
+	thisItemsSchema, err = scope.OpenAPI.resolveSchema(thisItemsSchema)
+	if err != nil {
+		return fmt.Errorf("%s items: %w", thisName, err)
+	}
+	if thisItemsSchema != nil {
+		// Array or Map items
+		thisItem.Items, err = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn, "")
+		if err != nil {
+			return err
+		}
+		err = fromSchema(scope, operation, thisItem.Items, thisItemsSchema, appearsIn)
+		if err != nil {
+			return err
+		}
+	}
+
+	return addProperty(scope, parent, thisItem)
 }
 
 func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *OASchema, appearsIn AppearsIn) error {
@@ -756,7 +814,6 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 		}
 
 		if len(thisSchema.OneOf) > 0 && scope.Definition.UserConfigDiscriminator != "" && parent.IsRoot() {
-			// Added once all operations are read, see addUserConfigs
 			scope.userConfigs = append(scope.userConfigs, &userConfigSource{
 				operation: operation,
 				name:      thisName,
@@ -766,61 +823,51 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 			continue
 		}
 
-		// Other "oneOf" are free-form objects
 		thisSchema, err = scope.OpenAPI.resolveSchema(thisSchema)
 		if err != nil {
 			return fmt.Errorf("%s: %w", thisName, err)
 		}
 
-		// 1. Only the create operation can have required fields.
-		// 2. Some fields are marked as required because they are required in the response, so we check if it's a request.
-		required := operation.Type == OperationCreate && appearsIn&RequestBody > 0 && slices.Contains(parentSchema.Required, thisName)
-		thisItem := newItem(scope, parent, thisName, thisSchema, required, appearsIn)
-
-		// With the patching workaround we have,
-		// it is important to not rely on the schema,
-		// but on the type explicitly.
-		var thisItemsSchema *OASchema
-		switch thisSchema.Type {
-		case SchemaTypeArray, SchemaTypeArrayOrdered:
-			thisItemsSchema = thisSchema.Items
-		case SchemaTypeObject:
-			additional := thisSchema.AdditionalProperties
-			if additional != nil && additional.Schema != nil {
-				// If additional properties for maps
-				thisItemsSchema = additional.Schema
-			} else if v, ok := thisSchema.Properties[anyField]; ok {
-				// ANY is a special case is additional properties
-				thisItemsSchema = v
-			} else if len(thisSchema.Properties) > 0 {
-				// A regular object with properties
-				err := fromSchema(scope, operation, thisItem, thisSchema, appearsIn)
+		if parent.IsRoot() {
+			if _, ok := scope.Definition.Hoist[thisName]; ok {
+				removed, err := scope.Definition.IsRemoved(thisName)
 				if err != nil {
 					return err
 				}
-			} else if additional == nil || additional.Allowed {
-				// A free-form map, or a map with invalid schema
-				thisItemsSchema = &OASchema{Type: SchemaTypeString}
+				if removed {
+					continue
+				}
+				if thisSchema.Type != SchemaTypeObject || len(thisSchema.Properties) == 0 {
+					return fmt.Errorf("hoist %q: schema must be an object with properties", thisName)
+				}
+				objRequired := slices.Contains(parentSchema.Required, thisName)
+				for _, childName := range sortedKeys(thisSchema.Properties) {
+					match, err := scope.Definition.IsHoisted(thisName, childName)
+					if err != nil {
+						return err
+					}
+					if !match {
+						continue
+					}
+					childSchema, err := scope.OpenAPI.resolveRef(thisSchema.Properties[childName])
+					if err != nil {
+						return fmt.Errorf("%s: %w", childName, err)
+					}
+					childSchema, err = scope.OpenAPI.resolveSchema(childSchema)
+					if err != nil {
+						return fmt.Errorf("%s: %w", childName, err)
+					}
+					childRequired := operation.Type == OperationCreate && appearsIn&RequestBody > 0 && objRequired && slices.Contains(thisSchema.Required, childName)
+					if err := fromSchemaProperty(scope, operation, parent, childName, childSchema, appearsIn, thisName, childRequired); err != nil {
+						return err
+					}
+				}
+				continue
 			}
-			// Otherwise, "additionalProperties: false" leaves an object without fields
 		}
 
-		// Either array item or additional properties
-		thisItemsSchema, err = scope.OpenAPI.resolveSchema(thisItemsSchema)
-		if err != nil {
-			return fmt.Errorf("%s items: %w", thisName, err)
-		}
-		if thisItemsSchema != nil {
-			// Array or Map items
-			thisItem.Items = newItem(scope, thisItem, thisItem.Name, thisItemsSchema, thisItem.Required, appearsIn)
-			err := fromSchema(scope, operation, thisItem.Items, thisItemsSchema, appearsIn)
-			if err != nil {
-				return err
-			}
-		}
-
-		err = addProperty(scope, parent, thisItem)
-		if err != nil {
+		required := operation.Type == OperationCreate && appearsIn&RequestBody > 0 && slices.Contains(parentSchema.Required, thisName)
+		if err := fromSchemaProperty(scope, operation, parent, thisName, thisSchema, appearsIn, "", required); err != nil {
 			return err
 		}
 	}
@@ -844,7 +891,10 @@ func fromParameter(scope *Scope, operation *Operation, parent *Item, path *OAPat
 		}
 
 		p.Schema.Description = p.Description
-		prop := newItem(scope, parent, p.Name, p.Schema, p.Required, appearsIn)
+		prop, err := newItem(scope, parent, p.Name, p.Schema, p.Required, appearsIn, "")
+		if err != nil {
+			return err
+		}
 		err = addProperty(scope, parent, prop)
 		if err != nil {
 			return err
@@ -894,8 +944,11 @@ func addProperty(scope *Scope, parent, prop *Item) error {
 		parent.Properties = make(map[string]*Item)
 	}
 
-	// CRUD fields often intersect with each other
-	// Merges duplicated fields
+	existing := parent.Properties[prop.Name]
+	if existing != nil && existing.HoistedFrom != prop.HoistedFrom {
+		return fmt.Errorf("field %q: hoisted from %q collides with root field", prop.Name, prop.HoistedFrom)
+	}
+
 	parent.Properties[prop.Name], err = mergeItem(parent, parent.Properties[prop.Name], prop)
 	return err
 }
@@ -1081,10 +1134,11 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	case a == nil:
 		// For creating items from the definition
 		a = &Item{
-			Name:       b.Name,
-			JSONName:   b.JSONName,
-			Type:       b.Type,
-			Properties: make(map[string]*Item),
+			Name:        b.Name,
+			JSONName:    b.JSONName,
+			HoistedFrom: b.HoistedFrom,
+			Type:        b.Type,
+			Properties:  make(map[string]*Item),
 		}
 	}
 
@@ -1125,6 +1179,9 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 
 	a.Parent = parent
 	a.AppearsIn |= b.AppearsIn
+	if b.HoistedFrom != "" {
+		a.HoistedFrom = b.HoistedFrom
+	}
 	a.Type = or(b.Type, a.Type) // In case user overrides the type
 	a.Required = a.Required || b.Required
 	a.Optional = a.Optional || b.Optional

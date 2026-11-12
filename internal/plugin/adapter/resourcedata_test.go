@@ -5,6 +5,7 @@ package adapter
 import (
 	"context"
 	"errors"
+	"maps"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -1061,5 +1062,94 @@ func TestResourceDataExpandWithoutChanges(t *testing.T) {
 		d, err := NewResourceData(sch, nil, WithTestPlan(state()))
 		require.NoError(t, err)
 		require.NoError(t, d.Expand(new(request)))
+	})
+}
+
+func TestResourceDataHoistedFields(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"pg_allow_replication": {Type: SchemaTypeBool, HoistedFrom: "access_control"},
+			"valkey_acl_keys":      {Type: SchemaTypeList, Items: &Schema{Type: SchemaTypeString}, HoistedFrom: "access_control"},
+			"username":             {Type: SchemaTypeString},
+			"id":                   {Type: SchemaTypeString, Computed: true},
+		},
+	}
+
+	t.Run("expand nests the fields after the modifiers", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(sch, nil, WithTestPlan(map[string]any{
+			"username":        "u",
+			"valkey_acl_keys": []any{"k"},
+		}))
+		require.NoError(t, err)
+		setReplication := func(_ ResourceData, dto map[string]any) error {
+			dto["pg_allow_replication"] = true
+			return nil
+		}
+		var out map[string]any
+		require.NoError(t, d.Expand(&out, setReplication))
+		require.Equal(t, map[string]any{
+			"username": "u",
+			"access_control": map[string]any{
+				"pg_allow_replication": true,
+				"valkey_acl_keys":      []any{"k"},
+			},
+		}, out)
+	})
+
+	t.Run("expand sends no object without the fields", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(sch, nil, WithTestPlan(map[string]any{"username": "u"}))
+		require.NoError(t, err)
+		var out map[string]any
+		require.NoError(t, d.Expand(&out))
+		require.Equal(t, map[string]any{"username": "u"}, out)
+	})
+
+	t.Run("flatten lifts the fields before the modifiers", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(sch, []string{"username"}, WithTestState(map[string]any{}))
+		require.NoError(t, err)
+		rsp := map[string]any{
+			"username": "u",
+			"access_control": map[string]any{
+				"valkey_acl_keys": []any{"k"},
+				"redis_acl_keys":  []any{"r"},
+				"username":        "nested",
+			},
+		}
+		var seen map[string]any
+		record := func(_ ResourceData, dto map[string]any) error {
+			seen = maps.Clone(dto)
+			return nil
+		}
+		require.NoError(t, d.Flatten(rsp, record))
+		require.Equal(t, map[string]any{"username": "u", "valkey_acl_keys": []any{"k"}}, seen)
+		require.Equal(t, "u", d.Get("username"))
+		require.Equal(t, []any{"k"}, d.Get("valkey_acl_keys"))
+	})
+
+	t.Run("flatten keeps the state of an omitted field", func(t *testing.T) {
+		t.Parallel()
+		d, err := NewResourceData(sch, []string{"username"}, WithTestState(map[string]any{"username": "u", "valkey_acl_keys": []any{"k"}}))
+		require.NoError(t, err)
+		require.NoError(t, d.Flatten(map[string]any{"username": "u", "access_control": map[string]any{}}))
+		require.Equal(t, []any{"k"}, d.Get("valkey_acl_keys"))
+	})
+
+	t.Run("has change hoisted", func(t *testing.T) {
+		t.Parallel()
+		state := map[string]any{"username": "u", "pg_allow_replication": false}
+		changed, err := NewResourceData(sch, nil, WithTestState(state), WithTestPlan(map[string]any{"username": "u", "pg_allow_replication": true}))
+		require.NoError(t, err)
+		require.True(t, changed.HasChangeHoisted("access_control"))
+		require.False(t, changed.HasChangeHoisted("other"))
+
+		rootOnly, err := NewResourceData(sch, nil, WithTestState(state), WithTestPlan(map[string]any{"username": "v", "pg_allow_replication": false}))
+		require.NoError(t, err)
+		require.False(t, rootOnly.HasChangeHoisted("access_control"))
 	})
 }

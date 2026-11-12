@@ -212,8 +212,11 @@ func TestResetPassword(t *testing.T) {
 					Return(&service.ServiceUserCredentialsModifyOut{}, nil)
 			}
 
-			err = resetPassword(ctx, client, d)
-			require.ErrorIs(t, err, tt.wantErr)
+			view := resetPassword
+			if tt.state != nil {
+				view = ResourceOptions.Update
+			}
+			require.ErrorIs(t, view(ctx, client, d), tt.wantErr)
 		})
 	}
 }

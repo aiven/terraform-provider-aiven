@@ -48,3 +48,55 @@ schema:
 	}
 	assert.Equal(t, expected, mergeYAML(base, def))
 }
+
+func TestFromSchemaHoist(t *testing.T) {
+	t.Parallel()
+	schema := &OASchema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*OASchema{
+			"access_control": {
+				Type: SchemaTypeObject,
+				Properties: map[string]*OASchema{
+					"pg_allow_replication": {Type: SchemaTypeBoolean},
+					"redis_acl_keys":       {Type: SchemaTypeArray, Items: &OASchema{Type: SchemaTypeString}},
+				},
+			},
+			"username": {Type: SchemaTypeString},
+		},
+	}
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope := &Scope{Definition: &Definition{
+		Hoist:  map[string][]string{"access_control": {"*"}},
+		Remove: []string{"access_control/redis_*"},
+	}}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+	assert.Contains(t, root.Properties, "pg_allow_replication")
+	assert.NotContains(t, root.Properties, "redis_acl_keys")
+	assert.NotContains(t, root.Properties, "access_control")
+	assert.Equal(t, "access_control", root.Properties["pg_allow_replication"].HoistedFrom)
+}
+
+func TestAddPropertyHoistCollision(t *testing.T) {
+	t.Parallel()
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{
+		"foo": {Name: "foo", HoistedFrom: ""},
+	}}
+	scope := &Scope{Definition: &Definition{}}
+	err := addProperty(scope, root, &Item{Name: "foo", HoistedFrom: "access_control"})
+	require.ErrorContains(t, err, "collides with root field")
+}
+
+func TestPruneCrossGroupFieldsHoistedJSONPath(t *testing.T) {
+	t.Parallel()
+	def := &Definition{typeName: "aiven_pg_user"}
+	root := &Item{Name: "root", Properties: map[string]*Item{}}
+	child := &Item{
+		Parent:      root,
+		Description: "valkey keys",
+		JSONName:    "valkey_acl_keys",
+		HoistedFrom: "access_control",
+	}
+	root.Properties["valkey_acl_keys"] = child
+	require.True(t, pruneCrossGroupFields(def, root, serviceTypes))
+	require.Equal(t, "valkey keys", def.prunedFields["access_control/valkey_acl_keys"])
+}

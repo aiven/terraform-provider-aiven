@@ -168,6 +168,7 @@ Common fields:
 - `clientHandler` - API client type: `project`, `service`, `organization`, `organizationbilling`, etc.
 - `remove` - Fields to exclude from schema (exact paths or glob patterns)
 - `rename` - Field name mappings (API field -> Terraform field)
+- `hoist` - Lifts the children of a root API object to top-level attributes, e.g. `hoist: {access_control: ["*"]}`. Values are glob patterns of child names. A hoisted field's path is `access_control/<child>` for `remove`, and it can't be renamed. The internal schema marks each hoisted field with `HoistedFrom: "access_control"`. `d.Expand` nests the marked fields after the modifiers, and `d.Flatten` lifts them before the modifiers, so the views and modifiers work with root fields only. `d.HasChangeHoisted("access_control")` reports a change of any of them. A child the API omits keeps its state, like a root field, so zero it in `flattenModifier` if that hides drift (see `aiven_valkey_user`). Cross-group pruning applies, e.g. `valkey_*` children are dropped from `aiven_pg_user`. Only root objects can be hoisted. A hoisted array is a set unless the schema sets `type: arrayOrdered`. A child that no declared update operation accepts is force-new: declare the update operation, even with `disableView: true`, and send the whole object (e.g. `serviceuser.Update`), so new children are updatable.
 - `schema` - Schema customizations (types, validation, behavior)
 - `expandModifier` / `flattenModifier` / `readModifier` - Enable custom Go modifiers
 - `version` - Schema version, the SDK `SchemaVersion` of a migrated resource (no state upgraders)
@@ -666,28 +667,7 @@ type MapModifier func(d ResourceData, dto map[string]any) error
 - `d` — the `adapter.ResourceData` interface for accessing plan/state/config values
 - `dto` — the raw map being sent to or received from the API
 
-**Example — nested API field** (`pg_allow_replication` stored as `access_control.pg_allow_replication` in API but exposed top-level in TF):
-```go
-func expandModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
-    return func(d adapter.ResourceData, dto map[string]any) error {
-        if v, ok := d.GetOk("pg_allow_replication"); ok {
-            dto["access_control"] = map[string]any{"pg_allow_replication": v}
-            delete(dto, "pg_allow_replication")
-        }
-        return nil
-    }
-}
-
-func flattenModifier(_ context.Context, _ avngen.Client) adapter.MapModifier {
-    return func(d adapter.ResourceData, dto map[string]any) error {
-        if v, ok := dto["access_control"]; ok {
-            dto["pg_allow_replication"] = v.(map[string]any)["pg_allow_replication"]
-            delete(dto, "access_control")
-        }
-        return nil
-    }
-}
-```
+Nested API fields exposed top-level in TF need no modifier: use `hoist`, e.g. `access_control` in `.service_user.yml`.
 
 **Composing multiple modifiers** with `adapter.ComposeMapModifiers()`:
 ```go
@@ -791,25 +771,11 @@ func init() {
 }
 ```
 
-**Example — custom update with multiple API operations** (`pg_user`):
+**Example — custom update with multiple API operations** (`mysql_user`, see `serviceuser.UpdateWith`):
 ```go
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-    if d.HasChange("pg_allow_replication") {
-        req := &service.ServiceUserCredentialsModifyIn{
-            Operation: service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
-            AccessControl: &service.AccessControlIn{
-                PgAllowReplication: new(d.Get("pg_allow_replication").(bool)),
-            },
-        }
-        _, err := client.ServiceUserCredentialsModify(ctx,
-            d.Get("project").(string),
-            d.Get("service_name").(string),
-            d.Get("username").(string), req)
-        if err != nil {
-            return err
-        }
-    }
-    return resetPassword(ctx, client, d)
+    // Sends access_control if a hoisted field changed, then resets the password
+    return serviceuser.UpdateWith(ctx, client, d, resetPassword)
 }
 ```
 

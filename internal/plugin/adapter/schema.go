@@ -51,4 +51,8 @@ type Schema struct {
 	// IsUserConfig marks a user config block of a resource. The API merges it on update: the options missing
 	// in the request keep their values, so removing its nested blocks changes only the state, see withoutRemovedBlocks.
 	IsUserConfig bool
+
+	// HoistedFrom names the API object of a root field, e.g. "access_control".
+	// Expand nests the field under it after the modifiers, Flatten lifts it before them.
+	HoistedFrom string
 }

@@ -2,10 +2,12 @@ package serviceuser_test
 
 import (
 	"context"
+	"maps"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
@@ -202,6 +204,90 @@ func TestResetPassword(t *testing.T) {
 
 			err = serviceuser.ResetPassword(ctx, client, d)
 			require.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	t.Parallel()
+
+	const project, serviceName, username = "prj", "svc", "usr"
+	ctx := context.Background()
+	schema := func() *adapter.Schema {
+		s := schemaInternal()
+		s.Properties["authentication"] = &adapter.Schema{Type: adapter.SchemaTypeString}
+		s.Properties["pg_allow_replication"] = &adapter.Schema{Type: adapter.SchemaTypeBool, HoistedFrom: serviceuser.AccessControlField}
+		return s
+	}
+	state := func() map[string]any {
+		return map[string]any{
+			"id": "prj/svc/usr", "project": project, "service_name": serviceName, "username": username,
+			"password": "OldPass", "authentication": "caching_sha2_password", "pg_allow_replication": false,
+		}
+	}
+	setAccessControl := &service.ServiceUserCredentialsModifyIn{
+		Operation:     service.ServiceUserCredentialsModifyOperationTypeSetAccessControl,
+		AccessControl: &service.AccessControlIn{PGAllowReplication: new(true)},
+	}
+	resetCredentials := &service.ServiceUserCredentialsModifyIn{
+		Operation:   service.ServiceUserCredentialsModifyOperationTypeResetCredentials,
+		NewPassword: new("NewPass456"),
+	}
+
+	tests := []struct {
+		name    string
+		plan    map[string]any
+		want    []*service.ServiceUserCredentialsModifyIn
+		wantErr error
+	}{
+		{
+			name:    "no changes",
+			wantErr: adapter.ErrNoChanges,
+		},
+		{
+			name: "access control change sends only the access control",
+			plan: map[string]any{"pg_allow_replication": true},
+			want: []*service.ServiceUserCredentialsModifyIn{setAccessControl},
+		},
+		{
+			name: "access control and password change",
+			plan: map[string]any{"pg_allow_replication": true, "password": "NewPass456"},
+			want: []*service.ServiceUserCredentialsModifyIn{setAccessControl, resetCredentials},
+		},
+		{
+			name: "password change",
+			plan: map[string]any{"password": "NewPass456"},
+			want: []*service.ServiceUserCredentialsModifyIn{resetCredentials},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			plan := state()
+			maps.Copy(plan, tt.plan)
+			d, err := adapter.NewResourceData(schema(), idFields(),
+				adapter.WithTestPlan(plan),
+				adapter.WithTestState(state()),
+				adapter.WithTestConfig(plan),
+			)
+			require.NoError(t, err)
+
+			client := avngen.NewMockClient(t)
+			var prev *mock.Call
+			for _, req := range tt.want {
+				call := client.EXPECT().
+					ServiceUserCredentialsModify(ctx, project, serviceName, username, req).
+					Return(&service.ServiceUserCredentialsModifyOut{}, nil).
+					Once()
+				if prev != nil {
+					call.NotBefore(prev)
+				}
+				prev = call
+			}
+
+			require.ErrorIs(t, serviceuser.Update(ctx, client, d), tt.wantErr)
 		})
 	}
 }

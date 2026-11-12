@@ -31,7 +31,7 @@ data "aiven_opensearch_user" "example" {
 
 - `project` (String) Project name.
 - `service_name` (String) Service name.
-- `username` (String) Account username.
+- `username` (String) Service username.
 
 ### Optional
 

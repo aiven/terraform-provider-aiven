@@ -42,7 +42,7 @@ resource "aiven_kafka" "example_kafka" {
 
 - `project` (String) Project name. Changing this property forces recreation of the resource.
 - `service_name` (String) Service name. Changing this property forces recreation of the resource.
-- `username` (String) Account username. Maximum length: `64`. Changing this property forces recreation of the resource.
+- `username` (String) Service username. Maximum length: `64`. Changing this property forces recreation of the resource.
 
 ### Optional
 

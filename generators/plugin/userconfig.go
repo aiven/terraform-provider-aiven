@@ -87,7 +87,10 @@ func addUserConfigs(scope *Scope, root *Item) error {
 			}
 
 			desc := pascalCase(kind) + " user configurable settings. " + userConfigNoReset
-			item := newItem(scope, root, kind+userConfigSuffix, &OASchema{Type: SchemaTypeObject, Description: desc}, false, src.appearsIn)
+			item, err := newItem(scope, root, kind+userConfigSuffix, &OASchema{Type: SchemaTypeObject, Description: desc}, false, src.appearsIn, "")
+			if err != nil {
+				return err
+			}
 			item.UserConfigType = kind
 
 			// The API keeps the options removed from the config.
