@@ -98,10 +98,13 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 	}
 
 	if item.Type == SchemaTypeString && isValidRegex(item.Pattern) {
-		codes = append(codes, jen.Qual(pkg, "RegexMatches").Call(
-			jen.Qual("regexp", "MustCompile").Call(jen.Lit(item.Pattern)),
-			jen.Lit(fmt.Sprintf("must match pattern %q", item.Pattern)),
-		))
+		regexpCall := jen.Qual("regexp", "MustCompile").Call(jen.Lit(item.Pattern))
+		message := jen.Lit(fmt.Sprintf("must match pattern %q", item.Pattern))
+		if item.Sensitive {
+			codes = append(codes, jen.Qual(customValidatorsPackage, "SensitiveRegexMatches").Call(regexpCall, message))
+		} else {
+			codes = append(codes, jen.Qual(pkg, "RegexMatches").Call(regexpCall, message))
+		}
 	}
 
 	if item.Type == SchemaTypeString {
