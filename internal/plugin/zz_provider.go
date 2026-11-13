@@ -27,6 +27,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmkaccessorgcp"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmkaccessoroci"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkapplication"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkapplicationdeployment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/flinkjarapplication"
@@ -96,6 +97,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_clickhouse_user":                     adapter.NewLazyResource(clickhouseuser.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyResource(connectionpool.ResourceOptions),
+		"aiven_flink":                               adapter.NewLazyResource(flink.ResourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyResource(flinkapplication.ResourceOptions),
 		"aiven_flink_application_deployment":        adapter.NewLazyResource(flinkapplicationdeployment.ResourceOptions),
 		"aiven_flink_jar_application":               adapter.NewLazyResource(flinkjarapplication.ResourceOptions),
@@ -157,6 +159,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_cmk_accessor_gcp":                    adapter.NewLazyDataSource(cmkaccessorgcp.DataSourceOptions),
 		"aiven_cmk_accessor_oci":                    adapter.NewLazyDataSource(cmkaccessoroci.DataSourceOptions),
 		"aiven_connection_pool":                     adapter.NewLazyDataSource(connectionpool.DataSourceOptions),
+		"aiven_flink":                               adapter.NewLazyDataSource(flink.DataSourceOptions),
 		"aiven_flink_application":                   adapter.NewLazyDataSource(flinkapplication.DataSourceOptions),
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyDataSource(gcporgvpcpeeringconnection.DataSourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyDataSource(gcpprivatelink.DataSourceOptions),
