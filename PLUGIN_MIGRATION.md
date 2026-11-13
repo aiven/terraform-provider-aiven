@@ -32,7 +32,7 @@
 |  26 | aiven_cmk_accessor_oci                      | yes    |     1 |
 |  27 | aiven_connection_pool                       | yes    |     2 |
 |  28 | aiven_external_identity                     | yes    |     1 |
-|  29 | aiven_flink                                 |        |     2 |
+|  29 | aiven_flink                                 | yes    |     2 |
 |  30 | aiven_flink_application                     | yes    |     2 |
 |  31 | aiven_flink_application_deployment          | yes    |     1 |
 |  32 | aiven_flink_application_version             |        |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 71%                          | 115    |   163 |
+|     | TOTAL MIGRATED 72%                          | 117    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
