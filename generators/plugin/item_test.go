@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/dave/jennifer/jen"
@@ -350,6 +351,9 @@ func TestDescriptionExample(t *testing.T) {
 		"Enabled.": {Description: "Enabled", Type: SchemaTypeBoolean, Example: true},
 		"Mode. The possible values are `a` and `b`.": {Description: "Mode", Type: SchemaTypeString, Enum: []any{"a", "b"}, Example: "a"},
 		"Port, defaults to 80.":                      {Description: "Port, defaults to 80", Type: SchemaTypeInteger, Example: 8080},
+		"Messages. Example: `9223372036854775807`.": {
+			Description: "Messages", Type: SchemaTypeInteger, Maximum: math.MaxInt64, DocExample: float64(math.MaxInt64),
+		},
 	}
 	for want, item := range cases {
 		item.Name = "field"
@@ -1066,6 +1070,58 @@ func TestMergeItemDropDefault(t *testing.T) {
 	require.Nil(t, got.Default)
 }
 
+func TestRecalcDeepEmptyIsNullAndCreateOnly(t *testing.T) {
+	t.Parallel()
+
+	def := &Definition{Operations: Operations{
+		{ID: "FooCreate", Type: OperationCreate},
+		{ID: "FooRead", Type: OperationRead},
+		{ID: "FooUpdate", Type: OperationUpdate},
+	}}
+	ops := def.Operations
+	roundTrip := ops.AppearsInID("FooCreate", OperationCreate, RequestBody) |
+		ops.AppearsInID("FooUpdate", OperationUpdate, RequestBody) |
+		ops.AppearsInID("FooRead", OperationRead, ResponseBody)
+	root := &Item{Name: "root", Type: SchemaTypeObject}
+	mk := func(item *Item, parent *Item) *Item {
+		item.Name = "foo"
+		item.AppearsIn = roundTrip
+		item.Parent = parent
+		return item
+	}
+
+	t.Run("emptyIsNull implies computed", func(t *testing.T) {
+		t.Parallel()
+		item := mk(&Item{Type: SchemaTypeString, EmptyIsNull: true}, root)
+		require.NoError(t, recalcDeep(def, item))
+		assert.True(t, item.Optional)
+		assert.True(t, item.Computed)
+		assert.False(t, item.UsesStateForUnknown())
+	})
+
+	t.Run("emptyIsNull needs a string", func(t *testing.T) {
+		t.Parallel()
+		item := mk(&Item{Type: SchemaTypeInteger, EmptyIsNull: true}, root)
+		require.ErrorContains(t, recalcDeep(def, item), "emptyIsNull needs a string")
+	})
+
+	t.Run("createOnly needs a root field", func(t *testing.T) {
+		t.Parallel()
+		parent := mk(&Item{Type: SchemaTypeObject}, root)
+		item := mk(&Item{Type: SchemaTypeBoolean, CreateOnly: true}, parent)
+		require.ErrorContains(t, recalcDeep(def, item), "createOnly needs a root field")
+	})
+}
+
+func TestMergeItemEmptyCollectionDefault(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{Name: "static_ips", Type: SchemaTypeArray}, &Item{Default: []any{}})
+	require.NoError(t, err)
+	require.Equal(t, []any{}, got.Default)
+}
+
 func TestMergeItemEnum(t *testing.T) {
 	t.Parallel()
 
@@ -1278,4 +1334,38 @@ func TestItemJSONPathHoisted(t *testing.T) {
 		HoistedFrom: "access_control",
 	}
 	assert.Equal(t, "access_control/pg_allow_replication", child.JSONPath())
+}
+
+func TestExampleDisabledAndMinimal(t *testing.T) {
+	t.Parallel()
+
+	minimal := func(name string, props ...*Item) *Item {
+		block := &Item{Name: name, Type: SchemaTypeObject, Optional: true, MinimalExample: true, Properties: map[string]*Item{}}
+		for _, p := range props {
+			p.JSONName, p.Parent = p.Name, block
+			block.Properties[p.Name] = p
+		}
+		return block
+	}
+	root := refTestRoot(
+		&Item{Name: "service_name", Type: SchemaTypeString, Required: true, Example: "my-pg"},
+		&Item{Name: "service_integrations", Type: SchemaTypeString, Optional: true, DisableExample: true},
+		minimal("pg_user_config",
+			&Item{Name: "pg_version", Type: SchemaTypeString, Required: true, Example: "17"},
+			&Item{Name: "backup_hour", Type: SchemaTypeInteger, Optional: true},
+		),
+		// Sorts first, so the title stays above the next field
+		minimal("access_control", &Item{Name: "pg", Type: SchemaTypeBoolean, Optional: true}),
+	)
+	got, err := exampleRoot(&Definition{typeName: "aiven_pg"}, resourceType, root)
+	require.NoError(t, err)
+	assert.Equal(t, `resource "aiven_pg" "example" {
+  service_name = "my-pg"
+
+  // OPTIONAL FIELDS
+  pg_user_config {
+    pg_version = "17"
+  }
+}
+`, string(got))
 }
