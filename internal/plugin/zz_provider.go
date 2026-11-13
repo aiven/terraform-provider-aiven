@@ -52,6 +52,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysqldatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysqluser"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearchsecuritypluginconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/opensearchuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationaddress"
@@ -124,6 +125,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_mysql":                               adapter.NewLazyResource(mysql.ResourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyResource(mysqldatabase.ResourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyResource(mysqluser.ResourceOptions),
+		"aiven_opensearch":                          adapter.NewLazyResource(opensearch.ResourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyResource(opensearchsecuritypluginconfig.ResourceOptions),
 		"aiven_opensearch_user":                     adapter.NewLazyResource(opensearchuser.ResourceOptions),
 		"aiven_organization_address":                adapter.NewLazyResource(organizationaddress.ResourceOptions),
@@ -183,6 +185,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_mysql":                               adapter.NewLazyDataSource(mysql.DataSourceOptions),
 		"aiven_mysql_database":                      adapter.NewLazyDataSource(mysqldatabase.DataSourceOptions),
 		"aiven_mysql_user":                          adapter.NewLazyDataSource(mysqluser.DataSourceOptions),
+		"aiven_opensearch":                          adapter.NewLazyDataSource(opensearch.DataSourceOptions),
 		"aiven_opensearch_security_plugin_config":   adapter.NewLazyDataSource(opensearchsecuritypluginconfig.DataSourceOptions),
 		"aiven_opensearch_user":                     adapter.NewLazyDataSource(opensearchuser.DataSourceOptions),
 		"aiven_organization_address":                adapter.NewLazyDataSource(organizationaddress.DataSourceOptions),

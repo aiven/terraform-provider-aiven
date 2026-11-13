@@ -67,7 +67,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.DatasourceOpenSearch(),
 			"aiven_opensearch_acl_config": opensearch.DatasourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpenSearchACLRule(),
 
@@ -114,7 +113,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.ResourceOpenSearch(),
 			"aiven_opensearch_acl_config": opensearch.ResourceOpenSearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.ResourceOpenSearchACLRule(),
 
