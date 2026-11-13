@@ -31,7 +31,7 @@ var DefaultSlowTests = []string{
 	"plugin-service-kafkatopic",
 	"plugin-service-mirrormakerreplicationflow",
 	"sdk-service-kafka",
-	"sdk-service-pg",
+	"plugin-service-pg",
 	"plugin-service-serviceintegration",
 	"plugin-service-kafkaacl",
 	"plugin-service-kafkaschemaregistryacl",

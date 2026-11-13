@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -31,7 +30,7 @@ func TestAccAivenPG_no_existing_project(t *testing.T) {
 }
 
 func TestAccAivenPG_invalid_disk_size(t *testing.T) {
-	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
+	expectErrorRegexBadString := regexp.MustCompile(`must\s+match\s+pattern\s+"\^\[1-9\]\[0-9\]\*\(GiB\|G\)\$"`)
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -314,7 +313,7 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "disk_space", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "disk_space"),
 					resource.TestCheckResourceAttrSet(resourceName, "disk_space_used"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
@@ -694,7 +693,7 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGTerminationProtectionServiceResource(rName),
+				Config: testAccPGTerminationProtectionServiceResource(rName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceTerminationProtection("data.aiven_pg.common-pg"),
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
@@ -707,7 +706,11 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
-				ExpectNonEmptyPlan: true,
+			},
+			{
+				// The destroy needs it disabled
+				Config: testAccPGTerminationProtectionServiceResource(rName, false),
+				Check:  resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 			},
 		},
 	})
@@ -839,7 +842,7 @@ data "aiven_pg" "common-pg" {
 }`, acc.ProjectName(), name)
 }
 
-func testAccPGTerminationProtectionServiceResource(name string) string {
+func testAccPGTerminationProtectionServiceResource(name string, protected bool) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo-pg" {
   project = "%s"
@@ -852,7 +855,7 @@ resource "aiven_pg" "bar-pg" {
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-  termination_protection  = true
+  termination_protection  = %t
 
   pg_user_config {
     public_access {
@@ -871,7 +874,7 @@ data "aiven_pg" "common-pg" {
   project      = aiven_pg.bar-pg.project
 
   depends_on = [aiven_pg.bar-pg]
-}`, acc.ProjectName(), name)
+}`, acc.ProjectName(), name, protected)
 }
 
 func testAccPGReadReplicaServiceResource(name string) string {
@@ -976,25 +979,6 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 			return fmt.Errorf("termination_protection enabled should prevent from deletion of a service, deletion went OK")
 		}
 
-		// set service termination_protection to false to make Terraform Destroy plan work
-		_, err = c.Services.Update(
-			ctx,
-			projectName,
-			service.Name,
-			aiven.UpdateServiceRequest{
-				Cloud:                 service.CloudName,
-				MaintenanceWindow:     &service.MaintenanceWindow,
-				Plan:                  service.Plan,
-				ProjectVPCID:          service.ProjectVPCID,
-				Powered:               true,
-				TerminationProtection: false,
-				UserConfig:            service.UserConfig,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
-		}
-
 		return nil
 	}
 }
@@ -1016,12 +1000,12 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.pg from Aiven")
 		}
 
-		if a["pg_user_config.0.public_access.0.pgbouncer"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.pgbouncer from Aiven")
+		if v := a["pg_user_config.0.public_access.0.pgbouncer"]; v == "true" {
+			return fmt.Errorf("expected public_access.pgbouncer to be disabled, got %q", v)
 		}
 
-		if a["pg_user_config.0.public_access.0.prometheus"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
+		if v := a["pg_user_config.0.public_access.0.prometheus"]; v == "true" {
+			return fmt.Errorf("expected public_access.prometheus to be disabled, got %q", v)
 		}
 
 		if a["pg_user_config.0.service_to_fork_from"] != "" {
@@ -1332,7 +1316,7 @@ func TestAccAivenPG_AdminPasswordConflicts(t *testing.T) {
 					),
 				},
 				{
-					Config:      testAccPGResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123!", "writeonly123!", 1),
+					Config:      testAccPGResourceWithBothPasswordsAfterCreation(serviceName, "adminpass123", "writeonly123!", 1),
 					ExpectError: regexp.MustCompile(`cannot set 'service_password_wo' and 'pg_user_config\.0\.admin_password' simultaneously`),
 				},
 			},
@@ -1352,7 +1336,7 @@ resource "aiven_pg" "test" {
   service_password_wo_version = %[4]d
 
   pg_user_config {
-    admin_password = "ConflictingPassword123!"
+    admin_password = "ConflictingPassword123"
   }
 }
 `, acc.ProjectName(), name, woPassword, version)
@@ -1418,22 +1402,22 @@ func TestAccAivenPG_invalid_plan_name(t *testing.T) {
 		{
 			name:        "upper case in plan name",
 			plan:        "Business-4",
-			expectError: regexp.MustCompile("plan name should be lowercase, possible fix: \"business-4\""),
+			expectError: regexp.MustCompile(`plan must match pattern`),
 		},
 		{
 			name:        "invalid characters in plan name",
 			plan:        "business@4",
-			expectError: regexp.MustCompile(`plan name should be lowercase alphanumeric \(e.g. "business-8", "my_plan_16"\)`),
+			expectError: regexp.MustCompile(`plan must match pattern`),
 		},
 		{
 			name:        "plan name too long (>128)",
 			plan:        strings.Repeat("a", 129),
-			expectError: regexp.MustCompile(`expected length of plan to be in the range \(1 - 128\), got`),
+			expectError: regexp.MustCompile(`plan string length must be between 1 and 128, got: 129`),
 		},
 		{
 			name:        "plan name empty",
 			plan:        "",
-			expectError: regexp.MustCompile(`expected length of plan to be in the range \(1 - 128\), got`),
+			expectError: regexp.MustCompile(`plan string length must be between 1 and 128, got: 0`),
 		},
 	}
 
