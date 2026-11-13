@@ -14,7 +14,7 @@ Gets information about an [Aiven for Apache Kafka® MirrorMaker 2](https://aiven
 ```terraform
 data "aiven_mirrormaker_replication_flow" "example" {
   project        = "my-project"
-  service_name   = "foo"
+  service_name   = "my-kafka-mirrormaker"
   source_cluster = "kafka-abc"
   target_cluster = "kafka-abc"
 

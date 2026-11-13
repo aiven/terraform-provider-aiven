@@ -36,6 +36,18 @@ type definition struct {
 func knownAPICallers() []string {
 	return []string{
 		"aiven_kafka_topic", // Validates "topic already exists" during the plan.
+		// Check additional_disk_space against the service plan.
+		"aiven_clickhouse",
+		"aiven_flink",
+		"aiven_grafana",
+		"aiven_kafka",
+		"aiven_kafka_connect",
+		"aiven_kafka_mirrormaker",
+		"aiven_mysql",
+		"aiven_opensearch",
+		"aiven_pg",
+		"aiven_thanos",
+		"aiven_valkey",
 	}
 }
 

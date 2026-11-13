@@ -13,9 +13,9 @@ Creates and manages an Aiven for PostgreSQL® service user. The built-in admin u
 
 ```terraform
 resource "aiven_pg_user" "example" {
-  project      = aiven_pg.example_postgres.project      // e.g. "my-project". Force new
-  service_name = aiven_pg.example_postgres.service_name // e.g. "my-pg". Force new
-  username     = "testuser"                             // Force new
+  project      = aiven_pg.example.project      // e.g. "my-project". Force new
+  service_name = aiven_pg.example.service_name // e.g. "my-pg". Force new
+  username     = "testuser"                    // Force new
 
   // OPTIONAL FIELDS
   password_wo          = "password123"
@@ -30,10 +30,10 @@ resource "aiven_pg_user" "example" {
   */
 }
 
-resource "aiven_pg" "example_postgres" {
-  project      = "my-project"
+resource "aiven_pg" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-pg"      // Force new
   plan         = "startup-4"
-  service_name = "example-postgres-service"
 }
 ```
 

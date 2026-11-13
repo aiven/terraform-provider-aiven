@@ -1,1 +1,1 @@
-terraform import aiven_mysql.example_mysql PROJECT/SERVICE_NAME
+terraform import aiven_mysql.example PROJECT/SERVICE_NAME
