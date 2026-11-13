@@ -138,11 +138,6 @@ tasks:
     generates:
       - "{{.OPENAPI_FILE}}"
 
-  gen-go:
-    desc: "Run Go code generation (`go generate ./...`)"
-    cmds:
-      - "{{.GO_CMD}} generate ./..."
-
   gen-plugin:
     desc: "Generate Terraform Plugin Framework resources"
     vars:
@@ -190,7 +185,6 @@ tasks:
     vars:
       no_spec: '{{.no_spec | default "false"}}'
     cmds:
-      - task: gen-go
       - task: docs
         vars:
           no_spec: '{{.no_spec}}'
@@ -217,13 +211,6 @@ tasks:
     desc: "Update go-client-codegen module dependency"
     cmds:
       - "{{.GO_CMD}} get github.com/aiven/go-client-codegen@latest"
-      - "{{.GO_CMD}} mod tidy"
-
-  load-schemas:
-    desc: "Update Go client codegen and API schema module dependencies"
-    cmds:
-      - task: load-codegen
-      - "{{.GO_CMD}} get github.com/aiven/go-api-schemas@latest"
       - "{{.GO_CMD}} mod tidy"
 
   dump-mockery:
