@@ -45,7 +45,7 @@
 |  39 | aiven_gcp_vpc_peering_connection            | yes    |     2 |
 |  40 | aiven_governance_access                     | yes    |     1 |
 |  41 | aiven_grafana                               | yes    |     2 |
-|  42 | aiven_kafka                                 |        |     2 |
+|  42 | aiven_kafka                                 | yes    |     2 |
 |  43 | aiven_kafka_acl                             | yes    |     2 |
 |  44 | aiven_kafka_connect                         |        |     2 |
 |  45 | aiven_kafka_connect_custom_plugin_file      | yes    |     1 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 68%                          | 111    |   163 |
+|     | TOTAL MIGRATED 69%                          | 113    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
