@@ -214,6 +214,22 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 			},
 		},
 		{
+			name:        "keeps an ID set by a failed Create",
+			idFields:    []string{"server_id"},
+			plan:        map[string]any{"name": "example"},
+			createID:    "created-id",
+			createError: errors.New("wait failed"),
+			wantError:   true,
+			wantID:      "created-id",
+		},
+		{
+			name:        "does not save state when Create fails without an ID",
+			idFields:    []string{"project", "name"},
+			plan:        map[string]any{"project": "project", "name": "example"},
+			createError: errors.New("create failed"),
+			wantError:   true,
+		},
+		{
 			name:                "does not save state when AlreadyExists adoption fails",
 			idFields:            []string{"project", "name"},
 			plan:                map[string]any{"project": "project", "name": "example"},
@@ -251,7 +267,9 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 					IgnoreAlreadyExists:    tt.ignoreAlreadyExists,
 					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						if tt.createID != "" {
-							return d.SetID(tt.createID)
+							if err := d.SetID(tt.createID); err != nil {
+								return err
+							}
 						}
 						return tt.createError
 					},
