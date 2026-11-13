@@ -79,6 +79,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplan"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceplanlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/transitgatewayvpcattachment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradestep"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkeyuser"
@@ -144,6 +145,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_service_integration":                 adapter.NewLazyResource(serviceintegration.ResourceOptions),
 		"aiven_service_integration_endpoint":        adapter.NewLazyResource(serviceintegrationendpoint.ResourceOptions),
 		"aiven_static_ip":                           adapter.NewLazyResource(staticip.ResourceOptions),
+		"aiven_thanos":                              adapter.NewLazyResource(thanos.ResourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyResource(transitgatewayvpcattachment.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(upgradestep.ResourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyResource(valkeyuser.ResourceOptions),
@@ -209,6 +211,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_service_list":                        adapter.NewLazyDataSource(servicelist.DataSourceOptions),
 		"aiven_service_plan":                        adapter.NewLazyDataSource(serviceplan.DataSourceOptions),
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(serviceplanlist.DataSourceOptions),
+		"aiven_thanos":                              adapter.NewLazyDataSource(thanos.DataSourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyDataSource(transitgatewayvpcattachment.DataSourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyDataSource(valkeyuser.DataSourceOptions),
 	}

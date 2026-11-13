@@ -22,7 +22,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
@@ -78,7 +77,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// clickhouse
 
 			// thanos
-			"aiven_thanos": thanos.DatasourceThanos(),
 
 			// valkey
 			"aiven_valkey": valkey.DatasourceValkey(),
@@ -127,7 +125,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
 
 			// thanos
-			"aiven_thanos": thanos.ResourceThanos(),
 
 			// valkey
 			"aiven_valkey": valkey.ResourceValkey(),
