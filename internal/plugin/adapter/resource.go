@@ -282,6 +282,11 @@ func (a *resourceAdapter) Create(
 		if a.resource.Conflict != nil {
 			releaseConflict(a.resource.TypeName, a.resource.Conflict, d)
 		}
+		// The ID comes from the create response, so a later step failed, e.g., a service wait:
+		// the tainted state keeps the resource manageable.
+		if d.ID() != "" {
+			rsp.State.Raw = d.tfValue()
+		}
 		diags.AddError("failed to create resource", err.Error())
 		return
 	}
