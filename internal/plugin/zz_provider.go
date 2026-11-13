@@ -82,6 +82,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/transitgatewayvpcattachment"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/upgradestep"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/valkeyuser"
 )
 
@@ -148,6 +149,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_thanos":                              adapter.NewLazyResource(thanos.ResourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyResource(transitgatewayvpcattachment.ResourceOptions),
 		"aiven_upgrade_step":                        adapter.NewLazyResource(upgradestep.ResourceOptions),
+		"aiven_valkey":                              adapter.NewLazyResource(valkey.ResourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyResource(valkeyuser.ResourceOptions),
 	}
 }
@@ -213,6 +215,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_service_plan_list":                   adapter.NewLazyDataSource(serviceplanlist.DataSourceOptions),
 		"aiven_thanos":                              adapter.NewLazyDataSource(thanos.DataSourceOptions),
 		"aiven_transit_gateway_vpc_attachment":      adapter.NewLazyDataSource(transitgatewayvpcattachment.DataSourceOptions),
+		"aiven_valkey":                              adapter.NewLazyDataSource(valkey.DataSourceOptions),
 		"aiven_valkey_user":                         adapter.NewLazyDataSource(valkeyuser.DataSourceOptions),
 	}
 }

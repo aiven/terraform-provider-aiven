@@ -22,7 +22,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
@@ -79,7 +78,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// thanos
 
 			// valkey
-			"aiven_valkey": valkey.DatasourceValkey(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -127,7 +125,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// thanos
 
 			// valkey
-			"aiven_valkey": valkey.ResourceValkey(),
 		},
 	}
 
