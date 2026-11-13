@@ -1,1 +1,1 @@
-terraform import aiven_thanos.example_thanos PROJECT/SERVICE_NAME
+terraform import aiven_thanos.example PROJECT/SERVICE_NAME

@@ -99,12 +99,12 @@
 |  93 | aiven_service_plan                          | yes    |     1 |
 |  94 | aiven_service_plan_list                     | yes    |     1 |
 |  95 | aiven_static_ip                             | yes    |     1 |
-|  96 | aiven_thanos                                |        |     2 |
+|  96 | aiven_thanos                                | yes    |     2 |
 |  97 | aiven_transit_gateway_vpc_attachment        | yes    |     2 |
 |  98 | aiven_upgrade_step                          | yes    |     1 |
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 77%                          | 125    |   163 |
+|     | TOTAL MIGRATED 78%                          | 127    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
