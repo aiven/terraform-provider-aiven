@@ -82,7 +82,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_mirrormaker":          kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse": clickhouse.DatasourceClickhouse(),
 
 			// thanos
 			"aiven_thanos": thanos.DatasourceThanos(),
@@ -135,7 +134,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_quota":                kafka.ResourceKafkaQuota(),
 
 			// clickhouse
-			"aiven_clickhouse":       clickhouse.ResourceClickhouse(),
 			"aiven_clickhouse_role":  clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant": clickhouse.ResourceClickhouseGrant(),
 

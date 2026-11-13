@@ -20,7 +20,7 @@
 |  14 | aiven_byoc_aws_entity                       | yes    |     1 |
 |  15 | aiven_byoc_aws_provision                    | yes    |     1 |
 |  16 | aiven_byoc_permissions                      | yes    |     1 |
-|  17 | aiven_clickhouse                            |        |     2 |
+|  17 | aiven_clickhouse                            | yes    |     2 |
 |  18 | aiven_clickhouse_database                   | yes    |     2 |
 |  19 | aiven_clickhouse_grant                      |        |     1 |
 |  20 | aiven_clickhouse_role                       |        |     1 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 69%                          | 113    |   163 |
+|     | TOTAL MIGRATED 71%                          | 115    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
