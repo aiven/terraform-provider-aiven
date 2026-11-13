@@ -222,7 +222,10 @@ func (db *DescriptionBuilder) BuildPage() string {
 func (db *DescriptionBuilder) build(page bool) string {
 	builder := new(strings.Builder)
 
-	base := formatText(db.base)
+	base := db.base
+	if base != "" {
+		base = formatText(base)
+	}
 	builder.WriteString(base)
 
 	const availabilityCommonPart = `
@@ -370,7 +373,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 
 	// Avoids redundant descriptions.
 	s := strings.TrimSpace(builder.String())
-	if s == "." {
+	if s == "" || s == "." {
 		return ""
 	}
 

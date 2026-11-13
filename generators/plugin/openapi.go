@@ -172,6 +172,8 @@ type OASchema struct {
 	Pattern              string                  `json:"pattern"`
 	Ref                  string                  `json:"$ref"`
 	OneOf                []*OASchema             `json:"oneOf"`
+	AnyOf                []*OASchema             `json:"anyOf"`
+	AllOf                []*OASchema             `json:"allOf"`
 	Title                string                  `json:"title"`
 	Description          string                  `json:"description"`
 	CreateOnly           bool                    `json:"createOnly"`
@@ -183,6 +185,11 @@ type OASchema struct {
 	SensitiveExt  bool `json:"x-_secure"`
 
 	name string // json field name
+
+	// Set by splitMultiTypeArrays
+	jsonName      string
+	deprecation   string
+	conflictsWith []string
 }
 
 // OAAdditionalProperties is either the schema of map values,

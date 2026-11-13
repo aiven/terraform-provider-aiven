@@ -31,6 +31,16 @@ func TestDescriptionBuilder_Build(t *testing.T) {
 			want: "",
 		},
 		{
+			name: "empty description with possible values",
+			desc: Desc("").PossibleValuesString("a", "b"),
+			want: "The possible values are `a` and `b`.",
+		},
+		{
+			name: "empty description alone",
+			desc: Desc("").PossibleValuesString(),
+			want: "",
+		},
+		{
 			name: "adds format hint",
 			desc: Desc("Billing group ID").FormatHint("Must be a valid UUID.").ForceNew(),
 			want: "Billing group ID. Must be a valid UUID. Changing this property forces recreation of the resource.",

@@ -46,6 +46,51 @@ func TestGenSchemaRendersReadOnlyObjectAsAttribute(t *testing.T) {
 	require.NotContains(t, got, "listvalidator")
 }
 
+// The collection keeps its state value, otherwise it plans as unknown on an update.
+func TestGenSchemaKeepsReadOnlyCollectionState(t *testing.T) {
+	for name, keep := range map[string]bool{"default": false, "useStateForUnknown": true} {
+		t.Run(name, func(t *testing.T) {
+			object := &Item{
+				Name:     "components",
+				Type:     SchemaTypeObject,
+				Computed: true,
+				Properties: map[string]*Item{
+					"host": {Name: "host", Type: SchemaTypeString, Computed: true},
+				},
+			}
+			if keep {
+				object.OverrideUseStateForUnknown = new(true)
+			}
+
+			got := genResourceSchemaCode(t, rootWithObject(object))
+			require.Contains(t, got, `"components": schema.ListNestedAttribute{`)
+			// The only list in the schema
+			modifier := `[]planmodifier.List{listplanmodifier.UseStateForUnknown()}`
+			require.Equal(t, keep, strings.Contains(got, modifier), got)
+		})
+	}
+}
+
+func TestGenSchemaRendersEmptyCollectionDefault(t *testing.T) {
+	ips := func(value any) *Item {
+		item := &Item{
+			Name:     "static_ips",
+			Type:     SchemaTypeArray,
+			Optional: true,
+			Computed: true,
+			Default:  value,
+		}
+		item.Items = &Item{Name: "static_ips", Type: SchemaTypeString, Parent: item}
+		return item
+	}
+
+	got := genResourceSchemaCode(t, rootWithObject(ips([]any{})))
+	require.Contains(t, got, "setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{}))")
+
+	_, err := genSchema(&Definition{Resource: &SchemaMeta{}}, resourceType, rootWithObject(ips([]any{"ip"})))
+	require.ErrorContains(t, err, "only an empty default")
+}
+
 // Objects and ordered lists take different paths through the internal schema generator.
 func TestGenSchemaInternalMarksReadOnlyCollectionsAsAttributes(t *testing.T) {
 	root := &Item{
