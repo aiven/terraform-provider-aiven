@@ -18,7 +18,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
@@ -47,7 +46,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// grafana
 
 			// mysql
-			"aiven_mysql": mysql.DatasourceMySQL(),
 
 			// pg
 
@@ -91,7 +89,6 @@ func Provider(version string) (*schema.Provider, error) {
 			// grafana
 
 			// mysql
-			"aiven_mysql": mysql.ResourceMySQL(),
 
 			// pg
 
