@@ -18,6 +18,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocawsentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocawsprovision"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/byocpermissions"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhousedatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/clickhouseuser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/cmk"
@@ -90,6 +91,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_byoc_aws_entity":                     adapter.NewLazyResource(byocawsentity.ResourceOptions),
 		"aiven_byoc_aws_provision":                  adapter.NewLazyResource(byocawsprovision.ResourceOptions),
 		"aiven_byoc_permissions":                    adapter.NewLazyResource(byocpermissions.ResourceOptions),
+		"aiven_clickhouse":                          adapter.NewLazyResource(clickhouse.ResourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyResource(clickhousedatabase.ResourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyResource(clickhouseuser.ResourceOptions),
 		"aiven_cmk":                                 adapter.NewLazyResource(cmk.ResourceOptions),
@@ -147,6 +149,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_azure_privatelink":                   adapter.NewLazyDataSource(azureprivatelink.DataSourceOptions),
 		"aiven_azure_vpc_peering_connection":        adapter.NewLazyDataSource(azurevpcpeeringconnection.DataSourceOptions),
 		"aiven_billing_group":                       adapter.NewLazyDataSource(billinggroup.DataSourceOptions),
+		"aiven_clickhouse":                          adapter.NewLazyDataSource(clickhouse.DataSourceOptions),
 		"aiven_clickhouse_database":                 adapter.NewLazyDataSource(clickhousedatabase.DataSourceOptions),
 		"aiven_clickhouse_user":                     adapter.NewLazyDataSource(clickhouseuser.DataSourceOptions),
 		"aiven_cmk_accessor_aws":                    adapter.NewLazyDataSource(cmkaccessoraws.DataSourceOptions),

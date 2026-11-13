@@ -37,6 +37,7 @@ func knownAPICallers() []string {
 	return []string{
 		"aiven_kafka_topic", // Validates "topic already exists" during the plan.
 		// Check additional_disk_space against the service plan.
+		"aiven_clickhouse",
 		"aiven_grafana",
 		"aiven_kafka",
 		"aiven_pg",

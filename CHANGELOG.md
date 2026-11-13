@@ -25,7 +25,8 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
-- Migrate `aiven_grafana`, `aiven_kafka` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
+- Migrate `aiven_clickhouse`, `aiven_grafana`, `aiven_kafka` and `aiven_pg` resources and data sources to the Plugin
+  Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the last block of a list sends an empty
     list, as in SDKv2, e.g., removing every `ip_filter_object` clears the IP filter, which requires
@@ -44,8 +45,8 @@ nav_order: 1
   - With `AIVEN_INCLUDE_SECRETS=false`, the read doesn't request secrets and stores the redacted values.
   - Changing `aiven_kafka` field `default_acl` after the creation shows an in-place change, which doesn't change the ACLs.
     Like any service update, it sends `powered = true`, which powers on a powered-off service.
-  - Remove the deprecated options the API no longer has: `additional_backup_regions` of `aiven_kafka`,
-    `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`.
+  - Remove the deprecated options the API no longer has: `additional_backup_regions` of `aiven_clickhouse`
+    and `aiven_kafka`, `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`.
   - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
     `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
 

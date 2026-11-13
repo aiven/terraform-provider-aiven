@@ -435,6 +435,10 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_backwardCompat(t *testing.T
 			TFConfig:           testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, acc.ProjectName(), `["foo", "bar"]`),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// The services drop the user config SDKv2 stored, which sends nothing. The kafka_user_config
+			// options are set, so aiven_kafka changes only if SDKv2 stored a nested block the config doesn't have.
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks:   acc.UpgradePlanChecks([]string{resourceName}, []string{"aiven_clickhouse.clickhouse"}),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
 				resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "2"),
