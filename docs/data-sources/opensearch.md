@@ -152,6 +152,8 @@ Read-Only:
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `azure_migration` (Block List) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the `public-*` hostname and the custom domain. Example: `grafana.example.org`.
+- `custom_keystores` (Block List) Allow to register custom keystores in OpenSearch (see [below for nested schema](#nestedblock--opensearch_user_config--custom_keystores))
+- `custom_repos` (Block List) Allow to register object storage repositories in OpenSearch (see [below for nested schema](#nestedblock--opensearch_user_config--custom_repos))
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
@@ -198,6 +200,142 @@ Read-Only:
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or `sas_token` should be specified.
 - `snapshot_name` (String) The snapshot name to restore from.
+
+
+<a id="nestedblock--opensearch_user_config--custom_keystores"></a>
+### Nested Schema for `opensearch_user_config.custom_keystores`
+
+Read-Only:
+
+- `name` (String)
+- `settings` (Block List) (see [below for nested schema](#nestedblock--opensearch_user_config--custom_keystores--settings))
+- `type` (String) The possible values are `azure`, `gcs` and `s3`.
+
+<a id="nestedblock--opensearch_user_config--custom_keystores--settings"></a>
+### Nested Schema for `opensearch_user_config.custom_keystores.settings`
+
+Has the attributes of exactly one of the variants below.
+
+**Variant 1**
+
+Read-Only:
+
+- `account` (String) Account name.
+- `key` (String, Sensitive) Azure account secret key. One of key or `sas_token` should be specified.
+- `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or `sas_token` should be specified.
+
+**Variant 2**
+
+Read-Only:
+
+- `credentials` (Block List, Sensitive) Google service account credentials map (see [below for nested schema](#nestedblock--opensearch_user_config--custom_keystores--settings--credentials))
+
+**Variant 3**
+
+Read-Only:
+
+- `access_key` (String) AWS Access key.
+- `secret_key` (String, Sensitive) AWS secret key.
+
+<a id="nestedblock--opensearch_user_config--custom_keystores--settings--credentials"></a>
+### Nested Schema for `opensearch_user_config.custom_keystores.settings.credentials`
+
+Read-Only:
+
+- `auth_provider_x509_cert_url` (String, Sensitive) The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.
+- `auth_uri` (String, Sensitive) The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.
+- `client_email` (String, Sensitive) Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.
+- `client_id` (String, Sensitive) Numeric client id for this service account. Example: `103654484443722885992`.
+- `client_x509_cert_url` (String, Sensitive) Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.
+- `hmac_access_id` (String, Sensitive) The access ID for HMAC authentication with Google Cloud Storage.
+- `hmac_secret` (String, Sensitive) The secret key for HMAC authentication with Google Cloud Storage.
+- `private_key` (String, Sensitive) PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----
+`.
+- `private_key_id` (String, Sensitive) Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.
+- `project_id` (String, Sensitive) Gcloud project id. Example: `some-my-project`.
+- `token_uri` (String, Sensitive) The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.
+- `type` (String, Sensitive) Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.
+- `universe_domain` (String, Sensitive) The universe domain. The default universe domain is googleapis.com. Example: `{"universe_domain": "googleapis.com", ...`.
+
+
+
+
+<a id="nestedblock--opensearch_user_config--custom_repos"></a>
+### Nested Schema for `opensearch_user_config.custom_repos`
+
+Read-Only:
+
+- `name` (String)
+- `settings` (Block List) (see [below for nested schema](#nestedblock--opensearch_user_config--custom_repos--settings))
+- `type` (String) The possible values are `azure`, `gcs` and `s3`.
+
+<a id="nestedblock--opensearch_user_config--custom_repos--settings"></a>
+### Nested Schema for `opensearch_user_config.custom_repos.settings`
+
+Read-Only:
+
+- `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
+- `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
+- `compress` (Boolean) when set to true metadata files are stored in compressed format.
+- `max_restore_bytes_per_sec` (String) Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.
+- `max_snapshot_bytes_per_sec` (String) Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.
+- `readonly` (Boolean) Whether the repository is read-only. The default value is `false`.
+
+Has the attributes of exactly one of the variants below.
+
+**Variant 1**
+
+Read-Only:
+
+- `account` (String) Account name.
+- `container` (String) Azure container name.
+- `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
+- `key` (String, Sensitive) Azure account secret key. One of key or `sas_token` should be specified.
+- `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or `sas_token` should be specified.
+
+**Variant 2**
+
+Read-Only:
+
+- `bucket` (String) Google Cloud Storage or S3 bucket name.
+- `credentials` (Block List, Sensitive) Google service account credentials map (see [below for nested schema](#nestedblock--opensearch_user_config--custom_repos--settings--credentials))
+
+**Variant 3**
+
+Read-Only:
+
+- `access_key` (String) AWS Access key.
+- `bucket` (String) Google Cloud Storage or S3 bucket name.
+- `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
+- `region` (String) S3 region.
+- `secret_key` (String, Sensitive) AWS secret key.
+- `server_side_encryption` (Boolean) When set to true files are encrypted on server side.
+
+<a id="nestedblock--opensearch_user_config--custom_repos--settings--credentials"></a>
+### Nested Schema for `opensearch_user_config.custom_repos.settings.credentials`
+
+Read-Only:
+
+- `auth_provider_x509_cert_url` (String, Sensitive) The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.
+- `auth_uri` (String, Sensitive) The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.
+- `client_email` (String, Sensitive) Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.
+- `client_id` (String, Sensitive) Numeric client id for this service account. Example: `103654484443722885992`.
+- `client_x509_cert_url` (String, Sensitive) Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.
+- `hmac_access_id` (String, Sensitive) The access ID for HMAC authentication with Google Cloud Storage.
+- `hmac_secret` (String, Sensitive) The secret key for HMAC authentication with Google Cloud Storage.
+- `private_key` (String, Sensitive) PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----
+`.
+- `private_key_id` (String, Sensitive) Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.
+- `project_id` (String, Sensitive) Gcloud project id. Example: `some-my-project`.
+- `token_uri` (String, Sensitive) The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.
+- `type` (String, Sensitive) Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.
+- `universe_domain` (String, Sensitive) The universe domain. The default universe domain is googleapis.com. Example: `{"universe_domain": "googleapis.com", ...`.
+
+
 
 
 <a id="nestedblock--opensearch_user_config--gcs_migration"></a>

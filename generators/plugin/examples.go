@@ -208,6 +208,9 @@ func chosenAlternatives(item *Item, fields []exampleField) map[string]bool {
 // object renders an object item into the body.
 // inComputedBlock - true if the current block is a computed block, so we don't add "Computed" title within a computed block.
 func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock bool) error {
+	if len(item.Variants) >= 2 {
+		item = exampleVariantScope(item)
+	}
 	def, entity := w.def, w.entity
 	alternatives, err := datasourceAlternativeAttrs(def, entity, item)
 	if err != nil {
@@ -588,6 +591,14 @@ func lookupExampleHint(def *Definition, root *Item) string {
 		return fmt.Sprintf("// LOOKUP — provide `%s` or %s", id, humanizeCodeList(composedOf, " and "))
 	}
 	return fmt.Sprintf("// LOOKUP — provide `%s`, or all of: %s", id, humanizeCodeList(composedOf, " and "))
+}
+
+// exampleVariantScope keeps the attributes of the first variant, and the attributes in no variant.
+func exampleVariantScope(item *Item) *Item {
+	others := lo.FlatMap(item.Variants[1:], func(v *Variant, _ int) []string { return v.Attributes })
+	clone := *item
+	clone.Properties = lo.OmitByKeys(item.Properties, lo.Without(others, item.Variants[0].Attributes...))
+	return &clone
 }
 
 // datasourceAlternativeAttrs returns root-level attribute names rendered as

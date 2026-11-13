@@ -194,7 +194,7 @@ func userConfigProperties(properties map[string]*OASchema) map[string]*OASchema 
 }
 
 // isTyped tells if the option and the options it requires have types.
-// Arrays of mixed item types are typed: they are split.
+// Arrays of mixed item types are typed: they are split. Object variants are typed: they are merged.
 func isTyped(s *OASchema) bool {
 	switch {
 	case s.Ref != "":
@@ -205,6 +205,10 @@ func isTyped(s *OASchema) bool {
 		return !slices.ContainsFunc(s.Required, func(k string) bool {
 			p, ok := s.Properties[k]
 			return ok && !isTyped(p)
+		})
+	case s.Type == "" && len(s.OneOf)+len(s.AnyOf)+len(s.AllOf) > 0:
+		return !slices.ContainsFunc(slices.Concat(s.OneOf, s.AnyOf, s.AllOf), func(v *OASchema) bool {
+			return v.Ref == "" && (v.Type != SchemaTypeObject || len(v.Properties) == 0 || !isTyped(v))
 		})
 	}
 	return s.Type != ""

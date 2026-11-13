@@ -333,6 +333,272 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								},
 							}},
 						},
+						"custom_keystores": schema.ListNestedBlock{
+							MarkdownDescription: "Allow to register custom keystores in OpenSearch.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{Computed: true},
+									"type": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "The possible values are `azure`, `gcs` and `s3`.",
+									},
+								},
+								Blocks: map[string]schema.Block{"settings": schema.ListNestedBlock{NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"access_key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "AWS Access key.",
+										},
+										"account": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Account name.",
+										},
+										"key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Azure account secret key. One of key or `sas_token` should be specified.",
+											Sensitive:           true,
+										},
+										"sas_token": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "A shared access signatures (SAS) token. One of key or `sas_token` should be specified.",
+											Sensitive:           true,
+										},
+										"secret_key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "AWS secret key.",
+											Sensitive:           true,
+										},
+									},
+									Blocks: map[string]schema.Block{"credentials": schema.ListNestedBlock{
+										MarkdownDescription: "Google service account credentials map.",
+										NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+											"auth_provider_x509_cert_url": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.",
+												Sensitive:           true,
+											},
+											"auth_uri": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.",
+												Sensitive:           true,
+											},
+											"client_email": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.",
+												Sensitive:           true,
+											},
+											"client_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Numeric client id for this service account. Example: `103654484443722885992`.",
+												Sensitive:           true,
+											},
+											"client_x509_cert_url": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.",
+												Sensitive:           true,
+											},
+											"hmac_access_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The access ID for HMAC authentication with Google Cloud Storage.",
+												Sensitive:           true,
+											},
+											"hmac_secret": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The secret key for HMAC authentication with Google Cloud Storage.",
+												Sensitive:           true,
+											},
+											"private_key": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
+												Sensitive:           true,
+											},
+											"private_key_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.",
+												Sensitive:           true,
+											},
+											"project_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Gcloud project id. Example: `some-my-project`.",
+												Sensitive:           true,
+											},
+											"token_uri": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.",
+												Sensitive:           true,
+											},
+											"type": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.",
+												Sensitive:           true,
+											},
+											"universe_domain": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The universe domain. The default universe domain is googleapis.com. Example: `{\"universe_domain\": \"googleapis.com\", ...`.",
+												Sensitive:           true,
+											},
+										}},
+									}},
+								}}},
+							},
+						},
+						"custom_repos": schema.ListNestedBlock{
+							MarkdownDescription: "Allow to register object storage repositories in OpenSearch.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{Computed: true},
+									"type": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "The possible values are `azure`, `gcs` and `s3`.",
+									},
+								},
+								Blocks: map[string]schema.Block{"settings": schema.ListNestedBlock{NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"access_key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "AWS Access key.",
+										},
+										"account": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Account name.",
+										},
+										"base_path": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "The path to the repository data within its container. The value of this setting should not start or end with a /.",
+										},
+										"bucket": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Google Cloud Storage or S3 bucket name.",
+										},
+										"chunk_size": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.",
+										},
+										"compress": schema.BoolAttribute{
+											Computed:            true,
+											MarkdownDescription: "when set to true metadata files are stored in compressed format.",
+										},
+										"container": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Azure container name.",
+										},
+										"endpoint": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.",
+										},
+										"endpoint_suffix": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Defines the DNS suffix for Azure Storage endpoints.",
+										},
+										"key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Azure account secret key. One of key or `sas_token` should be specified.",
+											Sensitive:           true,
+										},
+										"max_restore_bytes_per_sec": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+										},
+										"max_snapshot_bytes_per_sec": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.",
+										},
+										"readonly": schema.BoolAttribute{
+											Computed:            true,
+											MarkdownDescription: "Whether the repository is read-only. The default value is `false`.",
+										},
+										"region": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "S3 region.",
+										},
+										"sas_token": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "A shared access signatures (SAS) token. One of key or `sas_token` should be specified.",
+											Sensitive:           true,
+										},
+										"secret_key": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "AWS secret key.",
+											Sensitive:           true,
+										},
+										"server_side_encryption": schema.BoolAttribute{
+											Computed:            true,
+											MarkdownDescription: "When set to true files are encrypted on server side.",
+										},
+									},
+									Blocks: map[string]schema.Block{"credentials": schema.ListNestedBlock{
+										MarkdownDescription: "Google service account credentials map.",
+										NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+											"auth_provider_x509_cert_url": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.",
+												Sensitive:           true,
+											},
+											"auth_uri": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.",
+												Sensitive:           true,
+											},
+											"client_email": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.",
+												Sensitive:           true,
+											},
+											"client_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Numeric client id for this service account. Example: `103654484443722885992`.",
+												Sensitive:           true,
+											},
+											"client_x509_cert_url": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.",
+												Sensitive:           true,
+											},
+											"hmac_access_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The access ID for HMAC authentication with Google Cloud Storage.",
+												Sensitive:           true,
+											},
+											"hmac_secret": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The secret key for HMAC authentication with Google Cloud Storage.",
+												Sensitive:           true,
+											},
+											"private_key": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
+												Sensitive:           true,
+											},
+											"private_key_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.",
+												Sensitive:           true,
+											},
+											"project_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Gcloud project id. Example: `some-my-project`.",
+												Sensitive:           true,
+											},
+											"token_uri": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.",
+												Sensitive:           true,
+											},
+											"type": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.",
+												Sensitive:           true,
+											},
+											"universe_domain": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "The universe domain. The default universe domain is googleapis.com. Example: `{\"universe_domain\": \"googleapis.com\", ...`.",
+												Sensitive:           true,
+											},
+										}},
+									}},
+								}}},
+							},
+						},
 						"gcs_migration": schema.ListNestedBlock{
 							MarkdownDescription: "Google Cloud Storage migration settings.",
 							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
@@ -1604,6 +1870,278 @@ func datasourceSchemaInternal() *adapter.Schema {
 						"custom_domain": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
+						},
+						"custom_keystores": &adapter.Schema{
+							Computed: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"name": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"settings": &adapter.Schema{
+										Computed: true,
+										IsObject: true,
+										Items: &adapter.Schema{
+											Computed: true,
+											Properties: map[string]*adapter.Schema{
+												"access_key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"account": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"credentials": &adapter.Schema{
+													Computed: true,
+													IsObject: true,
+													Items: &adapter.Schema{
+														Computed: true,
+														Properties: map[string]*adapter.Schema{
+															"auth_provider_x509_cert_url": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"auth_uri": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_email": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_x509_cert_url": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"hmac_access_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"hmac_secret": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"private_key": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"private_key_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"project_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"token_uri": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"type": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"universe_domain": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+														},
+														Type: adapter.SchemaTypeObject,
+													},
+													Type: adapter.SchemaTypeList,
+												},
+												"key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"sas_token": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"secret_key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+											},
+											Type: adapter.SchemaTypeObject,
+										},
+										Type: adapter.SchemaTypeList,
+									},
+									"type": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeList,
+						},
+						"custom_repos": &adapter.Schema{
+							Computed: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"name": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+									"settings": &adapter.Schema{
+										Computed: true,
+										IsObject: true,
+										Items: &adapter.Schema{
+											Computed: true,
+											Properties: map[string]*adapter.Schema{
+												"access_key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"account": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"base_path": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"bucket": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"chunk_size": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"compress": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeBool,
+												},
+												"container": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"credentials": &adapter.Schema{
+													Computed: true,
+													IsObject: true,
+													Items: &adapter.Schema{
+														Computed: true,
+														Properties: map[string]*adapter.Schema{
+															"auth_provider_x509_cert_url": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"auth_uri": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_email": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"client_x509_cert_url": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"hmac_access_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"hmac_secret": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"private_key": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"private_key_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"project_id": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"token_uri": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"type": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+															"universe_domain": &adapter.Schema{
+																Computed: true,
+																Type:     adapter.SchemaTypeString,
+															},
+														},
+														Type: adapter.SchemaTypeObject,
+													},
+													Type: adapter.SchemaTypeList,
+												},
+												"endpoint": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"endpoint_suffix": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"max_restore_bytes_per_sec": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"max_snapshot_bytes_per_sec": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"readonly": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeBool,
+												},
+												"region": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"sas_token": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"secret_key": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeString,
+												},
+												"server_side_encryption": &adapter.Schema{
+													Computed: true,
+													Type:     adapter.SchemaTypeBool,
+												},
+											},
+											Type: adapter.SchemaTypeObject,
+										},
+										Type: adapter.SchemaTypeList,
+									},
+									"type": &adapter.Schema{
+										Computed: true,
+										Type:     adapter.SchemaTypeString,
+									},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeList,
 						},
 						"disable_replication_factor_adjustment": &adapter.Schema{
 							Computed: true,

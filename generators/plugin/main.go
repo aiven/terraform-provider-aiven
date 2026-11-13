@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -709,28 +710,29 @@ func newItem(scope *Scope, parent *Item, name string, s *OASchema, required bool
 		AppearsIn: parent.AppearsIn | appearsIn,
 
 		// Keeps TF names consistent
-		Name:               reTFName.ReplaceAllString(name, "_"),
-		JSONName:           or(s.jsonName, name),
-		HoistedFrom:        hoistedFrom,
-		DeprecationMessage: s.deprecation,
-		ConflictsWith:      s.conflictsWith,
-		Type:               s.Type,
-		Description:        s.Description,
-		Default:            s.Default,
-		DocExample:         s.Example,
-		MinItems:           s.MinItems,
-		MaxItems:           s.MaxItems,
-		MinLength:          s.MinLength,
-		MaxLength:          s.MaxLength,
-		Minimum:            numberToInt(s.Minimum, isInteger),
-		Maximum:            numberToInt(s.Maximum, !isInteger),
-		Format:             s.Format,
-		Pattern:            s.Pattern,
-		ForceNew:           s.CreateOnly || s.CreateOnlyExt,
-		Sensitive:          s.Sensitive || s.SensitiveExt,
-		Nullable:           s.Nullable,
-		Required:           required,
-		Properties:         make(map[string]*Item),
+		Name:                reTFName.ReplaceAllString(name, "_"),
+		JSONName:            or(s.jsonName, name),
+		HoistedFrom:         hoistedFrom,
+		DeprecationMessage:  s.deprecation,
+		ConflictsWith:       s.conflictsWith,
+		Type:                s.Type,
+		Description:         s.Description,
+		DescriptionConflict: s.descriptionConflict,
+		Default:             s.Default,
+		DocExample:          s.Example,
+		MinItems:            s.MinItems,
+		MaxItems:            s.MaxItems,
+		MinLength:           s.MinLength,
+		MaxLength:           s.MaxLength,
+		Minimum:             numberToInt(s.Minimum, isInteger),
+		Maximum:             numberToInt(s.Maximum, !isInteger),
+		Format:              s.Format,
+		Pattern:             s.Pattern,
+		ForceNew:            s.CreateOnly || s.CreateOnlyExt,
+		Sensitive:           s.Sensitive || s.SensitiveExt,
+		Nullable:            s.Nullable,
+		Required:            required,
+		Properties:          make(map[string]*Item),
 		Enum: lo.Filter(s.Enum, func(item any, _ int) bool {
 			switch fmt.Sprint(item) {
 			case "", "null", "<nil>":
@@ -811,6 +813,9 @@ func fromSchemaProperty(scope *Scope, operation *Operation, parent *Item, thisNa
 			if err != nil {
 				return err
 			}
+			if err := setItemVariants(thisItem, thisSchema); err != nil {
+				return fmt.Errorf("%s: %w", thisName, err)
+			}
 		} else if additional == nil || additional.Allowed {
 			// A free-form map, or a map with invalid schema
 			thisItemsSchema = &OASchema{Type: SchemaTypeString}
@@ -832,6 +837,9 @@ func fromSchemaProperty(scope *Scope, operation *Operation, parent *Item, thisNa
 		err = fromSchema(scope, operation, thisItem.Items, thisItemsSchema, appearsIn)
 		if err != nil {
 			return err
+		}
+		if err := setItemVariants(thisItem.Items, thisItemsSchema); err != nil {
+			return fmt.Errorf("%s items: %w", thisName, err)
 		}
 	}
 
@@ -860,6 +868,18 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 			continue
 		}
 
+		// Skips the removed fields before merging their variants, which may not merge,
+		// e.g., the service types of "services/user_config" of aiven_service_list
+		probe := &Item{Parent: parent, Name: thisName, JSONName: or(thisSchema.jsonName, thisName)}
+		removed, err := scope.Definition.IsRemoved(probe.JSONPath())
+		if err != nil {
+			return err
+		}
+		if removed {
+			continue
+		}
+
+		// Other "oneOf" are merged or free-form objects
 		thisSchema, err = scope.OpenAPI.resolveSchema(thisSchema)
 		if err != nil {
 			return fmt.Errorf("%s: %w", thisName, err)
@@ -867,13 +887,6 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 
 		if parent.IsRoot() {
 			if _, ok := scope.Definition.Hoist[thisName]; ok {
-				removed, err := scope.Definition.IsRemoved(thisName)
-				if err != nil {
-					return err
-				}
-				if removed {
-					continue
-				}
 				if thisSchema.Type != SchemaTypeObject || len(thisSchema.Properties) == 0 {
 					return fmt.Errorf("hoist %q: schema must be an object with properties", thisName)
 				}
@@ -909,6 +922,57 @@ func fromSchema(scope *Scope, operation *Operation, parent *Item, parentSchema *
 		}
 	}
 
+	return nil
+}
+
+// setItemVariants sets the variants of the merged schema, see OpenAPIDoc.mergeVariants,
+// with the names of the attributes the item has.
+func setItemVariants(item *Item, s *OASchema) error {
+	names := make(map[string]string, len(item.Properties))
+	for _, v := range item.Properties {
+		names[v.JSONName] = v.Name
+	}
+	attrs := func(keys []string) []string {
+		return slices.Sorted(slices.Values(lo.FilterMap(keys, func(k string, _ int) (string, bool) {
+			n, ok := names[k]
+			return n, ok
+		})))
+	}
+
+	for _, v := range s.variants {
+		if a := attrs(v.properties); len(a) > 0 {
+			item.Variants = append(item.Variants, &Variant{Title: v.title, Attributes: a, Required: attrs(v.required)})
+		}
+	}
+
+	// One variant is a plain object
+	if len(item.Variants) < 2 {
+		item.Variants = nil
+		return nil
+	}
+	item.AnyVariant = s.anyVariant
+
+	// No configuration fits exactly one of two equal variants
+	vs := item.Variants
+	for i, a := range lo.Ternary(s.anyVariant, nil, vs) {
+		for _, b := range vs[i+1:] {
+			if slices.Equal(a.Attributes, b.Attributes) && slices.Equal(a.Required, b.Required) {
+				return fmt.Errorf("%s and %s have the same attributes", a.Title, b.Title)
+			}
+		}
+	}
+
+	// The attributes all variants have and none requires don't tell them apart,
+	// so the docs list them once. Unless a variant would have none left
+	shared := lo.Without(
+		lo.Intersect(lo.Map(vs, func(v *Variant, _ int) []string { return v.Attributes })...),
+		lo.FlatMap(vs, func(v *Variant, _ int) []string { return v.Required })...,
+	)
+	if lo.EveryBy(vs, func(v *Variant) bool { return len(lo.Without(v.Attributes, shared...)) > 0 }) {
+		for _, v := range vs {
+			v.Attributes = lo.Without(v.Attributes, shared...)
+		}
+	}
 	return nil
 }
 
@@ -1209,9 +1273,10 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 
 	// Prefers user description from the definition file
 	if b.Description != "" && b.AppearsIn == 0 {
-		a.Description = b.Description
+		a.Description, a.DescriptionConflict = b.Description, ""
 	} else {
 		a.Description = orLonger(a.Description, b.Description)
+		a.DescriptionConflict = cmp.Or(a.DescriptionConflict, b.DescriptionConflict)
 	}
 
 	a.Parent = parent
@@ -1283,6 +1348,21 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 	a.AtLeastOneOf = mergeSlices(a.AtLeastOneOf, b.AtLeastOneOf)
 	a.AlsoRequires = mergeSlices(a.AlsoRequires, b.AlsoRequires)
 
+	// The operations share the schema, so they have the same variants
+	switch {
+	case len(b.Variants) == 0:
+	case len(a.Variants) == 0:
+		a.Variants = b.Variants
+	case len(a.Variants) != len(b.Variants):
+		return nil, fmt.Errorf("%s: the operations have %d and %d variants", a.Name, len(a.Variants), len(b.Variants))
+	default:
+		for i, v := range a.Variants {
+			v.Attributes = slices.Sorted(slices.Values(lo.Union(v.Attributes, b.Variants[i].Attributes)))
+			v.Required = slices.Sorted(slices.Values(lo.Union(v.Required, b.Variants[i].Required)))
+		}
+	}
+	a.AnyVariant = a.AnyVariant || b.AnyVariant
+
 	// User overrides that can set "false" values
 	a.OverrideSensitive = or(b.OverrideSensitive, a.OverrideSensitive)
 	a.OverrideRequired = or(b.OverrideRequired, a.OverrideRequired)
@@ -1310,6 +1390,10 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 // It is OK to inherit AppearsIn from the parent when you create a child node.
 // But shouldn't do that after all nodes are merged.
 func recalcDeep(def *Definition, item *Item) error {
+	if item.DescriptionConflict != "" {
+		return fmt.Errorf("%s, set the description in the definition", item.DescriptionConflict)
+	}
+
 	in := func(a AppearsIn) bool {
 		return item.AppearsIn.Contains(a)
 	}
