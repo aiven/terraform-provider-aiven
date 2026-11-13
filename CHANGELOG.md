@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
+  in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
   `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
 - Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
