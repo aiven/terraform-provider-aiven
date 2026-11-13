@@ -141,7 +141,12 @@ func (w *exampleWriter) fields(item *Item, alternatives map[string]bool) []examp
 	for _, k := range keys {
 		v := item.Properties[k]
 		// Don't expose internal virtual properties, like "id", or deprecated properties.
-		if v.Virtual || v.DeprecationMessage != "" {
+		if v.Virtual || v.DeprecationMessage != "" || v.DisableExample {
+			continue
+		}
+
+		// An empty block, e.g., "pg_user_config {}"
+		if v.MinimalExample && !hasRequiredFields(def, entity, v) {
 			continue
 		}
 
@@ -232,16 +237,30 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 		}
 
 		if v.IsNested() && !v.RendersAsAttribute(def, entity) {
+			requiredOnly := w.requiredOnly
+			w.requiredOnly = requiredOnly || v.MinimalExample
 			if v.IsArray() {
 				v = v.Items
 			}
 
-			valBlock := body.AppendNewBlock(k, nil)
+			valBlock := hclwrite.NewBlock(k, nil)
 			err := w.object(v, valBlock.Body(), section == sectionComputed || inComputedBlock)
+			w.requiredOnly = requiredOnly
 			if err != nil {
 				return fmt.Errorf("example items error: %w", err)
 			}
 
+			// hclwrite renders an empty block on two lines
+			if len(valBlock.Body().Attributes()) == 0 && len(valBlock.Body().Blocks()) == 0 {
+				body.AppendUnstructuredTokens(hclwrite.Tokens{
+					{Type: hclsyntax.TokenIdent, Bytes: []byte(k)},
+					{Type: hclsyntax.TokenOBrace, Bytes: []byte("{"), SpacesBefore: 1},
+					{Type: hclsyntax.TokenCBrace, Bytes: []byte("}")},
+					{Type: hclsyntax.TokenNewline, Bytes: []byte("\n")},
+				})
+			} else {
+				body.AppendBlock(valBlock)
+			}
 			continue
 		}
 
@@ -297,6 +316,19 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 	return nil
 }
 
+// hasRequiredFields tells whether a minimal block renders any field, see Item.MinimalExample.
+func hasRequiredFields(def *Definition, entity entityType, item *Item) bool {
+	if item.IsArray() {
+		item = item.Items
+	}
+	for _, p := range item.PropertiesByEntity(entity) {
+		if !p.Virtual && p.DeprecationMessage == "" && !p.DisableExample && p.IsRequired(def, entity) {
+			return true
+		}
+	}
+	return false
+}
+
 // exampleItemValue builds the cty example for an attribute: scalars, collections,
 // maps, and computed nested objects (as a one-element list, matching Item.TFType).
 func exampleItemValue(def *Definition, entity entityType, item *Item) (cty.Value, error) {
@@ -309,7 +341,7 @@ func exampleItemValue(def *Definition, entity entityType, item *Item) (cty.Value
 		attrs := make(map[string]cty.Value, len(obj.Properties))
 		for _, k := range sortedKeysPriority(def, entity, obj) {
 			v := obj.Properties[k]
-			if v.Virtual || v.DeprecationMessage != "" {
+			if v.Virtual || v.DeprecationMessage != "" || v.DisableExample {
 				continue
 			}
 			val, err := exampleItemValue(def, entity, v)

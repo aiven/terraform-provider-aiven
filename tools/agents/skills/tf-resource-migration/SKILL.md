@@ -365,6 +365,7 @@ Before marking migration complete:
 | DiffSuppressFunc behavior | Not portable — see [Diff Suppression Has No Equivalent](#diff-suppression-has-no-equivalent) |
 | Field the API accepts but never returns | Fill it in a `readView` override only when the state has no value, so imports don't keep a null and existing state stays untouched |
 | OpenAPI default would plan a change against SDKv2 state | Workaround: `dropDefault: true` plus `useStateForUnknown: true`, and send the API default from the create view. Goes away in v5.0.0 with SDKv2 state support |
+| Optional string plans `"" -> null` against SDKv2 state, or `""` in the config is inconsistent after apply | Workaround: `emptyIsNull: true`, and keep the prior value in the read when the API has none. Goes away in v5.0.0 with SDKv2 state support |
 | Computed value must force replacement | Compute it in `modifyPlan` and call `d.RequiresReplace(name)`; schema `forceNew` runs too early to see it |
 | Post-create waiter polls a nested attribute | `refreshState: true` plus `ResourceOptions.RefreshStateCheck`; `stateAttribute` only accepts top-level attributes |
 | Renamed ID field missing in old state | Use `readModifier: true` to extract from composite ID |
