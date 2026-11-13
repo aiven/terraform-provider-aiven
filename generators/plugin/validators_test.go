@@ -54,3 +54,37 @@ func TestGenValidatorsArrayWithoutItemEnum(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, codes)
 }
+
+func TestGenValidatorsStringPattern(t *testing.T) {
+	t.Parallel()
+
+	const pattern = `^[a-z]+$`
+
+	tests := []struct {
+		name string
+		item *Item
+		want string
+	}{
+		{
+			name: "sensitive string",
+			item: &Item{Type: SchemaTypeString, Pattern: pattern, Sensitive: true},
+			want: `validators.SensitiveRegexMatches(regexp.MustCompile("^[a-z]+$")`,
+		},
+		{
+			name: "non-sensitive string",
+			item: &Item{Type: SchemaTypeString, Pattern: pattern},
+			want: `stringvalidator.RegexMatches(regexp.MustCompile("^[a-z]+$")`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			codes, err := genValidators(&Definition{}, resourceType, tt.item)
+			require.NoError(t, err)
+			got := renderCode(t, jen.Var().Id("_").Op("=").Index().Any().Values(codes...))
+			assert.Contains(t, got, tt.want)
+		})
+	}
+}
