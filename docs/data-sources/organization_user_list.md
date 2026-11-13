@@ -23,6 +23,7 @@ data "aiven_organization_user_list" "example" {
     is_super_admin     = true
     join_time          = "2021-01-01T00:00:00Z"
     last_activity_time = "2021-01-01T00:00:00Z"
+    state              = "active"
     user_info {
       managing_organization_id = "org1a23f456789"
       city                     = "foo"
@@ -69,6 +70,7 @@ Read-Only:
 - `is_super_admin` (Boolean) Super admin state of the organization user.
 - `join_time` (String) Join time.
 - `last_activity_time` (String) Last activity time.
+- `state` (String) An enumeration. The possible values are `active`, `deactivated` and `deleted`.
 - `user_id` (String) User ID.
 - `user_info` (Block List) OrganizationUserInfo (see [below for nested schema](#nestedblock--users--user_info))
 
