@@ -23,6 +23,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/legacytimeouts"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/validators"
 )
 
 func resourceSchema(ctx context.Context) schema.Schema {
@@ -90,7 +91,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Datadog API key. Length must be between `1` and `256`. Must match pattern: `^[A-Za-z0-9]{1,256}$`. Example: `848f30907c15c55d601fe45487cce9b6`.",
 							Required:            true,
 							Sensitive:           true,
-							Validators:          []validator.String{stringvalidator.LengthBetween(1, 256), stringvalidator.RegexMatches(regexp.MustCompile("^[A-Za-z0-9]{1,256}$"), "must match pattern \"^[A-Za-z0-9]{1,256}$\"")},
+							Validators:          []validator.String{stringvalidator.LengthBetween(1, 256), validators.SensitiveRegexMatches(regexp.MustCompile("^[A-Za-z0-9]{1,256}$"), "must match pattern \"^[A-Za-z0-9]{1,256}$\"")},
 						},
 						"disable_consumer_stats": schema.BoolAttribute{
 							Computed:            true,
@@ -222,7 +223,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Secret Access Key. Maximum length: `128`. Must match pattern: `^[A-Za-z0-9/+=]+$`. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.",
 						Required:            true,
 						Sensitive:           true,
-						Validators:          []validator.String{stringvalidator.LengthAtMost(128), stringvalidator.RegexMatches(regexp.MustCompile("^[A-Za-z0-9/+=]+$"), "must match pattern \"^[A-Za-z0-9/+=]+$\"")},
+						Validators:          []validator.String{stringvalidator.LengthAtMost(128), validators.SensitiveRegexMatches(regexp.MustCompile("^[A-Za-z0-9/+=]+$"), "must match pattern \"^[A-Za-z0-9/+=]+$\"")},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "S3-compatible bucket URL. Maximum length: `2048`. Example: `https://mybucket.s3-myregion.amazonaws.com/mydataset/`.",
@@ -246,7 +247,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Azure Blob Storage connection string. Maximum length: `4096`. Must match pattern: `^([a-zA-Z0-9]+)=([^;]+)(?:;([a-zA-Z0-9]+)=([^;]+))*(;)?$`. Example: `AccountName=IDENT;AccountKey=SECRET`.",
 						Required:            true,
 						Sensitive:           true,
-						Validators:          []validator.String{stringvalidator.LengthAtMost(4096), stringvalidator.RegexMatches(regexp.MustCompile("^([a-zA-Z0-9]+)=([^;]+)(?:;([a-zA-Z0-9]+)=([^;]+))*(;)?$"), "must match pattern \"^([a-zA-Z0-9]+)=([^;]+)(?:;([a-zA-Z0-9]+)=([^;]+))*(;)?$\"")},
+						Validators:          []validator.String{stringvalidator.LengthAtMost(4096), validators.SensitiveRegexMatches(regexp.MustCompile("^([a-zA-Z0-9]+)=([^;]+)(?:;([a-zA-Z0-9]+)=([^;]+))*(;)?$"), "must match pattern \"^([a-zA-Z0-9]+)=([^;]+)(?:;([a-zA-Z0-9]+)=([^;]+))*(;)?$\"")},
 					},
 					"container": schema.StringAttribute{
 						MarkdownDescription: "Container. Maximum length: `256`. Example: `container-dev`.",
