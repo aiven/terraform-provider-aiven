@@ -44,6 +44,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							MarkdownDescription: "Last activity time.",
 						},
+						"state": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "An enumeration. The possible values are `active`, `deactivated` and `deleted`.",
+						},
 						"user_id": schema.StringAttribute{
 							Computed:            true,
 							MarkdownDescription: "User ID.",
@@ -133,6 +137,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 							Type:     adapter.SchemaTypeString,
 						},
 						"last_activity_time": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeString,
+						},
+						"state": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
 						},

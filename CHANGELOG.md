@@ -16,6 +16,9 @@ nav_order: 1
   Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
 - Change `aiven_mysql_database`: like `aiven_pg_database`, a create retried by the client no longer fails with 409,
   two resources with the same name fail before the create, and a replacement waits until the old database is deleted.
+- Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
+  are `active`, `deactivated` and `deleted`.
+- Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
 
 ## [4.66.0] - 2026-11-12
 

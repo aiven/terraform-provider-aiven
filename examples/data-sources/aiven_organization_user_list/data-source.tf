@@ -9,6 +9,7 @@ data "aiven_organization_user_list" "example" {
     is_super_admin     = true
     join_time          = "2021-01-01T00:00:00Z"
     last_activity_time = "2021-01-01T00:00:00Z"
+    state              = "active"
     user_info {
       managing_organization_id = "org1a23f456789"
       city                     = "foo"
