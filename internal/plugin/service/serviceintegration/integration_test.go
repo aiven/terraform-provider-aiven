@@ -381,6 +381,9 @@ func TestAccAivenServiceIntegration_backwardCompat(t *testing.T) {
 			TFConfig:           testAccServiceIntegrationBackwardCompat(rName),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// aiven_pg drops the pg_user_config SDKv2 stored, which sends nothing
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks:   acc.UpgradePlanChecks([]string{resourceName}, []string{"aiven_pg.source"}),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
@@ -405,6 +408,12 @@ func TestAccAivenServiceIntegration_autoscaler_backwardCompat(t *testing.T) {
 			TFConfig:           testAccServiceIntegrationAutoscaler(prefix, false),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
+			// aiven_pg drops the pg_user_config SDKv2 stored, which sends nothing
+			ExpectNonEmptyPlan: true,
+			ConfigPlanChecks: acc.UpgradePlanChecks(
+				[]string{resourceName, "aiven_service_integration_endpoint.test_endpoint"},
+				[]string{"aiven_pg.test_pg"},
+			),
 			Checks: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr(resourceName, "project", project),
 				resource.TestCheckResourceAttr(resourceName, "integration_type", "autoscaler"),

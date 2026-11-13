@@ -21,7 +21,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
@@ -51,7 +50,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_mysql": mysql.DatasourceMySQL(),
 
 			// pg
-			"aiven_pg": pg.DatasourcePG(),
 
 			// account
 			"aiven_account":                account.DatasourceAccount(),
@@ -101,7 +99,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_mysql": mysql.ResourceMySQL(),
 
 			// pg
-			"aiven_pg": pg.ResourcePG(),
 
 			// account
 			"aiven_account":                account.ResourceAccount(),

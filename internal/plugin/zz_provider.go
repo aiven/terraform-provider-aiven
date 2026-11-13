@@ -62,6 +62,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationusergroupmemberlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationuserlist"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organizationvpc"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pgdatabase"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/pguser"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/projectvpc"
@@ -122,6 +123,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_organization_user_group_member":      adapter.NewLazyResource(organizationusergroupmember.ResourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyResource(organizationvpc.ResourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyResource(organizationalunit.ResourceOptions),
+		"aiven_pg":                                  adapter.NewLazyResource(pg.ResourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyResource(pgdatabase.ResourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyResource(pguser.ResourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyResource(projectvpc.ResourceOptions),
@@ -177,6 +179,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_organization_user_list":              adapter.NewLazyDataSource(organizationuserlist.DataSourceOptions),
 		"aiven_organization_vpc":                    adapter.NewLazyDataSource(organizationvpc.DataSourceOptions),
 		"aiven_organizational_unit":                 adapter.NewLazyDataSource(organizationalunit.DataSourceOptions),
+		"aiven_pg":                                  adapter.NewLazyDataSource(pg.DataSourceOptions),
 		"aiven_pg_database":                         adapter.NewLazyDataSource(pgdatabase.DataSourceOptions),
 		"aiven_pg_user":                             adapter.NewLazyDataSource(pguser.DataSourceOptions),
 		"aiven_project_vpc":                         adapter.NewLazyDataSource(projectvpc.DataSourceOptions),
