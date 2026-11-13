@@ -91,7 +91,10 @@ func TestUserConfigEmptyString(t *testing.T) {
 		}
 	}
 
-	plan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(values()))
+	create := values()
+	delete(create, "id")
+	delete(create, "endpoint_id")
+	plan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(create))
 	require.NoError(t, err)
 	req := new(service.ServiceIntegrationEndpointCreateIn)
 	require.NoError(t, plan.Expand(req, adapter.ExpandUserConfig("endpoint_type")))
@@ -116,14 +119,34 @@ func TestUserConfigEmptyString(t *testing.T) {
 			require.NoError(t, d.Flatten(rsp, adapter.FlattenUserConfig("endpoint_type")))
 			assert.Equal(t, values()["datadog_user_config"], d.Get("datadog_user_config"))
 
-			// The next plan has the flattened block, and sends the same config
-			next := values()
-			next["datadog_user_config"] = d.Get("datadog_user_config")
-			nextPlan, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, adapter.WithTestPlan(next))
+			state := values()
+			state["datadog_user_config"] = d.Get("datadog_user_config")
+			update := func(plan map[string]any) (*service.ServiceIntegrationEndpointUpdateIn, error) {
+				rd, err := adapter.NewResourceData(
+					resourceSchemaInternal(),
+					ResourceOptions.IdentityFields,
+					adapter.WithTestPlan(plan),
+					adapter.WithTestState(state),
+					adapter.WithTestConfig(plan),
+				)
+				require.NoError(t, err)
+				out := new(service.ServiceIntegrationEndpointUpdateIn)
+				return out, rd.Expand(out, adapter.ExpandUserConfig("endpoint_type"))
+			}
+
+			// The next plan matches the flattened state
+			_, err = update(values())
+			require.ErrorIs(t, err, adapter.ErrNoChanges)
+
+			// A changed API key sends the empty string again
+			changed := values()
+			changed["datadog_user_config"] = []any{map[string]any{
+				"datadog_api_key":   "66666666777788889999000000000000",
+				"extra_tags_prefix": "",
+			}}
+			nextReq, err := update(changed)
 			require.NoError(t, err)
-			nextReq := new(service.ServiceIntegrationEndpointUpdateIn)
-			require.NoError(t, nextPlan.Expand(nextReq, adapter.ExpandUserConfig("endpoint_type")))
-			assert.Equal(t, req.UserConfig, nextReq.UserConfig)
+			assert.Equal(t, changed["datadog_user_config"].([]any)[0], nextReq.UserConfig)
 		})
 	}
 }

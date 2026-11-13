@@ -225,7 +225,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 	base := db.base
 
 	// Add a trailing dot if it's missing.
-	if !strings.HasSuffix(base, ".") {
+	if base != "" && !strings.HasSuffix(base, ".") {
 		base += "."
 	}
 	builder.WriteString(base)
@@ -375,7 +375,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 
 	// Avoids redundant descriptions.
 	s := strings.TrimSpace(builder.String())
-	if s == "." {
+	if s == "" || s == "." {
 		return ""
 	}
 
