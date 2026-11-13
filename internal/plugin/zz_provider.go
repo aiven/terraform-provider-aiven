@@ -35,6 +35,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/gcpprivatelink"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/gcpvpcpeeringconnection"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/governanceaccess"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnectcustompluginfile"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkanativeacl"
@@ -100,6 +101,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_gcp_privatelink":                     adapter.NewLazyResource(gcpprivatelink.ResourceOptions),
 		"aiven_gcp_vpc_peering_connection":          adapter.NewLazyResource(gcpvpcpeeringconnection.ResourceOptions),
 		"aiven_governance_access":                   adapter.NewLazyResource(governanceaccess.ResourceOptions),
+		"aiven_grafana":                             adapter.NewLazyResource(grafana.ResourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyResource(kafkaacl.ResourceOptions),
 		"aiven_kafka_connect_custom_plugin_file":    adapter.NewLazyResource(kafkaconnectcustompluginfile.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
@@ -152,6 +154,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_gcp_org_vpc_peering_connection":      adapter.NewLazyDataSource(gcporgvpcpeeringconnection.DataSourceOptions),
 		"aiven_gcp_privatelink":                     adapter.NewLazyDataSource(gcpprivatelink.DataSourceOptions),
 		"aiven_gcp_vpc_peering_connection":          adapter.NewLazyDataSource(gcpvpcpeeringconnection.DataSourceOptions),
+		"aiven_grafana":                             adapter.NewLazyDataSource(grafana.DataSourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyDataSource(kafkaacl.DataSourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(kafkaschemaregistryacl.DataSourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyDataSource(kafkatopic.DataSourceOptions),
