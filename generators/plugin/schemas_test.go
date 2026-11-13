@@ -313,3 +313,66 @@ func TestGenSchemaAddsUUIDValidatorForUUIDFormat(t *testing.T) {
 	require.Contains(t, got, `"Tenant ID. Must be a valid UUID."`)
 	require.Contains(t, got, `"App ID in UUID4 form."`)
 }
+
+func TestGenSchemaRendersVariantValidators(t *testing.T) {
+	t.Parallel()
+
+	settings := func(anyVariant bool, computed bool) *Item {
+		opt := !computed
+		settings := &Item{
+			Name:       "settings",
+			Type:       SchemaTypeObject,
+			Optional:   opt,
+			Computed:   computed,
+			AnyVariant: anyVariant,
+			Variants: []*Variant{
+				{Title: "Variant 1", Attributes: []string{"account"}, Required: []string{"account"}},
+				{Title: "Variant 2", Attributes: []string{"bucket"}},
+			},
+			Properties: map[string]*Item{
+				"account": {Name: "account", Type: SchemaTypeString, Optional: opt, Computed: computed},
+				"bucket":  {Name: "bucket", Type: SchemaTypeString, Optional: opt, Computed: computed},
+			},
+		}
+		repo := &Item{
+			Name:       "repo",
+			Type:       SchemaTypeObject,
+			Optional:   opt,
+			Computed:   computed,
+			Properties: map[string]*Item{"settings": settings},
+		}
+		settings.Parent = repo
+		for _, p := range settings.Properties {
+			p.Parent = settings
+		}
+		repo.Parent = &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{"repo": repo}}
+		return repo
+	}
+
+	t.Run("resource ExactlyOneVariant", func(t *testing.T) {
+		repo := settings(false, false)
+		got := genResourceSchemaCode(t, rootWithObject(repo.Properties["settings"]))
+		require.Contains(t, got, `validators.ExactlyOneVariant(validators.Variant{`)
+		require.Contains(t, got, "Required:")
+		require.Contains(t, got, "Title:")
+		require.Contains(t, got, "Variant 1")
+		require.Contains(t, got, `Attributes: []string{"bucket"}`)
+		require.NotRegexp(t, `Attributes:\s*\[\]string\{"bucket"\},\s*Required:`, got)
+	})
+
+	t.Run("resource AtLeastOneVariant", func(t *testing.T) {
+		got := genResourceSchemaCode(t, rootWithObject(settings(true, false).Properties["settings"]))
+		require.Contains(t, got, "validators.AtLeastOneVariant(")
+	})
+
+	t.Run("datasource omits validators", func(t *testing.T) {
+		repo := settings(false, true)
+		root := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{"repo": repo}}
+		repo.Parent = root
+		code, err := genSchema(&Definition{Datasource: &SchemaMeta{}}, datasourceType, root)
+		require.NoError(t, err)
+		got := renderCode(t, code)
+		require.NotContains(t, got, "ExactlyOneVariant")
+		require.NotContains(t, got, "AtLeastOneVariant")
+	})
+}

@@ -1,10 +1,15 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
+
+	"github.com/samber/lo"
 )
 
 // OpenAPIDoc represents a parsed OpenAPI document.
@@ -75,10 +80,13 @@ func (d *OpenAPIDoc) resolveRef(s *OASchema) (*OASchema, error) {
 	return s, nil
 }
 
-// resolveSchema resolves the ref and turns a "oneOf" into a free-form object,
-// keeping its description and flags, e.g. "_secure".
+// resolveSchema resolves the ref, merges the object variants, see mergeVariants,
+// and turns any other "oneOf" into a free-form object, keeping its description and flags, e.g. "_secure".
 func (d *OpenAPIDoc) resolveSchema(s *OASchema) (*OASchema, error) {
 	s, err := d.resolveRef(s)
+	if err == nil && s != nil {
+		s, err = d.mergeVariants(s)
+	}
 	if err != nil || s == nil || len(s.OneOf) == 0 {
 		return s, err
 	}
@@ -87,6 +95,169 @@ func (d *OpenAPIDoc) resolveSchema(s *OASchema) (*OASchema, error) {
 	o.Type = SchemaTypeObject
 	o.Properties, o.AdditionalProperties, o.Items, o.OneOf = nil, nil, nil, nil
 	return &o, nil
+}
+
+// schemaVariant is an object schema of a "oneOf" or "anyOf", with the JSON names.
+type schemaVariant struct {
+	title      string
+	properties []string
+	required   []string // Besides the properties the merged schema requires
+}
+
+// mergeVariants merges the object variants of a "oneOf", "anyOf" or "allOf" into one object.
+// An "allOf" requires what any variant requires. A "oneOf" or "anyOf" requires what all variants require,
+// and keeps the variants for the validator and the docs, see Item.Variants.
+// Returns the schema itself when a variant isn't an object.
+func (d *OpenAPIDoc) mergeVariants(s *OASchema) (*OASchema, error) {
+	variants, allOf := s.OneOf, false
+	switch {
+	case len(s.OneOf) > 0:
+	case len(s.AnyOf) > 0:
+		variants = s.AnyOf
+	case len(s.AllOf) > 0:
+		variants, allOf = s.AllOf, true
+	default:
+		return s, nil
+	}
+
+	resolved := make([]*OASchema, len(variants))
+	for i, v := range variants {
+		v, err := d.resolveSchema(v)
+		if err != nil {
+			return nil, err
+		}
+		if v == nil || v.Type != SchemaTypeObject || len(v.Properties) == 0 {
+			return s, nil
+		}
+		resolved[i] = v
+	}
+
+	// A copy: components are shared
+	o := *s
+	o.Type, o.OneOf, o.AnyOf, o.AllOf = SchemaTypeObject, nil, nil, nil
+	o.Properties, o.AdditionalProperties = make(map[string]*OASchema), nil
+	closed := true
+	for _, v := range resolved {
+		for k, p := range v.Properties {
+			var err error
+			o.Properties[k], err = d.mergeProperty(o.Properties[k], p)
+			if err != nil {
+				return nil, fmt.Errorf("%s: %w", k, err)
+			}
+		}
+		closed = closed && v.AdditionalProperties != nil && !v.AdditionalProperties.Allowed
+	}
+	if closed {
+		o.AdditionalProperties = new(OAAdditionalProperties)
+	}
+
+	required := lo.Map(resolved, func(v *OASchema, _ int) []string { return v.Required })
+	if allOf {
+		o.Required = lo.Union(append(required, s.Required)...)
+		return &o, nil
+	}
+
+	o.Required = lo.Union(s.Required, lo.Intersect(required...))
+	o.anyVariant = len(s.OneOf) == 0
+	for i, v := range resolved {
+		o.variants = append(o.variants, schemaVariant{
+			title:      cmp.Or(v.Title, fmt.Sprintf("Variant %d", i+1)),
+			properties: sortedKeys(v.Properties),
+			required:   lo.Without(v.Required, o.Required...),
+		})
+	}
+	return &o, nil
+}
+
+// mergeProperty merges a property that several variants have. The variants must agree on it:
+// one of them can miss the description, the title or the example, the rest must be equal.
+// Different descriptions or titles fail later, unless the definition describes the field, see Item.DescriptionConflict.
+func (d *OpenAPIDoc) mergeProperty(a, b *OASchema) (*OASchema, error) {
+	b, err := d.resolveSchema(b)
+	if err != nil || a == nil {
+		return b, err
+	}
+	a, err = d.resolveSchema(a)
+	if err != nil {
+		return nil, err
+	}
+
+	o := *a
+	set := func(v any) bool { return v != nil && v != "" }
+	for _, f := range []struct {
+		name string
+		a, b any
+	}{
+		{"description", a.Description, b.Description},
+		{"title", a.Title, b.Title},
+		{"example", a.Example, b.Example},
+	} {
+		if !set(f.a) || !set(f.b) || reflect.DeepEqual(f.a, f.b) {
+			continue
+		}
+		err := variantsDiffer(f.name, f.a, f.b)
+		if f.name == "example" {
+			return nil, err
+		}
+		o.descriptionConflict = cmp.Or(o.descriptionConflict, err.Error())
+	}
+	o.Description, o.Title = cmp.Or(a.Description, b.Description), cmp.Or(a.Title, b.Title)
+	if o.Example == nil {
+		o.Example = b.Example
+	}
+
+	// The fields besides the ones above and the nested schemas, which are merged below
+	x, y := *a, *b
+	for _, s := range []*OASchema{&x, &y} {
+		s.Description, s.Title, s.Example, s.Ref, s.Properties, s.Items = "", "", nil, "", nil, nil
+	}
+	if lo.ElementsMatch(x.Required, y.Required) {
+		y.Required = x.Required
+	}
+	if lo.ElementsMatch(x.Enum, y.Enum) {
+		y.Enum = x.Enum
+	}
+	vx, vy := reflect.ValueOf(x), reflect.ValueOf(y)
+	for i := range vx.NumField() {
+		f := vx.Type().Field(i)
+		if f.IsExported() && !reflect.DeepEqual(vx.Field(i).Interface(), vy.Field(i).Interface()) {
+			name, _, _ := strings.Cut(f.Tag.Get("json"), ",")
+			return nil, variantsDiffer(name, vx.Field(i).Interface(), vy.Field(i).Interface())
+		}
+	}
+	if !reflect.DeepEqual(a.variants, b.variants) || a.anyVariant != b.anyVariant {
+		return nil, errors.New("the variants have different oneOf or anyOf variants")
+	}
+
+	if (a.Items == nil) != (b.Items == nil) {
+		return nil, variantsDiffer("items", a.Items != nil, b.Items != nil)
+	}
+	if a.Items != nil {
+		o.Items, err = d.mergeProperty(a.Items, b.Items)
+		if err != nil {
+			return nil, fmt.Errorf("items: %w", err)
+		}
+	}
+
+	if !lo.ElementsMatch(sortedKeys(a.Properties), sortedKeys(b.Properties)) {
+		return nil, variantsDiffer("properties", sortedKeys(a.Properties), sortedKeys(b.Properties))
+	}
+	if len(a.Properties) > 0 {
+		o.Properties = make(map[string]*OASchema, len(a.Properties))
+		for k, p := range a.Properties {
+			o.Properties[k], err = d.mergeProperty(p, b.Properties[k])
+			if err != nil {
+				return nil, fmt.Errorf("%s: %w", k, err)
+			}
+		}
+	}
+	return &o, nil
+}
+
+func variantsDiffer(field string, a, b any) error {
+	x, _ := json.Marshal(a)
+	y, _ := json.Marshal(b)
+	return fmt.Errorf("the variants have different %s: %s and %s", field, x, y)
 }
 
 // Content represents a request or response body.
@@ -185,6 +356,11 @@ type OASchema struct {
 	SensitiveExt  bool `json:"x-_secure"`
 
 	name string // json field name
+
+	// Set by mergeVariants
+	variants            []schemaVariant
+	anyVariant          bool
+	descriptionConflict string
 
 	// Set by splitMultiTypeArrays
 	jsonName      string

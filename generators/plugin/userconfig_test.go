@@ -403,6 +403,44 @@ func TestUserConfigProperties(t *testing.T) {
 	assert.NotContains(t, result, "settings")
 	assert.NotContains(t, result, "keystores", "requires an untyped option")
 	assert.Contains(t, result, "optional", "the untyped option is optional")
+
+	t.Run("object variant composition kept", func(t *testing.T) {
+		t.Parallel()
+		settings := &OASchema{
+			OneOf: []*OASchema{
+				{Type: SchemaTypeObject, Required: []string{"account"}, Properties: map[string]*OASchema{"account": {Type: SchemaTypeString}}},
+				{Type: SchemaTypeObject, Required: []string{"bucket"}, Properties: map[string]*OASchema{"bucket": {Type: SchemaTypeString}}},
+			},
+		}
+		got := userConfigProperties(map[string]*OASchema{
+			"custom_repos": {Type: SchemaTypeArray, Items: &OASchema{
+				Type: SchemaTypeObject, Required: []string{"settings"},
+				Properties: map[string]*OASchema{"settings": settings},
+			}},
+		})
+		assert.Contains(t, got, "custom_repos")
+	})
+
+	t.Run("variant requires untyped option", func(t *testing.T) {
+		t.Parallel()
+		got := userConfigProperties(map[string]*OASchema{
+			"block": {Type: SchemaTypeObject, Required: []string{"settings"}, Properties: map[string]*OASchema{
+				"settings": untyped,
+			}},
+		})
+		assert.NotContains(t, got, "block")
+	})
+
+	t.Run("scalar variant dropped", func(t *testing.T) {
+		t.Parallel()
+		got := userConfigProperties(map[string]*OASchema{
+			"mixed": {OneOf: []*OASchema{
+				{Type: SchemaTypeBoolean},
+				{Type: SchemaTypeObject, Properties: map[string]*OASchema{"a": {Type: SchemaTypeString}}},
+			}},
+		})
+		assert.NotContains(t, got, "mixed")
+	})
 }
 
 func TestSplitMultiTypeArrays(t *testing.T) {

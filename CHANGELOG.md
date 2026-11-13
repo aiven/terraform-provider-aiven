@@ -26,6 +26,9 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
+- Add `aiven_opensearch` resource and data source fields `opensearch_user_config.custom_keystores`
+  and `opensearch_user_config.custom_repos`: their `settings` block validates at plan time that its attributes match
+  one object-storage type.
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
   `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos` and `aiven_valkey` resources
   and data sources to the Plugin Framework. Changes:

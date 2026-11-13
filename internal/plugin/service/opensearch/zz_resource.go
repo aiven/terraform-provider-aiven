@@ -470,6 +470,337 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							}},
 							Validators: []validator.List{listvalidator.SizeAtMost(1)},
 						},
+						"custom_keystores": schema.ListNestedBlock{
+							MarkdownDescription: "Allow to register custom keystores in OpenSearch.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: "Must match pattern: `^[^\\r\\n]*$`.",
+										Required:            true,
+										Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+									},
+									"type": schema.StringAttribute{
+										MarkdownDescription: "The possible values are `azure`, `gcs` and `s3`.",
+										Required:            true,
+										Validators:          []validator.String{stringvalidator.OneOf("azure", "gcs", "s3")},
+									},
+								},
+								Blocks: map[string]schema.Block{"settings": schema.ListNestedBlock{
+									NestedObject: schema.NestedBlockObject{
+										Attributes: map[string]schema.Attribute{
+											"access_key": schema.StringAttribute{
+												MarkdownDescription: "AWS Access key. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"account": schema.StringAttribute{
+												MarkdownDescription: "Account name. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"key": schema.StringAttribute{
+												MarkdownDescription: "Azure account secret key. One of key or `sas_token` should be specified. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"sas_token": schema.StringAttribute{
+												MarkdownDescription: "A shared access signatures (SAS) token. One of key or `sas_token` should be specified. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"secret_key": schema.StringAttribute{
+												MarkdownDescription: "AWS secret key. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+										},
+										Blocks: map[string]schema.Block{"credentials": schema.ListNestedBlock{
+											MarkdownDescription: "Google service account credentials map.",
+											NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+												"auth_provider_x509_cert_url": schema.StringAttribute{
+													MarkdownDescription: "The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"auth_uri": schema.StringAttribute{
+													MarkdownDescription: "The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"client_email": schema.StringAttribute{
+													MarkdownDescription: "Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"client_id": schema.StringAttribute{
+													MarkdownDescription: "Numeric client id for this service account. Example: `103654484443722885992`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"client_x509_cert_url": schema.StringAttribute{
+													MarkdownDescription: "Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"hmac_access_id": schema.StringAttribute{
+													MarkdownDescription: "The access ID for HMAC authentication with Google Cloud Storage.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"hmac_secret": schema.StringAttribute{
+													MarkdownDescription: "The secret key for HMAC authentication with Google Cloud Storage.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"private_key": schema.StringAttribute{
+													MarkdownDescription: "PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"private_key_id": schema.StringAttribute{
+													MarkdownDescription: "Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"project_id": schema.StringAttribute{
+													MarkdownDescription: "Gcloud project id. Example: `some-my-project`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"token_uri": schema.StringAttribute{
+													MarkdownDescription: "The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"type": schema.StringAttribute{
+													MarkdownDescription: "Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"universe_domain": schema.StringAttribute{
+													MarkdownDescription: "The universe domain. The default universe domain is googleapis.com. Example: `{\"universe_domain\": \"googleapis.com\", ...`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+											}},
+											Validators: []validator.List{listvalidator.SizeAtMost(1)},
+										}},
+										Validators: []validator.Object{validators.ExactlyOneVariant(validators.Variant{
+											Attributes: []string{"account", "key", "sas_token"},
+											Required:   []string{"account"},
+											Title:      "Variant 1",
+										}, validators.Variant{
+											Attributes: []string{"credentials"},
+											Required:   []string{"credentials"},
+											Title:      "Variant 2",
+										}, validators.Variant{
+											Attributes: []string{"access_key", "secret_key"},
+											Required:   []string{"access_key", "secret_key"},
+											Title:      "Variant 3",
+										})},
+									},
+									Validators: []validator.List{listvalidator.IsRequired(), listvalidator.SizeAtMost(1)},
+								}},
+							},
+							Validators: []validator.List{listvalidator.SizeAtMost(10)},
+						},
+						"custom_repos": schema.ListNestedBlock{
+							MarkdownDescription: "Allow to register object storage repositories in OpenSearch.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: "Must match pattern: `^[^\\r\\n]*$`.",
+										Required:            true,
+										Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+									},
+									"type": schema.StringAttribute{
+										MarkdownDescription: "The possible values are `azure`, `gcs` and `s3`.",
+										Required:            true,
+										Validators:          []validator.String{stringvalidator.OneOf("azure", "gcs", "s3")},
+									},
+								},
+								Blocks: map[string]schema.Block{"settings": schema.ListNestedBlock{
+									NestedObject: schema.NestedBlockObject{
+										Attributes: map[string]schema.Attribute{
+											"access_key": schema.StringAttribute{
+												MarkdownDescription: "AWS Access key. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"account": schema.StringAttribute{
+												MarkdownDescription: "Account name. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"base_path": schema.StringAttribute{
+												MarkdownDescription: "The path to the repository data within its container. The value of this setting should not start or end with a /. Must match pattern: `^[^\\r\\n]*$`.",
+												Required:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"bucket": schema.StringAttribute{
+												MarkdownDescription: "Google Cloud Storage or S3 bucket name. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"chunk_size": schema.StringAttribute{
+												MarkdownDescription: "Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"compress": schema.BoolAttribute{
+												MarkdownDescription: "when set to true metadata files are stored in compressed format.",
+												Optional:            true,
+											},
+											"container": schema.StringAttribute{
+												MarkdownDescription: "Azure container name. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"endpoint": schema.StringAttribute{
+												MarkdownDescription: "The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"endpoint_suffix": schema.StringAttribute{
+												MarkdownDescription: "Defines the DNS suffix for Azure Storage endpoints. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"key": schema.StringAttribute{
+												MarkdownDescription: "Azure account secret key. One of key or `sas_token` should be specified. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"max_restore_bytes_per_sec": schema.StringAttribute{
+												MarkdownDescription: "Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb. Must match pattern: `^\\d+\\s*(?:[bB]|[kKmMgGtTpP][bB])$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^\\d+\\s*(?:[bB]|[kKmMgGtTpP][bB])$"), "must match pattern \"^\\\\d+\\\\s*(?:[bB]|[kKmMgGtTpP][bB])$\"")},
+											},
+											"max_snapshot_bytes_per_sec": schema.StringAttribute{
+												MarkdownDescription: "Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb. Must match pattern: `^\\d+\\s*(?:[bB]|[kKmMgGtTpP][bB])$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^\\d+\\s*(?:[bB]|[kKmMgGtTpP][bB])$"), "must match pattern \"^\\\\d+\\\\s*(?:[bB]|[kKmMgGtTpP][bB])$\"")},
+											},
+											"readonly": schema.BoolAttribute{
+												MarkdownDescription: "Whether the repository is read-only. The default value is `false`.",
+												Optional:            true,
+											},
+											"region": schema.StringAttribute{
+												MarkdownDescription: "S3 region. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"sas_token": schema.StringAttribute{
+												MarkdownDescription: "A shared access signatures (SAS) token. One of key or `sas_token` should be specified. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"secret_key": schema.StringAttribute{
+												MarkdownDescription: "AWS secret key. Must match pattern: `^[^\\r\\n]*$`.",
+												Optional:            true,
+												Sensitive:           true,
+												Validators:          []validator.String{validators.SensitiveRegexMatches(regexp.MustCompile("^[^\\r\\n]*$"), "must match pattern \"^[^\\\\r\\\\n]*$\"")},
+											},
+											"server_side_encryption": schema.BoolAttribute{
+												MarkdownDescription: "When set to true files are encrypted on server side.",
+												Optional:            true,
+											},
+										},
+										Blocks: map[string]schema.Block{"credentials": schema.ListNestedBlock{
+											MarkdownDescription: "Google service account credentials map.",
+											NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+												"auth_provider_x509_cert_url": schema.StringAttribute{
+													MarkdownDescription: "The certificate service of Google. Example: `https://www.googleapis.com/oauth2/v1/certs`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"auth_uri": schema.StringAttribute{
+													MarkdownDescription: "The authentication endpoint of Google. Example: `https://accounts.google.com/o/oauth2/auth`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"client_email": schema.StringAttribute{
+													MarkdownDescription: "Email of the service account. Example: `my-service-account@some-my-project.iam.gserviceaccount.com`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"client_id": schema.StringAttribute{
+													MarkdownDescription: "Numeric client id for this service account. Example: `103654484443722885992`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"client_x509_cert_url": schema.StringAttribute{
+													MarkdownDescription: "Certificate URL for your service account. Example: `https://www.googleapis.com/robot/v1/metadata/x509/my-service-account%40some-my-project.iam.gserviceaccount.com`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"hmac_access_id": schema.StringAttribute{
+													MarkdownDescription: "The access ID for HMAC authentication with Google Cloud Storage.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"hmac_secret": schema.StringAttribute{
+													MarkdownDescription: "The secret key for HMAC authentication with Google Cloud Storage.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"private_key": schema.StringAttribute{
+													MarkdownDescription: "PEM-encoded private key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"private_key_id": schema.StringAttribute{
+													MarkdownDescription: "Hexadecimal ID number of your private key. Example: `5fdeb02a11ddf081930ac3ac60bf376a0aef8fad`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"project_id": schema.StringAttribute{
+													MarkdownDescription: "Gcloud project id. Example: `some-my-project`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"token_uri": schema.StringAttribute{
+													MarkdownDescription: "The token lease endpoint of Google. Example: `https://accounts.google.com/o/oauth2/token`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+												"type": schema.StringAttribute{
+													MarkdownDescription: "Always `service_account` for credentials created in Gcloud console or CLI. Example: `service_account`.",
+													Required:            true,
+													Sensitive:           true,
+												},
+												"universe_domain": schema.StringAttribute{
+													MarkdownDescription: "The universe domain. The default universe domain is googleapis.com. Example: `{\"universe_domain\": \"googleapis.com\", ...`.",
+													Optional:            true,
+													Sensitive:           true,
+												},
+											}},
+											Validators: []validator.List{listvalidator.SizeAtMost(1)},
+										}},
+										Validators: []validator.Object{validators.ExactlyOneVariant(validators.Variant{
+											Attributes: []string{"account", "container", "endpoint_suffix", "key", "sas_token"},
+											Required:   []string{"account", "container"},
+											Title:      "Variant 1",
+										}, validators.Variant{
+											Attributes: []string{"bucket", "credentials"},
+											Required:   []string{"bucket", "credentials"},
+											Title:      "Variant 2",
+										}, validators.Variant{
+											Attributes: []string{"access_key", "bucket", "endpoint", "region", "secret_key", "server_side_encryption"},
+											Required:   []string{"access_key", "bucket", "region", "secret_key"},
+											Title:      "Variant 3",
+										})},
+									},
+									Validators: []validator.List{listvalidator.IsRequired(), listvalidator.SizeAtMost(1)},
+								}},
+							},
+							Validators: []validator.List{listvalidator.SizeAtMost(10)},
+						},
 						"gcs_migration": schema.ListNestedBlock{
 							MarkdownDescription: "Google Cloud Storage migration settings.",
 							NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
@@ -2273,6 +2604,114 @@ func resourceSchemaInternal() *adapter.Schema {
 						"custom_domain": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeString,
+						},
+						"custom_keystores": &adapter.Schema{
+							Computed: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"name": &adapter.Schema{Type: adapter.SchemaTypeString},
+									"settings": &adapter.Schema{
+										IsObject: true,
+										Items: &adapter.Schema{
+											Properties: map[string]*adapter.Schema{
+												"access_key": &adapter.Schema{Type: adapter.SchemaTypeString},
+												"account":    &adapter.Schema{Type: adapter.SchemaTypeString},
+												"credentials": &adapter.Schema{
+													IsObject: true,
+													Items: &adapter.Schema{
+														Properties: map[string]*adapter.Schema{
+															"auth_provider_x509_cert_url": &adapter.Schema{Type: adapter.SchemaTypeString},
+															"auth_uri":                    &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_email":                &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_id":                   &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_x509_cert_url":        &adapter.Schema{Type: adapter.SchemaTypeString},
+															"hmac_access_id":              &adapter.Schema{Type: adapter.SchemaTypeString},
+															"hmac_secret":                 &adapter.Schema{Type: adapter.SchemaTypeString},
+															"private_key":                 &adapter.Schema{Type: adapter.SchemaTypeString},
+															"private_key_id":              &adapter.Schema{Type: adapter.SchemaTypeString},
+															"project_id":                  &adapter.Schema{Type: adapter.SchemaTypeString},
+															"token_uri":                   &adapter.Schema{Type: adapter.SchemaTypeString},
+															"type":                        &adapter.Schema{Type: adapter.SchemaTypeString},
+															"universe_domain":             &adapter.Schema{Type: adapter.SchemaTypeString},
+														},
+														Type: adapter.SchemaTypeObject,
+													},
+													Type: adapter.SchemaTypeList,
+												},
+												"key":        &adapter.Schema{Type: adapter.SchemaTypeString},
+												"sas_token":  &adapter.Schema{Type: adapter.SchemaTypeString},
+												"secret_key": &adapter.Schema{Type: adapter.SchemaTypeString},
+											},
+											Type: adapter.SchemaTypeObject,
+										},
+										Type: adapter.SchemaTypeList,
+									},
+									"type": &adapter.Schema{Type: adapter.SchemaTypeString},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeList,
+						},
+						"custom_repos": &adapter.Schema{
+							Computed: true,
+							Items: &adapter.Schema{
+								Computed: true,
+								Properties: map[string]*adapter.Schema{
+									"name": &adapter.Schema{Type: adapter.SchemaTypeString},
+									"settings": &adapter.Schema{
+										IsObject: true,
+										Items: &adapter.Schema{
+											Properties: map[string]*adapter.Schema{
+												"access_key": &adapter.Schema{Type: adapter.SchemaTypeString},
+												"account":    &adapter.Schema{Type: adapter.SchemaTypeString},
+												"base_path":  &adapter.Schema{Type: adapter.SchemaTypeString},
+												"bucket":     &adapter.Schema{Type: adapter.SchemaTypeString},
+												"chunk_size": &adapter.Schema{Type: adapter.SchemaTypeString},
+												"compress":   &adapter.Schema{Type: adapter.SchemaTypeBool},
+												"container":  &adapter.Schema{Type: adapter.SchemaTypeString},
+												"credentials": &adapter.Schema{
+													IsObject: true,
+													Items: &adapter.Schema{
+														Properties: map[string]*adapter.Schema{
+															"auth_provider_x509_cert_url": &adapter.Schema{Type: adapter.SchemaTypeString},
+															"auth_uri":                    &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_email":                &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_id":                   &adapter.Schema{Type: adapter.SchemaTypeString},
+															"client_x509_cert_url":        &adapter.Schema{Type: adapter.SchemaTypeString},
+															"hmac_access_id":              &adapter.Schema{Type: adapter.SchemaTypeString},
+															"hmac_secret":                 &adapter.Schema{Type: adapter.SchemaTypeString},
+															"private_key":                 &adapter.Schema{Type: adapter.SchemaTypeString},
+															"private_key_id":              &adapter.Schema{Type: adapter.SchemaTypeString},
+															"project_id":                  &adapter.Schema{Type: adapter.SchemaTypeString},
+															"token_uri":                   &adapter.Schema{Type: adapter.SchemaTypeString},
+															"type":                        &adapter.Schema{Type: adapter.SchemaTypeString},
+															"universe_domain":             &adapter.Schema{Type: adapter.SchemaTypeString},
+														},
+														Type: adapter.SchemaTypeObject,
+													},
+													Type: adapter.SchemaTypeList,
+												},
+												"endpoint":                   &adapter.Schema{Type: adapter.SchemaTypeString},
+												"endpoint_suffix":            &adapter.Schema{Type: adapter.SchemaTypeString},
+												"key":                        &adapter.Schema{Type: adapter.SchemaTypeString},
+												"max_restore_bytes_per_sec":  &adapter.Schema{Type: adapter.SchemaTypeString},
+												"max_snapshot_bytes_per_sec": &adapter.Schema{Type: adapter.SchemaTypeString},
+												"readonly":                   &adapter.Schema{Type: adapter.SchemaTypeBool},
+												"region":                     &adapter.Schema{Type: adapter.SchemaTypeString},
+												"sas_token":                  &adapter.Schema{Type: adapter.SchemaTypeString},
+												"secret_key":                 &adapter.Schema{Type: adapter.SchemaTypeString},
+												"server_side_encryption":     &adapter.Schema{Type: adapter.SchemaTypeBool},
+											},
+											Type: adapter.SchemaTypeObject,
+										},
+										Type: adapter.SchemaTypeList,
+									},
+									"type": &adapter.Schema{Type: adapter.SchemaTypeString},
+								},
+								Type: adapter.SchemaTypeObject,
+							},
+							Type: adapter.SchemaTypeList,
 						},
 						"disable_replication_factor_adjustment": &adapter.Schema{
 							Computed: true,

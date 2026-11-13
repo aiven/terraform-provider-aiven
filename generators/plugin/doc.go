@@ -10,6 +10,7 @@ import (
 
 	"github.com/aiven/go-client-codegen/handler/accountteam"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -288,15 +289,55 @@ func docItemGroupIndex(def *Definition, entity entityType, item *Item, name stri
 
 func docWriteBlockChildren(b *strings.Builder, def *Definition, entity entityType, item *Item, parents []string, root bool) error {
 	names := docPropertyNames(def, entity, item, root)
-	groups := make([][]string, len(docGroups))
-
-	for _, n := range names {
-		if n == "timeouts" {
-			groups[1] = append(groups[1], n)
-			continue
+	container := docSchemaContainer(item)
+	if len(container.Variants) == 0 {
+		nestedTypes, err := docWriteGroups(b, def, entity, item, parents, names, nil, root)
+		if err != nil {
+			return err
 		}
-		child := docSchemaContainer(item).PropertiesByEntity(entity)[n]
-		idx := docItemGroupIndex(def, entity, child, n)
+		return docWriteNestedTypes(b, def, entity, nestedTypes)
+	}
+
+	// The attributes in no variant, then each variant with all its attributes
+	inVariants := lo.FlatMap(container.Variants, func(v *Variant, _ int) []string { return v.Attributes })
+	nestedTypes, err := docWriteGroups(b, def, entity, item, parents, lo.Without(names, inVariants...), nil, root)
+	if err != nil {
+		return err
+	}
+
+	b.WriteString(docVariantsIntro(entity, container.AnyVariant))
+	b.WriteString("\n\n")
+	for _, v := range container.Variants {
+		b.WriteString("**" + v.Title + "**\n\n")
+		attrs := lo.Filter(names, func(n string, _ int) bool { return slices.Contains(v.Attributes, n) })
+		// The data source attributes are read-only
+		required := lo.Ternary(entity.isResource(), v.Required, nil)
+		nt, err := docWriteGroups(b, def, entity, item, parents, attrs, required, root)
+		if err != nil {
+			return err
+		}
+		nestedTypes = append(nestedTypes, nt...)
+	}
+	return docWriteNestedTypes(b, def, entity, lo.UniqBy(nestedTypes, func(nt docNestedType) string { return nt.anchorID }))
+}
+
+func docVariantsIntro(entity entityType, anyVariant bool) string {
+	count := lo.Ternary(anyVariant, "at least one", "exactly one")
+	if entity.isResource() {
+		return "Set the attributes of " + count + " of the variants below."
+	}
+	return "Has the attributes of " + count + " of the variants below."
+}
+
+// docWriteGroups writes the Required, Optional and Read-Only groups of the attributes.
+// The required ones are Required regardless of the schema, e.g., the attributes a variant requires.
+func docWriteGroups(b *strings.Builder, def *Definition, entity entityType, item *Item, parents, names, required []string, root bool) ([]docNestedType, error) {
+	groups := make([][]string, len(docGroups))
+	for _, n := range names {
+		idx := 0
+		if !slices.Contains(required, n) {
+			idx = docItemGroupIndex(def, entity, docSchemaContainer(item).PropertiesByEntity(entity)[n], n)
+		}
 		groups[idx] = append(groups[idx], n)
 	}
 
@@ -335,7 +376,7 @@ func docWriteBlockChildren(b *strings.Builder, def *Definition, entity entityTyp
 			child := docSchemaContainer(item).PropertiesByEntity(entity)[name]
 			nt, err := docWritePropertyLine(b, def, entity, path, child)
 			if err != nil {
-				return fmt.Errorf("render %q: %w", name, err)
+				return nil, fmt.Errorf("render %q: %w", name, err)
 			}
 			nestedTypes = append(nestedTypes, nt...)
 		}
@@ -343,7 +384,7 @@ func docWriteBlockChildren(b *strings.Builder, def *Definition, entity entityTyp
 		b.WriteByte('\n')
 	}
 
-	return docWriteNestedTypes(b, def, entity, nestedTypes)
+	return nestedTypes, nil
 }
 
 func docWritePropertyLine(b *strings.Builder, def *Definition, entity entityType, path []string, item *Item) ([]docNestedType, error) {

@@ -566,6 +566,21 @@ type Item struct {
 	// E.g. pg_version lists "The possible values are `13`, ... and `19`." in its description,
 	// and an older provider still sets pg_version = "20" once the API supports it.
 	DocEnum []any `yaml:"_docEnum,omitempty"`
+
+	// Variants records oneOf/anyOf object alternatives merged into this item.
+	Variants   []*Variant `yaml:"_variants,omitempty"`
+	AnyVariant bool       `yaml:"_anyVariant,omitempty"`
+
+	// DescriptionConflict tells how the merged variants describe it differently.
+	// Fails the generation, unless the definition sets the description.
+	DescriptionConflict string `yaml:"_descriptionConflict,omitempty"`
+}
+
+// Variant is one object alternative of a merged oneOf/anyOf schema.
+type Variant struct {
+	Title      string   `yaml:"title"`
+	Attributes []string `yaml:"attributes"`
+	Required   []string `yaml:"required"`
 }
 
 // InUserConfig reports whether the item is a user config block or nested in one.

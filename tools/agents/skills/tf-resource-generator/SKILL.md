@@ -397,7 +397,15 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
   - Only the `x-_secure` options are sensitive. Names like `access_key` aren't, unlike outside user configs.
   - An integer or number option is a number. Options without a type are skipped, and so are the objects
     that require them.
-- Without `userConfigDiscriminator`, a `oneOf` field is a free-form map.
+- Without `userConfigDiscriminator`, the object variants of a `oneOf`, `anyOf` or `allOf` merge into one object,
+  e.g. OpenSearch `custom_repos.settings`. A `oneOf` or `anyOf` requires what all variants require. The resource
+  gets `validators.ExactlyOneVariant` (`AtLeastOneVariant` for `anyOf`), which fails the plan when the attributes
+  don't fit a variant, and the docs list each variant after the attributes all variants share. Any other `oneOf` is
+  a free-form map.
+- The variants must agree on the properties they share, or the generation fails. One variant can miss the
+  description, the title or the example; anything else, e.g., the type, the enum or the nested properties, must be
+  equal. Different descriptions or titles need a `description` for the field in the definition, e.g.,
+  `custom_repos.settings.bucket` in `aiven_opensearch.yml`. Two `oneOf` variants can't have the same attributes.
 - While SDKv2 still has a resource or a data source of the same name, the generator writes no docs or
   examples for it.
 

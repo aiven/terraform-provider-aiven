@@ -734,17 +734,17 @@ func TestFromSchemaRefAndOneOf(t *testing.T) {
 	_, err := doc.resolveRef(&OASchema{Ref: "#/components/schemas/Loop"})
 	require.ErrorContains(t, err, "cyclic schema ref")
 
-	// A "oneOf" is an object without properties that keeps its description and flags
+	// A "oneOf" of object variants merges their properties
 	for _, config := range []*Item{root.Properties["config"], root.Properties["configs"].Items} {
 		assert.Equal(t, SchemaTypeObject, config.Type)
 		assert.Equal(t, "Config", config.Description)
 		assert.True(t, config.Sensitive)
-		assert.Empty(t, config.Properties)
+		assert.Contains(t, config.Properties, "a")
+		assert.Contains(t, config.Properties, "b")
+		require.Len(t, config.Variants, 2)
 	}
 
-	// A property renders it as a map of strings
-	require.NotNil(t, root.Properties["config"].Items)
-	assert.Equal(t, SchemaTypeString, root.Properties["config"].Items.Type)
+	assert.Empty(t, root.Properties["config"].Items, "merged object has properties, not a free-form map")
 	assert.Empty(t, doc.Components.Schemas["OneOfConfig"].Type, "the component is not modified")
 }
 
@@ -1459,4 +1459,222 @@ func TestExampleDisabledAndMinimal(t *testing.T) {
   }
 }
 `, string(got))
+}
+
+func TestFromSchemaSkipsRemovedConflictingOneOf(t *testing.T) {
+	t.Parallel()
+
+	schema := &OASchema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*OASchema{
+			"bad": {OneOf: []*OASchema{
+				{Type: SchemaTypeObject, Properties: map[string]*OASchema{"x": {Type: SchemaTypeString}}},
+				{Type: SchemaTypeObject, Properties: map[string]*OASchema{"x": {Type: SchemaTypeInteger}}},
+			}},
+		},
+	}
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope := &Scope{OpenAPI: &OpenAPIDoc{}, Definition: &Definition{Remove: []string{"bad"}}}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+	assert.NotContains(t, root.Properties, "bad")
+}
+
+func TestFromSchemaItemVariants(t *testing.T) {
+	t.Parallel()
+
+	schema := &OASchema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*OASchema{
+			"repo": {Type: SchemaTypeObject, Properties: map[string]*OASchema{
+				"settings": {OneOf: []*OASchema{
+					{Type: SchemaTypeObject, Required: []string{"account"}, Properties: map[string]*OASchema{
+						"account": {Type: SchemaTypeString},
+						"bucket":  {Type: SchemaTypeString},
+					}},
+					{Type: SchemaTypeObject, Required: []string{"bucket"}, Properties: map[string]*OASchema{
+						"bucket": {Type: SchemaTypeString},
+					}},
+				}},
+			}},
+		},
+	}
+	root := &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope := &Scope{
+		OpenAPI: &OpenAPIDoc{},
+		Definition: &Definition{
+			Rename: map[string]string{"repo/settings/account": "azure_account"},
+			Remove: []string{"repo/settings/bucket"},
+		},
+	}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+	settings := root.Properties["repo"].Properties["settings"]
+	require.Nil(t, settings.Variants, "only one variant keeps attributes")
+
+	schema = &OASchema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*OASchema{
+			"repo": {Type: SchemaTypeObject, Properties: map[string]*OASchema{
+				"settings": {OneOf: []*OASchema{
+					{Type: SchemaTypeObject, Properties: map[string]*OASchema{"account": {Type: SchemaTypeString}}},
+					{Type: SchemaTypeObject, Properties: map[string]*OASchema{"region": {Type: SchemaTypeString}}},
+				}},
+			}},
+		},
+	}
+	root = &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope.Definition = &Definition{Rename: map[string]string{"repo/settings/account": "azure_account"}}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+	settings = root.Properties["repo"].Properties["settings"]
+	require.Len(t, settings.Variants, 2)
+	assert.Contains(t, settings.Variants[0].Attributes, "azure_account")
+	assert.NotContains(t, settings.Variants[0].Attributes, "account")
+
+	schema = &OASchema{Type: SchemaTypeObject, Properties: map[string]*OASchema{
+		"settings": {OneOf: []*OASchema{
+			{Type: SchemaTypeObject, Required: []string{"account", "path"}, Properties: map[string]*OASchema{
+				"account": {Type: SchemaTypeString},
+				"path":    {Type: SchemaTypeString},
+				"chunk":   {Type: SchemaTypeString},
+			}},
+			{Type: SchemaTypeObject, Required: []string{"bucket", "path"}, Properties: map[string]*OASchema{
+				"bucket": {Type: SchemaTypeString},
+				"path":   {Type: SchemaTypeString},
+				"chunk":  {Type: SchemaTypeString},
+			}},
+		}},
+	}}
+	root = &Item{Name: "root", Type: SchemaTypeObject, Properties: make(map[string]*Item)}
+	scope.Definition = &Definition{}
+	require.NoError(t, fromSchema(scope, &Operation{}, root, schema, ReadHandler))
+	assert.Equal(t, []*Variant{
+		{Title: "Variant 1", Attributes: []string{"account"}, Required: []string{"account"}},
+		{Title: "Variant 2", Attributes: []string{"bucket"}, Required: []string{"bucket"}},
+	}, root.Properties["settings"].Variants, "the shared attributes are left out")
+}
+
+func TestSetItemVariantsKeepsShared(t *testing.T) {
+	t.Parallel()
+
+	variants := func(required []string, attrs ...[]string) []*Variant {
+		s := &OASchema{}
+		item := &Item{Properties: map[string]*Item{}}
+		for i, a := range attrs {
+			s.variants = append(s.variants, schemaVariant{title: fmt.Sprint(i), properties: a, required: required})
+			for _, k := range a {
+				item.Properties[k] = &Item{Name: k, JSONName: k}
+			}
+			required = nil
+		}
+		require.NoError(t, setItemVariants(item, s))
+		return item.Variants
+	}
+
+	got := variants([]string{"path"}, []string{"a", "path"}, []string{"b", "path"})
+	assert.Equal(t, []string{"a", "path"}, got[0].Attributes, "a variant requires it")
+	assert.Equal(t, []string{"b", "path"}, got[1].Attributes)
+
+	got = variants(nil, []string{"a", "path"}, []string{"path"})
+	assert.Equal(t, []string{"a", "path"}, got[0].Attributes, "a variant would be empty")
+	assert.Equal(t, []string{"path"}, got[1].Attributes)
+}
+
+func TestMergeItemVariants(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{
+		Name: "settings",
+		Type: SchemaTypeObject,
+		Variants: []*Variant{
+			{Title: "Variant 1", Attributes: []string{"a"}, Required: []string{"a"}},
+			{Title: "Variant 2", Attributes: []string{"b"}, Required: []string{"b"}},
+		},
+	}, &Item{
+		Name: "settings",
+		Type: SchemaTypeObject,
+		Variants: []*Variant{
+			{Title: "Variant 1", Attributes: []string{"c"}, Required: []string{"d"}},
+			{Title: "Variant 2", Attributes: []string{"e"}},
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"a", "c"}, got.Variants[0].Attributes)
+	assert.Equal(t, []string{"a", "d"}, got.Variants[0].Required)
+	assert.Equal(t, []string{"b", "e"}, got.Variants[1].Attributes)
+
+	_, err = mergeItem(parent, &Item{
+		Name:     "settings",
+		Variants: []*Variant{{Title: "Variant 1", Attributes: []string{"a"}}},
+	}, &Item{
+		Name:     "settings",
+		Variants: []*Variant{{Title: "Variant 1"}, {Title: "Variant 2"}},
+	})
+	require.ErrorContains(t, err, "1 and 2 variants")
+}
+
+func TestSetItemVariantsSameAttributes(t *testing.T) {
+	t.Parallel()
+
+	item := &Item{Properties: map[string]*Item{
+		"a": {Name: "a", JSONName: "a"},
+		"b": {Name: "b", JSONName: "b"},
+	}}
+	s := &OASchema{}
+	s.variants = []schemaVariant{
+		{title: "Variant 1", properties: []string{"a", "b"}},
+		{title: "Variant 2", properties: []string{"a", "b"}},
+	}
+	require.EqualError(t, setItemVariants(item, s), "Variant 1 and Variant 2 have the same attributes")
+
+	item = &Item{Properties: map[string]*Item{
+		"a": {Name: "a", JSONName: "a"},
+		"b": {Name: "b", JSONName: "b"},
+	}}
+	s = &OASchema{anyVariant: true}
+	s.variants = []schemaVariant{
+		{title: "Variant 1", properties: []string{"a", "b"}},
+		{title: "Variant 2", properties: []string{"a", "b"}},
+	}
+	require.NoError(t, setItemVariants(item, s))
+
+	item = &Item{Properties: map[string]*Item{
+		"a": {Name: "a", JSONName: "a"},
+		"b": {Name: "b", JSONName: "b"},
+	}}
+	s = &OASchema{}
+	s.variants = []schemaVariant{
+		{title: "Variant 1", properties: []string{"a", "b"}, required: []string{"a"}},
+		{title: "Variant 2", properties: []string{"a", "b"}},
+	}
+	require.NoError(t, setItemVariants(item, s))
+}
+
+func TestDescriptionConflict(t *testing.T) {
+	t.Parallel()
+
+	parent := &Item{Name: "root", Type: SchemaTypeObject, Properties: map[string]*Item{}}
+	got, err := mergeItem(parent, &Item{
+		Name:                "x",
+		Type:                SchemaTypeString,
+		AppearsIn:           ResponseBody,
+		DescriptionConflict: "c",
+	}, &Item{
+		Name:        "x",
+		Type:        SchemaTypeString,
+		AppearsIn:   0,
+		Description: "From YAML.",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "From YAML.", got.Description)
+	assert.Empty(t, got.DescriptionConflict)
+
+	got, err = mergeItem(parent,
+		&Item{Name: "y", Type: SchemaTypeString, AppearsIn: ResponseBody, DescriptionConflict: "c"},
+		&Item{Name: "y", Type: SchemaTypeString, AppearsIn: ResponseBody, DescriptionConflict: "c"},
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "c", got.DescriptionConflict)
+
+	err = recalcDeep(&Definition{}, &Item{Name: "x", Type: SchemaTypeString, DescriptionConflict: "c"})
+	require.EqualError(t, err, "c, set the description in the definition")
 }
