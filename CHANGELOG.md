@@ -13,8 +13,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker` and `aiven_pg`. When upgrading from v3, first run `terraform apply -refresh-only` with
-  v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+  `aiven_kafka_mirrormaker`, `aiven_mysql` and `aiven_pg`. When upgrading from v3, first run `terraform apply
+  -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
@@ -27,7 +27,7 @@ nav_order: 1
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
+  `aiven_kafka_mirrormaker`, `aiven_mysql` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the last block of a list sends an empty
     list, as in SDKv2, e.g., removing every `ip_filter_object` clears the IP filter, which requires
