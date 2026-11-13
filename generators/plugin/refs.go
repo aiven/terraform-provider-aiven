@@ -264,20 +264,34 @@ func refRequired(def *Definition, typeName string) (func(name string) bool, erro
 	}, nil
 }
 
-var sdkResources = sync.OnceValues(func() (map[string]*schema.Resource, error) {
+var sdkProvider = sync.OnceValues(func() (*schema.Provider, error) {
 	p, err := provider.Provider("dev")
 	if err != nil {
 		return nil, fmt.Errorf("could not load the SDK provider: %w", err)
 	}
-	return p.ResourcesMap, nil
+	return p, nil
 })
 
+// isSDKEntity tells if the SDK provider still has the resource or the data source.
+func isSDKEntity(entity entityType, typeName string) (bool, error) {
+	p, err := sdkProvider()
+	if err != nil {
+		return false, err
+	}
+	entities := p.ResourcesMap
+	if entity.IsDataSource() {
+		entities = p.DataSourcesMap
+	}
+	_, ok := entities[typeName]
+	return ok, nil
+}
+
 func sdkResource(typeName string) (*schema.Resource, error) {
-	resources, err := sdkResources()
+	p, err := sdkProvider()
 	if err != nil {
 		return nil, err
 	}
-	r, ok := resources[typeName]
+	r, ok := p.ResourcesMap[typeName]
 	if !ok {
 		return nil, fmt.Errorf("referenced resource %q not found", typeName)
 	}

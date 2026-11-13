@@ -390,6 +390,10 @@ func descExample(item *Item) any {
 		return nil
 	}
 	for _, v := range []any{item.Example, item.DocExample} {
+		// The spec's float64 rounds an int64 maximum up, e.g., 9223372036854775807 to 9223372036854775808
+		if f, ok := v.(float64); ok && item.Maximum > 0 && f >= float64(item.Maximum) {
+			v = item.Maximum
+		}
 		switch v.(type) {
 		case string, int, float64:
 			if !isEmpty(v) {
@@ -407,7 +411,7 @@ func itemEnumValues(item *Item) []any {
 	if item.Items != nil && len(item.Items.Enum) > 0 {
 		return item.Items.Enum
 	}
-	return nil
+	return item.DocEnum
 }
 
 func firstUpper[T ~string](s T) string {
