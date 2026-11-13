@@ -12,6 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- **IMPORTANT**: remove the v3 state upgrader of `aiven_grafana`. When upgrading from v3, first run `terraform apply
+  -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
@@ -23,6 +25,25 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
+- Migrate `aiven_grafana` resource and data source to the Plugin Framework. Changes:
+  - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
+    the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the last block of a list sends an empty
+    list, as in SDKv2, e.g., removing every `ip_filter_object` clears the IP filter, which requires
+    `AIVEN_ALLOW_IP_FILTER_PURGE`. Removing the whole block shows a change, which sends no options: the API keeps them,
+    including a custom `ip_filter` that SDKv2 cleared.
+  - The first plan after the upgrade might show an in-place change that removes the user config blocks SDKv2 stored
+    but the configuration doesn't have, e.g., `grafana_user_config` or its `public_access` block. The Plugin Framework
+    can't keep a block missing in the configuration. It's safe to apply: the service keeps its settings, hosts
+    and credentials. When only the blocks inside the user config are removed, the provider updates only the state
+    and doesn't call the API.
+  - An empty string is null in the state, e.g., `project_vpc_id` without a VPC.
+  - Setting only `maintenance_window_dow` or `maintenance_window_time` sends it, and the API keeps the other value. SDKv2
+    sent neither.
+  - The user config options are validated at plan time, e.g., their lengths and patterns.
+  - The connection blocks, e.g., `grafana`, are read-only.
+  - With `AIVEN_INCLUDE_SECRETS=false`, the read doesn't request secrets and stores the redacted values.
+  - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
+    `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
 
 ## [4.66.0] - 2026-11-12
 
