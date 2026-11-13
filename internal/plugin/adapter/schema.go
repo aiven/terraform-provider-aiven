@@ -55,4 +55,11 @@ type Schema struct {
 	// HoistedFrom names the API object of a root field, e.g. "access_control".
 	// Expand nests the field under it after the modifiers, Flatten lifts it before them.
 	HoistedFrom string
+
+	// JSONName is the API name of a user config option named differently,
+	// e.g., "ip_filter" for "ip_filter_string", or "pg_stat_statements.track" for "pg_stat_statements__dot__track".
+	JSONName string
+
+	// CreateOnly user config options are sent on create only, e.g., admin_password.
+	CreateOnly bool
 }
