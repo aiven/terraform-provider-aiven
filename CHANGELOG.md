@@ -12,8 +12,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka` and `aiven_pg`. When
-  upgrading from v3, first run `terraform apply -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+- **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`
+  and `aiven_pg`. When upgrading from v3, first run `terraform apply -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
@@ -25,8 +25,8 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
-- Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka` and `aiven_pg` resources and data sources
-  to the Plugin Framework. Changes:
+- Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_pg`
+  resources and data sources to the Plugin Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the last block of a list sends an empty
     list, as in SDKv2, e.g., removing every `ip_filter_object` clears the IP filter, which requires
@@ -45,8 +45,8 @@ nav_order: 1
   - With `AIVEN_INCLUDE_SECRETS=false`, the read doesn't request secrets and stores the redacted values.
   - Changing `aiven_kafka` field `default_acl` after the creation shows an in-place change, which doesn't change the ACLs.
     Like any service update, it sends `powered = true`, which powers on a powered-off service.
-  - Remove the deprecated options the API no longer has: `additional_backup_regions` of `aiven_clickhouse`, `aiven_flink`
-    and `aiven_kafka`, `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`.
+  - Remove the deprecated options the API no longer has: `additional_backup_regions` of `aiven_clickhouse`, `aiven_flink`,
+    `aiven_kafka` and `aiven_kafka_connect`, `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`.
   - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
     `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
 

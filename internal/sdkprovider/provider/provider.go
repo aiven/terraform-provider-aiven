@@ -77,7 +77,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_schema":               kafkaschema.DatasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration": kafkaschema.DatasourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":            kafka.DatasourceKafkaConnector(),
-			"aiven_kafka_connect":              kafka.DatasourceKafkaConnect(),
 			"aiven_kafka_mirrormaker":          kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
@@ -127,7 +126,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_kafka_schema":               kafkaschema.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration": kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":            kafka.ResourceKafkaConnector(),
-			"aiven_kafka_connect":              kafka.ResourceKafkaConnect(),
 			"aiven_kafka_mirrormaker":          kafka.ResourceKafkaMirrormaker(),
 			"aiven_kafka_quota":                kafka.ResourceKafkaQuota(),
 
