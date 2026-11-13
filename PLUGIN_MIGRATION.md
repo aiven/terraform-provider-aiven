@@ -63,7 +63,7 @@
 |  57 | aiven_mysql                                 | yes    |     2 |
 |  58 | aiven_mysql_database                        | yes    |     2 |
 |  59 | aiven_mysql_user                            | yes    |     2 |
-|  60 | aiven_opensearch                            |        |     2 |
+|  60 | aiven_opensearch                            | yes    |     2 |
 |  61 | aiven_opensearch_acl_config                 |        |     2 |
 |  62 | aiven_opensearch_acl_rule                   |        |     2 |
 |  63 | aiven_opensearch_security_plugin_config     | yes    |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 75%                          | 123    |   163 |
+|     | TOTAL MIGRATED 77%                          | 125    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```

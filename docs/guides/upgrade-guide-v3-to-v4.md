@@ -38,6 +38,7 @@ The latest v4 versions can't read the v3 state of these resources. Upgrade it wi
 | `aiven_kafka_connect`                | 4.65.1  |
 | `aiven_kafka_mirrormaker`            | 4.65.1  |
 | `aiven_mysql`                        | 4.65.1  |
+| `aiven_opensearch`                   | 4.65.1  |
 | `aiven_pg`                           | 4.65.1  |
 | `aiven_service_integration`          | 4.65.1  |
 | `aiven_service_integration_endpoint` | 4.65.1  |

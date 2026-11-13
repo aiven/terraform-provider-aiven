@@ -17,8 +17,8 @@ After enabling OpenSearch Security management, **you can no longer use Aiven Ter
 
 ```terraform
 resource "aiven_opensearch_security_plugin_config" "example" {
-  project        = aiven_opensearch.example_opensearch.project      // e.g. "my-project". Force new
-  service_name   = aiven_opensearch.example_opensearch.service_name // e.g. "my-opensearch". Force new
+  project        = aiven_opensearch.example.project      // e.g. "my-project". Force new
+  service_name   = aiven_opensearch.example.service_name // e.g. "my-opensearch". Force new
   admin_password = "h3.2aD!z2"
 
   /* COMPUTED FIELDS
@@ -28,10 +28,10 @@ resource "aiven_opensearch_security_plugin_config" "example" {
   */
 }
 
-resource "aiven_opensearch" "example_opensearch" {
-  project      = "my-project"
+resource "aiven_opensearch" "example" {
+  project      = "my-project"    // Force new
+  service_name = "my-opensearch" // Force new
   plan         = "startup-4"
-  service_name = "example-opensearch"
 }
 ```
 
