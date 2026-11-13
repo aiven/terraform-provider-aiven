@@ -131,6 +131,14 @@ properties:
         type: boolean
         $comment: |
           Set to true to disable Terraform example file generation for this resource.
+      importExample:
+        type: string
+        minLength: 1
+        $comment: |
+          Override the shell example in import.sh and the resource documentation, e.g. to show
+          alternative string import IDs accepted by a custom ImportState handler.
+          Documentation only: does not change the resource ID or identity-based import.
+          Keep alternative commands commented so the example imports the resource only once.
       refDepth:
         type: integer
         minimum: 1

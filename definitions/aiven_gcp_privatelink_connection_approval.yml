@@ -1,9 +1,25 @@
 # yaml-language-server: $schema=.schema.yml
 resource:
+  description: |
+    Approve a new Google Private Service Connect connection.
+
+    Destroying this resource removes it from Terraform state only. It does not revoke approval or delete the endpoint.
+    To remove one connection, delete its consumer forwarding rule.
+    Deleting the parent `aiven_gcp_privatelink` resource removes service-level PrivateLink
+    and can disrupt other PSC connections for the service.
+  # Keep the hand-written example with the consumer forwarding rule.
+  disableExample: true
   refreshState: true
   removeMissing: true
   # Keep SDK upgrades with an empty PSC selector from replacing the Terraform resource.
   modifyPlan: true
+  importExample: |
+    terraform import aiven_gcp_privatelink_connection_approval.example PROJECT/SERVICE_NAME
+    # For a service with multiple PSC connections, run this instead:
+    # terraform import aiven_gcp_privatelink_connection_approval.example PROJECT/SERVICE_NAME/PSC_CONNECTION_ID
+
+    # Identity-based import requires exactly one PSC connection for the service.
+    # For multiple connections, use the PSC-qualified string import above.
 clientHandler: privatelink
 identityFields: [project, service_name]
 legacyTimeouts: true
@@ -28,6 +44,10 @@ schema:
   user_ip_address:
     # The API accepts only IPv4, but the published schema omits the format.
     format: ipv4
+    description: |
+      Frontend IP address of the consumer forwarding rule.
+      Changing this address on an approved connection fails during apply.
+      To use a different IP, recreate the forwarding rule and approve the new connection using its new `psc_connection_id`.
   privatelink_connection_id:
     # Required in the approve URL, but discovered by the Terraform resource.
     required: false

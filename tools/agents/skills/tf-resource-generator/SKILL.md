@@ -201,6 +201,11 @@ from them. `identityFieldsOptional` lists the trailing `identityFields` not requ
 unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
 identity import for every resource. String import examples use the full ID, including optional fields.
 
+For a custom import handler that accepts additional string ID formats, set `resource.importExample`
+to a multiline shell example. It is used in both `examples/resources/<type>/import.sh` and the resource
+documentation. Keep alternative commands commented so copying the example imports the resource only
+once. This overrides documentation only; `identityFields` still defines the resource ID and identity import.
+
 `refreshState: true` enables a post-Create/Update Read that completes on the first successful Read,
 retrying transient 404/403 errors. To also wait for an attribute value, set `stateAttribute` and a
 `refreshState` block with `desired` and optional `failed` instead — desired already includes that

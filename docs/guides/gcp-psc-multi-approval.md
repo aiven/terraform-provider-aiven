@@ -71,8 +71,9 @@ The Google API cannot change an endpoint IP after approval or set the IP of a co
 by GCP without an Aiven approval. To change the IP, recreate the consumer forwarding rule and pass its new
 `psc_connection_id` to the approval resource. Replacing only the approval resource is insufficient.
 
-Destroying the approval resource removes it from Terraform state. To remove the actual connection,
-delete the consumer forwarding rule or its parent `aiven_gcp_privatelink` resource.
+Destroying the approval resource removes it from Terraform state only. To remove one connection,
+delete its consumer forwarding rule. Deleting the parent `aiven_gcp_privatelink` resource removes
+service-level PrivateLink and can disrupt other PSC connections for the service.
 
 GCP acceptance is scoped to the consumer project. If several endpoints from the same project are pending,
 GCP can accept a different endpoint from the one approved in Aiven. Such a connection can appear as

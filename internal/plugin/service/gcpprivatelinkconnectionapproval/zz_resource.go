@@ -49,13 +49,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The Aiven connection state. The Google endpoint status has a separate value. The possible values are `active`, `connected`, `pending-user-approval` and `user-approved`.",
 			},
 			"user_ip_address": schema.StringAttribute{
-				MarkdownDescription: "Frontend IP address of the forwarding rule that connects to the service at customer end. Must be a valid IPv4 address.",
+				MarkdownDescription: "Frontend IP address of the consumer forwarding rule. Changing this address on an approved connection fails during apply. To use a different IP, recreate the forwarding rule and approve the new connection using its new `psc_connection_id`. Must be a valid IPv4 address.",
 				Required:            true,
 				Validators:          []validator.String{validators.IPv4()},
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
-		MarkdownDescription: "Approve a new Google Private Service Connect connection. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Approve a new Google Private Service Connect connection.\n\nDestroying this resource removes it from Terraform state only. It does not revoke approval or delete the endpoint. To remove one connection, delete its consumer forwarding rule. Deleting the parent `aiven_gcp_privatelink` resource removes service-level PrivateLink and can disrupt other PSC connections for the service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {
