@@ -27,8 +27,8 @@ nav_order: 1
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg` and `aiven_thanos` resources and data sources
-  to the Plugin Framework. Changes:
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos` and `aiven_valkey` resources
+  and data sources to the Plugin Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. Removing the last block of a list sends an empty
     list, as in SDKv2, e.g., removing every `ip_filter_object` clears the IP filter, which requires

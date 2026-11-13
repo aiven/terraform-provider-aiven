@@ -102,9 +102,9 @@
 |  96 | aiven_thanos                                | yes    |     2 |
 |  97 | aiven_transit_gateway_vpc_attachment        | yes    |     2 |
 |  98 | aiven_upgrade_step                          | yes    |     1 |
-|  99 | aiven_valkey                                |        |     2 |
+|  99 | aiven_valkey                                | yes    |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 78%                          | 127    |   163 |
+|     | TOTAL MIGRATED 79%                          | 129    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
