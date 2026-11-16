@@ -157,7 +157,7 @@ tasks:
       - defer:
           task: fmt
       - task: internal:dump-schemas
-      - task: internal:load-schemas
+      - task: internal:load-codegen
       - task: internal:generate
       - task: internal:diff-schemas
 
