@@ -25,6 +25,15 @@ schema:
     example: my-opensearch
   opensearch_user_config:
     minimalExample: true
+    properties:
+      custom_repos:
+        items:
+          properties:
+            settings:
+              properties:
+                bucket:
+                  # The variants describe it as "Google Cloud Storage bucket name" and "S3 bucket name"
+                  description: Google Cloud Storage or S3 bucket name.
   opensearch:
     type: object
     computed: true

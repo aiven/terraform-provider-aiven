@@ -59,6 +59,9 @@ nav_order: 1
   to the Plugin Framework. Changes:
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_pg`
   resources and data sources to the Plugin Framework. Changes:
+- Add `aiven_opensearch` resource and data source fields `opensearch_user_config.custom_keystores`
+  and `opensearch_user_config.custom_repos`: their `settings` block validates at plan time that its attributes match
+  one object-storage type.
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
   `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos` and `aiven_valkey` resources
   and data sources to the Plugin Framework. Changes:
