@@ -30,7 +30,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"password_encryption_type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
+				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. `unknown` is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",
@@ -67,7 +67,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"valkey_acl_databases": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
+				MarkdownDescription: "Database ids the user can access. Requires Valkey `9.1` or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
 			},
 			"valkey_acl_keys": schema.ListAttribute{
 				Computed:            true,

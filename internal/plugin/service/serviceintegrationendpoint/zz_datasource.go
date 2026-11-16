@@ -97,7 +97,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"site": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Datadog intake site. Defaults to datadoghq.com. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.",
+							MarkdownDescription: "Datadog intake site. Defaults to `datadoghq.com`. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.",
 						},
 					},
 					Blocks: map[string]schema.Block{"datadog_tags": schema.ListNestedBlock{
@@ -252,7 +252,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"service_account_credentials": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Example: `{\"type\": \"service_account\", ...`.",
+						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{\"type\": \"service_account\", ...`.",
 						Sensitive:           true,
 					},
 				}},
@@ -270,7 +270,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"service_account_credentials": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Example: `{\"type\": \"service_account\", ...`.",
+						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{\"type\": \"service_account\", ...`.",
 						Sensitive:           true,
 					},
 				}},
@@ -461,7 +461,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"ssl_mode": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.",
+						MarkdownDescription: "SSL mode to use for the connection. Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.",
 					},
 					"ssl_root_cert": schema.StringAttribute{
 						Computed:            true,

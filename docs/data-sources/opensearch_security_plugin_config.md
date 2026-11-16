@@ -38,7 +38,7 @@ data "aiven_opensearch_security_plugin_config" "example" {
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) security plugin admin defined.
+- `admin_enabled` (Boolean) Security plugin admin defined.
 - `admin_password` (String, Sensitive) Current os-sec-admin password.
 - `available` (Boolean) Opensearch security available for the service.
 - `enabled` (Boolean) Opensearch security enabled for the service.

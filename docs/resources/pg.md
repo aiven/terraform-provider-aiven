@@ -149,12 +149,12 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - `node_count` (Number) Number of nodes for the service. Example: `3`.
-- `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- `pg_qualstats` (Block List, Max: 1, Deprecated) System-wide settings for the pg_qualstats extension (see [below for nested schema](#nestedblock--pg_user_config--pg_qualstats))
-- `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
-- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.
-- `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Changing this parameter causes a service restart. When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.
-- `pg_stat_plans_enable` (Boolean) Enable the pg_stat_plans extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.
+- `pg` (Block List, Max: 1) `postgresql.conf` configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
+- `pg_qualstats` (Block List, Max: 1, Deprecated) System-wide settings for the `pg_qualstats` extension (see [below for nested schema](#nestedblock--pg_user_config--pg_qualstats))
+- `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use `read_replica` service integration instead).
+- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use `service_to_fork_from`). This has effect only when a new service is being created. Example: `anotherservicename`.
+- `pg_stat_monitor_enable` (Boolean) Enable the `pg_stat_monitor` extension. Changing this parameter causes a service restart. When this extension is enabled, `pg_stat_statements` results for utility commands are unreliable. Default: `false`.
+- `pg_stat_plans_enable` (Boolean) Enable the `pg_stat_plans` extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.
 - `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, `18`, and newer. PostgreSQL major version.
 - `pgaudit` (Block List, Max: 1) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--pg_user_config--pgaudit))
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
@@ -166,10 +166,10 @@ Optional:
 - `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created. Example: `2019-01-01 23:34:45`.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
-- `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. Changing this parameter causes a service restart. Example: `41.5`.
+- `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the `shared_buffers` configuration value. Changing this parameter causes a service restart. Example: `41.5`.
 - `static_ips` (Boolean) Use static public IP addresses.
 - `switchover_windows` (Block List, Max: 28) (see [below for nested schema](#nestedblock--pg_user_config--switchover_windows))
-- `synchronous_replication` (String) Enum: `off`, `quorum`. Use synchronous_commit instead. Any change to this setting will automatically update synchronous_commit. Setting the value to quorum changes synchronous_commit to remote_write, while setting it to off changes synchronous_commit to off.
+- `synchronous_replication` (String) Enum: `off`, `quorum`. Use `synchronous_commit` instead. Any change to this setting will automatically update `synchronous_commit`. Setting the value to quorum changes `synchronous_commit` to `remote_write`, while setting it to off changes `synchronous_commit` to off.
 - `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
 - `variant` (String) Enum: `aiven`, `pg_lake`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
 - `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. The default is 1MB + 0.075% of total RAM (up to 32MB). Example: `4`.
@@ -210,43 +210,43 @@ Optional:
 
 Optional:
 
-- `autovacuum_analyze_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE (e.g. `0.2` for 20% of the table size). The default is `0.2`.
+- `autovacuum_analyze_scale_factor` (Number) Specifies a fraction of the table size to add to `autovacuum_analyze_threshold` when deciding whether to trigger an ANALYZE (e.g. `0.2` for 20% of the table size). The default is `0.2`.
 - `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is `50`.
-- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.
+- `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's `pg_class.relfrozenxid` field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.
 - `autovacuum_max_workers` (Number) Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is `3`. Changing this parameter causes a service restart.
 - `autovacuum_naptime` (Number) Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds. The default is `60`.
-- `autovacuum_vacuum_cost_delay` (Number) Specifies the cost delay value that will be used in automatic VACUUM operations. If `-1` is specified, the regular vacuum_cost_delay value will be used. The default is `2` (upstream default).
-- `autovacuum_vacuum_cost_limit` (Number) Specifies the cost limit value that will be used in automatic VACUUM operations. If `-1` is specified, the regular vacuum_cost_limit value will be used. The default is `-1` (upstream default).
-- `autovacuum_vacuum_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM (e.g. `0.2` for 20% of the table size). The default is `0.2`.
+- `autovacuum_vacuum_cost_delay` (Number) Specifies the cost delay value that will be used in automatic VACUUM operations. If `-1` is specified, the regular `vacuum_cost_delay` value will be used. The default is `2` (upstream default).
+- `autovacuum_vacuum_cost_limit` (Number) Specifies the cost limit value that will be used in automatic VACUUM operations. If `-1` is specified, the regular `vacuum_cost_limit` value will be used. The default is `-1` (upstream default).
+- `autovacuum_vacuum_scale_factor` (Number) Specifies a fraction of the table size to add to `autovacuum_vacuum_threshold` when deciding whether to trigger a VACUUM (e.g. `0.2` for 20% of the table size). The default is `0.2`.
 - `autovacuum_vacuum_threshold` (Number) Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is `50`.
 - `bgwriter_delay` (Number) Specifies the delay between activity rounds for the background writer in milliseconds. The default is `200`. Example: `200`.
-- `bgwriter_flush_after` (Number) Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes. Setting of 0 disables forced writeback. The default is `512`. Example: `512`.
+- `bgwriter_flush_after` (Number) Whenever more than `bgwriter_flush_after` bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes. Setting of 0 disables forced writeback. The default is `512`. Example: `512`.
 - `bgwriter_lru_maxpages` (Number) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. The default is `100`. Example: `100`.
-- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.
+- `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by `bgwriter_lru_multiplier` to arrive at an estimate of the number that will be needed during the next round, (up to `bgwriter_lru_maxpages`). `1.0` represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.
 - `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition. The default is `1000` (upstream default). Example: `1000`.
 - `default_toast_compression` (String) Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns. The default is `lz4`. Only available for PostgreSQL 14+.
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
 - `io_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units. Version 17 and up only. Default: `16`.
-- `io_max_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.
+- `io_max_combine_limit` (Number) EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter `io_combine_limit`. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.
 - `io_max_concurrency` (Number) EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `-1`.
 - `io_method` (String) Enum: `io_uring`, `sync`, `worker`. EXPERIMENTAL: Controls the maximum number of I/O operations that one process can execute simultaneously. Version 18 and up only. Changing this parameter causes a service restart. Default: `worker`.
-- `io_workers` (Number) EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only.
+- `io_workers` (Number) EXPERIMENTAL: Number of IO worker processes, for `io_method=worker`. Version 18 and up only.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one disables logging autovacuum actions. The default is `1000`.
 - `log_error_verbosity` (String) Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
 - `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
-- `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
-- `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
+- `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, `-1` disables.
+- `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, `-1` disables.
 - `max_connections` (Number) Sets the PostgreSQL maximum number of concurrent connections to the database server. For services with a read replica, first increase the read replica's value. After the change is applied to the replica, you can increase the primary service's value. Changing this parameter causes a service restart.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process. The default is `1000` (upstream default). Changing this parameter causes a service restart.
 - `max_locks_per_transaction` (Number) PostgreSQL maximum locks per transaction. Changing this parameter causes a service restart.
-- `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool defined by max_worker_processes). The default is `4` (upstream default). Changing this parameter causes a service restart.
+- `max_logical_replication_workers` (Number) PostgreSQL maximum logical replication workers (taken from the pool defined by `max_worker_processes`). The default is `4` (upstream default). Changing this parameter causes a service restart.
 - `max_parallel_workers` (Number) Sets the maximum number of workers that the system can support for parallel queries. The default is `8` (upstream default).
 - `max_parallel_workers_per_gather` (Number) Sets the maximum number of workers that can be started by a single Gather or Gather Merge node. The default is `2` (upstream default).
 - `max_pred_locks_per_transaction` (Number) PostgreSQL maximum predicate locks per transaction. The default is `64` (upstream default). Changing this parameter causes a service restart.
 - `max_prepared_transactions` (Number) PostgreSQL maximum prepared transactions. The default is `0`. Changing this parameter causes a service restart.
 - `max_replication_slots` (Number) PostgreSQL maximum replication slots. The default is `20`. Changing this parameter causes a service restart.
-- `max_slot_wal_keep_size` (Number) PostgreSQL maximum WAL size (MB) reserved for replication slots. If `-1` is specified, replication slots may retain an unlimited amount of WAL files. The default is `-1` (upstream default). wal_keep_size minimum WAL size setting takes precedence over this.
+- `max_slot_wal_keep_size` (Number) PostgreSQL maximum WAL size (MB) reserved for replication slots. If `-1` is specified, replication slots may retain an unlimited amount of WAL files. The default is `-1` (upstream default). `wal_keep_size` minimum WAL size setting takes precedence over this.
 - `max_stack_depth` (Number) Maximum depth of the stack in bytes. The default is `2097152` (upstream default).
 - `max_standby_archive_delay` (Number) Max standby archive delay in milliseconds. The default is `30000` (upstream default).
 - `max_standby_streaming_delay` (Number) Max standby streaming delay in milliseconds. The default is `30000` (upstream default).
@@ -254,14 +254,14 @@ Optional:
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders. The default is `20`. Changing this parameter causes a service restart.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support. The default is `8`. Changing this parameter causes a service restart.
 - `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords.
-- `pg_partman_bgw__dot__interval` (Number) Sets the time interval in seconds to run pg_partman's scheduled tasks. The default is `3600`. Example: `3600`.
-- `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
+- `pg_partman_bgw__dot__interval` (Number) Sets the time interval in seconds to run `pg_partman`'s scheduled tasks. The default is `3600`. Example: `3600`.
+- `pg_partman_bgw__dot__role` (String) Controls which role to use for `pg_partman`'s scheduled background tasks. Example: `myrolename`.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring. Only available for PostgreSQL 13+.
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets. Changing this parameter causes a service restart. Only available for PostgreSQL 13+. Example: `10`.
 - `pg_stat_plans__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements' plans are tracked. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable plan tracking. The default is `top`.
 - `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default is `top`.
 - `synchronous_commit` (String) Enum: `local`, `off`, `on`, `remote_apply`, `remote_write`. Sets the current transaction's synchronization level. The default is `off`. This setting takes precedence over `synchronous_replication`.
-- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
+- `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, `-1` for unlimited.
 - `timezone` (String) PostgreSQL service timezone. Example: `Europe/Helsinki`.
 - `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session. Changing this parameter causes a service restart. Example: `1024`.
 - `track_commit_timestamp` (String) Enum: `off`, `on`. Record commit time of transactions. Changing this parameter causes a service restart.
@@ -276,10 +276,10 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean, Deprecated) Enable / Disable pg_qualstats. Default: `false`.
+- `enabled` (Boolean, Deprecated) Enable / Disable `pg_qualstats`. Default: `false`.
 - `min_err_estimate_num` (Number, Deprecated) Error estimation num threshold to save quals. Default: `0`.
 - `min_err_estimate_ratio` (Number, Deprecated) Error estimation ratio threshold to save quals. Default: `0`.
-- `track_constants` (Boolean, Deprecated) Enable / Disable pg_qualstats constants tracking. Default: `true`.
+- `track_constants` (Boolean, Deprecated) Enable / Disable `pg_qualstats` constants tracking. Default: `true`.
 - `track_pg_catalog` (Boolean, Deprecated) Track quals on system catalogs too. Default: `false`.
 
 
@@ -290,13 +290,13 @@ Optional:
 
 - `feature_enabled` (Boolean) Enable pgaudit extension. When enabled, pgaudit extension will be automatically installed.Otherwise, extension will be uninstalled but auditing configurations will be preserved. Default: `false`.
 - `log` (List of String) Specifies which classes of statements will be logged by session audit logging.
-- `log_catalog` (Boolean) Specifies that session logging should be enabled in the case where all relations in a statement are in pg_catalog. Default: `true`.
+- `log_catalog` (Boolean) Specifies that session logging should be enabled in the case where all relations in a statement are in `pg_catalog`. Default: `true`.
 - `log_client` (Boolean) Specifies whether log messages will be visible to a client process such as psql. Default: `false`.
 - `log_level` (String) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `log`, `notice`, `warning`. Specifies the log level that will be used for log entries. Default: `log`.
-- `log_max_string_length` (Number) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.
+- `log_max_string_length` (Number) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of `-1` disable the truncation. Default: `-1`.
 - `log_nested_statements` (Boolean) This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. Default: `true`.
 - `log_parameter` (Boolean) Specifies that audit logging should include the parameters that were passed with the statement. Default: `false`.
-- `log_parameter_max_size` (Number) Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. Default: `0`.
+- `log_parameter_max_size` (Number) Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with `<long param suppressed>`. Default: `0`.
 - `log_relation` (Boolean) Specifies whether session audit logging should create a separate log entry for each relation (TABLE, VIEW, etc.) referenced in a SELECT or DML statement. Default: `false`.
 - `log_rows` (Boolean) Log Rows. Default: `false`.
 - `log_statement` (Boolean) Specifies whether logging will include the statement text and parameters (if enabled). Default: `true`.
@@ -314,13 +314,13 @@ Optional:
 - `autodb_pool_mode` (String) Enum: `session`, `statement`, `transaction`. PGBouncer pool mode. Default: `transaction`.
 - `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. Default: `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
-- `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.
+- `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when `max_prepared_statements` is set to a non-zero value. Setting it to 0 disables prepared statements. `max_prepared_statements` defaults to 100, and its maximum is 3000. Default: `100`.
 - `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. Default: `0`.
 - `server_connect_timeout` (Number) If connection and login don’t finish in this amount of time, the connection will be closed. (seconds).
 - `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). Default: `600`.
 - `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds). Default: `3600`.
 - `server_login_retry` (Number) If login to the server failed, because of failure to connect or from authentication, the pooler waits this much before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt. (seconds).
-- `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes. Default: `false`.
+- `server_reset_query_always` (Boolean) Run `server_reset_query` (DISCARD ALL) in all pooling modes. Default: `false`.
 
 
 <a id="nestedblock--pg_user_config--pglookout"></a>

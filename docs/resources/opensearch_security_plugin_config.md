@@ -49,7 +49,7 @@ resource "aiven_opensearch" "example_opensearch" {
 
 ### Read-Only
 
-- `admin_enabled` (Boolean) security plugin admin defined.
+- `admin_enabled` (Boolean) Security plugin admin defined.
 - `available` (Boolean) Opensearch security available for the service.
 - `enabled` (Boolean) Opensearch security enabled for the service.
 - `id` (String) Resource ID composed as: `project/service_name`.

@@ -17,6 +17,8 @@ import (
 	"github.com/dave/jennifer/jen"
 	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 const (
@@ -185,10 +187,7 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	values := make(jen.Dict)
 
 	if d := getDescription(o); d != "" {
-		for old, n := range replaceDescriptionSubStrings {
-			d = strings.ReplaceAll(d, old, n)
-		}
-		values[jen.Id("Description")] = jen.Lit(toTitle(d))
+		values[jen.Id("Description")] = jen.Lit(d)
 	}
 
 	var t string
@@ -325,14 +324,6 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	return values, nil
 }
 
-var (
-	reCode = regexp.MustCompile(`'([^'\s]+)'`)
-	// reGlob matches unquoted wildcard names (e.g. public-*), which Markdown
-	// would otherwise parse as emphasis delimiters.
-	reGlob       = regexp.MustCompile(`(^|\s)([\w-]+\*[\w*-]*)`)
-	reWhitespace = regexp.MustCompile(`\s+`)
-)
-
 func getDescription(o *object) string {
 	desc := make([]string, 0)
 	if o.Enum != nil {
@@ -349,19 +340,17 @@ func getDescription(o *object) string {
 		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
 	}
 
-	// Normalizes whitespaces
-	d := reWhitespace.ReplaceAllString(o.Description, " ")
+	d := o.Description
 	if len(d) < len(o.Title) {
 		d = o.Title
 	}
 
-	if d != "" {
-		// Wraps code chunks with backticks to render them as code blocks
-		d = reCode.ReplaceAllString(d, "`$1`")
-		d = reGlob.ReplaceAllString(d, "$1`$2`")
+	for old, n := range replaceDescriptionSubStrings {
+		d = strings.ReplaceAll(d, old, n)
+	}
 
-		// Adds a trailing dot if missing
-		desc = append(desc, addDot(d))
+	if d != "" {
+		desc = append(desc, userconfig.Desc(d).Build())
 	}
 
 	if o.isScalar() {
@@ -450,15 +439,4 @@ func isTypeSet(o *object) bool {
 		return true
 	}
 	return false
-}
-
-// toTitleRegex finds words with a leading lowercase letter,
-// ignores dotted and underscored literals
-var toTitleRegex = regexp.MustCompile(`^[a-z]\w+[\s,$]`)
-
-func toTitle(s string) string {
-	if !strings.HasPrefix(s, "fnmatch") && toTitleRegex.MatchString(s) {
-		return toUpperFirst(s)
-	}
-	return s
 }

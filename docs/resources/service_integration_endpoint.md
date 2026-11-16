@@ -113,7 +113,7 @@ Optional:
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with. Value must be between `1` and `100`. Example: `8`.
 - `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers. Value must be between `2` and `298`. Example: `60`.
 - `max_partition_contexts` (Number) Maximum number of partition contexts to send. Value must be between `200` and `200000`. Example: `32000`.
-- `site` (String) Datadog intake site. Defaults to datadoghq.com. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.
+- `site` (String) Datadog intake site. Defaults to `datadoghq.com`. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -211,7 +211,7 @@ Optional:
 Required:
 
 - `project_id` (String) GCP project id. Length must be between `6` and `30`. Example: `snappy-photon-12345`.
-- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Maximum length: `4096`. Example: `{"type": "service_account", ...`.
+- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Maximum length: `4096`. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -221,7 +221,7 @@ Required:
 
 - `log_id` (String) Google Cloud Logging log id. Maximum length: `512`. Example: `syslog`.
 - `project_id` (String) GCP project id. Length must be between `6` and `30`. Example: `snappy-photon-12345`.
-- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Maximum length: `4096`. Example: `{"type": "service_account", ...`.
+- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Maximum length: `4096`. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_kafka_user_config"></a>
@@ -331,7 +331,7 @@ Optional:
 - `ssl_client_key` (String, Sensitive) Client key. Maximum length: `16384`. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----`.
-- `ssl_mode` (String) SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.
+- `ssl_mode` (String) SSL mode to use for the connection. Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.
 - `ssl_root_cert` (String) SSL Root Cert. Maximum length: `16384`. Example: `-----BEGIN CERTIFICATE-----
 ...
 -----END CERTIFICATE-----

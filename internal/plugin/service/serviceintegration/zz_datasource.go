@@ -113,7 +113,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"auto_offset_reset_by_duration_ms": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= 25.8. The default value is `0`.",
+								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= `25.8`. The default value is `0`.",
 							},
 							"data_format": schema.StringAttribute{
 								Computed:            true,
@@ -169,7 +169,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"producer_compression_level": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. The default value is `-1`.",
+								MarkdownDescription: "The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; `-1` = codec-dependent default compression level. The default value is `-1`.",
 							},
 							"producer_linger_ms": schema.Int64Attribute{
 								Computed:            true,
@@ -185,7 +185,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"producer_request_required_acks": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). The default value is `-1`.",
+								MarkdownDescription: "The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, `-1` will block until message is committed by all in sync replicas (ISRs). The default value is `-1`.",
 							},
 							"skip_broken_messages": schema.Int64Attribute{
 								Computed:            true,
@@ -531,7 +531,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"consumer_max_poll_records": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Set consumer max.poll.records. Default is `500`.",
+								MarkdownDescription: "Set consumer `max.poll.records`. Default is `500`.",
 							},
 							"consumer_receive_buffer_bytes": schema.Int64Attribute{
 								Computed:            true,
@@ -623,7 +623,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 								},
 								"gather_file_events_stats": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 								},
 								"gather_index_io_waits": schema.BoolAttribute{
 									Computed:            true,
@@ -695,7 +695,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 							},
 							"gather_file_events_stats": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 							},
 							"gather_index_io_waits": schema.BoolAttribute{
 								Computed:            true,

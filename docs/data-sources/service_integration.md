@@ -101,7 +101,7 @@ Read-Only:
 Read-Only:
 
 - `auto_offset_reset` (String) Determines where to start reading from Kafka when no offset is stored or the stored offset is out of range. `earliest` starts from the beginning, `latest` starts from the end. The possible values are `beginning`, `earliest`, `end`, `largest`, `latest` and `smallest`. The default value is `earliest`.
-- `auto_offset_reset_by_duration_ms` (Number) When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= 25.8. The default value is `0`.
+- `auto_offset_reset_by_duration_ms` (Number) When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= `25.8`. The default value is `0`.
 - `columns` (Block List) Array of column definitions that specify the structure of the ClickHouse table. Each column maps to a field in the Kafka messages (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
 - `data_format` (String) The format of the messages in the Kafka topics. Determines how ClickHouse parses and serializes the data (e.g., JSON, CSV, Avro). The possible values are `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV` and `TabSeparated`. The default value is `JSONEachRow`.
 - `date_time_input_format` (String) Specifies how ClickHouse should parse DateTime values from text-based input formats. `basic` uses simple parsing, `best_effort` attempts more flexible parsing. The possible values are `basic`, `best_effort` and `best_effort_us`. The default value is `basic`.
@@ -117,11 +117,11 @@ Read-Only:
 - `producer_batch_num_messages` (Number) The maximum number of messages in a batch sent to Kafka. If the number of messages exceeds this value, the batch is sent. The default value is `10000`.
 - `producer_batch_size` (Number) The maximum size in bytes of a batch of messages sent to Kafka. If the batch size is exceeded, the batch is sent. The default value is `1000000`.
 - `producer_compression_codec` (String) The compression codec to use when sending a batch of messages to Kafka. The possible values are `gzip`, `lz4`, `none`, `snappy` and `zstd`. The default value is `none`.
-- `producer_compression_level` (Number) The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. The default value is `-1`.
+- `producer_compression_level` (Number) The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; `-1` = codec-dependent default compression level. The default value is `-1`.
 - `producer_linger_ms` (Number) The time in milliseconds to wait for additional messages before sending a batch. If the time is exceeded, the batch is sent. The default value is `5`.
 - `producer_queue_buffering_max_kbytes` (Number) The maximum size of the buffer in kilobytes before sending. The default value is `1048576`.
 - `producer_queue_buffering_max_messages` (Number) The maximum number of messages to buffer before sending. The default value is `100000`.
-- `producer_request_required_acks` (Number) The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). The default value is `-1`.
+- `producer_request_required_acks` (Number) The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, `-1` will block until message is committed by all in sync replicas (ISRs). The default value is `-1`.
 - `skip_broken_messages` (Number) Number of broken messages to skip before stopping processing when reading from Kafka. Useful for handling corrupted data without failing the entire integration. The default value is `0`.
 - `thread_per_consumer` (Boolean) When enabled, each consumer runs in its own thread, providing better isolation and potentially better performance for high-throughput scenarios. The default value is `false`.
 - `topics` (Block List) Array of Kafka topics that this table will read data from or write data to. Messages from all specified topics will be inserted into this table, and data inserted into this table will be published to the topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
@@ -343,7 +343,7 @@ Read-Only:
 - `consumer_fetch_max_wait_ms` (Number) The maximum amount of time the server will block before answering the fetch request if there isn't sufficient data to immediately satisfy `consumer_fetch_min_bytes`. Default is `500`.
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Default is `1`. Example: `1024`.
 - `consumer_max_partition_fetch_bytes` (Number) The maximum amount of data per partition the server will return. Default is `1048576` (1MiB).
-- `consumer_max_poll_records` (Number) Set consumer max.poll.records. Default is `500`.
+- `consumer_max_poll_records` (Number) Set consumer `max.poll.records`. Default is `500`.
 - `consumer_receive_buffer_bytes` (Number) The size of the TCP receive buffer (`SO_RCVBUF`) to use when reading data. Default is `65536` (64KiB). `-1` uses the OS default.
 - `consumer_request_timeout_ms` (Number) The maximum time the client will wait for a response to a request. Default is `30000` (30s).
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Default is `16384` (16KiB).
@@ -390,7 +390,7 @@ Read-Only:
 Read-Only:
 
 - `gather_event_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.
-- `gather_file_events_stats` (Boolean) gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
+- `gather_file_events_stats` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
 - `gather_index_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.
 - `gather_info_schema_auto_inc` (Boolean) Gather `auto_increment` columns and max values from information schema.
 - `gather_innodb_metrics` (Boolean) Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.
@@ -428,7 +428,7 @@ Read-Only:
 Read-Only:
 
 - `gather_event_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.EVENT_WAITS`.
-- `gather_file_events_stats` (Boolean) gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
+- `gather_file_events_stats` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.
 - `gather_index_io_waits` (Boolean) Gather metrics from `PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE`.
 - `gather_info_schema_auto_inc` (Boolean) Gather `auto_increment` columns and max values from information schema.
 - `gather_innodb_metrics` (Boolean) Gather metrics from `INFORMATION_SCHEMA.INNODB_METRICS`.

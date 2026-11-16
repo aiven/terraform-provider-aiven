@@ -17,7 +17,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"admin_enabled": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "security plugin admin defined.",
+				MarkdownDescription: "Security plugin admin defined.",
 			},
 			"admin_password": schema.StringAttribute{
 				Computed:            true,

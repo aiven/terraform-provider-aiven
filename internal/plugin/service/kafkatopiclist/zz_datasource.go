@@ -36,7 +36,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					Attributes: map[string]schema.Attribute{
 						"cleanup_policy": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "The retention policy to use on old segments. Possible values include 'delete', 'compact', or a comma-separated list of them. The default policy ('delete') will discard old segments when their retention time or size limit has been reached. The 'compact' setting will enable log compaction on the topic.",
+							MarkdownDescription: "The retention policy to use on old segments. Possible values include `delete`, `compact`, or a comma-separated list of them. The default policy (`delete`) will discard old segments when their retention time or size limit has been reached. The `compact` setting will enable log compaction on the topic.",
 						},
 						"diskless_enable": schema.BoolAttribute{
 							Computed:            true,
@@ -44,7 +44,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"min_insync_replicas": schema.Int64Attribute{
 							Computed:            true,
-							MarkdownDescription: "When a producer sets acks to 'all' (or '-1'), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks of 'all'. This will ensure that the producer raises an exception if a majority of replicas do not receive a write.",
+							MarkdownDescription: "When a producer sets acks to `all` (or `-1`), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, `min.insync.replicas` and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set `min.insync.replicas` to 2, and produce with acks of `all`. This will ensure that the producer raises an exception if a majority of replicas do not receive a write.",
 						},
 						"owner_user_group_id": schema.StringAttribute{
 							Computed:            true,
@@ -64,7 +64,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						},
 						"retention_bytes": schema.Int64Attribute{
 							Computed:            true,
-							MarkdownDescription: "This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the 'delete' retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.",
+							MarkdownDescription: "This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the `delete` retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.",
 						},
 						"retention_hours": schema.Int64Attribute{
 							Computed:            true,

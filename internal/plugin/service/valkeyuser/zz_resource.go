@@ -38,7 +38,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"password_encryption_type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
+				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. `unknown` is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
 			},
 			"password_wo": schema.StringAttribute{
 				MarkdownDescription: "The password of the service user (write-only, not stored in state). The field is required with `password_wo_version`. The field conflicts with `password`. Length must be between `8` and `256`.",
@@ -92,7 +92,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"valkey_acl_databases": schema.ListAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
+				MarkdownDescription: "Database ids the user can access. Requires Valkey `9.1` or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.",
 				Optional:            true,
 				Validators:          []validator.List{listvalidator.SizeAtMost(1024)},
 			},

@@ -128,7 +128,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						},
 						"site": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Datadog intake site. Defaults to datadoghq.com. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.",
+							MarkdownDescription: "Datadog intake site. Defaults to `datadoghq.com`. The possible values are `ap1.datadoghq.com`, `ap2.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us2.ddog-gov.com`, `us3.datadoghq.com` and `us5.datadoghq.com`.",
 							Optional:            true,
 							PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 							Validators:          []validator.String{stringvalidator.OneOf("ap1.datadoghq.com", "ap2.datadoghq.com", "datadoghq.com", "datadoghq.eu", "ddog-gov.com", "us2.ddog-gov.com", "us3.datadoghq.com", "us5.datadoghq.com")},
@@ -329,7 +329,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Validators:          []validator.String{stringvalidator.LengthBetween(6, 30)},
 					},
 					"service_account_credentials": schema.StringAttribute{
-						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Maximum length: `4096`. Example: `{\"type\": \"service_account\", ...`.",
+						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Maximum length: `4096`. Example: `{\"type\": \"service_account\", ...`.",
 						Required:            true,
 						Sensitive:           true,
 						Validators:          []validator.String{stringvalidator.LengthAtMost(4096)},
@@ -351,7 +351,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						Validators:          []validator.String{stringvalidator.LengthBetween(6, 30)},
 					},
 					"service_account_credentials": schema.StringAttribute{
-						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys . Maximum length: `4096`. Example: `{\"type\": \"service_account\", ...`.",
+						MarkdownDescription: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Maximum length: `4096`. Example: `{\"type\": \"service_account\", ...`.",
 						Required:            true,
 						Sensitive:           true,
 						Validators:          []validator.String{stringvalidator.LengthAtMost(4096)},
@@ -640,7 +640,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"ssl_mode": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.",
+						MarkdownDescription: "SSL mode to use for the connection. Please note that Aiven requires TLS for all connections to external PostgreSQL services. The possible values are `require`, `verify-ca` and `verify-full`. The default value is `verify-full`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.OneOf("require", "verify-ca", "verify-full")},

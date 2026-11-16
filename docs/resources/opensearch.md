@@ -112,8 +112,8 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `jwt` (Block List, Max: 1) OpenSearch JWT Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--jwt))
-- `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
-- `max_index_count` (Number) Use index_patterns instead. Default: `0`.
+- `keep_index_refresh_interval` (Boolean) Aiven automation resets `index.refresh_interval` to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
+- `max_index_count` (Number) Use `index_patterns` instead. Default: `0`.
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
@@ -146,12 +146,12 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
+- `key` (String, Sensitive) Azure account secret key. One of key or `sas_token` should be specified.
 - `max_restore_bytes_per_sec` (String) Throttles the restore rate per node. Defaults to unlimited. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.
 - `max_snapshot_bytes_per_sec` (String) Throttles the snapshot rate per node. Defaults to 40mb. Note that if the recovery settings for managed services are set, this value is overridden by the recovery settings. Value should be a byte size with unit, e.g. 40mb, 100kb, 1gb.
 - `readonly` (Boolean) Whether the repository is read-only. Default: `true`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
-- `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
+- `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or `sas_token` should be specified.
 
 
 <a id="nestedblock--opensearch_user_config--gcs_migration"></a>
@@ -257,13 +257,13 @@ Required:
 Optional:
 
 - `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. Default: `Authorization`.
-- `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization. Example: `preferred_username`.
+- `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer `<token>`. Optional. Default is Authorization. Example: `preferred_username`.
 - `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional. Example: `preferred_username`.
 - `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. Default: `10`.
 - `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). Default: `10000`.
 - `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT. Example: `roles`.
 - `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.
-- `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional. Example: `preferred_username`.
+- `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the `preferred_username` claim. Optional. Example: `preferred_username`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>
@@ -278,7 +278,7 @@ Optional:
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
 - `cluster_remote_store` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_remote_store))
 - `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false.
-- `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
+- `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count `*` 2.
 - `cluster_search_request_slowlog` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--cluster_search_request_slowlog))
 - `disk_watermarks` (Block List, Max: 1) Watermark settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--disk_watermarks))
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
@@ -293,8 +293,8 @@ Optional:
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes. Example: `4096`.
 - `indices_fielddata_cache_size` (Number) Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
 - `indices_memory_index_buffer_size` (Number) Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
-- `indices_memory_max_index_buffer_size` (Number) Absolute value. Default is unbound. Doesn't work without indices.memory.index_buffer_size. Maximum amount of heap used for query cache, an absolute indices.memory.index_buffer_size maximum hard limit.
-- `indices_memory_min_index_buffer_size` (Number) Absolute value. Default is 48mb. Doesn't work without indices.memory.index_buffer_size. Minimum amount of heap used for query cache, an absolute indices.memory.index_buffer_size minimal hard limit.
+- `indices_memory_max_index_buffer_size` (Number) Absolute value. Default is unbound. Doesn't work without `indices.memory.index_buffer_size`. Maximum amount of heap used for query cache, an absolute `indices.memory.index_buffer_size` maximum hard limit.
+- `indices_memory_min_index_buffer_size` (Number) Absolute value. Default is 48mb. Doesn't work without `indices.memory.index_buffer_size`. Minimum amount of heap used for query cache, an absolute `indices.memory.index_buffer_size` minimal hard limit.
 - `indices_queries_cache_size` (Number) Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.
 - `indices_query_bool_max_clause_count` (Number) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
 - `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.
@@ -310,7 +310,7 @@ Optional:
 - `knn_circuit_breaker_unset_percentage` (Number) The native memory usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets. Defaults to 5%.
 - `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
 - `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory in percentage that can be used for the KNN index. Defaults to 50% of the JVM heap size. 0 is used to set it to null which can be used to invalidate caches.
-- `ml_commons_connector_access_control_enabled` (Boolean) When set to true, the setting allows admins to control access and permissions to the connector API using backend_roles. Defaults to false.
+- `ml_commons_connector_access_control_enabled` (Boolean) When set to true, the setting allows admins to control access and permissions to the connector API using `backend_roles`. Defaults to false.
 - `ml_commons_max_model_on_node` (Number) Maximum number of ML models that can be deployed on a single ML node. Defaults to 10.
 - `ml_commons_model_access_control_enabled` (Boolean) Enable or disable model access control for ML Commons. When enabled, access to ML models is controlled by security permissions. Defaults to false.
 - `ml_commons_model_auto_deploy_enable` (Boolean) For externally hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy call first. Defaults to true.
@@ -319,7 +319,7 @@ Optional:
 - `ml_commons_only_run_on_ml_node` (Boolean) Enable or disable running ML Commons tasks only on ML nodes. When enabled, ML tasks will only execute on nodes designated as ML nodes. Defaults to true.
 - `ml_commons_trusted_connector_endpoints_regex` (List of String) Adds the trusted endpoints to the cluster settings. Supports Java regex expressions.
 - `node_search_cache_size` (String) Defines a limit of how much total remote data can be referenced as a ratio of the size of the disk reserved for the file cache. This is designed to be a safeguard to prevent oversubscribing a cluster. Defaults to 5gb. Requires restarting all OpenSearch nodes.
-- `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false. Deprecated and ignored for service version 3.3 and higher.
+- `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as `7.10` so clients continue to work. Default is false. Deprecated and ignored for service version `3.3` and higher.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
 - `remote_store` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--remote_store))
@@ -357,12 +357,12 @@ Optional:
 Optional:
 
 - `allowed_tries` (Number) The number of login attempts allowed before login is blocked. Example: `10`.
-- `authentication_backend` (String) Enum: `internal`. internal_authentication_backend_limiting.authentication_backend.
+- `authentication_backend` (String) Enum: `internal`. `internal_authentication_backend_limiting.authentication_backend`.
 - `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login. Example: `600`.
-- `max_blocked_clients` (Number) internal_authentication_backend_limiting.max_blocked_clients. Example: `100000`.
+- `max_blocked_clients` (Number) `internal_authentication_backend_limiting.max_blocked_clients`. Example: `100000`.
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login. Example: `100000`.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced. Example: `3600`.
-- `type` (String) Enum: `username`. internal_authentication_backend_limiting.type.
+- `type` (String) Enum: `username`. `internal_authentication_backend_limiting.type`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
@@ -403,10 +403,10 @@ Optional:
 
 Optional:
 
-- `debug` (String) Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
-- `info` (String) Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
-- `trace` (String) Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
-- `warn` (String) Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.
+- `debug` (String) Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.
+- `info` (String) Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.
+- `trace` (String) Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.
+- `warn` (String) Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.
 
 
 
@@ -436,7 +436,7 @@ Optional:
 
 Optional:
 
-- `mode` (String) Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.
+- `mode` (String) Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are `monitor_only`, enforced, or disabled. Default is `monitor_only`.
 - `node_duress` (Block List, Max: 1) Node duress settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--node_duress))
 - `search_shard_task` (Block List, Max: 1) Search shard settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_shard_task))
 - `search_task` (Block List, Max: 1) Search task settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_task))
@@ -446,8 +446,8 @@ Optional:
 
 Optional:
 
-- `cpu_threshold` (Number) The CPU usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.9.
-- `heap_threshold` (Number) The heap usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.7.
+- `cpu_threshold` (Number) The CPU usage threshold (as a percentage) required for a node to be considered to be under duress. Default is `0.9`.
+- `heap_threshold` (Number) The heap usage threshold (as a percentage) required for a node to be considered to be under duress. Default is `0.7`.
 - `num_successive_breaches` (Number) The number of successive limit breaches after which the node is considered to be under duress. Default is 3.
 
 
@@ -456,15 +456,15 @@ Optional:
 
 Optional:
 
-- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 10.0.
-- `cancellation_rate` (Number) The maximum number of tasks to cancel per millisecond of elapsed time. Default is 0.003.
-- `cancellation_ratio` (Number) The maximum number of tasks to cancel, as a percentage of successful task completions. Default is 0.1.
+- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is `10.0`.
+- `cancellation_rate` (Number) The maximum number of tasks to cancel per millisecond of elapsed time. Default is `0.003`.
+- `cancellation_ratio` (Number) The maximum number of tasks to cancel, as a percentage of successful task completions. Default is `0.1`.
 - `cpu_time_millis_threshold` (Number) The CPU usage threshold (in milliseconds) required for a single search shard task before it is considered for cancellation. Default is 15000.
 - `elapsed_time_millis_threshold` (Number) The elapsed time threshold (in milliseconds) required for a single search shard task before it is considered for cancellation. Default is 30000.
 - `heap_moving_average_window_size` (Number) The number of previously completed search shard tasks to consider when calculating the rolling average of heap usage. Default is 100.
-- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for a single search shard task before it is considered for cancellation. Default is 0.5.
-- `heap_variance` (Number) The minimum variance required for a single search shard task’s heap usage compared to the rolling average of previously completed tasks before it is considered for cancellation. Default is 2.0.
-- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search shard tasks before cancellation is applied. Default is 0.5.
+- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for a single search shard task before it is considered for cancellation. Default is `0.5`.
+- `heap_variance` (Number) The minimum variance required for a single search shard task’s heap usage compared to the rolling average of previously completed tasks before it is considered for cancellation. Default is `2.0`.
+- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search shard tasks before cancellation is applied. Default is `0.5`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--search_backpressure--search_task"></a>
@@ -472,15 +472,15 @@ Optional:
 
 Optional:
 
-- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 5.0.
-- `cancellation_rate` (Number) The maximum number of search tasks to cancel per millisecond of elapsed time. Default is 0.003.
-- `cancellation_ratio` (Number) The maximum number of search tasks to cancel, as a percentage of successful search task completions. Default is 0.1.
+- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is `5.0`.
+- `cancellation_rate` (Number) The maximum number of search tasks to cancel per millisecond of elapsed time. Default is `0.003`.
+- `cancellation_ratio` (Number) The maximum number of search tasks to cancel, as a percentage of successful search task completions. Default is `0.1`.
 - `cpu_time_millis_threshold` (Number) The CPU usage threshold (in milliseconds) required for an individual parent task before it is considered for cancellation. Default is 30000.
 - `elapsed_time_millis_threshold` (Number) The elapsed time threshold (in milliseconds) required for an individual parent task before it is considered for cancellation. Default is 45000.
 - `heap_moving_average_window_size` (Number) The window size used to calculate the rolling average of the heap usage for the completed parent tasks. Default is 10.
-- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is 0.2.
-- `heap_variance` (Number) The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage * variance. Default is 2.0.
-- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is 0.5.
+- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is `0.2`.
+- `heap_variance` (Number) The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage `*` variance. Default is `2.0`.
+- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is `0.5`.
 
 
 
@@ -532,7 +532,7 @@ Optional:
 - `pressure_checkpoint_limit` (Number) The maximum number of indexing checkpoints that a replica shard can fall behind when copying from primary. Once `segrep.pressure.checkpoint.limit` is breached along with `segrep.pressure.time.limit`, the segment replication backpressure mechanism is initiated. Default is 4 checkpoints. Default: `4`.
 - `pressure_enabled` (Boolean) Enables the segment replication backpressure mechanism. Default is false. Default: `false`.
 - `pressure_replica_stale_limit` (Number) The maximum number of stale replica shards that can exist in a replication group. Once `segrep.pressure.replica.stale.limit` is breached, the segment replication backpressure mechanism is initiated. Default is .5, which is 50% of a replication group. Default: `0.5`.
-- `pressure_time_limit` (String) The maximum amount of time that a replica shard can take to copy from the primary shard. Once segrep.pressure.time.limit is breached along with segrep.pressure.checkpoint.limit, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.
+- `pressure_time_limit` (String) The maximum amount of time that a replica shard can take to copy from the primary shard. Once `segrep.pressure.time.limit` is breached along with `segrep.pressure.checkpoint.limit`, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure"></a>
@@ -550,9 +550,9 @@ Optional:
 
 Optional:
 
-- `lower` (Number) Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is 0.75.
-- `optimal` (Number) Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is 0.85.
-- `upper` (Number) Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is 0.95.
+- `lower` (Number) Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is `0.75`.
+- `optimal` (Number) Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is `0.85`.
+- `upper` (Number) Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is `0.95`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter"></a>
@@ -568,7 +568,7 @@ Optional:
 
 Optional:
 
-- `soft_limit` (Number) Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is 0.7.
+- `soft_limit` (Number) Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is `0.7`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard"></a>
@@ -576,7 +576,7 @@ Optional:
 
 Optional:
 
-- `min_limit` (Number) Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is 0.001.
+- `min_limit` (Number) Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is `0.001`.
 
 
 
@@ -588,7 +588,7 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Enable or disable OpenSearch Dashboards. Default: `true`.
-- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.
+- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the `max_old_space_size` option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.
 - `multiple_data_source_enabled` (Boolean) Enable or disable multiple data sources in OpenSearch Dashboards. Default: `true`.
 - `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. Default: `30000`.
 - `session_keepalive` (Boolean) Determines whether the session TTL resets (is “kept alive”) on each user activity. Optional. Default is true. Default: `true`.
@@ -601,7 +601,7 @@ Optional:
 Optional:
 
 - `opensearch` (Boolean) Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
-- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `opensearch_dashboards` (Boolean) Allow clients to connect to `opensearch_dashboards` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 - `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
@@ -611,7 +611,7 @@ Optional:
 Optional:
 
 - `opensearch` (Boolean) Enable opensearch.
-- `opensearch_dashboards` (Boolean) Enable opensearch_dashboards.
+- `opensearch_dashboards` (Boolean) Enable `opensearch_dashboards`.
 - `prometheus` (Boolean) Enable prometheus.
 
 
@@ -621,7 +621,7 @@ Optional:
 Optional:
 
 - `opensearch` (Boolean) Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.
-- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.
+- `opensearch_dashboards` (Boolean) Allow clients to connect to `opensearch_dashboards` from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 

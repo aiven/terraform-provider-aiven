@@ -80,161 +80,6 @@ func sortedKeys[K ~string, V any](m map[K]V) []K {
 	return keys
 }
 
-var reNewline = regexp.MustCompile(`\s*\n+\s*`)
-
-// reParagraph splits a description on blank lines (a newline followed by
-// optional whitespace and another newline), i.e. author-intended paragraph
-// breaks.
-var reParagraph = regexp.MustCompile(`\n\s*\n`)
-
-// descModifier rewrites part of a description so it renders correctly in
-// Markdown.
-type descModifier struct {
-	re   *regexp.Regexp
-	repl string
-}
-
-// symbolRun matches a run of symbol characters: no letters (\pL), digits (\pN),
-// whitespace or quotes. It is spelled out rather than using \W so that "_",
-// which \w counts as a word character, is treated as a symbol too. Excluding
-// whitespace is what keeps the gap between two quoted values from being
-// mistaken for a quoted symbol: a quoted token such as ".*" never contains
-// whitespace, while every such gap does (e.g. the ": " in {"a": "b"}).
-const symbolRun = `([^\pL\pN\s'"]+)`
-
-// descModifiers are applied in order by applyDescModifiers:
-//   - a whitespace-delimited "*" (the wildcard meaning "all hosts") is wrapped
-//     in backticks, keeping the surrounding whitespace.
-//   - a quoted symbol run (e.g. '.', "/", ".*") has its quotes replaced by
-//     backticks, for single quotes, double quotes and the &quot; entity that
-//     the OpenAPI spec ships.
-var descModifiers = []descModifier{
-	{regexp.MustCompile(`(\s+)\*(\s+)`), "${1}`*`${2}"},
-	{regexp.MustCompile(`'` + symbolRun + `'`), "`${1}`"},
-	{regexp.MustCompile(`"` + symbolRun + `"`), "`${1}`"},
-	{regexp.MustCompile(`&quot;` + symbolRun + `&quot;`), "`${1}`"},
-}
-
-// applyDescModifiers applies descModifiers in order.
-func applyDescModifiers(s string) string {
-	for _, m := range descModifiers {
-		s = m.re.ReplaceAllString(s, m.repl)
-	}
-	return s
-}
-
-// reVerbatim matches what backtickIdentifiers keeps: code spans, URLs, Markdown link targets
-// and "${...}" placeholders, which it wraps whole.
-var reVerbatim = regexp.MustCompile("`[^`]*`" + `|https?://\S+|\]\([^)]*\)|\$\{[^}\s]*\}`)
-
-// reIdentifier matches a lowercase or uppercase word or dotted path,
-// e.g., "pg_stat_monitor.pgsm_max_buckets" or "PERFORMANCE_SCHEMA.EVENT_WAITS".
-var reIdentifier = regexp.MustCompile(`[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*|[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*)*`)
-
-// reSettingValue matches the value after an identifier, e.g., "=worker" of "io_method=worker".
-var reSettingValue = regexp.MustCompile(`^=[^\s,;)'"&]*`)
-
-// backtickIdentifiers wraps the lowercase and uppercase words with "_" in backticks, e.g., sas_token
-// and AIVEN_TOKEN, replacing the quotes around them.
-func backtickIdentifiers(s string) string {
-	var b strings.Builder
-	last := 0
-	for _, m := range reVerbatim.FindAllStringIndex(s, -1) {
-		b.WriteString(backtickProse(s[last:m[0]]))
-		if v := s[m[0]:m[1]]; strings.HasPrefix(v, "${") {
-			b.WriteString("`" + v + "`")
-		} else {
-			b.WriteString(v)
-		}
-		last = m[1]
-	}
-	b.WriteString(backtickProse(s[last:]))
-	return b.String()
-}
-
-func backtickProse(s string) string {
-	// Part of a longer token, e.g., "Max_size", "a-b_c", "path/to_file", "my_user@host" or "Long.MAX_VALUE"
-	glued := func(c byte, symbols string) bool {
-		return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' || strings.IndexByte(symbols, c) >= 0
-	}
-
-	var b strings.Builder
-	last := 0
-	for _, m := range reIdentifier.FindAllStringIndex(s, -1) {
-		start, end := m[0], m[1]
-		switch {
-		case start < last, // In the value of a setting
-			!strings.Contains(s[start:end], "_"),
-			start > 0 && glued(s[start-1], `_-/@.$\`),
-			end < len(s) && glued(s[end], `-/@\`):
-			continue
-		}
-
-		// A setting, e.g., "io_method=worker"
-		if v := reSettingValue.FindString(s[end:]); v != "" {
-			end += len(strings.TrimRight(v, "."))
-		}
-
-		before, after := start, end
-		for _, q := range []string{"'", `"`, "&quot;"} {
-			if strings.HasSuffix(s[:start], q) && strings.HasPrefix(s[end:], q) {
-				before, after = start-len(q), end+len(q)
-				break
-			}
-		}
-		// A JSON key or string value, e.g., {"key_name": "value_name"}
-		quoted := after > end
-		jsonKey := quoted && strings.HasPrefix(s[after:], ":")
-		jsonValue := quoted && s[before] != '\'' && strings.HasSuffix(strings.TrimRight(s[:before], " "), ":")
-		if jsonKey || jsonValue {
-			continue
-		}
-
-		b.WriteString(s[last:before])
-		b.WriteString("`" + s[start:end] + "`")
-		last = after
-	}
-	b.WriteString(s[last:])
-	return b.String()
-}
-
-// reJSONObject matches a JSON object without nested ones, e.g., {"key_name":"value"}.
-var reJSONObject = regexp.MustCompile(`\{\s*(?:"|&quot;)[^{}]*\}`)
-
-// normalizeDescription unwraps hard-wrapped lines into single spaces and runs
-// descModifiers and backtickIdentifiers over the result, except in JSON objects.
-// When preserveParagraphs is true (root entity descriptions), blank lines in the
-// source are kept as Markdown paragraph breaks; otherwise every newline collapses
-// to a space so attribute descriptions stay on one line (docs render them as
-// list/table entries).
-func normalizeDescription(s string, preserveParagraphs bool) string {
-	collapse := func(p string) string {
-		p = strings.TrimSpace(reNewline.ReplaceAllString(p, " "))
-		var b strings.Builder
-		last := 0
-		for _, m := range reJSONObject.FindAllStringIndex(p, -1) {
-			b.WriteString(backtickIdentifiers(applyDescModifiers(p[last:m[0]])))
-			b.WriteString(p[m[0]:m[1]])
-			last = m[1]
-		}
-		b.WriteString(backtickIdentifiers(applyDescModifiers(p[last:])))
-		return b.String()
-	}
-
-	if !preserveParagraphs {
-		return collapse(s)
-	}
-
-	paragraphs := reParagraph.Split(s, -1)
-	out := make([]string, 0, len(paragraphs))
-	for _, p := range paragraphs {
-		if c := collapse(p); c != "" {
-			out = append(out, c)
-		}
-	}
-	return strings.Join(out, "\n\n")
-}
-
 // cutDeprecated splits a description with the "DEPRECATED:" prefix, e.g., "DEPRECATED: use index_patterns instead",
 // into the title, which describes the field then, e.g., "(DEPRECATED) Maximum index count", and the deprecation message.
 func cutDeprecated(description, title string) (string, string, bool) {
@@ -243,14 +88,11 @@ func cutDeprecated(description, title string) (string, string, bool) {
 		return description, "", false
 	}
 
-	msg = firstUpper(strings.TrimSpace(msg))
-	if !strings.HasSuffix(msg, ".") {
-		msg += "."
-	}
+	msg = strings.TrimSpace(msg)
 	title = strings.TrimSpace(strings.TrimPrefix(title, "(DEPRECATED)"))
 
-	// The docs render the message as is
-	return or(title, msg), normalizeDescription(msg, false), true
+	// The docs render the message as is. An empty one would drop the deprecation.
+	return or(title, msg), or(userconfig.Desc(msg).Build(), "This field is deprecated."), true
 }
 
 // isValidRegex reports whether pattern is a non-empty regular expression
@@ -270,9 +112,7 @@ func fmtDescription(def *Definition, entity entityType, item *Item) string {
 }
 
 func descriptionBuilder(def *Definition, entity entityType, item *Item) *userconfig.DescriptionBuilder {
-	description := normalizeDescription(item.Description, item.IsRoot())
-
-	b := userconfig.Desc(description)
+	b := userconfig.Desc(item.Description)
 	if enum := itemEnumValues(item); len(enum) > 0 {
 		b.PossibleValuesString(schemautil.FlattenToString(enum)...)
 	}

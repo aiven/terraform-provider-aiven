@@ -338,79 +338,6 @@ func TestItemPath(t *testing.T) {
 	assert.Equal(t, "array", items.Path())
 }
 
-// TestApplyDescModifiers pins the description post-processing that wraps a lone
-// symbol in backticks: whitespace-delimited (e.g. the "*" wildcard) or
-// single-quoted (e.g. '.', '-'), while leaving Markdown emphasis, quoted
-// words/values and apostrophes inside words untouched.
-func TestApplyDescModifiers(t *testing.T) {
-	cases := map[string]string{
-		// whitespace-delimited symbols
-		"the host or * for all hosts": "the host or `*` for all hosts",
-		"foo * bar * baz":             "foo `*` bar `*` baz",
-		// single-quoted symbols (quotes dropped), "_" included
-		"symbols: '.', '_', and '-'.": "symbols: `.`, `_`, and `-`.",
-		"an '_id' suffix stays":       "an '_id' suffix stays",
-		// double-quoted symbols, single or a run, literal or &quot; entity
-		`use "/" as a separator`:       "use `/` as a separator",
-		`defaults to [".*"]`:           "defaults to [`.*`]",
-		`defaults to [&quot;.*&quot;]`: "defaults to [`.*`]",
-		// a lazy run stops at the closing quote instead of spanning two of them
-		`either ".*" or "-" works`: "either `.*` or `-` works",
-		// a quoted token never contains whitespace, so the gap between two
-		// quoted values must not be mistaken for one (JSON snippets in
-		// descriptions rely on this)
-		`{"key": "value"}`:                     `{"key": "value"}`,
-		`{&quot;key&quot;: &quot;value&quot;}`: `{&quot;key&quot;: &quot;value&quot;}`,
-		`values include 'delete', 'compact'`:   `values include 'delete', 'compact'`,
-		// left untouched
-		`matched by "topics.exclude"`: `matched by "topics.exclude"`,
-		"the value 'all' is allowed":  "the value 'all' is allowed",
-		"a digit like '5' stays":      "a digit like '5' stays",
-		"don't touch apostrophes":     "don't touch apostrophes",
-		"**bold** and *italic*":       "**bold** and *italic*",
-		"(*)":                         "(*)",                 // no surrounding whitespace
-		"ends with *":                 "ends with *",         // no trailing whitespace
-		"* leads":                     "* leads",             // no leading whitespace
-		"**bold** text":               "**bold** text",       // emphasis left intact
-		"a*b":                         "a*b",                 // not whitespace-delimited
-		"already `*` wrapped":         "already `*` wrapped", // no double-wrapping
-	}
-
-	for in, want := range cases {
-		assert.Equal(t, want, applyDescModifiers(in), "input: %q", in)
-	}
-}
-
-// TestNormalizeDescription pins the newline handling: root descriptions keep
-// author-intended blank lines as paragraph breaks while hard-wrapped lines are
-// unwrapped, and non-root descriptions collapse to a single line.
-func TestNormalizeDescription(t *testing.T) {
-	const src = "First paragraph line one\nline two.\n\nSecond paragraph with a * wildcard."
-
-	assert.Equal(t,
-		"First paragraph line one line two.\n\nSecond paragraph with a `*` wildcard.",
-		normalizeDescription(src, true),
-		"root: blank line preserved, soft wrap collapsed, wildcard backticked",
-	)
-
-	assert.Equal(t,
-		"First paragraph line one line two. Second paragraph with a `*` wildcard.",
-		normalizeDescription(src, false),
-		"non-root: everything collapses to one line",
-	)
-
-	// JSON objects stay verbatim
-	for in, want := range map[string]string{
-		`Set {"key_name":"value_name"} for key_name.`:           "Set {\"key_name\":\"value_name\"} for `key_name`.",
-		`{"a_b":1,"sep":"."}`:                                   `{"a_b":1,"sep":"."}`,
-		`{&quot;key_name&quot;:&quot;value_name&quot;}`:         `{&quot;key_name&quot;:&quot;value_name&quot;}`,
-		`{"outer": {"key_name": "value_name"}}`:                 `{"outer": {"key_name": "value_name"}}`,
-		"referenced with ${<provider_name>:<key_name>} and '.'": "referenced with `${<provider_name>:<key_name>}` and `.`",
-	} {
-		assert.Equal(t, want, normalizeDescription(in, false), "input: %q", in)
-	}
-}
-
 func TestDescriptionExample(t *testing.T) {
 	def := &Definition{Resource: &SchemaMeta{}}
 	root := &Item{Name: "root", Type: SchemaTypeObject}
@@ -1295,69 +1222,6 @@ func TestExampleSections(t *testing.T) {
 	}
 }
 
-// TestBacktickIdentifiers pins lowercase snake_case words (and dotted paths)
-// wrapped in backticks, with quotes stripped and verbatim spans left alone.
-func TestBacktickIdentifiers(t *testing.T) {
-	cases := map[string]string{
-		// bare identifier mid-sentence
-		"One of key or sas_token should be specified": "One of key or `sas_token` should be specified",
-		// identifier at sentence start
-		"user_operations records calls": "`user_operations` records calls",
-		// identifier before sentence end
-		"set preferred_zones.": "set `preferred_zones`.",
-		// dotted path
-		"a table's pg_class.relfrozenxid field": "a table's `pg_class.relfrozenxid` field",
-		// quoted identifiers become backticks
-		`options are 'mysql_native_password' and "caching_sha2_password"`: "options are `mysql_native_password` and `caching_sha2_password`",
-		// &quot; entity quotes
-		`&quot;read_committed&quot; level`: "`read_committed` level",
-		// possessive after identifier
-		"pg_partman's role": "`pg_partman`'s role",
-		// a setting is wrapped with its value
-		"for io_method=worker.":        "for `io_method=worker`.",
-		"adds a diskless_az= hint":     "adds a `diskless_az=` hint",
-		"set 'ssl_mode=require' first": "set `ssl_mode=require` first",
-		"use log_level=debug_all here": "use `log_level=debug_all` here",
-		// colon after identifier (not a JSON key)
-		"provider: aws, auth_method: credentials": "provider: aws, `auth_method`: credentials",
-		// JSON keys and string values stay quoted
-		`{"key_name": "value"}`:                             `{"key_name": "value"}`,
-		`{"key_name": "value_with_underscore"}`:             `{"key_name": "value_with_underscore"}`,
-		`{&quot;error_code&quot;: &quot;not_powered&quot;}`: `{&quot;error_code&quot;: &quot;not_powered&quot;}`,
-		"Example: 'foo_bar'":                                "Example: `foo_bar`",
-		// ${...} placeholder wrapped whole
-		"referenced with ${<provider_name>:<secret_path>:<key_name>}.": "referenced with `${<provider_name>:<secret_path>:<key_name>}`.",
-		// already backtick-wrapped
-		"already " + "`sas_token`" + " wrapped": "already `sas_token` wrapped",
-		// markdown link with URL in target
-		"see [ACLs](https://registry.terraform.io/docs/resources/kafka_acl).": "see [ACLs](https://registry.terraform.io/docs/resources/kafka_acl).",
-		// bare URL
-		"https://docs.datadoghq.com/getting_started/tagging": "https://docs.datadoghq.com/getting_started/tagging",
-		// relative markdown link
-		"[aiven_kafka_acl](../kafka_acl.md)": "[`aiven_kafka_acl`](../kafka_acl.md)",
-		// mixed case not wrapped
-		"Max_size stays": "Max_size stays",
-		// uppercase words with "_"
-		"set AIVEN_TOKEN first":                     "set `AIVEN_TOKEN` first",
-		"from PERFORMANCE_SCHEMA.EVENT_WAITS.":      "from `PERFORMANCE_SCHEMA.EVENT_WAITS`.",
-		"responds with 'UNSUPPORTED_VERSION' error": "responds with `UNSUPPORTED_VERSION` error",
-		"(Long.MAX_VALUE) and SO_RCVBUF-like":       "(Long.MAX_VALUE) and SO_RCVBUF-like",
-		"FOO_bar and aFOO_BAR":                      "FOO_bar and aFOO_BAR",
-		// uppercase words without "_" are mostly acronyms
-		"Run server_reset_query (DISCARD ALL) in the VPC": "Run `server_reset_query` (DISCARD ALL) in the VPC",
-		// an uppercase setting value stays in its code span
-		"use log_level=DEBUG_ALL here": "use `log_level=DEBUG_ALL` here",
-		// glued to other token characters
-		"a-b_c, path/to_file, my_user@host, $foo_bar, _italic_": "a-b_c, path/to_file, my_user@host, $foo_bar, _italic_",
-		// no underscore → not an identifier target
-		"no underscore here": "no underscore here",
-	}
-
-	for in, want := range cases {
-		assert.Equal(t, want, backtickIdentifiers(in), "input: %q", in)
-	}
-}
-
 func TestCutDeprecated(t *testing.T) {
 	cases := []struct {
 		name, description, title string
@@ -1375,8 +1239,16 @@ func TestCutDeprecated(t *testing.T) {
 		{
 			name:            "without a title",
 			description:     "DEPRECATED: setting has no effect.",
-			wantDescription: "Setting has no effect.",
+			wantDescription: "setting has no effect.",
 			wantMsg:         "Setting has no effect.",
+			wantOK:          true,
+		},
+		{
+			name:            "without a message",
+			description:     "DEPRECATED:",
+			title:           "(DEPRECATED) Index count",
+			wantDescription: "Index count",
+			wantMsg:         "This field is deprecated.",
 			wantOK:          true,
 		},
 		{

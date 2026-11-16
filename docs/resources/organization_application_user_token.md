@@ -63,7 +63,7 @@ resource "aiven_organization_application_user" "example" {
 
 - `create_time` (String) Create Time.
 - `created_manually` (Boolean) True for tokens explicitly created via the `access_tokens` API, false for tokens created via login.
-- `currently_active` (Boolean) true if API request was made with this access token.
+- `currently_active` (Boolean) True if API request was made with this access token.
 - `expiry_time` (String) Timestamp when the access token will expire unless extended, if ever.
 - `full_token` (String, Sensitive) Full Token.
 - `id` (String) Resource ID composed as: `organization_id/user_id/token_prefix`.

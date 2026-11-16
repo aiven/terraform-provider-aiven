@@ -230,7 +230,7 @@ func valkeyUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"valkey_acl_channels_default": {
-				Description:  "Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Valkey configuration acl-pubsub-default.",
+				Description:  "Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, `all_channels` is assumed to keep backward compatibility. This option doesn't affect Valkey configuration acl-pubsub-default.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"allchannels", "resetchannels"}, false),
@@ -256,7 +256,7 @@ func valkeyUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"valkey_io_threads": {
-				Description: "Set Valkey IO thread count. On Valkey 9.0 and later, changes are applied without a restart. On Valkey 8.1, changing this replaces the service nodes. Example: `1`.",
+				Description: "Set Valkey IO thread count. On Valkey `9.0` and later, changes are applied without a restart. On Valkey `8.1`, changing this replaces the service nodes. Example: `1`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},

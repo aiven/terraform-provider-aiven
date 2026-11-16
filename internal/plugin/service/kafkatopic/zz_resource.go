@@ -60,7 +60,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 				DeprecationMessage:  "Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
-				MarkdownDescription: "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)",
+				MarkdownDescription: "Client-side deletion protection that prevents the resource from being deleted by Terraform. **Resource can still be deleted in the Aiven Console**. The default value is `false`. **Deprecated**: Instead, use [`prevent_destroy`](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion).",
 				Optional:            true,
 			},
 			"topic_description": schema.StringAttribute{
@@ -81,14 +81,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"cleanup_policy": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The retention policy to use on old segments. Possible values include 'delete', 'compact', or a comma-separated list of them. The default policy ('delete') will discard old segments when their retention time or size limit has been reached. The 'compact' setting will enable log compaction on the topic. The possible values are `compact`, `compact,delete` and `delete`.",
+						MarkdownDescription: "The retention policy to use on old segments. Possible values include `delete`, `compact`, or a comma-separated list of them. The default policy (`delete`) will discard old segments when their retention time or size limit has been reached. The `compact` setting will enable log compaction on the topic. The possible values are `compact`, `compact,delete` and `delete`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.OneOf("compact", "compact,delete", "delete")},
 					},
 					"compression_type": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer. The possible values are `gzip`, `lz4`, `producer`, `snappy`, `uncompressed` and `zstd`.",
+						MarkdownDescription: "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer. The possible values are `gzip`, `lz4`, `producer`, `snappy`, `uncompressed` and `zstd`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.OneOf("gzip", "lz4", "producer", "snappy", "uncompressed", "zstd")},
@@ -131,14 +131,14 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"local_retention_bytes": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls the maximum bytes tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the limit is equal to overall retention time. If set to -1, no limit is applied but it's possible only if overall retention is also -1. The field is required with `retention_bytes`.",
+						MarkdownDescription: "This configuration controls the maximum bytes tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to `-2`, the limit is equal to overall retention time. If set to `-1`, no limit is applied but it's possible only if overall retention is also `-1`. The field is required with `retention_bytes`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("retention_bytes"))},
 					},
 					"local_retention_ms": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to -2, the time limit is equal to overall retention time. If set to -1, no time limit is applied but it's possible only if overall retention is also -1. The field is required with `retention_ms`.",
+						MarkdownDescription: "This configuration controls the maximum time tiered storage will retain segment files locally before it will discard old log segments to free up space. If set to `-2`, the time limit is equal to overall retention time. If set to `-1`, no time limit is applied but it's possible only if overall retention is also `-1`. The field is required with `retention_ms`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("retention_ms"))},
@@ -151,7 +151,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"max_message_bytes": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The largest record batch size allowed by Kafka (after compression if compression is enabled). If this is increased and there are consumers older than 0.10.2, the consumers' fetch size must also be increased so that the they can fetch record batches this large. In the latest message format version, records are always grouped into batches for efficiency. In previous message format versions, uncompressed records are not grouped into batches and this limit only applies to a single record in that case.",
+						MarkdownDescription: "The largest record batch size allowed by Kafka (after compression if compression is enabled). If this is increased and there are consumers older than `0.10.2`, the consumers' fetch size must also be increased so that the they can fetch record batches this large. In the latest message format version, records are always grouped into batches for efficiency. In previous message format versions, uncompressed records are not grouped into batches and this limit only applies to a single record in that case.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
@@ -163,26 +163,26 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"message_format_version": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be 'None'. The possible values are `0.10.0`, `0.10.0-IV0`, `0.10.0-IV1`, `0.10.1`, `0.10.1-IV0`, `0.10.1-IV1`, `0.10.1-IV2`, `0.10.2`, `0.10.2-IV0`, `0.11.0`, `0.11.0-IV0`, `0.11.0-IV1`, `0.11.0-IV2`, `0.8.0`, `0.8.1`, `0.8.2`, `0.9.0`, `1.0`, `1.0-IV0`, `1.1`, `1.1-IV0`, `2.0`, `2.0-IV0`, `2.0-IV1`, `2.1`, `2.1-IV0`, `2.1-IV1`, `2.1-IV2`, `2.2`, `2.2-IV0`, `2.2-IV1`, `2.3`, `2.3-IV0`, `2.3-IV1`, `2.4`, `2.4-IV0`, `2.4-IV1`, `2.5`, `2.5-IV0`, `2.6`, `2.6-IV0`, `2.7`, `2.7-IV0`, `2.7-IV1`, `2.7-IV2`, `2.8`, `2.8-IV0`, `2.8-IV1`, `3.0`, `3.0-IV0`, `3.0-IV1`, `3.1`, `3.1-IV0`, `3.2`, `3.2-IV0`, `3.3`, `3.3-IV0`, `3.3-IV1`, `3.3-IV2`, `3.3-IV3`, `3.4`, `3.4-IV0`, `3.5`, `3.5-IV0`, `3.5-IV1`, `3.5-IV2`, `3.6`, `3.6-IV0`, `3.6-IV1`, `3.6-IV2`, `3.7`, `3.7-IV0`, `3.7-IV1`, `3.7-IV2`, `3.7-IV3`, `3.7-IV4`, `3.8`, `3.8-IV0`, `3.9`, `3.9-IV0`, `3.9-IV1`, `4.0`, `4.0-IV0`, `4.1`, `4.1-IV0`, `4.2`, `4.2-IV0`, `4.3` and `4.3-IV0`.",
+						MarkdownDescription: "Specify the message format version the broker will use to append messages to the logs. The value should be a valid ApiVersion. Some examples are: `0.8.2`, `0.9.0.0`, `0.10.0`, check ApiVersion for more details. By setting a particular message format version, the user is certifying that all the existing messages on disk are smaller or equal than the specified version. Setting this value incorrectly will cause consumers with older versions to break as they will receive messages with a format that they don't understand. Deprecated in Kafka 4.0+: this configuration is removed and any supplied value will be ignored; for services upgraded to 4.0+, the returned value may be `None`. The possible values are `0.10.0`, `0.10.0-IV0`, `0.10.0-IV1`, `0.10.1`, `0.10.1-IV0`, `0.10.1-IV1`, `0.10.1-IV2`, `0.10.2`, `0.10.2-IV0`, `0.11.0`, `0.11.0-IV0`, `0.11.0-IV1`, `0.11.0-IV2`, `0.8.0`, `0.8.1`, `0.8.2`, `0.9.0`, `1.0`, `1.0-IV0`, `1.1`, `1.1-IV0`, `2.0`, `2.0-IV0`, `2.0-IV1`, `2.1`, `2.1-IV0`, `2.1-IV1`, `2.1-IV2`, `2.2`, `2.2-IV0`, `2.2-IV1`, `2.3`, `2.3-IV0`, `2.3-IV1`, `2.4`, `2.4-IV0`, `2.4-IV1`, `2.5`, `2.5-IV0`, `2.6`, `2.6-IV0`, `2.7`, `2.7-IV0`, `2.7-IV1`, `2.7-IV2`, `2.8`, `2.8-IV0`, `2.8-IV1`, `3.0`, `3.0-IV0`, `3.0-IV1`, `3.1`, `3.1-IV0`, `3.2`, `3.2-IV0`, `3.3`, `3.3-IV0`, `3.3-IV1`, `3.3-IV2`, `3.3-IV3`, `3.4`, `3.4-IV0`, `3.5`, `3.5-IV0`, `3.5-IV1`, `3.5-IV2`, `3.6`, `3.6-IV0`, `3.6-IV1`, `3.6-IV2`, `3.7`, `3.7-IV0`, `3.7-IV1`, `3.7-IV2`, `3.7-IV3`, `3.7-IV4`, `3.8`, `3.8-IV0`, `3.9`, `3.9-IV0`, `3.9-IV1`, `4.0`, `4.0-IV0`, `4.1`, `4.1-IV0`, `4.2`, `4.2-IV0`, `4.3` and `4.3-IV0`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:          []validator.String{stringvalidator.OneOf("0.10.0", "0.10.0-IV0", "0.10.0-IV1", "0.10.1", "0.10.1-IV0", "0.10.1-IV1", "0.10.1-IV2", "0.10.2", "0.10.2-IV0", "0.11.0", "0.11.0-IV0", "0.11.0-IV1", "0.11.0-IV2", "0.8.0", "0.8.1", "0.8.2", "0.9.0", "1.0", "1.0-IV0", "1.1", "1.1-IV0", "2.0", "2.0-IV0", "2.0-IV1", "2.1", "2.1-IV0", "2.1-IV1", "2.1-IV2", "2.2", "2.2-IV0", "2.2-IV1", "2.3", "2.3-IV0", "2.3-IV1", "2.4", "2.4-IV0", "2.4-IV1", "2.5", "2.5-IV0", "2.6", "2.6-IV0", "2.7", "2.7-IV0", "2.7-IV1", "2.7-IV2", "2.8", "2.8-IV0", "2.8-IV1", "3.0", "3.0-IV0", "3.0-IV1", "3.1", "3.1-IV0", "3.2", "3.2-IV0", "3.3", "3.3-IV0", "3.3-IV1", "3.3-IV2", "3.3-IV3", "3.4", "3.4-IV0", "3.5", "3.5-IV0", "3.5-IV1", "3.5-IV2", "3.6", "3.6-IV0", "3.6-IV1", "3.6-IV2", "3.7", "3.7-IV0", "3.7-IV1", "3.7-IV2", "3.7-IV3", "3.7-IV4", "3.8", "3.8-IV0", "3.9", "3.9-IV0", "3.9-IV1", "4.0", "4.0-IV0", "4.1", "4.1-IV0", "4.2", "4.2-IV0", "4.3", "4.3-IV0")},
 					},
 					"message_timestamp_after_max_ms": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
+						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If `message.timestamp.type=CreateTime`, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"message_timestamp_before_max_ms": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
+						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If `message.timestamp.type=CreateTime`, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"message_timestamp_difference_max_ms": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if message.timestamp.type=LogAppendTime.",
+						MarkdownDescription: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If `message.timestamp.type=CreateTime`, a message will be rejected if the difference in timestamp exceeds this threshold. This configuration is ignored if `message.timestamp.type=LogAppendTime`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
@@ -195,7 +195,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"min_cleanable_dirty_ratio": schema.Float64Attribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls how frequently the log compactor will attempt to clean the log (assuming log compaction is enabled). By default we will avoid cleaning a log where more than 50% of the log has been compacted. This ratio bounds the maximum space wasted in the log by duplicates (at 50% at most 50% of the log could be duplicates). A higher ratio will mean fewer, more efficient cleanings but will mean more wasted space in the log. If the max.compaction.lag.ms or the min.compaction.lag.ms configurations are also specified, then the log compactor considers the log to be eligible for compaction as soon as either: (i) the dirty ratio threshold has been met and the log has had dirty (uncompacted) records for at least the min.compaction.lag.ms duration, or (ii) if the log has had dirty (uncompacted) records for at most the max.compaction.lag.ms period. Maximum value: `1`.",
+						MarkdownDescription: "This configuration controls how frequently the log compactor will attempt to clean the log (assuming log compaction is enabled). By default we will avoid cleaning a log where more than 50% of the log has been compacted. This ratio bounds the maximum space wasted in the log by duplicates (at 50% at most 50% of the log could be duplicates). A higher ratio will mean fewer, more efficient cleanings but will mean more wasted space in the log. If the `max.compaction.lag.ms` or the `min.compaction.lag.ms` configurations are also specified, then the log compactor considers the log to be eligible for compaction as soon as either: (i) the dirty ratio threshold has been met and the log has had dirty (uncompacted) records for at least the `min.compaction.lag.ms` duration, or (ii) if the log has had dirty (uncompacted) records for at most the `max.compaction.lag.ms` period. Maximum value: `1`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.Float64{float64planmodifier.UseStateForUnknown()},
 					},
@@ -207,7 +207,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"min_insync_replicas": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "When a producer sets acks to 'all' (or '-1'), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks of 'all'. This will ensure that the producer raises an exception if a majority of replicas do not receive a write. Minimum value: `1`.",
+						MarkdownDescription: "When a producer sets acks to `all` (or `-1`), this configuration specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used together, `min.insync.replicas` and acks allow you to enforce greater durability guarantees. A typical scenario would be to create a topic with a replication factor of 3, set `min.insync.replicas` to 2, and produce with acks of `all`. This will ensure that the producer raises an exception if a majority of replicas do not receive a write. Minimum value: `1`.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
@@ -225,13 +225,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 					},
 					"retention_bytes": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the 'delete' retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.",
+						MarkdownDescription: "This configuration controls the maximum size a partition (which consists of log segments) can grow to before we will discard old log segments to free up space if we are using the `delete` retention policy. By default there is no size limit only a time limit. Since this limit is enforced at the partition level, multiply it by the number of partitions to compute the topic retention in bytes.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"retention_ms": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "This configuration controls the maximum time we will retain a log before we will discard old log segments to free up space if we are using the 'delete' retention policy. This represents an SLA on how soon consumers must read their data. If set to -1, no time limit is applied.",
+						MarkdownDescription: "This configuration controls the maximum time we will retain a log before we will discard old log segments to free up space if we are using the `delete` retention policy. This represents an SLA on how soon consumers must read their data. If set to `-1`, no time limit is applied.",
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},

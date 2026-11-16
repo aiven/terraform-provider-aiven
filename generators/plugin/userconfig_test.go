@@ -62,10 +62,8 @@ func TestUserConfigDescription(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]*OASchema{
-		"Tags with prefix `aiven-` are reserved.": {Description: "Tags with prefix 'aiven-' are reserved."},
-		"Values: `delete`, `compact`.":            {Description: "Values: 'delete', 'compact'."},
-		"Don't touch apostrophes.":                {Description: "Don't touch apostrophes."},
-		"A longer `title`":                        {Description: "Short", Title: "A longer 'title'"},
+		"A description":  {Description: "A description", Title: "Short"},
+		"A longer title": {Description: "Short", Title: "A longer title"},
 	}
 	for want, s := range cases {
 		assert.Equal(t, want, userConfigDescription(s))

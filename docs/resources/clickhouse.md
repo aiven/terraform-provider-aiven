@@ -98,7 +98,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `session_settings` (Block List, Max: 1) ClickHouse session settings, which can be found in the `system.settings` table (see [below for nested schema](#nestedblock--clickhouse_user_config--session_settings))
 - `static_ips` (Boolean) Use static public IP addresses.
-- `tiered_storage_move_factor` (Number) The percentage of free disk space required on local storage before data is moved to object storage. A value of 0.2 means data is moved when local storage has less than 20% free space. Default: `0.2`.
+- `tiered_storage_move_factor` (Number) The percentage of free disk space required on local storage before data is moved to object storage. A value of `0.2` means data is moved when local storage has less than 20% free space. Default: `0.2`.
 
 <a id="nestedblock--clickhouse_user_config--ip_filter_object"></a>
 ### Nested Schema for `clickhouse_user_config.ip_filter_object`
@@ -118,9 +118,9 @@ Optional:
 Optional:
 
 - `clickhouse` (Boolean) Allow clients to connect to clickhouse with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
-- `clickhouse_arrowflight` (Boolean) Allow clients to connect to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
-- `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
-- `clickhouse_mysql` (Boolean) Allow clients to connect to clickhouse_mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `clickhouse_arrowflight` (Boolean) Allow clients to connect to `clickhouse_arrowflight` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `clickhouse_https` (Boolean) Allow clients to connect to `clickhouse_https` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `clickhouse_mysql` (Boolean) Allow clients to connect to `clickhouse_mysql` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 - `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
@@ -130,9 +130,9 @@ Optional:
 Optional:
 
 - `clickhouse` (Boolean) Enable clickhouse.
-- `clickhouse_arrowflight` (Boolean) Enable clickhouse_arrowflight.
-- `clickhouse_https` (Boolean) Enable clickhouse_https.
-- `clickhouse_mysql` (Boolean) Enable clickhouse_mysql.
+- `clickhouse_arrowflight` (Boolean) Enable `clickhouse_arrowflight`.
+- `clickhouse_https` (Boolean) Enable `clickhouse_https`.
+- `clickhouse_mysql` (Boolean) Enable `clickhouse_mysql`.
 - `prometheus` (Boolean) Enable prometheus.
 
 
@@ -142,9 +142,9 @@ Optional:
 Optional:
 
 - `clickhouse` (Boolean) Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.
-- `clickhouse_arrowflight` (Boolean) Allow clients to connect to clickhouse_arrowflight from the public internet for service nodes that are in a project VPC or another type of private network.
-- `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.
-- `clickhouse_mysql` (Boolean) Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.
+- `clickhouse_arrowflight` (Boolean) Allow clients to connect to `clickhouse_arrowflight` from the public internet for service nodes that are in a project VPC or another type of private network.
+- `clickhouse_https` (Boolean) Allow clients to connect to `clickhouse_https` from the public internet for service nodes that are in a project VPC or another type of private network.
+- `clickhouse_mysql` (Boolean) Allow clients to connect to `clickhouse_mysql` from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
@@ -153,7 +153,7 @@ Optional:
 
 Optional:
 
-- `vector_similarity_index_cache_size` (Number) Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is 0.07 (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.
+- `vector_similarity_index_cache_size` (Number) Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is `0.07` (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.
 
 
 <a id="nestedblock--clickhouse_user_config--session_settings"></a>

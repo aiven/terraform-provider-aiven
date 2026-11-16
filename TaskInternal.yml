@@ -175,14 +175,15 @@ tasks:
       - find docs-tfplugindocs/resources -name "*.md" -type f -exec sed -i'' -e 's/^- `default` (String)/- `default` (String, Deprecated) Use specific CRUD timeouts instead./' {} +
 
   docs:
-    desc: "Generate all provider documentation (tfplugindocs, gen-plugin, merge into docs/)"
+    desc: "Generate all provider documentation (gen-plugin, tfplugindocs, merge into docs/)"
     vars:
       no_spec: '{{.no_spec | default "false"}}'
     cmds:
-      - task: gen-docs
+      # tfplugindocs builds the provider, so it needs the regenerated plugin resources
       - task: gen-plugin
         vars:
           no_spec: '{{.no_spec}}'
+      - task: gen-docs
       - ./tools/scripts/docs-merge.sh
 
   generate:

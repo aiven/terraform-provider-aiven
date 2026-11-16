@@ -28,7 +28,7 @@ data "aiven_project" "example_project" {
 ### Read-Only
 
 - `account_id` (String) Link a project to an existing account using its account ID. This field is deprecated. Use `parent_id` instead. To set up proper dependencies please refer to this variable as a reference.
-- `add_account_owners_admin_access` (Boolean) If parent_id is set, grant account owner team admin access to the new project. The default value is `true`.
+- `add_account_owners_admin_access` (Boolean) If `parent_id` is set, grant account owner team admin access to the new project. The default value is `true`.
 - `available_credits` (String) The number of trial or promotional credits remaining for this project.
 - `billing_group` (String) The ID of the billing group this project is assigned to. To set up proper dependencies please refer to this variable as a reference.
 - `ca_cert` (String, Sensitive) The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.

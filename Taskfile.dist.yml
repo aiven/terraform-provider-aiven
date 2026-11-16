@@ -145,7 +145,7 @@ tasks:
           no_spec: '{{.no_spec}}'
 
   docs:
-    desc: Generate documentation for the provider (tfplugindocs, gen-plugin, merge into docs/)
+    desc: Generate documentation for the provider (gen-plugin, tfplugindocs, merge into docs/)
     cmds:
       - defer:
           task: fmt
