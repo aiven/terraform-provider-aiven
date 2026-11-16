@@ -1,1 +1,1 @@
-terraform import aiven_opensearch.example_opensearch PROJECT/SERVICE_NAME
+terraform import aiven_opensearch.example PROJECT/SERVICE_NAME
