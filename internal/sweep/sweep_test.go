@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/connectionpool"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/grafana"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
@@ -20,7 +21,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
