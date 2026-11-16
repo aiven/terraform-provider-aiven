@@ -46,6 +46,8 @@ nav_order: 1
 - Migrate `aiven_grafana` resource and data source to the Plugin Framework. Changes:
 - Migrate `aiven_grafana` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
 - Migrate `aiven_grafana`, `aiven_kafka` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
+- Migrate `aiven_clickhouse`, `aiven_grafana`, `aiven_kafka` and `aiven_pg` resources and data sources to the Plugin
+  Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. So does removing every block of a list,
     as in SDKv2. Removing every `ip_filter_object` sends an empty list, also as in SDKv2, which clears the IP filter
@@ -65,9 +67,9 @@ nav_order: 1
   - Changing `aiven_kafka` field `default_acl` after the creation shows an in-place change that updates only the state, not the ACLs.
   - Removing the deprecated `aiven_kafka` field `karapace` shows an in-place change, which doesn't change the service. SDKv2
     ignored the removal, so the first plan after the upgrade can show it too.
-  - Remove the deprecated options the API spec no longer has: `additional_backup_regions` of `aiven_kafka`,
-    `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`. A configuration that sets them fails
-    validation, so remove them before upgrading.
+  - Remove the deprecated options the API spec no longer has: `additional_backup_regions` of `aiven_clickhouse`
+    and `aiven_kafka`, `pg_user_config.pg_qualstats` and `kafka_user_config.tiered_storage.local_cache`. A configuration
+    that sets them fails validation, so remove them before upgrading.
   - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
     `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
 
