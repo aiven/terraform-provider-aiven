@@ -177,8 +177,8 @@ func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct opensearch.public_access.opensearch from Aiven")
 		}
 
-		if a["opensearch_user_config.0.public_access.0.prometheus"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
+		if v := a["opensearch_user_config.0.public_access.0.prometheus"]; v == "true" {
+			return fmt.Errorf("expected public_access.prometheus to be disabled, got %q", v)
 		}
 
 		if a["opensearch.0.uris.#"] == "" {
@@ -242,12 +242,11 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 				),
 			},
 			{
-				// 2. All values are zero
+				// 3. All values are zero
 				Config: testAccAivenOpenSearchUserUserConfigZeroValues(projectName,
 					"action_destructive_requires_name", "false",
 					"override_main_response_version", "true",
 					"knn_memory_circuit_breaker_limit", "0",
-					"email_sender_username", "",
 				),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
@@ -256,8 +255,15 @@ func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.action_destructive_requires_name", "false"),
 					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.override_main_response_version", "true"),
 					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.knn_memory_circuit_breaker_limit", "0"),
-					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.email_sender_username", ""),
 				),
+			},
+			{
+				// 4. An empty string fails the pattern
+				Config: testAccAivenOpenSearchUserUserConfigZeroValues(projectName,
+					"email_sender_username", "",
+				),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`email_sender_username\s+must\s+match\s+pattern`),
 			},
 		},
 	})
