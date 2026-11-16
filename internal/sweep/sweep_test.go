@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/connectionpool"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/grafana"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -18,7 +19,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
-	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
