@@ -14,7 +14,7 @@ Gets information about an Aiven for Apache Flink® application.
 ```terraform
 data "aiven_flink_application" "example" {
   project      = "my-project"
-  service_name = "my-application"
+  service_name = "my-flink"
 
   // LOOKUP — provide `application_id` or `name`
   application_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"

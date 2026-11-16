@@ -32,6 +32,7 @@ The latest v4 versions can't read the v3 state of these resources. Upgrade it wi
 | Resource                             | Version |
 | ------------------------------------ | ------- |
 | `aiven_kafka_topic`                  | 4.58.0  |
+| `aiven_flink`                        | 4.65.1  |
 | `aiven_grafana`                      | 4.65.1  |
 | `aiven_kafka`                        | 4.65.1  |
 | `aiven_pg`                           | 4.65.1  |

@@ -66,7 +66,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_project_user": project.DatasourceProjectUser(),
 
 			// flink
-			"aiven_flink":                     flink.DatasourceFlink(),
 			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
@@ -116,7 +115,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
 
 			// flink
-			"aiven_flink":                     flink.ResourceFlink(),
 			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
