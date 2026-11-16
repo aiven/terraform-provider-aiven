@@ -47,6 +47,7 @@ func knownAPICallers() []string {
 		"aiven_opensearch",
 		"aiven_pg",
 		"aiven_thanos",
+		"aiven_valkey",
 	}
 }
 
