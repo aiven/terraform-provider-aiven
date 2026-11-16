@@ -23,7 +23,7 @@ import (
 )
 
 // The tags added outside of Terraform show up in the plan. Removing every datadog_tags block changes only the state,
-// and the API keeps the options missing in a later update.
+// and the API keeps the options missing in a later update or removed alongside another change.
 func TestAccAivenServiceIntegrationEndpointDatadogTags(t *testing.T) {
 	const resourceName = "aiven_service_integration_endpoint.datadog"
 	ctx := context.Background()
@@ -133,6 +133,23 @@ resource "aiven_service_integration_endpoint" "datadog" {
 				),
 			},
 			{Config: config("max_partition_contexts = 32000"), PlanOnly: true},
+			{
+				Config: config(tag + "\nmax_partition_contexts = 32000"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.#", "1"),
+					expectAPITags("env:test"),
+				),
+			},
+			{
+				// Removing all tags alongside another update must keep the API tags.
+				Config: config("max_partition_contexts = 64000"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.max_partition_contexts", "64000"),
+					expectAPITags("env:test"),
+				),
+			},
+			{Config: config("max_partition_contexts = 64000"), PlanOnly: true},
 		},
 	})
 }
