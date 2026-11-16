@@ -78,12 +78,12 @@ func thanosUserConfig() *schema.Schema {
 				Description: "Allow access to selected service ports from private networks",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"query_frontend": {
-						Description: "Allow clients to connect to query_frontend with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `query_frontend` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"receiver_routing": {
-						Description: "Allow clients to connect to receiver_routing with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `receiver_routing` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -96,12 +96,12 @@ func thanosUserConfig() *schema.Schema {
 				Description: "Allow access to selected service components through Privatelink",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"query_frontend": {
-						Description: "Enable query_frontend.",
+						Description: "Enable `query_frontend`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"receiver_routing": {
-						Description: "Enable receiver_routing.",
+						Description: "Enable `receiver_routing`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -124,17 +124,17 @@ func thanosUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"query_frontend": {
-						Description: "Allow clients to connect to query_frontend from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `query_frontend` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"receiver_ingesting": {
-						Description: "Allow clients to connect to receiver_ingesting from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `receiver_ingesting` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"receiver_routing": {
-						Description: "Allow clients to connect to receiver_routing from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `receiver_routing` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -177,12 +177,12 @@ func thanosUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"store_limits_request_samples": {
-						Description: "The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 * store.limits.request-series. Default: `0`.",
+						Description: "The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 `*` store.limits.request-series. Default: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"store_limits_request_series": {
-						Description: "The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 * cpu_count. Default: `0`.",
+						Description: "The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 `*` `cpu_count`. Default: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

@@ -59,7 +59,7 @@ resource "aiven_organization" "example" {
 
 ### Required
 
-- `access_data` (Block List, Max: 1) access type specific data. Changing this property forces recreation of the resource (see [below for nested schema](#nestedblock--access_data))
+- `access_data` (Block List, Max: 1) Access type specific data. Changing this property forces recreation of the resource (see [below for nested schema](#nestedblock--access_data))
 - `access_name` (String) Label to describe the access. Changing this property forces recreation of the resource.
 - `access_type` (String) An enumeration. The possible value is `KAFKA`. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.

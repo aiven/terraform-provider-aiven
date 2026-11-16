@@ -68,7 +68,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"key": {
-						Description: "Azure account secret key. One of key or sas_token should be specified.",
+						Description: "Azure account secret key. One of key or `sas_token` should be specified.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
@@ -94,7 +94,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"sas_token": {
-						Description: "A shared access signatures (SAS) token. One of key or sas_token should be specified.",
+						Description: "A shared access signatures (SAS) token. One of key or `sas_token` should be specified.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
@@ -362,12 +362,12 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"keep_index_refresh_interval": {
-				Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
+				Description: "Aiven automation resets `index.refresh_interval` to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"max_index_count": {
-				Description: "Use index_patterns instead. Default: `0`.",
+				Description: "Use `index_patterns` instead. Default: `0`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -401,7 +401,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"jwt_header": {
-						Description: "The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization. Example: `preferred_username`.",
+						Description: "The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer `<token>`. Optional. Default is Authorization. Example: `preferred_username`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -431,7 +431,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"subject_key": {
-						Description: "The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional. Example: `preferred_username`.",
+						Description: "The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the `preferred_username` claim. Optional. Example: `preferred_username`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -464,7 +464,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"authentication_backend": {
-										Description:  "Enum: `internal`. internal_authentication_backend_limiting.authentication_backend.",
+										Description:  "Enum: `internal`. `internal_authentication_backend_limiting.authentication_backend`.",
 										Optional:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"internal"}, false),
@@ -475,7 +475,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"max_blocked_clients": {
-										Description: "internal_authentication_backend_limiting.max_blocked_clients. Example: `100000`.",
+										Description: "`internal_authentication_backend_limiting.max_blocked_clients`. Example: `100000`.",
 										Optional:    true,
 										Type:        schema.TypeInt,
 									},
@@ -490,7 +490,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"type": {
-										Description:  "Enum: `username`. internal_authentication_backend_limiting.type.",
+										Description:  "Enum: `username`. `internal_authentication_backend_limiting.type`.",
 										Optional:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"username"}, false),
@@ -588,7 +588,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"cluster_routing_allocation_node_concurrent_recoveries": {
-						Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.",
+						Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count `*` 2.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -603,22 +603,22 @@ func opensearchUserConfig() *schema.Schema {
 							"threshold": {
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"debug": {
-										Description: "Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Description: "Debug threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"info": {
-										Description: "Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Description: "Info threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"trace": {
-										Description: "Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Description: "Trace threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"warn": {
-										Description: "Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or -1. Default is -1.",
+										Description: "Warning threshold for total request took time. The value should be in the form count and unit, where unit one of (s,m,h,d,nanos,ms,micros) or `-1`. Default is `-1`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
@@ -717,12 +717,12 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"indices_memory_max_index_buffer_size": {
-						Description: "Absolute value. Default is unbound. Doesn't work without indices.memory.index_buffer_size. Maximum amount of heap used for query cache, an absolute indices.memory.index_buffer_size maximum hard limit.",
+						Description: "Absolute value. Default is unbound. Doesn't work without `indices.memory.index_buffer_size`. Maximum amount of heap used for query cache, an absolute `indices.memory.index_buffer_size` maximum hard limit.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"indices_memory_min_index_buffer_size": {
-						Description: "Absolute value. Default is 48mb. Doesn't work without indices.memory.index_buffer_size. Minimum amount of heap used for query cache, an absolute indices.memory.index_buffer_size minimal hard limit.",
+						Description: "Absolute value. Default is 48mb. Doesn't work without `indices.memory.index_buffer_size`. Minimum amount of heap used for query cache, an absolute `indices.memory.index_buffer_size` minimal hard limit.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -802,7 +802,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"ml_commons_connector_access_control_enabled": {
-						Description: "When set to true, the setting allows admins to control access and permissions to the connector API using backend_roles. Defaults to false.",
+						Description: "When set to true, the setting allows admins to control access and permissions to the connector API using `backend_roles`. Defaults to false.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -852,7 +852,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"override_main_response_version": {
-						Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false. Deprecated and ignored for service version 3.3 and higher.",
+						Description: "Compatibility mode sets OpenSearch to report its version as `7.10` so clients continue to work. Default is false. Deprecated and ignored for service version `3.3` and higher.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -907,7 +907,7 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "Search Backpressure Settings",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"mode": {
-								Description:  "Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.",
+								Description:  "Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are `monitor_only`, enforced, or disabled. Default is `monitor_only`.",
 								Optional:     true,
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"disabled", "enforced", "monitor_only"}, false),
@@ -916,12 +916,12 @@ func opensearchUserConfig() *schema.Schema {
 								Description: "Node duress settings",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"cpu_threshold": {
-										Description: "The CPU usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.9.",
+										Description: "The CPU usage threshold (as a percentage) required for a node to be considered to be under duress. Default is `0.9`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"heap_threshold": {
-										Description: "The heap usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.7.",
+										Description: "The heap usage threshold (as a percentage) required for a node to be considered to be under duress. Default is `0.7`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -939,17 +939,17 @@ func opensearchUserConfig() *schema.Schema {
 								Description: "Search shard settings",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"cancellation_burst": {
-										Description: "The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 10.0.",
+										Description: "The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is `10.0`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"cancellation_rate": {
-										Description: "The maximum number of tasks to cancel per millisecond of elapsed time. Default is 0.003.",
+										Description: "The maximum number of tasks to cancel per millisecond of elapsed time. Default is `0.003`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"cancellation_ratio": {
-										Description: "The maximum number of tasks to cancel, as a percentage of successful task completions. Default is 0.1.",
+										Description: "The maximum number of tasks to cancel, as a percentage of successful task completions. Default is `0.1`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -969,17 +969,17 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"heap_percent_threshold": {
-										Description: "The heap usage threshold (as a percentage) required for a single search shard task before it is considered for cancellation. Default is 0.5.",
+										Description: "The heap usage threshold (as a percentage) required for a single search shard task before it is considered for cancellation. Default is `0.5`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"heap_variance": {
-										Description: "The minimum variance required for a single search shard task’s heap usage compared to the rolling average of previously completed tasks before it is considered for cancellation. Default is 2.0.",
+										Description: "The minimum variance required for a single search shard task’s heap usage compared to the rolling average of previously completed tasks before it is considered for cancellation. Default is `2.0`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"total_heap_percent_threshold": {
-										Description: "The heap usage threshold (as a percentage) required for the sum of heap usages of all search shard tasks before cancellation is applied. Default is 0.5.",
+										Description: "The heap usage threshold (as a percentage) required for the sum of heap usages of all search shard tasks before cancellation is applied. Default is `0.5`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -992,17 +992,17 @@ func opensearchUserConfig() *schema.Schema {
 								Description: "Search task settings",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"cancellation_burst": {
-										Description: "The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 5.0.",
+										Description: "The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is `5.0`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"cancellation_rate": {
-										Description: "The maximum number of search tasks to cancel per millisecond of elapsed time. Default is 0.003.",
+										Description: "The maximum number of search tasks to cancel per millisecond of elapsed time. Default is `0.003`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"cancellation_ratio": {
-										Description: "The maximum number of search tasks to cancel, as a percentage of successful search task completions. Default is 0.1.",
+										Description: "The maximum number of search tasks to cancel, as a percentage of successful search task completions. Default is `0.1`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -1022,17 +1022,17 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"heap_percent_threshold": {
-										Description: "The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is 0.2.",
+										Description: "The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is `0.2`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"heap_variance": {
-										Description: "The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage * variance. Default is 2.0.",
+										Description: "The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage `*` variance. Default is `2.0`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"total_heap_percent_threshold": {
-										Description: "The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is 0.5.",
+										Description: "The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is `0.5`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -1156,7 +1156,7 @@ func opensearchUserConfig() *schema.Schema {
 								Type:        schema.TypeFloat,
 							},
 							"pressure_time_limit": {
-								Description: "The maximum amount of time that a replica shard can take to copy from the primary shard. Once segrep.pressure.time.limit is breached along with segrep.pressure.checkpoint.limit, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.",
+								Description: "The maximum amount of time that a replica shard can take to copy from the primary shard. Once `segrep.pressure.time.limit` is breached along with `segrep.pressure.checkpoint.limit`, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
@@ -1182,17 +1182,17 @@ func opensearchUserConfig() *schema.Schema {
 								Description: "Operating factor",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"lower": {
-										Description: "Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is 0.75.",
+										Description: "Specify the lower occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is below this limit, shard indexing backpressure decreases the current allocated memory for that shard. Default is `0.75`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"optimal": {
-										Description: "Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is 0.85.",
+										Description: "Specify the optimal occupancy of the allocated quota of memory for the shard. If the total memory usage of a shard is at this level, shard indexing backpressure doesn’t change the current allocated memory for that shard. Default is `0.85`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
 									"upper": {
-										Description: "Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is 0.95.",
+										Description: "Specify the upper occupancy limit of the allocated quota of memory for the shard. If the total memory usage of a shard is above this limit, shard indexing backpressure increases the current allocated memory for that shard. Default is `0.95`.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
 									},
@@ -1206,7 +1206,7 @@ func opensearchUserConfig() *schema.Schema {
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"node": {
 										Elem: &schema.Resource{Schema: map[string]*schema.Schema{"soft_limit": {
-											Description: "Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is 0.7.",
+											Description: "Define the percentage of the node-level memory threshold that acts as a soft indicator for strain on a node. Default is `0.7`.",
 											Optional:    true,
 											Type:        schema.TypeFloat,
 										}}},
@@ -1216,7 +1216,7 @@ func opensearchUserConfig() *schema.Schema {
 									},
 									"shard": {
 										Elem: &schema.Resource{Schema: map[string]*schema.Schema{"min_limit": {
-											Description: "Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is 0.001.",
+											Description: "Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica). Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard. Default is `0.001`.",
 											Optional:    true,
 											Type:        schema.TypeFloat,
 										}}},
@@ -1303,7 +1303,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"max_old_space_size": {
-						Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.",
+						Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the `max_old_space_size` option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -1346,7 +1346,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"opensearch_dashboards": {
-						Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `opensearch_dashboards` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -1369,7 +1369,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"opensearch_dashboards": {
-						Description: "Enable opensearch_dashboards.",
+						Description: "Enable `opensearch_dashboards`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -1398,7 +1398,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"opensearch_dashboards": {
-						Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `opensearch_dashboards` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

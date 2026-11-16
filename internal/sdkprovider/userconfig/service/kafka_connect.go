@@ -44,7 +44,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"gcp_auth_allowed_urls": {
-				Description: "Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.",
+				Description: "Allow-list of HTTPS URLs used to validate GCP `credential_source` requests for Kafka Connect.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Type:        schema.TypeList,
@@ -109,7 +109,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. `read_uncommitted` is the default, but `read_committed` can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"read_committed", "read_uncommitted"}, false),
@@ -145,7 +145,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"producer_batch_size": {
-						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
+						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the `linger.ms` time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -161,7 +161,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
+						Description: "This setting gives the upper bound on the delay for batching: once there is `batch.size` worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -203,7 +203,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"preferred_zones": {
-				Description: "List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If single_zone is enabled with an availability_zone, that setting takes precedence over preferred_zones. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.",
+				Description: "List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If `single_zone` is enabled with an `availability_zone`, that setting takes precedence over `preferred_zones`. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.",
 				Elem: &schema.Schema{
 					Description: "Zone ID. Example: `euc1-az1`.",
 					Type:        schema.TypeString,
@@ -216,7 +216,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Allow access to selected service ports from private networks",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"kafka_connect": {
-						Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `kafka_connect` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -239,7 +239,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"kafka_connect": {
-						Description: "Enable kafka_connect.",
+						Description: "Enable `kafka_connect`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -257,7 +257,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Allow access to selected service ports from the public Internet",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"kafka_connect": {
-						Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `kafka_connect` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -278,7 +278,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Type:        schema.TypeList,
 			},
 			"secret_providers": {
-				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
+				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, `auth_method`: token) and AWS Secrets Manager (provider: aws, `auth_method`: credentials) are supported. Secrets can be referenced in connector config with `${<provider_name>:<secret_path>:<key_name>}`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"aws": {
 						Description: "AWS secret provider configuration",

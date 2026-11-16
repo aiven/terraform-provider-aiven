@@ -63,14 +63,14 @@ resource "aiven_organization" "example" {
 ### Required
 
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
-- `plugin_name` (String) User-provided name identifying this custom plugin (e.g. 'my-custom-connectors'). Length must be between `1` and `64`. Changing this property forces recreation of the resource.
-- `plugin_version` (String) User-provided version string for this plugin upload. Must be a valid PEP 440 version (e.g. '2.7.14', '1.0.0a1', '2.7.14.dev0'). Length must be between `1` and `32`. Changing this property forces recreation of the resource.
+- `plugin_name` (String) User-provided name identifying this custom plugin (e.g. `my-custom-connectors`). Length must be between `1` and `64`. Changing this property forces recreation of the resource.
+- `plugin_version` (String) User-provided version string for this plugin upload. Must be a valid PEP 440 version (e.g. `2.7.14`, `1.0.0a1`, `2.7.14.dev0`). Length must be between `1` and `32`. Changing this property forces recreation of the resource.
 - `service_type` (String) The Aiven service type this plugin is intended for. The possible value is `kafka_connect`. Changing this property forces recreation of the resource.
 - `source` (String) Local path to the JAR or ZIP file to upload.
 
 ### Optional
 
-- `content_type` (String) MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.
+- `content_type` (String) MIME type of the plugin file being uploaded. Use `application/java-archive` for a single JAR file or `application/zip` for a ZIP plugin bundle. Defaults to `application/java-archive` when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.
 - `file_description` (String) Optional human-readable change notes specific to this plugin version. Maximum length: `256`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 

@@ -36,7 +36,7 @@ resource "aiven_project" "example_project" {
 ### Optional
 
 - `account_id` (String, Deprecated) Link a project to an existing account using its account ID. This field is deprecated. Use `parent_id` instead. To set up proper dependencies please refer to this variable as a reference.
-- `add_account_owners_admin_access` (Boolean, Deprecated) If parent_id is set, grant account owner team admin access to the new project. The default value is `true`.
+- `add_account_owners_admin_access` (Boolean, Deprecated) If `parent_id` is set, grant account owner team admin access to the new project. The default value is `true`.
 - `billing_group` (String) The ID of the billing group this project is assigned to. To set up proper dependencies please refer to this variable as a reference.
 - `copy_from_project` (String) The name of the project to copy billing information, technical contacts, and some other project attributes from. This is most useful to set up the same billing method when you use bank transfers to pay invoices for other projects. You can only do this when creating a project. You can't set the billing over the API for an existing. To set up proper dependencies please refer to this variable as a reference.
 - `default_cloud` (String) Default cloud provider and region where services are hosted. This can be changed after the project is created and will not affect existing services.

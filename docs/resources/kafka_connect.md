@@ -117,18 +117,18 @@ Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
 - `custom_plugins` (Block List, Max: 10) Install custom plugins uploaded via the custom file service (see [below for nested schema](#nestedblock--kafka_connect_user_config--custom_plugins))
-- `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.
+- `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP `credential_source` requests for Kafka Connect.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_connect_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `kafka_connect` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
 - `plugin_versions` (Block List) The plugin selected by the user (see [below for nested schema](#nestedblock--kafka_connect_user_config--plugin_versions))
-- `preferred_zones` (List of String) List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If single_zone is enabled with an availability_zone, that setting takes precedence over preferred_zones. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.
+- `preferred_zones` (List of String) List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If `single_zone` is enabled with an `availability_zone`, that setting takes precedence over `preferred_zones`. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_connect_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_connect_user_config--public_access))
 - `sasl_oauthbearer_allowed_urls` (List of String) List of allowed URLs for SASL OAUTHBEARER authentication. Only HTTPS URLs are allowed for security reasons.
-- `secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers))
+- `secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, `auth_method`: token) and AWS Secrets Manager (provider: aws, `auth_method`: credentials) are supported. Secrets can be referenced in connector config with `${<provider_name>:<secret_path>:<key_name>}` (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
@@ -161,17 +161,17 @@ Optional:
 - `connector_client_config_override_policy` (String) Enum: `All`, `None`. Defines what client configurations can be overridden by the connector. Default is None.
 - `consumer_auto_offset_reset` (String) Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.
 - `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
-- `consumer_isolation_level` (String) Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
+- `consumer_isolation_level` (String) Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. `read_uncommitted` is the default, but `read_committed` can be used if consume-exactly-once behavior is desired.
 - `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.
 - `consumer_max_poll_interval_ms` (Number) The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).
 - `offset_flush_timeout_ms` (Number) Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).
 - `prefer_ipv6_address_enable` (Boolean) When enabled, connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack. Default: `false`.
-- `producer_batch_size` (Number) This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).
+- `producer_batch_size` (Number) This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the `linger.ms` time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).
 - `producer_buffer_memory` (Number) The total bytes of memory the producer can use to buffer records waiting to be sent to the broker (defaults to 33554432).
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
-- `producer_linger_ms` (Number) This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.
+- `producer_linger_ms` (Number) This setting gives the upper bound on the delay for batching: once there is `batch.size` worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.
 - `producer_max_request_size` (Number) This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.
 - `scheduled_rebalance_max_delay_ms` (Number) The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.
 - `session_timeout_ms` (Number) The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
@@ -191,7 +191,7 @@ Required:
 
 Optional:
 
-- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `kafka_connect` (Boolean) Allow clients to connect to `kafka_connect` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 - `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
@@ -201,7 +201,7 @@ Optional:
 Optional:
 
 - `jolokia` (Boolean) Enable jolokia.
-- `kafka_connect` (Boolean) Enable kafka_connect.
+- `kafka_connect` (Boolean) Enable `kafka_connect`.
 - `prometheus` (Boolean) Enable prometheus.
 
 
@@ -210,7 +210,7 @@ Optional:
 
 Optional:
 
-- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.
+- `kafka_connect` (Boolean) Allow clients to connect to `kafka_connect` from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 

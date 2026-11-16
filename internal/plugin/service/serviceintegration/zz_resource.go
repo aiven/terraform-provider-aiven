@@ -145,7 +145,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"auto_offset_reset_by_duration_ms": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= 25.8. Maximum value: `2147483647`. The default value is `0`.",
+								MarkdownDescription: "When set to a non-zero value and there are no committed offsets, the consumer starts from the offset corresponding to (now - `auto_offset_reset_by_duration_ms`). This overrides `auto_offset_reset` when set. Requires ClickHouse >= `25.8`. Maximum value: `2147483647`. The default value is `0`.",
 								Optional:            true,
 								Validators:          []validator.Int64{int64validator.AtMost(2147483647)},
 							},
@@ -226,7 +226,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"producer_compression_level": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; -1 = codec-dependent default compression level. Maximum value: `12`. The default value is `-1`.",
+								MarkdownDescription: "The compression level to use when sending a batch of messages to Kafka. Usable range is algorithm-dependent: [0-9] for gzip; [0-12] for lz4; only 0 for snappy; `-1` = codec-dependent default compression level. Maximum value: `12`. The default value is `-1`.",
 								Optional:            true,
 								Validators:          []validator.Int64{int64validator.AtMost(12)},
 							},
@@ -250,7 +250,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"producer_request_required_acks": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, -1 will block until message is committed by all in sync replicas (ISRs). Maximum value: `1000`. The default value is `-1`.",
+								MarkdownDescription: "The number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: 0=Broker does not send any response/ack to client, `-1` will block until message is committed by all in sync replicas (ISRs). Maximum value: `1000`. The default value is `-1`.",
 								Optional:            true,
 								Validators:          []validator.Int64{int64validator.AtMost(1000)},
 							},
@@ -745,7 +745,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"consumer_max_poll_records": schema.Int64Attribute{
 								Computed:            true,
-								MarkdownDescription: "Set consumer max.poll.records. Default is `500`. Value must be between `100` and `20000`.",
+								MarkdownDescription: "Set consumer `max.poll.records`. Default is `500`. Value must be between `100` and `20000`.",
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 								Validators:          []validator.Int64{int64validator.Between(100, 20000)},
@@ -893,7 +893,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 								},
 								"gather_file_events_stats": schema.BoolAttribute{
 									Computed:            true,
-									MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
+									MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 									Optional:            true,
 									PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 								},
@@ -1001,7 +1001,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 							},
 							"gather_file_events_stats": schema.BoolAttribute{
 								Computed:            true,
-								MarkdownDescription: "gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
+								MarkdownDescription: "Gather metrics from `PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME`.",
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 							},
@@ -1105,7 +1105,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": legacytimeouts.BlockAll(ctx),
 		},
-		MarkdownDescription: "Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).\n\n-> Services integrations are not supported for services running on hobbyist plans.\n\nYou can set up an integration between two Aiven services or an Aiven service and an external service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).\n\nYou can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).\n\n~> **Warning:** For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size. See [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.\n\nIf this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).\n\n-> Services integrations are not supported for services running on hobbyist plans.\n\nYou can set up an integration between two Aiven services or an Aiven service and an external service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an [integration endpoint](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint).\n\nYou can also use service integrations to enable and use the [disk autoscaler](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler).\n\n~> **Warning:** For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.\nSee [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.\n\nIf this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
 		Version:             1,
 	}
 }

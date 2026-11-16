@@ -160,8 +160,8 @@ Optional:
 
 Optional:
 
-- `query_frontend` (Boolean) Allow clients to connect to query_frontend with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
-- `receiver_routing` (Boolean) Allow clients to connect to receiver_routing with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `query_frontend` (Boolean) Allow clients to connect to `query_frontend` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `receiver_routing` (Boolean) Allow clients to connect to `receiver_routing` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
 <a id="nestedblock--thanos_user_config--privatelink_access"></a>
@@ -169,8 +169,8 @@ Optional:
 
 Optional:
 
-- `query_frontend` (Boolean) Enable query_frontend.
-- `receiver_routing` (Boolean) Enable receiver_routing.
+- `query_frontend` (Boolean) Enable `query_frontend`.
+- `receiver_routing` (Boolean) Enable `receiver_routing`.
 
 
 <a id="nestedblock--thanos_user_config--public_access"></a>
@@ -180,9 +180,9 @@ Optional:
 
 - `compactor` (Boolean) Allow clients to connect to compactor from the public internet for service nodes that are in a project VPC or another type of private network.
 - `query` (Boolean) Allow clients to connect to query from the public internet for service nodes that are in a project VPC or another type of private network.
-- `query_frontend` (Boolean) Allow clients to connect to query_frontend from the public internet for service nodes that are in a project VPC or another type of private network.
-- `receiver_ingesting` (Boolean) Allow clients to connect to receiver_ingesting from the public internet for service nodes that are in a project VPC or another type of private network.
-- `receiver_routing` (Boolean) Allow clients to connect to receiver_routing from the public internet for service nodes that are in a project VPC or another type of private network.
+- `query_frontend` (Boolean) Allow clients to connect to `query_frontend` from the public internet for service nodes that are in a project VPC or another type of private network.
+- `receiver_ingesting` (Boolean) Allow clients to connect to `receiver_ingesting` from the public internet for service nodes that are in a project VPC or another type of private network.
+- `receiver_routing` (Boolean) Allow clients to connect to `receiver_routing` from the public internet for service nodes that are in a project VPC or another type of private network.
 - `ruler` (Boolean) Allow clients to connect to ruler from the public internet for service nodes that are in a project VPC or another type of private network.
 - `store` (Boolean) Allow clients to connect to store from the public internet for service nodes that are in a project VPC or another type of private network.
 
@@ -196,8 +196,8 @@ Optional:
 - `query_lookback_delta` (String) The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. Default: `5m`.
 - `query_metadata_default_time_range` (String) The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. Default: `0s`.
 - `query_timeout` (String) Maximum time to process a query by the query node. Default: `2m`.
-- `store_limits_request_samples` (Number) The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 * store.limits.request-series. Default: `0`.
-- `store_limits_request_series` (Number) The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 * cpu_count. Default: `0`.
+- `store_limits_request_samples` (Number) The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 `*` store.limits.request-series. Default: `0`.
+- `store_limits_request_series` (Number) The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 `*` `cpu_count`. Default: `0`.
 
 
 <a id="nestedblock--thanos_user_config--query_frontend"></a>

@@ -158,7 +158,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"mysql": {
-				Description: "mysql.conf configuration values",
+				Description: "`mysql.conf` configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"automatic_sp_privileges": {
 						Description: "When enabled, the server automatically grants the EXECUTE and ALTER ROUTINE privileges to the creator of a stored routine and drops them when the routine is dropped.",
@@ -166,7 +166,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"collation_server": {
-						Description:  "Enum: `utf8mb4_0900_ai_ci`, `utf8mb4_0900_as_ci`, `utf8mb4_0900_as_cs`, `utf8mb4_0900_bin`, `utf8mb4_bg_0900_ai_ci`, `utf8mb4_bg_0900_as_cs`, `utf8mb4_bin`, `utf8mb4_bs_0900_ai_ci`, `utf8mb4_bs_0900_as_cs`, `utf8mb4_croatian_ci`, `utf8mb4_cs_0900_ai_ci`, `utf8mb4_cs_0900_as_cs`, `utf8mb4_czech_ci`, `utf8mb4_da_0900_ai_ci`, `utf8mb4_da_0900_as_cs`, `utf8mb4_danish_ci`, `utf8mb4_de_pb_0900_ai_ci`, `utf8mb4_de_pb_0900_as_cs`, `utf8mb4_eo_0900_ai_ci`, `utf8mb4_eo_0900_as_cs`, `utf8mb4_es_0900_ai_ci`, `utf8mb4_es_0900_as_cs`, `utf8mb4_es_trad_0900_ai_ci`, `utf8mb4_es_trad_0900_as_cs`, `utf8mb4_esperanto_ci`, `utf8mb4_estonian_ci`, `utf8mb4_et_0900_ai_ci`, `utf8mb4_et_0900_as_cs`, `utf8mb4_general_ci`, `utf8mb4_german2_ci`, `utf8mb4_gl_0900_ai_ci`, `utf8mb4_gl_0900_as_cs`, `utf8mb4_hr_0900_ai_ci`, `utf8mb4_hr_0900_as_cs`, `utf8mb4_hu_0900_ai_ci`, `utf8mb4_hu_0900_as_cs`, `utf8mb4_hungarian_ci`, `utf8mb4_icelandic_ci`, `utf8mb4_is_0900_ai_ci`, `utf8mb4_is_0900_as_cs`, `utf8mb4_ja_0900_as_cs`, `utf8mb4_ja_0900_as_cs_ks`, `utf8mb4_la_0900_ai_ci`, `utf8mb4_la_0900_as_cs`, `utf8mb4_latvian_ci`, `utf8mb4_lithuanian_ci`, `utf8mb4_lt_0900_ai_ci`, `utf8mb4_lt_0900_as_cs`, `utf8mb4_lv_0900_ai_ci`, `utf8mb4_lv_0900_as_cs`, `utf8mb4_mn_cyrl_0900_ai_ci`, `utf8mb4_mn_cyrl_0900_as_cs`, `utf8mb4_nb_0900_ai_ci`, `utf8mb4_nb_0900_as_cs`, `utf8mb4_nn_0900_ai_ci`, `utf8mb4_nn_0900_as_cs`, `utf8mb4_persian_ci`, `utf8mb4_pl_0900_ai_ci`, `utf8mb4_pl_0900_as_cs`, `utf8mb4_polish_ci`, `utf8mb4_ro_0900_ai_ci`, `utf8mb4_ro_0900_as_cs`, `utf8mb4_roman_ci`, `utf8mb4_romanian_ci`, `utf8mb4_ru_0900_ai_ci`, `utf8mb4_ru_0900_as_cs`, `utf8mb4_sinhala_ci`, `utf8mb4_sk_0900_ai_ci`, `utf8mb4_sk_0900_as_cs`, `utf8mb4_sl_0900_ai_ci`, `utf8mb4_sl_0900_as_cs`, `utf8mb4_slovak_ci`, `utf8mb4_slovenian_ci`, `utf8mb4_spanish2_ci`, `utf8mb4_spanish_ci`, `utf8mb4_sr_latn_0900_ai_ci`, `utf8mb4_sr_latn_0900_as_cs`, `utf8mb4_sv_0900_ai_ci`, `utf8mb4_sv_0900_as_cs`, `utf8mb4_swedish_ci`, `utf8mb4_tr_0900_ai_ci`, `utf8mb4_tr_0900_as_cs`, `utf8mb4_turkish_ci`, `utf8mb4_unicode_520_ci`, `utf8mb4_unicode_ci`, `utf8mb4_vi_0900_ai_ci`, `utf8mb4_vi_0900_as_cs`, `utf8mb4_vietnamese_ci`, `utf8mb4_zh_0900_as_cs`. The default collation for databases created without one, which their new tables then inherit. Only collations of the utf8mb4 character set are accepted. Databases Aiven creates, defaultdb and those added through the API or Console, keep utf8mb4_0900_ai_ci. Changing it leaves existing databases as they are. A change applies to new connections at once. After the next server restart, for example at maintenance, an upgrade, a plan change or a node replacement, sessions reset with COM_RESET_CONNECTION also compare strings with this collation, which a change without a restart does not do. Every 0900 collation except utf8mb4_0900_ai_ci has an id above 255, so after that restart MySQL announces a wrong character set to connecting clients. Clients that take their character set from the server, such as PHP mysqli and PDO without a charset option and MySQL Connector/NET (MySql.Data) without CharSet, must then set utf8mb4 themselves. Default is utf8mb4_0900_ai_ci.",
+						Description:  "Enum: `utf8mb4_0900_ai_ci`, `utf8mb4_0900_as_ci`, `utf8mb4_0900_as_cs`, `utf8mb4_0900_bin`, `utf8mb4_bg_0900_ai_ci`, `utf8mb4_bg_0900_as_cs`, `utf8mb4_bin`, `utf8mb4_bs_0900_ai_ci`, `utf8mb4_bs_0900_as_cs`, `utf8mb4_croatian_ci`, `utf8mb4_cs_0900_ai_ci`, `utf8mb4_cs_0900_as_cs`, `utf8mb4_czech_ci`, `utf8mb4_da_0900_ai_ci`, `utf8mb4_da_0900_as_cs`, `utf8mb4_danish_ci`, `utf8mb4_de_pb_0900_ai_ci`, `utf8mb4_de_pb_0900_as_cs`, `utf8mb4_eo_0900_ai_ci`, `utf8mb4_eo_0900_as_cs`, `utf8mb4_es_0900_ai_ci`, `utf8mb4_es_0900_as_cs`, `utf8mb4_es_trad_0900_ai_ci`, `utf8mb4_es_trad_0900_as_cs`, `utf8mb4_esperanto_ci`, `utf8mb4_estonian_ci`, `utf8mb4_et_0900_ai_ci`, `utf8mb4_et_0900_as_cs`, `utf8mb4_general_ci`, `utf8mb4_german2_ci`, `utf8mb4_gl_0900_ai_ci`, `utf8mb4_gl_0900_as_cs`, `utf8mb4_hr_0900_ai_ci`, `utf8mb4_hr_0900_as_cs`, `utf8mb4_hu_0900_ai_ci`, `utf8mb4_hu_0900_as_cs`, `utf8mb4_hungarian_ci`, `utf8mb4_icelandic_ci`, `utf8mb4_is_0900_ai_ci`, `utf8mb4_is_0900_as_cs`, `utf8mb4_ja_0900_as_cs`, `utf8mb4_ja_0900_as_cs_ks`, `utf8mb4_la_0900_ai_ci`, `utf8mb4_la_0900_as_cs`, `utf8mb4_latvian_ci`, `utf8mb4_lithuanian_ci`, `utf8mb4_lt_0900_ai_ci`, `utf8mb4_lt_0900_as_cs`, `utf8mb4_lv_0900_ai_ci`, `utf8mb4_lv_0900_as_cs`, `utf8mb4_mn_cyrl_0900_ai_ci`, `utf8mb4_mn_cyrl_0900_as_cs`, `utf8mb4_nb_0900_ai_ci`, `utf8mb4_nb_0900_as_cs`, `utf8mb4_nn_0900_ai_ci`, `utf8mb4_nn_0900_as_cs`, `utf8mb4_persian_ci`, `utf8mb4_pl_0900_ai_ci`, `utf8mb4_pl_0900_as_cs`, `utf8mb4_polish_ci`, `utf8mb4_ro_0900_ai_ci`, `utf8mb4_ro_0900_as_cs`, `utf8mb4_roman_ci`, `utf8mb4_romanian_ci`, `utf8mb4_ru_0900_ai_ci`, `utf8mb4_ru_0900_as_cs`, `utf8mb4_sinhala_ci`, `utf8mb4_sk_0900_ai_ci`, `utf8mb4_sk_0900_as_cs`, `utf8mb4_sl_0900_ai_ci`, `utf8mb4_sl_0900_as_cs`, `utf8mb4_slovak_ci`, `utf8mb4_slovenian_ci`, `utf8mb4_spanish2_ci`, `utf8mb4_spanish_ci`, `utf8mb4_sr_latn_0900_ai_ci`, `utf8mb4_sr_latn_0900_as_cs`, `utf8mb4_sv_0900_ai_ci`, `utf8mb4_sv_0900_as_cs`, `utf8mb4_swedish_ci`, `utf8mb4_tr_0900_ai_ci`, `utf8mb4_tr_0900_as_cs`, `utf8mb4_turkish_ci`, `utf8mb4_unicode_520_ci`, `utf8mb4_unicode_ci`, `utf8mb4_vi_0900_ai_ci`, `utf8mb4_vi_0900_as_cs`, `utf8mb4_vietnamese_ci`, `utf8mb4_zh_0900_as_cs`. The default collation for databases created without one, which their new tables then inherit. Only collations of the utf8mb4 character set are accepted. Databases Aiven creates, defaultdb and those added through the API or Console, keep `utf8mb4_0900_ai_ci`. Changing it leaves existing databases as they are. A change applies to new connections at once. After the next server restart, for example at maintenance, an upgrade, a plan change or a node replacement, sessions reset with `COM_RESET_CONNECTION` also compare strings with this collation, which a change without a restart does not do. Every 0900 collation except `utf8mb4_0900_ai_ci` has an id above 255, so after that restart MySQL announces a wrong character set to connecting clients. Clients that take their character set from the server, such as PHP mysqli and PDO without a charset option and MySQL Connector/NET (MySql.Data) without CharSet, must then set utf8mb4 themselves. Default is `utf8mb4_0900_ai_ci`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"utf8mb4_0900_ai_ci", "utf8mb4_0900_as_ci", "utf8mb4_0900_as_cs", "utf8mb4_0900_bin", "utf8mb4_bg_0900_ai_ci", "utf8mb4_bg_0900_as_cs", "utf8mb4_bin", "utf8mb4_bs_0900_ai_ci", "utf8mb4_bs_0900_as_cs", "utf8mb4_croatian_ci", "utf8mb4_cs_0900_ai_ci", "utf8mb4_cs_0900_as_cs", "utf8mb4_czech_ci", "utf8mb4_da_0900_ai_ci", "utf8mb4_da_0900_as_cs", "utf8mb4_danish_ci", "utf8mb4_de_pb_0900_ai_ci", "utf8mb4_de_pb_0900_as_cs", "utf8mb4_eo_0900_ai_ci", "utf8mb4_eo_0900_as_cs", "utf8mb4_es_0900_ai_ci", "utf8mb4_es_0900_as_cs", "utf8mb4_es_trad_0900_ai_ci", "utf8mb4_es_trad_0900_as_cs", "utf8mb4_esperanto_ci", "utf8mb4_estonian_ci", "utf8mb4_et_0900_ai_ci", "utf8mb4_et_0900_as_cs", "utf8mb4_general_ci", "utf8mb4_german2_ci", "utf8mb4_gl_0900_ai_ci", "utf8mb4_gl_0900_as_cs", "utf8mb4_hr_0900_ai_ci", "utf8mb4_hr_0900_as_cs", "utf8mb4_hu_0900_ai_ci", "utf8mb4_hu_0900_as_cs", "utf8mb4_hungarian_ci", "utf8mb4_icelandic_ci", "utf8mb4_is_0900_ai_ci", "utf8mb4_is_0900_as_cs", "utf8mb4_ja_0900_as_cs", "utf8mb4_ja_0900_as_cs_ks", "utf8mb4_la_0900_ai_ci", "utf8mb4_la_0900_as_cs", "utf8mb4_latvian_ci", "utf8mb4_lithuanian_ci", "utf8mb4_lt_0900_ai_ci", "utf8mb4_lt_0900_as_cs", "utf8mb4_lv_0900_ai_ci", "utf8mb4_lv_0900_as_cs", "utf8mb4_mn_cyrl_0900_ai_ci", "utf8mb4_mn_cyrl_0900_as_cs", "utf8mb4_nb_0900_ai_ci", "utf8mb4_nb_0900_as_cs", "utf8mb4_nn_0900_ai_ci", "utf8mb4_nn_0900_as_cs", "utf8mb4_persian_ci", "utf8mb4_pl_0900_ai_ci", "utf8mb4_pl_0900_as_cs", "utf8mb4_polish_ci", "utf8mb4_ro_0900_ai_ci", "utf8mb4_ro_0900_as_cs", "utf8mb4_roman_ci", "utf8mb4_romanian_ci", "utf8mb4_ru_0900_ai_ci", "utf8mb4_ru_0900_as_cs", "utf8mb4_sinhala_ci", "utf8mb4_sk_0900_ai_ci", "utf8mb4_sk_0900_as_cs", "utf8mb4_sl_0900_ai_ci", "utf8mb4_sl_0900_as_cs", "utf8mb4_slovak_ci", "utf8mb4_slovenian_ci", "utf8mb4_spanish2_ci", "utf8mb4_spanish_ci", "utf8mb4_sr_latn_0900_ai_ci", "utf8mb4_sr_latn_0900_as_cs", "utf8mb4_sv_0900_ai_ci", "utf8mb4_sv_0900_as_cs", "utf8mb4_swedish_ci", "utf8mb4_tr_0900_ai_ci", "utf8mb4_tr_0900_as_cs", "utf8mb4_turkish_ci", "utf8mb4_unicode_520_ci", "utf8mb4_unicode_ci", "utf8mb4_vi_0900_ai_ci", "utf8mb4_vi_0900_as_cs", "utf8mb4_vietnamese_ci", "utf8mb4_zh_0900_as_cs"}, false),
@@ -203,7 +203,7 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"OFF", "ON"}, false),
 					},
 					"group_concat_max_len": {
-						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.",
+						Description: "The maximum permitted result length in bytes for the `GROUP_CONCAT()` function. Example: `1024`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -228,7 +228,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"innodb_ft_cache_size": {
-						Description: "The size in bytes of the InnoDB FULLTEXT index cache for each table. Pending index updates are flushed to disk when the cache reaches this limit. innodb_ft_total_cache_size controls the combined cache limit for all tables. Default is 8000000. Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "The size in bytes of the InnoDB FULLTEXT index cache for each table. Pending index updates are flushed to disk when the cache reaches this limit. `innodb_ft_total_cache_size` controls the combined cache limit for all tables. Default is 8000000. Changing this parameter will lead to a restart of the MySQL service.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -278,12 +278,12 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"innodb_io_capacity": {
-						Description: "The number of I/O operations per second (IOPS) available to InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer. Set this to a value appropriate for the underlying storage; it must not exceed innodb_io_capacity_max. Example: `2000`.",
+						Description: "The number of I/O operations per second (IOPS) available to InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer. Set this to a value appropriate for the underlying storage; it must not exceed `innodb_io_capacity_max`. Example: `2000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_io_capacity_max": {
-						Description: "The maximum number of I/O operations per second (IOPS) that InnoDB background tasks may perform when flushing falls behind. Defaults to twice innodb_io_capacity (minimum 2000). This must be greater than or equal to innodb_io_capacity.",
+						Description: "The maximum number of I/O operations per second (IOPS) that InnoDB background tasks may perform when flushing falls behind. Defaults to twice `innodb_io_capacity` (minimum 2000). This must be greater than or equal to `innodb_io_capacity`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -298,22 +298,22 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"innodb_max_dirty_pages_pct": {
-						Description: "Percentage of dirty pages in the InnoDB buffer pool at which InnoDB starts flushing aggressively. Lowering it spreads write I/O more evenly and shortens crash recovery, at the cost of flushing pages that might have been modified again. Must stay at or above innodb_max_dirty_pages_pct_lwm. Default is 90. Example: `75`.",
+						Description: "Percentage of dirty pages in the InnoDB buffer pool at which InnoDB starts flushing aggressively. Lowering it spreads write I/O more evenly and shortens crash recovery, at the cost of flushing pages that might have been modified again. Must stay at or above `innodb_max_dirty_pages_pct_lwm`. Default is 90. Example: `75`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
 					"innodb_max_dirty_pages_pct_lwm": {
-						Description: "Percentage of dirty pages in the InnoDB buffer pool at which InnoDB starts pre-flushing, to keep the dirty page ratio from reaching innodb_max_dirty_pages_pct. 0 turns pre-flushing off. Cannot be set above innodb_max_dirty_pages_pct. Default is 10. Example: `10`.",
+						Description: "Percentage of dirty pages in the InnoDB buffer pool at which InnoDB starts pre-flushing, to keep the dirty page ratio from reaching `innodb_max_dirty_pages_pct`. 0 turns pre-flushing off. Cannot be set above `innodb_max_dirty_pages_pct`. Default is 10. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
 					"innodb_max_purge_lag": {
-						Description: "Number of outstanding transactions the InnoDB purge operation may fall behind by before INSERT, UPDATE and DELETE are delayed to let it catch up. The delay applies per row and grows with the lag, and it is capped by innodb_max_purge_lag_delay, which has to be set as well for this option to have any effect. Default is 0, which never delays anything.",
+						Description: "Number of outstanding transactions the InnoDB purge operation may fall behind by before INSERT, UPDATE and DELETE are delayed to let it catch up. The delay applies per row and grows with the lag, and it is capped by `innodb_max_purge_lag_delay`, which has to be set as well for this option to have any effect. Default is 0, which never delays anything.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_max_purge_lag_delay": {
-						Description: "Cap in microseconds on the per-row delay innodb_max_purge_lag applies to INSERT, UPDATE and DELETE. MySQL clamps the delay to this value unconditionally, so while this is 0 no delay is ever applied and innodb_max_purge_lag on its own does nothing. Both options must be non-zero for either to take effect. Default is 0. Example: `10000`.",
+						Description: "Cap in microseconds on the per-row delay `innodb_max_purge_lag` applies to INSERT, UPDATE and DELETE. MySQL clamps the delay to this value unconditionally, so while this is 0 no delay is ever applied and `innodb_max_purge_lag` on its own does nothing. Both options must be non-zero for either to take effect. Default is 0. Example: `10000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -369,13 +369,13 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"MEMORY", "TempTable"}, false),
 					},
 					"log_output": {
-						Description:  "Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.",
+						Description:  "Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when `slow_query_log` is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the `mysql.slow_log` table at the same time, choose INSIGHTS,TABLE. To only use the `mysql.slow_log` table, choose TABLE. To silence slow logs, choose NONE.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "INSIGHTS,TABLE", "NONE", "TABLE"}, false),
 					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Requests to set this below 0.05 seconds are rejected. Lower values log almost every statement, which can fill the disk, and AI Insights ignores queries under 50 ms. Example: `10`.",
+						Description: "The `slow_query_logs` work as SQL statements that take more than `long_query_time` seconds to execute. Requests to set this below `0.05` seconds are rejected. Lower values log almost every statement, which can fill the disk, and AI Insights ignores queries under 50 ms. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -402,7 +402,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_heap_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
+						Description: "Limits the size of internal in-memory tables. Also set `tmp_table_size`. Default is 16777216 (16M).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -412,7 +412,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_user_connections": {
-						Description: "The maximum number of simultaneous connections permitted to any single user account. 0, the default, means no per-account limit. Any other value must be at least 10 below max_connections, so that monitoring and your own admin sessions can still connect when an application saturates its own limit. Aiven's replication and management connections are unaffected however low you set this. Example: `50`.",
+						Description: "The maximum number of simultaneous connections permitted to any single user account. 0, the default, means no per-account limit. Any other value must be at least 10 below `max_connections`, so that monitoring and your own admin sessions can still connect when an application saturates its own limit. Aiven's replication and management connections are unaffected however low you set this. Example: `50`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -447,7 +447,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"performance_schema_events_statements_history_size": {
-						Description: "The number of rows per thread in the events_statements_history table. Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "The number of rows per thread in the `events_statements_history` table. Changing this parameter will lead to a restart of the MySQL service.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -462,7 +462,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"slow_query_log": {
-						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
+						Description: "Slow query log enables capturing of slow queries. Setting `slow_query_log` to false also truncates the `mysql.slow_log` table.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -487,7 +487,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"tmp_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",
+						Description: "Limits the size of internal in-memory tables. Also set `max_heap_table_size`. Default is 16777216 (16M).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -510,7 +510,7 @@ func mysqlUserConfig() *schema.Schema {
 				Description: "MySQL incremental backup configuration",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"enabled": {
-						Description: "Enable periodic incremental backups. When enabled, full_backup_week_schedule must be set. Incremental backups only store changes since the last backup, making them faster and more storage-efficient than full backups. This is particularly useful for large databases where daily full backups would be too time-consuming or expensive.",
+						Description: "Enable periodic incremental backups. When enabled, `full_backup_week_schedule` must be set. Incremental backups only store changes since the last backup, making them faster and more storage-efficient than full backups. This is particularly useful for large databases where daily full backups would be too time-consuming or expensive.",
 						Required:    true,
 						Type:        schema.TypeBool,
 					},

@@ -168,10 +168,10 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"pg": {
-				Description: "postgresql.conf configuration values",
+				Description: "`postgresql.conf` configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"autovacuum_analyze_scale_factor": {
-						Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE (e.g. `0.2` for 20% of the table size). The default is `0.2`.",
+						Description: "Specifies a fraction of the table size to add to `autovacuum_analyze_threshold` when deciding whether to trigger an ANALYZE (e.g. `0.2` for 20% of the table size). The default is `0.2`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -181,7 +181,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autovacuum_freeze_max_age": {
-						Description: "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.",
+						Description: "Specifies the maximum age (in transactions) that a table's `pg_class.relfrozenxid` field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. The system launches autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -196,17 +196,17 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autovacuum_vacuum_cost_delay": {
-						Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If `-1` is specified, the regular vacuum_cost_delay value will be used. The default is `2` (upstream default).",
+						Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If `-1` is specified, the regular `vacuum_cost_delay` value will be used. The default is `2` (upstream default).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"autovacuum_vacuum_cost_limit": {
-						Description: "Specifies the cost limit value that will be used in automatic VACUUM operations. If `-1` is specified, the regular vacuum_cost_limit value will be used. The default is `-1` (upstream default).",
+						Description: "Specifies the cost limit value that will be used in automatic VACUUM operations. If `-1` is specified, the regular `vacuum_cost_limit` value will be used. The default is `-1` (upstream default).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"autovacuum_vacuum_scale_factor": {
-						Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM (e.g. `0.2` for 20% of the table size). The default is `0.2`.",
+						Description: "Specifies a fraction of the table size to add to `autovacuum_vacuum_threshold` when deciding whether to trigger a VACUUM (e.g. `0.2` for 20% of the table size). The default is `0.2`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -221,7 +221,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"bgwriter_flush_after": {
-						Description: "Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes. Setting of 0 disables forced writeback. The default is `512`. Example: `512`.",
+						Description: "Whenever more than `bgwriter_flush_after` bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes. Setting of 0 disables forced writeback. The default is `512`. Example: `512`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -231,7 +231,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"bgwriter_lru_multiplier": {
-						Description: "The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.",
+						Description: "The average recent need for new buffers is multiplied by `bgwriter_lru_multiplier` to arrive at an estimate of the number that will be needed during the next round, (up to `bgwriter_lru_maxpages`). `1.0` represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is `2.0`. Example: `2`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -257,7 +257,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"io_max_combine_limit": {
-						Description: "EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter io_combine_limit. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.",
+						Description: "EXPERIMENTAL: Controls the largest I/O size in operations that combine I/O in 8kB units, and silently limits the user-settable parameter `io_combine_limit`. Version 18 and up only. Changing this parameter causes a service restart. Default: `16`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -273,7 +273,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"io_uring", "sync", "worker"}, false),
 					},
 					"io_workers": {
-						Description: "EXPERIMENTAL: Number of IO worker processes, for io_method=worker. Version 18 and up only.",
+						Description: "EXPERIMENTAL: Number of IO worker processes, for `io_method=worker`. Version 18 and up only.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -300,12 +300,12 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"'%m [%p] %q[user=%u,db=%d,app=%a] '", "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '", "'pid=%p,user=%u,db=%d,app=%a,client=%h '", "'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '"}, false),
 					},
 					"log_min_duration_statement": {
-						Description: "Log statements that take more than this number of milliseconds to run, -1 disables.",
+						Description: "Log statements that take more than this number of milliseconds to run, `-1` disables.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_temp_files": {
-						Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables.",
+						Description: "Log statements for each temporary file created larger than this number of kilobytes, `-1` disables.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -325,7 +325,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_logical_replication_workers": {
-						Description: "PostgreSQL maximum logical replication workers (taken from the pool defined by max_worker_processes). The default is `4` (upstream default). Changing this parameter causes a service restart.",
+						Description: "PostgreSQL maximum logical replication workers (taken from the pool defined by `max_worker_processes`). The default is `4` (upstream default). Changing this parameter causes a service restart.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -355,7 +355,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_slot_wal_keep_size": {
-						Description: "PostgreSQL maximum WAL size (MB) reserved for replication slots. If `-1` is specified, replication slots may retain an unlimited amount of WAL files. The default is `-1` (upstream default). wal_keep_size minimum WAL size setting takes precedence over this.",
+						Description: "PostgreSQL maximum WAL size (MB) reserved for replication slots. If `-1` is specified, replication slots may retain an unlimited amount of WAL files. The default is `-1` (upstream default). `wal_keep_size` minimum WAL size setting takes precedence over this.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -396,12 +396,12 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"md5", "scram-sha-256"}, false),
 					},
 					"pg_partman_bgw__dot__interval": {
-						Description: "Sets the time interval in seconds to run pg_partman's scheduled tasks. The default is `3600`. Example: `3600`.",
+						Description: "Sets the time interval in seconds to run `pg_partman`'s scheduled tasks. The default is `3600`. Example: `3600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"pg_partman_bgw__dot__role": {
-						Description: "Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.",
+						Description: "Controls which role to use for `pg_partman`'s scheduled background tasks. Example: `myrolename`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -434,7 +434,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"local", "off", "on", "remote_apply", "remote_write"}, false),
 					},
 					"temp_file_limit": {
-						Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited.",
+						Description: "PostgreSQL temporary file limit in KiB, `-1` for unlimited.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -483,11 +483,11 @@ func pgUserConfig() *schema.Schema {
 			},
 			"pg_qualstats": {
 				Deprecated:  "This property is deprecated.",
-				Description: "System-wide settings for the pg_qualstats extension",
+				Description: "System-wide settings for the `pg_qualstats` extension",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"enabled": {
 						Deprecated:  "This property is deprecated.",
-						Description: "Enable / Disable pg_qualstats. Default: `false`.",
+						Description: "Enable / Disable `pg_qualstats`. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -505,7 +505,7 @@ func pgUserConfig() *schema.Schema {
 					},
 					"track_constants": {
 						Deprecated:  "This property is deprecated.",
-						Description: "Enable / Disable pg_qualstats constants tracking. Default: `true`.",
+						Description: "Enable / Disable `pg_qualstats` constants tracking. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -521,23 +521,23 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"pg_read_replica": {
-				Description: "Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).",
+				Description: "Should the service which is being forked be a read replica (deprecated, use `read_replica` service integration instead).",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"pg_service_to_fork_from": {
-				Description: "Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created. Example: `anotherservicename`.",
+				Description: "Name of the PG Service from which to fork (deprecated, use `service_to_fork_from`). This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"pg_stat_monitor_enable": {
-				Description: "Enable the pg_stat_monitor extension. Changing this parameter causes a service restart. When this extension is enabled, pg_stat_statements results for utility commands are unreliable. Default: `false`.",
+				Description: "Enable the `pg_stat_monitor` extension. Changing this parameter causes a service restart. When this extension is enabled, `pg_stat_statements` results for utility commands are unreliable. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"pg_stat_plans_enable": {
-				Description: "Enable the pg_stat_plans extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.",
+				Description: "Enable the `pg_stat_plans` extension. Changing this parameter causes a service restart. Tracks execution plans for SQL queries. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -565,7 +565,7 @@ func pgUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"log_catalog": {
-						Description: "Specifies that session logging should be enabled in the case where all relations in a statement are in pg_catalog. Default: `true`.",
+						Description: "Specifies that session logging should be enabled in the case where all relations in a statement are in `pg_catalog`. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -581,7 +581,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"debug1", "debug2", "debug3", "debug4", "debug5", "info", "log", "notice", "warning"}, false),
 					},
 					"log_max_string_length": {
-						Description: "Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. Default: `-1`.",
+						Description: "Crop parameters representation and whole statements if they exceed this threshold. A (default) value of `-1` disable the truncation. Default: `-1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -596,7 +596,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"log_parameter_max_size": {
-						Description: "Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. Default: `0`.",
+						Description: "Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with `<long param suppressed>`. Default: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -666,7 +666,7 @@ func pgUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"max_prepared_statements": {
-						Description: "PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.",
+						Description: "PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when `max_prepared_statements` is set to a non-zero value. Setting it to 0 disables prepared statements. `max_prepared_statements` defaults to 100, and its maximum is 3000. Default: `100`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -696,7 +696,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeFloat,
 					},
 					"server_reset_query_always": {
-						Description: "Run server_reset_query (DISCARD ALL) in all pooling modes. Default: `false`.",
+						Description: "Run `server_reset_query` (DISCARD ALL) in all pooling modes. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -809,7 +809,7 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"shared_buffers_percentage": {
-				Description: "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. Changing this parameter causes a service restart. Example: `41.5`.",
+				Description: "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the `shared_buffers` configuration value. Changing this parameter causes a service restart. Example: `41.5`.",
 				Optional:    true,
 				Type:        schema.TypeFloat,
 			},
@@ -842,7 +842,7 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"synchronous_replication": {
-				Description:  "Enum: `off`, `quorum`. Use synchronous_commit instead. Any change to this setting will automatically update synchronous_commit. Setting the value to quorum changes synchronous_commit to remote_write, while setting it to off changes synchronous_commit to off.",
+				Description:  "Enum: `off`, `quorum`. Use `synchronous_commit` instead. Any change to this setting will automatically update `synchronous_commit`. Setting the value to quorum changes `synchronous_commit` to `remote_write`, while setting it to off changes `synchronous_commit` to off.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"off", "quorum"}, false),

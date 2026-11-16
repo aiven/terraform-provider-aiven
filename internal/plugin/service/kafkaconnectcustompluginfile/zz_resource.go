@@ -21,7 +21,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"content_type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "MIME type of the plugin file being uploaded. Use 'application/java-archive' for a single JAR file or 'application/zip' for a ZIP plugin bundle. Defaults to 'application/java-archive' when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "MIME type of the plugin file being uploaded. Use `application/java-archive` for a single JAR file or `application/zip` for a ZIP plugin bundle. Defaults to `application/java-archive` when omitted. The possible values are `application/java-archive` and `application/zip`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.OneOf("application/java-archive", "application/zip")},
@@ -120,13 +120,13 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"plugin_name": schema.StringAttribute{
-				MarkdownDescription: "User-provided name identifying this custom plugin (e.g. 'my-custom-connectors'). Length must be between `1` and `64`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "User-provided name identifying this custom plugin (e.g. `my-custom-connectors`). Length must be between `1` and `64`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 64)},
 			},
 			"plugin_version": schema.StringAttribute{
-				MarkdownDescription: "User-provided version string for this plugin upload. Must be a valid PEP 440 version (e.g. '2.7.14', '1.0.0a1', '2.7.14.dev0'). Length must be between `1` and `32`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "User-provided version string for this plugin upload. Must be a valid PEP 440 version (e.g. `2.7.14`, `1.0.0a1`, `2.7.14.dev0`). Length must be between `1` and `32`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthBetween(1, 32)},

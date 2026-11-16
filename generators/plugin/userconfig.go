@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -141,17 +140,12 @@ func pascalCase(s string) string {
 	return strings.Join(parts, "")
 }
 
-// reUserConfigCode matches a single-quoted token without whitespace, e.g. 'aiven-'.
-var reUserConfigCode = regexp.MustCompile(`'([^'\s]+)'`)
-
-// userConfigDescription prefers the longer of the description and the title,
-// and wraps single-quoted tokens in backticks, as SDKv2 user configs do.
+// userConfigDescription prefers the longer of the description and the title, as SDKv2 user configs do.
 func userConfigDescription(s *OASchema) string {
-	d := s.Description
-	if len(d) < len(s.Title) {
-		d = s.Title
+	if len(s.Description) < len(s.Title) {
+		return s.Title
 	}
-	return reUserConfigCode.ReplaceAllString(d, "`$1`")
+	return s.Description
 }
 
 // keepUserConfigState plans the user config options missing in the config with their state values.

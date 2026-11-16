@@ -54,7 +54,7 @@ resource "aiven_opensearch" "example_opensearch" {
 ### Read-Only
 
 - `id` (String) Resource ID composed as: `project/service_name/username`.
-- `password_encryption_type` (String) The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.
+- `password_encryption_type` (String) The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. `unknown` is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.
 - `type` (String) Account type.
 
 <a id="nestedblock--timeouts"></a>

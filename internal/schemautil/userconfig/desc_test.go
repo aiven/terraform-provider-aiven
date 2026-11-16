@@ -46,6 +46,66 @@ func TestDescriptionBuilder_Build(t *testing.T) {
 			want: "Batch size. The default value is `1000000`.",
 		},
 		{
+			name: "drops extra trailing dots",
+			desc: Desc("Service setting.. "),
+			want: "Service setting.",
+		},
+		{
+			name: "keeps question mark",
+			desc: Desc("Is it enabled?"),
+			want: "Is it enabled?",
+		},
+		{
+			name: "keeps a closing code fence",
+			desc: Desc("Example:\n```\nfoo\n```"),
+			want: "Example:\n```\nfoo\n```",
+		},
+		{
+			name: "keeps appended sentences outside a code fence",
+			desc: Desc("Example:\n\n```\ncode\n```").DefaultValue(42).ForceNew(),
+			want: "Example:\n\n```\ncode\n```\n\nThe default value is `42`. Changing this property forces recreation of the resource.",
+		},
+		{
+			name: "capitalizes a leading word",
+			desc: Desc("service setting"),
+			want: "Service setting.",
+		},
+		{
+			name: "keeps a leading literal",
+			desc: Desc("fnmatch pattern"),
+			want: "fnmatch pattern.",
+		},
+		{
+			name: "wraps a leading identifier in code",
+			desc: Desc("user_operations records API calls"),
+			want: "`user_operations` records API calls.",
+		},
+		{
+			name: "wraps single-quoted tokens in code",
+			desc: Desc("Prefix 'aiven-' is reserved. Values: 'delete', 'compact'. Symbols: '.', '_id'. 'http://'/'https://' URL. Don't touch apostrophes"),
+			want: "Prefix `aiven-` is reserved. Values: `delete`, `compact`. Symbols: `.`, `_id`. `http://`/`https://` URL. Don't touch apostrophes.",
+		},
+		{
+			name: "wraps wildcards in code",
+			desc: Desc("The host or * for all hosts, foo * bar, or public-*, logs_*_foo_* names"),
+			want: "The host or `*` for all hosts, foo `*` bar, or `public-*`, `logs_*_foo_*` names.",
+		},
+		{
+			name: "keeps emphasis and code",
+			desc: Desc("**Bold** and *italic*, **bold text**, a*b, (*), ends with *, already `*` and `'x'` wrapped"),
+			want: "**Bold** and *italic*, **bold text**, a*b, (*), ends with *, already `*` and `'x'` wrapped.",
+		},
+		{
+			name: "wraps placeholders in code",
+			desc: Desc("Each entry is <group object ID>:<org ID>:<role>. Use ${<provider>:<key>}, or Bearer <token>"),
+			want: "Each entry is `<group object ID>:<org ID>:<role>`. Use `${<provider>:<key>}`, or Bearer `<token>`.",
+		},
+		{
+			name: "keeps code and comparisons as is",
+			desc: Desc("Example: `https://example.com/<TENANT_ID>/token`. Requires a < b and c > d\n\n```\n<root>\n```"),
+			want: "Example: `https://example.com/<TENANT_ID>/token`. Requires a < b and c > d\n\n```\n<root>\n```",
+		},
+		{
 			name: "adds beta availability warning",
 			desc: Desc("Service setting").Beta(),
 			want: "Service setting. " + `

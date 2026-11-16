@@ -37,7 +37,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"currently_active": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "true if API request was made with this access token.",
+				MarkdownDescription: "True if API request was made with this access token.",
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Description. Maximum length: `1000`. Changing this property forces recreation of the resource.",

@@ -92,17 +92,17 @@ func clickhouseUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_arrowflight": {
-						Description: "Allow clients to connect to clickhouse_arrowflight with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `clickhouse_arrowflight` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_https": {
-						Description: "Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `clickhouse_https` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_mysql": {
-						Description: "Allow clients to connect to clickhouse_mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `clickhouse_mysql` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -125,17 +125,17 @@ func clickhouseUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_arrowflight": {
-						Description: "Enable clickhouse_arrowflight.",
+						Description: "Enable `clickhouse_arrowflight`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_https": {
-						Description: "Enable clickhouse_https.",
+						Description: "Enable `clickhouse_https`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_mysql": {
-						Description: "Enable clickhouse_mysql.",
+						Description: "Enable `clickhouse_mysql`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -164,17 +164,17 @@ func clickhouseUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_arrowflight": {
-						Description: "Allow clients to connect to clickhouse_arrowflight from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `clickhouse_arrowflight` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_https": {
-						Description: "Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `clickhouse_https` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"clickhouse_mysql": {
-						Description: "Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `clickhouse_mysql` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -196,7 +196,7 @@ func clickhouseUserConfig() *schema.Schema {
 			"server_settings": {
 				Description: "ClickHouse server settings, which can be found in the `system.server_settings` table",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"vector_similarity_index_cache_size": {
-					Description: "Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is 0.07 (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.",
+					Description: "Fraction of total server memory allocated to the vector similarity index cache. 0 disables the cache. Default is `0.07` (7% of server memory). Only effective on ClickHouse 25.8+. Default: `0.07`.",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				}}},
@@ -232,7 +232,7 @@ func clickhouseUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"tiered_storage_move_factor": {
-				Description: "The percentage of free disk space required on local storage before data is moved to object storage. A value of 0.2 means data is moved when local storage has less than 20% free space. Default: `0.2`.",
+				Description: "The percentage of free disk space required on local storage before data is moved to object storage. A value of `0.2` means data is moved when local storage has less than 20% free space. Default: `0.2`.",
 				Optional:    true,
 				Type:        schema.TypeFloat,
 			},

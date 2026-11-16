@@ -63,7 +63,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"gcp_auth_allowed_urls": {
-				Description: "Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.",
+				Description: "Allow-list of HTTPS URLs used to validate GCP `credential_source` requests for Kafka Connect.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Type:        schema.TypeList,
@@ -131,7 +131,7 @@ func kafkaUserConfig() *schema.Schema {
 								Type:        schema.TypeInt,
 							},
 							"group_by": {
-								Description:  "Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when record_type is user_operations. Default: `user_and_ip`.",
+								Description:  "Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when `record_type` is `user_operations`. Default: `user_and_ip`.",
 								Optional:     true,
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"user", "user_and_ip"}, false),
@@ -142,7 +142,7 @@ func kafkaUserConfig() *schema.Schema {
 								Type:        schema.TypeBool,
 							},
 							"record_type": {
-								Description:  "Enum: `user_activity`, `user_operations`. user_operations records individual Kafka API calls (produce, fetch, etc.). user_activity records higher-level user actions. Default: `user_operations`.",
+								Description:  "Enum: `user_activity`, `user_operations`. `user_operations` records individual Kafka API calls (produce, fetch, etc.). `user_activity` records higher-level user actions. Default: `user_operations`.",
 								Optional:     true,
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"user_activity", "user_operations"}, false),
@@ -174,32 +174,32 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_heartbeat_interval_ms": {
-						Description: "The heartbeat interval given to the members of a consumer group using the consumer rebalance protocol. Must be between group.consumer.min.heartbeat.interval.ms and group.consumer.max.heartbeat.interval.ms, and lower than group.consumer.session.timeout.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Description: "The heartbeat interval given to the members of a consumer group using the consumer rebalance protocol. Must be between `group.consumer.min.heartbeat.interval.ms` and `group.consumer.max.heartbeat.interval.ms`, and lower than `group.consumer.session.timeout.ms`. (Default: 5000 ms (5 seconds)) Requires Kafka `4.0` or later. Example: `5000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_max_heartbeat_interval_ms": {
-						Description: "The maximum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.heartbeat.interval.ms. (Default: 15000 ms (15 seconds)) Requires Kafka 4.0 or later. Example: `15000`.",
+						Description: "The maximum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be less than `group.consumer.min.heartbeat.interval.ms`. (Default: 15000 ms (15 seconds)) Requires Kafka `4.0` or later. Example: `15000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_max_session_timeout_ms": {
-						Description: "The maximum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.session.timeout.ms. (Default: 60000 ms (60 seconds)) Requires Kafka 4.0 or later. Example: `60000`.",
+						Description: "The maximum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be less than `group.consumer.min.session.timeout.ms`. (Default: 60000 ms (60 seconds)) Requires Kafka `4.0` or later. Example: `60000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_min_heartbeat_interval_ms": {
-						Description: "The minimum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.heartbeat.interval.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Description: "The minimum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be greater than `group.consumer.max.heartbeat.interval.ms`. (Default: 5000 ms (5 seconds)) Requires Kafka `4.0` or later. Example: `5000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_min_session_timeout_ms": {
-						Description: "The minimum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Description: "The minimum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be greater than `group.consumer.max.session.timeout.ms`. (Default: 45000 ms (45 seconds)) Requires Kafka `4.0` or later. Example: `45000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_consumer_session_timeout_ms": {
-						Description: "The timeout used to detect consumer group member failures when using the consumer rebalance protocol. Must be between group.consumer.min.session.timeout.ms and group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Description: "The timeout used to detect consumer group member failures when using the consumer rebalance protocol. Must be between `group.consumer.min.session.timeout.ms` and `group.consumer.max.session.timeout.ms`. (Default: 45000 ms (45 seconds)) Requires Kafka `4.0` or later. Example: `45000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -300,7 +300,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_cleaner_min_cleanable_ratio": {
-						Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. (Default: 0.5). Example: `0.5`.",
+						Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting `log.cleaner.max.compaction.lag.ms` to enforce compactions sooner, instead of setting a very high value for this option. (Default: `0.5`). Example: `0.5`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -321,7 +321,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_flush_interval_ms": {
-						Description: "The maximum time in ms that a message in any topic is kept in memory (page-cache) before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used (Default: null).",
+						Description: "The maximum time in ms that a message in any topic is kept in memory (page-cache) before flushed to disk. If not set, the value in `log.flush.scheduler.interval.ms` is used (Default: null).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -336,12 +336,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_local_retention_bytes": {
-						Description: "The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value. (Default: -2).",
+						Description: "The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to `-2`, the value of `log.retention.bytes` is used. The effective value should always be less than or equal to `log.retention.bytes` value. (Default: `-2`).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_local_retention_ms": {
-						Description: "The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value. (Default: -2).",
+						Description: "The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to `-2`, the value of `log.retention.ms` is used. The effective value should always be less than or equal to `log.retention.ms` value. (Default: `-2`).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -351,12 +351,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"log_message_timestamp_after_max_ms": {
-						Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp. (Default: 9223372036854775807 (Long.MAX_VALUE)).",
+						Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If `message.timestamp.type=CreateTime`, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps later than the broker's timestamp. (Default: 9223372036854775807 (Long.MAX_VALUE)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_message_timestamp_before_max_ms": {
-						Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If message.timestamp.type=CreateTime, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp. (Default: 9223372036854775807 (Long.MAX_VALUE)).",
+						Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message. If `message.timestamp.type=CreateTime`, a message will be rejected if the difference in timestamp exceeds this threshold. Applies only for messages with timestamps earlier than the broker's timestamp. (Default: 9223372036854775807 (Long.MAX_VALUE)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -377,27 +377,27 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"log_retention_bytes": {
-						Description: "The maximum size of the log before deleting messages (Default: -1).",
+						Description: "The maximum size of the log before deleting messages (Default: `-1`).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_retention_hours": {
-						Description: "The number of hours to keep a log file before deleting it. Use -1 for unlimited retention or 1 or higher. Setting 0 is invalid and prevents Kafka from starting. (Default: 168 hours, or 1 week).",
+						Description: "The number of hours to keep a log file before deleting it. Use `-1` for unlimited retention or 1 or higher. Setting 0 is invalid and prevents Kafka from starting. (Default: 168 hours, or 1 week).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_retention_ms": {
-						Description: "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied. (Default: null, log.retention.hours applies).",
+						Description: "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in `log.retention.minutes` is used. If set to `-1`, no time limit is applied. (Default: null, `log.retention.hours` applies).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_roll_jitter_ms": {
-						Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used (Default: null).",
+						Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in `log.roll.jitter.hours` is used (Default: null).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_roll_ms": {
-						Description: "The maximum time before a new log segment is rolled out (in milliseconds). (Default: null, log.roll.hours applies (Default: 168, 7 days)).",
+						Description: "The maximum time before a new log segment is rolled out (in milliseconds). (Default: null, `log.roll.hours` applies (Default: 168, 7 days)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -427,7 +427,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"min_insync_replicas": {
-						Description: "When a producer sets acks to `all` (or `-1`), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. (Default: 1). Example: `1`.",
+						Description: "When a producer sets acks to `all` (or `-1`), `min.insync.replicas` specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. (Default: 1). Example: `1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -487,7 +487,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"transaction_remove_expired_transaction_cleanup_interval_ms": {
-						Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)).",
+						Description: "The interval at which to remove transactions that have expired due to `transactional.id.expiration.ms` passing (Default: 3600000 ms (1 hour)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -545,7 +545,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. `read_uncommitted` is the default, but `read_committed` can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"read_committed", "read_uncommitted"}, false),
@@ -581,7 +581,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"producer_batch_size": {
-						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
+						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the `linger.ms` time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -597,7 +597,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
+						Description: "This setting gives the upper bound on the delay for batching: once there is `batch.size` worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -639,7 +639,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_connect_secret_providers": {
-				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
+				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, `auth_method`: token) and AWS Secrets Manager (provider: aws, `auth_method`: credentials) are supported. Secrets can be referenced in connector config with `${<provider_name>:<secret_path>:<key_name>}`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"aws": {
 						Description: "AWS secret provider configuration",
@@ -906,7 +906,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"preferred_zones": {
-				Description: "List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If single_zone is enabled with an availability_zone, that setting takes precedence over preferred_zones. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.",
+				Description: "List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If `single_zone` is enabled with an `availability_zone`, that setting takes precedence over `preferred_zones`. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.",
 				Elem: &schema.Schema{
 					Description: "Zone ID. Example: `euc1-az1`.",
 					Type:        schema.TypeString,
@@ -924,12 +924,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"kafka_connect": {
-						Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `kafka_connect` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"kafka_rest": {
-						Description: "Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `kafka_rest` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -939,7 +939,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"schema_registry": {
-						Description: "Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Description: "Allow clients to connect to `schema_registry` with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -962,12 +962,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"kafka_connect": {
-						Description: "Enable kafka_connect.",
+						Description: "Enable `kafka_connect`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"kafka_rest": {
-						Description: "Enable kafka_rest.",
+						Description: "Enable `kafka_rest`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -977,7 +977,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"schema_registry": {
-						Description: "Enable schema_registry.",
+						Description: "Enable `schema_registry`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -995,12 +995,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"kafka_connect": {
-						Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `kafka_connect` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"kafka_rest": {
-						Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `kafka_rest` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -1010,7 +1010,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"schema_registry": {
-						Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Description: "Allow clients to connect to `schema_registry` from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

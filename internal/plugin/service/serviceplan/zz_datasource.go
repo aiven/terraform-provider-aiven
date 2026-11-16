@@ -107,7 +107,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 					},
 					"recovery_mode": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "Mechanism how backups can be restored. 'basic' means a backup is restored as is so that the system is restored to the state it was when the backup was generated. 'pitr' means point-in-time-recovery, which allows restoring the system to any state since the first available full snapshot. The possible values are `basic` and `pitr`.",
+						MarkdownDescription: "Mechanism how backups can be restored. `basic` means a backup is restored as is so that the system is restored to the state it was when the backup was generated. `pitr` means point-in-time-recovery, which allows restoring the system to any state since the first available full snapshot. The possible values are `basic` and `pitr`.",
 					},
 				}},
 			},

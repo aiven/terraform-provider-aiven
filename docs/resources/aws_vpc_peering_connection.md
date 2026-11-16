@@ -9,9 +9,9 @@ description: |-
 
 Creates and manages an AWS VPC peering connection with an Aiven VPC. Configure either `vpc_id` or both `project` and `project_vpc_id` to select the Aiven VPC.
 
-On Terraform 1.12 or later, prefer resource identity for new imports to specify each part of the connection key explicitly. Existing resources gain identity during refresh without reimporting; their string IDs remain unchanged. References to `id` and string imports remain supported.
+On Terraform `1.12` or later, prefer resource identity for new imports to specify each part of the connection key explicitly. Existing resources gain identity during refresh without reimporting; their string IDs remain unchanged. References to `id` and string imports remain supported.
 
-Terraform 1.12 and 1.13 cannot read saved resource identity with an older provider that doesn't support it. Upgrade Terraform to 1.14 or later before downgrading to such a provider.
+Terraform `1.12` and `1.13` cannot read saved resource identity with an older provider that doesn't support it. Upgrade Terraform to `1.14` or later before downgrading to such a provider.
 
 If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement. To retry with the same peer identifiers, use destroy-before-create for the recovery apply. With `create_before_destroy`, the existing connection prevents creation of its replacement. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
 

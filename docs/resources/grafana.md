@@ -89,7 +89,7 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `alerting_enabled` (Boolean) Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.
+- `alerting_enabled` (Boolean) Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with `unified_alerting_enabled`.
 - `alerting_error_or_timeout` (String) Enum: `alerting`, `keep_state`. Default error or timeout setting for new alerting rules.
 - `alerting_max_annotations_to_keep` (Number) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations. Example: `0`.
 - `alerting_nodata_or_nullvalues` (String) Enum: `alerting`, `keep_state`, `no_data`, `ok`. Default value for 'no data or null values' for new alerting rules.
@@ -117,7 +117,7 @@ Optional:
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `metrics_disable_total_stats` (Boolean) Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.
+- `metrics_disable_total_stats` (Boolean) Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless `metrics_enabled` is set.
 - `metrics_enabled` (Boolean) Enable Grafana's /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP. This setup introduces significant security risks, such as potential phishing, spoofing, and other data breaches.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
@@ -129,7 +129,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `smtp_server` (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
 - `static_ips` (Boolean) Use static public IP addresses.
-- `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.
+- `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set `unified_alerting_enabled` to false and `alerting_enabled` to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.
 - `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false.
 - `user_auto_assign_org_role` (String) Enum: `Admin`, `Editor`, `Viewer`. Set role for new signups. Defaults to Viewer.
 - `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards.

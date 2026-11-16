@@ -38,7 +38,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"password_encryption_type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. 'unknown' is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
+				MarkdownDescription: "The password hashing algorithm used for this PostgreSQL user, derived from the stored password hash. `unknown` is reported when the hash is missing or uses an unrecognised format. The possible values are `md5`, `scram-sha-256` and `unknown`.",
 			},
 			"pg_allow_replication": schema.BoolAttribute{
 				Computed:            true,

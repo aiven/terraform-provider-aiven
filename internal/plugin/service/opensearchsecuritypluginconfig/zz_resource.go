@@ -21,7 +21,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"admin_enabled": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "security plugin admin defined.",
+				MarkdownDescription: "Security plugin admin defined.",
 			},
 			"admin_password": schema.StringAttribute{
 				MarkdownDescription: "Current os-sec-admin password. Length must be between `8` and `256`.",

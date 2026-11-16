@@ -28,7 +28,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			"host": schema.StringAttribute{
 				Computed:            true,
 				Default:             stringdefault.StaticString("*"),
-				MarkdownDescription: "the host or `*` for all hosts. Maximum length: `256`. The default value is `*`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "The host or `*` for all hosts. Maximum length: `256`. The default value is `*`. Changing this property forces recreation of the resource.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},
@@ -57,7 +57,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.OneOf("ALLOW", "DENY")},
 			},
 			"principal": schema.StringAttribute{
-				MarkdownDescription: "principal is in 'principalType:name' format. Maximum length: `256`. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Principal is in `principalType:name` format. Maximum length: `256`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(256)},

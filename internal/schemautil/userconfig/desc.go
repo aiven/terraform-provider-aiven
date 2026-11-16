@@ -222,12 +222,7 @@ func (db *DescriptionBuilder) BuildPage() string {
 func (db *DescriptionBuilder) build(page bool) string {
 	builder := new(strings.Builder)
 
-	base := db.base
-
-	// Add a trailing dot if it's missing.
-	if !strings.HasSuffix(base, ".") {
-		base += "."
-	}
+	base := formatText(db.base)
 	builder.WriteString(base)
 
 	const availabilityCommonPart = `
@@ -380,11 +375,11 @@ func (db *DescriptionBuilder) build(page bool) string {
 	}
 
 	if db.deprecationMessage != "" {
-		s += fmt.Sprintf(" **Deprecated**: %s", db.deprecationMessage)
+		s += fmt.Sprintf(" **Deprecated**: %s", formatText(db.deprecationMessage))
 	}
 
-	// The sentences appended to a callout would be pulled into its box
-	if base = strings.TrimSpace(base); len(s) > len(base) && HasCallout(lastParagraph(base)) {
+	// The sentences appended to a callout would be pulled into its box, and after a code fence they'd keep it open
+	if base = strings.TrimSpace(base); len(s) > len(base) && (HasCallout(lastParagraph(base)) || strings.HasSuffix(base, "```")) {
 		s = base + "\n\n" + strings.TrimSpace(s[len(base):])
 	}
 

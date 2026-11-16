@@ -25,7 +25,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"alerting_enabled": {
-				Description: "Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.",
+				Description: "Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with `unified_alerting_enabled`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -510,7 +510,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"metrics_disable_total_stats": {
-				Description: "Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.",
+				Description: "Do not collect the `grafana_stat_total_*` and `grafana_stat_totals_*` metrics, which require periodic database queries. Defaults to true, unless `metrics_enabled` is set.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -635,7 +635,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"unified_alerting_enabled": {
-				Description: "Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.",
+				Description: "Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set `unified_alerting_enabled` to false and `alerting_enabled` to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},

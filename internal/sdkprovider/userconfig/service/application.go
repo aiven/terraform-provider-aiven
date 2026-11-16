@@ -77,7 +77,7 @@ func applicationUserConfig() *schema.Schema {
 								Description: "Access control for the application's ports. An application supports a single OIDC provider, which protects every port: set `security` on one port, or on several with the same value, and it is stored on every port. Omit it from every port to leave the ports reachable by anyone who can reach their address",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"authentication_method": {
-										Description:  "Enum: `aiven_platform`, `oidc`, `okta`. Which authentication method protects this port. The oidc and okta methods both use the oidc configuration; aiven_platform takes none.",
+										Description:  "Enum: `aiven_platform`, `oidc`, `okta`. Which authentication method protects this port. The oidc and okta methods both use the oidc configuration; `aiven_platform` takes none.",
 										Required:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"aiven_platform", "oidc", "okta"}, false),
@@ -142,12 +142,12 @@ func applicationUserConfig() *schema.Schema {
 								Type:        schema.TypeString,
 							},
 							"build_path": {
-								Description: "Path of image build context. If set without containerfile_path, this will also be used to search for Containerfile/Dockerfile. Example: `main`.",
+								Description: "Path of image build context. If set without `containerfile_path`, this will also be used to search for Containerfile/Dockerfile. Example: `main`.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"containerfile_path": {
-								Description: "Path of Containerfile/Dockerfile in the source directory. Does not have to overlap with build_path. Send null to clear on update; omit to leave unchanged. Example: `./Containerfile`.",
+								Description: "Path of Containerfile/Dockerfile in the source directory. Does not have to overlap with `build_path`. Send null to clear on update; omit to leave unchanged. Example: `./Containerfile`.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
