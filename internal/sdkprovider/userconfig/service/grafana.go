@@ -95,6 +95,21 @@ func grafanaUserConfig() *schema.Schema {
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
+					"org_mapping": {
+						Description: "Map Azure AD groups to Grafana organizations and roles. Each entry is `<group object ID>:<organization ID>:<role>`. Use `*` as the group to match all users, or as the organization to match all organizations. The role defaults to Viewer. Users matching at least one entry are removed from organizations they are not mapped to.",
+						Elem: &schema.Schema{
+							Description: "Group to organization and role mapping. Example: `c0ffee15-c01d-0000-1111-012345abcdef:1:Editor`.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 50,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"skip_org_role_sync": {
+						Description: "Stop automatically syncing user organizations and roles at sign-in.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"token_url": {
 						Description: "Token URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/token`.",
 						Required:    true,
@@ -466,7 +481,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"grafana_version": {
-				Description: "Enum: `11`, `12`, and newer. Grafana major version.",
+				Description: "Enum: `11`, `12`, `13`, and newer. Grafana major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
