@@ -31,9 +31,10 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"backup_interval_hours": {
-				Description: "Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.",
-				Optional:    true,
-				Type:        schema.TypeInt,
+				Description:  "Enum: `12`, `24`, `3`, `4`, `6`, `8`. Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only).",
+				Optional:     true,
+				Type:         schema.TypeInt,
+				ValidateFunc: validation.IntInSlice([]int{12, 24, 3, 4, 6, 8}),
 			},
 			"backup_retention_days": {
 				Description: "Number of days to retain automatic backups. Backups older than this value will be automatically deleted. (Applicable to ACU plans only). Example: `7`.",
@@ -45,11 +46,34 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
+			"enable_ipv6": {
+				Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"follower_fetching": {
 				Description: "Enable follower fetching",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
 					Description: "Whether to enable the follower fetching functionality.",
 					Optional:    true,
+					Type:        schema.TypeBool,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"gcp_auth_allowed_urls": {
+				Description: "Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
+			},
+			"inkless": {
+				Description: "Inkless configuration values",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
+					Description: "Whether to enable the Inkless functionality.",
+					ForceNew:    true,
+					Required:    true,
 					Type:        schema.TypeBool,
 				}}},
 				MaxItems: 1,
@@ -98,8 +122,38 @@ func kafkaUserConfig() *schema.Schema {
 			"kafka": {
 				Description: "Kafka broker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"audit_log": {
+						Description: "Enable Kafka audit logging by providing this object. Removing it disables the feature. Enabling, updating, or disabling audit logging causes a rolling restart of all Kafka brokers",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"aggregation_period_sec": {
+								Description: "Aggregation period in seconds over which audit log entries are batched before being emitted. Default: `300`.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"group_by": {
+								Description:  "Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when record_type is user_operations. Default: `user_and_ip`.",
+								Optional:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"user", "user_and_ip"}, false),
+							},
+							"include_denials": {
+								Description: "Whether to include denied authorization attempts in the audit log. Default: `false`.",
+								Optional:    true,
+								Type:        schema.TypeBool,
+							},
+							"record_type": {
+								Description:  "Enum: `user_activity`, `user_operations`. user_operations records individual Kafka API calls (produce, fetch, etc.). user_activity records higher-level user actions. Default: `user_operations`.",
+								Optional:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"user_activity", "user_operations"}, false),
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"auto_create_topics_enable": {
-						Description: "Enable auto-creation of topics. (Default: true).",
+						Description: "Enable auto-creation of topics. (Default: false).",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -119,6 +173,42 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"group_consumer_heartbeat_interval_ms": {
+						Description: "The heartbeat interval given to the members of a consumer group using the consumer rebalance protocol. Must be between group.consumer.min.heartbeat.interval.ms and group.consumer.max.heartbeat.interval.ms, and lower than group.consumer.session.timeout.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_max_heartbeat_interval_ms": {
+						Description: "The maximum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.heartbeat.interval.ms. (Default: 15000 ms (15 seconds)) Requires Kafka 4.0 or later. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_max_session_timeout_ms": {
+						Description: "The maximum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.session.timeout.ms. (Default: 60000 ms (60 seconds)) Requires Kafka 4.0 or later. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_min_heartbeat_interval_ms": {
+						Description: "The minimum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.heartbeat.interval.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_min_session_timeout_ms": {
+						Description: "The minimum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_consumer_session_timeout_ms": {
+						Description: "The timeout used to detect consumer group member failures when using the consumer rebalance protocol. Must be between group.consumer.min.session.timeout.ms and group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_coordinator_rebalance_protocols": {
+						Description:  "Enum: `classic`, `classic,consumer`, `classic,consumer,share`, `classic,consumer,share,streams`, `classic,consumer,streams`, `classic,share`, `classic,streams`. The enabled consumer group rebalance protocols. Use consumer, classic, share, streams to enable Kafka share groups.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"classic", "classic,consumer", "classic,consumer,share", "classic,consumer,share,streams", "classic,consumer,streams", "classic,share", "classic,streams"}, false),
+					},
 					"group_initial_rebalance_delay_ms": {
 						Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. (Default: 3000 ms (3 seconds)). Example: `3000`.",
 						Optional:    true,
@@ -131,6 +221,71 @@ func kafkaUserConfig() *schema.Schema {
 					},
 					"group_min_session_timeout_ms": {
 						Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. (Default: 6000 ms (6 seconds)). Example: `6000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_delivery_count_limit": {
+						Description: "The maximum delivery attempts for a share-group record. Example: `5`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_heartbeat_interval_ms": {
+						Description: "The heartbeat interval used by share group members. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_groups": {
+						Description: "The maximum number of share groups allowed on the broker.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_heartbeat_interval_ms": {
+						Description: "The maximum heartbeat interval allowed for share group members. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_record_lock_duration_ms": {
+						Description: "The maximum record lock duration allowed for share groups. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_session_timeout_ms": {
+						Description: "The maximum session timeout allowed for share group members. Example: `60000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_max_size": {
+						Description: "The maximum number of members allowed in a share group. Example: `200`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_heartbeat_interval_ms": {
+						Description: "The minimum heartbeat interval allowed for share group members. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_record_lock_duration_ms": {
+						Description: "The minimum record lock duration allowed for share groups. Example: `15000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_min_session_timeout_ms": {
+						Description: "The minimum session timeout allowed for share group members. Example: `45000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_partition_max_record_locks": {
+						Description: "The maximum number of record locks allowed per share group partition. Example: `2000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_record_lock_duration_ms": {
+						Description: "The duration for which a fetched share-group record is locked. Example: `30000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"group_share_session_timeout_ms": {
+						Description: "The timeout used to detect share group member failures. Example: `45000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -301,13 +456,23 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"sasl_oauthbearer_allow_unverified_audience": {
+						Description: "Accept tokens whatever their audience when sasl_oauthbearer_expected_audience is not set. Either this or sasl_oauthbearer_expected_audience is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the audience is not verified unless sasl_oauthbearer_expected_audience is set (Default: false).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_allow_unverified_issuer": {
+						Description: "Accept tokens whatever their issuer when sasl_oauthbearer_expected_issuer is not set. Either this or sasl_oauthbearer_expected_issuer is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the issuer is not verified unless sasl_oauthbearer_expected_issuer is set (Default: false).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"sasl_oauthbearer_expected_audience": {
-						Description: "The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences. (Default: null).",
+						Description: "The comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"sasl_oauthbearer_expected_issuer": {
-						Description: "Optional setting for the broker to use to verify that the JWT was created by the expected issuer.(Default: null).",
+						Description: "The broker uses this setting to verify that the JWT was created by the expected issuer.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -420,6 +585,11 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"prefer_ipv6_address_enable": {
+						Description: "When enabled, connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"producer_batch_size": {
 						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
@@ -511,6 +681,48 @@ func kafkaUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"azure": {
+						Description: "Azure KeyVault secret provider configuration",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"auth_method": {
+								Description:  "Enum: `credentials`. Auth method of the Azure KeyVault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"credentials"}, false),
+							},
+							"client_id": {
+								Description: "Azure client ID for the service principal.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"secret": {
+								Description: "Azure client secret for the service principal.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+							"tenant_id": {
+								Description: "Azure tenant ID for the service principal.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"env": {
+						Description: "ENV secret provider configuration",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"secrets": {
+							Description: "Key/value map of secrets for ENV secret provider.",
+							Required:    true,
+							Sensitive:   true,
+							Type:        schema.TypeMap,
+						}}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"name": {
 						Description: "Name of the secret provider. Used to reference secrets in connector config.",
 						Required:    true,
@@ -540,6 +752,11 @@ func kafkaUserConfig() *schema.Schema {
 								Optional:    true,
 								Type:        schema.TypeInt,
 							},
+							"server_pem": {
+								Description: "PEM encoded certificate of the Vault server. Required if the vault server uses a self-signed certificate.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
 							"token": {
 								Description: "Token used to authenticate with vault and auth method `token`.",
 								Optional:    true,
@@ -557,11 +774,23 @@ func kafkaUserConfig() *schema.Schema {
 			},
 			"kafka_diskless": {
 				Description: "Kafka Diskless configuration values",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
-					Description: "Whether to enable the Diskless functionality.",
-					Required:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"auto_diskless_topic_regexes": {
+						Description: "The regexes of topics to auto enable diskless. Topics matching any of the regexes will be created as diskless topics.",
+						Elem: &schema.Schema{
+							Description: "The regex to match topics to auto enable diskless. It follows `java.util.regex.Pattern` syntax, but only a subset of characters is allowed.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 32,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"enabled": {
+						Description: "Whether to enable the Diskless functionality.",
+						Required:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
@@ -667,7 +896,12 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, and newer. Kafka major version.",
+				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, `4.2`, `4.3`, and newer. Kafka major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"karapace_version": {
+				Description: "Enum: `6.2.1`, `6.2.2`, `6.2.3`, `6.2.4`, and newer. Select a Karapace version for this service, or select Latest to use the latest available version automatically. New versions become available after installation during a maintenance update.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -680,6 +914,16 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication via Privatelink. (Default: False).",
 				Optional:    true,
 				Type:        schema.TypeBool,
+			},
+			"preferred_zones": {
+				Description: "List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If single_zone is enabled with an availability_zone, that setting takes precedence over preferred_zones. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.",
+				Elem: &schema.Schema{
+					Description: "Zone ID. Example: `euc1-az1`.",
+					Type:        schema.TypeString,
+				},
+				MaxItems: 10,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",
@@ -808,6 +1052,26 @@ func kafkaUserConfig() *schema.Schema {
 						Description: "If enabled, kafka errors which can be retried or custom errors specified for the service will not be raised, instead, a warning log is emitted. This will denoise issue tracking systems, i.e. sentry. Defaults to `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_authentication_enabled": {
+						Description: "If enabled, the Schema Registry validates OAuth 2.0/OIDC JWT bearer tokens. Requires `sasl_oauthbearer_jwks_endpoint_url`, `sasl_oauthbearer_expected_issuer`, and `sasl_oauthbearer_expected_audience` under `kafka`. Defaults to `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_authorization_enabled": {
+						Description: "If enabled, the Schema Registry enforces role-based authorization using the JWT roles claim. It also enables `sasl_oauthbearer_authentication_enabled` if it isn't already enabled. Authorization requires authentication. Defaults to `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_method_roles": {
+						Description: "Maps HTTP methods to allowed roles. Use a JSON object with `GET`, `POST`, `PUT`, and `DELETE` keys mapped to arrays of roles. Role names use the `karapace.` prefix. Example: `{\"GET\": [\"karapace.schema:read\"], \"POST\": [], \"PUT\": [], \"DELETE\": []}`. Example: `{\"GET\":[\"karapace.schema:read\"],\"POST\":[],\"PUT\":[],\"DELETE\":[]}`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"sasl_oauthbearer_roles_claim_path": {
+						Description: "The JSON path the Schema Registry uses to find the roles claim in the JWT. Defaults to `resource_access.karapace.roles`.",
+						Optional:    true,
+						Type:        schema.TypeString,
 					},
 					"schema_reader_strict_mode": {
 						Description: "If enabled, causes the Karapace schema-registry service to shutdown when there are invalid schema records in the `_schemas` topic. Defaults to `false`.",

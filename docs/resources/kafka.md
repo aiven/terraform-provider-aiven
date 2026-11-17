@@ -108,10 +108,13 @@ Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
 - `aiven_kafka_topic_messages` (Boolean) Allow access to read Kafka topic messages in the Aiven Console and REST API.
-- `backup_interval_hours` (Number) Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only). Example: `24`.
+- `backup_interval_hours` (Number) Enum: `12`, `24`, `3`, `4`, `6`, `8`. Interval in hours between automatic backups. Minimum value is 3 hours. Must be a divisor of 24 (3, 4, 6, 8, 12, 24). (Applicable to ACU plans only).
 - `backup_retention_days` (Number) Number of days to retain automatic backups. Backups older than this value will be automatically deleted. (Applicable to ACU plans only). Example: `7`.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
+- `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `follower_fetching` (Block List, Max: 1) Enable follower fetching (see [below for nested schema](#nestedblock--kafka_user_config--follower_fetching))
+- `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.
+- `inkless` (Block List, Max: 1) Inkless configuration values (see [below for nested schema](#nestedblock--kafka_user_config--inkless))
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
@@ -126,9 +129,11 @@ Optional:
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (Block List, Max: 1) Kafka SASL mechanisms (see [below for nested schema](#nestedblock--kafka_user_config--kafka_sasl_mechanisms))
-- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, and newer. Kafka major version.
+- `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, `3.9`, `4.0`, `4.1`, `4.2`, `4.3`, and newer. Kafka major version.
+- `karapace_version` (String) Enum: `6.2.1`, `6.2.2`, `6.2.3`, `6.2.4`, and newer. Select a Karapace version for this service, or select Latest to use the latest available version automatically. New versions become available after installation during a maintenance update.
 - `letsencrypt_sasl` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication. (Default: False).
 - `letsencrypt_sasl_privatelink` (Boolean) Use a Let's Encrypt certificate authority (CA) for Kafka SASL authentication via Privatelink. (Default: False).
+- `preferred_zones` (List of String) List of preferred zone IDs for service node placement. Nodes will be placed in these zones when available. If a specified zone is unavailable (e.g., due to capacity constraints), nodes will be placed in other available zones to maintain the configured number of zones for availability. Invalid zone IDs are rejected at configuration time. Zone IDs are cloud-specific: AWS uses zone IDs like `euc1-az1`, GCP uses zone names like `europe-west1-a`, and Azure uses `location/zone` format like `germanywestcentral/1`. If single_zone is enabled with an availability_zone, that setting takes precedence over preferred_zones. Changes take effect on next node recreation (e.g., maintenance or plan change). For eligible plans, nodes outside preferred zones are automatically rebalanced once per day.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
@@ -148,6 +153,14 @@ Optional:
 - `enabled` (Boolean) Whether to enable the follower fetching functionality.
 
 
+<a id="nestedblock--kafka_user_config--inkless"></a>
+### Nested Schema for `kafka_user_config.inkless`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable the Inkless functionality.
+
+
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
 
@@ -165,13 +178,34 @@ Optional:
 
 Optional:
 
-- `auto_create_topics_enable` (Boolean) Enable auto-creation of topics. (Default: true).
+- `audit_log` (Block List, Max: 1) Enable Kafka audit logging by providing this object. Removing it disables the feature. Enabling, updating, or disabling audit logging causes a rolling restart of all Kafka brokers (see [below for nested schema](#nestedblock--kafka_user_config--kafka--audit_log))
+- `auto_create_topics_enable` (Boolean) Enable auto-creation of topics. (Default: false).
 - `compression_type` (String) Enum: `gzip`, `lz4`, `producer`, `snappy`, `uncompressed`, `zstd`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.
 - `default_replication_factor` (Number) Replication factor for auto-created topics (Default: 3).
+- `group_consumer_heartbeat_interval_ms` (Number) The heartbeat interval given to the members of a consumer group using the consumer rebalance protocol. Must be between group.consumer.min.heartbeat.interval.ms and group.consumer.max.heartbeat.interval.ms, and lower than group.consumer.session.timeout.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.
+- `group_consumer_max_heartbeat_interval_ms` (Number) The maximum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.heartbeat.interval.ms. (Default: 15000 ms (15 seconds)) Requires Kafka 4.0 or later. Example: `15000`.
+- `group_consumer_max_session_timeout_ms` (Number) The maximum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be less than group.consumer.min.session.timeout.ms. (Default: 60000 ms (60 seconds)) Requires Kafka 4.0 or later. Example: `60000`.
+- `group_consumer_min_heartbeat_interval_ms` (Number) The minimum heartbeat interval allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.heartbeat.interval.ms. (Default: 5000 ms (5 seconds)) Requires Kafka 4.0 or later. Example: `5000`.
+- `group_consumer_min_session_timeout_ms` (Number) The minimum session timeout allowed for consumer group members using the consumer rebalance protocol. Must not be greater than group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.
+- `group_consumer_session_timeout_ms` (Number) The timeout used to detect consumer group member failures when using the consumer rebalance protocol. Must be between group.consumer.min.session.timeout.ms and group.consumer.max.session.timeout.ms. (Default: 45000 ms (45 seconds)) Requires Kafka 4.0 or later. Example: `45000`.
+- `group_coordinator_rebalance_protocols` (String) Enum: `classic`, `classic,consumer`, `classic,consumer,share`, `classic,consumer,share,streams`, `classic,consumer,streams`, `classic,share`, `classic,streams`. The enabled consumer group rebalance protocols. Use consumer, classic, share, streams to enable Kafka share groups.
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. (Default: 3000 ms (3 seconds)). Example: `3000`.
 - `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Default: 1800000 ms (30 minutes).
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. (Default: 6000 ms (6 seconds)). Example: `6000`.
+- `group_share_delivery_count_limit` (Number) The maximum delivery attempts for a share-group record. Example: `5`.
+- `group_share_heartbeat_interval_ms` (Number) The heartbeat interval used by share group members. Example: `5000`.
+- `group_share_max_groups` (Number) The maximum number of share groups allowed on the broker.
+- `group_share_max_heartbeat_interval_ms` (Number) The maximum heartbeat interval allowed for share group members. Example: `15000`.
+- `group_share_max_record_lock_duration_ms` (Number) The maximum record lock duration allowed for share groups. Example: `60000`.
+- `group_share_max_session_timeout_ms` (Number) The maximum session timeout allowed for share group members. Example: `60000`.
+- `group_share_max_size` (Number) The maximum number of members allowed in a share group. Example: `200`.
+- `group_share_min_heartbeat_interval_ms` (Number) The minimum heartbeat interval allowed for share group members. Example: `5000`.
+- `group_share_min_record_lock_duration_ms` (Number) The minimum record lock duration allowed for share groups. Example: `15000`.
+- `group_share_min_session_timeout_ms` (Number) The minimum session timeout allowed for share group members. Example: `45000`.
+- `group_share_partition_max_record_locks` (Number) The maximum number of record locks allowed per share group partition. Example: `2000`.
+- `group_share_record_lock_duration_ms` (Number) The duration for which a fetched share-group record is locked. Example: `30000`.
+- `group_share_session_timeout_ms` (Number) The timeout used to detect share group member failures. Example: `45000`.
 - `log_cleaner_delete_retention_ms` (Number) How long are delete records retained? (Default: 86400000 (1 day)).
 - `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted. (Default: 9223372036854775807 ms (Long.MAX_VALUE)).
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. (Default: 0.5). Example: `0.5`.
@@ -205,14 +239,27 @@ Optional:
 - `producer_purgatory_purge_interval_requests` (Number) The purge interval (in number of requests) of the producer request purgatory (Default: 1000).
 - `replica_fetch_max_bytes` (Number) The number of bytes of messages to attempt to fetch for each partition . This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. (Default: 1048576 bytes (1 mebibytes)).
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response. Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum. (Default: 10485760 bytes (10 mebibytes)).
-- `sasl_oauthbearer_expected_audience` (String) The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences. (Default: null).
-- `sasl_oauthbearer_expected_issuer` (String) Optional setting for the broker to use to verify that the JWT was created by the expected issuer.(Default: null).
+- `sasl_oauthbearer_allow_unverified_audience` (Boolean) Accept tokens whatever their audience when sasl_oauthbearer_expected_audience is not set. Either this or sasl_oauthbearer_expected_audience is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the audience is not verified unless sasl_oauthbearer_expected_audience is set (Default: false).
+- `sasl_oauthbearer_allow_unverified_issuer` (Boolean) Accept tokens whatever their issuer when sasl_oauthbearer_expected_issuer is not set. Either this or sasl_oauthbearer_expected_issuer is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the issuer is not verified unless sasl_oauthbearer_expected_issuer is set (Default: false).
+- `sasl_oauthbearer_expected_audience` (String) The comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.
+- `sasl_oauthbearer_expected_issuer` (String) The broker uses this setting to verify that the JWT was created by the expected issuer.
 - `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. (Default: null).
 - `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT.(Default: sub).
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (Default: 104857600 bytes).
 - `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: true).
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)).
 - `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)).
+
+<a id="nestedblock--kafka_user_config--kafka--audit_log"></a>
+### Nested Schema for `kafka_user_config.kafka.audit_log`
+
+Optional:
+
+- `aggregation_period_sec` (Number) Aggregation period in seconds over which audit log entries are batched before being emitted. Default: `300`.
+- `group_by` (String) Enum: `user`, `user_and_ip`. Group audit log entries by user or by user and IP address. Only valid when record_type is user_operations. Default: `user_and_ip`.
+- `include_denials` (Boolean) Whether to include denied authorization attempts in the audit log. Default: `false`.
+- `record_type` (String) Enum: `user_activity`, `user_operations`. user_operations records individual Kafka API calls (produce, fetch, etc.). user_activity records higher-level user actions. Default: `user_operations`.
+
 
 
 <a id="nestedblock--kafka_user_config--kafka_authentication_methods"></a>
@@ -238,6 +285,7 @@ Optional:
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).
 - `offset_flush_timeout_ms` (Number) Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).
+- `prefer_ipv6_address_enable` (Boolean) When enabled, connectors will automatically resolve IPv6 addresses from external server names configured with dual-stack. Default: `false`.
 - `producer_batch_size` (Number) This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).
 - `producer_buffer_memory` (Number) The total bytes of memory the producer can use to buffer records waiting to be sent to the broker (defaults to 33554432).
 - `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
@@ -266,6 +314,8 @@ Required:
 Optional:
 
 - `aws` (Block List, Max: 1) AWS secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--aws))
+- `azure` (Block List, Max: 1) Azure KeyVault secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--azure))
+- `env` (Block List, Max: 1) ENV secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--env))
 - `vault` (Block List, Max: 1) Vault secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--vault))
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--aws"></a>
@@ -282,6 +332,28 @@ Optional:
 - `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
 
 
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--azure"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.azure`
+
+Required:
+
+- `auth_method` (String) Enum: `credentials`. Auth method of the Azure KeyVault secret provider.
+
+Optional:
+
+- `client_id` (String) Azure client ID for the service principal.
+- `secret` (String, Sensitive) Azure client secret for the service principal.
+- `tenant_id` (String) Azure tenant ID for the service principal.
+
+
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--env"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.env`
+
+Required:
+
+- `secrets` (Map of String, Sensitive) Key/value map of secrets for ENV secret provider.
+
+
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--vault"></a>
 ### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.vault`
 
@@ -294,6 +366,7 @@ Optional:
 
 - `engine_version` (Number) Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.
 - `prefix_path_depth` (Number) Prefix path depth of the secrets Engine. Default is 1. If the secrets engine path has more than one segment it has to be increased to the number of segments.
+- `server_pem` (String) PEM encoded certificate of the Vault server. Required if the vault server uses a self-signed certificate.
 - `token` (String, Sensitive) Token used to authenticate with vault and auth method `token`.
 
 
@@ -304,6 +377,10 @@ Optional:
 Required:
 
 - `enabled` (Boolean) Whether to enable the Diskless functionality.
+
+Optional:
+
+- `auto_diskless_topic_regexes` (List of String) The regexes of topics to auto enable diskless. Topics matching any of the regexes will be created as diskless topics.
 
 
 <a id="nestedblock--kafka_user_config--kafka_rest_config"></a>
@@ -378,6 +455,10 @@ Optional:
 
 - `leader_eligibility` (Boolean) If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.
 - `retriable_errors_silenced` (Boolean) If enabled, kafka errors which can be retried or custom errors specified for the service will not be raised, instead, a warning log is emitted. This will denoise issue tracking systems, i.e. sentry. Defaults to `true`.
+- `sasl_oauthbearer_authentication_enabled` (Boolean) If enabled, the Schema Registry validates OAuth 2.0/OIDC JWT bearer tokens. Requires `sasl_oauthbearer_jwks_endpoint_url`, `sasl_oauthbearer_expected_issuer`, and `sasl_oauthbearer_expected_audience` under `kafka`. Defaults to `false`.
+- `sasl_oauthbearer_authorization_enabled` (Boolean) If enabled, the Schema Registry enforces role-based authorization using the JWT roles claim. It also enables `sasl_oauthbearer_authentication_enabled` if it isn't already enabled. Authorization requires authentication. Defaults to `false`.
+- `sasl_oauthbearer_method_roles` (String) Maps HTTP methods to allowed roles. Use a JSON object with `GET`, `POST`, `PUT`, and `DELETE` keys mapped to arrays of roles. Role names use the `karapace.` prefix. Example: `{"GET": ["karapace.schema:read"], "POST": [], "PUT": [], "DELETE": []}`. Example: `{"GET":["karapace.schema:read"],"POST":[],"PUT":[],"DELETE":[]}`.
+- `sasl_oauthbearer_roles_claim_path` (String) The JSON path the Schema Registry uses to find the roles claim in the JWT. Defaults to `resource_access.karapace.roles`.
 - `schema_reader_strict_mode` (Boolean) If enabled, causes the Karapace schema-registry service to shutdown when there are invalid schema records in the `_schemas` topic. Defaults to `false`.
 - `topic_name` (String) The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
 
