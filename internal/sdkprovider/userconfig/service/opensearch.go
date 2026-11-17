@@ -776,6 +776,21 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"knn_cache_item_expiry_enabled": {
+						Description: "Enable or disable removing KNN graphs from the cache when they are idle. Disabled by default.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"knn_cache_item_expiry_minutes": {
+						Description: "If enabled, the amount of time in minutes a KNN graph can be idle in the cache before being evicted. Example: `180`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"knn_circuit_breaker_unset_percentage": {
+						Description: "The native memory usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets. Defaults to 5%.",
+						Optional:    true,
+						Type:        schema.TypeFloat,
+					},
 					"knn_memory_circuit_breaker_enabled": {
 						Description: "Enable or disable KNN memory circuit breaker. Defaults to true.",
 						Optional:    true,
@@ -791,8 +806,23 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"ml_commons_max_model_on_node": {
+						Description: "Maximum number of ML models that can be deployed on a single ML node. Defaults to 10.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"ml_commons_model_access_control_enabled": {
 						Description: "Enable or disable model access control for ML Commons. When enabled, access to ML models is controlled by security permissions. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"ml_commons_model_auto_deploy_enable": {
+						Description: "For externally hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy call first. Defaults to true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"ml_commons_model_auto_redeploy_enable": {
+						Description: "Automatically redeploy deployed or partially deployed models after ML nodes rejoin the cluster, e.g. after a node replacement. Defaults to true.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -1015,6 +1045,16 @@ func opensearchUserConfig() *schema.Schema {
 						MaxItems: 1,
 						Optional: true,
 						Type:     schema.TypeList,
+					},
+					"search_cancel_after_time_interval": {
+						Description: "Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Example: `5m`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"search_default_search_timeout": {
+						Description: "Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Example: `30s`.",
+						Optional:    true,
+						Type:        schema.TypeString,
 					},
 					"search_insights_top_queries": {
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -1293,7 +1333,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, and newer. OpenSearch version.",
+				Description: "Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, `3.8`, and newer. OpenSearch version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

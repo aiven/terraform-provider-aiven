@@ -117,7 +117,7 @@ Optional:
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
-- `opensearch_version` (String) Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, and newer. OpenSearch version.
+- `opensearch_version` (String) Enum: `1`, `2`, `2.19`, `3.3`, `3.6`, `3.8`, and newer. OpenSearch version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
@@ -305,10 +305,16 @@ Optional:
 - `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index.
 - `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Example: `8`.
 - `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Example: `30`.
+- `knn_cache_item_expiry_enabled` (Boolean) Enable or disable removing KNN graphs from the cache when they are idle. Disabled by default.
+- `knn_cache_item_expiry_minutes` (Number) If enabled, the amount of time in minutes a KNN graph can be idle in the cache before being evicted. Example: `180`.
+- `knn_circuit_breaker_unset_percentage` (Number) The native memory usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets. Defaults to 5%.
 - `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
 - `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory in percentage that can be used for the KNN index. Defaults to 50% of the JVM heap size. 0 is used to set it to null which can be used to invalidate caches.
 - `ml_commons_connector_access_control_enabled` (Boolean) When set to true, the setting allows admins to control access and permissions to the connector API using backend_roles. Defaults to false.
+- `ml_commons_max_model_on_node` (Number) Maximum number of ML models that can be deployed on a single ML node. Defaults to 10.
 - `ml_commons_model_access_control_enabled` (Boolean) Enable or disable model access control for ML Commons. When enabled, access to ML models is controlled by security permissions. Defaults to false.
+- `ml_commons_model_auto_deploy_enable` (Boolean) For externally hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy call first. Defaults to true.
+- `ml_commons_model_auto_redeploy_enable` (Boolean) Automatically redeploy deployed or partially deployed models after ML nodes rejoin the cluster, e.g. after a node replacement. Defaults to true.
 - `ml_commons_native_memory_threshold` (Number) Native memory threshold percentage for ML Commons. Controls the maximum percentage of native memory that can be used by ML Commons operations. Defaults to 90%.
 - `ml_commons_only_run_on_ml_node` (Boolean) Enable or disable running ML Commons tasks only on ML nodes. When enabled, ML tasks will only execute on nodes designated as ML nodes. Defaults to true.
 - `ml_commons_trusted_connector_endpoints_regex` (List of String) Adds the trusted endpoints to the cluster settings. Supports Java regex expressions.
@@ -319,6 +325,8 @@ Optional:
 - `remote_store` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--remote_store))
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
 - `search_backpressure` (Block List, Max: 1) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
+- `search_cancel_after_time_interval` (String) Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Example: `5m`.
+- `search_default_search_timeout` (String) Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Example: `30s`.
 - `search_insights_top_queries` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
 - `segrep` (Block List, Max: 1) Segment Replication Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--segrep))

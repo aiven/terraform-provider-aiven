@@ -12,11 +12,18 @@ func rsyslogUserConfig() *schema.Schema {
 	return &schema.Schema{
 		Description:      "Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
-		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"escape_newlines": {
-			Description: "Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
-			Optional:    true,
-			Type:        schema.TypeBool,
-		}}},
+		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"escape_newlines": {
+				Description: "Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
+			"octet_counted_framing": {
+				Description: "Per-service override for octet-counted framing (RFC 6587 section 3.4.1). When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
+		}},
 		MaxItems: 1,
 		Optional: true,
 		Type:     schema.TypeList,

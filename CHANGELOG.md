@@ -12,6 +12,91 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.63.1] - 2026-11-17
+
+- Change `aiven_dragonfly` resource field `dragonfly_user_config`: deprecate: This property is deprecated
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.org_mapping`: Map Azure AD groups to Grafana organizations and roles
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.skip_org_role_sync`: Stop automatically syncing user
+  organizations and roles at sign-in.
+- Add `aiven_grafana` field `grafana_user_config.metrics_disable_total_stats`: Do not collect the grafana_stat_total_*
+  and grafana_stat_totals_* metrics, which require periodic database queries
+- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `12`, `13`
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_heartbeat_interval_ms`: The heartbeat interval given
+  to the members of a consumer group using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_heartbeat_interval_ms`: The maximum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_session_timeout_ms`: The maximum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_heartbeat_interval_ms`: The minimum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_session_timeout_ms`: The minimum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_session_timeout_ms`: The timeout used to detect consumer
+  group member failures when using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever
+  their audience when sasl_oauthbearer_expected_audience is not set
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their
+  issuer when sasl_oauthbearer_expected_issuer is not set
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `4.3`
+- Change `aiven_kafka` field `kafka_user_config.karapace_version` (enum): add `6.2.4`
+- Add `aiven_kafka_connect` field `kafka_connect_user_config.custom_plugins`: Install custom plugins uploaded
+  via the custom file service
+- Add `aiven_kafka_mirrormaker` field `kafka_mirrormaker_user_config.kafka_mirrormaker_version` (enum): Kafka MirrorMaker
+  major version
+- Add `aiven_mysql` field `mysql_user_config.mysql.collation_server` (enum): The default collation for databases created
+  without one, which their new tables then inherit
+- Add `aiven_mysql` field `mysql_user_config.mysql.event_scheduler` (enum): Whether the event scheduler runs the events
+  created with CREATE EVENT
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_cache_size`: The size in bytes of the InnoDB FULLTEXT index
+  cache for each table
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_sort_pll_degree`: The number of parallel threads used
+  to tokenize and index text when building an InnoDB FULLTEXT index
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_ft_total_cache_size`: The combined memory limit in bytes
+  for InnoDB FULLTEXT index caches across all tables
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_max_dirty_pages_pct`: Percentage of dirty pages in the InnoDB
+  buffer pool at which InnoDB starts flushing aggressively
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_max_purge_lag`: Number of outstanding transactions the InnoDB
+  purge operation may fall behind by before INSERT, UPDATE and DELETE are delayed to let it catch up
+- Add `aiven_mysql` field `mysql_user_config.mysql.innodb_sort_buffer_size`: The size in bytes of the sort buffer used
+  when creating InnoDB indexes
+- Add `aiven_mysql` field `mysql_user_config.mysql.schema_definition_cache`: The number of schema definition objects
+  the data dictionary object cache can hold
+- Add `aiven_mysql` field `mysql_user_config.mysql.tablespace_definition_cache`: The number of tablespace definition
+  objects the data dictionary object cache can hold
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.knn_cache_item_expiry_enabled`: Enable or disable
+  removing KNN graphs from the cache when they are idle
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.knn_cache_item_expiry_minutes`: If enabled, the amount
+  of time in minutes a KNN graph can be idle in the cache before being evicted
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.knn_circuit_breaker_unset_percentage`: The native memory
+  usage, as a percentage below the KNN memory circuit breaker limit, at which a tripped circuit breaker resets
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_max_model_on_node`: Maximum number
+  of ML models that can be deployed on a single ML node
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_auto_deploy_enable`: For externally
+  hosted models only: automatically deploy a model on its first predict request instead of requiring an explicit deploy
+  call first
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.ml_commons_model_auto_redeploy_enable`: Automatically
+  redeploy deployed or partially deployed models after ML nodes rejoin the cluster, e.g
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.search_cancel_after_time_interval`: Hard limit
+  for search requests
+- Add `aiven_opensearch` field `opensearch_user_config.opensearch.search_default_search_timeout`: Soft timeout for search
+  requests that don't set their own timeout
+- Change `aiven_opensearch` field `opensearch_user_config.opensearch_version` (enum): add `3.8`
+- Change `aiven_pg` field `pg_user_config.variant` (enum): add `pg_lake`
+- Add `aiven_service_integration` field `datadog_user_config.datadog_pg_dbname`: Database the Datadog PostgreSQL check
+  connects to
+- Add `aiven_service_integration` field `rsyslog_user_config.octet_counted_framing`: Per-service override
+  for octet-counted framing (RFC 6587 section 3.4.1)
+- Add `aiven_service_integration_endpoint` field `rsyslog_user_config.octet_counted_framing`: Frame each log message with
+  its length prefix (RFC 6587 section 3.4.1) so multi-line records arrive whole at receivers that support it
+- Add `aiven_valkey` field `valkey_user_config.replicas`: Number of replicas per shard in the Valkey cluster. Only applies
+  to cluster plans
+- Add `aiven_valkey` field `valkey_user_config.shard_count`: Number of shards (primaries) in the Valkey cluster. Required
+  for cluster plans
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_sampling_percentage`: Percentage of key accesses sampled for hot key detection
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_top_k`: Number of hottest keys to track and report with
+  the HOTKEYS GET command
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_window_seconds`: Length of the hot key reporting window in seconds
+
 ## [4.63.0] - 2026-09-21
 
 - Fix `aiven_organization_user` data source incorrectly inheriting the deprecation warning from the deprecated resource

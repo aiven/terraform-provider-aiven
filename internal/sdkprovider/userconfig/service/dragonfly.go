@@ -11,6 +11,7 @@ import (
 
 func dragonflyUserConfig() *schema.Schema {
 	return &schema.Schema{
+		Deprecated:       "This property is deprecated.",
 		Description:      "Dragonfly user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{

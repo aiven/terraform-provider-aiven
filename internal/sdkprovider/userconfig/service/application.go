@@ -44,6 +44,19 @@ func applicationUserConfig() *schema.Schema {
 					"ports": {
 						Description: "Ports",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"custom_domain": {
+								Deprecated:  "This property is deprecated.",
+								Description: "Custom hostname served by this port. Example: `app.example.com`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"custom_domains": {
+								Description: "Custom hostnames served by this port. At most 20 per port, and a hostname can be on only one port.",
+								Elem:        &schema.Schema{Type: schema.TypeString},
+								MaxItems:    20,
+								Optional:    true,
+								Type:        schema.TypeList,
+							},
 							"name": {
 								Description: "Allowed characters: ASCII letters, digits, underscore, hyphen. Single (non-consecutive) ASCII spaces are allowed between characters. No leading or trailing spaces. Example: `default`.",
 								Required:    true,
@@ -60,7 +73,51 @@ func applicationUserConfig() *schema.Schema {
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"HTTP"}, false),
 							},
+							"security": {
+								Description: "Access control for the application's ports. An application supports a single OIDC provider, which protects every port: set `security` on one port, or on several with the same value, and it is stored on every port. Omit it from every port to leave the ports reachable by anyone who can reach their address",
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"authentication_method": {
+										Description:  "Enum: `aiven_platform`, `oidc`, `okta`. Which authentication method protects this port. The oidc and okta methods both use the oidc configuration; aiven_platform takes none.",
+										Required:     true,
+										Type:         schema.TypeString,
+										ValidateFunc: validation.StringInSlice([]string{"aiven_platform", "oidc", "okta"}, false),
+									},
+									"oidc": {
+										Description: "Generic OpenID Connect provider that callers of this port must authenticate against",
+										Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+											"client_id": {
+												Description: "OAuth2 client ID registered with the issuer. Example: `0oa1b2c3d4e5f6g7h8i9`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"client_secret": {
+												Description: "OAuth2 client secret registered with the issuer. Redacted when read back. Example: `example-client-secret`.",
+												Required:    true,
+												Sensitive:   true,
+												Type:        schema.TypeString,
+											},
+											"issuer_url": {
+												Description: "OIDC issuer base URL. Must serve /.well-known/openid-configuration over HTTPS. Example: `https://login.example.com`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"name": {
+												Description: "Label for this authentication configuration, shown to the user. Example: `Corporate Okta`.",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+										}},
+										MaxItems: 1,
+										Optional: true,
+										Type:     schema.TypeList,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
 						}},
+						MaxItems: 5,
 						Optional: true,
 						Type:     schema.TypeList,
 					},
@@ -86,6 +143,11 @@ func applicationUserConfig() *schema.Schema {
 							},
 							"build_path": {
 								Description: "Path of image build context. If set without containerfile_path, this will also be used to search for Containerfile/Dockerfile. Example: `main`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"commit_sha": {
+								Description: "Full 40-character lowercase hex SHA of the commit to deploy. Without it, the HEAD of the configured branch is deployed; with it, this commit is deployed regardless of new pushes to the branch. Requires a VCS integration. Changing the branch clears it. Send null to clear on update; omit to leave unchanged. Example: `7fec93fe4ec0f95278976d8107b28d1c16c932da`.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},

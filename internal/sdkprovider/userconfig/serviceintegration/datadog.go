@@ -24,6 +24,11 @@ func datadogUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"datadog_pg_dbname": {
+				Description: "Database the Datadog PostgreSQL check connects to. Relation metrics are collected only from this database. The main service database is used when unset. Database Monitoring collects query statistics from every database regardless of this option. Example: `defaultdb`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"datadog_pg_relations": {
 				Description: "Relations to collect PostgreSQL relation metrics for, such as table size, index statistics, row counts, vacuum ages and locks. No relation metrics are collected when unset",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{

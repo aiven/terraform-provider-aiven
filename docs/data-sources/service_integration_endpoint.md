@@ -321,6 +321,7 @@ Read-Only:
 - `key` (String)
 - `logline` (String)
 - `max_message_size` (Number)
+- `octet_counted_framing` (Boolean)
 - `port` (Number)
 - `sd` (String)
 - `server` (String)

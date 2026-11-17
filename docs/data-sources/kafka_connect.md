@@ -81,6 +81,7 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `custom_plugins` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--custom_plugins))
 - `gcp_auth_allowed_urls` (List of String)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
@@ -95,6 +96,15 @@ Read-Only:
 - `secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
+
+<a id="nestedobjatt--kafka_connect_user_config--custom_plugins"></a>
+### Nested Schema for `kafka_connect_user_config.custom_plugins`
+
+Read-Only:
+
+- `plugin_name` (String)
+- `plugin_version` (String)
+
 
 <a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_connect_user_config.ip_filter_object`

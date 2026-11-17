@@ -95,6 +95,21 @@ func grafanaUserConfig() *schema.Schema {
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
+					"org_mapping": {
+						Description: "Map Azure AD groups to Grafana organizations and roles. Each entry is <group object ID>:<organization ID>:<role>. Use * as the group to match all users, or as the organization to match all organizations. The role defaults to Viewer. Users matching at least one entry are removed from organizations they are not mapped to.",
+						Elem: &schema.Schema{
+							Description: "Group to organization and role mapping. Example: `c0ffee15-c01d-0000-1111-012345abcdef:1:Editor`.",
+							Type:        schema.TypeString,
+						},
+						MaxItems: 50,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"skip_org_role_sync": {
+						Description: "Stop automatically syncing user organizations and roles at sign-in.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"token_url": {
 						Description: "Token URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/token`.",
 						Required:    true,
@@ -343,12 +358,12 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"dashboard_previews_enabled": {
-				Description: "Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
+				Description: "Dashboard previews were removed from Grafana upstream, so this setting no longer enables browsing of dashboards in grid (pictures) mode. On Grafana 11 and 12 it only enables the bundled image renderer plugin, which is not shipped with Grafana 13 and onward.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"dashboard_scenes_enabled": {
-				Description: "Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.",
+				Description: "Setting has no effect with Grafana 11 and onward. Grafana renders dashboards with the Scenes Library by default.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -466,7 +481,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"grafana_version": {
-				Description: "Enum: `11`, and newer. Grafana major version.",
+				Description: "Enum: `11`, `12`, `13`, and newer. Grafana major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -508,6 +523,11 @@ func grafanaUserConfig() *schema.Schema {
 				MaxItems: 8000,
 				Optional: true,
 				Type:     schema.TypeSet,
+			},
+			"metrics_disable_total_stats": {
+				Description: "Do not collect the grafana_stat_total_* and grafana_stat_totals_* metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.",
+				Optional:    true,
+				Type:        schema.TypeBool,
 			},
 			"metrics_enabled": {
 				Description: "Enable Grafana's /metrics endpoint.",

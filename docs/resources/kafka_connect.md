@@ -116,6 +116,7 @@ resource "aiven_service_integration" "kafka_connect_integration" {
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `custom_plugins` (Block List, Max: 10) Install custom plugins uploaded via the custom file service (see [below for nested schema](#nestedblock--kafka_connect_user_config--custom_plugins))
 - `gcp_auth_allowed_urls` (List of String) Allow-list of HTTPS URLs used to validate GCP credential_source requests for Kafka Connect.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_connect_user_config--ip_filter_object))
@@ -130,6 +131,15 @@ Optional:
 - `secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
+
+<a id="nestedblock--kafka_connect_user_config--custom_plugins"></a>
+### Nested Schema for `kafka_connect_user_config.custom_plugins`
+
+Required:
+
+- `plugin_name` (String) The name of the custom plugin as specified during upload. Example: `my-custom-connector`.
+- `plugin_version` (String) The version to install. Use a semver version (e.g. `1.0.0`) or `latest` to always use the most recent version. Example: `latest`.
+
 
 <a id="nestedblock--kafka_connect_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_connect_user_config.ip_filter_object`

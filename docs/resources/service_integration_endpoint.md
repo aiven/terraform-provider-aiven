@@ -417,13 +417,14 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
-- `escape_newlines` (Boolean) When true, embedded newlines in a log message are escaped so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Useful for newline-delimited cloud log intakes that drop continuation lines. Default: `false`.
+- `escape_newlines` (Boolean) Escape embedded newlines so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Enabled by default. Set to false if the receiving server expects raw newlines in messages. Default: `true`.
 - `key` (String, Sensitive) PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----
 `.
 - `logline` (String) Custom syslog message format. Example: `<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%`.
 - `max_message_size` (Number) Rsyslog max message size. Default: `8192`.
+- `octet_counted_framing` (Boolean) Frame each log message with its length prefix (RFC 6587 section 3.4.1) so multi-line records arrive whole at receivers that support it. Only enable it if the receiver supports octet-counted framing (for example rsyslog or syslog-ng); other receivers cannot parse the length prefix. Disabled by default. When enabled, it takes precedence over escape_newlines. Default: `false`.
 - `sd` (String) Structured data block for log message. Example: `TOKEN tag="LiteralValue"`.
 
 
