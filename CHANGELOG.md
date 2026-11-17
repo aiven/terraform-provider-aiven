@@ -11,28 +11,124 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
-  when multiple PSC connections exist for the same service
-- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources: allows correlating GCP Private Service Connect connection IDs with their corresponding hostnames
-- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
-- Migrate `aiven_service_component` data source to use generated client
-- Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`, `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
+## [4.37.5] - 2026-11-17
+
+- Add `aiven_kafka` field `kafka_user_config.backup_interval_hours` (enum): Interval in hours between automatic backups.
+  Minimum value is 3 hours
+- Add `aiven_kafka` field `kafka_user_config.backup_retention_days`: Number of days to retain automatic backups. Backups
+  older than this value will be automatically deleted
+- Add `aiven_kafka` field `kafka_user_config.enable_ipv6`: Register AAAA DNS records for the service, and allow IPv6
+  packets to service ports.
+- Add `aiven_kafka` field `kafka_user_config.gcp_auth_allowed_urls`: Allow-list of HTTPS URLs used to validate
+  GCP credential_source requests for Kafka Connect.
+- Add `aiven_kafka` field `kafka_user_config.inkless`: Inkless configuration values
+- Add `aiven_kafka` field `kafka_user_config.kafka.audit_log`: Enable Kafka audit logging by providing this object.
+  Removing it disables the feature
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_heartbeat_interval_ms`: The heartbeat interval given
+  to the members of a consumer group using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_heartbeat_interval_ms`: The maximum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_max_session_timeout_ms`: The maximum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_heartbeat_interval_ms`: The minimum heartbeat
+  interval allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_min_session_timeout_ms`: The minimum session timeout
+  allowed for consumer group members using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_consumer_session_timeout_ms`: The timeout used to detect consumer
+  group member failures when using the consumer rebalance protocol
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_coordinator_rebalance_protocols` (enum): The enabled consumer
+  group rebalance protocols
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_delivery_count_limit`: The maximum delivery attempts
+  for a share-group record
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_heartbeat_interval_ms`: The heartbeat interval used
+  by share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_groups`: The maximum number of share groups allowed on the broker.
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_heartbeat_interval_ms`: The maximum heartbeat interval
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_record_lock_duration_ms`: The maximum record lock
+  duration allowed for share groups
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_session_timeout_ms`: The maximum session timeout
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_max_size`: The maximum number of members allowed in a share group
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_heartbeat_interval_ms`: The minimum heartbeat interval
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_record_lock_duration_ms`: The minimum record lock
+  duration allowed for share groups
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_min_session_timeout_ms`: The minimum session timeout
+  allowed for share group members
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_partition_max_record_locks`: The maximum number of record
+  locks allowed per share group partition
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_record_lock_duration_ms`: The duration for which a fetched
+  share-group record is locked
+- Add `aiven_kafka` field `kafka_user_config.kafka.group_share_session_timeout_ms`: The timeout used to detect share group
+  member failures
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever
+  their audience when sasl_oauthbearer_expected_audience is not set
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their
+  issuer when sasl_oauthbearer_expected_issuer is not set
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_config.prefer_ipv6_address_enable`: When enabled, connectors
+  will automatically resolve IPv6 addresses from external server names configured with dual-stack
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_plugin_versions`: The plugin selected by the user
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.azure`: Azure KeyVault secret provider configuration
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.env`: ENV secret provider configuration
+- Add `aiven_kafka` field `kafka_user_config.kafka_connect_secret_providers.vault.server_pem`: PEM encoded certificate
+  of the Vault server
+- Add `aiven_kafka` field `kafka_user_config.kafka_diskless`: Kafka Diskless configuration values
+- Add `aiven_kafka` field `kafka_user_config.karapace_version` (enum): Select a Karapace version for this service,
+  or select Latest to use the latest available version automatically
+- Add `aiven_kafka` field `kafka_user_config.letsencrypt_sasl`: Use a Let's Encrypt certificate authority (CA) for Kafka
+  SASL authentication
+- Add `aiven_kafka` field `kafka_user_config.preferred_zones`: List of preferred zone IDs for service node placement.
+  Nodes will be placed in these zones when available
+- Add `aiven_kafka` field `kafka_user_config.sasl_oauthbearer_allowed_urls`: List of allowed URLs for SASL OAUTHBEARER authentication
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_authentication_enabled`: If enabled,
+  the Schema Registry validates OAuth 2.0/OIDC JWT bearer tokens
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_authorization_enabled`: If enabled,
+  the Schema Registry enforces role-based authorization using the JWT roles claim
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_method_roles`: Maps HTTP methods
+  to allowed roles
+- Add `aiven_kafka` field `kafka_user_config.schema_registry_config.sasl_oauthbearer_roles_claim_path`: The JSON path
+  the Schema Registry uses to find the roles claim in the JWT
+- Add `aiven_kafka` field `kafka_user_config.single_zone.availability_zone`: The availability zone to use for the service.
+  This is only used when enabled is set to true
+- Change `aiven_kafka` field `kafka_user_config.ip_filter`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.ip_filter_object`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.ip_filter_string`: max items ~~`2048`~~ → `8000`
+- Change `aiven_kafka` field `kafka_user_config.kafka_version` (enum): add `3.9`, `4.0`, `4.1`, `4.2`, `4.3`
+
+## [4.37.4] - 2026-04-23
+
+- Add `aiven_kafka` field `config.kafka.log_message_timestamp_after_max_ms`
+- Add `aiven_kafka` field `config.kafka.log_message_timestamp_before_max_ms`
+
+## [4.37.3] - 2026-04-22
+
 - Add `aiven_kafka_topic` field `config.message_timestamp_after_max_ms`: The maximum difference allowed between
   the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
   with timestamps later than the broker's timestamp.
 - Add `aiven_kafka_topic` field `config.message_timestamp_before_max_ms`: The maximum difference allowed between
   the timestamp when a broker receives a message and the timestamp specified in the message. Applies only for messages
   with timestamps earlier than the broker's timestamp.
-- Add `aiven_kafka` field `config.kafka.log_message_timestamp_after_max_ms`
-- Add `aiven_kafka` field `config.kafka.log_message_timestamp_before_max_ms`
+
+## [4.37.2] - 2026-02-13
+
+- Change `aiven_gcp_privatelink_connection_approval`: allow selecting which connection to approve via `psc_connection_id`
+  when multiple PSC connections exist for the same service
+- Add `privatelink_connection_id` to the `components` attribute on all service resources and data sources: allows
+  correlating GCP Private Service Connect connection IDs with their corresponding hostnames
+- Add `privatelink_connection_id` to `aiven_service_component` data source: enables filtering by privatelink connection ID
+- Migrate `aiven_service_component` data source to use generated client
+- Change `aiven_valkey_user`: ACL fields (`valkey_acl_categories`, `valkey_acl_commands`, `valkey_acl_keys`,
+  `valkey_acl_channels`) can now be updated in-place without forcing resource recreation
 
 ## [4.37.1] - 2026-01-14
+
 - Fix `aiven_kafka_schema`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 - Fix `aiven_kafka_schema_configuration`: handle 403 Forbidden error when Schema Registry is disabled by verifying service state
 
 ## [4.37.0] - 2025-03-12
 
-- Fix user config plan suppresses `false` values 
+- Fix user config plan suppresses `false` values
 - Fix `terraform import` for various resources
 - Fix `aiven_organization_application_user`: improve delete operation
 - Improve `aiven_organiztion_permission`: use `PermissionsSet` endpoint to set permissions

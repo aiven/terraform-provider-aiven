@@ -95,8 +95,13 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `aiven_kafka_topic_messages` (Boolean)
+- `backup_interval_hours` (Number)
+- `backup_retention_days` (Number)
 - `custom_domain` (String)
+- `enable_ipv6` (Boolean)
 - `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
+- `gcp_auth_allowed_urls` (List of String)
+- `inkless` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--inkless))
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
@@ -104,16 +109,22 @@ Read-Only:
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
+- `kafka_connect_plugin_versions` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_plugin_versions))
 - `kafka_connect_secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers))
+- `kafka_diskless` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_diskless))
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_sasl_mechanisms` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_sasl_mechanisms))
 - `kafka_version` (String)
+- `karapace_version` (String)
+- `letsencrypt_sasl` (Boolean)
 - `letsencrypt_sasl_privatelink` (Boolean)
+- `preferred_zones` (List of String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--public_access))
+- `sasl_oauthbearer_allowed_urls` (List of String)
 - `schema_registry` (Boolean)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
 - `service_log` (Boolean)
@@ -123,6 +134,14 @@ Read-Only:
 
 <a id="nestedobjatt--kafka_user_config--follower_fetching"></a>
 ### Nested Schema for `kafka_user_config.follower_fetching`
+
+Read-Only:
+
+- `enabled` (Boolean)
+
+
+<a id="nestedobjatt--kafka_user_config--inkless"></a>
+### Nested Schema for `kafka_user_config.inkless`
 
 Read-Only:
 
@@ -143,13 +162,34 @@ Read-Only:
 
 Read-Only:
 
+- `audit_log` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka--audit_log))
 - `auto_create_topics_enable` (Boolean)
 - `compression_type` (String)
 - `connections_max_idle_ms` (Number)
 - `default_replication_factor` (Number)
+- `group_consumer_heartbeat_interval_ms` (Number)
+- `group_consumer_max_heartbeat_interval_ms` (Number)
+- `group_consumer_max_session_timeout_ms` (Number)
+- `group_consumer_min_heartbeat_interval_ms` (Number)
+- `group_consumer_min_session_timeout_ms` (Number)
+- `group_consumer_session_timeout_ms` (Number)
+- `group_coordinator_rebalance_protocols` (String)
 - `group_initial_rebalance_delay_ms` (Number)
 - `group_max_session_timeout_ms` (Number)
 - `group_min_session_timeout_ms` (Number)
+- `group_share_delivery_count_limit` (Number)
+- `group_share_heartbeat_interval_ms` (Number)
+- `group_share_max_groups` (Number)
+- `group_share_max_heartbeat_interval_ms` (Number)
+- `group_share_max_record_lock_duration_ms` (Number)
+- `group_share_max_session_timeout_ms` (Number)
+- `group_share_max_size` (Number)
+- `group_share_min_heartbeat_interval_ms` (Number)
+- `group_share_min_record_lock_duration_ms` (Number)
+- `group_share_min_session_timeout_ms` (Number)
+- `group_share_partition_max_record_locks` (Number)
+- `group_share_record_lock_duration_ms` (Number)
+- `group_share_session_timeout_ms` (Number)
 - `log_cleaner_delete_retention_ms` (Number)
 - `log_cleaner_max_compaction_lag_ms` (Number)
 - `log_cleaner_min_cleanable_ratio` (Number)
@@ -183,6 +223,8 @@ Read-Only:
 - `producer_purgatory_purge_interval_requests` (Number)
 - `replica_fetch_max_bytes` (Number)
 - `replica_fetch_response_max_bytes` (Number)
+- `sasl_oauthbearer_allow_unverified_audience` (Boolean)
+- `sasl_oauthbearer_allow_unverified_issuer` (Boolean)
 - `sasl_oauthbearer_expected_audience` (String)
 - `sasl_oauthbearer_expected_issuer` (String)
 - `sasl_oauthbearer_jwks_endpoint_url` (String)
@@ -191,6 +233,17 @@ Read-Only:
 - `transaction_partition_verification_enable` (Boolean)
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number)
 - `transaction_state_log_segment_bytes` (Number)
+
+<a id="nestedobjatt--kafka_user_config--kafka--audit_log"></a>
+### Nested Schema for `kafka_user_config.kafka.audit_log`
+
+Read-Only:
+
+- `aggregation_period_sec` (Number)
+- `group_by` (String)
+- `include_denials` (Boolean)
+- `record_type` (String)
+
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_authentication_methods"></a>
@@ -216,6 +269,7 @@ Read-Only:
 - `consumer_max_poll_records` (Number)
 - `offset_flush_interval_ms` (Number)
 - `offset_flush_timeout_ms` (Number)
+- `prefer_ipv6_address_enable` (Boolean)
 - `producer_batch_size` (Number)
 - `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)
@@ -225,12 +279,23 @@ Read-Only:
 - `session_timeout_ms` (Number)
 
 
+<a id="nestedobjatt--kafka_user_config--kafka_connect_plugin_versions"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_plugin_versions`
+
+Read-Only:
+
+- `plugin_name` (String)
+- `version` (String)
+
+
 <a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers"></a>
 ### Nested Schema for `kafka_user_config.kafka_connect_secret_providers`
 
 Read-Only:
 
 - `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--aws))
+- `azure` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--azure))
+- `env` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--env))
 - `name` (String)
 - `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault))
 
@@ -245,6 +310,25 @@ Read-Only:
 - `secret_key` (String)
 
 
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--azure"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.azure`
+
+Read-Only:
+
+- `auth_method` (String)
+- `client_id` (String)
+- `secret` (String)
+- `tenant_id` (String)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--env"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.env`
+
+Read-Only:
+
+- `secrets` (Map of String)
+
+
 <a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault"></a>
 ### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.vault`
 
@@ -254,8 +338,18 @@ Read-Only:
 - `auth_method` (String)
 - `engine_version` (Number)
 - `prefix_path_depth` (Number)
+- `server_pem` (String)
 - `token` (String)
 
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_diskless"></a>
+### Nested Schema for `kafka_user_config.kafka_diskless`
+
+Read-Only:
+
+- `auto_diskless_topic_regexes` (List of String)
+- `enabled` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>
@@ -330,6 +424,10 @@ Read-Only:
 
 - `leader_eligibility` (Boolean)
 - `retriable_errors_silenced` (Boolean)
+- `sasl_oauthbearer_authentication_enabled` (Boolean)
+- `sasl_oauthbearer_authorization_enabled` (Boolean)
+- `sasl_oauthbearer_method_roles` (String)
+- `sasl_oauthbearer_roles_claim_path` (String)
 - `schema_reader_strict_mode` (Boolean)
 - `topic_name` (String)
 
@@ -339,6 +437,7 @@ Read-Only:
 
 Read-Only:
 
+- `availability_zone` (String)
 - `enabled` (Boolean)
 
 
