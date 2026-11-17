@@ -1046,6 +1046,16 @@ func opensearchUserConfig() *schema.Schema {
 						Optional: true,
 						Type:     schema.TypeList,
 					},
+					"search_cancel_after_time_interval": {
+						Description: "Hard limit for search requests. When it is reached, the search task is cancelled and the request fails. OpenSearch default value is used when this is not defined. Example: `5m`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"search_default_search_timeout": {
+						Description: "Soft timeout for search requests that don't set their own timeout. When it is reached, the search returns partial results with `timed_out: true`, and the search task keeps running unless it is cancelled. OpenSearch default value is used when this is not defined. Example: `30s`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"search_insights_top_queries": {
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"cpu": {

@@ -48,7 +48,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"binlog_retention_period": {
-				Description: "Warning: reducing this value can make a large batch of binary logs eligible for purge at once. Depending on the volume, this can sometimes stall the MySQL commit path and block writes until the purge completes. To stay on the safe side, prefer lowering the value gradually in small decrements during a low-traffic window rather than dropping it drastically in one step. Example: `600`.",
+				Description: "By default, the longest retention you can set is 86400 seconds (24 hours). To keep binary logs for longer, up to 1814400 seconds (21 days), contact Aiven support. If the service has enough disk space for the additional binary logs, Aiven raises the limit for the whole project. Warning: reducing this value can make a large batch of binary logs eligible for purge at once. Depending on the volume, this can sometimes stall the MySQL commit path and block writes until the purge completes. To stay on the safe side, prefer lowering the value gradually in small decrements during a low-traffic window rather than dropping it drastically in one step. Example: `600`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -121,7 +121,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
@@ -165,6 +165,12 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"collation_server": {
+						Description:  "Enum: `utf8mb4_0900_ai_ci`, `utf8mb4_0900_as_ci`, `utf8mb4_0900_as_cs`, `utf8mb4_0900_bin`, `utf8mb4_bg_0900_ai_ci`, `utf8mb4_bg_0900_as_cs`, `utf8mb4_bin`, `utf8mb4_bs_0900_ai_ci`, `utf8mb4_bs_0900_as_cs`, `utf8mb4_croatian_ci`, `utf8mb4_cs_0900_ai_ci`, `utf8mb4_cs_0900_as_cs`, `utf8mb4_czech_ci`, `utf8mb4_da_0900_ai_ci`, `utf8mb4_da_0900_as_cs`, `utf8mb4_danish_ci`, `utf8mb4_de_pb_0900_ai_ci`, `utf8mb4_de_pb_0900_as_cs`, `utf8mb4_eo_0900_ai_ci`, `utf8mb4_eo_0900_as_cs`, `utf8mb4_es_0900_ai_ci`, `utf8mb4_es_0900_as_cs`, `utf8mb4_es_trad_0900_ai_ci`, `utf8mb4_es_trad_0900_as_cs`, `utf8mb4_esperanto_ci`, `utf8mb4_estonian_ci`, `utf8mb4_et_0900_ai_ci`, `utf8mb4_et_0900_as_cs`, `utf8mb4_general_ci`, `utf8mb4_german2_ci`, `utf8mb4_gl_0900_ai_ci`, `utf8mb4_gl_0900_as_cs`, `utf8mb4_hr_0900_ai_ci`, `utf8mb4_hr_0900_as_cs`, `utf8mb4_hu_0900_ai_ci`, `utf8mb4_hu_0900_as_cs`, `utf8mb4_hungarian_ci`, `utf8mb4_icelandic_ci`, `utf8mb4_is_0900_ai_ci`, `utf8mb4_is_0900_as_cs`, `utf8mb4_ja_0900_as_cs`, `utf8mb4_ja_0900_as_cs_ks`, `utf8mb4_la_0900_ai_ci`, `utf8mb4_la_0900_as_cs`, `utf8mb4_latvian_ci`, `utf8mb4_lithuanian_ci`, `utf8mb4_lt_0900_ai_ci`, `utf8mb4_lt_0900_as_cs`, `utf8mb4_lv_0900_ai_ci`, `utf8mb4_lv_0900_as_cs`, `utf8mb4_mn_cyrl_0900_ai_ci`, `utf8mb4_mn_cyrl_0900_as_cs`, `utf8mb4_nb_0900_ai_ci`, `utf8mb4_nb_0900_as_cs`, `utf8mb4_nn_0900_ai_ci`, `utf8mb4_nn_0900_as_cs`, `utf8mb4_persian_ci`, `utf8mb4_pl_0900_ai_ci`, `utf8mb4_pl_0900_as_cs`, `utf8mb4_polish_ci`, `utf8mb4_ro_0900_ai_ci`, `utf8mb4_ro_0900_as_cs`, `utf8mb4_roman_ci`, `utf8mb4_romanian_ci`, `utf8mb4_ru_0900_ai_ci`, `utf8mb4_ru_0900_as_cs`, `utf8mb4_sinhala_ci`, `utf8mb4_sk_0900_ai_ci`, `utf8mb4_sk_0900_as_cs`, `utf8mb4_sl_0900_ai_ci`, `utf8mb4_sl_0900_as_cs`, `utf8mb4_slovak_ci`, `utf8mb4_slovenian_ci`, `utf8mb4_spanish2_ci`, `utf8mb4_spanish_ci`, `utf8mb4_sr_latn_0900_ai_ci`, `utf8mb4_sr_latn_0900_as_cs`, `utf8mb4_sv_0900_ai_ci`, `utf8mb4_sv_0900_as_cs`, `utf8mb4_swedish_ci`, `utf8mb4_tr_0900_ai_ci`, `utf8mb4_tr_0900_as_cs`, `utf8mb4_turkish_ci`, `utf8mb4_unicode_520_ci`, `utf8mb4_unicode_ci`, `utf8mb4_vi_0900_ai_ci`, `utf8mb4_vi_0900_as_cs`, `utf8mb4_vietnamese_ci`, `utf8mb4_zh_0900_as_cs`. The default collation for databases created without one, which their new tables then inherit. Only collations of the utf8mb4 character set are accepted. Databases Aiven creates, defaultdb and those added through the API or Console, keep utf8mb4_0900_ai_ci. Changing it leaves existing databases as they are. A change applies to new connections at once. After the next server restart, for example at maintenance, an upgrade, a plan change or a node replacement, sessions reset with COM_RESET_CONNECTION also compare strings with this collation, which a change without a restart does not do. Every 0900 collation except utf8mb4_0900_ai_ci has an id above 255, so after that restart MySQL announces a wrong character set to connecting clients. Clients that take their character set from the server, such as PHP mysqli and PDO without a charset option and MySQL Connector/NET (MySql.Data) without CharSet, must then set utf8mb4 themselves. Default is utf8mb4_0900_ai_ci.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"utf8mb4_0900_ai_ci", "utf8mb4_0900_as_ci", "utf8mb4_0900_as_cs", "utf8mb4_0900_bin", "utf8mb4_bg_0900_ai_ci", "utf8mb4_bg_0900_as_cs", "utf8mb4_bin", "utf8mb4_bs_0900_ai_ci", "utf8mb4_bs_0900_as_cs", "utf8mb4_croatian_ci", "utf8mb4_cs_0900_ai_ci", "utf8mb4_cs_0900_as_cs", "utf8mb4_czech_ci", "utf8mb4_da_0900_ai_ci", "utf8mb4_da_0900_as_cs", "utf8mb4_danish_ci", "utf8mb4_de_pb_0900_ai_ci", "utf8mb4_de_pb_0900_as_cs", "utf8mb4_eo_0900_ai_ci", "utf8mb4_eo_0900_as_cs", "utf8mb4_es_0900_ai_ci", "utf8mb4_es_0900_as_cs", "utf8mb4_es_trad_0900_ai_ci", "utf8mb4_es_trad_0900_as_cs", "utf8mb4_esperanto_ci", "utf8mb4_estonian_ci", "utf8mb4_et_0900_ai_ci", "utf8mb4_et_0900_as_cs", "utf8mb4_general_ci", "utf8mb4_german2_ci", "utf8mb4_gl_0900_ai_ci", "utf8mb4_gl_0900_as_cs", "utf8mb4_hr_0900_ai_ci", "utf8mb4_hr_0900_as_cs", "utf8mb4_hu_0900_ai_ci", "utf8mb4_hu_0900_as_cs", "utf8mb4_hungarian_ci", "utf8mb4_icelandic_ci", "utf8mb4_is_0900_ai_ci", "utf8mb4_is_0900_as_cs", "utf8mb4_ja_0900_as_cs", "utf8mb4_ja_0900_as_cs_ks", "utf8mb4_la_0900_ai_ci", "utf8mb4_la_0900_as_cs", "utf8mb4_latvian_ci", "utf8mb4_lithuanian_ci", "utf8mb4_lt_0900_ai_ci", "utf8mb4_lt_0900_as_cs", "utf8mb4_lv_0900_ai_ci", "utf8mb4_lv_0900_as_cs", "utf8mb4_mn_cyrl_0900_ai_ci", "utf8mb4_mn_cyrl_0900_as_cs", "utf8mb4_nb_0900_ai_ci", "utf8mb4_nb_0900_as_cs", "utf8mb4_nn_0900_ai_ci", "utf8mb4_nn_0900_as_cs", "utf8mb4_persian_ci", "utf8mb4_pl_0900_ai_ci", "utf8mb4_pl_0900_as_cs", "utf8mb4_polish_ci", "utf8mb4_ro_0900_ai_ci", "utf8mb4_ro_0900_as_cs", "utf8mb4_roman_ci", "utf8mb4_romanian_ci", "utf8mb4_ru_0900_ai_ci", "utf8mb4_ru_0900_as_cs", "utf8mb4_sinhala_ci", "utf8mb4_sk_0900_ai_ci", "utf8mb4_sk_0900_as_cs", "utf8mb4_sl_0900_ai_ci", "utf8mb4_sl_0900_as_cs", "utf8mb4_slovak_ci", "utf8mb4_slovenian_ci", "utf8mb4_spanish2_ci", "utf8mb4_spanish_ci", "utf8mb4_sr_latn_0900_ai_ci", "utf8mb4_sr_latn_0900_as_cs", "utf8mb4_sv_0900_ai_ci", "utf8mb4_sv_0900_as_cs", "utf8mb4_swedish_ci", "utf8mb4_tr_0900_ai_ci", "utf8mb4_tr_0900_as_cs", "utf8mb4_turkish_ci", "utf8mb4_unicode_520_ci", "utf8mb4_unicode_ci", "utf8mb4_vi_0900_ai_ci", "utf8mb4_vi_0900_as_cs", "utf8mb4_vietnamese_ci", "utf8mb4_zh_0900_as_cs"}, false),
+					},
 					"connect_timeout": {
 						Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.",
 						Optional:    true,
@@ -190,6 +196,12 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"event_scheduler": {
+						Description:  "Enum: `OFF`, `ON`. Whether the event scheduler runs the events created with CREATE EVENT. Set OFF to stop every event on the service without dropping it, and ON to start them again. A change applies at once, without a restart. Events take effect only on the primary node. After a failover, they are re-enabled on the new primary. Default is ON.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"OFF", "ON"}, false),
+					},
 					"group_concat_max_len": {
 						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.",
 						Optional:    true,
@@ -212,6 +224,11 @@ func mysqlUserConfig() *schema.Schema {
 					},
 					"innodb_flush_neighbors": {
 						Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent. Example: `0`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"innodb_ft_cache_size": {
+						Description: "The size in bytes of the InnoDB FULLTEXT index cache for each table. Pending index updates are flushed to disk when the cache reaches this limit. innodb_ft_total_cache_size controls the combined cache limit for all tables. Default is 8000000. Changing this parameter will lead to a restart of the MySQL service.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -244,6 +261,16 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"innodb_ft_sort_pll_degree": {
+						Description: "The number of parallel threads used to tokenize and index text when building an InnoDB FULLTEXT index. Default is 2. Changing this parameter will lead to a restart of the MySQL service. Example: `2`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"innodb_ft_total_cache_size": {
+						Description: "The combined memory limit in bytes for InnoDB FULLTEXT index caches across all tables. When an index operation reaches this limit, InnoDB forces cached index updates to disk to reduce memory usage. Values above 5% of plan RAM are rejected. Changing this parameter will lead to a restart of the MySQL service.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 					"innodb_ft_user_stopword_table": {
 						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for specific InnoDB tables. Example: `db_name/table_name`.",
@@ -315,6 +342,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"innodb_sort_buffer_size": {
+						Description: "The size in bytes of the sort buffer used when creating InnoDB indexes. Also controls the read and write buffer sizes for the temporary log used during online DDL operations. Default is 1048576 (1 MiB). Changing this parameter will lead to a restart of the MySQL service.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"innodb_thread_concurrency": {
 						Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit). Example: `10`.",
 						Optional:    true,
@@ -343,7 +375,7 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "INSIGHTS,TABLE", "NONE", "TABLE"}, false),
 					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.",
+						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Requests to set this below 0.05 seconds are rejected. Lower values log almost every statement, which can fill the disk, and AI Insights ignores queries under 50 ms. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -424,6 +456,11 @@ func mysqlUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"schema_definition_cache": {
+						Description: "The number of schema definition objects the data dictionary object cache can hold. Raise it above the number of schemas on the service to keep their definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own schemas, so a high value costs nothing extra on a service with few schemas. Default is 256. Example: `4000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"slow_query_log": {
 						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
 						Optional:    true,
@@ -443,6 +480,11 @@ func mysqlUserConfig() *schema.Schema {
 						Description: "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
 						Optional:    true,
 						Type:        schema.TypeBool,
+					},
+					"tablespace_definition_cache": {
+						Description: "The number of tablespace definition objects the data dictionary object cache can hold. Each InnoDB table stored in its own file is a separate tablespace, so raise it above the number of tables on the service to keep their tablespace definitions in memory. Each cached definition uses a small amount of memory, and the cache never holds more than the service's own tables, so a high value costs nothing extra on a service with few tables. Default is 256. Example: `10000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 					"tmp_table_size": {
 						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",

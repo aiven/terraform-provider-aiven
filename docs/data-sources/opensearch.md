@@ -298,6 +298,8 @@ Read-Only:
 - `remote_store` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--remote_store))
 - `script_max_compilations_rate` (String)
 - `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
+- `search_cancel_after_time_interval` (String)
+- `search_default_search_timeout` (String)
 - `search_insights_top_queries` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number)
 - `segrep` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--segrep))

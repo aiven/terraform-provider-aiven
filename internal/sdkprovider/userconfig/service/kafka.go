@@ -456,13 +456,23 @@ func kafkaUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"sasl_oauthbearer_allow_unverified_audience": {
+						Description: "Accept tokens whatever their audience when sasl_oauthbearer_expected_audience is not set. Either this or sasl_oauthbearer_expected_audience is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the audience is not verified unless sasl_oauthbearer_expected_audience is set (Default: false).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"sasl_oauthbearer_allow_unverified_issuer": {
+						Description: "Accept tokens whatever their issuer when sasl_oauthbearer_expected_issuer is not set. Either this or sasl_oauthbearer_expected_issuer is required when sasl_oauthbearer_jwks_endpoint_url is set. Apache Kafka only has this option from version 4.4: before that, the issuer is not verified unless sasl_oauthbearer_expected_issuer is set (Default: false).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"sasl_oauthbearer_expected_audience": {
-						Description: "The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences. (Default: null).",
+						Description: "The comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"sasl_oauthbearer_expected_issuer": {
-						Description: "Optional setting for the broker to use to verify that the JWT was created by the expected issuer.(Default: null).",
+						Description: "The broker uses this setting to verify that the JWT was created by the expected issuer.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},

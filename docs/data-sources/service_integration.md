@@ -436,3 +436,4 @@ Read-Only:
 Read-Only:
 
 - `escape_newlines` (Boolean)
+- `octet_counted_framing` (Boolean)

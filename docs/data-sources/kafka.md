@@ -226,6 +226,8 @@ Read-Only:
 - `producer_purgatory_purge_interval_requests` (Number)
 - `replica_fetch_max_bytes` (Number)
 - `replica_fetch_response_max_bytes` (Number)
+- `sasl_oauthbearer_allow_unverified_audience` (Boolean)
+- `sasl_oauthbearer_allow_unverified_issuer` (Boolean)
 - `sasl_oauthbearer_expected_audience` (String)
 - `sasl_oauthbearer_expected_issuer` (String)
 - `sasl_oauthbearer_jwks_endpoint_url` (String)

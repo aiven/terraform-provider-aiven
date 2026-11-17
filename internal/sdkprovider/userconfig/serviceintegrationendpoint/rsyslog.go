@@ -25,7 +25,7 @@ func rsyslogUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"escape_newlines": {
-				Description: "When true, embedded newlines in a log message are escaped so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Useful for newline-delimited cloud log intakes that drop continuation lines. Default: `false`.",
+				Description: "Escape embedded newlines so a multi-line record (e.g. a stack trace) is delivered as one complete log entry. Enabled by default. Set to false if the receiving server expects raw newlines in messages. Default: `true`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -50,6 +50,11 @@ func rsyslogUserConfig() *schema.Schema {
 				Description: "Rsyslog max message size. Default: `8192`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
+			},
+			"octet_counted_framing": {
+				Description: "Frame each log message with its length prefix (RFC 6587 section 3.4.1) so multi-line records arrive whole at receivers that support it. Only enable it if the receiver supports octet-counted framing (for example rsyslog or syslog-ng); other receivers cannot parse the length prefix. Disabled by default. When enabled, it takes precedence over escape_newlines. Default: `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
 			},
 			"port": {
 				Description: "Rsyslog server port. Default: `514`.",

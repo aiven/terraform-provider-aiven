@@ -45,9 +45,17 @@ func applicationUserConfig() *schema.Schema {
 						Description: "Ports",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"custom_domain": {
+								Deprecated:  "This property is deprecated.",
 								Description: "Custom hostname served by this port. Example: `app.example.com`.",
 								Optional:    true,
 								Type:        schema.TypeString,
+							},
+							"custom_domains": {
+								Description: "Custom hostnames served by this port. At most 20 per port, and a hostname can be on only one port.",
+								Elem:        &schema.Schema{Type: schema.TypeString},
+								MaxItems:    20,
+								Optional:    true,
+								Type:        schema.TypeList,
 							},
 							"name": {
 								Description: "Allowed characters: ASCII letters, digits, underscore, hyphen. Single (non-consecutive) ASCII spaces are allowed between characters. No leading or trailing spaces. Example: `default`.",
@@ -69,10 +77,10 @@ func applicationUserConfig() *schema.Schema {
 								Description: "Access control for the application's ports. An application supports a single OIDC provider, which protects every port: set `security` on one port, or on several with the same value, and it is stored on every port. Omit it from every port to leave the ports reachable by anyone who can reach their address",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"authentication_method": {
-										Description:  "Enum: `aiven_platform`, `oidc`. Which of the authentication configurations below applies to this port.",
+										Description:  "Enum: `aiven_platform`, `oidc`, `okta`. Which authentication method protects this port. The oidc and okta methods both use the oidc configuration; aiven_platform takes none.",
 										Required:     true,
 										Type:         schema.TypeString,
-										ValidateFunc: validation.StringInSlice([]string{"aiven_platform", "oidc"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"aiven_platform", "oidc", "okta"}, false),
 									},
 									"oidc": {
 										Description: "Generic OpenID Connect provider that callers of this port must authenticate against",
@@ -135,6 +143,11 @@ func applicationUserConfig() *schema.Schema {
 							},
 							"build_path": {
 								Description: "Path of image build context. If set without containerfile_path, this will also be used to search for Containerfile/Dockerfile. Example: `main`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"commit_sha": {
+								Description: "Full 40-character lowercase hex SHA of the commit to deploy. Without it, the HEAD of the configured branch is deployed; with it, this commit is deployed regardless of new pushes to the branch. Requires a VCS integration. Changing the branch clears it. Send null to clear on update; omit to leave unchanged. Example: `7fec93fe4ec0f95278976d8107b28d1c16c932da`.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},

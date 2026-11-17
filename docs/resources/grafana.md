@@ -102,8 +102,8 @@ Optional:
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. When you set a custom domain for a service deployed in a VPC, the service certificate is only created for the public-* hostname and the custom domain. Example: `grafana.example.org`.
-- `dashboard_previews_enabled` (Boolean) Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
-- `dashboard_scenes_enabled` (Boolean) Enable use of the Grafana Scenes Library as the dashboard engine. i.e. the `dashboardScene` feature flag. Upstream blog post at https://grafana.com/blog/2024/10/31/grafana-dashboards-are-now-powered-by-scenes-big-changes-same-ui/.
+- `dashboard_previews_enabled` (Boolean) Dashboard previews were removed from Grafana upstream, so this setting no longer enables browsing of dashboards in grid (pictures) mode. On Grafana 11 and 12 it only enables the bundled image renderer plugin, which is not shipped with Grafana 13 and onward.
+- `dashboard_scenes_enabled` (Boolean) Setting has no effect with Grafana 11 and onward. Grafana renders dashboards with the Scenes Library by default.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
 - `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard. Example: `20`.
 - `dataproxy_send_user_header` (Boolean) Send `X-Grafana-User` header to data source.
@@ -113,10 +113,11 @@ Optional:
 - `editors_can_admin` (Boolean) Editors can manage folders, teams and dashboards created by them.
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID. Example: `UA-123456-4`.
-- `grafana_version` (String) Enum: `11`, and newer. Grafana major version.
+- `grafana_version` (String) Enum: `11`, `12`, `13`, and newer. Grafana major version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 8000) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `metrics_disable_total_stats` (Boolean) Do not collect the grafana_stat_total_* and grafana_stat_totals_* metrics, which require periodic database queries. Defaults to true, unless metrics_enabled is set.
 - `metrics_enabled` (Boolean) Enable Grafana's /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP. This setup introduces significant security risks, such as potential phishing, spoofing, and other data breaches.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
@@ -149,6 +150,8 @@ Optional:
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_domains` (List of String) Allowed domains.
 - `allowed_groups` (List of String) Require users to belong to one of given groups.
+- `org_mapping` (List of String) Map Azure AD groups to Grafana organizations and roles. Each entry is <group object ID>:<organization ID>:<role>. Use * as the group to match all users, or as the organization to match all organizations. The role defaults to Viewer. Users matching at least one entry are removed from organizations they are not mapped to.
+- `skip_org_role_sync` (Boolean) Stop automatically syncing user organizations and roles at sign-in.
 
 
 <a id="nestedblock--grafana_user_config--auth_generic_oauth"></a>

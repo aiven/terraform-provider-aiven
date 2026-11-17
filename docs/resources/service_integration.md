@@ -482,6 +482,7 @@ Optional:
 Optional:
 
 - `escape_newlines` (Boolean) Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.
+- `octet_counted_framing` (Boolean) Per-service override for octet-counted framing (RFC 6587 section 3.4.1). When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.
 
 
 <a id="nestedblock--timeouts"></a>

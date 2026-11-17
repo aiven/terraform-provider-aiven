@@ -107,7 +107,7 @@ func valkeyUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
@@ -255,8 +255,23 @@ func valkeyUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"valkey_hotkeys_sampling_percentage": {
+				Description: "Percentage of key accesses sampled for hot key detection. Lower values reduce overhead at the cost of accuracy. Only takes effect when `valkey_hotkeys_top_k` is above 0. Defaults to 1. Requires Valkey 9.2 or later.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"valkey_hotkeys_top_k": {
+				Description: "Number of hottest keys to track and report with the HOTKEYS GET command. 0 disables hot key detection. Requires Valkey 9.2 or later.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"valkey_hotkeys_window_seconds": {
+				Description: "Length of the hot key reporting window in seconds. HOTKEYS GET reports the last completed window. Only takes effect when `valkey_hotkeys_top_k` is above 0. Defaults to 1. Requires Valkey 9.2 or later.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"valkey_io_threads": {
-				Description: "Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.",
+				Description: "Set Valkey IO thread count. On Valkey 9.0 and later, changes are applied without a restart. On Valkey 8.1, changing this replaces the service nodes. Example: `1`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
