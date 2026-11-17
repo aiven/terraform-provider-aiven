@@ -625,3 +625,16 @@ func TestExpandUserConfigRemovedBlocks(t *testing.T) {
 		})
 	}
 }
+
+func TestSetFixedValues(t *testing.T) {
+	t.Parallel()
+
+	dto := map[string]any{"cloud_provider": "aws", "display_name": "foo"}
+	err := SetFixedValues(map[string]string{"cloud_provider": "azure", "deployment_model": "standard"})(nil, dto)
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{
+		"cloud_provider":   "azure",
+		"deployment_model": "standard",
+		"display_name":     "foo",
+	}, dto)
+}

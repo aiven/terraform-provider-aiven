@@ -7,11 +7,23 @@ resource:
     ARN created in the customer AWS account. Transitions the environment from
     `draft` to `active` so services can be deployed into it.
 
-    Create this resource after the customer-side AWS infrastructure
-    (IAM role, VPC, subnets, security groups, buckets) has been defined.
+    Apply `aiven_byoc_aws_entity` first, then the customer-side AWS infrastructure
+    (IAM role, VPC, subnets, security groups, buckets) built from its outputs, and
+    create this resource last. Terraform orders only what this resource references: set
+    `aws_iam_role_arn` from the IAM role's `arn`, and add the rest of the customer-side
+    infrastructure to `depends_on`, e.g., `depends_on = [aws_vpc.example]`, so it's
+    created before and destroyed after this resource. The example leaves out the
+    customer-side infrastructure, so it doesn't work on its own.
+
+    Destroying this resource deletes the environment, unless provisioning hasn't
+    activated it, e.g., `creation_failed`: `aiven_byoc_aws_entity` deletes it then.
+    An environment in `creation_failed` can't be provisioned again: fix the cause, then
+    replace the entity, e.g., `terraform apply -replace=aiven_byoc_aws_entity.example`,
+    which replaces this resource too.
   stateAttribute: state
   refreshState:
     desired: [active]
+    failed: [creation_failed, deleted]
   deleteState:
     desired: [deleted]
 clientHandler: byoc
@@ -22,6 +34,9 @@ operations:
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentGet
     type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentDelete
     type: delete
@@ -67,3 +82,4 @@ schema:
     format: uuid
   aws_iam_role_arn:
     required: true
+    example: arn:aws:iam::012345678901:role/aiven-byoc

@@ -1053,6 +1053,28 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 		require.Zero(t, reads, "Read must not resolve a different object after Delete rejected its key")
 	})
 
+	t.Run("skipped delete stops before read without retrying", func(t *testing.T) {
+		t.Parallel()
+
+		deletes, reads := 0, 0
+		a := fastAdapter(
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				deletes++
+				return ErrDeleteSkipped
+			},
+			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return nil
+			},
+		)
+		a.resource.DeleteState.Attribute = "status"
+		a.resource.DeleteState.Desired = []string{"DELETED"}
+
+		require.ErrorIs(t, a.deleteState(t.Context(), nil), ErrDeleteSkipped)
+		require.Equal(t, 1, deletes)
+		require.Zero(t, reads)
+	})
+
 	t.Run("polls read until the desired state is reached", func(t *testing.T) {
 		t.Parallel()
 
@@ -1745,4 +1767,36 @@ func TestResourceAdapterDeleteReleasesConflictName(t *testing.T) {
 	reclaimRsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(createRaw.Type(), nil)}}
 	a.Create(t.Context(), conflictReq, &reclaimRsp)
 	require.False(t, reclaimRsp.Diagnostics.HasError())
+}
+
+func TestResourceAdapterDeleteSkipped(t *testing.T) {
+	t.Parallel()
+
+	schema := conflictResourceSchema()
+	raw, err := toTFValue(schema, map[string]any{"project": "p1", "name": "db1", "id": "p1/db1"})
+	require.NoError(t, err)
+
+	reads := 0
+	a := &resourceAdapter{
+		resource: ResourceOptions{
+			TypeName:       "aiven_test_delete_skipped",
+			SchemaInternal: schema,
+			IdentityFields: []string{"project", "name"},
+			DeleteState:    &DeleteStateOptions{retryDelay: time.Millisecond},
+			Delete: func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				return fmt.Errorf("%w: owned by another resource", ErrDeleteSkipped)
+			},
+			Read: func(_ context.Context, _ avngen.Client, _ ResourceData) error {
+				reads++
+				return nil
+			},
+		},
+	}
+
+	rsp := resource.DeleteResponse{}
+	a.Delete(t.Context(), resource.DeleteRequest{State: tfsdk.State{Raw: raw}}, &rsp)
+	require.False(t, rsp.Diagnostics.HasError())
+	require.Equal(t, 1, rsp.Diagnostics.WarningsCount())
+	require.Contains(t, rsp.Diagnostics.Warnings()[0].Detail(), "owned by another resource")
+	require.Zero(t, reads)
 }

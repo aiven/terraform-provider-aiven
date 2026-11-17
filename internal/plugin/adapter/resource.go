@@ -758,6 +758,10 @@ func (a *resourceAdapter) Delete(
 	} else {
 		err = a.resource.Delete(ctx, a.client, d)
 	}
+	if errors.Is(err, ErrDeleteSkipped) {
+		diags.AddWarning("Resource removed from the state only", err.Error())
+		err = nil
+	}
 	if err != nil && (errors.Is(err, ErrDeleteStateFailed) || !IsNotFound(err)) {
 		diags.AddError("failed to delete resource", err.Error())
 		return
@@ -789,6 +793,9 @@ var ErrDeleteStateDesired = errors.New("resource has not reached the desired del
 // ErrDeleteStateFailed stops deletion immediately, without polling Read or retrying Delete.
 var ErrDeleteStateFailed = errors.New("resource deletion cannot continue")
 
+// ErrDeleteSkipped keeps the resource in the API and removes it from the state only, without polling Read.
+var ErrDeleteSkipped = errors.New("resource deletion skipped")
+
 // defaultDeleteStateRetryDelay is the fixed delay between attempts when DeleteStateOptions.retryDelay
 // is zero.
 const defaultDeleteStateRetryDelay = time.Second * 5
@@ -804,7 +811,7 @@ const defaultDeleteStateRetryDelay = time.Second * 5
 //   - any other Read error fails the delete;
 //   - a successful Read means the resource is still present, so the poll continues.
 //
-// ErrDeleteStateFailed is an exception: it stops deletion before Read and is never retried.
+// ErrDeleteStateFailed and ErrDeleteSkipped are exceptions: they stop deletion before Read and are never retried.
 //
 // The delay is fixed and there is no attempt cap: the poll runs until it succeeds or ctx (the delete
 // timeout) is cancelled. On timeout ctx.Err() is returned wrapped with the last attempt's error,
@@ -834,7 +841,7 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 			// is cleared once Delete finally succeeds.
 			if !deleteSucceeded {
 				deleteErr = a.resource.Delete(ctx, a.client, rd)
-				if errors.Is(deleteErr, ErrDeleteStateFailed) {
+				if errors.Is(deleteErr, ErrDeleteStateFailed) || errors.Is(deleteErr, ErrDeleteSkipped) {
 					return deleteErr
 				}
 				deleteSucceeded = deleteErr == nil

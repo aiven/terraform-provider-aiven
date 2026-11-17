@@ -37,6 +37,17 @@ func RenameFields(fields map[string]string) MapModifier {
 	}
 }
 
+// SetFixedValues sets request fields, overriding the plan.
+// Used for fields removed from the schema, e.g. the discriminator of a polymorphic endpoint.
+func SetFixedValues(values map[string]string) MapModifier {
+	return func(_ ResourceData, dto map[string]any) error {
+		for k, v := range values {
+			dto[k] = v
+		}
+		return nil
+	}
+}
+
 // ExpandUserConfig sends the block of the discriminator value as "user_config", e.g.,
 // "datadog_user_config" for "datadog", see userConfigBlock.
 // Without the block, sends an empty object, as SDKv2 does: some requests require the field.

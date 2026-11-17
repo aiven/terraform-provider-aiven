@@ -2,14 +2,16 @@
 page_title: "aiven_byoc_aws_provision Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from draft to active so services can be deployed into it. Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been defined. Beta resource. This resource is in the beta stage and may change without notice. Set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+  Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from draft to active so services can be deployed into it. Apply aiven_byoc_aws_entity first, then the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) built from its outputs, and create this resource last. Terraform orders only what this resource references: set aws_iam_role_arn from the IAM role's arn, and add the rest of the customer-side infrastructure to depends_on, e.g., depends_on = [aws_vpc.example], so it's created before and destroyed after this resource. The example leaves out the customer-side infrastructure, so it doesn't work on its own. Destroying this resource deletes the environment, unless provisioning hasn't activated it, e.g., creation_failed: aiven_byoc_aws_entity deletes it then. An environment in creation_failed can't be provisioned again: fix the cause, then replace the entity, e.g., terraform apply -replace=aiven_byoc_aws_entity.example, which replaces this resource too. Beta resource. This resource is in the beta stage and may change without notice. Set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_byoc_aws_provision (Resource)
 
 Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it.
 
-Create this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been defined.
+Apply `aiven_byoc_aws_entity` first, then the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) built from its outputs, and create this resource last. Terraform orders only what this resource references: set `aws_iam_role_arn` from the IAM role's `arn`, and add the rest of the customer-side infrastructure to `depends_on`, e.g., `depends_on = [aws_vpc.example]`, so it's created before and destroyed after this resource. The example leaves out the customer-side infrastructure, so it doesn't work on its own.
+
+Destroying this resource deletes the environment, unless provisioning hasn't activated it, e.g., `creation_failed`: `aiven_byoc_aws_entity` deletes it then. An environment in `creation_failed` can't be provisioned again: fix the cause, then replace the entity, e.g., `terraform apply -replace=aiven_byoc_aws_entity.example`, which replaces this resource too.
 
 ~> **Beta resource**
 This resource is in the beta stage and may change without notice. Set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
@@ -20,7 +22,7 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 resource "aiven_byoc_aws_provision" "example" {
   organization_id             = data.aiven_organization.example.id                        // e.g. "org1a23f456789". Force new
   custom_cloud_environment_id = aiven_byoc_aws_entity.example.custom_cloud_environment_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
-  aws_iam_role_arn            = "arn:aws:iam::012345678901:root"                          // Force new
+  aws_iam_role_arn            = "arn:aws:iam::012345678901:role/aiven-byoc"
 
   /* COMPUTED FIELDS
   aiven_aws_assume_role_external_id = "admin"
@@ -32,7 +34,6 @@ resource "aiven_byoc_aws_provision" "example" {
 
 resource "aiven_byoc_aws_entity" "example" {
   organization_id  = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
-  cloud_provider   = "aws"                              // Force new
   cloud_region     = "eu-west-1"                        // Force new
   deployment_model = "standard"                         // Force new
   display_name     = "byoc-cloud-prod-eu-west-1"
@@ -48,7 +49,7 @@ data "aiven_organization" "example" {
 
 ### Required
 
-- `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.
+- `aws_iam_role_arn` (String) Amazon Resource Name. Maximum length: `2048`.
 - `custom_cloud_environment_id` (String) ID of a custom cloud environment. Must be a valid UUID. Changing this property forces recreation of the resource.
 - `organization_id` (String) ID of an organization. Changing this property forces recreation of the resource.
 
