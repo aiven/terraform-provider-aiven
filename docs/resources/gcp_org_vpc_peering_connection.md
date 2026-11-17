@@ -2,12 +2,12 @@
 page_title: "aiven_gcp_org_vpc_peering_connection Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a Google Cloud VPC peering connection. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages a Google Cloud VPC peering connection. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_gcp_org_vpc_peering_connection (Resource)
 
-Creates and manages a Google Cloud VPC peering connection. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages a Google Cloud VPC peering connection. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

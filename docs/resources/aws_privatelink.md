@@ -2,12 +2,12 @@
 page_title: "aiven_aws_privatelink Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an AWS PrivateLink for Aiven services https://aiven.io/docs/platform/howto/use-aws-privatelinks in a VPC. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an AWS PrivateLink for Aiven services https://aiven.io/docs/platform/howto/use-aws-privatelinks in a VPC. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_aws_privatelink (Resource)
 
-Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

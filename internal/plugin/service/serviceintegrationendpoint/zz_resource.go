@@ -895,7 +895,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 			"timeouts": legacytimeouts.BlockAll(ctx),
 		},
-		MarkdownDescription: "Creates and manages an integration endpoint.\n\nIntegration endpoints let you send data like metrics and logs from Aiven services to external systems. The `autoscaler` endpoint lets you automatically scale the disk space on your services.\n\nAfter creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Creates and manages an integration endpoint.\n\nIntegration endpoints let you send data like metrics and logs from Aiven services to external systems. The `autoscaler` endpoint lets you automatically scale the disk space on your services.\n\nAfter creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.",
 		Version:             1,
 	}
 }

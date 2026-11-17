@@ -2,7 +2,7 @@
 page_title: "aiven_service_integration Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven service integration https://aiven.io/docs/platform/concepts/service-integration. Services integrations are not supported for services running on hobbyist plans. You can set up an integration between two Aiven services or an Aiven service and an external service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an integration endpoint https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint. You can also use service integrations to enable and use the disk autoscaler https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler. Warning: For services managed by Terraform, removing an autoscaler integration on services with additional_disk_space resets the service disk space to the service plan's disk size. See Remove the autoscaler for more. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven service integration https://aiven.io/docs/platform/concepts/service-integration. Services integrations are not supported for services running on hobbyist plans. You can set up an integration between two Aiven services or an Aiven service and an external service. For example, you can send metrics from an Aiven service to a Grafana service to show dashboards, or create an observability pipeline by shipping logs into Aiven for OpenSearch or Aiven for Clickhouse. For external integrations, you also need an integration endpoint https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration_endpoint. You can also use service integrations to enable and use the disk autoscaler https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/disk-autoscaler. Warning: For services managed by Terraform, removing an autoscaler integration on services with additional_disk_space resets the service disk space to the service plan's disk size. See Remove the autoscaler for more. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_service_integration (Resource)
@@ -18,7 +18,7 @@ You can also use service integrations to enable and use the [disk autoscaler](ht
 ~> **Warning:** For services managed by Terraform, removing an autoscaler integration on services with `additional_disk_space` resets the service disk space to the service plan's disk size.
 See [Remove the autoscaler](/providers/aiven/aiven/latest/docs/guides/disk-autoscaler#remove-the-autoscaler) for more.
 
-If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

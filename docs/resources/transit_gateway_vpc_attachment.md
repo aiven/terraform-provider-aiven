@@ -2,14 +2,14 @@
 page_title: "aiven_transit_gateway_vpc_attachment Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC. Configure either vpc_id or both project and project_vpc_id to select the Aiven VPC. Legacy configurations using an AWS VPC ID (vpc-*) as peer_vpc create ordinary AWS VPC peerings. When peer_region is omitted, the initial lookup requires a single matching connection across all regions. The provider saves its region for subsequent refresh and deletion, including replacement cleanup. Use aiven_aws_vpc_peering_connection for new AWS VPC peerings. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC. Configure either vpc_id or both project and project_vpc_id to select the Aiven VPC. Legacy configurations using an AWS VPC ID (vpc-*) as peer_vpc create ordinary AWS VPC peerings. When peer_region is omitted, the initial lookup requires a single matching connection across all regions. The provider saves its region for subsequent refresh and deletion, including replacement cleanup. Use aiven_aws_vpc_peering_connection for new AWS VPC peerings. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_transit_gateway_vpc_attachment (Resource)
 
 Creates and manages an AWS Transit Gateway VPC attachment for an Aiven project VPC. Configure either `vpc_id` or both `project` and `project_vpc_id` to select the Aiven VPC.
 
-Legacy configurations using an AWS VPC ID (`vpc-*`) as `peer_vpc` create ordinary AWS VPC peerings. When `peer_region` is omitted, the initial lookup requires a single matching connection across all regions. The provider saves its region for subsequent refresh and deletion, including replacement cleanup. Use `aiven_aws_vpc_peering_connection` for new AWS VPC peerings. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Legacy configurations using an AWS VPC ID (`vpc-*`) as `peer_vpc` create ordinary AWS VPC peerings. When `peer_region` is omitted, the initial lookup requires a single matching connection across all regions. The provider saves its region for subsequent refresh and deletion, including replacement cleanup. Use `aiven_aws_vpc_peering_connection` for new AWS VPC peerings. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

@@ -2,12 +2,12 @@
 page_title: "aiven_kafka_schema_registry_acl Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_kafka_schema_registry_acl (Resource)
 
-Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages an Aiven for Apache Kafka® Schema Registry ACL entry. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

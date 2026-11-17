@@ -2,12 +2,12 @@
 page_title: "aiven_mysql_database Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for MySQL® https://aiven.io/docs/products/mysql database. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven for MySQL® https://aiven.io/docs/products/mysql database. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_mysql_database (Resource)
 
-Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages an [Aiven for MySQL®](https://aiven.io/docs/products/mysql) database. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 
