@@ -13,7 +13,7 @@ Creates and manages a [user group](https://aiven.io/docs/platform/howto/list-gro
 
 ```terraform
 resource "aiven_organization_user_group" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
   description     = "The group of admins for the organization"
   name            = "Admin Users"
 
@@ -25,7 +25,7 @@ resource "aiven_organization_user_group" "example" {
   */
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

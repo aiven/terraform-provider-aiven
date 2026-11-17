@@ -19,9 +19,9 @@ By default, Aiven Terraform Provider validates whether the resource already exis
 
 ```terraform
 resource "aiven_organization_permission" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
-  resource_type   = "organization"                // Force new
-  resource_id     = "foo"                         // Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  resource_type   = "organization"                     // Force new
+  resource_id     = "foo"                              // Force new
   permissions {
     principal_id   = "u12345"
     permissions    = ["read_only"]
@@ -34,7 +34,7 @@ resource "aiven_organization_permission" "example" {
   }
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

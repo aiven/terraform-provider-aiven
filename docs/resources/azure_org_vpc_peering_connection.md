@@ -13,7 +13,7 @@ Creates and manages an Azure VPC peering connection with an Aiven VPC. If this r
 
 ```terraform
 resource "aiven_azure_org_vpc_peering_connection" "example" {
-  organization_id       = aiven_organization.example.id                      // e.g. "org1a23f456789". Force new
+  organization_id       = data.aiven_organization.example.id                 // e.g. "org1a23f456789". Force new
   organization_vpc_id   = aiven_organization_vpc.example.organization_vpc_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d". Force new
   azure_subscription_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"             // Force new
   vnet_name             = "my-vnet"                                          // Force new
@@ -28,12 +28,12 @@ resource "aiven_azure_org_vpc_peering_connection" "example" {
 }
 
 resource "aiven_organization_vpc" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
-  cloud_name      = "aws-eu-west-1"               // Force new
-  network_cidr    = "10.0.0.0/24"                 // Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  cloud_name      = "aws-eu-west-1"                    // Force new
+  network_cidr    = "10.0.0.0/24"                      // Force new
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

@@ -527,6 +527,8 @@ Choosing the target:
    (Kafka ACL `topic = "top*"`), or polymorphic IDs (`aiven_organization_permission.resource_id`).
 5. **Check the target example.** Omit the ref if the shared example uses an incompatible cloud or service.
    Keep literal examples, or use `disableExample: true` with a hand-written example for a complete configuration.
+6. **Look up what exists before the apply.** Reference the data source with `ref: data.<type>.<attribute>`
+   when the object is never created next to the resource: `organization_id` → `data.aiven_organization.id`.
 
 How the example is assembled:
 
@@ -535,6 +537,9 @@ How the example is assembled:
 - SDK resources and definitions with `disableExample` contribute the first matching `resource` block of their
   hand-written `examples/resources/<type>/resource.tf`, with its label (e.g. `example_kafka`).
   It is reduced to required top-level fields too, per the plugin schema or, for SDK resources, the SDK schema.
+- A `data.` ref contributes a `data "<type>" "example"` block that sets the data source's required fields,
+  then its lookup keys (`resultListLookupKeys`), e.g. `name` for `aiven_organization`.
+  Only generated data sources are supported.
 - `examples/resources/<type>/resource.tf` stays a single block with literals, because `examples_tests` plans it
   with a provider that serves Plugin Framework resources only. Only the doc page shows the example with refs.
 - Resources with a doc template override (`templates/resources/<name>.md.tmpl`) don't render it.
@@ -544,10 +549,11 @@ How the example is assembled:
 Stop project-scoped chains before the project (`aiven_organization_project`) and anything it leads to:
 set `refDepth` to the depth of the last block before it, so refs to it render as literals.
 `refDepth: 2` stops a VPC peering example at `aiven_project_vpc`; `refDepth: 1` renders `aiven_project_vpc` alone.
-Organization-scoped resources may render `aiven_organization`, their natural parent.
+Organization-scoped resources look up `data.aiven_organization`, their natural parent.
 
 `task generate` fails on a malformed ref, a self-reference, a cycle, an unknown target or attribute
-(checked against the SDK schema for SDK resources), or a YAML target that is deprecated or has no resource.
+(checked against the SDK schema for SDK resources), or a YAML target that is deprecated or has no resource
+(no data source for `data.` refs).
 SDK deprecation isn't checked, so verify it in `docs/resources/<name>.md`.
 
 ## Generated View Structure

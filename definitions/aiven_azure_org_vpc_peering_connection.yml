@@ -51,7 +51,7 @@ remove:
   - vpc_peering_connection_type
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
   organization_vpc_id:
     ref: aiven_organization_vpc.organization_vpc_id
     format: uuid

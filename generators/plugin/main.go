@@ -243,6 +243,8 @@ func genDefinition(doc *OpenAPIDoc, def *Definition) error {
 					return fmt.Errorf("could not generate ref example: %w", err)
 				}
 			}
+		} else {
+			def.datasourceRoot = renderRoot
 		}
 
 		filePath := genFilePath(location, entity)

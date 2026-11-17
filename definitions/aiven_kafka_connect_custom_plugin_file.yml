@@ -28,7 +28,7 @@ remove:
   - plugin_description
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
   # Force new, so not auto-promoted. Omitted, it reads back the API default.
   content_type:
     computed: true

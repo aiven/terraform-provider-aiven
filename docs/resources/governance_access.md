@@ -16,7 +16,7 @@ This resource is in the beta stage and may change without notice. Set the `PROVI
 
 ```terraform
 resource "aiven_governance_access" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
   access_data {
     acls {
       operation       = "Write"
@@ -50,7 +50,7 @@ resource "aiven_governance_access" "example" {
   */
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

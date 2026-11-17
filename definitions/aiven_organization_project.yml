@@ -35,7 +35,7 @@ rename:
   project: project_id # comes from ProjectKmsGetCA
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
   billing_group_id:
     ref: aiven_organization_billing_group.billing_group_id
     format: uuid
@@ -45,7 +45,7 @@ schema:
   ca_cert:
     sensitive: true
   parent_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
     description: |
       Link a project to an [organization or organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) by using its ID.
       To set up proper dependencies please refer to this variable as a reference.

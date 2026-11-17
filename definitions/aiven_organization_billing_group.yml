@@ -17,7 +17,7 @@ operations:
     type: read
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
   billing_group_id:
     format: uuid
   billing_address_id:

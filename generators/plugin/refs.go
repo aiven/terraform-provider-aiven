@@ -17,23 +17,38 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
-// reRef matches a `ref` value: "<resource type>.<attribute>".
-var reRef = regexp.MustCompile(`^(aiven_[a-z0-9_]+)\.([a-z0-9_]+)$`)
+// reRef matches a `ref` value: "<resource type>.<attribute>" or "data.<data source type>.<attribute>".
+var reRef = regexp.MustCompile(`^(data\.)?(aiven_[a-z0-9_]+)\.([a-z0-9_]+)$`)
 
-func parseRef(ref string) (typeName, attr string, err error) {
-	m := reRef.FindStringSubmatch(ref)
-	if m == nil {
-		return "", "", fmt.Errorf(`invalid ref %q, expected "<resource type>.<attribute>"`, ref)
-	}
-	return m[1], m[2], nil
+type ref struct {
+	data     bool
+	typeName string
+	attr     string
 }
 
-// refExample is a resource example block that other examples can reference.
+func parseRef(s string) (ref, error) {
+	m := reRef.FindStringSubmatch(s)
+	if m == nil {
+		return ref{}, fmt.Errorf(`invalid ref %q, expected "<resource type>.<attribute>" or "data.<data source type>.<attribute>"`, s)
+	}
+	return ref{data: m[1] != "", typeName: m[2], attr: m[3]}, nil
+}
+
+// refExample is a resource or data source example block that other examples can reference.
 type refExample struct {
+	data     bool
 	typeName string
 	label    string
 	hcl      []byte
 	deps     []*refExample // Transitive, dependencies first.
+}
+
+// address is the block address without the label, e.g. "data.aiven_organization".
+func (e *refExample) address() string {
+	if e.data {
+		return "data." + e.typeName
+	}
+	return e.typeName
 }
 
 // newRefExample renders the compact block (required fields only) that dependents prepend to their doc example.
@@ -85,26 +100,31 @@ func (w *exampleWriter) refTokens(item *Item) (hclwrite.Tokens, error) {
 		return nil, fmt.Errorf("ref is supported for scalar fields only, got %s %q", item.Type, item.Path())
 	}
 
-	typeName, attr, err := parseRef(item.Ref)
+	r, err := parseRef(item.Ref)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", item.Path(), err)
 	}
 
-	refDepth := max(w.refDepth-1, 0)
-	target, err := refTarget(w.def, typeName, attr, refDepth)
+	var target *refExample
+	if r.data {
+		target, err = dataRefTarget(w.def, r.typeName, r.attr)
+	} else {
+		target, err = refTarget(w.def, r.typeName, r.attr, max(w.refDepth-1, 0))
+	}
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", item.Path(), err)
 	}
 
-	if !slices.ContainsFunc(w.deps, func(d *refExample) bool { return d.typeName == target.typeName }) {
+	if !slices.ContainsFunc(w.deps, func(d *refExample) bool { return d.address() == target.address() }) {
 		w.deps = append(w.deps, target)
 	}
 
-	return hclwrite.TokensForTraversal(hcl.Traversal{
-		hcl.TraverseRoot{Name: typeName},
-		hcl.TraverseAttr{Name: target.label},
-		hcl.TraverseAttr{Name: attr},
-	}), nil
+	traversal := hcl.Traversal{hcl.TraverseRoot{Name: r.typeName}}
+	if r.data {
+		traversal = hcl.Traversal{hcl.TraverseRoot{Name: "data"}, hcl.TraverseAttr{Name: r.typeName}}
+	}
+	traversal = append(traversal, hcl.TraverseAttr{Name: target.label}, hcl.TraverseAttr{Name: r.attr})
+	return hclwrite.TokensForTraversal(traversal), nil
 }
 
 // refSource follows the refs of item to the last generated attribute with an example or a default,
@@ -113,15 +133,22 @@ func refSource(def *Definition, item *Item) (*Definition, *Item) {
 	if item.Ref == "" {
 		return def, item
 	}
-	typeName, attr, err := parseRef(item.Ref)
+	r, err := parseRef(item.Ref)
 	if err != nil {
 		return def, item
 	}
-	t := def.refTargets[typeName]
-	if t == nil || t.resourceRoot == nil {
+	t := def.refTargets[r.typeName]
+	if t == nil {
 		return def, item
 	}
-	v := t.resourceRoot.Properties[attr]
+	root := t.resourceRoot
+	if r.data {
+		root = t.datasourceRoot
+	}
+	if root == nil {
+		return def, item
+	}
+	v := root.Properties[r.attr]
 	if v == nil || v.Type != item.Type {
 		return def, item
 	}
@@ -160,6 +187,50 @@ func refTarget(def *Definition, typeName, attr string, refDepth int) (*refExampl
 		}
 	}
 	return loadRefExample(def, typeName)
+}
+
+// dataRefTarget returns the data source block that looks up the referenced object.
+// It sets the required fields and the lookup keys of the data source:
+// the users know the name of an existing object rather than its ID.
+func dataRefTarget(def *Definition, typeName, attr string) (*refExample, error) {
+	t := def.refTargets[typeName]
+	if t == nil || t.datasourceRoot == nil {
+		return nil, fmt.Errorf("referenced data source %q is not generated yet", typeName)
+	}
+	root := t.datasourceRoot
+	if _, ok := root.Properties[attr]; !ok {
+		return nil, fmt.Errorf("referenced data source %q has no attribute %q", typeName, attr)
+	}
+
+	var keys []string
+	for _, k := range sortedKeysPriority(t, datasourceType, root) {
+		if root.Properties[k].IsRequired(t, datasourceType) {
+			keys = append(keys, k)
+		}
+	}
+	for _, k := range t.DatasourceLookupComposedOf() {
+		if !slices.Contains(keys, k) {
+			keys = append(keys, k)
+		}
+	}
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("referenced data source %q has no lookup or required fields", typeName)
+	}
+
+	f := hclwrite.NewEmptyFile()
+	body := f.Body().AppendNewBlock("data", []string{typeName, exampleLabel}).Body()
+	for _, k := range keys {
+		v, ok := root.Properties[k]
+		if !ok {
+			return nil, fmt.Errorf("referenced data source %q has no lookup field %q", typeName, k)
+		}
+		val, err := exampleItemValue(t, datasourceType, v)
+		if err != nil {
+			return nil, err
+		}
+		body.SetAttributeValue(k, val)
+	}
+	return &refExample{data: true, typeName: typeName, label: exampleLabel, hcl: f.Bytes()}, nil
 }
 
 var fileRefExamples = make(map[string]*refExample)
@@ -289,8 +360,8 @@ func flattenRefExamples(direct []*refExample) []*refExample {
 	var out []*refExample
 	seen := make(map[string]bool)
 	add := func(e *refExample) {
-		if !seen[e.typeName] {
-			seen[e.typeName] = true
+		if !seen[e.address()] {
+			seen[e.address()] = true
 			out = append(out, e)
 		}
 	}
@@ -312,29 +383,34 @@ func resolveRefs(defs []*Definition) ([]*Definition, error) {
 	}
 
 	for _, d := range defs {
-		for _, ref := range collectRefs(d.Schema) {
-			typeName, _, err := parseRef(ref)
+		for _, s := range collectRefs(d.Schema) {
+			r, err := parseRef(s)
 			if err != nil {
 				return nil, fmt.Errorf("%s: %w", d.fileName, err)
 			}
-			if typeName == d.typeName {
-				return nil, fmt.Errorf("%s: ref %q points to itself", d.fileName, ref)
+			if r.typeName == d.typeName {
+				return nil, fmt.Errorf("%s: ref %q points to itself", d.fileName, s)
 			}
 
-			t, ok := byType[typeName]
-			if !ok {
+			t, ok := byType[r.typeName]
+			switch {
+			case !ok && r.data:
+				return nil, fmt.Errorf("%s: ref %q points to a data source that isn't generated", d.fileName, s)
+			case !ok:
 				continue // SDK resource, resolved from its example file.
-			}
-			if t.Resource == nil {
-				return nil, fmt.Errorf("%s: ref %q points to a definition without a resource", d.fileName, ref)
-			}
-			if t.Resource.DeprecationMessage != "" {
-				return nil, fmt.Errorf("%s: ref %q points to a deprecated resource: %s", d.fileName, ref, t.Resource.DeprecationMessage)
+			case r.data && t.Datasource == nil:
+				return nil, fmt.Errorf("%s: ref %q points to a definition without a data source", d.fileName, s)
+			case r.data && t.Datasource.DeprecationMessage != "":
+				return nil, fmt.Errorf("%s: ref %q points to a deprecated data source: %s", d.fileName, s, t.Datasource.DeprecationMessage)
+			case !r.data && t.Resource == nil:
+				return nil, fmt.Errorf("%s: ref %q points to a definition without a resource", d.fileName, s)
+			case !r.data && t.Resource.DeprecationMessage != "":
+				return nil, fmt.Errorf("%s: ref %q points to a deprecated resource: %s", d.fileName, s, t.Resource.DeprecationMessage)
 			}
 			if d.refTargets == nil {
 				d.refTargets = make(map[string]*Definition)
 			}
-			d.refTargets[typeName] = t
+			d.refTargets[r.typeName] = t
 		}
 	}
 
