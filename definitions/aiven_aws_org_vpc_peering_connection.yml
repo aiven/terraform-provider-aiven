@@ -54,7 +54,7 @@ remove:
   - peer_azure_tenant_id # Azure tenant id in UUID4 form
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
   organization_vpc_id:
     ref: aiven_organization_vpc.organization_vpc_id
     format: uuid

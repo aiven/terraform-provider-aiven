@@ -28,4 +28,4 @@ operations:
     type: delete
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id

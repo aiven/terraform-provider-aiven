@@ -13,10 +13,10 @@ Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/o
 
 ```terraform
 resource "aiven_organization_project" "example" {
-  organization_id  = aiven_organization.example.id                             // e.g. "org1234abcd"
+  organization_id  = data.aiven_organization.example.id                        // e.g. "org1234abcd"
   project_id       = "my-project"                                              // Force new
   billing_group_id = aiven_organization_billing_group.example.billing_group_id // e.g. "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d"
-  parent_id        = aiven_organization.example.id                             // e.g. "a3fd7a594e01"
+  parent_id        = data.aiven_organization.example.id                        // e.g. "a3fd7a594e01"
 
   // OPTIONAL FIELDS
   base_port = 10000
@@ -32,7 +32,7 @@ resource "aiven_organization_project" "example" {
 }
 
 resource "aiven_organization_billing_group" "example" {
-  organization_id     = aiven_organization.example.id                 // e.g. "org1a23f456789". Force new
+  organization_id     = data.aiven_organization.example.id            // e.g. "org1a23f456789". Force new
   billing_address_id  = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
   shipping_address_id = aiven_organization_address.example.address_id // e.g. "addr4b1ff1ceeaa"
   billing_contact_emails {
@@ -49,14 +49,14 @@ resource "aiven_organization_billing_group" "example" {
 }
 
 resource "aiven_organization_address" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
   address_lines   = ["Street 1", "Street 2"]
   city            = "Helsinki"
   country_code    = "FI"
   name            = "Aiven Oy"
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

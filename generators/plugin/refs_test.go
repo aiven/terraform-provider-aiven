@@ -78,6 +78,176 @@ func TestResolveRefs(t *testing.T) {
 	}
 }
 
+func TestParseRef(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		in      string
+		want    ref
+		wantErr bool
+	}{
+		{in: "aiven_kafka.service_name", want: ref{typeName: "aiven_kafka", attr: "service_name"}},
+		{in: "data.aiven_organization.id", want: ref{data: true, typeName: "aiven_organization", attr: "id"}},
+		{in: "aiven_kafka", wantErr: true},
+		{in: "data.aiven_kafka", wantErr: true},
+		{in: "resource.aiven_kafka.id", wantErr: true},
+		{in: "data.kafka.id", wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			t.Parallel()
+			got, err := parseRef(tt.in)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestResolveDataRefs(t *testing.T) {
+	t.Parallel()
+
+	org := func(datasource *SchemaMeta) *Definition {
+		return &Definition{fileName: "aiven_org.yml", typeName: "aiven_org", Datasource: datasource}
+	}
+
+	a := refTestDef("aiven_a", map[string]string{"org_id": "data.aiven_org.id"})
+	target := org(&SchemaMeta{})
+	got, err := resolveRefs([]*Definition{a, target})
+	require.NoError(t, err)
+	assert.Equal(t, []*Definition{target, a}, got)
+	assert.Equal(t, map[string]*Definition{"aiven_org": target}, a.refTargets)
+
+	for name, tc := range map[string]struct {
+		target *Definition
+		errMsg string
+	}{
+		"not generated": {nil, "points to a data source that isn't generated"},
+		"no data source": {
+			&Definition{fileName: "aiven_org.yml", typeName: "aiven_org", Resource: &SchemaMeta{}},
+			"points to a definition without a data source",
+		},
+		"deprecated": {org(&SchemaMeta{DeprecationMessage: "Use aiven_b"}), "points to a deprecated data source"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			defs := []*Definition{refTestDef("aiven_a", map[string]string{"org_id": "data.aiven_org.id"})}
+			if tc.target != nil {
+				defs = append(defs, tc.target)
+			}
+			_, err := resolveRefs(defs)
+			require.ErrorContains(t, err, tc.errMsg)
+		})
+	}
+}
+
+func TestExampleDocDataRef(t *testing.T) {
+	t.Parallel()
+
+	org := &Definition{
+		fileName:   "aiven_org.yml",
+		typeName:   "aiven_org",
+		Datasource: &SchemaMeta{},
+		Operations: []*Operation{{
+			Type:                 OperationRead,
+			DatasourceLookup:     true,
+			ResultListLookupKeys: map[string]string{"AccountName": "name"},
+		}},
+	}
+	org.datasourceRoot = refTestRoot(
+		&Item{Name: "id", Type: SchemaTypeString, Optional: true, Computed: true},
+		&Item{Name: "name", Type: SchemaTypeString, Optional: true, Computed: true, Example: "Acme"},
+	)
+
+	group := refTestDef("aiven_group", map[string]string{"organization_id": "data.aiven_org.id"})
+	group.refTargets = map[string]*Definition{"aiven_org": org}
+	group.resourceRoot = refTestRoot(
+		&Item{Name: "organization_id", Type: SchemaTypeString, Required: true, Ref: "data.aiven_org.id", Example: "org123"},
+		&Item{Name: "name", Type: SchemaTypeString, Required: true, Example: "admins"},
+		&Item{Name: "id", Type: SchemaTypeString, Computed: true},
+	)
+	var err error
+	group.refExample, err = newRefExample(group, group.resourceRoot, 0)
+	require.NoError(t, err)
+
+	member := refTestDef("aiven_member", nil)
+	member.refTargets = map[string]*Definition{"aiven_org": org, "aiven_group": group}
+	root := refTestRoot(
+		&Item{Name: "organization_id", Type: SchemaTypeString, Required: true, Ref: "data.aiven_org.id", Example: "org123"},
+		&Item{Name: "group_id", Type: SchemaTypeString, Required: true, Ref: "aiven_group.id", Example: "ug123"},
+	)
+
+	got, err := exampleDoc(member, root)
+	require.NoError(t, err)
+	assert.Equal(t, `resource "aiven_member" "example" {
+  group_id        = aiven_group.example.id    // e.g. "ug123"
+  organization_id = data.aiven_org.example.id // e.g. "org123"
+}
+
+resource "aiven_group" "example" {
+  organization_id = data.aiven_org.example.id // e.g. "org123"
+  name            = "admins"
+}
+
+data "aiven_org" "example" {
+  name = "Acme"
+}
+`, string(got))
+
+	t.Run("required fields without a lookup", func(t *testing.T) {
+		t.Parallel()
+		ds := &Definition{fileName: "aiven_ds.yml", typeName: "aiven_ds", Datasource: &SchemaMeta{}}
+		ds.datasourceRoot = refTestRoot(
+			&Item{Name: "project", Type: SchemaTypeString, IDAttribute: true, Example: "my-project"},
+			&Item{Name: "id", Type: SchemaTypeString, Computed: true},
+		)
+		def := refTestDef("aiven_x", nil)
+		def.refTargets = map[string]*Definition{"aiven_ds": ds}
+
+		e, err := dataRefTarget(def, "aiven_ds", "id")
+		require.NoError(t, err)
+		assert.Equal(t, "data \"aiven_ds\" \"example\" {\n  project = \"my-project\"\n}\n", string(e.hcl))
+
+		_, err = dataRefTarget(def, "aiven_ds", "no_such_attribute")
+		require.ErrorContains(t, err, `referenced data source "aiven_ds" has no attribute "no_such_attribute"`)
+	})
+
+	t.Run("required fields and lookup keys", func(t *testing.T) {
+		t.Parallel()
+		ds := &Definition{
+			fileName:       "aiven_app.yml",
+			typeName:       "aiven_app",
+			Datasource:     &SchemaMeta{},
+			IdentityFields: []string{"project", "service_name", "application_id"},
+			Operations: []*Operation{{
+				Type:                 OperationRead,
+				DatasourceLookup:     true,
+				ResultListLookupKeys: map[string]string{"Name": "name"},
+			}},
+		}
+		ds.datasourceRoot = refTestRoot(
+			&Item{Name: "project", Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 0, Example: "my-project"},
+			&Item{Name: "service_name", Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 1, Example: "my-flink"},
+			&Item{Name: "application_id", Type: SchemaTypeString, IDAttribute: true, IDAttributePosition: 2},
+			&Item{Name: "name", Type: SchemaTypeString, Optional: true, Computed: true, Example: "my-app"},
+		)
+		def := refTestDef("aiven_x", nil)
+		def.refTargets = map[string]*Definition{"aiven_app": ds}
+
+		e, err := dataRefTarget(def, "aiven_app", "application_id")
+		require.NoError(t, err)
+		assert.Equal(t, `data "aiven_app" "example" {
+  project      = "my-project"
+  service_name = "my-flink"
+  name         = "my-app"
+}
+`, string(hclwrite.Format(e.hcl)))
+	})
+}
+
 func TestRequiredBlock(t *testing.T) {
 	t.Parallel()
 

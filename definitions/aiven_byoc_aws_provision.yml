@@ -59,7 +59,7 @@ remove:
   - oracle_subnet_workload # CIDR for the private workload subnet
 schema:
   organization_id:
-    ref: aiven_organization.id
+    ref: data.aiven_organization.id
     forceNew: true
   custom_cloud_environment_id:
     ref: aiven_byoc_aws_entity.custom_cloud_environment_id

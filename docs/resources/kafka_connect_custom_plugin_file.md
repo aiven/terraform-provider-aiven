@@ -16,10 +16,10 @@ This feature is in the limited availability stage and may change without notice.
 
 ```terraform
 resource "aiven_kafka_connect_custom_plugin_file" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
-  plugin_name     = "my-custom-connectors"        // Force new
-  plugin_version  = "2.7.14"                      // Force new
-  service_type    = "kafka_connect"               // Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  plugin_name     = "my-custom-connectors"             // Force new
+  plugin_version  = "2.7.14"                           // Force new
+  service_type    = "kafka_connect"                    // Force new
   source          = "./my-custom-connectors-2.7.14.jar"
 
   // OPTIONAL FIELDS
@@ -53,7 +53,7 @@ resource "aiven_kafka_connect_custom_plugin_file" "example" {
   */
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

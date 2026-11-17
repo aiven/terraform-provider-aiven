@@ -13,7 +13,7 @@ Adds and manages users in a [user group](https://registry.terraform.io/providers
 
 ```terraform
 resource "aiven_organization_user_group_member" "example" {
-  organization_id = aiven_organization.example.id                  // e.g. "org1a23f456789". Force new
+  organization_id = data.aiven_organization.example.id             // e.g. "org1a23f456789". Force new
   group_id        = aiven_organization_user_group.example.group_id // e.g. "foo". Force new
   user_id         = "foo"                                          // Force new
 
@@ -23,12 +23,12 @@ resource "aiven_organization_user_group_member" "example" {
 }
 
 resource "aiven_organization_user_group" "example" {
-  organization_id = aiven_organization.example.id // e.g. "org1a23f456789". Force new
+  organization_id = data.aiven_organization.example.id // e.g. "org1a23f456789". Force new
   description     = "The group of admins for the organization"
   name            = "Admin Users"
 }
 
-resource "aiven_organization" "example" {
+data "aiven_organization" "example" {
   name = "Aiven Ltd"
 }
 ```

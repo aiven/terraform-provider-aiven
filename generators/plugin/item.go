@@ -319,6 +319,9 @@ type Definition struct {
 	// so definitions referencing this one can validate and render against them.
 	resourceRoot *Item
 	refExample   *refExample
+
+	// datasourceRoot is set when the data source is generated, for `data.` refs.
+	datasourceRoot *Item
 }
 
 // ShortName returns the Terraform type name with the "aiven_" prefix stripped,
