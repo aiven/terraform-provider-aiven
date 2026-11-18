@@ -21,6 +21,18 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.org_mapping`: Map Azure AD groups to Grafana organizations and roles
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.skip_org_role_sync`: Stop automatically syncing user
+  organizations and roles at sign-in.
+- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `13`
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever
+  their audience when `sasl_oauthbearer_expected_audience` is not set
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their
+  issuer when `sasl_oauthbearer_expected_issuer` is not set
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_sampling_percentage`: Percentage of key accesses sampled for hot key detection
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_top_k`: Number of hottest keys to track and report with
+  the HOTKEYS GET command
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_window_seconds`: Length of the hot key reporting window in seconds
 
 ## [4.66.0] - 2026-11-12
 
