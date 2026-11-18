@@ -17,7 +17,10 @@ func (rep *repository) Delete(ctx context.Context, project, service, topic strin
 	}
 
 	rep.Lock()
-	rep.seenTopics[newKey(project, service, topic)] = false
-	rep.Unlock()
+	defer rep.Unlock()
+	topicKey := newKey(project, service, topic)
+	delete(rep.listed[newKey(project, service)].topics, topic)
+	delete(rep.created, topicKey)
+	rep.deleted[topicKey] = rep.now()
 	return nil
 }

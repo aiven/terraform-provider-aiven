@@ -274,7 +274,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 				{
 					PreConfig: func() {
 						ctx := t.Context()
-						require.NoError(t, err)
 
 						err = retry.Do(
 							func() error {
@@ -293,8 +292,28 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 						)
 						require.NoError(t, err)
 
-						// Forget the cached read so the next refresh hits the live API.
-						assert.NoError(t, kafkatopicrepository.ForgetTopic(projectName, kafkaName, topicName))
+						// Deletes the topic outside Terraform: the refresh must find it missing in the cached topics
+						err = client.ServiceKafkaTopicDelete(ctx, projectName, kafkaName, topicName)
+						require.NoError(t, err)
+
+						err = retry.Do(
+							func() error {
+								_, err := client.ServiceKafkaTopicGet(ctx, projectName, kafkaName, topicName)
+								if avngen.IsNotFound(err) {
+									return nil
+								}
+								if err == nil {
+									return fmt.Errorf("topic %q still exists", topicName)
+								}
+								return err
+							},
+							retry.Context(ctx),
+							retry.Delay(5*time.Second),
+							retry.DelayType(retry.FixedDelay),
+							retry.Attempts(20),
+							retry.LastErrorOnly(true),
+						)
+						require.NoError(t, err)
 					},
 					ExpectNonEmptyPlan: true,
 					RefreshState:       true,

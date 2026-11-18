@@ -1,3 +1,28 @@
+// Package kafkatopicrepository serves aiven_kafka_topic CRUD with as few API calls as possible.
+//
+// A Kafka service can have thousands of topics, and Terraform reads every one of them on each refresh.
+// Reading them one by one costs a call per topic, so the repository caches topic names and batches reads.
+//
+// It uses two endpoints:
+//   - v1List (ServiceKafkaTopicList): every topic name of a service in one cheap call. It lags:
+//     a new topic shows up late, and a deleted one stays listed for a while.
+//   - V2List (ServiceKafkaTopicListV2): the configuration of up to 100 named topics in one heavy call.
+//     One missing name fails the whole call with 404, and a stale cache may leave some topics out.
+//
+// Read checks the cached v1List names first: a topic the list lacks is not found, with no V2List call.
+// It queues the rest, and a worker sends them to V2List each second, in chunks of up to 100 per service.
+// On a V2List 404 the service is relisted: the topics the list lacks are not found, the rest are retried.
+// A list younger than listMaxAge isn't relisted.
+//
+// Create reserves the name, because v1List doesn't return a new topic yet.
+// Delete records the topic, because v1List may still return it.
+//
+// When changing it:
+//   - Count the calls for a service that lost every topic: Kafka loses them on a power cycle without backup.
+//     That refresh costs one v1List call and no V2List calls. Don't add per-topic V2List or Get calls,
+//     e.g., to confirm a topic the list lacks.
+//   - v1List decides whether a topic exists, V2List returns its configuration.
+//   - The repository is a process singleton (see New), shared by every topic in a Terraform run.
 package kafkatopicrepository
 
 import (
@@ -14,8 +39,9 @@ import (
 
 var (
 	initOnce sync.Once
-	// singleRep a singleton for repository to share it across running goroutines
-	singleRep = &repository{}
+	// singleRep a singleton for repository to share it across running goroutines.
+	// Has its maps before New() runs, so ForgetService() doesn't panic.
+	singleRep = newRepository(nil)
 	// errNotFound mimics Aiven "not found" error. Never wrap it, so it can be determined by avngen.IsNotFound
 	errNotFound = avngen.Error{Status: http.StatusNotFound, Message: "Topic not found"}
 	// errAlreadyExists mimics Aiven "conflict" error. Never wrap it, so it can be determined by avngen.IsAlreadyExists
@@ -31,8 +57,12 @@ const (
 
 	// defaultWorkerCallInterval how often worker should run
 	defaultWorkerCallInterval = time.Second
-	defaultSeenTopicsSize     = 1000
-	defaultSeenServicesSize   = 10
+
+	// defaultListMaxAge a list younger than it isn't relisted. Its age counts from when v1List returned
+	defaultListMaxAge = 5 * time.Second
+
+	// defaultListLag how long v1List may miss a new topic, or still return a deleted one
+	defaultListLag = time.Minute
 )
 
 // New returns process singleton Repository
@@ -65,19 +95,21 @@ type topicsClient interface {
 func newRepository(client topicsClient) *repository {
 	r := &repository{
 		client:             client,
-		seenTopics:         make(map[string]bool, defaultSeenTopicsSize),
-		seenServices:       make(map[string]bool, defaultSeenServicesSize),
+		listed:             make(map[string]listing),
+		created:            make(map[string]time.Time),
+		deleted:            make(map[string]time.Time),
+		serviceLocks:       make(map[string]*sync.Mutex),
+		now:                time.Now,
 		v2ListBatchSize:    defaultV2ListBatchSize,
 		v2ListRetryDelay:   defaultV2ListRetryDelay,
 		workerCallInterval: defaultWorkerCallInterval,
+		listMaxAge:         defaultListMaxAge,
+		listLag:            defaultListLag,
 	}
 	return r
 }
 
-// repository implements Repository
-// Handling thousands of topics might be challenging for the API
-// This repository uses retries, rate-limiting, queueing, caching to provide with best speed/durability ratio
-// Must be used as a singleton. See singleRep.
+// repository implements Repository, see the package doc. Must be used as a singleton, see singleRep.
 type repository struct {
 	sync.Mutex
 	client             topicsClient
@@ -85,13 +117,38 @@ type repository struct {
 	v2ListBatchSize    int
 	v2ListRetryDelay   time.Duration
 	workerCallInterval time.Duration
+	listMaxAge         time.Duration
+	listLag            time.Duration
 
-	// seenTopics stores topic names from v1List and Create()
-	// because v1List might not return fresh topics
-	seenTopics map[string]bool
+	// listed stores what v1List returned by service key. A missing service hasn't been listed yet.
+	listed map[string]listing
 
-	// seenServices stores true if v1List was called for the service
-	seenServices map[string]bool
+	// created stores when Create() reserved a topic, then when it created it: v1List doesn't return fresh topics right away.
+	// Ends when v1List returns it, or on a V2 404 when a list taken listLag after it doesn't.
+	created map[string]time.Time
+
+	// deleted stores when Delete() ran: v1List may still return a deleted topic, so a list skips it.
+	// Ends when a list started after it doesn't return the topic, or one started listLag after it does.
+	deleted map[string]time.Time
+
+	// serviceLocks by service key: v1List runs under it, not under the repository lock.
+	// Lock order: service lock, then repository lock.
+	serviceLocks map[string]*sync.Mutex
+
+	now func() time.Time
+}
+
+// serviceLock returns the lock that serializes v1List of a service with the cache updates that must not interleave with it.
+func (rep *repository) serviceLock(project, service string) *sync.Mutex {
+	rep.Lock()
+	defer rep.Unlock()
+	key := newKey(project, service)
+	mu, ok := rep.serviceLocks[key]
+	if !ok {
+		mu = new(sync.Mutex)
+		rep.serviceLocks[key] = mu
+	}
+	return mu
 }
 
 // worker processes the queue with fetch and ticker (rate-limit). Runs in the background.
@@ -120,34 +177,27 @@ func (rep *repository) withdraw() []*request {
 	return q
 }
 
-// forgetTopic removes a topic from repository.seenTopics.
-// For tests only, never use in prod!
-func (rep *repository) forgetTopic(project, service, topic string) error {
-	rep.Lock()
-	defer rep.Unlock()
-	key := newKey(project, service, topic)
-	if !rep.seenTopics[key] {
-		return errNotFound
-	}
-	rep.seenTopics[key] = false
-	return nil
-}
-
-// forgetService removes all the caches for the given service name
+// forgetService removes all the caches for the given service name. Must hold the repository lock.
 func (rep *repository) forgetService(project, service string) {
-	rep.Lock()
-	defer rep.Unlock()
-	key := newKey(project, service)
-	if rep.seenServices != nil {
-		rep.seenServices[key] = false
-	}
-
-	keyPrefix := key + "/"
-	for k := range rep.seenTopics {
-		if strings.HasPrefix(k, keyPrefix) {
-			rep.seenTopics[k] = false
+	serviceKey := newKey(project, service)
+	delete(rep.listed, serviceKey)
+	keyPrefix := serviceKey + "/"
+	for _, m := range []map[string]time.Time{rep.created, rep.deleted} {
+		for k := range m {
+			if strings.HasPrefix(k, keyPrefix) {
+				delete(m, k)
+			}
 		}
 	}
+}
+
+// listing is the topic names v1List returned for a service.
+type listing struct {
+	topics map[string]bool
+	// started is the time the list reflects: reservations and deletions are checked against it
+	started time.Time
+	// returned is when v1List returned: the list's age counts from it, so a slow call doesn't make the list old on arrival
+	returned time.Time
 }
 
 type response struct {
@@ -178,12 +228,12 @@ func isConflict(err error) bool {
 	return errors.As(err, &e) && e.Status == http.StatusConflict
 }
 
-// ForgetTopic see repository.forgetTopic
-func ForgetTopic(project, service, topic string) error {
-	return singleRep.forgetTopic(project, service, topic)
-}
-
 // ForgetService see repository.forgetService
 func ForgetService(project, service string) {
+	mu := singleRep.serviceLock(project, service)
+	mu.Lock()
+	defer mu.Unlock()
+	singleRep.Lock()
+	defer singleRep.Unlock()
 	singleRep.forgetService(project, service)
 }

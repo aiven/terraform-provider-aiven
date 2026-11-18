@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
+  of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
+  that keeps retrying its read no longer delays reading the others.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
   `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
 - Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
