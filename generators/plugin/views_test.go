@@ -802,6 +802,14 @@ func TestFixedValues(t *testing.T) {
 		require.NoError(t, validateFixedValues(item, op(OperationCreate, map[string]string{"cloud_provider": "azure"})))
 	})
 
+	t.Run("rejects fixed values on a handwritten create", func(t *testing.T) {
+		create := op(OperationCreate, map[string]string{"cloud_provider": "azure"})
+		create.DisableView = true
+		def := &Definition{Resource: &SchemaMeta{}, Operations: Operations{create}}
+		_, err := genViews(def, item)
+		require.ErrorContains(t, err, "fixedValues")
+	})
+
 	cases := []struct {
 		name   string
 		typ    OperationType
