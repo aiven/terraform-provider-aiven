@@ -28,8 +28,16 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 
 	err = rep.client.ServiceKafkaTopicCreate(ctx, project, service, req)
 	if err != nil && !avngen.IsAlreadyExists(err) {
+		rep.release(project, service, req.TopicName)
 		return fmt.Errorf("topic create error: %w", err)
 	}
 
+	// listLag counts from when the topic exists: the create call may retry for a while
+	rep.Lock()
+	defer rep.Unlock()
+	key := newKey(project, service, req.TopicName)
+	if _, ok := rep.created[key]; ok {
+		rep.created[key] = rep.now()
+	}
 	return nil
 }

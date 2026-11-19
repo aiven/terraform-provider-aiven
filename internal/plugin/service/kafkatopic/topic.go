@@ -33,10 +33,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-// deleteView delegates to kafkatopicrepository.Delete so the seenTopics cache
-// is invalidated alongside the API call. Skipping the cache eviction would
-// cause modifyPlan's Exists() check to falsely report "topic conflict, already
-// exists" for a name destroyed and re-created in the same provider process.
+// deleteView delegates to kafkatopicrepository.Delete so the topic cache
+// is invalidated alongside the API call.
 func deleteView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	return kafkatopicrepository.New(client).Delete(
 		ctx,

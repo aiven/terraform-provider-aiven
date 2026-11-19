@@ -15,9 +15,7 @@ legacyTimeouts: true
 requireServiceReady: [kafka]
 # All CRUD views are hand-written and delegate to the shared
 # kafkatopicrepository, which provides batching, caching, the special V2-list
-# read shape and (on Delete) cache invalidation. Skipping the repository for
-# Delete would leave the seenTopics cache stale and trip modifyPlan's Exists()
-# check on a topic destroyed and re-created in the same provider process.
+# read shape and (on Delete) cache invalidation.
 operations:
   - id: ServiceKafkaTopicCreate
     type: create

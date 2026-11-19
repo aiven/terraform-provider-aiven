@@ -3,6 +3,8 @@ package kafkatopicrepository
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync/atomic"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkatopic"
@@ -41,157 +43,234 @@ func (rep *repository) Read(ctx context.Context, project, service, topic string)
 	}
 }
 
-// Exists omits service not found
+// Exists omits service not found.
+// Relists a list older than listMaxAge: topics might be created or deleted outside Terraform.
 func (rep *repository) Exists(ctx context.Context, project, service, topic string) (bool, error) {
-	err := rep.exists(ctx, project, service, topic, false)
-	if avngen.IsNotFound(err) {
-		// Either topic or service or project does not exist
-		return false, nil
+	mu := rep.serviceLock(project, service)
+	mu.Lock()
+	defer mu.Unlock()
+	if err := rep.relist(ctx, project, service); err != nil {
+		return false, err
 	}
-	return err == nil, err
-}
-
-// exists returns nil if topic exists, or errNotFound if doesn't:
-// 1. checks repository.seenTopics for known topics
-// 2. calls v1List for the remote state for the given service and marks it in repository.seenServices
-// 3. saves topic names to repository.seenTopics, so its result can be reused
-// 4. when acquire true, then saves topic to repository.seenTopics (for creating)
-func (rep *repository) exists(ctx context.Context, project, service, topic string, acquire bool) error {
 	rep.Lock()
 	defer rep.Unlock()
-	// Checks repository.seenTopics.
-	// If it has been just created, it is not available in v1List.
-	// So calling it first doesn't make any sense
-	serviceKey := newKey(project, service)
-	topicKey := newKey(serviceKey, topic)
-	if rep.seenTopics[topicKey] {
+	return rep.has(project, service, topic), nil
+}
+
+// exists returns nil if the topic exists, or errNotFound if it doesn't.
+// Relists on a miss, like Exists. With acquire, reserves the name for Create().
+func (rep *repository) exists(ctx context.Context, project, service, topic string, acquire bool) error {
+	rep.Lock()
+	found := rep.has(project, service, topic)
+	rep.Unlock()
+	if found {
 		return nil
 	}
 
-	// Goes for v1List
-	if !rep.seenServices[serviceKey] {
-		list, err := rep.client.ServiceKafkaTopicList(ctx, project, service)
-		if err != nil {
-			return err
-		}
-
-		// Marks seen all the topics
-		for _, t := range list {
-			rep.seenTopics[newKey(serviceKey, t.TopicName)] = true
-		}
-
-		// Service is seen too. It never goes here again
-		rep.seenServices[serviceKey] = true
+	mu := rep.serviceLock(project, service)
+	mu.Lock()
+	defer mu.Unlock()
+	if err := rep.relist(ctx, project, service); err != nil {
+		return err
 	}
-
-	// Checks updated list
-	if rep.seenTopics[topicKey] {
+	rep.Lock()
+	defer rep.Unlock()
+	if rep.has(project, service, topic) {
 		return nil
 	}
 
 	// Create functions run in parallel need to lock the name before create
 	// Otherwise they may run into conflict
 	if acquire {
-		rep.seenTopics[topicKey] = true
+		rep.created[newKey(project, service, topic)] = rep.now()
 	}
-
-	// v1List doesn't contain the topic
 	return errNotFound
 }
 
-// laterDeadline returns true if a ends after b. No deadline is the latest.
-func laterDeadline(a, b context.Context) bool {
-	da, okA := a.Deadline()
-	db, okB := b.Deadline()
-	if !okA || !okB {
-		return !okA && okB
-	}
-	return da.After(db)
+// release ends the reservation of a topic Create() failed to create.
+func (rep *repository) release(project, service, topic string) {
+	rep.Lock()
+	defer rep.Unlock()
+	delete(rep.created, newKey(project, service, topic))
 }
 
-// fetch fetches requested topics configuration
-// 1. groups topics by service
-// 2. requests topics (in chunks)
-// Warning: if we call V2List with at least one "not found" topic, it will return 404 for all topics
-// Should be certain that all topics in queue do exist. Call repository.exists first to do so
-func (rep *repository) fetch(queue []*request) {
-	// Groups topics by service
-	byService := make(map[string][]*request, 0)
-	for i := range queue {
-		r := queue[i]
-		key := newKey(r.project, r.service)
-		byService[key] = append(byService[key], r)
+// dropMissing answers not found to the requests a list younger than listMaxAge doesn't have and returns the rest.
+// Ends the reservations the list missed more than listLag after Create(): v1List returns a new topic by then.
+func (rep *repository) dropMissing(ctx context.Context, project, service string, reqs []*request) ([]*request, error) {
+	mu := rep.serviceLock(project, service)
+	mu.Lock()
+	defer mu.Unlock()
+	if err := rep.relist(ctx, project, service); err != nil {
+		return reqs, err
+	}
+	rep.Lock()
+	defer rep.Unlock()
+	listedAt := rep.listed[newKey(project, service)].started
+	for _, r := range reqs {
+		key := newKey(r.project, r.service, r.topic)
+		if created, ok := rep.created[key]; ok && listedAt.Sub(created) > rep.listLag {
+			delete(rep.created, key)
+		}
+	}
+	kept, missing := lo.FilterReject(reqs, func(r *request, _ int) bool { return rep.has(r.project, r.service, r.topic) })
+	for _, r := range missing {
+		r.send(nil, errNotFound)
+	}
+	return kept, nil
+}
+
+// relist lists the service, unless its list is younger than listMaxAge.
+// Forgets a deleted service. Must hold the service lock, and not the repository lock: v1List runs without it.
+func (rep *repository) relist(ctx context.Context, project, service string) error {
+	serviceKey := newKey(project, service)
+	rep.Lock()
+	ls, ok := rep.listed[serviceKey]
+	fresh := ok && rep.now().Sub(ls.returned) < rep.listMaxAge
+	rep.Unlock()
+	if fresh {
+		return nil
 	}
 
-	// Fetches topics configuration
+	started := rep.now()
+	topics, err := rep.client.ServiceKafkaTopicList(ctx, project, service)
+
+	rep.Lock()
+	defer rep.Unlock()
+	if avngen.IsNotFound(err) {
+		rep.forgetService(project, service)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	got := make(map[string]bool, len(topics))
+	for _, t := range topics {
+		got[t.TopicName] = true
+	}
+	keyPrefix := serviceKey + "/"
+	for key, deletedAt := range rep.deleted {
+		topic, ok := strings.CutPrefix(key, keyPrefix)
+		if ok && !started.Before(deletedAt) && (!got[topic] || started.Sub(deletedAt) >= rep.listLag) {
+			delete(rep.deleted, key)
+		}
+	}
+	names := make(map[string]bool, len(got))
+	for topic := range got {
+		key := newKey(serviceKey, topic)
+		if _, ok := rep.deleted[key]; ok {
+			continue
+		}
+		names[topic] = true
+		delete(rep.created, key)
+	}
+	rep.listed[serviceKey] = listing{topics: names, started: started, returned: rep.now()}
+	return nil
+}
+
+// has must hold the repository lock.
+func (rep *repository) has(project, service, topic string) bool {
+	serviceKey := newKey(project, service)
+	_, created := rep.created[newKey(serviceKey, topic)]
+	return created || rep.listed[serviceKey].topics[topic]
+}
+
+// chunkContext ends once every caller is done: the adapter cancels a caller's ctx as soon as it gets its topic.
+// Keeps the values of the first caller's ctx.
+func chunkContext(chunk []*request) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(context.WithoutCancel(chunk[0].ctx))
+	var waiting atomic.Int64
+	waiting.Store(int64(len(chunk)))
+	for _, r := range chunk {
+		context.AfterFunc(r.ctx, func() {
+			if waiting.Add(-1) == 0 {
+				cancel()
+			}
+		})
+	}
+	return ctx, cancel
+}
+
+// fetch groups topics by service and slices them by repository.v2ListBatchSize, because V2List has a limit.
+// Each chunk runs on its own, so a chunk that keeps retrying doesn't hold up the others.
+func (rep *repository) fetch(queue []*request) {
+	byService := lo.GroupBy(queue, func(r *request) string { return newKey(r.project, r.service) })
 	for _, reqs := range byService {
-		// Topics are grouped by service
-		// We can share this values
-		project := reqs[0].project
-		service := reqs[0].service
-
-		// Uses the caller ctx with the latest deadline
-		ctx := lo.MaxBy(reqs, func(a, b *request) bool { return laterDeadline(a.ctx, b.ctx) }).ctx
-
-		// Slices requests by repository.v2ListBatchSize
-		// because V2List has a limit
 		for _, chunk := range lo.Chunk(reqs, rep.v2ListBatchSize) {
-			topicNames := lo.Uniq(lo.Map(chunk, func(r *request, _ int) string { return r.topic }))
+			go rep.fetchChunk(chunk)
+		}
+	}
+}
 
-			// V2List() and Get() do not get info immediately
-			// Some retries should be applied if result is not equal to requested values
-			var list []kafkatopic.ServiceKafkaTopicGetOut
-			err := retry.Do(func() error {
-				rspList, err := rep.client.ServiceKafkaTopicListV2(ctx, project, service, &kafkatopic.ServiceKafkaTopicListV2In{TopicNames: topicNames})
+// fetchChunk fetches the configuration of topics of the same service.
+// Warning: if we call V2List with at least one "not found" topic, it will return 404 for all topics
+func (rep *repository) fetchChunk(chunk []*request) {
+	project := chunk[0].project
+	service := chunk[0].service
 
-				// A 404 means that the "chunk" contains a topic not found on the backend,
-				// even though repository.exists confirmed the topic exists.
-				// The backend uses a cache, and the two endpoints might be inconsistent.
-				// Keeps retrying.
-				if avngen.IsNotFound(err) {
-					return fmt.Errorf("topic list is inconsistent: %w", err)
-				}
+	ctx, cancel := chunkContext(chunk)
+	defer cancel()
 
-				// A 409 "Topic is not yet available" means the topic is still being created.
-				// Keeps retrying until the ctx deadline.
-				if isConflict(err) {
-					return fmt.Errorf("topic is not available yet: %w", err)
-				}
+	// The requests without a response yet
+	pending := chunk
 
-				// Something else happened
-				// We have retries in the client, so this is bad
-				if err != nil {
-					return retry.Unrecoverable(err)
-				}
+	// V2List() and Get() do not get info immediately
+	// Some retries should be applied if result is not equal to requested values
+	err := retry.Do(func() error {
+		// Skips the requests whose caller gave up
+		if pending = lo.Filter(pending, func(r *request, _ int) bool { return r.ctx.Err() == nil }); len(pending) == 0 {
+			return nil
+		}
 
-				// This is an old cache, we need to retry it until succeed
-				if len(rspList) != len(topicNames) {
-					return fmt.Errorf("got %d topics, expected %d. Retrying", len(rspList), len(topicNames))
-				}
+		topicNames := lo.Uniq(lo.Map(pending, func(r *request, _ int) string { return r.topic }))
+		rspList, err := rep.client.ServiceKafkaTopicListV2(ctx, project, service, &kafkatopic.ServiceKafkaTopicListV2In{TopicNames: topicNames})
 
-				list = rspList
+		// A 404 means that the "chunk" contains a topic not found on the backend:
+		// it was deleted outside Terraform, or the two endpoints are inconsistent (the backend uses a cache).
+		// Answers not found for the topics the list no longer has, keeps retrying the rest.
+		if avngen.IsNotFound(err) {
+			var dropErr error
+			if pending, dropErr = rep.dropMissing(ctx, project, service, pending); dropErr != nil {
+				return retry.Unrecoverable(dropErr)
+			}
+			if len(pending) == 0 {
 				return nil
-			}, retry.Context(ctx), retry.Delay(rep.v2ListRetryDelay))
-			if err != nil {
-				// Flatten the error to a string because the retry-wrapped form
-				// is too convoluted to assert against in tests.
-				err = fmt.Errorf("topic read error: %w", err)
-				for _, r := range chunk {
-					r.send(nil, err)
-				}
-				continue
 			}
+			return fmt.Errorf("topic list is inconsistent: %w", err)
+		}
 
-			// Sends topics
-			topics := lo.KeyBy(list, func(t kafkatopic.ServiceKafkaTopicGetOut) string { return t.TopicName })
-			for _, r := range chunk {
-				t, ok := topics[r.topic]
-				if !ok {
-					r.send(nil, errNotFound)
-					continue
-				}
+		// A 409 "Topic is not yet available" means the topic is still being created.
+		// Keeps retrying until the ctx deadline.
+		if isConflict(err) {
+			return fmt.Errorf("topic is not available yet: %w", err)
+		}
+
+		// Something else happened
+		// We have retries in the client, so this is bad
+		if err != nil {
+			return retry.Unrecoverable(err)
+		}
+
+		// Sends topics. V2List might return an old cache without some of them: retries the rest
+		topics := lo.KeyBy(rspList, func(t kafkatopic.ServiceKafkaTopicGetOut) string { return t.TopicName })
+		var rest []*request
+		for _, r := range pending {
+			if t, ok := topics[r.topic]; ok {
 				r.send(&t, nil)
+			} else {
+				rest = append(rest, r)
 			}
+		}
+		if pending = rest; len(pending) > 0 {
+			return fmt.Errorf("got %d topics, expected %d. Retrying", len(rspList), len(topicNames))
+		}
+		return nil
+	}, retry.Context(ctx), retry.Delay(rep.v2ListRetryDelay))
+	if err != nil {
+		// Flatten the error to a string because the retry-wrapped form
+		// is too convoluted to assert against in tests.
+		err = fmt.Errorf("topic read error: %w", err)
+		for _, r := range pending {
+			r.send(nil, err)
 		}
 	}
 }

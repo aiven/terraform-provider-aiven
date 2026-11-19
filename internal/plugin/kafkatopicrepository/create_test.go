@@ -7,7 +7,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkatopic"
@@ -36,14 +35,16 @@ func TestCreateConflict(t *testing.T) {
 	assert.EqualValues(t, 1, client.createCalled)
 	assert.EqualValues(t, 1, client.v1ListCalled)
 	assert.EqualValues(t, 0, client.v2ListCalled)
-	assert.True(t, rep.seenServices["a/b"])
-	assert.True(t, rep.seenTopics["a/b/c"])
+
+	ok, err := rep.Exists(ctx, "a", "b", "c")
+	require.NoError(t, err)
+	assert.True(t, ok)
 }
 
 // TestCreateRecreateMissing must recreate missing topic
 // When Kafka is off, it looses all topics. We recreate them instead of making user clear the state
 func TestCreateRecreateMissing(t *testing.T) {
-	client := &fakeTopicClient{}
+	client := &fakeTopicClient{storage: map[string]kafkatopic.TopicOut{}}
 	rep := newRepository(client)
 	ctx := context.Background()
 
@@ -52,24 +53,28 @@ func TestCreateRecreateMissing(t *testing.T) {
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, client.createCalled)
 	assert.EqualValues(t, 1, client.v1ListCalled)
-	assert.EqualValues(t, 0, client.v2ListCalled)
-	assert.True(t, rep.seenServices["a/b"])
-	assert.True(t, rep.seenTopics["a/b/c"])
 
-	// Forgets the topic, like if it's missing
-	err = rep.forgetTopic("a", "b", "c")
+	// The list returns the topic, then Kafka loses it
+	client.putTopic("a/b/c", kafkatopic.TopicOut{TopicName: "c"})
+	forceRelist(t, rep, "a", "b")
+	client.deleteTopic("a/b/c")
+	forceRelist(t, rep, "a", "b")
+
+	ok, err := rep.Exists(ctx, "a", "b", "c")
 	require.NoError(t, err)
-	assert.True(t, rep.seenServices["a/b"])
-	assert.False(t, rep.seenTopics["a/b/c"]) // not cached, missing
+	assert.False(t, ok)
+	assert.EqualValues(t, 3, atomic.LoadInt32(&client.v1ListCalled)) // initial list, two relists
 
 	// Recreates topic
 	err = rep.Create(ctx, "a", "b", &kafkatopic.ServiceKafkaTopicCreateIn{TopicName: "c"})
 	require.NoError(t, err)
-	assert.EqualValues(t, 2, client.createCalled) // Updated
-	assert.EqualValues(t, 1, client.v1ListCalled)
+	assert.EqualValues(t, 2, atomic.LoadInt32(&client.createCalled))
+	assert.EqualValues(t, 3, atomic.LoadInt32(&client.v1ListCalled))
 	assert.EqualValues(t, 0, client.v2ListCalled)
-	assert.True(t, rep.seenServices["a/b"])
-	assert.True(t, rep.seenTopics["a/b/c"]) // cached again
+
+	ok, err = rep.Exists(ctx, "a", "b", "c")
+	require.NoError(t, err)
+	assert.True(t, ok)
 }
 
 func TestCreateRetries(t *testing.T) {
@@ -101,8 +106,7 @@ func TestCreateRetries(t *testing.T) {
 			}
 
 			ctx := context.Background()
-			rep := newRepository(client)
-			rep.workerCallInterval = time.Millisecond
+			rep := newTestRepository(client)
 
 			req := &kafkatopic.ServiceKafkaTopicCreateIn{
 				TopicName: "my-topic",
@@ -115,6 +119,11 @@ func TestCreateRetries(t *testing.T) {
 				require.EqualError(t, err, opt.expectErr.Error())
 			}
 			assert.Equal(t, opt.expectCalled, client.createCalled)
+
+			// A failed create doesn't keep the name
+			ok, err := rep.Exists(ctx, "foo", "bar", "my-topic")
+			require.NoError(t, err)
+			assert.Equal(t, opt.expectErr == nil, ok)
 		})
 	}
 }
