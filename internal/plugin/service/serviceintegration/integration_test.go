@@ -257,13 +257,56 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *test
 	project := acc.ProjectName()
 	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_service_integration.clickhouse_kafka_source"
+	config := func(viewName, offset string) string {
+		tableOptions := fmt.Sprintf("auto_offset_reset = %q", offset)
+		if viewName != "" {
+			tableOptions += fmt.Sprintf(`
+        materialized_view {
+          view_name = %q
+          order_by  = [tables.key]
+        }
+`, viewName)
+		}
+		return testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `toset(["bar"])`, tableOptions)
+	}
+	checkAPIMaterializedView := func(want string) resource.TestCheckFunc {
+		return resource.TestCheckResourceAttrWith(resourceName, "integration_id", func(id string) error {
+			client, err := acc.GetTestGenAivenClient()
+			if err != nil {
+				return err
+			}
+			out, err := client.ServiceIntegrationGet(context.Background(), project, id)
+			if err != nil {
+				return err
+			}
+			tables, ok := out.UserConfig["tables"].([]any)
+			if !ok || len(tables) != 1 {
+				return fmt.Errorf("expected one table in the API, got %v", out.UserConfig["tables"])
+			}
+			table, ok := tables[0].(map[string]any)
+			if !ok || table["name"] != "bar" {
+				return fmt.Errorf("expected table bar in the API, got %v", tables[0])
+			}
+			if want == "" {
+				if view := table["materialized_view"]; view != nil {
+					return fmt.Errorf("expected API table bar to have no materialized_view, got %v", view)
+				}
+				return nil
+			}
+			view, ok := table["materialized_view"].(map[string]any)
+			if !ok || view["view_name"] != want {
+				return fmt.Errorf("expected API table bar to have materialized_view %q, got %v", want, table["materialized_view"])
+			}
+			return nil
+		})
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, "[]"),
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, "[]", ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
 					resource.TestCheckResourceAttr(resourceName, "project", project),
@@ -273,17 +316,49 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *test
 				),
 			},
 			{
-				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["foo", "bar", "baz"]`),
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["foo", "bar", "baz"]`, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "3"),
 				),
 			},
 			{
-				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["bar"]`),
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, `["bar"]`, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.#", "1"),
 				),
 			},
+			{
+				Config: config("bar_mv_combined", "latest"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.materialized_view.0.view_name", "bar_mv_combined"),
+					checkAPIMaterializedView("bar_mv_combined"),
+				),
+			},
+			{
+				// Establish that replacing tables without the nested view removes it in the API.
+				Config: config("", "earliest"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.auto_offset_reset", "earliest"),
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.materialized_view.#", "0"),
+					checkAPIMaterializedView(""),
+				),
+			},
+			{
+				Config: config("bar_mv_removal", "earliest"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.materialized_view.0.view_name", "bar_mv_removal"),
+					checkAPIMaterializedView("bar_mv_removal"),
+				),
+			},
+			{
+				// Removing only the nested view must update the API too.
+				Config: config("", "earliest"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "clickhouse_kafka_user_config.0.tables.0.materialized_view.#", "0"),
+					checkAPIMaterializedView(""),
+				),
+			},
+			{Config: config("", "earliest"), PlanOnly: true},
 		},
 	})
 }
@@ -423,7 +498,7 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_backwardCompat(t *testing.T
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() { acc.TestAccPreCheck(t) },
 		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
-			TFConfig:           testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, acc.ProjectName(), `["foo", "bar"]`),
+			TFConfig:           testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, acc.ProjectName(), `["foo", "bar"]`, ""),
 			OldProviderVersion: "4.65.1",
 			PlanOnly:           true,
 			Checks: resource.ComposeTestCheckFunc(
@@ -866,7 +941,7 @@ resource "aiven_service_integration" "postgres-datadog" {
 `, acc.ProjectName(), name, name)
 }
 
-func testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, tables string) string {
+func testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project, tables, tableOptions string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
   project = %[2]q
@@ -916,11 +991,12 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
           name = tables.key
           type = "LowCardinality(String)"
         }
+        %[4]s
       }
     }
   }
 }
-`, prefix, project, tables)
+`, prefix, project, tables, tableOptions)
 }
 
 func testAccServiceIntegrationClickhousePostgresUserConfig(prefix, project string) string {
