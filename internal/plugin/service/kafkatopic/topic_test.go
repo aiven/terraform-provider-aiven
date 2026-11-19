@@ -15,6 +15,7 @@ import (
 	kafkatopichandler "github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -254,12 +255,24 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	// Kafka loses all topics on power-cycle without backup; refresh + apply should
 	// recreate the topic without the user having to clean state up manually.
 	t.Run("recreate_missing", func(t *testing.T) {
-		topicResource := "aiven_kafka_topic.topic"
+		const (
+			topicResource = "aiven_kafka_topic.topic"
+			keptResource  = "aiven_kafka_topic.kept"
+		)
 		topicName := acc.RandName("topic")
+		keptName := acc.RandName("kept")
+		t.Cleanup(func() {
+			// A failed refresh can leave this topic outside the state used for teardown.
+			if t.Failed() {
+				testAccDeleteKafkaTopic(t, client, projectName, kafkaName, keptName)
+			}
+		})
 		kafkaID := fmt.Sprintf("%s/%s", projectName, kafkaName)
 		topicID := fmt.Sprintf("%s/%s", kafkaID, topicName)
+		checkKept := resource.TestCheckResourceAttr(keptResource, "id", kafkaID+"/"+keptName)
 
-		config := testAccAivenKafkaTopicResourceRecreateMissing(projectName, kafkaName, topicName)
+		config := testAccKafkaTopicConfig("topic", projectName, kafkaName, topicName) +
+			testAccKafkaTopicConfig("kept", projectName, kafkaName, keptName)
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { acc.TestAccPreCheck(t) },
 			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -269,6 +282,7 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 					Config: config,
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(topicResource, "id", topicID),
+						checkKept,
 					),
 				},
 				{
@@ -317,6 +331,11 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 					},
 					ExpectNonEmptyPlan: true,
 					RefreshState:       true,
+					Check:              checkKept,
+					RefreshPlanChecks: resource.RefreshPlanChecks{PostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(topicResource, plancheck.ResourceActionCreate),
+						plancheck.ExpectResourceAction(keptResource, plancheck.ResourceActionNoop),
+					}},
 				},
 				{
 					Config: config,
@@ -354,7 +373,7 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 			Steps: []resource.TestStep{
 				{
-					Config:        testAccAivenKafkaTopicResourceImportMissing(projectName, kafkaName, topicName),
+					Config:        testAccKafkaTopicConfig("topic", projectName, kafkaName, topicName),
 					ResourceName:  "aiven_kafka_topic.topic",
 					ImportState:   true,
 					ImportStateId: fmt.Sprintf("%s/%s/%s", projectName, kafkaName, topicName),
@@ -377,6 +396,63 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 				},
 			},
 		})
+	})
+
+	t.Run("conflicts_after_external_recreate", func(t *testing.T) {
+		const externalDescription = "recreated outside Terraform"
+		name := acc.RandName("topic")
+		config := testAccKafkaTopicConfig("topic", projectName, kafkaName, name)
+
+		var destroyStarted time.Time
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{Config: config},
+				{
+					Config:                    config,
+					Destroy:                   true,
+					PreventPostDestroyRefresh: true,
+					ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+						beforeTopicApply(func() {
+							// Applying a saved plan starts a fresh provider. The in-process test server spans both commands.
+							kafkatopicrepository.ForgetService(projectName, kafkaName)
+							destroyStarted = time.Now()
+						}),
+					}},
+				},
+				{
+					PreConfig: func() {
+						testAccRecreateKafkaTopic(t, client, projectName, kafkaName, name, externalDescription)
+					},
+					Config:      config,
+					ExpectError: regexp.MustCompile(`already exists`),
+					Check: func(s *terraform.State) error {
+						if _, ok := s.RootModule().Resources["aiven_kafka_topic.topic"]; ok {
+							return fmt.Errorf("Terraform adopted externally recreated topic %q", name)
+						}
+						return nil
+					},
+				},
+			},
+		})
+
+		elapsed := time.Since(destroyStarted)
+		err := retry.Do(
+			func() error {
+				topic, err := client.ServiceKafkaTopicGet(t.Context(), projectName, kafkaName, name)
+				if err == nil && topic.TopicDescription != externalDescription {
+					return fmt.Errorf("unexpected description for externally recreated topic %q: %q", name, topic.TopicDescription)
+				}
+				return err
+			},
+			retry.Context(t.Context()), retry.RetryIf(isTopicNotReady),
+			retry.Delay(2*time.Second), retry.DelayType(retry.FixedDelay), retry.LastErrorOnly(true),
+		)
+		require.NoError(t, err)
+		if elapsed >= time.Minute {
+			t.Skipf("Observed a conflict %s after the destroy step started. The one-minute deletion cache may have expired.", elapsed)
+		}
 	})
 
 	// Verifies that the data source surfaces a missing topic as an error.
@@ -798,27 +874,67 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccAivenKafkaTopicResourceRecreateMissing(projectName, kafkaName, topicName string) string {
+func testAccKafkaTopicConfig(resourceName, projectName, kafkaName, topicName string) string {
 	return fmt.Sprintf(`
-resource "aiven_kafka_topic" "topic" {
-  project      = %[1]q
-  service_name = %[2]q
-  topic_name   = %[3]q
+resource "aiven_kafka_topic" "%s" {
+  project      = %q
+  service_name = %q
+  topic_name   = %q
   partitions   = 5
   replication  = 2
-}`, projectName, kafkaName, topicName)
+}
+`, resourceName, projectName, kafkaName, topicName)
 }
 
-func testAccAivenKafkaTopicResourceImportMissing(projectName, kafkaName, topicName string) string {
-	return fmt.Sprintf(`
-resource "aiven_kafka_topic" "topic" {
-  project      = %[1]q
-  service_name = %[2]q
-  topic_name   = %[3]q
-  partitions   = 5
-  replication  = 2
+type beforeTopicApply func()
+
+func (f beforeTopicApply) CheckPlan(context.Context, plancheck.CheckPlanRequest, *plancheck.CheckPlanResponse) {
+	f()
 }
-`, projectName, kafkaName, topicName)
+
+// Wait for V1 to identify the external creation. It can still list the previous topic during deletion.
+func testAccRecreateKafkaTopic(t *testing.T, client avngen.Client, project, service, name, description string) {
+	t.Helper()
+	t.Cleanup(func() { testAccDeleteKafkaTopic(t, client, project, service, name) })
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
+	defer cancel()
+	req := &kafkatopichandler.ServiceKafkaTopicCreateIn{
+		TopicName:        name,
+		TopicDescription: &description,
+		Partitions:       new(5),
+		Replication:      new(2),
+	}
+	var created bool
+	err := retry.Do(func() error {
+		if !created {
+			err := client.ServiceKafkaTopicCreate(ctx, project, service, req)
+			// The previous topic can still be deleting. A retry of our POST can also find the new one.
+			if err != nil && !isTopicNotReady(err) {
+				return retry.Unrecoverable(err)
+			}
+			created = err == nil
+		}
+		list, err := client.ServiceKafkaTopicList(ctx, project, service)
+		if err != nil {
+			return retry.Unrecoverable(err)
+		}
+		for _, topic := range list {
+			if topic.TopicName == name && topic.TopicDescription == description && topic.State == kafkatopichandler.TopicStateTypeActive {
+				return nil
+			}
+		}
+		return fmt.Errorf("waiting for V1 to list the active external topic %q", name)
+	}, retry.Context(ctx), retry.Attempts(60), retry.Delay(2*time.Second), retry.DelayType(retry.FixedDelay), retry.LastErrorOnly(true))
+	require.NoError(t, err)
+}
+
+func testAccDeleteKafkaTopic(t *testing.T, client avngen.Client, project, service, name string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	if err := client.ServiceKafkaTopicDelete(ctx, project, service, name); !avngen.IsNotFound(err) {
+		assert.NoError(t, err)
+	}
 }
 
 func testAccAivenKafkaTopicConflictsIfExists(projectName, kafkaName, topicName string) string {

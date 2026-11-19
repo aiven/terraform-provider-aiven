@@ -538,6 +538,29 @@ func TestRepositoryReadCreatedTopicOldReservation(t *testing.T) {
 	assert.Equal(t, &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "c"}, topic)
 }
 
+func TestRepositoryReadUnlistedTopicInDeletedBatch(t *testing.T) {
+	client := &fakeTopicClient{
+		storage:                 map[string]kafkatopic.TopicOut{"a/b/gone": {TopicName: "gone"}},
+		v1ListHidden:            map[string]bool{"a/b/live": true},
+		v2ListNotFoundOnMissing: true,
+	}
+	rep := newTestRepository(client)
+	clock := useFakeClock(rep)
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+
+	require.NoError(t, rep.Create(ctx, "a", "b", &kafkatopic.ServiceKafkaTopicCreateIn{TopicName: "live"}))
+	client.putTopic("a/b/live", kafkatopic.TopicOut{TopicName: "live"})
+	client.deleteTopic("a/b/gone")
+	clock.advance(rep.listLag + time.Second)
+
+	// V2 can read "live" on its own. Including "gone" makes the batch return 404.
+	res := readTogether(t, rep, map[string]context.Context{"live": ctx, "gone": ctx})
+	require.True(t, avngen.IsNotFound(res["gone"].err), "got %v", res["gone"].err)
+	require.NoError(t, res["live"].err)
+	assert.Equal(t, &kafkatopic.ServiceKafkaTopicGetOut{TopicName: "live"}, res["live"].topic)
+}
+
 // TestRepositoryReadCreatedTopicListedBeforeTTL reads a created topic in a chunk with a deleted one:
 // a list taken before listLag passed doesn't end the reservation, even if the 404 comes after.
 func TestRepositoryReadCreatedTopicListedBeforeTTL(t *testing.T) {
