@@ -358,6 +358,8 @@ operations:
       cursorParam: cursor            # The query parameter that takes nextField
       pageSizeParam: limit           # Optional: omit when the API rejects it
       pageSize: 100                  # Optional: defaults to the param's maximum, else its default
+    fixedValues:                     # Request fields always sent with these values (create only),
+      cloud_provider: azure          # rendered as adapter.SetFixedValues(map[string]string{...}) in Expand
 ```
 
 **Find examples**: `grep -A 5 "operations:" definitions/aiven_*.yml`
@@ -394,6 +396,34 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
   - Only the `x-_secure` options are sensitive. Names like `access_key` aren't, unlike outside user configs.
 - Without `userConfigDiscriminator`, a `oneOf` field is a free-form map.
 
+### Polymorphic Endpoints
+
+A polymorphic endpoint serves several variants through one flattened schema, selected by a
+discriminator field: `CustomCloudEnvironmentCreate` takes `cloud_provider: aws|azure|google|oracle`
+and returns the `aws_*`, `azure_*`, `google_*` and `oracle_*` fields of every variant.
+
+Create one resource per variant, named after it (`aiven_byoc_aws_entity`, `aiven_byoc_azure_entity`), and:
+
+1. Remove the discriminator from the schema and set it with `fixedValues` on the create operation.
+   Don't ask the user for it with a one-value `enum`.
+2. Let cross-group pruning drop the other variants' fields, then remove by hand the ones it misses
+   (see [Removing Fields](#removing-fields)).
+3. Narrow shared enums with a definition `enum` when the variant supports fewer values
+   (`aiven_byoc_azure_entity.deployment_model`).
+
+```yaml
+operations:
+  - id: CustomCloudEnvironmentCreate
+    type: create
+    fixedValues:
+      cloud_provider: azure
+remove:
+  - cloud_provider # Polymorphic endpoint discriminator, set by the create operation's fixedValues
+```
+
+The generator fails if a `fixedValues` field is not a string field of the operation's request body,
+is outside its enum, or is still in the schema.
+
 ### Removing Fields
 
 `remove` drops attributes the resource should not expose. Entries are matched against the
@@ -414,6 +444,11 @@ comment. The first `task generate` writes the missing entries; subsequent runs a
 Group membership is defined by `serviceTypes` and `cloudTypes` in `generators/plugin/main.go`;
 see `definitions/aiven_byoc_aws_entity.yml` for the result. Prefer this over hand-rolled globs:
 the generator keeps the list exhaustive and self-updating as the API grows new fields.
+
+Auto-detection reads names only. A field that belongs to another group but has no group token in
+its name is kept, so remove it by hand: on the BYOC entities, `aiven_object_storage_credentials_creator_user`
+is a Google service account (same OpenAPI `title` and `maxLength` as the `google_*` account fields).
+Compare each kept field's `title`, `description` and `maxLength` with its siblings before trusting it.
 
 **Use globs for cases the group tables do not cover.** Entries are glob patterns, so `*` and `?`
 match within a single path segment, `**` matches across segments, and a pattern with no wildcards
@@ -488,6 +523,10 @@ Any format replaces the length validators and hints. Validators apply to scalar 
 
 **Item enums**: an `enum` on the items of a scalar list or set validates each item, e.g.
 `listvalidator.ValueStringsAre(stringvalidator.OneOf(...))`. Other item constraints are not validated.
+
+**Fixed request values**: to pin a request field to one value, `remove:` it and set it with the
+operation's `fixedValues` (see [Polymorphic Endpoints](#polymorphic-endpoints)) instead of asking the
+user for it.
 
 **Blocks vs attributes**: a nested collection of objects renders as a **block**, unless it is
 read-only all the way down — then it renders as a **computed nested attribute**
@@ -1052,6 +1091,7 @@ Search the codebase for similar patterns:
 | `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
 | `service_integration_endpoint` | `oneOf` user config split by `userConfigDiscriminator`, `queryParams`, Read wrapped in `init()` |
 | `service_integration` | `userConfigDiscriminator`, renamed path parameter, Create/Update waiters wrapped in `init()` |
+| `byoc_azure_entity` | Polymorphic endpoint: discriminator set by `fixedValues`, other variants' fields removed |
 | `flinkjarapplicationversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements

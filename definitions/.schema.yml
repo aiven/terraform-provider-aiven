@@ -443,6 +443,13 @@ definitions:
         dependentRequired:
           pageSize: [pageSizeParam]
         additionalProperties: false
+      fixedValues:
+        type: object
+        additionalProperties:
+          type: string
+        $comment: |
+          Request fields always sent with these values (create only), e.g. the discriminator
+          of a polymorphic endpoint: `cloud_provider: azure`. The fields must be listed in `remove`.
     required:
       - id
       - type

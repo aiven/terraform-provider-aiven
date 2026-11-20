@@ -35,8 +35,22 @@ nav_order: 1
 - Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
   of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
   To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+- Add `aiven_byoc_azure_entity` resource: creates and manages a BYOC custom cloud environment on Azure.
+- Add `aiven_byoc_azure_provision` resource: provisions a BYOC custom cloud environment on Azure.
+- Remove field `aiven_object_storage_credentials_creator_user` from `aiven_byoc_aws_entity` resource: it holds a Google
+  service account identifier, which does not apply to AWS. References to it can be safely removed from Terraform files
+  without replacing the resource.
+- Remove field `cloud_provider` from `aiven_byoc_aws_entity` resource: the resource always creates an AWS environment.
+  The field can be safely removed from Terraform files: although it forced replacement before, removing it does
+  not replace the resource.
+- Fix `aiven_byoc_aws_provision`: changing `aws_iam_role_arn` fails the plan. It used to replace the resource, which
+  deleted the custom cloud environment and left `aiven_byoc_aws_entity` pointing at it. Replace the entity instead.
+- Fix `aiven_byoc_aws_provision`: fail as soon as the custom cloud environment reaches `creation_failed` instead
+  of waiting for the create timeout.
 - Fix `aiven_byoc_aws_provision`: a failed or timed-out create no longer taints the resource, whose replacement deleted
   the custom cloud environment. After a timeout, the next apply resumes waiting.
+- Fix `aiven_byoc_aws_entity` and `aiven_byoc_aws_provision`: plan to recreate the resource when its custom cloud
+  environment is gone instead of failing to read it.
 
 ## [4.66.0] - 2026-11-12
 
