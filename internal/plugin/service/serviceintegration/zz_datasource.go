@@ -755,10 +755,16 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			},
 			"rsyslog_user_config": schema.ListNestedBlock{
 				MarkdownDescription: "Rsyslog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later.",
-				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{"escape_newlines": schema.BoolAttribute{
-					Computed:            true,
-					MarkdownDescription: "Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
-				}}},
+				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
+					"escape_newlines": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Per-service override for escaping embedded newlines in log messages. When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
+					},
+					"octet_counted_framing": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Per-service override for octet-counted framing (RFC 6587 section `3.4.1`). When set, it overrides the rsyslog endpoint setting for this service. When unset, the endpoint setting applies.",
+					},
+				}},
 			},
 			"timeouts": timeouts.Block(ctx),
 		},
@@ -1700,10 +1706,16 @@ func datasourceSchemaInternal() *adapter.Schema {
 				IsObject: true,
 				Items: &adapter.Schema{
 					Computed: true,
-					Properties: map[string]*adapter.Schema{"escape_newlines": &adapter.Schema{
-						Computed: true,
-						Type:     adapter.SchemaTypeBool,
-					}},
+					Properties: map[string]*adapter.Schema{
+						"escape_newlines": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+						"octet_counted_framing": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
+						},
+					},
 					Type: adapter.SchemaTypeObject,
 				},
 				Type: adapter.SchemaTypeList,
