@@ -396,7 +396,7 @@ func TestGenConflictOptions(t *testing.T) {
 	t.Parallel()
 
 	unpaged := func(def *Definition) {
-		def.Resource = &SchemaMeta{AlreadyExists: AlreadyExistsCheck}
+		def.Resource = &SchemaMeta{AlreadyExists: AlreadyExistsConflict}
 		def.Operations[0].Pagination = nil
 		def.Operations[0].ResultKey = "databases"
 	}

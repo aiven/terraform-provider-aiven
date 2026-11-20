@@ -25,7 +25,6 @@ var ResourceOptions = adapter.ResourceOptions{
 	Delete:                deleteView,
 	DeleteState:           &adapter.DeleteStateOptions{},
 	IdentityFields:        []string{"project", "service_name", "database_name"},
-	IgnoreAlreadyExists:   true,
 	Read:                  readView,
 	RefreshState:          &adapter.RefreshStateCondition{},
 	RemoveMissing:         true,

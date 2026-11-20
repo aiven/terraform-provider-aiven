@@ -35,6 +35,7 @@ nav_order: 1
 - `aiven_gcp_privatelink_connection_approval`: retries no longer fail solely because the connection was already approved with the configured IP.
 - Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource in the state as tainted instead of losing it.
 - Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g., `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
+- `aiven_byoc_aws_provision`: a failed or timed-out create no longer taints the resource, whose replacement deleted the custom cloud environment. After a timeout, the next apply resumes waiting.
 
 ### User configurations
 

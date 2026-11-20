@@ -177,11 +177,6 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			return nil, errors.New("refreshState.failed requires refreshState.desired")
 		}
 
-		switch res.AlreadyExists {
-		case "", AlreadyExistsAdopt, AlreadyExistsCheck:
-		default:
-			return nil, fmt.Errorf("alreadyExists must be %q or %q, got %q", AlreadyExistsAdopt, AlreadyExistsCheck, res.AlreadyExists)
-		}
 		if res.AlreadyExists != "" && res.RefreshState == nil {
 			return nil, errors.New("alreadyExists requires refreshState")
 		}
@@ -259,16 +254,18 @@ func genNewResource(entity entityType, def *Definition, item *Item, hasConfigVal
 			values["RemoveMissing"] = jen.True()
 		}
 
-		if res.AlreadyExists != "" {
-			values["IgnoreAlreadyExists"] = jen.True()
-		}
-
-		if res.AlreadyExists == AlreadyExistsCheck {
+		switch res.AlreadyExists {
+		case "":
+		case AlreadyExistsAdopt:
+			values["AdoptExisting"] = jen.True()
+		case AlreadyExistsConflict:
 			v, err := genConflictOptions(def, item)
 			if err != nil {
-				return nil, fmt.Errorf("alreadyExists: check: %w", err)
+				return nil, fmt.Errorf("alreadyExists: conflict: %w", err)
 			}
 			values["Conflict"] = v
+		default:
+			return nil, fmt.Errorf("alreadyExists must be %q or %q, got %q", AlreadyExistsAdopt, AlreadyExistsConflict, res.AlreadyExists)
 		}
 
 		if def.Resource.TerminationProtection {
@@ -717,10 +714,10 @@ func pagedOperation(def *Definition) (*Operation, error) {
 }
 
 // listOperation returns the read that pageView and pageMatch wrap: the paginated one, else, for
-// alreadyExists: check, the only read with resultListLookupKeys, which is a single page.
+// alreadyExists: conflict, the only read with resultListLookupKeys, which is a single page.
 func listOperation(def *Definition) (*Operation, error) {
 	found, err := pagedOperation(def)
-	if err != nil || found != nil || def.Resource == nil || def.Resource.AlreadyExists != AlreadyExistsCheck {
+	if err != nil || found != nil || def.Resource == nil || def.Resource.AlreadyExists != AlreadyExistsConflict {
 		return found, err
 	}
 	for _, op := range def.Operations {
