@@ -20,6 +20,7 @@ var ResourceOptions = adapter.ResourceOptions{
 	Delete:         deleteView,
 	IdentityFields: []string{"organization_id", "custom_cloud_environment_id"},
 	Read:           readView,
+	RemoveMissing:  true,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),
 	TypeName:       typeName,
@@ -28,7 +29,7 @@ var ResourceOptions = adapter.ResourceOptions{
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	req := new(byoc.CustomCloudEnvironmentCreateIn)
-	err := d.Expand(req)
+	err := d.Expand(req, adapter.SetFixedValues(map[string]string{"cloud_provider": "aws"}))
 	if err != nil {
 		return err
 	}
