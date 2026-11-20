@@ -43,6 +43,7 @@ func knownAPICallers() []string {
 		"aiven_kafka",
 		"aiven_kafka_connect",
 		"aiven_kafka_mirrormaker",
+		"aiven_mysql",
 		"aiven_pg",
 	}
 }
