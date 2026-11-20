@@ -60,8 +60,8 @@ nav_order: 1
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_pg`
   resources and data sources to the Plugin Framework. Changes:
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch` and `aiven_pg` resources and data sources to the Plugin
-  Framework. Changes:
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg` and `aiven_thanos` resources and data sources
+  to the Plugin Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. So does removing every block of a list,
     as in SDKv2. Removing every `ip_filter_object` sends an empty list, also as in SDKv2, which clears the IP filter
@@ -83,9 +83,9 @@ nav_order: 1
     ignored the removal, so the first plan after the upgrade can show it too.
   - Remove the deprecated options the API spec no longer has: `additional_backup_regions` of `aiven_clickhouse`,
     `aiven_flink`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_kafka_mirrormaker`, `pg_user_config.pg_qualstats`,
-    `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
-    and `kafka_user_config.tiered_storage.local_cache`. A configuration that sets them fails validation, so remove them
-    before upgrading.
+    `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`,
+    `kafka_user_config.tiered_storage.local_cache` and `thanos_user_config.env`. A configuration that sets them fails
+    validation, so remove them before upgrading.
   - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
     `grafana_user_config.dashboard_previews_enabled`, `grafana_user_config.dashboard_scenes_enabled` and `opensearch_user_config.max_index_count`.
 
