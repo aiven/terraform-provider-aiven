@@ -1362,6 +1362,11 @@ func ServiceReadyForget(project, serviceName string) {
 	serviceCheck.Forget(project, serviceName)
 }
 
+// ServiceReadyStore caches the ServiceGet result for (project, serviceName).
+func ServiceReadyStore(s *service.ServiceGetOut, project, serviceName string) {
+	serviceCheck.Store(s, project, serviceName)
+}
+
 // CheckServiceReady verifies the target service exists, is powered on,
 // and has the expected service type before performing operations that
 // require it. Some operations like database management need the service

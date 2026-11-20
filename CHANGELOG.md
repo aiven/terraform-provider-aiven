@@ -15,6 +15,8 @@ nav_order: 1
 - Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
   of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
   that keeps retrying its read no longer delays reading the others.
+- **IMPORTANT**: remove the v3 state upgrader of `aiven_grafana`. When upgrading from v3, first run `terraform apply
+  -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
@@ -37,6 +39,25 @@ nav_order: 1
 - Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
   of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
   To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+- Migrate `aiven_grafana` resource and data source to the Plugin Framework. Changes:
+  - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
+    the API value, e.g., removing `alerting_enabled = true` keeps `true`. So does removing every block of a list,
+    as in SDKv2. Removing every `ip_filter_object` sends an empty list, also as in SDKv2, which clears the IP filter
+    and requires `AIVEN_ALLOW_IP_FILTER_PURGE`. Removing the whole block shows a change that updates only the state:
+    the API keeps the options, including a custom `ip_filter` that SDKv2 cleared.
+  - The first plan after the upgrade might show an in-place change that removes the user config blocks SDKv2 stored
+    but the configuration doesn't have, e.g., `grafana_user_config` or its `public_access` block. The Plugin Framework
+    can't keep a block missing in the configuration. It's safe to apply: when nothing else changes, the provider updates
+    only the state and doesn't call the API.
+  - An empty string is null in the state, except `project_vpc_id` and `disk_space`, which keep the `""` of the configuration
+    or the SDKv2 state.
+  - Setting only `maintenance_window_dow` or `maintenance_window_time` sends it, and the API keeps the other value. SDKv2
+    sent neither.
+  - The user config options are validated at plan time, e.g., their lengths and patterns.
+  - The connection blocks, e.g., `grafana`, are read-only.
+  - With `AIVEN_INCLUDE_SECRETS=false`, the read doesn't request secrets and stores the redacted values.
+  - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
+    `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
 
 ## [4.66.0] - 2026-11-12
 
