@@ -93,18 +93,18 @@ type ResourceOptions struct {
 	// Instead of forcing users to manually clean up the state, Terraform will plan to "create" the resource again.
 	RemoveMissing bool
 
-	// IgnoreAlreadyExists treats a 409 Conflict ("already exists") response from Create as success.
-	// This is useful when the resource being managed is a one-shot provisioning action whose effect is
-	// idempotent from Terraform's perspective — re-running it should adopt the existing entity rather
-	// than fail. With Conflict, an existing resource fails Create instead, and a 409 only comes from
-	// the client retrying a Create the API applied.
-	// Requires non-nil RefreshState so the full state is populated by the subsequent Read.
+	// AdoptExisting is `alreadyExists: adopt`, for an idempotent Create, e.g. a one-shot provisioning
+	// action: a 409 Conflict adopts the existing entity, and a failed post-Create refresh leaves no
+	// state, so the next apply adopts it too instead of replacing a tainted resource.
+	// Requires non-nil RefreshState so the subsequent Read populates the state.
 	// NOTE: This does NOT work for resources whose ID is returned only in the Create response
 	// (e.g. server-assigned IDs), because on conflict there is no response to read the ID from and
 	// the subsequent Read has nothing to look up.
-	IgnoreAlreadyExists bool
+	AdoptExisting bool
 
-	// Conflict, when non-nil, fails Create if the resource exists. Delete releases its keys.
+	// Conflict is `alreadyExists: conflict`: Create fails with ErrConflict if the resource exists,
+	// and Delete releases its keys. A 409 from Create then comes from the client retrying a Create
+	// the API applied, so it's treated as success. Requires non-nil RefreshState.
 	Conflict *ConflictOptions
 
 	// Returns an error on "plan" if the resource is marked for deletion and the `termination_protection` field is set to true.
@@ -152,7 +152,30 @@ type ResourceOptions struct {
 	RequireServiceReady []string
 }
 
+// NewResource panics on invalid options: they are static, so `task generate` catches it when it loads the schema.
 func NewResource(options ResourceOptions) resource.Resource {
+	if c := options.RefreshState; c != nil && (c.Attribute != "" || c.Desired != nil || c.Failed != nil) {
+		if len(c.Desired) == 0 {
+			panic(fmt.Sprintf("%s: refresh state condition for %q has no desired values", options.TypeName, c.Attribute))
+		}
+		if c.Attribute == "" {
+			panic(fmt.Sprintf("%s: refresh state condition has no attribute", options.TypeName))
+		}
+	}
+	if c := options.DeleteState; c != nil && len(c.Desired) > 0 && c.Attribute == "" {
+		panic(fmt.Sprintf("%s: delete state condition has no attribute", options.TypeName))
+	}
+	if options.AdoptExisting && options.Conflict != nil {
+		panic(fmt.Sprintf("%s: AdoptExisting and Conflict are mutually exclusive", options.TypeName))
+	}
+	if options.RefreshState == nil {
+		if options.AdoptExisting {
+			panic(fmt.Sprintf("%s: AdoptExisting requires RefreshState", options.TypeName))
+		}
+		if options.Conflict != nil {
+			panic(fmt.Sprintf("%s: Conflict requires RefreshState", options.TypeName))
+		}
+	}
 	return &resourceAdapter{
 		resource: options,
 	}
@@ -230,6 +253,46 @@ func (a *resourceAdapter) IdentitySchema(_ context.Context, _ resource.IdentityS
 	}
 }
 
+// begin returns the ResourceData and ctx with the operation timeout and a warnings collector into diags,
+// which end drains and cancels.
+func (a *resourceAdapter) begin(
+	ctx context.Context,
+	diags *diag.Diagnostics,
+	timeout timeoutType,
+	opts ...ResourceDataOpt,
+) (context.Context, ResourceData, func(), error) {
+	opts = append([]ResourceDataOpt{WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional)}, opts...)
+	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields, opts...)
+	if err != nil {
+		return ctx, nil, nil, fmt.Errorf("failed to create ResourceData: %w", err)
+	}
+
+	ctx, cancel, err := withTimeout(ctx, d, timeout)
+	if err != nil {
+		return ctx, nil, nil, fmt.Errorf("failed to read timeouts block: %w", err)
+	}
+
+	ctx, drainWarnings := WithWarnings(ctx, diags)
+	return ctx, d, func() {
+		drainWarnings()
+		cancel()
+	}, nil
+}
+
+// checkServiceReady runs schemautil.CheckServiceReady for RequireServiceReady resources.
+func (a *resourceAdapter) checkServiceReady(ctx context.Context, d ResourceData) error {
+	if len(a.resource.RequireServiceReady) == 0 {
+		return nil
+	}
+	return schemautil.CheckServiceReady(
+		ctx,
+		a.client,
+		d.Get("project").(string),
+		d.Get("service_name").(string),
+		a.resource.RequireServiceReady...,
+	)
+}
+
 func (a *resourceAdapter) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
@@ -238,49 +301,38 @@ func (a *resourceAdapter) Create(
 	defer func() { a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics) }()
 
 	diags := &rsp.Diagnostics
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutCreate,
 		WithPlan(req.Plan),
 		WithConfig(req.Config),
+		WithPrivate(rsp.Private),
 	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to create resource", err.Error())
 		return
 	}
-	if rsp.Private != nil {
-		d.(*resourceData).private = rsp.Private
-	}
+	defer end()
 
-	ctx, cancel, err := withTimeout(ctx, d, timeoutCreate)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
+	if err := a.checkServiceReady(ctx, d); err != nil {
+		diags.AddError("failed to create resource", err.Error())
 		return
 	}
-	defer cancel()
 
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
-
-	if len(a.resource.RequireServiceReady) > 0 {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
-			diags.AddError("failed to create resource", err.Error())
-			return
-		}
-	}
-
-	if a.resource.Conflict != nil {
-		if err := claimConflict(ctx, a.client, a.resource.TypeName, a.resource.Conflict, d); err != nil {
+	conflict := a.resource.Conflict
+	if conflict != nil {
+		if err := claimConflict(ctx, a.client, a.resource.TypeName, conflict, d); err != nil {
 			diags.AddError("failed to create resource", err.Error())
 			return
 		}
 	}
 
 	err = a.resource.Create(ctx, a.client, d)
-	createSucceeded := err == nil
-	if err != nil && !(a.resource.IgnoreAlreadyExists && avngen.IsAlreadyExists(err)) {
-		if a.resource.Conflict != nil {
-			releaseConflict(a.resource.TypeName, a.resource.Conflict, d)
+	exists := isAivenError(err, http.StatusConflict) && (a.resource.AdoptExisting || conflict != nil)
+	if err != nil && !exists {
+		if conflict != nil {
+			releaseConflict(a.resource.TypeName, conflict, d)
 		}
 		diags.AddError("failed to create resource", err.Error())
 		return
@@ -288,18 +340,13 @@ func (a *resourceAdapter) Create(
 
 	if a.resource.RefreshState != nil {
 		// Terraform persists state returned with an error diagnostic and marks the resource as
-		// tainted. Checkpoint a successfully created resource before polling so it remains
-		// manageable when the post-Create refresh fails. Do not checkpoint after an ignored 409.
-		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
-		if stateCheckpointed {
-			rsp.State.Raw = d.tfValue()
-		}
-
+		// tainted. Checkpoint a successfully created resource so it remains manageable when the
+		// post-Create refresh fails. Not after an ignored 409, or when adopting: the next apply
+		// adopts it instead of replacing a tainted resource.
+		checkpoint := !exists && !a.resource.AdoptExisting
 		err = a.refreshState(ctx, d)
 		if err != nil {
-			// A successful Read may populate a server-assigned ID that was unavailable before
-			// polling. Preserve it without replacing an earlier, known-good checkpoint.
-			if createSucceeded && !stateCheckpointed && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
+			if checkpoint && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
 				rsp.State.Raw = d.tfValue()
 			}
 			diags.AddError("failed to refresh state", err.Error())
@@ -356,35 +403,25 @@ func (a *resourceAdapter) Read(
 	}()
 
 	diags := &rsp.Diagnostics
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutRead,
 		WithState(req.State),
+		WithPrivate(rsp.Private),
 	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to read resource", err.Error())
 		return
 	}
-	if rsp.Private != nil {
-		d.(*resourceData).private = rsp.Private
-	}
+	defer end()
 
-	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
+	if err := a.checkServiceReady(ctx, d); err != nil {
+		diags.AddError("failed to read resource", err.Error())
 		return
 	}
-	defer cancel()
-
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
-
 	read := a.resource.Read
 	if len(a.resource.RequireServiceReady) > 0 {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
-			diags.AddError("failed to read resource", err.Error())
-			return
-		}
 		read = retryNotFound(read, readNotFoundRetryDelay)
 	}
 
@@ -449,14 +486,6 @@ const defaultRefreshStateRetryDelay = time.Second * 5
 // last attempt's error, so the user sees why the state never settled rather than a bare deadline.
 func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) error {
 	condition := a.resource.RefreshState
-	hasAttributeCondition := condition.Attribute != "" || condition.Desired != nil || condition.Failed != nil
-	if hasAttributeCondition && len(condition.Desired) == 0 {
-		return fmt.Errorf("refresh state condition for %q has no desired values", condition.Attribute)
-	}
-	if hasAttributeCondition && condition.Attribute == "" {
-		return errors.New("refresh state condition has no attribute")
-	}
-
 	retryDelay := a.resource.refreshStateRetryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultRefreshStateRetryDelay
@@ -488,7 +517,7 @@ func (a *resourceAdapter) refreshState(ctx context.Context, rd ResourceData) err
 				return err
 			}
 
-			if hasAttributeCondition {
+			if len(condition.Desired) > 0 {
 				attributeValue, ok := rd.GetOk(condition.Attribute)
 				if ok && slices.ContainsFunc(condition.Failed, func(failed string) bool {
 					return Equal(attributeValue, failed)
@@ -559,43 +588,31 @@ func (a *resourceAdapter) Update(
 	defer func() { a.setIdentity(ctx, rsp.State, rsp.Identity, &rsp.Diagnostics) }()
 
 	diags := &rsp.Diagnostics
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutUpdate,
 		WithPlan(req.Plan),
 		WithState(req.State),
 		WithConfig(req.Config),
+		WithPrivate(rsp.Private),
 	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to update resource", err.Error())
 		return
 	}
-	if rsp.Private != nil {
-		d.(*resourceData).private = rsp.Private
-	}
+	defer end()
 
-	ctx, cancel, err := withTimeout(ctx, d, timeoutUpdate)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
+	if err := a.checkServiceReady(ctx, d); err != nil {
+		diags.AddError("failed to update resource", err.Error())
 		return
-	}
-	defer cancel()
-
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
-
-	if len(a.resource.RequireServiceReady) > 0 {
-		if err := schemautil.CheckServiceReady(ctx, a.client, d.Get("project").(string), d.Get("service_name").(string), a.resource.RequireServiceReady...); err != nil {
-			diags.AddError("failed to update resource", err.Error())
-			return
-		}
 	}
 
 	// Some resources might have "virtual" fields, like "termination_protection".
 	// Those fields can be technically updated, but they don't require an API call.
 	// So we skip the Update call if it's not implemented.
 	if a.resource.Update != nil {
-		err = a.resource.Update(ctx, a.client, d)
+		err := a.resource.Update(ctx, a.client, d)
 		if errors.Is(err, ErrNoChanges) {
 			// The API keeps the values: there is nothing to wait for, e.g., an inactive integration stays inactive
 			state, err := unchangedState(req.Plan.Raw, req.State.Raw)
@@ -614,8 +631,7 @@ func (a *resourceAdapter) Update(
 	}
 
 	if a.resource.RefreshState != nil {
-		err = a.refreshState(ctx, d)
-		if err != nil {
+		if err := a.refreshState(ctx, d); err != nil {
 			diags.AddError("failed to refresh state", err.Error())
 			return
 		}
@@ -725,28 +741,18 @@ func (a *resourceAdapter) Delete(
 	}
 
 	diags := &rsp.Diagnostics
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutDelete,
 		WithState(req.State),
+		WithPrivate(rsp.Private),
 	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to delete resource", err.Error())
 		return
 	}
-	if rsp.Private != nil {
-		d.(*resourceData).private = rsp.Private
-	}
-
-	ctx, cancel, err := withTimeout(ctx, d, timeoutDelete)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
-		return
-	}
-	defer cancel()
-
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
+	defer end()
 
 	// The Aiven client might receive 5xx errors from the backend, causing it to retry the delete operation.
 	// However, the resource may have already been deleted, in which case a 404 error can be safely ignored.
@@ -813,10 +819,6 @@ const defaultDeleteStateRetryDelay = time.Second * 5
 // Each Read's warnings are buffered so only the last attempt's are merged into the outer collector.
 func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) error {
 	opts := a.resource.DeleteState
-	if len(opts.Desired) > 0 && opts.Attribute == "" {
-		return errors.New("delete state condition has no attribute")
-	}
-
 	retryDelay := opts.retryDelay
 	if retryDelay == 0 {
 		retryDelay = defaultDeleteStateRetryDelay
@@ -827,11 +829,6 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 	var deleteErr error
 	err := retry.Do(
 		func() error {
-			// Delete is issued until it succeeds once, then only Read polls. While it errors (e.g.
-			// 409 = dependents still detaching) it is re-issued next attempt and the error is
-			// remembered; it isn't fatal on its own, so the Read below drives the outcome. The
-			// remembered error is attached to the not-terminal error so a timeout surfaces why, and
-			// is cleared once Delete finally succeeds.
 			if !deleteSucceeded {
 				deleteErr = a.resource.Delete(ctx, a.client, rd)
 				if errors.Is(deleteErr, ErrDeleteStateFailed) {
@@ -854,8 +851,6 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 				return err
 			}
 
-			// Still present: with no Desired the only terminal is a 404, so keep polling; otherwise
-			// Attribute must match any Desired value. The last Delete error is attached after the loop.
 			if len(opts.Desired) == 0 {
 				return fmt.Errorf("%w: waiting for the resource to be gone", ErrDeleteStateDesired)
 			}
@@ -882,19 +877,15 @@ func (a *resourceAdapter) deleteState(ctx context.Context, rd ResourceData) erro
 		// On timeout, wrap ctx.Err() with the last attempt's error so a stuck delete reports why.
 		retry.WrapContextErrorWithLastError(true),
 		retry.RetryIf(func(err error) bool {
-			// Keep polling only while not-terminal; a 404 or any other Read error ends the poll.
-			return !errors.Is(err, ErrDeleteStateFailed) && errors.Is(err, ErrDeleteStateDesired)
+			// A 404 or any other Read error ends the poll.
+			return errors.Is(err, ErrDeleteStateDesired)
 		}),
 	)
 
 	AddWarnings(ctx, lastAttemptWarnings...)
 
-	// With no attempt cap, the loop only stops on success (nil), ErrDeleteStateFailed, a terminal Read
-	// error (404 or any other), or context cancellation. An ErrDeleteStateDesired here can only be the
-	// last attempt's error wrapped into the context deadline (retry.WrapContextErrorWithLastError):
-	// the poll timed out. Join the last unresolved Delete error (nil once Delete succeeded) so the deadline also
-	// reports why the delete never finished. All other outcomes pass through untouched.
-	if !errors.Is(err, ErrDeleteStateFailed) && errors.Is(err, ErrDeleteStateDesired) {
+	// ErrDeleteStateDesired here means the poll timed out: report why the last Delete failed, if it did.
+	if errors.Is(err, ErrDeleteStateDesired) {
 		err = errors.Join(err, deleteErr)
 	}
 
@@ -982,26 +973,18 @@ func (a *resourceAdapter) ValidateConfig(
 	}
 
 	diags := &rsp.Diagnostics
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields,
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	// Some resources might run API calls to validate the configuration.
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutRead,
 		WithConfig(req.Config),
 	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to validate config", err.Error())
 		return
 	}
-
-	// Some resources might run API calls to validate the configuration.
-	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
-		return
-	}
-	defer cancel()
-
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
+	defer end()
 
 	err = a.resource.ValidateConfig(ctx, a.client, d)
 	if err != nil {
@@ -1043,29 +1026,20 @@ func (a *resourceAdapter) ModifyPlan(
 	}
 
 	diags := &rsp.Diagnostics
-	opts := []ResourceDataOpt{
-		WithIdentityFieldsOptional(a.resource.IdentityFieldsOptional),
+	ctx, d, end, err := a.begin(
+		ctx,
+		diags,
+		timeoutRead,
 		WithPreservePlanValues(),
 		WithPlan(req.Plan),
 		WithState(req.State),
 		WithConfig(req.Config),
-	}
-
-	d, err := NewResourceData(a.resource.SchemaInternal, a.resource.IdentityFields, opts...)
+	)
 	if err != nil {
-		diags.AddError("failed to create ResourceData", err.Error())
+		diags.AddError("failed to modify plan", err.Error())
 		return
 	}
-
-	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
-	if err != nil {
-		diags.AddError("failed to read timeouts block", err.Error())
-		return
-	}
-	defer cancel()
-
-	ctx, drainWarnings := WithWarnings(ctx, diags)
-	defer drainWarnings()
+	defer end()
 
 	err = a.resource.ModifyPlan(ctx, a.client, d)
 	if err != nil {

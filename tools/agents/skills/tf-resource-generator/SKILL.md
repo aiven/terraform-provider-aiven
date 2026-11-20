@@ -614,6 +614,7 @@ Beyond basic CRUD, `ResourceOptions` supports:
 - `IdentityFieldsOptional` — generated from top-level `identityFieldsOptional` in the definition YAML
 - `MutableIdentity` — inferred when an identity field is sent in the Update request body
 - `RefreshStateCheck` — post-Create/Update convergence check that `refreshState` can't express (see [Resource Configuration](#resource-configuration))
+- `AdoptExisting` / `Conflict` — generated from `alreadyExists: adopt` / `alreadyExists: conflict`, mutually exclusive (see [Paginated list reads](#paginated-list-reads))
 
 ## ResourceData Interface
 
@@ -831,16 +832,18 @@ Set `pagination` on the read op (see Operations Configuration). The generator em
 The spec doesn't say which service types an endpoint paginates. `ServiceDatabaseList` paginates
 PostgreSQL only, `maxItems` included, so `aiven_mysql_database` sets no `pagination`.
 
-Set `resource.alreadyExists: check` to fail Create when the resource exists, in the API or as
-another resource with the same keys in the same run. The adapter lists the scope with `pageView`
-once and matches it with `pageMatch`, where the scope is the read op's path parameters and the
-keys are its `resultListLookupKeys`. The read is the paginated one, else the only read with
-`resultListLookupKeys`, which `pageView` fetches as a single page; it needs `resultKey` to name
-the item type. Delete releases the keys. The API might create the resource and still fail, so the
-client's retry gets 409: `alreadyExists: check` sets `IgnoreAlreadyExists` so that 409 counts as
-success. A resource that existed before Create is not adopted: the check fails first. Requires
-`refreshState`. Use `alreadyExists: adopt` to adopt an existing resource on 409 without the
-conflict check.
+Set `resource.alreadyExists: conflict` to fail Create when the resource exists, in the API or as
+another resource with the same keys in the same run. The generator emits `ResourceOptions.Conflict`,
+which lists the scope with `pageView` once and matches it with `pageMatch`, where the scope is the
+read op's path parameters and the keys are its `resultListLookupKeys`. The read is the paginated
+one, else the only read with `resultListLookupKeys`, which `pageView` fetches as a single page; it
+needs `resultKey` to name the item type. Delete releases the keys. The API might create the resource
+and still fail, so the client's retry gets 409, which counts as success. A resource that existed
+before Create is not adopted: the list finds it first. Requires `refreshState`.
+
+Use `alreadyExists: adopt`, emitted as `AdoptExisting: true`, for an idempotent Create: it adopts an
+existing resource on any 409, and a failed refresh leaves no state, so the next apply runs Create
+again instead of replacing a tainted resource. The two values are mutually exclusive.
 Tests that delete a resource outside Terraform call `adapter.ForgetConflict`.
 
 **Reference**: `definitions/aiven_pg_database.yml`, and `definitions/aiven_mysql_database.yml` for an
