@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/samber/lo"
 )
 
 const schemaSuffix = "Schema"
@@ -198,8 +199,36 @@ func genSetNestedBlock(def *Definition, entity entityType, item *Item) (jen.Code
 
 	// Blocks can't be sensitive, their attributes are (see recalcDeep)
 	delete(values, "Sensitive")
+	if entity.isResource() && len(elem.Variants) >= 2 && !elem.IsReadOnly(def, entity) {
+		nested[jen.Id("Validators")] = genVariantValidators(elem)
+	}
 	values["NestedObject"] = jen.Qual(pkg, "NestedBlockObject").Values(nested)
 	return jen.Qual(pkg, t).Values(dictFromMap(values, false)), nil
+}
+
+func genVariantValidators(item *Item) jen.Code {
+	method := "ExactlyOneVariant"
+	if item.AnyVariant {
+		method = "AtLeastOneVariant"
+	}
+	args := make([]jen.Code, 0, len(item.Variants))
+	for _, v := range item.Variants {
+		fields := jen.Dict{
+			jen.Id("Title"): jen.Lit(v.Title),
+			jen.Id("Attributes"): jen.Index().String().Values(lo.Map(v.Attributes, func(s string, _ int) jen.Code {
+				return jen.Lit(s)
+			})...),
+		}
+		if len(v.Required) > 0 {
+			fields[jen.Id("Required")] = jen.Index().String().Values(lo.Map(v.Required, func(s string, _ int) jen.Code {
+				return jen.Lit(s)
+			})...)
+		}
+		args = append(args, jen.Qual(customValidatorsPackage, "Variant").Values(fields))
+	}
+	return jen.Index().Qual(validatorPackage, "Object").Values(
+		jen.Qual(customValidatorsPackage, method).Call(args...),
+	)
 }
 
 func genAttributeValues(def *Definition, entity entityType, item *Item) (map[string]jen.Code, error) {
