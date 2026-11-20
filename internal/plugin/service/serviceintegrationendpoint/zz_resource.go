@@ -869,6 +869,12 @@ func resourceSchema(ctx context.Context) schema.Schema {
 						PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 						Validators:          []validator.Int64{int64validator.Between(2048, 2147483647)},
 					},
+					"octet_counted_framing": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Frame each log message with its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it. Only enable it if the receiver supports octet-counted framing (for example rsyslog or syslog-ng); other receivers cannot parse the length prefix. Disabled by default. When enabled, it takes precedence over `escape_newlines`. The default value is `false`.",
+						Optional:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "Rsyslog server port. Value must be between `1` and `65535`. The default value is `514`.",
 						Required:            true,
@@ -1557,6 +1563,10 @@ func resourceSchemaInternal() *adapter.Schema {
 							Computed:       true,
 							Type:           adapter.SchemaTypeInt,
 							ZeroNotAllowed: true,
+						},
+						"octet_counted_framing": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
 						},
 						"port": &adapter.Schema{
 							Type:           adapter.SchemaTypeInt,
