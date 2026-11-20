@@ -60,8 +60,8 @@ nav_order: 1
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_pg`
   resources and data sources to the Plugin Framework. Changes:
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg` and `aiven_thanos` resources and data sources
-  to the Plugin Framework. Changes:
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch`, `aiven_pg`, `aiven_thanos` and `aiven_valkey` resources
+  and data sources to the Plugin Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. So does removing every block of a list,
     as in SDKv2. Removing every `ip_filter_object` sends an empty list, also as in SDKv2, which clears the IP filter
