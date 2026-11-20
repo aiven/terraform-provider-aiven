@@ -31,8 +31,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"aws_iam_role_arn": schema.StringAttribute{
-				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`. Changing this property forces recreation of the resource.",
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				MarkdownDescription: "Amazon Resource Name. Maximum length: `2048`.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.LengthAtMost(2048)},
 			},
@@ -63,7 +62,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": timeouts.BlockAll(ctx)},
-		MarkdownDescription: "Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it.\n\nCreate this resource after the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) has been defined. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.",
+		MarkdownDescription: "Provisions a BYOC custom cloud environment by handing Aiven the IAM role ARN created in the customer AWS account. Transitions the environment from `draft` to `active` so services can be deployed into it.\n\nApply `aiven_byoc_aws_entity` first, then the customer-side AWS infrastructure (IAM role, VPC, subnets, security groups, buckets) built from its outputs, and create this resource last. Terraform orders only what this resource references: set `aws_iam_role_arn` from the IAM role's `arn`, and add the rest of the customer-side infrastructure to `depends_on`, e.g., `depends_on = [aws_vpc.example]`, so it's created before and destroyed after this resource. The example leaves out the customer-side infrastructure, so it doesn't work on its own.\n\nProvisioning can take longer than the create timeout. If it times out, apply again: it resumes waiting. If it fails with `creation_failed`, fix the cause and replace the entity, e.g., `terraform apply -replace=aiven_byoc_aws_entity.example`, which replaces this resource too. Replace it as well to change `aws_iam_role_arn` after provisioning. The plan can only reject a change it knows: if the IAM role is replaced in the same apply and gets another ARN, the environment is updated to it.\n\nDestroying this resource deletes the environment, after provisioning finishes if it is still running. \n\n**This resource is in the beta stage and may change without notice.** Set\nthe `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {

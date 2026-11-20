@@ -1,19 +1,36 @@
 # yaml-language-server: $schema=.schema.yml
 beta: true
 resource:
-  alreadyExists: adopt
+  alreadyExists: adopt # Provision returns 409 while provisioning or after it, the next apply waits for the outcome
+  modifyPlan: true
   description: |
     Provisions a BYOC custom cloud environment by handing Aiven the IAM role
     ARN created in the customer AWS account. Transitions the environment from
     `draft` to `active` so services can be deployed into it.
 
-    Create this resource after the customer-side AWS infrastructure
-    (IAM role, VPC, subnets, security groups, buckets) has been defined.
+    Apply `aiven_byoc_aws_entity` first, then the customer-side AWS infrastructure
+    (IAM role, VPC, subnets, security groups, buckets) built from its outputs, and
+    create this resource last. Terraform orders only what this resource references: set
+    `aws_iam_role_arn` from the IAM role's `arn`, and add the rest of the customer-side
+    infrastructure to `depends_on`, e.g., `depends_on = [aws_vpc.example]`, so it's
+    created before and destroyed after this resource. The example leaves out the
+    customer-side infrastructure, so it doesn't work on its own.
+
+    Provisioning can take longer than the create timeout. If it times out, apply again:
+    it resumes waiting. If it fails with `creation_failed`, fix the cause and replace the
+    entity, e.g., `terraform apply -replace=aiven_byoc_aws_entity.example`, which replaces
+    this resource too. Replace it as well to change `aws_iam_role_arn` after provisioning.
+    The plan can only reject a change it knows: if the IAM role is replaced in the same
+    apply and gets another ARN, the environment is updated to it.
+
+    Destroying this resource deletes the environment, after provisioning finishes if it
+    is still running.
   stateAttribute: state
   refreshState:
     desired: [active]
-  deleteState:
-    desired: [deleted]
+    failed: [creation_failed]
+  deleteState: true
+  removeMissing: true
 clientHandler: byoc
 identityFields: [organization_id, custom_cloud_environment_id]
 operations:
@@ -22,6 +39,9 @@ operations:
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentGet
     type: read
+    resultKey: custom_cloud_environment
+  - id: CustomCloudEnvironmentUpdate
+    type: update
     resultKey: custom_cloud_environment
   - id: CustomCloudEnvironmentDelete
     type: delete
@@ -67,3 +87,4 @@ schema:
     format: uuid
   aws_iam_role_arn:
     required: true
+    example: arn:aws:iam::012345678901:role/aiven-byoc

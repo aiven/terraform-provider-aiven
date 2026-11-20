@@ -10,6 +10,7 @@ Repo-wide conventions (tooling, where new code goes) live in [`AGENTS.md`](../..
 |-------|-------------|
 | [tf-resource-generator](./tf-resource-generator/SKILL.md) | Generate new Terraform resources and data sources from YAML definitions and OpenAPI specs |
 | [tf-resource-migration](./tf-resource-migration/SKILL.md) | Migrate existing SDK-based resources to the Plugin Framework while preserving state and behavior |
+| [tf-byoc-resource](./tf-byoc-resource/SKILL.md) | BYOC custom cloud environment lifecycle and how the `aiven_byoc_*` resources map onto it |
 
 ## Usage
 

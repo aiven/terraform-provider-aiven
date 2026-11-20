@@ -36,5 +36,6 @@ For end-to-end workflows, read the skills in [tools/agents/skills/](tools/agents
 
 - [tf-resource-generator](tools/agents/skills/tf-resource-generator/SKILL.md) — creating new resources/data sources from YAML.
 - [tf-resource-migration](tools/agents/skills/tf-resource-migration/SKILL.md) — migrating SDK resources to the Plugin Framework.
+- [tf-byoc-resource](tools/agents/skills/tf-byoc-resource/SKILL.md) — BYOC environment lifecycle and the `aiven_byoc_*` resources.
 
 These skills are the source of truth for YAML schema, adapter API, modifier patterns, and state-compatibility rules. This file is the source of truth for project-wide tooling conventions.
