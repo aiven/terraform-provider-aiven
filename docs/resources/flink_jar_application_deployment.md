@@ -2,12 +2,12 @@
 page_title: "aiven_flink_jar_application_deployment Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages the deployment of an Aiven for Apache Flink® jar application https://aiven.io/docs/products/flink/howto/create-jar-application. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated. Beta resource in limited availability. This feature is in the limited availability stage and may change without notice. To enable this feature, contact the sales team http://aiven.io/contact. Once it's enabled, set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
+  Creates and manages the deployment of an Aiven for Apache Flink® jar application https://aiven.io/docs/products/flink/howto/create-jar-application. If a refresh can't find this resource, it's removed from the state and a new create plan is generated. Beta resource in limited availability. This feature is in the limited availability stage and may change without notice. To enable this feature, contact the sales team http://aiven.io/contact. Once it's enabled, set the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_flink_jar_application_deployment (Resource)
 
-Creates and manages the deployment of an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages the deployment of an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ~> **Beta resource in limited availability**
 This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.

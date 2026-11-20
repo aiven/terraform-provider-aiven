@@ -2,14 +2,14 @@
 page_title: "aiven_gcp_vpc_peering_connection Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a Google Cloud VPC peering connection. Configure either vpc_id or both project and project_vpc_id to select the Aiven VPC. If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement. To retry with the same peer identifiers, use destroy-before-create for the recovery apply. With create_before_destroy, the existing connection prevents creation of its replacement. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages a Google Cloud VPC peering connection. Configure either vpc_id or both project and project_vpc_id to select the Aiven VPC. If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement. To retry with the same peer identifiers, use destroy-before-create for the recovery apply. With create_before_destroy, the existing connection prevents creation of its replacement. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_gcp_vpc_peering_connection (Resource)
 
 Creates and manages a Google Cloud VPC peering connection. Configure either `vpc_id` or both `project` and `project_vpc_id` to select the Aiven VPC.
 
-If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement. To retry with the same peer identifiers, use destroy-before-create for the recovery apply. With `create_before_destroy`, the existing connection prevents creation of its replacement. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+If creation succeeds but the readiness check fails, Terraform keeps the connection in state for replacement. To retry with the same peer identifiers, use destroy-before-create for the recovery apply. With `create_before_destroy`, the existing connection prevents creation of its replacement. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

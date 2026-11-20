@@ -2,7 +2,7 @@
 page_title: "aiven_service_integration_endpoint Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an integration endpoint. Integration endpoints let you send data like metrics and logs from Aiven services to external systems. The autoscaler endpoint lets you automatically scale the disk space on your services. After creating an endpoint, use the service integration resource https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration to connect it to a service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an integration endpoint. Integration endpoints let you send data like metrics and logs from Aiven services to external systems. The autoscaler endpoint lets you automatically scale the disk space on your services. After creating an endpoint, use the service integration resource https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration to connect it to a service. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_service_integration_endpoint (Resource)
@@ -11,7 +11,7 @@ Creates and manages an integration endpoint.
 
 Integration endpoints let you send data like metrics and logs from Aiven services to external systems. The `autoscaler` endpoint lets you automatically scale the disk space on your services.
 
-After creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+After creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

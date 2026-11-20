@@ -78,7 +78,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Creates and manages a [connection pool](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling) in an Aiven for PostgreSQL® service. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {

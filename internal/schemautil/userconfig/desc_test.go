@@ -169,7 +169,7 @@ This data source is in the limited availability stage and may change without not
 		{
 			name: "keeps the callout last, so nothing is pulled into the box",
 			desc: Desc("Service setting").LimitedAvailability().RemoveMissing(),
-			want: "Service setting. If this resource is missing (for example, after a service power off), " +
+			want: "Service setting. If a refresh can't find this resource, " +
 				"it's removed from the state and a new create plan is generated." + `
 
 ~> **Limited availability resource**
@@ -180,7 +180,7 @@ This resource is in the limited availability stage and may change without notice
 			desc: Desc("Service setting.\n\n~> **Warning**\nMind the gap.").LimitedAvailability().RemoveMissing(),
 			want: "Service setting.\n\n~> **Warning**\nMind the gap." + `
 
-If this resource is missing (for example, after a service power off), ` +
+If a refresh can't find this resource, ` +
 				"it's removed from the state and a new create plan is generated." + `
 
 ~> **Limited availability resource**

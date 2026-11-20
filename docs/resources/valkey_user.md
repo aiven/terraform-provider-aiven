@@ -2,12 +2,12 @@
 page_title: "aiven_valkey_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Valkey™ https://aiven.io/docs/products/valkey service user. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages an Aiven for Valkey™ https://aiven.io/docs/products/valkey service user. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_valkey_user (Resource)
 
-Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

@@ -2,12 +2,12 @@
 page_title: "aiven_organization_vpc Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages a VPC for an Aiven organization. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+  Creates and manages a VPC for an Aiven organization. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 ---
 
 # aiven_organization_vpc (Resource)
 
-Creates and manages a VPC for an Aiven organization. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.
+Creates and manages a VPC for an Aiven organization. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.
 
 ## Example Usage
 

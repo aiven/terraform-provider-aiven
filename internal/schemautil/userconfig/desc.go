@@ -365,7 +365,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 
 	if db.withRemoveMissing {
 		builder.WriteRune(' ')
-		builder.WriteString("If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.")
+		builder.WriteString("If a refresh can't find this resource, it's removed from the state and a new create plan is generated.")
 	}
 
 	// Avoids redundant descriptions.

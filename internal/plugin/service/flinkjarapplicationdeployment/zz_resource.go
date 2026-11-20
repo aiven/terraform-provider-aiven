@@ -122,7 +122,7 @@ func resourceSchema(ctx context.Context) schema.Schema {
 			},
 		},
 		Blocks:              map[string]schema.Block{"timeouts": legacytimeouts.BlockAll(ctx)},
-		MarkdownDescription: "Creates and manages the deployment of an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If this resource is missing (for example, after a service power off), it's removed from the state and a new create plan is generated.",
+		MarkdownDescription: "Creates and manages the deployment of an [Aiven for Apache Flink® jar application](https://aiven.io/docs/products/flink/howto/create-jar-application). This feature is in the limited availability stage and may change without notice. To enable this feature, contact the [sales team](http://aiven.io/contact). Once it's enabled, set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource. If a refresh can't find this resource, it's removed from the state and a new create plan is generated.",
 	}
 }
 func resourceSchemaInternal() *adapter.Schema {
