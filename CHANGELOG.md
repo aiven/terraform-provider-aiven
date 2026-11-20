@@ -24,6 +24,17 @@ nav_order: 1
 - Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
   are `active`, `deactivated` and `deleted`.
 - Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
+- Migrate `aiven_gcp_privatelink_connection_approval` to the Plugin Framework. Existing state and import IDs remain
+  supported. With `psc_connection_id = ""`, the first plan after upgrading may include an in-place update to Terraform
+  state only. See [Plugin Framework
+  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide.
+- Change `aiven_gcp_privatelink_connection_approval`: `user_ip_address` must be a valid IPv4 address.
+- Fix `aiven_gcp_privatelink_connection_approval`: retries no longer fail solely because the connection was already
+  approved with the configured IP.
+- Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
+  of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
+  To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
 
 ## [4.66.0] - 2026-11-12
 

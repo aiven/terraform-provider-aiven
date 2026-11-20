@@ -185,6 +185,8 @@ type SchemaMeta struct {
 	AlreadyExists AlreadyExists `yaml:"alreadyExists,omitempty"`
 	// DisableExample skips the Terraform example file.
 	DisableExample bool `yaml:"disableExample,omitempty"`
+	// ImportExample overrides the shell example in import.sh and the resource documentation.
+	ImportExample string `yaml:"importExample,omitempty"`
 	// RefDepth limits the doc example to this many blocks along each ref chain, the resource included.
 	// The last block renders its refs as literals. It also caps the block in dependents' examples.
 	// Zero means unlimited.

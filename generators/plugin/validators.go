@@ -24,6 +24,12 @@ var stringFormats = map[StringFormat]stringFormatSpec{
 		documented: regexp.MustCompile(`\b\d{1,3}(\.\d{1,3}){3}\b|[0-9a-fA-F]{1,4}::`),
 		example:    "10.0.0.0/24",
 	},
+	StringFormatIPv4: {
+		validator:  "IPv4",
+		hint:       "Must be a valid IPv4 address.",
+		documented: regexp.MustCompile(`(?i)\bipv4\b`),
+		example:    "10.20.30.40",
+	},
 	StringFormatIPv4CIDR: {
 		validator:  "IPv4CIDR",
 		hint:       "Must be a valid IPv4 CIDR block, for example `10.0.0.0/24`.",

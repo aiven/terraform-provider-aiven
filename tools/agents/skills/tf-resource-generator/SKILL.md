@@ -201,6 +201,11 @@ from them. `identityFieldsOptional` lists the trailing `identityFields` not requ
 unset ones are left out of the resource and data source string IDs (`foo/bar` instead of `foo/bar/baz`). The generator validates these fields and documents
 identity import for every resource. String import examples use the full ID, including optional fields.
 
+For a custom import handler that accepts additional string ID formats, set `resource.importExample`
+to a multiline shell example. It is used in both `examples/resources/<type>/import.sh` and the resource
+documentation. Keep alternative commands commented so copying the example imports the resource only
+once. This overrides documentation only; `identityFields` still defines the resource ID and identity import.
+
 `refreshState: true` enables a post-Create/Update Read that completes on the first successful Read,
 retrying transient 404/403 errors. To also wait for an attribute value, set `stateAttribute` and a
 `refreshState` block with `desired` and optional `failed` instead — desired already includes that
@@ -451,7 +456,7 @@ schema:
     enumExclude: [val3]            # Removes values from the OpenAPI enum; each must be in it
     minimum: 1
     maximum: 100
-    format: uuid|cidr|ipv4-cidr    # String validator, see Formats
+    format: uuid|cidr|ipv4|ipv4-cidr # String validator, see Formats
     example: value                 # Doc example; ignored with a declared format
     conflictsWith: [other_field]
     exactlyOneOf: [field_a, field_b]
@@ -474,6 +479,8 @@ Skip prefixed IDs (`org…`, `u…`, `ug…`, `acl…`, `addr…`, `pm…`), com
 fields, which get no validators. `format: cidr` emits `validators.CIDR()`; resource docs get a CIDR example hint unless
 the description has an IP example.
 `format: ipv4-cidr` emits `validators.IPv4CIDR()`, which rejects IPv6.
+`format: ipv4` emits `validators.IPv4()`, which accepts dotted-quad IPv4 addresses, including public
+addresses, and rejects IPv6 and CIDR notation. Prefer the API's `format` over a resource override when available.
 When unset, the format is guessed: `uuid` for fields named `uuid`, `cidr` for fields named `*cidr*`, `ipv4-cidr` when
 such a field also has `maxLength: 18`. A guessed format keeps the field's own example and only fills in a missing one;
 declare it to replace a bad one.
