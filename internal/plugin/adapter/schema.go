@@ -49,10 +49,18 @@ type Schema struct {
 	ZeroNotAllowed bool
 
 	// IsUserConfig marks a user config block of a resource. The API merges it on update: the options missing
-	// in the request keep their values, so removing its nested blocks changes only the state, see withoutRemovedBlocks.
+	// in the request keep their values, so removing its nested blocks changes only the state, see UserConfigChanges.
 	IsUserConfig bool
 
 	// HoistedFrom names the API object of a root field, e.g. "access_control".
 	// Expand nests the field under it after the modifiers, Flatten lifts it before them.
 	HoistedFrom string
+
+	// JSONName is the API name of a user config option named differently,
+	// e.g., "ip_filter" for "ip_filter_string", or "pg_stat_statements.track" for "pg_stat_statements__dot__track".
+	JSONName string
+
+	// CreateOnly fields are sent on create only, e.g., the admin_password option.
+	// Changing a root one updates only the state, e.g., default_acl.
+	CreateOnly bool
 }
