@@ -1,6 +1,6 @@
 resource "aiven_flink_jar_application_deployment" "example" {
   project        = "my-project" // Force new
-  service_name   = "my-application" // Force new
+  service_name   = "my-flink" // Force new
   application_id = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d" // Force new
   version_id     = "1a2b3c4d-5e6f-4a8b-9c0d-1e2f3a4b5c6d" // Force new
 
