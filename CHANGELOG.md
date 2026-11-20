@@ -35,6 +35,8 @@ nav_order: 1
 - Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
   of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
   To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+- Fix `aiven_byoc_aws_provision`: a failed or timed-out create no longer taints the resource, whose replacement deleted
+  the custom cloud environment. After a timeout, the next apply resumes waiting.
 
 ## [4.66.0] - 2026-11-12
 

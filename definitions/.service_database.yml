@@ -8,7 +8,7 @@ resource:
   refreshState: true
   deleteState: true
   removeMissing: true
-  alreadyExists: check
+  alreadyExists: conflict
   terminationProtection: true
 rename:
   dbname: database_name # ServiceDatabaseDelete path param is "dbname"

@@ -267,15 +267,12 @@ func yamlFieldNames(t reflect.Type) map[string]bool {
 	return names
 }
 
-// AlreadyExists is what Create does when the resource exists. The empty value fails on 409.
+// AlreadyExists sets adapter.ResourceOptions.AdoptExisting or Conflict.
 type AlreadyExists string
 
 const (
-	// AlreadyExistsAdopt treats 409 as success, e.g. for one-shot provisioning actions.
-	AlreadyExistsAdopt AlreadyExists = "adopt"
-	// AlreadyExistsCheck fails when the list read finds the resource, see adapter.ConflictOptions.
-	// Then a 409 means the client retried a request the API applied, so it's treated as success.
-	AlreadyExistsCheck AlreadyExists = "check"
+	AlreadyExistsAdopt    AlreadyExists = "adopt"
+	AlreadyExistsConflict AlreadyExists = "conflict"
 )
 
 type Definition struct {

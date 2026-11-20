@@ -450,6 +450,14 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 		require.Contains(t, renderCode(t, code), `RefreshStateDelay: adapter.MustParseDuration("15s")`)
 	})
 
+	t.Run("emits alreadyExists", func(t *testing.T) {
+		code, err := genNewResource(resourceType, &Definition{
+			Resource: &SchemaMeta{RefreshState: &RefreshState{}, AlreadyExists: AlreadyExistsAdopt},
+		}, stringItem(), false)
+		require.NoError(t, err)
+		require.Regexp(t, `AdoptExisting:\s+true`, renderCode(t, code))
+	})
+
 	t.Run("rejects alreadyExists without refreshState", func(t *testing.T) {
 		_, err := genNewResource(resourceType, &Definition{
 			Resource: &SchemaMeta{AlreadyExists: AlreadyExistsAdopt},
@@ -464,7 +472,7 @@ func TestGenNewResourceRefreshStateValidation(t *testing.T) {
 				AlreadyExists: AlreadyExists("yes"),
 			},
 		}, stringItem(), false)
-		require.EqualError(t, err, `alreadyExists must be "adopt" or "check", got "yes"`)
+		require.EqualError(t, err, `alreadyExists must be "adopt" or "conflict", got "yes"`)
 	})
 }
 

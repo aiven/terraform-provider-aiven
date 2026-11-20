@@ -135,19 +135,19 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 	refreshError := errors.New("refresh failed")
 	alreadyExistsError := avngen.Error{Status: http.StatusConflict, Message: "resource already exists"}
 	tests := []struct {
-		name                string
-		idFields            []string
-		idFieldsOptional    []string
-		plan                map[string]any
-		createID            string
-		createError         error
-		readID              []string
-		readState           string
-		readError           error
-		refreshState        *RefreshStateCondition
-		ignoreAlreadyExists bool
-		wantError           bool
-		wantID              string
+		name             string
+		idFields         []string
+		idFieldsOptional []string
+		plan             map[string]any
+		createID         string
+		createError      error
+		readID           []string
+		readState        string
+		readError        error
+		refreshState     *RefreshStateCondition
+		adoptExisting    bool
+		wantError        bool
+		wantID           string
 	}{
 		{
 			name:      "keeps an ID set by Create",
@@ -214,22 +214,48 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 			},
 		},
 		{
-			name:                "does not save state when AlreadyExists adoption fails",
-			idFields:            []string{"project", "name"},
-			plan:                map[string]any{"project": "project", "name": "example"},
-			createError:         alreadyExistsError,
-			readError:           refreshError,
-			ignoreAlreadyExists: true,
-			wantError:           true,
+			name:          "does not save state when adoption fails",
+			idFields:      []string{"project", "name"},
+			plan:          map[string]any{"project": "project", "name": "example"},
+			createError:   alreadyExistsError,
+			readError:     refreshError,
+			adoptExisting: true,
+			wantError:     true,
 		},
 		{
-			name:                "saves state when AlreadyExists adoption succeeds",
-			idFields:            []string{"project", "name"},
-			plan:                map[string]any{"project": "project", "name": "example"},
-			createError:         alreadyExistsError,
-			readID:              []string{"project", "example"},
-			ignoreAlreadyExists: true,
-			wantID:              "project/example",
+			name:          "saves state when adoption succeeds",
+			idFields:      []string{"project", "name"},
+			plan:          map[string]any{"project": "project", "name": "example"},
+			createError:   alreadyExistsError,
+			readID:        []string{"project", "example"},
+			adoptExisting: true,
+			wantID:        "project/example",
+		},
+		{
+			name:          "adopts on any 409",
+			idFields:      []string{"project", "name"},
+			plan:          map[string]any{"project": "project", "name": "example"},
+			createError:   avngen.Error{Status: http.StatusConflict, Message: "in progress"},
+			readID:        []string{"project", "example"},
+			adoptExisting: true,
+			wantID:        "project/example",
+		},
+		{
+			name:          "does not save state when an adopting Create fails to refresh",
+			idFields:      []string{"project", "server_id"},
+			plan:          map[string]any{"project": "project"},
+			createID:      "created-id",
+			readID:        []string{"project", "server-id"},
+			readError:     refreshError,
+			adoptExisting: true,
+			wantError:     true,
+		},
+		{
+			name:        "fails on 409 without adoption",
+			idFields:    []string{"project", "name"},
+			plan:        map[string]any{"project": "project", "name": "example"},
+			createError: alreadyExistsError,
+			wantError:   true,
 		},
 	}
 
@@ -248,7 +274,7 @@ func TestResourceAdapterCreatePreservesStateAfterRefreshError(t *testing.T) {
 					IdentityFields:         tt.idFields,
 					IdentityFieldsOptional: tt.idFieldsOptional,
 					RefreshState:           refreshState,
-					IgnoreAlreadyExists:    tt.ignoreAlreadyExists,
+					AdoptExisting:          tt.adoptExisting,
 					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
 						if tt.createID != "" {
 							return d.SetID(tt.createID)
@@ -753,70 +779,6 @@ func TestResourceAdapter_refreshState(t *testing.T) {
 		require.Contains(t, err.Error(), `"state"`)
 	})
 
-	t.Run("rejects failed values without desired values before reading", func(t *testing.T) {
-		t.Parallel()
-
-		attempts := 0
-		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-			attempts++
-			return nil
-		})
-		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Failed: []string{"ERROR"}}
-
-		err := a.refreshState(t.Context(), nil)
-
-		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
-		require.Zero(t, attempts)
-	})
-
-	t.Run("rejects an explicitly empty desired list before reading", func(t *testing.T) {
-		t.Parallel()
-
-		attempts := 0
-		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-			attempts++
-			return nil
-		})
-		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state", Desired: []string{}}
-
-		err := a.refreshState(t.Context(), nil)
-
-		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
-		require.Zero(t, attempts)
-	})
-
-	t.Run("rejects an attribute without desired values before reading", func(t *testing.T) {
-		t.Parallel()
-
-		attempts := 0
-		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-			attempts++
-			return nil
-		})
-		a.resource.RefreshState = &RefreshStateCondition{Attribute: "state"}
-
-		err := a.refreshState(t.Context(), nil)
-
-		require.EqualError(t, err, `refresh state condition for "state" has no desired values`)
-		require.Zero(t, attempts)
-	})
-
-	t.Run("rejects a condition without an attribute before reading", func(t *testing.T) {
-		t.Parallel()
-
-		attempts := 0
-		a := fastAdapter(func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-			attempts++
-			return nil
-		})
-		a.resource.RefreshState = &RefreshStateCondition{Desired: []string{"ACTIVE"}}
-
-		err := a.refreshState(t.Context(), nil)
-
-		require.EqualError(t, err, "refresh state condition has no attribute")
-		require.Zero(t, attempts)
-	})
-
 	t.Run("retries until the context deadline when the desired state is never reached", func(t *testing.T) {
 		t.Parallel()
 
@@ -984,28 +946,6 @@ func TestResourceAdapter_deleteState(t *testing.T) {
 	warning := func(summary string) diag.Diagnostic {
 		return diag.NewWarningDiagnostic(summary, "detail")
 	}
-
-	t.Run("rejects desired values without an attribute before deleting", func(t *testing.T) {
-		t.Parallel()
-
-		deletes, reads := 0, 0
-		a := fastAdapter(
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				deletes++
-				return nil
-			},
-			func(_ context.Context, _ avngen.Client, _ ResourceData) error {
-				reads++
-				return nil
-			},
-		)
-		a.resource.DeleteState.Desired = []string{"DELETED"}
-
-		err := a.deleteState(t.Context(), nil)
-		require.EqualError(t, err, "delete state condition has no attribute")
-		require.Zero(t, deletes)
-		require.Zero(t, reads)
-	})
 
 	t.Run("deletes once then surfaces the 404 when read reports the resource gone", func(t *testing.T) {
 		t.Parallel()
@@ -1594,6 +1534,118 @@ func conflictResourceSchema() *Schema {
 				},
 			},
 		},
+	}
+}
+
+func TestResourceAdapterCreateConflictAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	schema := conflictResourceSchema()
+	alreadyExists := avngen.Error{Status: http.StatusConflict, Message: "resource already exists"}
+	otherConflict := avngen.Error{Status: http.StatusConflict, Message: "in progress"}
+
+	for _, tt := range []struct {
+		name      string
+		project   string
+		resName   string
+		createErr error
+	}{
+		{name: "already_exists", project: "p1", resName: "exists", createErr: alreadyExists},
+		{name: "other_conflict", project: "p2", resName: "busy", createErr: otherConflict},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			plan := map[string]any{"project": tt.project, "name": tt.resName}
+			raw, err := toTFValue(schema, plan)
+			require.NoError(t, err)
+
+			conflict := &ConflictOptions{
+				Parent: []string{"project"},
+				Keys:   []string{"name"},
+				Load: func(_ context.Context, _ avngen.Client, _ ResourceData) (func(ResourceData) bool, error) {
+					return func(ResourceData) bool { return false }, nil
+				},
+			}
+
+			createCalled := false
+			a := &resourceAdapter{
+				resource: ResourceOptions{
+					TypeName:       "aiven_test_conflict_exists_" + tt.name,
+					SchemaInternal: schema,
+					IdentityFields: []string{"project", "name"},
+					Conflict:       conflict,
+					Create: func(_ context.Context, _ avngen.Client, d ResourceData) error {
+						createCalled = true
+						if tt.createErr != nil {
+							return tt.createErr
+						}
+						return d.SetID(tt.project, tt.resName)
+					},
+				},
+			}
+
+			req := resource.CreateRequest{Plan: tfsdk.Plan{Raw: raw}, Config: tfsdk.Config{Raw: raw}}
+			rsp := resource.CreateResponse{State: tfsdk.State{Raw: tftypes.NewValue(raw.Type(), nil)}}
+			a.Create(t.Context(), req, &rsp)
+
+			require.False(t, rsp.Diagnostics.HasError())
+			require.True(t, createCalled)
+		})
+	}
+}
+
+func TestNewResourceInvalidOptions(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		options ResourceOptions
+		want    string
+	}{
+		{
+			name:    "failed values without desired values",
+			options: ResourceOptions{RefreshState: &RefreshStateCondition{Attribute: "state", Failed: []string{"ERROR"}}},
+			want:    `aiven_test: refresh state condition for "state" has no desired values`,
+		},
+		{
+			name:    "empty desired values",
+			options: ResourceOptions{RefreshState: &RefreshStateCondition{Attribute: "state", Desired: []string{}}},
+			want:    `aiven_test: refresh state condition for "state" has no desired values`,
+		},
+		{
+			name:    "refresh attribute without desired values",
+			options: ResourceOptions{RefreshState: &RefreshStateCondition{Attribute: "state"}},
+			want:    `aiven_test: refresh state condition for "state" has no desired values`,
+		},
+		{
+			name:    "refresh desired values without attribute",
+			options: ResourceOptions{RefreshState: &RefreshStateCondition{Desired: []string{"ACTIVE"}}},
+			want:    "aiven_test: refresh state condition has no attribute",
+		},
+		{
+			name:    "delete desired values without attribute",
+			options: ResourceOptions{DeleteState: &DeleteStateOptions{Desired: []string{"DELETED"}}},
+			want:    "aiven_test: delete state condition has no attribute",
+		},
+		{
+			name:    "adopt and conflict",
+			options: ResourceOptions{AdoptExisting: true, Conflict: &ConflictOptions{}},
+			want:    "aiven_test: AdoptExisting and Conflict are mutually exclusive",
+		},
+		{
+			name:    "adopt without refresh state",
+			options: ResourceOptions{AdoptExisting: true},
+			want:    "aiven_test: AdoptExisting requires RefreshState",
+		},
+		{
+			name:    "conflict without refresh state",
+			options: ResourceOptions{Conflict: &ConflictOptions{}},
+			want:    "aiven_test: Conflict requires RefreshState",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.options.TypeName = "aiven_test"
+			require.PanicsWithValue(t, tt.want, func() { NewResource(tt.options) })
+		})
 	}
 }
 

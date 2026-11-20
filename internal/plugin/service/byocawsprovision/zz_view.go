@@ -15,16 +15,16 @@ import (
 const typeName = "aiven_byoc_aws_provision"
 
 var ResourceOptions = adapter.ResourceOptions{
-	Beta:   true,
-	Create: createView,
-	Delete: deleteView,
+	AdoptExisting: true,
+	Beta:          true,
+	Create:        createView,
+	Delete:        deleteView,
 	DeleteState: &adapter.DeleteStateOptions{
 		Attribute: "state",
 		Desired:   []string{"deleted"},
 	},
-	IdentityFields:      []string{"organization_id", "custom_cloud_environment_id"},
-	IgnoreAlreadyExists: true,
-	Read:                readView,
+	IdentityFields: []string{"organization_id", "custom_cloud_environment_id"},
+	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"active"},
