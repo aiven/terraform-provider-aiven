@@ -300,10 +300,15 @@ func TestAccAivenResource_backwardCompat(t *testing.T) {
 }
 ```
 
+When the package's tests already create a service with `acc.CreateTestService`, run the backward-compatibility
+test as a subtest that reuses it rather than creating another one. Leave `OldProviderVersion` empty unless there's
+a reason to pin it: users upgrade from the latest release.
+
 **Run it** like any acceptance test (CI runs the same tests through `task test-backward`, which only
 adds the `backwardcompat` build tag; no test file is gated by it today):
 ```bash
 task test-acc -- -run TestAccAivenResource_backwardCompat
+task test-acc -- -run 'TestAccAivenResource/backward_compat' # as a subtest
 ```
 
 **What this test does:**
@@ -328,7 +333,9 @@ ls internal/sdkprovider/service/*resource_name*_test.go
 - All CRUD operations from SDK tests
 - Update step: If the resource implements `Update` (mutable fields that are not all `ForceNew`), acceptance tests MUST include a Terraform apply that changes at least one updatable attribute after create — i.e. an explicit `update` step in the test sequence, not only create + destroy. Skip this only when the resource is create/delete-only or every mutable change forces replacement.
 - Edge cases
-- Error handling
+- Error handling. `ExpectError` patterns from SDK tests break: the Plugin Framework shows a generic summary
+  ("failed to modify plan", "failed to update resource") with the message as the detail, and Terraform wraps the
+  detail. Match the message itself, without an `Error:` prefix, and use `\s+` between words.
 - Import functionality
 - Special field behaviors
 
@@ -400,7 +407,11 @@ task test-acc -- -run TestAccAivenResource_backwardCompat
 
 Once all tests pass and state compatibility is verified:
 
-1. **Remove SDK resource** - Delete from `internal/sdkprovider/` and remove provider registration
+1. **Remove SDK resource** - Delete from `internal/sdkprovider/` and remove provider registration. If no
+   `_test.go` file remains in `internal/sdkprovider/service/<pkg>`, remove its entry from `DefaultSlowTests`
+   (`tools/test/matrix.go`); `TestDefaultSlowTestsExist` fails otherwise. Add the new `plugin-service-<pkg>`
+   packages only if they're slow and not listed yet: a `/test` comment that selects only slow packages fails its
+   summary check.
 2. **Update documentation** - Ensure docs reflect the Plugin Framework version
 3. **Add migration notes if needed** - Document any unavoidable behavioral differences. Differences every migrated
    resource shares, e.g., removed blocks in the first plan or null in place of zero values, are in the "Plugin Framework

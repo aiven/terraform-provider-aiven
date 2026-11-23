@@ -162,7 +162,7 @@ func (d *resourceData) requiresReplaceKeys() []string {
 }
 
 // isUnknown tells if the planned value is unknown until apply, e.g., a dynamic block over an unknown list.
-// Get returns a zero value for it, see WithPreservePlanValues.
+// Get returns a zero value for it, or the prior state for an ID field, see WithPreservePlanValues.
 func (d *resourceData) isUnknown(key string) bool {
 	v, ok := d.plan[key].(tftypes.Value)
 	return ok && !v.IsKnown()

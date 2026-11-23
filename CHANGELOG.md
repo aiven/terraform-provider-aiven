@@ -15,6 +15,13 @@ nav_order: 1
 - Fix `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin
   Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000`
   or an empty `local_retention_ms`, no longer fail every apply.
+- Migrate `aiven_kafka_schema_configuration` resource and data source to the Plugin Framework. See [Plugin Framework
+  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide.
+- Change `aiven_kafka_schema_configuration`: the data source no longer has the never-set `subject_name`, `schema`,
+  `schema_type`, `version` and `references` attributes. Creating the resource without `compatibility_level` keeps
+  the service's current level. Operations fail early when the Kafka service is powered off, and create fails when
+  the schema registry is disabled.
 - Migrate `aiven_kafka_schema` resource and data source to the Plugin Framework. When `schema` differs from the state only
   in formatting, e.g., a heredoc, the first plan after upgrading has an in-place update that changes the state only.
   See [Plugin Framework

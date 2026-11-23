@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  description: >-
+    The Kafka Schema Configuration resource allows the creation and management of Aiven Kafka Schema Configurations.
+  refreshState: true
+  removeMissing: true
+  # The generated example's `aiven_kafka` has no `schema_registry`, which the configuration needs.
+  disableExample: true
+datasource:
+  description: >-
+    The Kafka Schema Configuration data source provides information about the existing Aiven Kafka Schema Configuration.
+clientHandler: kafkaschemaregistry
+identityFields: [project, service_name]
+legacyTimeouts: true
+requireServiceReady: [kafka]
+operations:
+  - id: ServiceSchemaRegistryGlobalConfigPut
+    type: create
+    disableView: true
+  - id: ServiceSchemaRegistryGlobalConfigGet
+    type: read
+    disableView: true
+  - id: ServiceSchemaRegistryGlobalConfigPut
+    type: update
+    disableView: true
+  # The API can't delete the global config, so deleteView resets it to BACKWARD.
+  - id: ServiceSchemaRegistryGlobalConfigPut
+    type: delete
+    disableView: true
+rename:
+  compatibility: compatibility_level
+  compatibilityLevel: compatibility_level
+schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
+  compatibility_level:
+    # The PUT body requires it, but the SDK had it optional: create skips the PUT when it's not configured.
+    optional: true
+    # Read sets the service's level when it's not configured. Removing it keeps the current one.
+    computed: true
+    useStateForUnknown: true

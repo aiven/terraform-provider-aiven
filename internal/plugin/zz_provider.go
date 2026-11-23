@@ -40,6 +40,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnectcustompluginfile"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkanativeacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschemaconfiguration"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschemaregistryacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkatopic"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkatopiclist"
@@ -107,6 +108,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_kafka_connect_custom_plugin_file":    adapter.NewLazyResource(kafkaconnectcustompluginfile.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
 		"aiven_kafka_schema":                        adapter.NewLazyResource(kafkaschema.ResourceOptions),
+		"aiven_kafka_schema_configuration":          adapter.NewLazyResource(kafkaschemaconfiguration.ResourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(kafkaschemaregistryacl.ResourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyResource(kafkatopic.ResourceOptions),
 		"aiven_kafka_user":                          adapter.NewLazyResource(kafkauser.ResourceOptions),
@@ -158,6 +160,7 @@ func DataSources() map[string]func() datasource.DataSource {
 		"aiven_gcp_vpc_peering_connection":          adapter.NewLazyDataSource(gcpvpcpeeringconnection.DataSourceOptions),
 		"aiven_kafka_acl":                           adapter.NewLazyDataSource(kafkaacl.DataSourceOptions),
 		"aiven_kafka_schema":                        adapter.NewLazyDataSource(kafkaschema.DataSourceOptions),
+		"aiven_kafka_schema_configuration":          adapter.NewLazyDataSource(kafkaschemaconfiguration.DataSourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyDataSource(kafkaschemaregistryacl.DataSourceOptions),
 		"aiven_kafka_topic":                         adapter.NewLazyDataSource(kafkatopic.DataSourceOptions),
 		"aiven_kafka_topic_list":                    adapter.NewLazyDataSource(kafkatopiclist.DataSourceOptions),
