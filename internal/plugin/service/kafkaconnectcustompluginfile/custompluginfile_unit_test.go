@@ -12,16 +12,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/fileupload"
 )
 
-type replacementTrackingResourceData struct {
-	adapter.ResourceData
-	requiresReplace []string
-}
-
-func (d *replacementTrackingResourceData) RequiresReplace(keys ...string) {
-	d.ResourceData.RequiresReplace(keys...)
-	d.requiresReplace = append(d.requiresReplace, keys...)
-}
-
 func TestModifyPlan(t *testing.T) {
 	t.Parallel()
 
@@ -35,7 +25,7 @@ func TestModifyPlan(t *testing.T) {
 		return path
 	}
 
-	newData := func(t *testing.T, plan, state map[string]any) *replacementTrackingResourceData {
+	newData := func(t *testing.T, plan, state map[string]any) adapter.ResourceData {
 		t.Helper()
 
 		opts := []adapter.ResourceDataOpt{adapter.WithTestPlan(plan)}
@@ -45,7 +35,7 @@ func TestModifyPlan(t *testing.T) {
 
 		d, err := adapter.NewResourceData(resourceSchemaInternal(), ResourceOptions.IdentityFields, opts...)
 		require.NoError(t, err)
-		return &replacementTrackingResourceData{ResourceData: d}
+		return d
 	}
 
 	t.Run("new resource stores the checksum without replacement", func(t *testing.T) {
@@ -55,7 +45,7 @@ func TestModifyPlan(t *testing.T) {
 		d := newData(t, map[string]any{"source": path}, nil)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Empty(t, d.requiresReplace)
+		require.Empty(t, adapter.RequiresReplaceKeys(d))
 
 		want, err := fileupload.Checksum(path)
 		require.NoError(t, err)
@@ -75,7 +65,7 @@ func TestModifyPlan(t *testing.T) {
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Empty(t, d.requiresReplace)
+		require.Empty(t, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("changed content requires replacement", func(t *testing.T) {
@@ -87,7 +77,7 @@ func TestModifyPlan(t *testing.T) {
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
+		require.Equal(t, []string{"source", fileSha256Field}, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("existing resource with empty prior checksum requires replacement", func(t *testing.T) {
@@ -102,7 +92,7 @@ func TestModifyPlan(t *testing.T) {
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
+		require.Equal(t, []string{"source", fileSha256Field}, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("unknown source of a new resource does not require replacement", func(t *testing.T) {
@@ -111,7 +101,7 @@ func TestModifyPlan(t *testing.T) {
 		d := newData(t, map[string]any{"source": tftypes.NewValue(tftypes.String, tftypes.UnknownValue)}, nil)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Empty(t, d.requiresReplace)
+		require.Empty(t, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("unknown source of an existing resource requires replacement", func(t *testing.T) {
@@ -123,7 +113,7 @@ func TestModifyPlan(t *testing.T) {
 		)
 
 		require.NoError(t, modifyPlan(t.Context(), nil, d))
-		require.Equal(t, []string{"source", fileSha256Field}, d.requiresReplace)
+		require.Equal(t, []string{"source", fileSha256Field}, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("missing file is an error", func(t *testing.T) {

@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  description: >-
+    The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.
+    Schemas with references are hard deleted, while schemas without references are only soft deleted.
+  refreshState: true
+  removeMissing: true
+  modifyPlan: true
+  # The generated example's `aiven_kafka` has no `schema_registry`, which the schema needs.
+  disableExample: true
+datasource:
+  description: The Kafka Schema data source provides information about the existing Aiven Kafka Schema.
+clientHandler: kafkaschemaregistry
+identityFields: [project, service_name, subject_name]
+legacyTimeouts: true
+requireServiceReady: [kafka]
+# All views are hand-written: a schema is a subject version plus the subject's compatibility config.
+operations:
+  - id: ServiceSchemaRegistrySubjectVersionPost
+    type: create
+    disableView: true
+  - id: ServiceSchemaRegistrySubjectVersionGet
+    type: read
+    resultKey: version
+    disableView: true
+  - id: ServiceSchemaRegistrySubjectVersionPost
+    type: update
+    disableView: true
+  - id: ServiceSchemaRegistrySubjectConfigPut
+    type: update
+    disableView: true
+  - id: ServiceSchemaRegistrySubjectDelete
+    type: delete
+    disableView: true
+rename:
+  compatibility: compatibility_level
+  schemaType: schema_type
+remove:
+  - id # Schema ID
+  - subject
+  - version_id
+schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
+  subject_name:
+    example: my-topic-value
+  schema:
+    # The spec only says "Schema".
+    description: Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema, depending on the schema type.
+    example: '{"type": "record", "name": "Order", "fields": [{"name": "id", "type": "string"}]}'
+  schema_type:
+    # SDKv2 didn't read the type, so its configs may omit it for any type. Without a default, an
+    # omitted type keeps the state, and modifyPlan replaces the resource for a configured change only.
+    description: >-
+      Schema type, `AVRO` by default. Changing it forces recreation of the resource; removing it keeps the
+      current type.
+    computed: true
+    useStateForUnknown: true
+  compatibility_level:
+    # Read sets the subject's level when it's not configured. Removing it keeps the current one.
+    computed: true
+    useStateForUnknown: true

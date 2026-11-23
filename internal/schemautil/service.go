@@ -1362,6 +1362,19 @@ func ServiceReadyForget(project, serviceName string) {
 	serviceCheck.Forget(project, serviceName)
 }
 
+// GetService returns the service, cached per process, see serviceCheck.
+func GetService(ctx context.Context, client avngen.Client, project, serviceName string) (*service.ServiceGetOut, error) {
+	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
+		return client.ServiceGet(ctx, project, serviceName)
+	}, project, serviceName)
+	if avngen.IsNotFound(err) {
+		// A 404 may be eventual consistency for a service created
+		// elsewhere, so let the next caller retry.
+		serviceCheck.Forget(project, serviceName)
+	}
+	return s, err
+}
+
 // CheckServiceReady verifies the target service exists, is powered on,
 // and has the expected service type before performing operations that
 // require it. Some operations like database management need the service
@@ -1384,15 +1397,8 @@ func CheckServiceReady(ctx context.Context, client avngen.Client, project, servi
 		}
 	}
 
-	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
-		return client.ServiceGet(ctx, project, serviceName)
-	}, project, serviceName)
+	s, err := GetService(ctx, client, project, serviceName)
 	if err != nil {
-		if avngen.IsNotFound(err) {
-			// A 404 may be eventual consistency for a service created
-			// elsewhere, so let the next caller retry.
-			serviceCheck.Forget(project, serviceName)
-		}
 		return err
 	}
 	if !slices.Contains(serviceTypes, s.ServiceType) {

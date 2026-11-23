@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/samber/lo"
 	"github.com/zclconf/go-cty/cty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 // exampleLabel is the block label of generated examples.
@@ -277,6 +278,8 @@ func (w *exampleWriter) object(item *Item, body *hclwrite.Body, inComputedBlock 
 				return err
 			}
 			comments = append(comments, "e.g. "+string(hclwrite.TokensForValue(val).Bytes()))
+		} else if jsonTokens, ok := exampleJSONTokens(val); ok {
+			tokens = jsonTokens
 		} else {
 			tokens = hclwrite.TokensForValue(val)
 			if val.Type().IsListType() {
@@ -419,6 +422,25 @@ func exampleCollectionTokens(val cty.Value) hclwrite.Tokens {
 	}
 	tokens = append(tokens, &hclwrite.Token{Type: hclsyntax.TokenCBrack, Bytes: []byte("]")})
 	return tokens
+}
+
+// exampleJSONTokens renders a JSON object string as jsonencode({...}), which reads better than an escaped string.
+func exampleJSONTokens(val cty.Value) (hclwrite.Tokens, bool) {
+	if !val.Type().Equals(cty.String) || !strings.HasPrefix(strings.TrimSpace(val.AsString()), "{") {
+		return nil, false
+	}
+
+	src := []byte(val.AsString())
+	t, err := ctyjson.ImpliedType(src)
+	if err != nil {
+		return nil, false
+	}
+	obj, err := ctyjson.Unmarshal(src, t)
+	if err != nil {
+		return nil, false
+	}
+
+	return hclwrite.TokensForFunctionCall("jsonencode", hclwrite.TokensForValue(obj)), true
 }
 
 // exampleArrayElems builds the element values for an array example. A list-valued

@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -109,6 +111,30 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 		acc.WithUserConfig(map[string]any{"schema_registry": true}),
 	)
 
+	t.Run("backward_compat", func(t *testing.T) {
+		subjectName := acc.RandName("backward")
+		resourceName := "aiven_kafka_schema.foo"
+		datasourceName := "data.aiven_kafka_schema.schema"
+
+		resource.ParallelTest(t, resource.TestCase{
+			PreCheck: func() { acc.TestAccPreCheck(t) },
+			Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+				PreConfig: func() { require.NoError(t, <-serviceIsReady) },
+				TFConfig:  testAccKafkaSchemaBackwardCompatConfig(projectName, serviceName, subjectName),
+				Checks: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", subjectName),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "compatibility_level", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
+					resource.TestCheckResourceAttr(datasourceName, "subject_name", subjectName),
+					resource.TestCheckResourceAttr(datasourceName, "version", "1"),
+				),
+			}),
+		})
+	})
+
 	t.Run("basic", func(t *testing.T) {
 		resourceName := "aiven_kafka_schema.foo"
 		subjectName := acc.RandName("basic")
@@ -153,8 +179,11 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 					),
 				},
 				{
-					Config:      testAccKafkaSchemaResourceInvalidUpdate(projectName, serviceName, subjectName),
-					ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
+					Config: testAccKafkaSchemaResourceInvalidUpdate(projectName, serviceName, subjectName),
+					ExpectError: regexp.MustCompile(fmt.Sprintf(
+						`subject\s+"%s":\s+schema\s+is\s+not\s+compatible\s+with\s+previous\s+version\s+\d+`,
+						regexp.QuoteMeta(subjectName),
+					)),
 				},
 			},
 		})
@@ -204,6 +233,7 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 		resourceName2 := "aiven_kafka_schema.bar"
 		fooSubject := acc.RandName("json")
 		barSubject := acc.RandName("protobuf")
+		config := testAccKafkaSchemaJSONProtobufResource(projectName, serviceName, fooSubject, barSubject)
 
 		// This test can't run in parallel
 		resource.Test(t, resource.TestCase{
@@ -215,7 +245,7 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 			CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
 			Steps: []resource.TestStep{
 				{
-					Config: testAccKafkaSchemaJSONProtobufResource(projectName, serviceName, fooSubject, barSubject),
+					Config: config,
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
 						testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema2"),
@@ -229,6 +259,27 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName2, "subject_name", barSubject),
 						resource.TestCheckResourceAttr(resourceName2, "version", "1"),
 						resource.TestCheckResourceAttr(resourceName2, "schema_type", "PROTOBUF"),
+					),
+				},
+				{
+					// SDKv2 never read the type, so its configs may omit it, e.g., after an import.
+					Config:   strings.Replace(config, `schema_type  = "PROTOBUF"`, "", 1),
+					PlanOnly: true,
+				},
+				{
+					// An omitted type keeps the state, so a schema change doesn't replace the resource.
+					Config: strings.NewReplacer(
+						`schema_type  = "PROTOBUF"`, "",
+						"int32 test = 5;", "int32 test = 5;\n      string name = 6;",
+					).Replace(config),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction(resourceName2, plancheck.ResourceActionUpdate),
+						},
+					},
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName2, "schema_type", "PROTOBUF"),
+						resource.TestCheckResourceAttr(resourceName2, "version", "2"),
 					),
 				},
 			},
@@ -302,7 +353,7 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 				},
 				{
 					Config:      testAccKafkaSchemaAVROReferencesIncompatibleResource(projectName, serviceName, avroRefSubject, avroDepSubject),
-					ExpectError: regexp.MustCompile("Incompatible schema, compatibility_mode=BACKWARD. Incompatibilities: reader type: string not compatible with writer type: int"),
+					ExpectError: regexp.MustCompile(`Incompatible\s+schema,\s+compatibility_mode=BACKWARD\.\s+Incompatibilities:\s+reader\s+type:\s+string\s+not\s+compatible\s+with\s+writer\s+type:\s+int`),
 				},
 			},
 		})
@@ -901,6 +952,42 @@ resource "aiven_kafka_schema" "schema" {
 `, projectName, serviceName, subjectName)
 }
 
+func testAccKafkaSchemaBackwardCompatConfig(projectName, serviceName, subjectName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  subject_name        = %[3]q
+  compatibility_level = "FORWARD"
+
+  schema = <<EOT
+    {
+      "doc": "example",
+      "fields": [
+        {
+          "default": 5,
+          "doc": "my test number",
+          "name": "test",
+          "namespace": "test",
+          "type": "int"
+        }
+      ],
+      "name": "example",
+      "namespace": "example",
+      "type": "record"
+    }
+  EOT
+}
+
+data "aiven_kafka_schema" "schema" {
+  project      = aiven_kafka_schema.foo.project
+  service_name = aiven_kafka_schema.foo.service_name
+  subject_name = aiven_kafka_schema.foo.subject_name
+
+  depends_on = [aiven_kafka_schema.foo]
+}`, projectName, serviceName, subjectName)
+}
+
 func testAccKafkaSchemaResource(projectName, serviceName, subjectName string) string {
 	return fmt.Sprintf(`
 resource "aiven_kafka_schema_configuration" "foo" {
@@ -1089,7 +1176,7 @@ func TestAccAivenKafkaSchema_invalid_avro_schema(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      invalidAvroSchemaConfig,
-				ExpectError: regexp.MustCompile(`Error: schema validation error: avro: unknown type: enum`),
+				ExpectError: regexp.MustCompile(`schema validation error: avro: unknown type: enum`),
 			},
 		},
 	})
