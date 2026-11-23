@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=.schema.yml
+resource:
+  description: Creates and manages quotas for an Aiven for Apache Kafka® service user.
+  removeMissing: true
+clientHandler: kafka
+identityFields: [project, service_name, client_id, user]
+identityFieldsOptional: [client_id, user]
+legacyTimeouts: true
+requireServiceReady: [kafka]
+rename:
+  client-id: client_id
+operations:
+  - id: ServiceKafkaQuotaCreate
+    type: create
+    disableView: true
+  - id: ServiceKafkaQuotaDescribe
+    type: read
+    resultKey: quota
+    disableView: true
+  - id: ServiceKafkaQuotaCreate
+    type: update
+    disableView: true
+  - id: ServiceKafkaQuotaDelete
+    type: delete
+    disableView: true
+schema:
+  project:
+    ref: aiven_kafka.project
+  service_name:
+    ref: aiven_kafka.service_name
+  user:
+    # Update reuses the create API call, so the generator treats user and client_id as updatable.
+    forceNew: true
+    atLeastOneOf: [user, client_id]
+    pattern: '^(\*$|[a-zA-Z0-9_?][a-zA-Z0-9-_?*.].{0,62})$'
+  client_id:
+    forceNew: true
+    atLeastOneOf: [user, client_id]
+  consumer_byte_rate:
+    # The SDK had integer byte rates.
+    type: integer
+    atLeastOneOf: [consumer_byte_rate, producer_byte_rate, request_percentage]
+  producer_byte_rate:
+    type: integer
+    atLeastOneOf: [consumer_byte_rate, producer_byte_rate, request_percentage]
+  request_percentage:
+    atLeastOneOf: [consumer_byte_rate, producer_byte_rate, request_percentage]

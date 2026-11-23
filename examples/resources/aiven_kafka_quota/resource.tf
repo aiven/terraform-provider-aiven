@@ -1,9 +1,11 @@
-resource "aiven_kafka_quota" "example_quota" {
-  project            = data.aiven_project.foo.project
-  service_name       = aiven_kafka.example_kafka.service_name
-  user               = "example-kafka-user"
-  client_id          = "example_client"
-  consumer_byte_rate = 1000
-  producer_byte_rate = 1000
-  request_percentage = 50
+resource "aiven_kafka_quota" "example" {
+  project      = "my-project" // Force new
+  service_name = "my-kafka" // Force new
+
+  // OPTIONAL FIELDS
+  client_id          = "abc123" // Force new
+  user               = "alice" // Force new
+  consumer_byte_rate = 1073741824
+  producer_byte_rate = 1073741824
+  request_percentage = 100
 }

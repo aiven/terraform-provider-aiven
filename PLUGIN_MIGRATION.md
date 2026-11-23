@@ -52,7 +52,7 @@
 |  46 | aiven_kafka_connector                       |        |     2 |
 |  47 | aiven_kafka_mirrormaker                     |        |     2 |
 |  48 | aiven_kafka_native_acl                      | yes    |     1 |
-|  49 | aiven_kafka_quota                           |        |     1 |
+|  49 | aiven_kafka_quota                           | yes    |     1 |
 |  50 | aiven_kafka_schema                          | yes    |     2 |
 |  51 | aiven_kafka_schema_configuration            | yes    |     2 |
 |  52 | aiven_kafka_schema_registry_acl             | yes    |     2 |
@@ -105,6 +105,6 @@
 |  99 | aiven_valkey                                |        |     2 |
 | 100 | aiven_valkey_user                           | yes    |     2 |
 +-----+---------------------------------------------+--------+-------+
-|     | TOTAL MIGRATED 69%                          | 112    |   163 |
+|     | TOTAL MIGRATED 69%                          | 113    |   163 |
 +-----+---------------------------------------------+--------+-------+
 ```
