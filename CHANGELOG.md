@@ -35,6 +35,25 @@ nav_order: 1
 - Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
   of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
   To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.org_mapping`: Map Azure AD groups to Grafana organizations and roles
+- Add `aiven_grafana` field `grafana_user_config.auth_azuread.skip_org_role_sync`: Stop automatically syncing user
+  organizations and roles at sign-in.
+- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `13`
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever
+  their audience when `sasl_oauthbearer_expected_audience` is not set
+- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their
+  issuer when `sasl_oauthbearer_expected_issuer` is not set
+- Change `aiven_pg` field `pg_user_config.pg_version` (enum): add `19`
+- Add `aiven_service_integration` field `rsyslog_user_config.octet_counted_framing`: Per-service override
+  for octet-counted framing (RFC 6587 section `3.4.1`)
+- Add `aiven_service_integration_endpoint` field `rsyslog_user_config.octet_counted_framing`: Frame each log message with
+  its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_sampling_percentage`: Percentage of key accesses sampled for hot key detection
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_top_k`: Number of hottest keys to track and report with
+  the HOTKEYS GET command
+- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_window_seconds`: Length of the hot key reporting window in seconds
+- Add `aiven_valkey` field `valkey_user_config.valkey_modules_enabled`: Modules loaded by the service. `json` is available
+  on all versions, `bloom` and `search` require Valkey 9 or later
 
 ## [4.66.0] - 2026-11-12
 

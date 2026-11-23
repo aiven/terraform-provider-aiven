@@ -614,6 +614,10 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Rsyslog max message size. The default value is `8192`.",
 					},
+					"octet_counted_framing": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Frame each log message with its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it. Only enable it if the receiver supports octet-counted framing (for example rsyslog or syslog-ng); other receivers cannot parse the length prefix. Disabled by default. When enabled, it takes precedence over `escape_newlines`. The default value is `false`.",
+					},
 					"port": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: "Rsyslog server port. The default value is `514`.",
@@ -1348,6 +1352,10 @@ func datasourceSchemaInternal() *adapter.Schema {
 						"max_message_size": &adapter.Schema{
 							Computed: true,
 							Type:     adapter.SchemaTypeInt,
+						},
+						"octet_counted_framing": &adapter.Schema{
+							Computed: true,
+							Type:     adapter.SchemaTypeBool,
 						},
 						"port": &adapter.Schema{
 							Computed: true,
