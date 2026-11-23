@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin
+  Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000`
+  or an empty `local_retention_ms`, no longer fail every apply.
 - Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
   of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
   that keeps retrying its read no longer delays reading the others.
