@@ -22,6 +22,8 @@ nav_order: 1
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
   `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
+- Add API request and response logs: set `TF_LOG_PROVIDER_AIVEN_HTTP=DEBUG` along with `TF_LOG=DEBUG`
+  or `TF_LOG_PROVIDER=DEBUG`. Passwords, keys and other secrets are masked.
 - Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
   Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
 - Change `aiven_mysql_database`: like `aiven_pg_database`, a create retried by the client no longer fails with 409,

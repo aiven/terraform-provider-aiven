@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -30,13 +31,20 @@ func NewAivenClient(opts ...ClientOpt) (*aiven.Client, error) {
 	return aiven.NewTokenClient(o.token, o.userAgent)
 }
 
-// NewAivenGenClient Returns generated client
+// NewAivenGenClient returns the generated client. With EnvLogHTTP set, it logs
+// the API requests and responses.
 func NewAivenGenClient(opts ...ClientOpt) (avngen.Client, error) {
 	o, err := newClientOpts(opts...)
 	if err != nil {
 		return nil, err
 	}
-	return avngen.NewClient(avngen.TokenOpt(o.token), avngen.UserAgentOpt(o.userAgent))
+	genOpts := []avngen.Option{avngen.TokenOpt(o.token), avngen.UserAgentOpt(o.userAgent)}
+	if os.Getenv(EnvLogHTTP) != "" {
+		genOpts = append(genOpts, avngen.TransportOpt(func(next http.RoundTripper) http.RoundTripper {
+			return loggingTransport{next: next}
+		}))
+	}
+	return avngen.NewClient(genOpts...)
 }
 
 var (

@@ -14,3 +14,4 @@ about: Spotted a problem? Let us know!
 ## What else do we need to know?
 
 <!-- Include your platform, version, and any other information that seems relevant. -->
+<!-- Logs of the API calls help a lot: see https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/troubleshooting. Check them for secrets before you post them. -->
