@@ -259,6 +259,7 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName2, "subject_name", barSubject),
 						resource.TestCheckResourceAttr(resourceName2, "version", "1"),
 						resource.TestCheckResourceAttr(resourceName2, "schema_type", "PROTOBUF"),
+						resource.TestMatchResourceAttr(resourceName2, "schema", regexp.MustCompile(`(?m)^\s*syntax = 'proto3';$`)),
 					),
 				},
 				{
@@ -844,7 +845,7 @@ resource "aiven_kafka_schema" "bar" {
   schema_type  = "PROTOBUF"
 
   schema = <<EOT
-    syntax = "proto3";
+    syntax = 'proto3';
 
     message Example {
       int32 test = 5;
