@@ -33,6 +33,7 @@ provider "aiven" {
  * To use beta resources, set `PROVIDER_AIVEN_ENABLE_BETA` to any value.
  * To allow IP filters to be purged, set `AIVEN_ALLOW_IP_FILTER_PURGE` to any value. This feature prevents accidental purging of IP filters, which can cause you to lose access to services.
  * To read resources without their secrets, set `AIVEN_INCLUDE_SECRETS` to `false`. By default, the provider requests secrets, which needs a token with a [role that can read them](https://aiven.io/docs/tools/api/secret-redaction).
+ * To log the API requests and responses, set `TF_LOG_PROVIDER_AIVEN_HTTP` to `DEBUG` along with `TF_LOG=DEBUG` or `TF_LOG_PROVIDER=DEBUG`. See [Troubleshooting](guides/troubleshooting.md).
 
 ## Resource options
 The list of options in this document is not comprehensive. However, most map directly to the [Aiven REST API](https://api.aiven.io/doc/) properties.
