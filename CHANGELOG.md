@@ -29,8 +29,8 @@ nav_order: 1
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`
   and `aiven_pg`. When upgrading from v3, first run `terraform apply -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - **IMPORTANT**: remove the v3 state upgraders of `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql` and `aiven_pg`. When upgrading from v3, first run `terraform apply
-  -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch` and `aiven_pg`. When upgrading from v3, first
+  run `terraform apply -refresh-only` with v4.65.1, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
 - Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
   in the state as tainted instead of losing it.
 - Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
@@ -63,7 +63,8 @@ nav_order: 1
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_pg`
   resources and data sources to the Plugin Framework. Changes:
 - Migrate `aiven_clickhouse`, `aiven_flink`, `aiven_grafana`, `aiven_kafka`, `aiven_kafka_connect`,
-  `aiven_kafka_mirrormaker`, `aiven_mysql` and `aiven_pg` resources and data sources to the Plugin Framework. Changes:
+  `aiven_kafka_mirrormaker`, `aiven_mysql`, `aiven_opensearch` and `aiven_pg` resources and data sources to the Plugin
+  Framework. Changes:
   - The state has only the user config options in the configuration, not the API defaults. Removing an option keeps
     the API value, e.g., removing `alerting_enabled = true` keeps `true`. So does removing every block of a list,
     as in SDKv2. Removing every `ip_filter_object` sends an empty list, also as in SDKv2, which clears the IP filter
@@ -84,11 +85,12 @@ nav_order: 1
   - Removing the deprecated `aiven_kafka` field `karapace` shows an in-place change, which doesn't change the service. SDKv2
     ignored the removal, so the first plan after the upgrade can show it too.
   - Remove the deprecated options the API spec no longer has: `additional_backup_regions` of `aiven_clickhouse`,
-    `aiven_flink`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_kafka_mirrormaker`, `pg_user_config.pg_qualstats`
+    `aiven_flink`, `aiven_kafka`, `aiven_kafka_connect` and `aiven_kafka_mirrormaker`, `pg_user_config.pg_qualstats`,
+    `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
     and `kafka_user_config.tiered_storage.local_cache`. A configuration that sets them fails validation, so remove them
     before upgrading.
   - Deprecate the options the API marks as deprecated: `grafana_user_config.alerting_enabled`,
-    `grafana_user_config.dashboard_previews_enabled` and `grafana_user_config.dashboard_scenes_enabled`.
+    `grafana_user_config.dashboard_previews_enabled`, `grafana_user_config.dashboard_scenes_enabled` and `opensearch_user_config.max_index_count`.
 
 ## [4.66.0] - 2026-11-12
 
