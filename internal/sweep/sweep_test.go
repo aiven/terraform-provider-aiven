@@ -13,6 +13,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/staticip"
+	_ "github.com/aiven/terraform-provider-aiven/internal/plugin/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
