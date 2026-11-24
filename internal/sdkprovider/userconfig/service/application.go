@@ -146,6 +146,11 @@ func applicationUserConfig() *schema.Schema {
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
+							"commit_sha": {
+								Description: "Full 40-character lowercase hex SHA of the commit to deploy. Without it, the HEAD of the configured branch is deployed; with it, this commit is deployed regardless of new pushes to the branch. Requires a VCS integration. Changing the branch clears it. Send null to clear on update; omit to leave unchanged. Example: `7fec93fe4ec0f95278976d8107b28d1c16c932da`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
 							"containerfile_path": {
 								Description: "Path of Containerfile/Dockerfile in the source directory. Does not have to overlap with `build_path`. Send null to clear on update; omit to leave unchanged. Example: `./Containerfile`.",
 								Optional:    true,
@@ -163,8 +168,8 @@ func applicationUserConfig() *schema.Schema {
 								Type:        schema.TypeString,
 							},
 							"repository_url": {
-								Description: "Repository URL. Example: `git@github.com:Aiven-Open/mcp-aiven.git`.",
-								Required:    true,
+								Description: "URL of the source repository. Not needed with a VCS integration: the API then sets it to the URL of the repository of `remote_repository_id`, and replaces a `repository_url` sent with it. Example: `git@github.com:Aiven-Open/mcp-aiven.git`.",
+								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"vcs_integration_id": {

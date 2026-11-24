@@ -147,6 +147,8 @@ Read-Only:
 - `auth_url` (String)
 - `client_id` (String)
 - `client_secret` (String)
+- `org_mapping` (List of String)
+- `skip_org_role_sync` (Boolean)
 - `token_url` (String)
 
 
