@@ -21,8 +21,10 @@ package kafkatopic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 
 	avngen "github.com/aiven/go-client-codegen"
@@ -57,7 +59,7 @@ var (
 // until the next refresh.
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	req := new(kafkatopic.ServiceKafkaTopicCreateIn)
-	if err := d.Expand(req, expandConfig, adapter.RenameFields(map[string]string{"tag": "tags"})); err != nil {
+	if err := d.Expand(req, expandConfig(nil), adapter.RenameFields(map[string]string{"tag": "tags"})); err != nil {
 		return err
 	}
 
@@ -71,26 +73,56 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		return err
 	}
 
-	return d.SetID(
+	err = d.SetID(
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		d.Get("topic_name").(string),
 	)
+	if err != nil {
+		return err
+	}
+	return setManagedConfigKeys(ctx, d)
 }
 
 func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
-	req := new(kafkatopic.ServiceKafkaTopicUpdateIn)
-	if err := d.Expand(req, expandConfig, adapter.RenameFields(map[string]string{"tag": "tags"})); err != nil {
+	req, err := updateRequest(ctx, d)
+	if err != nil {
 		return err
 	}
 
-	return kafkatopicrepository.New(client).Update(
+	err = kafkatopicrepository.New(client).Update(
 		ctx,
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		d.Get("topic_name").(string),
 		req,
 	)
+	if err != nil {
+		return err
+	}
+	return setManagedConfigKeys(ctx, d)
+}
+
+func updateRequest(ctx context.Context, d adapter.ResourceData) (*kafkatopic.ServiceKafkaTopicUpdateIn, error) {
+	removed, err := removedConfigKeys(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	req := new(kafkatopic.ServiceKafkaTopicUpdateIn)
+	err = d.Expand(req, expandConfig(removed), adapter.RenameFields(map[string]string{"tag": "tags"}))
+	switch {
+	case errors.Is(err, adapter.ErrNoChanges) && len(removed) > 0:
+		// The removed config block is the only change.
+		config := make(map[string]any, len(removed))
+		for _, k := range removed {
+			config[k] = nil
+		}
+		req.Config = &config
+	case err != nil:
+		return nil, err
+	}
+	return req, nil
 }
 
 // readView is used both by the resource (with `removeMissing: true`) and by
@@ -154,6 +186,7 @@ func validateConfig(ctx context.Context, client avngen.Client, d adapter.Resourc
 //   - partition count cannot decrease on existing resources
 //   - a topic with the same name must not already exist on the service (new
 //     resources only — existing ones are reconciled by Read)
+//   - config keys removed from the manifest are planned as null, see removedConfigKeys
 //
 // Config-only checks (e.g. retention byte relationship) are in validateConfig.
 func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
@@ -164,6 +197,12 @@ func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 		newP, _ := d.Get("partitions").(int)
 		if newP < oldP {
 			return errPartitionsCannotDecrease
+		}
+	}
+
+	if !d.IsNewResource() {
+		if err := planRemovedConfig(ctx, d); err != nil {
+			return err
 		}
 	}
 
@@ -305,39 +344,121 @@ var stringIntegers = map[string]bool{
 	"segment_ms":                          true,
 }
 
-// expandConfig sends only the config values set in the manifest, like SDKv2 did.
+// expandConfig sends only the config values set in the manifest, like SDKv2 did,
+// and sends the removed keys as null, which resets them to the cluster setting or Kafka default.
 // The plan also inherits computed values from the state, which pre-v4.55.2
 // providers could leave unparsable, e.g. "9223372036854776000" or "".
 // todo: remove the string conversion in v5.0.0, legacy.
-func expandConfig(d adapter.ResourceData, dto map[string]any) error {
-	raw, ok := dto["config"]
-	if !ok {
+func expandConfig(removed []string) adapter.MapModifier {
+	return func(d adapter.ResourceData, dto map[string]any) error {
+		topicConfig := make(map[string]any)
+		if raw, ok := dto["config"]; ok {
+			topicConfig, ok = raw.(map[string]any)
+			if !ok {
+				return fmt.Errorf("config is not a map[string]any")
+			}
+		}
+
+		for k, v := range topicConfig {
+			if _, ok := d.GetConfigOk("config.0." + k); !ok {
+				delete(topicConfig, k)
+				continue
+			}
+
+			if !stringIntegers[k] {
+				continue
+			}
+
+			// fmt.Sprint copes with both the legacy string form and any future
+			// numeric/json.Number schema migration without panicking.
+			intValue, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
+			if err != nil {
+				return fmt.Errorf("failed to parse %s as an integer: %w", k, err)
+			}
+			topicConfig[k] = intValue
+		}
+
+		for _, k := range removed {
+			topicConfig[k] = nil
+		}
+
+		if len(topicConfig) > 0 {
+			dto["config"] = topicConfig
+		}
 		return nil
 	}
+}
 
-	topicConfig, ok := raw.(map[string]any)
-	if !ok {
-		return fmt.Errorf("config is not a map[string]any")
+// managedConfigKeysPrivate stores the config keys the last create or update sent from the manifest.
+// Only these keys are reset when removed from the manifest: the topic keeps the overrides
+// set outside Terraform and those applied by providers that didn't track the keys.
+const managedConfigKeysPrivate = "managed_config_keys"
+
+// unresettableConfig lists the keys the API ignores when sent as null.
+var unresettableConfig = map[string]bool{
+	"remote_storage_enable": true,
+}
+
+// manifestConfigKeys returns the sorted config keys set in the manifest.
+func manifestConfigKeys(d adapter.ResourceData) []string {
+	var keys []string
+	for k := range d.Schema().Properties["config"].Items.Properties {
+		if _, ok := d.GetConfigOk("config.0." + k); ok {
+			keys = append(keys, k)
+		}
+	}
+	slices.Sort(keys)
+	return keys
+}
+
+func setManagedConfigKeys(ctx context.Context, d adapter.ResourceData) error {
+	keys := manifestConfigKeys(d)
+	if len(keys) == 0 {
+		// An empty value removes the key.
+		return d.SetPrivate(ctx, managedConfigKeysPrivate, nil)
 	}
 
-	for k, v := range topicConfig {
-		if _, ok := d.GetConfigOk("config.0." + k); !ok {
-			delete(topicConfig, k)
-			continue
-		}
+	b, err := json.Marshal(keys)
+	if err != nil {
+		return err
+	}
+	return d.SetPrivate(ctx, managedConfigKeysPrivate, b)
+}
 
-		if !stringIntegers[k] {
-			continue
-		}
-
-		// fmt.Sprint copes with both the legacy string form and any future
-		// numeric/json.Number schema migration without panicking.
-		intValue, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
-		if err != nil {
-			return fmt.Errorf("failed to parse %s as an integer: %w", k, err)
-		}
-		topicConfig[k] = intValue
+// removedConfigKeys returns the managed config keys that are no longer in the manifest.
+func removedConfigKeys(ctx context.Context, d adapter.ResourceData) ([]string, error) {
+	b, err := d.GetPrivate(ctx, managedConfigKeysPrivate)
+	if err != nil || len(b) == 0 {
+		return nil, err
 	}
 
+	var managed []string
+	if err := json.Unmarshal(b, &managed); err != nil {
+		return nil, fmt.Errorf("failed to read %s from the private state: %w", managedConfigKeysPrivate, err)
+	}
+
+	current := manifestConfigKeys(d)
+	var removed []string
+	for _, k := range managed {
+		if !unresettableConfig[k] && !slices.Contains(current, k) {
+			removed = append(removed, k)
+		}
+	}
+	return removed, nil
+}
+
+// planRemovedConfig plans the removed config keys as null, so the plan shows the reset.
+// A removed config block is already a change in the plan.
+func planRemovedConfig(ctx context.Context, d adapter.ResourceData) error {
+	removed, err := removedConfigKeys(ctx, d)
+	if err != nil {
+		return err
+	}
+
+	for _, k := range removed {
+		if err := d.Set("config.0."+k, nil); err != nil {
+			return err
+		}
+	}
 	return nil
 }

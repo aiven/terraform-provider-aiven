@@ -122,6 +122,49 @@ func TestResourceDataSetUnknown(t *testing.T) {
 	})
 }
 
+// A nested nil removes one value and keeps the unknown values of the others in the plan.
+func TestResourceDataSetNestedNil(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"config": {
+				Type:     SchemaTypeList,
+				IsObject: true,
+				Computed: true,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"a": {Type: SchemaTypeString, Computed: true},
+						"b": {Type: SchemaTypeString, Computed: true},
+					},
+				},
+			},
+		},
+	}
+
+	d, err := NewResourceData(sch, nil, WithPreservePlanValues(), WithTestPlan(map[string]any{
+		"config": []any{map[string]any{
+			"a": "1",
+			"b": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		}},
+	}))
+	require.NoError(t, err)
+	require.NoError(t, d.Set("config.0.a", nil))
+	require.NoError(t, d.Set("config.1.a", nil), "a missing item is a no-op")
+	require.NoError(t, d.Set("missing.0.a", nil), "a missing block is a no-op")
+
+	var attributes map[string]tftypes.Value
+	require.NoError(t, d.tfValue().As(&attributes))
+	var config []tftypes.Value
+	require.NoError(t, attributes["config"].As(&config))
+	var item map[string]tftypes.Value
+	require.NoError(t, config[0].As(&item))
+	require.True(t, item["a"].IsNull())
+	require.False(t, item["b"].IsKnown())
+}
+
 // TestGetOkFalseIsAValue pins down that a stored false is a value, not a missing one.
 // Read overrides that fill in a field the API never returns (jardeployment's
 // restart_enabled) use GetOk to tell "the user set this" from "nothing is stored",
