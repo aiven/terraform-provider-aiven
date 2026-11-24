@@ -16,7 +16,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
@@ -47,7 +46,6 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// grafana
-			"aiven_grafana": grafana.DatasourceGrafana(),
 
 			// mysql
 			"aiven_mysql": mysql.DatasourceMySQL(),
@@ -98,7 +96,6 @@ func Provider(version string) (*schema.Provider, error) {
 
 		ResourcesMap: map[string]*schema.Resource{
 			// grafana
-			"aiven_grafana": grafana.ResourceGrafana(),
 
 			// mysql
 			"aiven_mysql": mysql.ResourceMySQL(),

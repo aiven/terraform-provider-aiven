@@ -54,9 +54,9 @@ func (e *FrameworkFieldExtractor) ExtractFields(schema any) ([]TemplateField, er
 
 	switch s := schema.(type) {
 	case resourceschema.Schema:
-		fields = e.extractFields(s.Attributes)
+		fields = append(e.extractFields(s.Attributes), e.extractBlocks(s.Blocks)...)
 	case datasourceschema.Schema:
-		fields = e.extractFields(s.Attributes)
+		fields = append(e.extractFields(s.Attributes), e.extractBlocks(s.Blocks)...)
 	default:
 		return nil, fmt.Errorf("unsupported schema type: %T", schema)
 	}
@@ -88,6 +88,48 @@ func (e *FrameworkFieldExtractor) extractFields(attributes any) []TemplateField 
 		}
 	}
 
+	return fields
+}
+
+// extractBlocks extracts the blocks as the SDK ones, e.g., pg_user_config, which are optional
+func (e *FrameworkFieldExtractor) extractBlocks(blocks any) []TemplateField {
+	fields := make([]TemplateField, 0)
+	add := func(name string, isCollection, isSet bool, attributes, nested any) {
+		fields = append(fields, TemplateField{
+			Name:         name,
+			Optional:     true,
+			FieldType:    FieldTypeObject,
+			IsObject:     true,
+			IsCollection: isCollection,
+			IsSetType:    isSet,
+			NestedFields: append(e.extractFields(attributes), e.extractBlocks(nested)...),
+		})
+	}
+
+	switch b := blocks.(type) {
+	case map[string]resourceschema.Block:
+		for name, block := range b {
+			switch v := block.(type) {
+			case resourceschema.ListNestedBlock:
+				add(name, true, false, v.NestedObject.Attributes, v.NestedObject.Blocks)
+			case resourceschema.SetNestedBlock:
+				add(name, true, true, v.NestedObject.Attributes, v.NestedObject.Blocks)
+			case resourceschema.SingleNestedBlock:
+				add(name, false, false, v.Attributes, v.Blocks)
+			}
+		}
+	case map[string]datasourceschema.Block:
+		for name, block := range b {
+			switch v := block.(type) {
+			case datasourceschema.ListNestedBlock:
+				add(name, true, false, v.NestedObject.Attributes, v.NestedObject.Blocks)
+			case datasourceschema.SetNestedBlock:
+				add(name, true, true, v.NestedObject.Attributes, v.NestedObject.Blocks)
+			case datasourceschema.SingleNestedBlock:
+				add(name, false, false, v.Attributes, v.Blocks)
+			}
+		}
+	}
 	return fields
 }
 
