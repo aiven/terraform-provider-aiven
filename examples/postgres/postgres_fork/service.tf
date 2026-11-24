@@ -15,4 +15,9 @@ resource "aiven_pg" "postgres_fork" {
   pg_user_config {
     service_to_fork_from = aiven_pg.original_postgres_service.service_name
   }
+
+  # Restoring the data can take longer than the default 20 minutes.
+  timeouts {
+    create = "60m"
+  }
 }
