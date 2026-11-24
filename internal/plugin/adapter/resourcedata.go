@@ -33,8 +33,9 @@ type ResourceData interface {
 	SetPrivate(ctx context.Context, key string, value []byte) error
 	HasChange(key string) bool
 	HasChangeHoisted(object string) bool
+	UserConfigChanges(name string) []string
 	Set(key string, value any) error
-	SetUnknown(key string) error
+	SetUnknown(keys ...string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -51,15 +52,15 @@ type ResourceData interface {
 }
 
 type resourceData struct {
-	schema              *Schema
-	plan, state, config map[string]any
-	idFields            []string
-	idFieldsOptional    []string
-	isDataSource        bool
-	preservePlanValues  bool
-	requiresReplace     []string
-	private             privateState
-	privateValues       map[string][]byte
+	schema                         *Schema
+	plan, state, config, configRaw map[string]any
+	idFields                       []string
+	idFieldsOptional               []string
+	isDataSource                   bool
+	preservePlanValues             bool
+	requiresReplace                []string
+	private                        privateState
+	privateValues                  map[string][]byte
 }
 
 // Framework's private state type is internal, so depend only on its public methods.
@@ -297,6 +298,11 @@ func (d *resourceData) HasChange(key string) bool {
 		return false
 	}
 
+	// A value unknown until apply may change, e.g., the ID of a VPC created in the same apply
+	if d.isUnknown(key) {
+		return true
+	}
+
 	planVal, _, pOK, err := getOk(d.schema, d.plan, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get plan value for %q: %w", key, err))
@@ -309,7 +315,103 @@ func (d *resourceData) HasChange(key string) bool {
 	if pOK != sOK {
 		return true
 	}
-	return !cmp.Equal(planVal, stateVal)
+	return !cmp.Equal(withoutNulls(planVal), stateVal)
+}
+
+// UserConfigChanges returns the options of a user config block that an update sends with a value the state doesn't have,
+// e.g., ["public_access"]: the configured ones, and an IP filter cleared, see keepConfigured.
+// A removed option is no change: the update doesn't send it, and the API keeps the value.
+func (d *resourceData) UserConfigChanges(name string) []string {
+	sch := d.schema.Properties[name]
+	plan := firstObject(d.plan[name])
+	if sch == nil || sch.Items == nil || plan == nil || d.state == nil {
+		return nil
+	}
+
+	config, state := firstObject(d.configRaw[name]), firstObject(d.state[name])
+	var changed []string
+	for k, v := range config {
+		if configured(v, state[k]) {
+			changed = append(changed, k)
+		}
+	}
+	for k, v := range keepConfigured(sch.Items, plan, firstObject(d.config[name]), state) {
+		c, ok := config[k]
+		if tv, isValue := c.(tftypes.Value); (!ok || isValue && tv.IsNull()) && !cmp.Equal(v, state[k]) {
+			changed = append(changed, k)
+		}
+	}
+	slices.Sort(changed)
+	return changed
+}
+
+// configured tells if cfg sets a value that differs from state, see UserConfigChanges.
+func configured(cfg, state any) bool {
+	switch c := cfg.(type) {
+	case tftypes.Value:
+		// A null or an unknown placeholder
+		return !c.IsKnown()
+	case map[string]any:
+		st, _ := state.(map[string]any)
+		for k, v := range c {
+			if configured(v, st[k]) {
+				return true
+			}
+		}
+		return false
+	case []any:
+		if !isObjectList(c) {
+			return !cmp.Equal(withoutNulls(c), state)
+		}
+
+		// A block is compared by index, unless the number of blocks changes
+		st, _ := state.([]any)
+		for i, item := range c {
+			var s any
+			if len(st) == len(c) {
+				s = st[i]
+			}
+			if configured(item, s) {
+				return true
+			}
+		}
+		return false
+	}
+	return !cmp.Equal(cfg, state)
+}
+
+func isObjectList(list []any) bool {
+	if len(list) == 0 {
+		return false
+	}
+	for _, item := range list {
+		if _, ok := item.(map[string]any); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// withoutNulls drops the null placeholders of ModifyPlan, as the state has no nulls, e.g.,
+// {"foo": 1, "bar": tftypes.String<null>} → {"foo": 1}. An unknown value is a change, so it stays.
+func withoutNulls(v any) any {
+	switch v := v.(type) {
+	case map[string]any:
+		result := make(map[string]any, len(v))
+		for k, item := range v {
+			if tv, ok := item.(tftypes.Value); !ok || !tv.IsNull() {
+				result[k] = withoutNulls(item)
+			}
+		}
+		return result
+	case []any:
+		result := make([]any, len(v))
+		for i, item := range v {
+			result[i] = withoutNulls(item)
+		}
+		return result
+	}
+	return v
 }
 
 // Set sets a value by a path.
@@ -318,24 +420,27 @@ func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
 }
 
-// SetUnknown marks a computed attribute as unknown during ModifyPlan so Read can
-// determine its value during apply. Unknown values cannot be written to state.
-func (d *resourceData) SetUnknown(key string) error {
+// SetUnknown marks the computed attributes as unknown during ModifyPlan so Read can
+// determine their values during apply, e.g., the values a plan change resets.
+// Unknown values cannot be written to state.
+func (d *resourceData) SetUnknown(keys ...string) error {
 	if d.plan == nil || !d.preservePlanValues {
 		return fmt.Errorf("SetUnknown is only supported during ModifyPlan")
 	}
-	prop, ok := d.schema.Properties[key]
-	if !ok {
-		return fmt.Errorf("key %q not found in schema", key)
+	for _, key := range keys {
+		prop, ok := d.schema.Properties[key]
+		if !ok {
+			return fmt.Errorf("key %q not found in schema", key)
+		}
+		if !prop.Computed {
+			return fmt.Errorf("attribute %q is not computed", key)
+		}
+		value, err := toTFValue(prop, nil)
+		if err != nil {
+			return err
+		}
+		d.plan[key] = tftypes.NewValue(value.Type(), tftypes.UnknownValue)
 	}
-	if !prop.Computed {
-		return fmt.Errorf("attribute %q is not computed", key)
-	}
-	value, err := toTFValue(prop, nil)
-	if err != nil {
-		return err
-	}
-	d.plan[key] = tftypes.NewValue(value.Type(), tftypes.UnknownValue)
 	return nil
 }
 
@@ -403,6 +508,12 @@ func (d *resourceData) Expand(out any, modifiers ...MapModifier) error {
 		}
 	}
 
+	for k, sch := range d.schema.Properties {
+		if sch.CreateOnly && !d.IsNewResource() {
+			delete(norm, k)
+		}
+	}
+
 	for _, modifier := range modifiers {
 		if err := modifier(d, norm); err != nil {
 			return err
@@ -448,8 +559,9 @@ func flattenHoisted(sch *Schema, dto map[string]any) {
 	}
 }
 
-// isUnchanged tells if the plan matches the state, apart from the timeouts and the computed fields the plan doesn't set,
-// e.g., unknown until apply, a removed block, or blocks removed from a user config: Expand doesn't send them.
+// isUnchanged tells if the plan matches the state, apart from the timeouts, the computed fields the plan doesn't set,
+// e.g., unknown until apply or a removed block, and the fields Expand doesn't send: the create-only ones,
+// and the user config options, see UserConfigChanges.
 func (d *resourceData) isUnchanged() bool {
 	if d.state == nil {
 		return false
@@ -460,12 +572,19 @@ func (d *resourceData) isUnchanged() bool {
 	delete(plan, "timeouts")
 	delete(state, "timeouts")
 	for k, sch := range d.schema.Properties {
-		v, ok := d.plan[k]
+		_, ok := d.plan[k]
 		switch {
 		case sch.Computed && !ok:
 			delete(state, k)
+		case sch.CreateOnly:
+			delete(plan, k)
+			delete(state, k)
 		case ok && sch.IsUserConfig:
-			state[k] = withoutRemovedBlocks(sch, v, state[k])
+			if len(d.UserConfigChanges(k)) > 0 {
+				return false
+			}
+			delete(plan, k)
+			delete(state, k)
 		}
 	}
 	return reflect.DeepEqual(plan, state)
@@ -581,7 +700,7 @@ func (d *resourceData) pruneUnsetEmptyCollections(state, norm map[string]any) {
 
 		// A computed attribute has no configured shape to preserve. Its explicit API
 		// value is authoritative, even when that value is an empty collection.
-		if sch.Computed && sch.IsAttribute {
+		if sch.Computed && (sch.IsAttribute || !sch.IsObject) {
 			continue
 		}
 
@@ -788,6 +907,12 @@ func WithConfig(config tfsdk.Config) ResourceDataOpt {
 			return fmt.Errorf("failed to decode config: %w", err)
 		}
 		d.config = configMap
+
+		configRaw, err := fromTFValue(d.schema, config.Raw, true)
+		if err != nil {
+			return fmt.Errorf("failed to decode raw config: %w", err)
+		}
+		d.configRaw = configRaw
 		return nil
 	}
 }
@@ -820,6 +945,7 @@ func WithTestState(state map[string]any) ResourceDataOpt {
 func WithTestConfig(config map[string]any) ResourceDataOpt {
 	return func(d *resourceData) error {
 		d.config = config
+		d.configRaw = config
 		return nil
 	}
 }
