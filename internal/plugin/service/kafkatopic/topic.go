@@ -305,30 +305,38 @@ var stringIntegers = map[string]bool{
 	"segment_ms":                          true,
 }
 
-// expandConfig expands the config block by converting string values to integers.
-// todo: remove in v5.0.0, legacy.
-func expandConfig(_ adapter.ResourceData, dto map[string]any) error {
-	config, ok := dto["config"]
+// expandConfig sends only the config values set in the manifest, like SDKv2 did.
+// The plan also inherits computed values from the state, which pre-v4.55.2
+// providers could leave unparsable, e.g. "9223372036854776000" or "".
+// todo: remove the string conversion in v5.0.0, legacy.
+func expandConfig(d adapter.ResourceData, dto map[string]any) error {
+	raw, ok := dto["config"]
 	if !ok {
 		return nil
 	}
 
-	configMap, ok := config.(map[string]any)
+	topicConfig, ok := raw.(map[string]any)
 	if !ok {
 		return fmt.Errorf("config is not a map[string]any")
 	}
 
-	for k, v := range configMap {
+	for k, v := range topicConfig {
+		if _, ok := d.GetConfigOk("config.0." + k); !ok {
+			delete(topicConfig, k)
+			continue
+		}
+
 		if !stringIntegers[k] {
 			continue
 		}
+
 		// fmt.Sprint copes with both the legacy string form and any future
 		// numeric/json.Number schema migration without panicking.
-		intValue, err := strconv.Atoi(fmt.Sprint(v))
+		intValue, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
 		if err != nil {
 			return fmt.Errorf("failed to parse %s as an integer: %w", k, err)
 		}
-		configMap[k] = intValue
+		topicConfig[k] = intValue
 	}
 
 	return nil

@@ -189,3 +189,80 @@ func TestUpdateWithoutConfig(t *testing.T) {
 	err = ResourceOptions.Update(context.Background(), avngen.NewMockClient(t), d)
 	require.ErrorIs(t, err, adapter.ErrNoChanges)
 }
+
+func topicValues() map[string]any {
+	return map[string]any{
+		"id":           "my-project/my-kafka/my-topic",
+		"project":      "my-project",
+		"service_name": "my-kafka",
+		"topic_name":   "my-topic",
+		"partitions":   3,
+		"replication":  2,
+	}
+}
+
+// updateTopic builds the request updateView sends. The topic repository is a process
+// singleton that keeps the first client, so a mock client can't capture it.
+func updateTopic(t *testing.T, state, plan, config map[string]any) (*kafkatopic.ServiceKafkaTopicUpdateIn, error) {
+	t.Helper()
+
+	d, err := adapter.NewResourceData(
+		resourceSchemaInternal(),
+		ResourceOptions.IdentityFields,
+		adapter.WithTestPlan(plan),
+		adapter.WithTestState(state),
+		adapter.WithTestConfig(config),
+	)
+	require.NoError(t, err)
+
+	req := new(kafkatopic.ServiceKafkaTopicUpdateIn)
+	err = d.Expand(req, expandConfig, adapter.RenameFields(map[string]string{"tag": "tags"}))
+	return req, err
+}
+
+// State values missing from the manifest aren't sent: pre-v4.55.2 providers
+// could leave them unparsable (https://github.com/aiven/terraform-provider-aiven/issues/3082).
+func TestUpdateSendsConfigFromManifestOnly(t *testing.T) {
+	t.Parallel()
+
+	staleConfig := map[string]any{
+		"retention_bytes":    "1234",
+		"flush_messages":     "9223372036854776000",
+		"local_retention_ms": "",
+	}
+
+	state := topicValues()
+	state["config"] = []any{staleConfig}
+
+	plan := topicValues()
+	plan["partitions"] = 4
+	plan["config"] = []any{staleConfig}
+
+	config := topicValues()
+	config["config"] = []any{map[string]any{"retention_bytes": "1234"}}
+
+	got, err := updateTopic(t, state, plan, config)
+	require.NoError(t, err)
+
+	require.NotNil(t, got.Config.RetentionBytes)
+	require.Equal(t, 1234, *got.Config.RetentionBytes)
+	require.Nil(t, got.Config.FlushMessages)
+	require.Nil(t, got.Config.LocalRetentionMs)
+}
+
+// An invalid value in the manifest still fails.
+func TestUpdateRejectsUserSetOverflowingConfigValue(t *testing.T) {
+	t.Parallel()
+
+	overflowed := map[string]any{"flush_messages": "9223372036854776000"}
+
+	plan := topicValues()
+	plan["partitions"] = 4
+	plan["config"] = []any{overflowed}
+
+	config := topicValues()
+	config["config"] = []any{overflowed}
+
+	_, err := updateTopic(t, topicValues(), plan, config)
+	require.ErrorContains(t, err, "failed to parse flush_messages as an integer")
+}
