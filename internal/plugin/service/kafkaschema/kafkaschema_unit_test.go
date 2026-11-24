@@ -103,10 +103,34 @@ func TestEqualSchemas(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "protobuf whitespace only",
-			a:    "syntax = proto3;\n\nmessage M { string f = 1; }",
-			b:    "syntax=proto3;message M{string f=1;}",
+			name: "protobuf syntax quotes and whitespace",
+			a:    "syntax = 'proto3';\n\nmessage M { string f = 1; }",
+			b:    `syntax="proto3";message M{string f=1;}`,
 			want: true,
+		},
+		{
+			name: "protobuf quoted option with escapes",
+			a:    `option (label) = 'don\'t say "hello" \\';`,
+			b:    `option (label) = "don't say \"hello\" \\";`,
+			want: true,
+		},
+		{
+			name: "protobuf whitespace inside a literal changes its value",
+			a:    `option (label) = "one: two";`,
+			b:    `option (label) = 'one:two';`,
+			want: false,
+		},
+		{
+			name: "protobuf quote characters inside a literal change its value",
+			a:    `option (label) = "'proto3'";`,
+			b:    `option (label) = '"proto3"';`,
+			want: false,
+		},
+		{
+			name: "protobuf quotes inside comments are documentation",
+			a:    "// use 'proto3'\nsyntax = 'proto3';",
+			b:    "// use \"proto3\"\nsyntax = \"proto3\";",
+			want: false,
 		},
 		{
 			name: "protobuf spacing around punctuation",
@@ -122,8 +146,8 @@ func TestEqualSchemas(t *testing.T) {
 		},
 		{
 			name: "protobuf different content",
-			a:    "syntax = proto3;\nmessage M { string f = 1; }",
-			b:    "syntax = proto3;\nmessage M { int32 f = 1; }",
+			a:    "syntax = 'proto3';\nmessage M { string f = 1; }",
+			b:    "syntax = \"proto3\";\nmessage M { int32 f = 1; }",
 			want: false,
 		},
 	}

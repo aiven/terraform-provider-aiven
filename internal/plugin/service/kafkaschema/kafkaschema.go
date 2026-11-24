@@ -31,22 +31,45 @@ func init() {
 }
 
 var (
-	whitespaceRegExp       = regexp.MustCompile(`\s+`)
-	punctuationSpaceRegExp = regexp.MustCompile(`\s*([^\w\s])\s*`)
+	whitespaceRegExp         = regexp.MustCompile(`\s+`)
+	punctuationSpaceRegExp   = regexp.MustCompile(`\s*([^\w\s])\s*`)
+	protobufLiteralOrComment = regexp.MustCompile(`//[^\n]*|(?s:/\*.*?\*/)|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'`)
+	// Consume escaped backslashes in pairs so only escapes of actual quote characters are removed.
+	protobufQuoteEscapes = strings.NewReplacer(`\\`, `\\`, `\"`, `"`, `\'`, `'`)
 )
 
 // equalSchemas reports whether the schemas are the same JSON, or the same Protobuf up to formatting.
 func equalSchemas(a, b string) bool {
+	if a == b {
+		return true
+	}
 	var objA, objB any
 	if json.Unmarshal([]byte(a), &objA) == nil && json.Unmarshal([]byte(b), &objB) == nil {
 		return reflect.DeepEqual(objA, objB)
 	}
-	return normalizeProtobuf(a) == normalizeProtobuf(b)
+	return slices.Equal(normalizeProtobuf(a), normalizeProtobuf(b))
 }
 
-// normalizeProtobuf collapses whitespace and removes it around punctuation, so formatting
-// doesn't matter but "string f" and "stringf" differ.
-func normalizeProtobuf(s string) string {
+// Karapace can reprint a single-quoted literal with double quotes. Compare the contents of
+// each literal separately to preserve whitespace in strings and token boundaries outside them.
+func normalizeProtobuf(s string) []string {
+	spans := protobufLiteralOrComment.FindAllStringIndex(s, -1)
+	parts := make([]string, 0, 2*len(spans)+1)
+	start := 0
+	for _, span := range spans {
+		token := s[span[0]:span[1]]
+		if token[0] == '/' {
+			continue // Quotes in comments are part of the surrounding text.
+		}
+		text := normalizeProtobufSpacing(s[start:span[0]])
+		value := protobufQuoteEscapes.Replace(token[1 : len(token)-1])
+		parts = append(parts, text, value)
+		start = span[1]
+	}
+	return append(parts, normalizeProtobufSpacing(s[start:]))
+}
+
+func normalizeProtobufSpacing(s string) string {
 	s = whitespaceRegExp.ReplaceAllString(strings.TrimSpace(s), " ")
 	return punctuationSpaceRegExp.ReplaceAllString(s, "$1")
 }
