@@ -76,7 +76,7 @@ data "aiven_kafka_topic" "example" {
 
 ### Read-Only
 
-- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration (see [below for nested schema](#nestedblock--config))
+- `config` (Block List) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing a value applied with provider v4.67.0 or later resets it to the cluster setting or the Kafka default. Values applied with earlier versions, and values set outside Terraform, are kept (see [below for nested schema](#nestedblock--config))
 - `id` (String) Resource ID composed as: `project/service_name/topic_name`.
 - `owner_user_group_id` (String) The user group that owns this topic.
 - `partitions` (Number) Number of partitions.

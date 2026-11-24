@@ -1061,6 +1061,9 @@ func (a *resourceAdapter) ModifyPlan(
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
 	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
+	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
 	if err != nil {

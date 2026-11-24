@@ -12,6 +12,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_topic`: removing a `config` value, or the whole block, resets it to the cluster setting or the Kafka
+  default. Only values applied by this version or later are reset; values applied by earlier versions or set outside
+  Terraform are kept.
 - Fix `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin
   Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000`
   or an empty `local_retention_ms`, no longer fail every apply.

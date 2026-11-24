@@ -154,6 +154,68 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 		})
 	})
 
+	// Removing a config value, then the whole block, resets the topic overrides.
+	t.Run("reset_removed_config", func(t *testing.T) {
+		resourceName := "aiven_kafka_topic.foo"
+		topicName := acc.RandName("topic")
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { acc.TestAccPreCheck(t) },
+			ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+			CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, `
+    retention_ms  = "3600000"
+    segment_bytes = "536870912"`),
+					Check: testAccCheckKafkaTopicOverrides(client, projectName, kafkaName, topicName, true, true),
+				},
+				{
+					Config: testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, `
+    segment_bytes = "536870912"`),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckNoResourceAttr(resourceName, "config.0.retention_ms"),
+						testAccCheckKafkaTopicOverrides(client, projectName, kafkaName, topicName, false, true),
+					),
+				},
+				{
+					Config: testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, ""),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "config.#", "0"),
+						testAccCheckKafkaTopicOverrides(client, projectName, kafkaName, topicName, false, false),
+					),
+				},
+			},
+		})
+	})
+
+	// A value applied by a provider that didn't track the managed config keys is kept:
+	// existing topics must not start sending nulls after the upgrade.
+	t.Run("reset_keeps_untracked_config", func(t *testing.T) {
+		const oldVersion = "4.56.0"
+
+		topicName := acc.RandName("topic")
+		resource.Test(t, resource.TestCase{
+			PreCheck:     func() { acc.TestAccPreCheck(t) },
+			CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					ExternalProviders: map[string]resource.ExternalProvider{
+						"aiven": acc.ExternalAivenProvider(t, oldVersion),
+					},
+					Config: testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, `
+    retention_ms  = "3600000"
+    segment_bytes = "536870912"`),
+				},
+				{
+					ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+					Config: testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, `
+    segment_bytes = "536870912"`),
+					Check: testAccCheckKafkaTopicOverrides(client, projectName, kafkaName, topicName, true, true),
+				},
+			},
+		})
+	})
+
 	// Verifies how import handles a config value equal to the Kafka default.
 	// The API reports such values as default_config, and the provider only keeps
 	// them when prior state marks them as user-set.
@@ -672,6 +734,51 @@ resource "aiven_kafka_topic" "foo" {
     retention_ms = "604800000"
   }
 }`, projectName, kafkaName, topicName)
+}
+
+// testAccKafkaTopicResetConfigResource renders the config block only when it has values.
+func testAccKafkaTopicResetConfigResource(projectName, kafkaName, topicName, config string) string {
+	block := ""
+	if config != "" {
+		block = fmt.Sprintf("config {%s\n  }", config)
+	}
+	return fmt.Sprintf(`
+resource "aiven_kafka_topic" "foo" {
+  project                = %[1]q
+  service_name           = %[2]q
+  topic_name             = %[3]q
+  partitions             = 3
+  replication            = 2
+  termination_protection = false
+
+  %[4]s
+}`, projectName, kafkaName, topicName, block)
+}
+
+// testAccCheckKafkaTopicOverrides checks whether retention_ms and segment_bytes are set on the topic.
+func testAccCheckKafkaTopicOverrides(
+	client avngen.Client,
+	projectName, kafkaName, topicName string,
+	retentionMs, segmentBytes bool,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		rsp, err := client.ServiceKafkaTopicGet(context.Background(), projectName, kafkaName, topicName)
+		if err != nil {
+			return err
+		}
+
+		got := map[string]bool{
+			"retention_ms":  rsp.Config.RetentionMs != nil && rsp.Config.RetentionMs.Source == kafkatopichandler.SourceTypeTopicConfig,
+			"segment_bytes": rsp.Config.SegmentBytes != nil && rsp.Config.SegmentBytes.Source == kafkatopichandler.SourceTypeTopicConfig,
+		}
+		want := map[string]bool{"retention_ms": retentionMs, "segment_bytes": segmentBytes}
+		for k, v := range want {
+			if got[k] != v {
+				return fmt.Errorf("expected the %s override to be set: %t, got: %t", k, v, got[k])
+			}
+		}
+		return nil
+	}
 }
 
 func testAccKafkaTopicTerminationProtectionResource(projectName, kafkaName, topicName string) string {

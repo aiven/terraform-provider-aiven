@@ -416,6 +416,7 @@ func withoutNulls(v any) any {
 
 // Set sets a value by a path.
 // Returns an error if the key is not found in the schema.
+// A nil value removes the key; a nested key, e.g., "config.0.retention_ms", is removed in place.
 func (d *resourceData) Set(key string, value any) error {
 	return d.set(key, value, false)
 }
@@ -445,6 +446,10 @@ func (d *resourceData) SetUnknown(keys ...string) error {
 }
 
 func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error {
+	if value == nil && strings.Contains(key, ".") {
+		return removeNested(d.currentState(), key)
+	}
+
 	prop, ok := d.schema.Properties[key]
 	if !ok {
 		return fmt.Errorf("key %q not found in schema", key)
@@ -460,6 +465,36 @@ func (d *resourceData) set(key string, value any, ignoreUnknownKeys bool) error 
 			return err
 		}
 		state[key] = norm
+	}
+	return nil
+}
+
+// removeNested removes a nested value, e.g., "config.0.retention_ms", in place.
+// Unlike setting the parent block, it keeps the unknown values the plan has for the other fields.
+func removeNested(m map[string]any, key string) error {
+	parts := strings.Split(key, ".")
+	var current any = m
+	for _, p := range parts[:len(parts)-1] {
+		switch v := current.(type) {
+		case map[string]any:
+			current = v[p]
+		case []any:
+			i, err := strconv.Atoi(p)
+			if err != nil {
+				return fmt.Errorf("invalid index %q in %q: %w", p, key, err)
+			}
+			if i < 0 || i >= len(v) {
+				return nil
+			}
+			current = v[i]
+		default:
+			// The parent is null or unknown: nothing to remove.
+			return nil
+		}
+	}
+
+	if parent, ok := current.(map[string]any); ok {
+		delete(parent, parts[len(parts)-1])
 	}
 	return nil
 }

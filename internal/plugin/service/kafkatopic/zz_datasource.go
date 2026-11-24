@@ -58,7 +58,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"config": schema.ListNestedBlock{
-				MarkdownDescription: "[Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing the block won't reset the topic configuration to default values. Instead, the topic will retain its last known configuration.",
+				MarkdownDescription: "[Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. Removing a value applied with provider v4.67.0 or later resets it to the cluster setting or the Kafka default. Values applied with earlier versions, and values set outside Terraform, are kept.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"cleanup_policy": schema.StringAttribute{
 						Computed:            true,
