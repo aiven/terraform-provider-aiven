@@ -486,6 +486,29 @@ schema:
 
 The service definitions set `minimalExample` on their user config blocks (e.g. `pg_user_config`) for now.
 
+**Keep overrides minimal.** The generator derives the attributes from the operations: a path parameter or a field
+required in the create body is `required`, any other request field is optional, a create field missing from the
+update body is `forceNew`, and a response-only or defaulted field is `computed`. Descriptions and examples come
+from the spec. Override only what that gets wrong, then challenge each override: remove it, run `task generate`,
+and keep it only if the `zz_` files or the docs change (`ref` changes the docs only). The response's top-level
+`errors` and `message` are dropped without a `remove`.
+
+Put a one-line `#` comment above each override that isn't obvious, saying why the derived value is wrong:
+
+```yaml
+schema_type:
+  # Update reuses the create call, so the type looks updatable. A new type is rarely compatible
+  # with the current version, and updateView registers a new version only for a schema change.
+  forceNew: true
+compatibility_level:
+  # Read sets the subject's level when it's not configured. Removing it keeps the current one.
+  computed: true
+  useStateForUnknown: true
+```
+
+Don't add `useStateForUnknown` to a computed attribute that an update can change, e.g. a version: the plan would
+promise the old value.
+
 **Important**: Use `arrayOrdered` (list) for complex objects, not `array` (set). Sets cause performance issues.
 
 **Formats**: set `format: uuid` on string fields that hold a UUID instead of writing a UUID `example`.
@@ -767,6 +790,12 @@ func modifyPlan(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 Whatever `modifyPlan` writes with `d.Set` becomes the planned value, which is the equivalent of SDKv2's `CustomizeDiff` + `SetNew`. Only computed attributes may be written: Terraform rejects a plan whose value for a configured attribute differs from the configuration.
 
 `d.RequiresReplace("attr")` marks attributes whose planned value forces the resource to be replaced. Schema plan modifiers (`forceNew: true` -> `RequiresReplace()`) run **before** `modifyPlan`, so they compare a value it has not written yet: a computed value produced here needs `d.RequiresReplace` to have any effect. Marking an unknown attribute panics.
+
+Values unknown until apply, e.g. `version = aiven_kafka_schema.ref.version`, read as zero or missing, at the top
+level and inside lists, sets and objects; an ID field reads its prior state instead. Neither is the final value. At
+the top level, use `d.HasChange`, which counts an unknown value as a change. Inside lists, sets and objects, treat a
+zero or missing value as "changed". To unit-test it, build the data with `adapter.WithPreservePlanValues()` and put
+`tftypes.NewValue(tftypes.Number, tftypes.UnknownValue)` in `WithTestPlan`.
 
 ```go
 // A version is immutable, so edited file content can only go into a new one. The shared helper

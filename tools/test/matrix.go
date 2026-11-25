@@ -27,7 +27,7 @@ type Matrix struct {
 // DefaultSlowTests lists the unique names (see pathToUniqueName) of test packages that run in CI's slow lane.
 // Picked from nightly timings. Keep in sync with reality.
 var DefaultSlowTests = []string{
-	"sdk-service-kafkaschema",
+	"plugin-service-kafkaschema",
 	"plugin-service-kafkatopic",
 	"plugin-service-mirrormakerreplicationflow",
 	"sdk-service-kafka",

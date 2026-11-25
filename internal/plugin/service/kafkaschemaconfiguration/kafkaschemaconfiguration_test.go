@@ -1,4 +1,4 @@
-package kafkaschema_test
+package kafkaschemaconfiguration_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -30,16 +31,12 @@ func TestAccAivenKafkaSchemaConfiguration_basic(t *testing.T) {
 				),
 			},
 			{
-				// disable schema registry and remove the configuration resource simultaneously.
-				// provider should handle the 403 Forbidden error (due to disabled API)
 				Config: testAccKafkaSchemaConfigurationResource(rName, false, false),
 			},
 			{
-				// enable schema registry again, but without the configuration resource
 				Config: testAccKafkaSchemaConfigurationResource(rName, true, false),
 			},
 			{
-				// add the configuration resource back
 				Config: testAccKafkaSchemaConfigurationResource(rName, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", acc.ProjectName()),
@@ -51,7 +48,37 @@ func TestAccAivenKafkaSchemaConfiguration_basic(t *testing.T) {
 	})
 }
 
-// Kafka Schemas configuration cannot be deleted
+func TestAccAivenKafkaSchemaConfiguration_backwardCompat(t *testing.T) {
+	projectName := acc.ProjectName()
+	serviceName := acc.RandName("kafka")
+	resourceName := "aiven_kafka_schema_configuration.foo"
+	datasourceName := "data.aiven_kafka_schema_configuration.config"
+
+	serviceIsReady := acc.CreateTestService(
+		t,
+		projectName,
+		serviceName,
+		acc.WithServiceType("kafka"),
+		acc.WithPlan("startup-4"),
+		acc.WithCloud("google-europe-west1"),
+		acc.WithUserConfig(map[string]any{"schema_registry": true}),
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() { acc.TestAccPreCheck(t) },
+		Steps: acc.BackwardCompatibilitySteps(t, acc.BackwardCompatConfig{
+			PreConfig: func() { require.NoError(t, <-serviceIsReady) },
+			TFConfig:  testAccKafkaSchemaConfigurationBackwardCompatConfig(projectName, serviceName),
+			Checks: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "project", projectName),
+				resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+				resource.TestCheckResourceAttr(resourceName, "compatibility_level", "FORWARD"),
+				resource.TestCheckResourceAttr(datasourceName, "compatibility_level", "FORWARD"),
+			),
+		}),
+	})
+}
+
 func testAccCheckAivenKafkaSchemaConfigurationResourceDestroy(_ *terraform.State) error {
 	return nil
 }
@@ -89,4 +116,19 @@ resource "aiven_kafka_schema_configuration" "foo" {
 }`
 	}
 	return config
+}
+
+func testAccKafkaSchemaConfigurationBackwardCompatConfig(projectName, serviceName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka_schema_configuration" "foo" {
+  project             = %[1]q
+  service_name        = %[2]q
+  compatibility_level = "FORWARD"
+}
+
+data "aiven_kafka_schema_configuration" "config" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+}
+`, projectName, serviceName)
 }
