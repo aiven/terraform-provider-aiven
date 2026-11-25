@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -220,6 +221,7 @@ func TestAccAivenMirrorMakerReplicationFlow(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.#", "3"),
+					waitForTopics,
 				),
 			}),
 		})
@@ -242,10 +244,19 @@ func TestAccAivenMirrorMakerReplicationFlow(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
 					resource.TestCheckNoResourceAttr(resourceName, "topics.#"),
 					resource.TestCheckNoResourceAttr(resourceName, "topics_blacklist.#"),
+					waitForTopics,
 				),
 			}),
 		})
 	})
+}
+
+// waitForTopics lets the topics created by the published provider show up in the
+// topic list: it lags, and the next refresh runs in a new process with no memory
+// of the create, so a topic it misses is dropped from the state.
+func waitForTopics(*terraform.State) error {
+	time.Sleep(10 * time.Second)
+	return nil
 }
 
 // Validation only, so it needs no services and stays out of the shared-service test.
