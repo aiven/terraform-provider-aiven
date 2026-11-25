@@ -9,16 +9,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
 
-type replacementTrackingResourceData struct {
-	adapter.ResourceData
-	requiresReplace []string
-}
-
-func (d *replacementTrackingResourceData) RequiresReplace(keys ...string) {
-	d.ResourceData.RequiresReplace(keys...)
-	d.requiresReplace = append(d.requiresReplace, keys...)
-}
-
 func TestModifyPlanUnknownSource(t *testing.T) {
 	t.Parallel()
 
@@ -32,9 +22,8 @@ func TestModifyPlanUnknownSource(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		tracked := &replacementTrackingResourceData{ResourceData: d}
-		require.NoError(t, modifyPlan(t.Context(), nil, tracked))
-		require.Empty(t, tracked.requiresReplace)
+		require.NoError(t, modifyPlan(t.Context(), nil, d))
+		require.Empty(t, adapter.RequiresReplaceKeys(d))
 	})
 
 	t.Run("existing resource requires replacement", func(t *testing.T) {
@@ -51,8 +40,7 @@ func TestModifyPlanUnknownSource(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		tracked := &replacementTrackingResourceData{ResourceData: d}
-		require.NoError(t, modifyPlan(t.Context(), nil, tracked))
-		require.Equal(t, []string{"source", fileSha256Field}, tracked.requiresReplace)
+		require.NoError(t, modifyPlan(t.Context(), nil, d))
+		require.Equal(t, []string{"source", fileSha256Field}, adapter.RequiresReplaceKeys(d))
 	})
 }

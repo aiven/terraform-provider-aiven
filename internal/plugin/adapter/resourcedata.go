@@ -206,12 +206,15 @@ func (d *resourceData) Get(key string) any {
 func (d *resourceData) GetOk(key string) (any, bool) {
 	// getOk doesn't fail if plan is nil.
 	// It returns a typed zero value.
-	v, _, ok, err := getOk(d.schema, d.plan, key)
+	v, sch, ok, err := getOk(d.schema, d.plan, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get value for %q from plan: %w", key, err))
 	}
 
 	if ok {
+		if d.preservePlanValues {
+			v = withoutPreserved(sch, v)
+		}
 		return v, true
 	}
 
@@ -950,6 +953,11 @@ func WithTestConfig(config map[string]any) ResourceDataOpt {
 	}
 }
 
+// RequiresReplaceKeys returns the attributes ModifyPlan marked with RequiresReplace. For tests only.
+func RequiresReplaceKeys(d ResourceData) []string {
+	return d.requiresReplaceKeys()
+}
+
 // normalizeStateValue normalizes a top-level value for the state.
 // A user config option can be an empty string, e.g., datadog_user_config.extra_tags_prefix = "".
 // FlattenUserConfig keeps only the configured options, so the API's empty defaults don't get in.
@@ -1150,6 +1158,37 @@ func normalizeAny(sch *Schema, value any, ignoreUnknownKeys, setFlow, keepEmpty 
 	default:
 		return nil, fmt.Errorf("can't normalize type: %T", value)
 	}
+}
+
+// withoutPreserved copies a list, map or object without the nil/unknown values kept by
+// WithPreservePlanValues, as if the plan was decoded without it.
+func withoutPreserved(sch *Schema, data any) any {
+	switch v := data.(type) {
+	case []any:
+		out := make([]any, len(v))
+		for i, item := range v {
+			if _, ok := item.(tftypes.Value); ok {
+				out[i] = zeroValue(sch.Items.Type)
+			} else {
+				out[i] = withoutPreserved(sch.Items, item)
+			}
+		}
+		return out
+	case map[string]any:
+		out := make(map[string]any, len(v))
+		for k, item := range v {
+			if _, ok := item.(tftypes.Value); ok {
+				continue
+			}
+			itemSch := sch.Items
+			if sch.Type == SchemaTypeObject {
+				itemSch = sch.Properties[k]
+			}
+			out[k] = withoutPreserved(itemSch, item)
+		}
+		return out
+	}
+	return data
 }
 
 func zeroValue(kind SchemaType) any {

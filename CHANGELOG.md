@@ -15,6 +15,15 @@ nav_order: 1
 - Fix `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin
   Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000`
   or an empty `local_retention_ms`, no longer fail every apply.
+- Migrate `aiven_kafka_schema` resource and data source to the Plugin Framework. When `schema` differs from the state only
+  in formatting, e.g., a heredoc, the first plan after upgrading has an in-place update that changes the state only.
+  See [Plugin Framework
+  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide.
+- Change `aiven_kafka_schema`: the schema compatibility error names the subject and the version it was checked against.
+  `schema_type` is read from the API, so it's set after an import and in the data source. Removing `schema_type` keeps
+  the current type instead of replacing the resource with an `AVRO` one. A `compatibility_level` removed outside Terraform
+  shows as a change. Operations fail early when the Kafka service is powered off.
 - Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
   of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
   that keeps retrying its read no longer delays reading the others.

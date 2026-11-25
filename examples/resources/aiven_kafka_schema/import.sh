@@ -1,1 +1,1 @@
-terraform import aiven_kafka_schema.kafka-schema1 project/service_name/subject_name
+terraform import aiven_kafka_schema.example PROJECT/SERVICE_NAME/SUBJECT_NAME

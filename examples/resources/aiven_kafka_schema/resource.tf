@@ -1,24 +1,24 @@
-resource "aiven_kafka_schema" "kafka-schema1" {
-  project             = aiven_project.kafka-schemas-project1.project
-  service_name        = aiven_kafka.kafka-service1.service_name
-  subject_name        = "kafka-schema1"
-  compatibility_level = "FORWARD"
+resource "aiven_kafka_schema" "example" {
+  project             = aiven_kafka.example_kafka.project
+  service_name        = aiven_kafka.example_kafka.service_name
+  subject_name        = "my-topic-value"
+  compatibility_level = "FULL"
+  schema = jsonencode({
+    fields = [{
+      name = "id"
+      type = "string"
+    }]
+    name = "Order"
+    type = "record"
+  })
+}
 
-  schema = <<EOT
-    {
-      "doc": "example",
-      "fields": [
-        {
-          "default": 5,
-          "doc": "my test number",
-          "name": "test",
-          "namespace": "test",
-          "type": "int"
-        }
-      ],
-      "name": "example",
-      "namespace": "example",
-      "type": "record"
-    }
-  EOT
+resource "aiven_kafka" "example_kafka" {
+  project      = "my-project"
+  plan         = "business-4"
+  service_name = "example-kafka"
+
+  kafka_user_config {
+    schema_registry = true
+  }
 }

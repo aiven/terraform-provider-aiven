@@ -531,6 +531,45 @@ func TestResourceDataHasChangeUnknown(t *testing.T) {
 	}
 }
 
+func TestResourceDataGetDropsNestedPreservedValues(t *testing.T) {
+	t.Parallel()
+
+	sch := &Schema{
+		Type: SchemaTypeObject,
+		Properties: map[string]*Schema{
+			"id": {Type: SchemaTypeString, Computed: true},
+			"refs": {
+				Type: SchemaTypeSet,
+				Items: &Schema{
+					Type: SchemaTypeObject,
+					Properties: map[string]*Schema{
+						"name":    {Type: SchemaTypeString},
+						"subject": {Type: SchemaTypeString},
+						"version": {Type: SchemaTypeInt},
+					},
+				},
+			},
+			"tags": {Type: SchemaTypeList, Items: &Schema{Type: SchemaTypeString}},
+		},
+	}
+
+	rd, err := NewResourceData(sch, []string{"id"},
+		WithPreservePlanValues(),
+		WithTestPlan(map[string]any{
+			"refs": []any{map[string]any{
+				"name":    "a",
+				"subject": tftypes.NewValue(tftypes.String, nil),
+				"version": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+			}},
+			"tags": []any{"x", tftypes.NewValue(tftypes.String, tftypes.UnknownValue)},
+		}),
+	)
+	require.NoError(t, err)
+	require.Equal(t, []any{map[string]any{"name": "a"}}, rd.Get("refs"))
+	require.Equal(t, []any{"x", ""}, rd.Get("tags"))
+	require.NotPanics(t, func() { _ = rd.(*resourceData).tfValue() })
+}
+
 // TestResourceDataGetOkSplitsCompositeID verifies that GetOk derives id-field
 // component values by splitting the composite "id" string from state when the
 // components are not stored as their own top-level fields (e.g. legacy state

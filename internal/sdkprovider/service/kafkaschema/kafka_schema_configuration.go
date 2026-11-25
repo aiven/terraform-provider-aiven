@@ -2,21 +2,17 @@ package kafkaschema
 
 import (
 	"context"
-	"path/filepath"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
-
-var schemaRegistryCheckGroup singleflight.Group
 
 var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -99,11 +95,11 @@ func resourceKafkaSchemaConfigurationRead(ctx context.Context, d *schema.Resourc
 	}
 
 	// if Schema Registry is disabled, the resource is considered deleted
-	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	s, err := schemautil.GetService(ctx, client, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !enabled {
+	if s.UserConfig["schema_registry"] != true {
 		d.SetId("")
 		return nil
 	}
@@ -134,11 +130,11 @@ func resourceKafkaSchemaConfigurationDelete(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	enabled, err := isSchemaRegistryEnabled(ctx, client, project, serviceName)
+	s, err := schemautil.GetService(ctx, client, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !enabled {
+	if s.UserConfig["schema_registry"] != true {
 		return nil
 	}
 
@@ -154,30 +150,4 @@ func resourceKafkaSchemaConfigurationDelete(ctx context.Context, d *schema.Resou
 	}
 
 	return nil
-}
-
-// isSchemaRegistryEnabled checks if the Schema Registry is enabled
-func isSchemaRegistryEnabled(ctx context.Context, client avngen.Client, project, serviceName string) (bool, error) {
-	key := filepath.Join(project, serviceName)
-
-	v, err, _ := schemaRegistryCheckGroup.Do(key, func() (any, error) {
-		service, err := client.ServiceGet(ctx, project, serviceName)
-		if err != nil {
-			return false, err
-		}
-
-		if v, ok := service.UserConfig["schema_registry"]; ok {
-			if val, ok := v.(bool); ok {
-				return val, nil
-			}
-		}
-
-		return false, nil
-	})
-
-	if err != nil {
-		return false, err
-	}
-
-	return v.(bool), nil
 }
