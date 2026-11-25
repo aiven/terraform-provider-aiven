@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-### Enhancements
+### New
 
 - Added a new feature.
 `,
@@ -43,11 +43,24 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2.3] - 2025-06-23
 
-### Enhancements
+### New
 
 - Added a new feature.
 `,
 			expectErr: false,
+		},
+		{
+			name: "malformed draft",
+			initialContent: `# Changelog
+
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- bullet outside a section
+`,
+			version:         "1.2.3",
+			date:            "2025-06-23",
+			expectErr:       true,
+			expectedErrType: ErrMalformedDraft,
 		},
 		{
 			name:            "file does not exist",
@@ -116,6 +129,18 @@ func TestExtract(t *testing.T) {
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [3.0.0] - 2025-06-01
+
+### New
+
+- ` + "`aiven_x`" + ` field ` + "`y`" + `: a long description.
+
+### User configurations
+
+- ` + "`aiven_pg.pg_user_config`" + `
+  * Added ` + "`pg.new_option`" + `: text.
+  * Changed ` + "`pg_version`" + ` (enum): add ` + "`19`" + `
+
 ## [2.0.0] - 2025-05-20
 
 ### BREAKING CHANGES
@@ -152,6 +177,21 @@ func TestExtract(t *testing.T) {
 		expectErr        bool
 		errContains      string
 	}{
+		{
+			name:             "extract keeps nested user configuration bullets on their own lines",
+			versionToExtract: "3.0.0",
+			expectedOutput: `### New
+
+- ` + "`aiven_x`" + ` field ` + "`y`" + `: a long description.
+
+### User configurations
+
+- ` + "`aiven_pg.pg_user_config`" + `
+  * Added ` + "`pg.new_option`" + `: text.
+  * Changed ` + "`pg_version`" + ` (enum): add ` + "`19`" + `
+
+`,
+		},
 		{
 			name:             "extract top version with multiple sections and wrapped lines",
 			versionToExtract: "2.0.0",

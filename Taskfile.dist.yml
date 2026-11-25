@@ -160,6 +160,8 @@ tasks:
       - task: internal:load-schemas
       - task: internal:generate
       - task: internal:diff-schemas
+        vars:
+          CHANGELOG_SUMMARY: '{{.CHANGELOG_SUMMARY}}'
 
   update-client:
     desc: "Update Go client codegen"

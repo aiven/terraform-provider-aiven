@@ -224,8 +224,10 @@ away with it through its legacy type-system shims. Decide what the suppression w
 - **It paired with a computed attribute that drove replacement** (`CustomizeDiff` + `SetNew` on a
   `ForceNew` computed field). Compute the value in `modifyPlan` and call `d.RequiresReplace` on it.
 
-Whichever applies, the behavior changes for at least some configurations, so call it out in
-`CHANGELOG.md`. `internal/plugin/service/flinkjarapplicationversion` migrated a resource that used both a
+Whichever applies, the behavior changes for at least some configurations, so call it out in the
+appropriate section of the draft `CHANGELOG.md` (see [CONTRIBUTING.md — Changelog](../../../../CONTRIBUTING.md#changelog)).
+When the change addresses a GitHub issue, end the bullet with its link.
+`internal/plugin/service/flinkjarapplicationversion` migrated a resource that used both a
 `DiffSuppressFunc` and `CustomizeDiff`.
 
 ### 6. Create YAML Definition
@@ -268,8 +270,9 @@ the latest version in `CHANGELOG.md`. Then:
 
 - Add a row to the table in `templates/guides/upgrade-guide-v3-to-v4.md`, e.g., `aiven_service_integration` and 4.65.1.
   Keep it sorted by version, then by name.
-- Add a CHANGELOG `**IMPORTANT**` entry, e.g., "When upgrading from v3, run `terraform apply -refresh-only`
-  with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4)".
+- Under `### Action required` in the draft `CHANGELOG.md`, add the upgrade action, e.g. when upgrading from v3, run
+  `terraform apply -refresh-only` with v4.65.1 first, see the [upgrade guide](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4).
+  Format rules: [CONTRIBUTING.md — Changelog](../../../../CONTRIBUTING.md#changelog).
 
 ### 9. Backward Compatibility Testing
 
@@ -349,7 +352,7 @@ Before marking migration complete:
 - [ ] Backward compatibility test added using `acc.BackwardCompatibilitySteps()`
 - [ ] All SDK test scenarios pass with Plugin version
 - [ ] When the resource supports Update, acceptance tests include an update step (apply with changed config after create)
-- [ ] Changelog entry added to `CHANGELOG.md`
+- [ ] Changelog entries added per [CONTRIBUTING.md — Changelog](../../../../CONTRIBUTING.md#changelog), linking any GitHub issue the change addresses
 
 ## Common Migration Issues
 
@@ -405,10 +408,12 @@ Once all tests pass and state compatibility is verified:
 3. **Add migration notes if needed** - Document any unavoidable behavioral differences. Differences every migrated
    resource shares, e.g., removed blocks in the first plan or null in place of zero values, are in the "Plugin Framework
    migration" section of `templates/guides/upgrade-guide-v3-to-v4.md`: link it, don't repeat it
-4. **Add changelog entry** - Add record to `CHANGELOG.md` under the unreleased section:
+4. **Add changelog entries** — draft section of `CHANGELOG.md`; see [CONTRIBUTING.md — Changelog](../../../../CONTRIBUTING.md#changelog). When the change addresses a GitHub issue, end the bullet with its link, e.g. `([#3082](https://github.com/aiven/terraform-provider-aiven/issues/3082))`.
    ```markdown
-   - Migrate `aiven_resource_name` to the Plugin Framework, see [Plugin Framework migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration) in the upgrade guide
-   - Change `aiven_resource_name`: deprecate `termination_protection` field. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion)
+   ### Improved
+
+   - `aiven_resource_name`: migrate to the Plugin Framework, see [Plugin Framework migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration) in the upgrade guide.
+   - `aiven_resource_name`: deprecate `termination_protection`. Instead, use [prevent_destroy](https://developer.hashicorp.com/terraform/tutorials/state/resource-lifecycle#prevent-resource-deletion).
    ```
 
 **Do not maintain both versions** - this creates maintenance burden and user confusion.

@@ -191,3 +191,33 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
 
 This project adheres to the [Conventional Commits](https://conventionalcommits.org/en/v1.0.0/) specification.
 Please, make sure that your commit messages follow that specification.
+
+## Changelog
+
+Hand-edit entries in the draft section `## [MAJOR.MINOR.PATCH] - YYYY-MM-DD` at the top of `CHANGELOG.md`. Use `###` sections in this fixed order: `Action required`, `New`, `Improved`, `Fixed`, `User configurations`. Omit empty sections.
+
+Start each bullet with the subject, not a verb; the section supplies it:
+
+```markdown
+- `aiven_kafka_topic`: a topic deleted outside Terraform is removed from the state.
+```
+
+When a change addresses a GitHub issue, end the bullet with its link, e.g. `([#3082](https://github.com/aiven/terraform-provider-aiven/issues/3082))`.
+
+`Action required` lists anything users must do when upgrading (breaking changes, state upgrades, new required fields), including the exact action.
+
+| Commit type | Section |
+|-------------|---------|
+| `feat` | `New`, or `Improved` if it alters existing behavior |
+| `fix` | `Fixed` |
+| `perf` and `refactor` (including [Plugin Framework migrations](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)) | `Improved`; `Action required` if users must act |
+| `!` or `BREAKING CHANGE` | `Action required` |
+| `docs`, `test`, `ci`, `build`, `chore`, `style` | None; if no commit in the PR needs an entry, add `[skip no-changelog]` to a commit message (any commit skips the whole PR) |
+
+`task update-schemas` writes `User configurations` and the schema field and enum bullets in `New` and `Improved` for the
+schema changes from its dependency update. Schema edits made before it runs aren't captured, and `task generate` writes
+no entries. Don't change a generated bullet to describe a different schema; if a later schema edit makes one stale, delete it.
+
+Write each bullet on one line. Wrap a long bullet by indenting the continuation lines with two spaces; `task fmt` joins
+them into one line. Unindented text that isn't a bullet fails `task fmt`, as does a bullet outside a section or an unknown
+section.

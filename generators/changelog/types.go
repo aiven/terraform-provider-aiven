@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -44,43 +41,6 @@ type Item struct {
 type Diff struct {
 	Action        DiffAction
 	Item          *Item
-	AlsoAppliesTo *Item // e.g., when the change is same for resource and datasource
+	AlsoAppliesTo *Item // when the change is the same for resource and datasource
 	Description   string
-}
-
-func (c *Diff) String() string {
-	// e.g.: "Add `aiven_project` resource"
-	path := strings.SplitN(c.Item.Path, ".", 2)
-	msg := fmt.Sprintf("%s `%s`", c.Action, path[0])
-
-	// Often the same diff applies both for resource and datasource
-	// These makes every entry in the changelog have "resource and datasource field"
-	// This is a bit redundant, so we remove it
-	if c.AlsoAppliesTo == nil {
-		msg = fmt.Sprintf("%s %s", msg, c.Item.Kind)
-	}
-
-	// e.g.: "field `project`"
-	if len(path) > 1 {
-		msg = fmt.Sprintf("%s field `%s`", msg, path[1])
-		if len(findEnums(c.Item.Description)) > 0 {
-			msg += " (enum)"
-		}
-	}
-
-	// Adds beta if needed
-	if hasBeta(c.Description) {
-		msg = fmt.Sprintf("%s _(beta)_", msg)
-	}
-	if hasLimited(c.Description) {
-		msg = fmt.Sprintf("%s _(limited availability)_", msg)
-	}
-
-	// Adds description
-	if c.Description != "" {
-		msg = fmt.Sprintf("%s: %s", msg, c.Description)
-	}
-
-	const maxSize = 120
-	return shorten(maxSize, msg)
 }

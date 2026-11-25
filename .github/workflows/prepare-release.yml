@@ -62,10 +62,13 @@ jobs:
         run: |
           CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
 
-          # Store in GitHub env for PR body
-          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # Store in GitHub env for PR body; a random delimiter can't clash with the notes.
+          DELIMITER="CHANGELOG_$(openssl rand -hex 16)"
+          {
+            echo "CHANGELOG_CONTENT<<$DELIMITER"
+            echo "$CHANGELOG_CONTENT"
+            echo "$DELIMITER"
+          } >> "$GITHUB_ENV"
 
       - name: Commit changes
         run: |
@@ -86,7 +89,6 @@ jobs:
           body: |
             ## Release v${{ inputs.version }}
 
-            ### Changelog
             ${{ env.CHANGELOG_CONTENT }}
 
             ---
