@@ -28,11 +28,9 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: task update-schemas
+      - run: task update-schemas CHANGELOG_SUMMARY=changes.out
       - id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-      - id: changes
-        run: git diff CHANGELOG.md | awk '/^\+[ -]/ {print substr($0, 2)}' > changes.out
       - id: create_pr
         uses: peter-evans/create-pull-request@v8
         with:

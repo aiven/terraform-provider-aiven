@@ -6,59 +6,56 @@ nav_order: 1
 
 # Changelog
 
+<!-- Writing rules, section names and the commit type mapping: CONTRIBUTING.md#changelog -->
 <!-- Always keep the following header in place: -->
 
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Fix `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin
-  Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000`
-  or an empty `local_retention_ms`, no longer fail every apply.
-- Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
-  of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
-  that keeps retrying its read no longer delays reading the others.
-- Fix the Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource
-  in the state as tainted instead of losing it.
-- Fix the Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g.,
-  `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
-- Add `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later.
-  Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
-- Change `aiven_mysql_database`: like `aiven_pg_database`, a create retried by the client no longer fails with 409,
-  two resources with the same name fail before the create, and a replacement waits until the old database is deleted.
-- Add `aiven_organization_user_list` datasource field `users.state` (enum): An enumeration. The possible values
-  are `active`, `deactivated` and `deleted`.
-- Change `aiven_service_component` datasource field `usage` (enum): add `node`, `shard`
-- Migrate `aiven_gcp_privatelink_connection_approval` to the Plugin Framework. Existing state and import IDs remain
-  supported. With `psc_connection_id = ""`, the first plan after upgrading may include an in-place update to Terraform
-  state only. See [Plugin Framework
-  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
-  in the upgrade guide.
-- Change `aiven_gcp_privatelink_connection_approval`: `user_ip_address` must be a valid IPv4 address.
-- Fix `aiven_gcp_privatelink_connection_approval`: retries no longer fail solely because the connection was already
-  approved with the configured IP.
-- Change `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead
-  of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven.
-  To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
-- Add `aiven_grafana` field `grafana_user_config.auth_azuread.org_mapping`: Map Azure AD groups to Grafana organizations and roles
-- Add `aiven_grafana` field `grafana_user_config.auth_azuread.skip_org_role_sync`: Stop automatically syncing user
-  organizations and roles at sign-in.
-- Change `aiven_grafana` field `grafana_user_config.grafana_version` (enum): add `13`
-- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever
-  their audience when `sasl_oauthbearer_expected_audience` is not set
-- Add `aiven_kafka` field `kafka_user_config.kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their
-  issuer when `sasl_oauthbearer_expected_issuer` is not set
-- Change `aiven_pg` field `pg_user_config.pg_version` (enum): add `19`
-- Add `aiven_service_integration` field `rsyslog_user_config.octet_counted_framing`: Per-service override
-  for octet-counted framing (RFC 6587 section `3.4.1`)
-- Add `aiven_service_integration_endpoint` field `rsyslog_user_config.octet_counted_framing`: Frame each log message with
-  its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it
-- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_sampling_percentage`: Percentage of key accesses sampled for hot key detection
-- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_top_k`: Number of hottest keys to track and report with
-  the HOTKEYS GET command
-- Add `aiven_valkey` field `valkey_user_config.valkey_hotkeys_window_seconds`: Length of the hot key reporting window in seconds
-- Add `aiven_valkey` field `valkey_user_config.valkey_modules_enabled`: Modules loaded by the service. `json` is available
-  on all versions, `bloom` and `search` require Valkey 9 or later
+### Action required
+
+- `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven. To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+
+### New
+
+- `aiven_organization_user_list` data source field `users.state` (enum): The possible values are `active`, `deactivated` and `deleted`.
+- `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
+
+### Improved
+
+- `aiven_mysql_database`: creation is stricter. Two resources with the same name fail before the create, a create retried by the client no longer fails with 409, and a replacement waits until the old database is deleted.
+- `aiven_gcp_privatelink_connection_approval`: migrate to the Plugin Framework. Existing state and import IDs remain supported. With `psc_connection_id = ""`, the first plan after upgrading may include an in-place update to Terraform state only. See [Plugin Framework migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration) in the upgrade guide. `user_ip_address` must be a valid IPv4 address.
+- `aiven_service_component` data source field `usage` (enum): add `node` and `shard`
+
+### Fixed
+
+- `aiven_kafka_topic`: only `config` values set in the configuration are sent to the API, as before the Plugin Framework migration. Values a pre-v4.55.2 provider left in the state, e.g. `flush_messages` as `9223372036854776000` or an empty `local_retention_ms`, no longer fail every apply ([#3082](https://github.com/aiven/terraform-provider-aiven/issues/3082)).
+- `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic that keeps retrying its read no longer delays reading the others.
+- `aiven_gcp_privatelink_connection_approval`: retries no longer fail solely because the connection was already approved with the configured IP.
+- Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource in the state as tainted instead of losing it.
+- Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g., `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
+
+### User configurations
+
+- `aiven_grafana.grafana_user_config`
+  * Added `auth_azuread.org_mapping`: Map Azure AD groups to Grafana organizations and roles.
+  * Added `auth_azuread.skip_org_role_sync`: Stop automatically syncing user organizations and roles at sign-in.
+  * Changed `grafana_version` (enum): add `13`
+- `aiven_kafka.kafka_user_config`
+  * Added `kafka.sasl_oauthbearer_allow_unverified_audience`: Accept tokens whatever their audience when `sasl_oauthbearer_expected_audience` is not set.
+  * Added `kafka.sasl_oauthbearer_allow_unverified_issuer`: Accept tokens whatever their issuer when `sasl_oauthbearer_expected_issuer` is not set.
+- `aiven_pg.pg_user_config`
+  * Changed `pg_version` (enum): add `19`
+- `aiven_service_integration.rsyslog_user_config`
+  * Added `octet_counted_framing`: Per-service override for octet-counted framing (RFC 6587 section `3.4.1`).
+- `aiven_service_integration_endpoint.rsyslog_user_config`
+  * Added `octet_counted_framing`: Frame each log message with its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it.
+- `aiven_valkey.valkey_user_config`
+  * Added `valkey_hotkeys_sampling_percentage`: Percentage of key accesses sampled for hot key detection.
+  * Added `valkey_hotkeys_top_k`: Number of hottest keys to track and report with the HOTKEYS GET command.
+  * Added `valkey_hotkeys_window_seconds`: Length of the hot key reporting window in seconds.
+  * Added `valkey_modules_enabled`: Modules loaded by the service. `json` is available on all versions, `bloom` and `search` require Valkey 9 or later.
 
 ## [4.66.0] - 2026-11-12
 

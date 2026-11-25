@@ -12,10 +12,7 @@ import (
 	vtool "github.com/aiven/terraform-provider-aiven/tools/version"
 )
 
-const (
-	FileName        = "CHANGELOG.md"
-	changelogHeader = "## [MAJOR.MINOR.PATCH] - YYYY-MM-DD"
-)
+const FileName = "CHANGELOG.md"
 
 var (
 	// ErrInvalidVersionFormat indicates that the provided version format is invalid.
@@ -24,8 +21,11 @@ var (
 	// ErrVersionAlreadyExists indicates that the version already exists in the changelog.
 	ErrVersionAlreadyExists = errors.New("version already exists")
 
+	// ErrMalformedDraft indicates that the draft section can't be parsed.
+	ErrMalformedDraft = errors.New("malformed draft section")
+
 	// ErrTemplateHeaderNotFound indicates that template header is missing in the file.
-	ErrTemplateHeaderNotFound = fmt.Errorf("template header '%s' not found", changelogHeader)
+	ErrTemplateHeaderNotFound = fmt.Errorf("template header '%s' not found", DraftHeader)
 
 	// continuationRegex matches an indented line that isn't a list item: GitHub renders newlines
 	// in PR bodies and release notes as hard breaks, so wrapped lines are joined.
@@ -43,6 +43,13 @@ func Update(filePath, version, date string) error {
 		return err
 	}
 	content := string(contentBytes)
+
+	// refuse to release a draft the formatter would reject.
+	if _, body, _, bodyStartLine, splitErr := SplitFile(content); splitErr == nil {
+		if _, parseErr := ParseDraft(body, bodyStartLine); parseErr != nil {
+			return fmt.Errorf("%w: %w", ErrMalformedDraft, parseErr)
+		}
+	}
 
 	// check if the version already exists using a multiline-aware regex.
 	versionExistsRegex, err := regexp.Compile(`(?m)^## \[` + regexp.QuoteMeta(version) + `\]`)
@@ -66,7 +73,7 @@ func Update(filePath, version, date string) error {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		if line == changelogHeader {
+		if line == DraftHeader {
 			headerFoundAndPatched = true
 			newHeaderLine := fmt.Sprintf("## [%s] - %s", version, date)
 

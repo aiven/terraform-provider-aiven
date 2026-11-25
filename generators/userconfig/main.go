@@ -337,7 +337,7 @@ func getDescription(o *object) string {
 			values = append(values, "and newer")
 		}
 
-		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
+		desc = append(desc, fmt.Sprintf("%s%s.", userconfig.EnumPrefix, strings.Join(values, ", ")))
 	}
 
 	d := o.Description
