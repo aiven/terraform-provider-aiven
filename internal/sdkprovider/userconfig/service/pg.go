@@ -542,7 +542,7 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"pg_version": {
-				Description: "Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, `18`, and newer. PostgreSQL major version.",
+				Description: "Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`, `17`, `18`, `19`, and newer. PostgreSQL major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
