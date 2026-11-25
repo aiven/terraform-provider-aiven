@@ -31,6 +31,11 @@ nav_order: 1
   `schema_type` is read from the API, so it's set after an import and in the data source. Removing `schema_type` keeps
   the current type instead of replacing the resource with an `AVRO` one. A `compatibility_level` removed outside Terraform
   shows as a change. Operations fail early when the Kafka service is powered off.
+- Migrate `aiven_kafka_quota` to the Plugin Framework. See [Plugin Framework
+  migration](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/upgrade-guide-v3-to-v4#plugin-framework-migration)
+  in the upgrade guide.
+- Change `aiven_kafka_quota`: create, read, update, and delete fail early when the Kafka service is powered off.
+- Change `aiven_kafka_quota`: the API, not the plan, rejects negative rates and a `request_percentage` above 100.
 - Fix `aiven_kafka_topic`: a topic deleted outside Terraform while the provider runs is removed from the state instead
   of failing the refresh of up to 100 topics, and a new topic with its name no longer fails with a false conflict. A topic
   that keeps retrying its read no longer delays reading the others.

@@ -7,8 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
+	kafkaquota "github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaquota"
 	org "github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
 )
 
 func TestComplexSchema(t *testing.T) {
@@ -158,9 +159,9 @@ func TestKafkaQuotaResource(t *testing.T) {
 	t.Parallel()
 
 	ts := InitializeTemplateStore(t)
-	ts.registerSDKResource(
+	ts.registerFrameworkComponent(
 		"aiven_kafka_quota",
-		kafka.ResourceKafkaQuota(),
+		adapter.NewResource(kafkaquota.ResourceOptions),
 		ResourceKindResource,
 	)
 

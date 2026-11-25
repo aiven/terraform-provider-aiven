@@ -39,6 +39,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaacl"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaconnectcustompluginfile"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkanativeacl"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaquota"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschema"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschemaconfiguration"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafkaschemaregistryacl"
@@ -107,6 +108,7 @@ func Resources() map[string]func() resource.Resource {
 		"aiven_kafka_acl":                           adapter.NewLazyResource(kafkaacl.ResourceOptions),
 		"aiven_kafka_connect_custom_plugin_file":    adapter.NewLazyResource(kafkaconnectcustompluginfile.ResourceOptions),
 		"aiven_kafka_native_acl":                    adapter.NewLazyResource(kafkanativeacl.ResourceOptions),
+		"aiven_kafka_quota":                         adapter.NewLazyResource(kafkaquota.ResourceOptions),
 		"aiven_kafka_schema":                        adapter.NewLazyResource(kafkaschema.ResourceOptions),
 		"aiven_kafka_schema_configuration":          adapter.NewLazyResource(kafkaschemaconfiguration.ResourceOptions),
 		"aiven_kafka_schema_registry_acl":           adapter.NewLazyResource(kafkaschemaregistryacl.ResourceOptions),
