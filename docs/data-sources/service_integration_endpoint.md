@@ -367,6 +367,7 @@ Read-Only:
 `.
 - `logline` (String) Custom syslog message format. Example: `<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%`.
 - `max_message_size` (Number) Rsyslog max message size. The default value is `8192`.
+- `octet_counted_framing` (Boolean) Frame each log message with its length prefix (RFC 6587 section `3.4.1`) so multi-line records arrive whole at receivers that support it. Only enable it if the receiver supports octet-counted framing (for example rsyslog or syslog-ng); other receivers cannot parse the length prefix. Disabled by default. When enabled, it takes precedence over `escape_newlines`. The default value is `false`.
 - `port` (Number) Rsyslog server port. The default value is `514`.
 - `sd` (String) Structured data block for log message. Example: `TOKEN tag="LiteralValue"`.
 - `server` (String) Rsyslog server IP address or hostname. Example: `logs.example.com`.
