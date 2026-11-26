@@ -264,16 +264,11 @@ tasks:
     silent: true
 
   verify-version:
-    desc: "Verifies the new version doesn't exist and is a sequential semantic version bump."
+    desc: "Verifies the new version doesn't exist and is a sequential semantic version bump, and prints it as x.y.z. Empty VERSION is the next minor."
     vars:
-      VERSION: '{{.VERSION}}'
-    preconditions:
-      - sh: 'test -n "{{.VERSION}}"'
-        msg: |
-          Error: VERSION must be provided as an argument.
-          Usage: task verify-version VERSION=x.y.z
+      VERSION: '{{.VERSION | default ""}}'
     cmds:
-      - "{{.GO_CMD}} run ./tools/main.go version verify {{.VERSION}}"
+      - "{{.GO_CMD}} run ./tools/main.go version verify {{shellQuote .VERSION}}"
     silent: true
 
   nothing:

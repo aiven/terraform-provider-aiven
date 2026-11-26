@@ -276,7 +276,7 @@ tasks:
       - "{{.GO_CMD}} run ./tools/main.go changelog extract {{.VERSION}}"
 
   ci:verify-version:
-    desc: "Verifies the new version doesn't exist and is a sequential bump. Usage: task ci:verify-version VERSION=x.y.z"
+    desc: "Verifies the new version doesn't exist and is a sequential bump, and prints it as x.y.z. Empty VERSION is the next minor. Usage: task ci:verify-version VERSION=x.y.z"
     cmds:
       - task: internal:verify-version
         vars:
