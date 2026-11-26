@@ -1473,7 +1473,7 @@ func TestRetryNotFound(t *testing.T) {
 	}{
 		{name: "succeeds first try", errs: []error{nil}, wantAttempts: 1},
 		{name: "succeeds after 404s", errs: []error{notFound, ErrNotFound, nil}, wantAttempts: 3},
-		{name: "gives up after retries", errs: []error{notFound, notFound, notFound, nil}, wantErr: notFound, wantAttempts: 3},
+		{name: "gives up after retries", errs: []error{notFound, notFound, notFound, notFound, notFound, notFound, nil}, wantErr: notFound, wantAttempts: 6},
 		{name: "does not retry other errors", errs: []error{ErrMultiple, nil}, wantErr: ErrMultiple, wantAttempts: 1},
 	}
 
@@ -1493,6 +1493,72 @@ func TestRetryNotFound(t *testing.T) {
 			} else {
 				require.ErrorIs(t, err, tt.wantErr)
 			}
+			require.Equal(t, tt.wantAttempts, attempts)
+		})
+	}
+}
+
+func TestRetryNotFoundContext(t *testing.T) {
+	t.Parallel()
+
+	notFound := avngen.Error{Status: http.StatusNotFound}
+	tests := []struct {
+		name         string
+		delay        time.Duration
+		read         func(ctx context.Context, cancel context.CancelFunc, attempt int) error
+		wantErr      error
+		wantAttempts int
+	}{
+		{
+			name:  "context ends while waiting to retry",
+			delay: time.Minute,
+			read: func(_ context.Context, cancel context.CancelFunc, _ int) error {
+				cancel()
+				return notFound
+			},
+			wantErr:      notFound,
+			wantAttempts: 1,
+		},
+		{
+			name:  "context ends during a retried read",
+			delay: time.Microsecond,
+			read: func(ctx context.Context, cancel context.CancelFunc, attempt int) error {
+				if attempt == 1 {
+					return notFound
+				}
+				cancel()
+				return ctx.Err()
+			},
+			wantErr:      notFound,
+			wantAttempts: 2,
+		},
+		{
+			name:  "context ends during the first read",
+			delay: time.Microsecond,
+			read: func(ctx context.Context, cancel context.CancelFunc, _ int) error {
+				cancel()
+				return ctx.Err()
+			},
+			wantErr:      context.Canceled,
+			wantAttempts: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+
+			attempts := 0
+			read := retryNotFound(func(ctx context.Context, _ avngen.Client, _ ResourceData) error {
+				attempts++
+				return tt.read(ctx, cancel, attempts)
+			}, tt.delay)
+
+			err := read(ctx, nil, nil)
+			require.ErrorIs(t, err, tt.wantErr)
 			require.Equal(t, tt.wantAttempts, attempts)
 		})
 	}

@@ -411,7 +411,7 @@ func (a *resourceAdapter) Read(
 }
 
 const (
-	readNotFoundRetries    = 2
+	readNotFoundRetries    = 5
 	readNotFoundRetryDelay = 5 * time.Second
 )
 
@@ -422,15 +422,27 @@ func retryNotFound(
 	delay time.Duration,
 ) func(ctx context.Context, client avngen.Client, d ResourceData) error {
 	return func(ctx context.Context, client avngen.Client, d ResourceData) error {
-		return retry.Do(
+		err := retry.Do(
 			func() error { return read(ctx, client, d) },
 			retry.Attempts(readNotFoundRetries+1),
 			retry.Delay(delay),
 			retry.DelayType(retry.FixedDelay),
-			retry.LastErrorOnly(true),
 			retry.Context(ctx),
 			retry.RetryIf(IsNotFound),
 		)
+
+		// The read deadline can end the wait or the call itself: return the last error
+		// that isn't the context's, so a 404 still reaches RemoveMissing.
+		var attempts retry.Error
+		if !errors.As(err, &attempts) {
+			return err
+		}
+		for _, e := range slices.Backward(attempts) {
+			if !errors.Is(e, ctx.Err()) {
+				return e
+			}
+		}
+		return attempts[len(attempts)-1]
 	}
 }
 
