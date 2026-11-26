@@ -14,6 +14,8 @@ updates:
         patterns:
           - "*"
     labels:
+      - dependencies
+      - github_actions
       - "no changelog"
   - package-ecosystem: gomod
     directory: /
@@ -33,6 +35,8 @@ updates:
         patterns:
           - "*"
     labels:
+      - dependencies
+      - go
       - "no changelog"
   - package-ecosystem: gomod
     directory: /tools
@@ -48,4 +52,6 @@ updates:
         patterns:
           - "*"
     labels:
+      - dependencies
+      - go
       - "no changelog"
