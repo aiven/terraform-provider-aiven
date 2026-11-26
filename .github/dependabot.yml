@@ -13,6 +13,8 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+    labels:
+      - "no changelog"
   - package-ecosystem: gomod
     directory: /
     schedule:
@@ -30,6 +32,8 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+    labels:
+      - "no changelog"
   - package-ecosystem: gomod
     directory: /tools
     schedule:
@@ -43,3 +47,5 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+    labels:
+      - "no changelog"
