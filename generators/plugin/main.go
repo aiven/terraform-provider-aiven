@@ -1201,8 +1201,9 @@ func mergeItem(parent, a, b *Item) (*Item, error) {
 		a.Maximum = b.Maximum
 	} else if b.AppearsIn == 0 {
 		// User defined values in definition.yml
-		if b.Minimum != 0 {
-			a.Minimum = b.Minimum
+		if b.OverrideMinimum != nil {
+			a.Minimum = *b.OverrideMinimum
+			a.OverrideMinimum = b.OverrideMinimum
 		}
 		if b.Maximum != 0 {
 			a.Maximum = b.Maximum

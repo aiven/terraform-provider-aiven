@@ -111,6 +111,8 @@ func TestAccAivenKafkaSchema(t *testing.T) {
 		acc.WithUserConfig(map[string]any{"schema_registry": true}),
 	)
 
+	testSchemaMigration(t, projectName, serviceName, serviceIsReady)
+
 	t.Run("backward_compat", func(t *testing.T) {
 		subjectName := acc.RandName("backward")
 		resourceName := "aiven_kafka_schema.foo"

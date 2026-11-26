@@ -5,9 +5,12 @@ package kafkaschema
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -26,6 +29,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"project": schema.StringAttribute{
 				MarkdownDescription: "Project name.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"schema": schema.StringAttribute{
 				Computed:            true,
@@ -38,6 +42,7 @@ func datasourceSchema(ctx context.Context) schema.Schema {
 			"service_name": schema.StringAttribute{
 				MarkdownDescription: "Service name.",
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"subject_name": schema.StringAttribute{
 				MarkdownDescription: "Subject name.",

@@ -2,18 +2,22 @@ package kafkaschema
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"maps"
 	"net/http"
 	"slices"
+	"strings"
 	"testing"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/bufbuild/protocompile/options"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 )
@@ -56,7 +60,7 @@ func TestGetSchemaVersion_NotFoundIsRetried(t *testing.T) {
 
 	version, err := getSchemaVersion(ctx, mockClient, project, serviceName, subjectName, schemaID)
 	require.NoError(t, err)
-	require.Equal(t, 2, version)
+	require.Equal(t, 2, version.Version)
 }
 
 // TestGetSchemaVersion_OtherErrorsFail makes sure only 404 is retried.
@@ -104,14 +108,14 @@ func TestEqualSchemas(t *testing.T) {
 		},
 		{
 			name: "protobuf whitespace only",
-			a:    "syntax = proto3;\n\nmessage M { string f = 1; }",
-			b:    "syntax=proto3;message M{string f=1;}",
+			a:    "syntax = \"proto3\";\n\nmessage M { string f = 1; }",
+			b:    "syntax=\"proto3\";message M{string f=1;}",
 			want: true,
 		},
 		{
 			name: "protobuf spacing around punctuation",
-			a:    "message M{string f=1;}",
-			b:    "message M {\n  string f = 1;\n}\n",
+			a:    "syntax=\"proto3\";message M{string f=1;}",
+			b:    "syntax = \"proto3\"; message M {\n  string f = 1;\n}\n",
 			want: true,
 		},
 		{
@@ -121,9 +125,27 @@ func TestEqualSchemas(t *testing.T) {
 			want: false,
 		},
 		{
+			name: "protobuf line comment separator",
+			a:    "syntax=\"proto3\";\n//Order\nmessage Order {}",
+			b:    "syntax=\"proto3\";\n// Order\nmessage Order {}",
+			want: true,
+		},
+		{
+			name: "comment after syntax documents next declaration",
+			a:    "syntax=\"proto3\"; // Order\nmessage Order {}",
+			b:    "syntax=\"proto3\";\n// Order\nmessage Order {}",
+			want: true,
+		},
+		{
+			name: "protobuf comment contents",
+			a:    "syntax=\"proto3\";\n//Order  ID\nmessage Order {}",
+			b:    "syntax=\"proto3\";\n// Order ID\nmessage Order {}",
+			want: false,
+		},
+		{
 			name: "protobuf different content",
-			a:    "syntax = proto3;\nmessage M { string f = 1; }",
-			b:    "syntax = proto3;\nmessage M { int32 f = 1; }",
+			a:    "syntax = \"proto3\";\nmessage M { string f = 1; }",
+			b:    "syntax = \"proto3\";\nmessage M { int32 f = 1; }",
 			want: false,
 		},
 	}
@@ -133,6 +155,55 @@ func TestEqualSchemas(t *testing.T) {
 			require.Equal(t, tc.want, equalSchemas(tc.a, tc.b))
 		})
 	}
+}
+
+func TestSameRegistrationText(t *testing.T) {
+	t.Parallel()
+	require.True(t, sameRegistrationText(`{"type":"number","maximum":1.0}`, `{ "maximum": 1.0, "type": "number" }`))
+	require.False(t, sameRegistrationText(`{"type":"number","maximum":1.0}`, `{"type":"number","maximum":1}`))
+	require.True(t, sameRegistrationText(`{"maximum":1.50}`, `{"maximum":1.5}`))
+	require.True(t, sameRegistrationText(`{"maximum":15e-1}`, `{"maximum":1.5}`))
+	require.False(t, sameRegistrationText(`{"maximum":0.10000000000000000001}`, `{"maximum":0.1}`))
+	require.False(t, sameRegistrationText(`{"maximum":-0.0}`, `{"maximum":0.0}`))
+	require.True(t, sameRegistrationText(`{"maximum":-0e3}`, `{"maximum":-0.0}`))
+	require.True(t, sameRegistrationText(`{"maximum":-0}`, `{"maximum":0}`))
+	const header = "syntax = \"proto3\";\n"
+	const enum = "// Delivery states\nenum Status { READY = 0; }\n"
+	const message = "// Event\nmessage M { Status state = 1; }\n"
+	require.True(t, sameRegistrationText(header+enum+message, header+message+enum))
+	require.False(t, sameRegistrationText(header+enum+message, header+`message M { Status state = 1; }`+"\n// Event\n"+enum))
+	require.False(t, sameRegistrationText(header+`message A {} message B {}`, header+`message B {} message A {}`))
+	const descriptor = "CgdtLnByb3RvIhUKAU0SEAoIb3JkZXJfaWQYASABKAliBnByb3RvMw=="
+	require.True(t, sameRegistrationText(descriptor, header+`message M { string order_id = 1; }`))
+	require.False(t, sameRegistrationText(descriptor, header+"message M {\n// Order identifier\nstring order_id = 1; }"))
+	require.False(t, sameRegistrationText(descriptor, header+`message M { string order_id = 1 [json_name = "orderId"]; }`))
+}
+
+func TestSerializedRegistrationText(t *testing.T) {
+	const source = `syntax = "proto3";
+package orders;
+option java_package = "orders";
+option go_package = "example/orders";
+message Order {
+  reserved 3, 5 to 7;
+  optional string key = 1;
+  oneof payload { bytes value = 2; }
+  message Nested {}
+  enum Status { READY = 0 [deprecated = true]; }
+}`
+	parsed, err := parseProto(source)
+	require.NoError(t, err)
+	_, err = options.InterpretUnlinkedOptions(parsed)
+	require.NoError(t, err)
+	data, err := proto.Marshal(parsed.FileDescriptorProto())
+	require.NoError(t, err)
+	compiled := base64.StdEncoding.EncodeToString(data)
+	require.True(t, sameRegistrationText(compiled, source))
+	require.False(t, sameRegistrationText(compiled, strings.Replace(source, "reserved 3, 5 to 7;", "reserved 3; reserved 5 to 7;", 1)))
+	require.False(t, sameRegistrationText(compiled, strings.Replace(source, "optional string key", "// Partition key\noptional string key", 1)))
+	require.False(t, sameRegistrationText(compiled, strings.Replace(source,
+		"option java_package = \"orders\";\noption go_package = \"example/orders\";",
+		"option go_package = \"example/orders\";\noption java_package = \"orders\";", 1)))
 }
 
 func newModifyPlanData(t *testing.T, plan, state map[string]any) adapter.ResourceData {
@@ -152,6 +223,22 @@ func newModifyPlanData(t *testing.T, plan, state map[string]any) adapter.Resourc
 		require.NoError(t, d.SetUnknown("version"))
 	}
 	return d
+}
+
+// Terraform carries the private plan into a second RPC with null prior state on replacement.
+func planWithReplacement(t *testing.T, ctx context.Context, client avngen.Client, first adapter.ResourceData, config map[string]any) error {
+	t.Helper()
+	if err := modifyPlan(ctx, client, first); err != nil {
+		return err
+	}
+	pending, err := first.GetPrivate(ctx, replacementSourceKey)
+	require.NoError(t, err)
+	if len(pending) == 0 {
+		return nil
+	}
+	create := newModifyPlanData(t, config, nil)
+	require.NoError(t, create.SetPrivate(ctx, replacementSourceKey, pending))
+	return modifyPlan(ctx, client, create)
 }
 
 func TestModifyPlan(t *testing.T) {
@@ -268,13 +355,70 @@ func TestModifyPlan(t *testing.T) {
 			`subject "subj": schema is not compatible with previous version 3: boom`,
 		)
 	})
+	t.Run("incompatible type replacement", func(t *testing.T) {
+		plan, state := existing(schemaA, schemaA, nil, nil)
+		plan["schema_type"] = "JSON"
+		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceSchemaRegistryCompatibility(mock.Anything, proj, svc, subj, 3, mock.Anything).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: false}, nil)
+		require.ErrorContains(t, planWithReplacement(t, ctx, client, newModifyPlanData(t, plan, state), plan), "is not compatible")
+	})
+	t.Run("incompatible rename to existing subject", func(t *testing.T) {
+		plan, state := existing(schemaA, schemaA, nil, nil)
+		plan["subject_name"] = "destination"
+		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionsGet(mock.Anything, proj, svc, "destination").Return([]int{1, 2}, nil)
+		client.EXPECT().ServiceSchemaRegistryCompatibility(mock.Anything, proj, svc, "destination", 2, mock.Anything).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: false}, nil)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionGet(mock.Anything, proj, svc, "destination", 1).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{Schema: schemaA, References: []kafkaschemaregistry.ReferenceOut{{Name: "dep", Subject: "dep", Version: 1}}}, nil)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionGet(mock.Anything, proj, svc, "destination", 2).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{Schema: `{"type":"int"}`}, nil)
+		require.ErrorContains(t, planWithReplacement(t, ctx, client, newModifyPlanData(t, plan, state), plan), `subject "destination": schema is not compatible with previous version 2`)
+	})
+	t.Run("move without type validates the create default", func(t *testing.T) {
+		plan, state := existing(schemaA, schemaA, nil, nil)
+		state["schema_type"], plan["schema_type"], plan["subject_name"] = "JSON", "JSON", "destination"
+		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionsGet(mock.Anything, proj, svc, "destination").Return([]int{1}, nil)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionGet(mock.Anything, proj, svc, "destination", 1).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{Schema: schemaA, SchemaType: "JSON"}, nil)
+		client.EXPECT().ServiceSchemaRegistryCompatibility(mock.Anything, proj, svc, "destination", 1, mock.Anything).
+			RunAndReturn(func(_ context.Context, _, _, _ string, _ int, in *kafkaschemaregistry.ServiceSchemaRegistryCompatibilityIn) (*kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut, error) {
+				return &kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: in.SchemaType == "JSON"}, nil
+			})
+		config := maps.Clone(plan)
+		delete(config, "schema_type")
+		require.ErrorContains(t, planWithReplacement(t, ctx, client, newModifyPlanData(t, plan, state), config), "is not compatible")
+	})
+	t.Run("move to a registry being enabled", func(t *testing.T) {
+		plan, state := existing(schemaA, schemaA, nil, nil)
+		plan["service_name"] = "another-kafka"
+		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionsGet(mock.Anything, proj, "another-kafka", subj).
+			Return(nil, avngen.Error{Status: http.StatusForbidden})
+		client.EXPECT().ServiceGet(mock.Anything, proj, "another-kafka").
+			Return(&service.ServiceGetOut{ServiceType: "kafka", State: service.ServiceStateTypeRunning, UserConfig: map[string]any{"schema_registry": false}}, nil).Maybe()
+		client.EXPECT().ServiceSchemaRegistryCompatibility(mock.Anything, proj, svc, subj, 3, mock.Anything).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: true}, nil).Maybe()
+		require.NoError(t, planWithReplacement(t, ctx, client, newModifyPlanData(t, plan, state), plan))
+	})
+	t.Run("SDK import with an explicitly conflicting type", func(t *testing.T) {
+		plan, state := existing(schemaA, schemaA, nil, nil)
+		state["schema_type"] = ""
+		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceSchemaRegistrySubjectVersionGet(mock.Anything, proj, svc, subj, 3).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{SchemaType: "JSON"}, nil)
+		client.EXPECT().ServiceSchemaRegistryCompatibility(mock.Anything, proj, svc, subj, 3, mock.Anything).
+			Return(&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: true}, nil).Maybe()
+		require.ErrorContains(t, modifyPlan(ctx, client, newModifyPlanData(t, plan, state)), "refresh-only")
+	})
 
-	t.Run("empty schema skipped", func(t *testing.T) {
+	t.Run("known empty avro is rejected", func(t *testing.T) {
 		t.Parallel()
 		plan, state := existing("", schemaA, nil, nil)
 		d := newModifyPlanData(t, plan, state)
-		require.NoError(t, modifyPlan(ctx, nil, d))
-		require.Equal(t, 0, d.Get("version"))
+		require.ErrorContains(t, modifyPlan(ctx, nil, d), "schema validation error")
 	})
 
 	for _, tc := range []struct {
@@ -289,8 +433,53 @@ func TestModifyPlan(t *testing.T) {
 			plan, state := existing(schemaA, schemaA, nil, nil)
 			plan["schema_type"], state["schema_type"] = tc.planType, tc.stateType
 			d := newModifyPlanData(t, plan, state)
-			require.NoError(t, modifyPlan(ctx, nil, d))
+			client := avngen.NewMockClient(t)
+			if tc.stateType == "" {
+				client.EXPECT().ServiceSchemaRegistrySubjectVersionGet(ctx, proj, svc, subj, 3).
+					Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{SchemaType: "PROTOBUF"}, nil).Once()
+			}
+			if tc.replace {
+				client.EXPECT().ServiceSchemaRegistryCompatibility(ctx, proj, svc, subj, 3, mock.Anything).
+					Return(&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityOut{IsCompatible: true}, nil).Once()
+			}
+			require.NoError(t, planWithReplacement(t, ctx, client, d, plan))
 			require.Equal(t, tc.replace, slices.Contains(adapter.RequiresReplaceKeys(d), "schema_type"))
+		})
+	}
+}
+
+func TestConfirmDestinationVersions(t *testing.T) {
+	const project, name, subject = "project", "kafka", "payments"
+	notFound := avngen.Error{Status: http.StatusNotFound}
+	denied := avngen.Error{Status: http.StatusForbidden}
+	for _, tc := range []struct {
+		name        string
+		subjects    []string
+		listErr     error
+		versions    []int
+		versionsErr error
+		diagnostic  string
+	}{
+		{name: "listed subject still has no visible versions", subjects: []string{subject}, diagnostic: "not yet visible"},
+		{name: "scoped read recovers when listing is denied", listErr: denied, versions: []int{1, 2}},
+		{name: "cannot confirm absence", listErr: denied, versionsErr: notFound, diagnostic: "unable to confirm"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client := avngen.NewMockClient(t)
+			api := client.EXPECT()
+			api.ServiceSchemaRegistrySubjectVersionsGet(mock.Anything, project, name, subject).Return(nil, notFound).Once()
+			api.ServiceGet(mock.Anything, project, name).Return(&service.ServiceGetOut{
+				ServiceType: "kafka", State: service.ServiceStateTypeRunning, UserConfig: map[string]any{"schema_registry": true},
+			}, nil)
+			api.ServiceSchemaRegistrySubjects(mock.Anything, project, name).Return(tc.subjects, tc.listErr)
+			api.ServiceSchemaRegistrySubjectVersionsGet(mock.Anything, project, name, subject).Return(tc.versions, tc.versionsErr)
+			versions, err := replacementDestinationVersions(t.Context(), client, project, name, subject)
+			if tc.diagnostic != "" {
+				require.ErrorContains(t, err, tc.diagnostic)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tc.versions, versions)
 		})
 	}
 }
@@ -321,6 +510,7 @@ func TestCreateView(t *testing.T) {
 
 	ctx := context.Background()
 	client := avngen.NewMockClient(t)
+	client.EXPECT().ServiceGet(ctx, "p", "s").Return(&service.ServiceGetOut{ServiceType: "kafka"}, nil).Once()
 	post := client.EXPECT().
 		ServiceSchemaRegistrySubjectVersionPost(ctx, "p", "s", "subj", mock.Anything).
 		Return(7, nil).
@@ -331,7 +521,7 @@ func TestCreateView(t *testing.T) {
 		Once()
 	client.EXPECT().
 		ServiceSchemaRegistrySubjectVersionGet(ctx, "p", "s", "subj", 1).
-		Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{Id: 7, Version: 1}, nil).
+		Return(&kafkaschemaregistry.ServiceSchemaRegistrySubjectVersionGetOut{Id: 7, Version: 1, Schema: `{"type":"string"}`}, nil).
 		Once()
 	client.EXPECT().
 		ServiceSchemaRegistrySubjectConfigPut(
@@ -348,6 +538,7 @@ func TestCreateView(t *testing.T) {
 	d, err := adapter.NewResourceData(
 		resourceSchemaInternal(),
 		ResourceOptions.IdentityFields,
+		adapter.WithTestConfig(map[string]any{"compatibility_level": "FULL"}),
 		adapter.WithTestPlan(map[string]any{
 			"project":             "p",
 			"service_name":        "s",
@@ -386,6 +577,7 @@ func TestUpdateView(t *testing.T) {
 		d, err := adapter.NewResourceData(
 			resourceSchemaInternal(),
 			ResourceOptions.IdentityFields,
+			adapter.WithTestConfig(map[string]any{"compatibility_level": compatibility}),
 			adapter.WithTestPlan(plan),
 			adapter.WithTestState(state),
 		)
@@ -403,6 +595,7 @@ func TestUpdateView(t *testing.T) {
 		t.Parallel()
 		// The mock fails on any other call, e.g., registering a new version.
 		client := avngen.NewMockClient(t)
+		client.EXPECT().ServiceGet(ctx, "p", "s").Return(&service.ServiceGetOut{ServiceType: "kafka"}, nil).Once()
 		client.EXPECT().
 			ServiceSchemaRegistrySubjectConfigPut(
 				ctx,
@@ -433,7 +626,7 @@ func TestReadView_preservesConfiguredSchemaFormatting(t *testing.T) {
 
 	mockClient.EXPECT().
 		ServiceGet(ctx, project, serviceName).
-		Return(&service.ServiceGetOut{UserConfig: map[string]any{"schema_registry": true}}, nil).
+		Return(&service.ServiceGetOut{ServiceType: "kafka", UserConfig: map[string]any{"schema_registry": true}}, nil).
 		Maybe()
 	mockClient.EXPECT().
 		ServiceSchemaRegistrySubjectVersionGet(ctx, project, serviceName, subjectName, 3).
@@ -466,4 +659,62 @@ func TestReadView_preservesConfiguredSchemaFormatting(t *testing.T) {
 	require.Equal(t, "AVRO", d.Get("schema_type"))
 	require.Empty(t, d.Get("compatibility_level"))
 	require.Empty(t, d.Get("references"))
+}
+
+func TestRegisteredProtobufDeclarations(t *testing.T) {
+	t.Parallel()
+	const syntax = "syntax = \"proto3\";\n"
+	t.Run("serialized optional presence", func(t *testing.T) {
+		const proto3 = "CgdtLnByb3RvIhYKBU9yZGVyEg0KAmlkGAEgASgJiAEBYgZwcm90bzM="
+		const proto2 = "CgdtLnByb3RvIhYKBU9yZGVyEg0KAmlkGAEgASgJiAEBYgZwcm90bzI="
+		require.True(t, sameProtobufDeclarations(proto3, syntax+`message Order { optional string id = 1; }`, nil))
+		require.False(t, sameProtobufDeclarations(proto3, syntax+`message Order { string id = 1; }`, nil))
+		require.False(t, sameProtobufDeclarations(proto3, syntax+`message Order { oneof key { string id = 1; } }`, nil))
+		require.True(t, sameProtobufDeclarations(proto2, `syntax = "proto2"; message Order { optional string id = 1; }`, nil))
+		require.False(t, sameProtobufDeclarations(proto2, `syntax = "proto2"; message Order { required string id = 1; }`, nil))
+	})
+	t.Run("descriptor field JSON name", func(t *testing.T) {
+		// FileDescriptorProto for M.order_id with no explicit JSON name.
+		const descriptor = "CgdtLnByb3RvIhUKAU0SEAoIb3JkZXJfaWQYASABKAliBnByb3RvMw=="
+		require.True(t, sameProtobufDeclarations(descriptor, syntax+`message M { string order_id = 1; }`, nil))
+		require.False(t, sameProtobufDeclarations(descriptor, syntax+`message M { string order_id = 1 [json_name = "id"]; }`, nil))
+	})
+	t.Run("proto2 group placement", func(t *testing.T) {
+		const proto2 = `syntax = "proto2"; `
+		for _, tc := range []struct {
+			name, before, after string
+			equal               bool
+		}{
+			{"inside oneof", `message M { oneof key { group G = 1 { optional int32 x = 1; } int32 n = 2; } }`, `message M { oneof key { int32 n = 2; group G = 1 { optional int32 x = 1; } } }`, true},
+			// G and N are both addressable nested messages; swapping their indexes changes the wire contract.
+			{"changed nested message index", `message M { message N {} optional group G = 1 { optional int32 x = 1; } }`, `message M { optional group G = 1 { optional int32 x = 1; } message N {} }`, false},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				_, err := parseProto(proto2 + tc.before)
+				require.NoError(t, err)
+				require.Equal(t, tc.equal, sameProtobufDeclarations(proto2+tc.before, proto2+tc.after, nil))
+			})
+		}
+	})
+	for _, tc := range []struct {
+		name, submitted, registry string
+		same                      bool
+	}{
+		{"map entries and nested messages", "message M { message N {} map<string, string> labels = 1; }", "message M { map<string, string> labels = 1; message N {} }", true},
+		{"public imports grouped", `import public "a.proto"; import "b.proto"; message M {}`, `import "b.proto"; import public "a.proto"; message M {}`, true},
+		{"referenced schema.proto", `import "schema.proto"; message M { External e = 1; } // header`, `import "schema.proto"; message M { External e = 1; }`, true},
+		{"public import changed", `import public "a.proto"; import "b.proto";`, `import "a.proto"; import public "b.proto";`, false},
+		{"weak import changed", `import weak "a.proto";`, `import "a.proto";`, false},
+		{"message index changed", "message A {} message B {}", "message B {} message A {}", false},
+		{"enum reservation dropped", "enum E { reserved 5; X = 0; }", "enum E { X = 0; }", false},
+		{"changed aggregate option", `message M { option (meta) = { params: { key: "region" value: "EU" } }; }`, `message M { option (meta) = { params: { key: "region", value: "US" } }; }`, false},
+		{"repeated option order changed", `message M { option (meta) = { tags: "A" tags: "B" }; }`, `message M { option (meta) = { tags: ["B","A"] }; }`, false},
+		{"nonempty RPC option lost", `message M {} service S { rpc Get(M) returns (M) { option deprecated = true; } }`, `message M {} service S { rpc Get(M) returns (M); }`, false},
+		{"deprecated enum value lost", "enum E { X = 0 [deprecated = true]; }", "enum E { X = 0; }", false},
+		{"explicit packing changed", "message M { repeated int32 x = 1 [packed = false]; }", "message M { repeated int32 x = 1; }", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.same, sameProtobufDeclarations(syntax+tc.submitted, syntax+tc.registry, nil))
+		})
+	}
 }

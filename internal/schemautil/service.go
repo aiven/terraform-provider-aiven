@@ -1362,17 +1362,10 @@ func ServiceReadyForget(project, serviceName string) {
 	serviceCheck.Forget(project, serviceName)
 }
 
-// GetService returns the service, cached per process, see serviceCheck.
+// GetService reads mutable service settings as they are now. By default the
+// client coalesces concurrent identical GETs without retaining their result.
 func GetService(ctx context.Context, client avngen.Client, project, serviceName string) (*service.ServiceGetOut, error) {
-	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
-		return client.ServiceGet(ctx, project, serviceName)
-	}, project, serviceName)
-	if avngen.IsNotFound(err) {
-		// A 404 may be eventual consistency for a service created
-		// elsewhere, so let the next caller retry.
-		serviceCheck.Forget(project, serviceName)
-	}
-	return s, err
+	return client.ServiceGet(ctx, project, serviceName)
 }
 
 // CheckServiceReady verifies the target service exists, is powered on,
@@ -1397,10 +1390,21 @@ func CheckServiceReady(ctx context.Context, client avngen.Client, project, servi
 		}
 	}
 
-	s, err := GetService(ctx, client, project, serviceName)
+	s, err := serviceCheck.Do(func() (*service.ServiceGetOut, error) {
+		return GetService(ctx, client, project, serviceName)
+	}, project, serviceName)
 	if err != nil {
+		if avngen.IsNotFound(err) {
+			// A service created elsewhere may not be visible yet.
+			serviceCheck.Forget(project, serviceName)
+		}
 		return err
 	}
+	return ValidateServiceReady(s, project, serviceName, serviceTypes...)
+}
+
+// ValidateServiceReady evaluates the type and power state of a service already fetched.
+func ValidateServiceReady(s *service.ServiceGetOut, project, serviceName string, serviceTypes ...string) error {
 	if !slices.Contains(serviceTypes, s.ServiceType) {
 		expected := strings.Join(lo.Map(serviceTypes, func(t string, _ int) string { return strconv.Quote(t) }), ", ")
 		if len(serviceTypes) > 1 {

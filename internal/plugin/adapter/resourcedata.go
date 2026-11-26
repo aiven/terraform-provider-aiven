@@ -26,6 +26,9 @@ const idField = "id"
 type ResourceData interface {
 	Get(key string) any
 	GetOk(key string) (any, bool)
+	GetPlanOk(key string) (any, bool)
+	IsPlanFullyKnown(key string) bool
+	IsConfigUnknown(key string) bool
 	GetConfigOk(key string) (any, bool)
 	GetState(key string) any
 	GetStateOk(key string) (any, bool)
@@ -36,6 +39,7 @@ type ResourceData interface {
 	UserConfigChanges(name string) []string
 	Set(key string, value any) error
 	SetUnknown(keys ...string) error
+	CheckpointUpdate(keys ...string) error
 	SetID(parts ...string) error
 	ID() string
 	IsNewResource() bool
@@ -61,6 +65,33 @@ type resourceData struct {
 	requiresReplace                []string
 	private                        privateState
 	privateValues                  map[string][]byte
+	updateState                    *tftypes.Value
+}
+
+// CheckpointUpdate copies confirmed attributes into the update response. If a later API
+// operation fails, Terraform keeps these values together with the untouched prior state.
+func (d *resourceData) CheckpointUpdate(keys ...string) error {
+	if d.updateState == nil {
+		return nil
+	}
+	var previous map[string]tftypes.Value
+	if err := d.updateState.As(&previous); err != nil {
+		return err
+	}
+	fields := maps.Clone(previous)
+	for _, key := range keys {
+		prop, ok := d.schema.Properties[key]
+		if !ok {
+			return fmt.Errorf("unknown checkpoint attribute %q", key)
+		}
+		value, err := toTFValue(prop, d.plan[key])
+		if err != nil {
+			return fmt.Errorf("checkpoint %q: %w", key, err)
+		}
+		fields[key] = value
+	}
+	*d.updateState = tftypes.NewValue(d.updateState.Type(), fields)
+	return nil
 }
 
 // Framework's private state type is internal, so depend only on its public methods.
@@ -168,6 +199,22 @@ func (d *resourceData) isUnknown(key string) bool {
 	return ok && !v.IsKnown()
 }
 
+// IsConfigUnknown distinguishes an unresolved top-level expression from an omitted attribute.
+func (d *resourceData) IsConfigUnknown(key string) bool {
+	v, ok := d.configRaw[key].(tftypes.Value)
+	return ok && !v.IsKnown()
+}
+
+// IsPlanFullyKnown reports whether a planned attribute and all its elements are known
+// during ModifyPlan. Null and empty collections are both known.
+func (d *resourceData) IsPlanFullyKnown(key string) bool {
+	value, err := toTFValue(d.schema.Properties[key], d.plan[key])
+	if err != nil {
+		panic(fmt.Errorf("failed to inspect plan for %q: %w", key, err))
+	}
+	return value.IsFullyKnown()
+}
+
 // hasPlan is false on Read.
 func (d *resourceData) hasPlan() bool {
 	return d.plan != nil
@@ -201,23 +248,28 @@ func (d *resourceData) Get(key string) any {
 	return v
 }
 
-// GetOk looks up a value by key, checking plan, then config, then state. Returns the value and whether it was found.
-// ID fields are read from the state even if the plan is not present.
-func (d *resourceData) GetOk(key string) (any, bool) {
-	// getOk doesn't fail if plan is nil.
-	// It returns a typed zero value.
+// GetPlanOk returns a known value from the plan. Ignored configuration may differ
+// from that plan, including when Terraform plans no value at all.
+func (d *resourceData) GetPlanOk(key string) (any, bool) {
 	v, sch, ok, err := getOk(d.schema, d.plan, key)
 	if err != nil {
 		panic(fmt.Errorf("failed to get value for %q from plan: %w", key, err))
 	}
+	if ok && d.preservePlanValues {
+		v = withoutPreserved(sch, v)
+	}
+	return v, ok
+}
 
+// GetOk looks up a value by key, checking plan, then config, then state. Returns the value and whether it was found.
+// ID fields are read from the state even if the plan is not present.
+func (d *resourceData) GetOk(key string) (any, bool) {
+	v, ok := d.GetPlanOk(key)
 	if ok {
-		if d.preservePlanValues {
-			v = withoutPreserved(sch, v)
-		}
 		return v, true
 	}
 
+	var err error
 	// 1. Datasource reads config only
 	// 2. WriteOnly fields are read from the config
 	if d.config != nil {

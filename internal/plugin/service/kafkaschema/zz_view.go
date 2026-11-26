@@ -8,25 +8,23 @@ import "github.com/aiven/terraform-provider-aiven/internal/plugin/adapter"
 const typeName = "aiven_kafka_schema"
 
 var ResourceOptions = adapter.ResourceOptions{
-	Create:              createView,
-	Delete:              deleteView,
-	IdentityFields:      []string{"project", "service_name", "subject_name"},
-	ModifyPlan:          modifyPlan,
-	Read:                readView,
-	RefreshState:        &adapter.RefreshStateCondition{},
-	RemoveMissing:       true,
-	RequireServiceReady: []string{"kafka"},
-	Schema:              resourceSchema,
-	SchemaInternal:      resourceSchemaInternal(),
-	TypeName:            typeName,
-	Update:              updateView,
+	Create:         createView,
+	Delete:         deleteView,
+	IdentityFields: []string{"project", "service_name", "subject_name"},
+	ModifyPlan:     modifyPlan,
+	Read:           readView,
+	RefreshState:   &adapter.RefreshStateCondition{},
+	RemoveMissing:  true,
+	Schema:         resourceSchema,
+	SchemaInternal: resourceSchemaInternal(),
+	TypeName:       typeName,
+	Update:         updateView,
 }
 
 var DataSourceOptions = adapter.DataSourceOptions{
-	IdentityFields:      []string{"project", "service_name", "subject_name"},
-	Read:                readView,
-	RequireServiceReady: []string{"kafka"},
-	Schema:              datasourceSchema,
-	SchemaInternal:      datasourceSchemaInternal(),
-	TypeName:            typeName,
+	IdentityFields: []string{"project", "service_name", "subject_name"},
+	Read:           readView,
+	Schema:         datasourceSchema,
+	SchemaInternal: datasourceSchemaInternal(),
+	TypeName:       typeName,
 }

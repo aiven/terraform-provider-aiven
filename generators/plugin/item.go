@@ -547,9 +547,12 @@ type Item struct {
 	MaxLength    int   `yaml:"maxLength,omitempty"`
 	MinItems     int   `yaml:"minItems,omitempty"`
 	MaxItems     int   `yaml:"maxItems,omitempty"`
-	Minimum      int   `yaml:"minimum,omitempty"`
+	Minimum      int   `yaml:"_minimum,omitempty"`
 	Maximum      int   `yaml:"maximum,omitempty"`
 	Example      any   `yaml:"example,omitempty"`
+
+	// OverrideMinimum retains an explicit YAML lower bound, including zero.
+	OverrideMinimum *int `yaml:"minimum,omitempty"`
 
 	// DisableExample keeps the field out of the generated examples, e.g., a block the service type rejects.
 	DisableExample bool `yaml:"disableExample,omitempty"`

@@ -42,9 +42,9 @@ resource "aiven_kafka" "example_kafka" {
 
 ### Required
 
-- `project` (String) Project name. Changing this property forces recreation of the resource.
+- `project` (String) Project name. Must match pattern: `^[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.
 - `schema` (String) Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema, depending on the schema type. Maximum length: `1048576`.
-- `service_name` (String) Service name. Changing this property forces recreation of the resource.
+- `service_name` (String) Service name. Must match pattern: `^[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.
 - `subject_name` (String) Subject name. Changing this property forces recreation of the resource.
 
 ### Optional
@@ -64,9 +64,9 @@ resource "aiven_kafka" "example_kafka" {
 
 Required:
 
-- `name` (String) The name used to reference the provided subject and version. Maximum length: `1024`.
-- `subject` (String) Subject. Maximum length: `1024`.
-- `version` (Number) Version.
+- `name` (String) The name used to reference the provided subject and version. Length must be between `1` and `1024`.
+- `subject` (String) Subject. Length must be between `1` and `1024`.
+- `version` (Number) Version. Minimum value: `0`.
 
 
 <a id="nestedblock--timeouts"></a>

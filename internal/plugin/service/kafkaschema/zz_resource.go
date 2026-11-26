@@ -5,7 +5,9 @@ package kafkaschema
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -24,7 +26,6 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.OneOf("BACKWARD", "BACKWARD_TRANSITIVE", "FORWARD", "FORWARD_TRANSITIVE", "FULL", "FULL_TRANSITIVE", "NONE")},
 			},
 			"id": schema.StringAttribute{
@@ -33,9 +34,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project": schema.StringAttribute{
-				MarkdownDescription: "Project name. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Project name. Must match pattern: `^[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"schema": schema.StringAttribute{
 				MarkdownDescription: "Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema, depending on the schema type. Maximum length: `1048576`.",
@@ -50,9 +52,10 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				Validators:          []validator.String{stringvalidator.OneOf("AVRO", "JSON", "PROTOBUF")},
 			},
 			"service_name": schema.StringAttribute{
-				MarkdownDescription: "Service name. Changing this property forces recreation of the resource.",
+				MarkdownDescription: "Service name. Must match pattern: `^[a-zA-Z0-9_-]*$`. Changing this property forces recreation of the resource.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Required:            true,
+				Validators:          []validator.String{stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "must match pattern \"^[a-zA-Z0-9_-]*$\"")},
 			},
 			"subject_name": schema.StringAttribute{
 				MarkdownDescription: "Subject name. Changing this property forces recreation of the resource.",
@@ -69,18 +72,19 @@ func resourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Schema references.",
 				NestedObject: schema.NestedBlockObject{Attributes: map[string]schema.Attribute{
 					"name": schema.StringAttribute{
-						MarkdownDescription: "The name used to reference the provided subject and version. Maximum length: `1024`.",
+						MarkdownDescription: "The name used to reference the provided subject and version. Length must be between `1` and `1024`.",
 						Required:            true,
-						Validators:          []validator.String{stringvalidator.LengthAtMost(1024)},
+						Validators:          []validator.String{stringvalidator.LengthBetween(1, 1024)},
 					},
 					"subject": schema.StringAttribute{
-						MarkdownDescription: "Subject. Maximum length: `1024`.",
+						MarkdownDescription: "Subject. Length must be between `1` and `1024`.",
 						Required:            true,
-						Validators:          []validator.String{stringvalidator.LengthAtMost(1024)},
+						Validators:          []validator.String{stringvalidator.LengthBetween(1, 1024)},
 					},
 					"version": schema.Int64Attribute{
-						MarkdownDescription: "Version.",
+						MarkdownDescription: "Version. Minimum value: `0`.",
 						Required:            true,
+						Validators:          []validator.Int64{int64validator.AtLeast(0)},
 					},
 				}},
 				Validators: []validator.Set{setvalidator.SizeAtMost(128)},
@@ -105,8 +109,14 @@ func resourceSchemaInternal() *adapter.Schema {
 			"references": &adapter.Schema{
 				Items: &adapter.Schema{
 					Properties: map[string]*adapter.Schema{
-						"name":    &adapter.Schema{Type: adapter.SchemaTypeString},
-						"subject": &adapter.Schema{Type: adapter.SchemaTypeString},
+						"name": &adapter.Schema{
+							Type:           adapter.SchemaTypeString,
+							ZeroNotAllowed: true,
+						},
+						"subject": &adapter.Schema{
+							Type:           adapter.SchemaTypeString,
+							ZeroNotAllowed: true,
+						},
 						"version": &adapter.Schema{Type: adapter.SchemaTypeInt},
 					},
 					Type: adapter.SchemaTypeObject,

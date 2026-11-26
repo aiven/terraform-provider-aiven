@@ -149,7 +149,7 @@ func descriptionBuilder(def *Definition, entity entityType, item *Item) *usercon
 			b.FormatHint(f.hint)
 		}
 
-		if item.Minimum > 0 {
+		if item.Minimum > 0 || item.OverrideMinimum != nil {
 			b.Minimum(item.Minimum)
 		}
 

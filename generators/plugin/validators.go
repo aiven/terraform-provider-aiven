@@ -78,10 +78,11 @@ func genValidators(def *Definition, entity entityType, item *Item) ([]jen.Code, 
 
 	// Integers
 	if item.Type == SchemaTypeInteger {
+		hasMinimum := item.Minimum > 0 || item.OverrideMinimum != nil
 		switch {
-		case item.Minimum > 0 && item.Maximum > 0:
+		case hasMinimum && item.Maximum > 0:
 			codes = append(codes, jen.Qual(pkg, "Between").Call(jen.Lit(item.Minimum), jen.Lit(item.Maximum)))
-		case item.Minimum > 0:
+		case hasMinimum:
 			codes = append(codes, jen.Qual(pkg, "AtLeast").Call(jen.Lit(item.Minimum)))
 		case item.Maximum > 0:
 			codes = append(codes, jen.Qual(pkg, "AtMost").Call(jen.Lit(item.Maximum)))

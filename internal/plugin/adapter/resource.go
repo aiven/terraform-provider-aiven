@@ -65,6 +65,11 @@ type ResourceOptions struct {
 	// of its Desired values, and any Failed value terminates refresh with an error.
 	RefreshState *RefreshStateCondition
 
+	// CreateIsUpsert marks a registration that can adopt an existing object and
+	// safely be repeated. Returning state on failure would taint that object and
+	// cause Terraform to destroy it before retrying the registration.
+	CreateIsUpsert bool
+
 	// Time to wait after creating or updating the resource to let the backend catch up.
 	RefreshStateDelay time.Duration
 
@@ -284,7 +289,7 @@ func (a *resourceAdapter) Create(
 		}
 		// The ID comes from the create response, so a later step failed, e.g., a service wait:
 		// the tainted state keeps the resource manageable.
-		if d.ID() != "" {
+		if !a.resource.CreateIsUpsert && d.ID() != "" {
 			rsp.State.Raw = d.tfValue()
 		}
 		diags.AddError("failed to create resource", err.Error())
@@ -295,7 +300,8 @@ func (a *resourceAdapter) Create(
 		// Terraform persists state returned with an error diagnostic and marks the resource as
 		// tainted. Checkpoint a successfully created resource before polling so it remains
 		// manageable when the post-Create refresh fails. Do not checkpoint after an ignored 409.
-		stateCheckpointed := createSucceeded && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
+		checkpointCreate := createSucceeded && !a.resource.CreateIsUpsert
+		stateCheckpointed := checkpointCreate && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional)
 		if stateCheckpointed {
 			rsp.State.Raw = d.tfValue()
 		}
@@ -304,7 +310,7 @@ func (a *resourceAdapter) Create(
 		if err != nil {
 			// A successful Read may populate a server-assigned ID that was unavailable before
 			// polling. Preserve it without replacing an earlier, known-good checkpoint.
-			if createSucceeded && !stateCheckpointed && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
+			if checkpointCreate && !stateCheckpointed && ensurePostCreateID(d, a.resource.IdentityFields, a.resource.IdentityFieldsOptional) {
 				rsp.State.Raw = d.tfValue()
 			}
 			diags.AddError("failed to refresh state", err.Error())
@@ -579,6 +585,7 @@ func (a *resourceAdapter) Update(
 		d.(*resourceData).private = rsp.Private
 	}
 
+	d.(*resourceData).updateState = &rsp.State.Raw
 	ctx, cancel, err := withTimeout(ctx, d, timeoutUpdate)
 	if err != nil {
 		diags.AddError("failed to read timeouts block", err.Error())
@@ -1060,6 +1067,9 @@ func (a *resourceAdapter) ModifyPlan(
 	if err != nil {
 		diags.AddError("failed to create ResourceData", err.Error())
 		return
+	}
+	if rsp.Private != nil {
+		d.(*resourceData).private = rsp.Private
 	}
 
 	ctx, cancel, err := withTimeout(ctx, d, timeoutRead)
