@@ -211,7 +211,7 @@ tasks:
     desc: "Compare current schemas against {{.OLD_SCHEMA}} and update CHANGELOG.md"
     # No sources/generates: schema diffs depend on external client enums, not local files.
     cmds:
-      - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog={{.CHANGELOG_FILE}}"
+      - "{{.CHANGELOG_CMD}} -diff -schema={{.OLD_SCHEMA}} -changelog={{.CHANGELOG_FILE}}{{if .CHANGELOG_SUMMARY}} -summary={{.CHANGELOG_SUMMARY}}{{end}}"
       - rm {{.OLD_SCHEMA}}
 
   load-codegen:

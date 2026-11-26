@@ -14,6 +14,8 @@ The canonical commands you will need most:
 - `task build` — compiles the provider. Use as a quick sanity check.
 - `task test-unit` — unit tests (no API calls).
 
+For unreleased `CHANGELOG.md` entries, follow [CONTRIBUTING.md — Changelog](CONTRIBUTING.md#changelog).
+
 ### Do NOT use
 
 For the workflows above, do not reach for:

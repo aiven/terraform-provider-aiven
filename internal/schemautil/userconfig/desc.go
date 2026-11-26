@@ -15,6 +15,7 @@ const (
 	// DataSource is a constant that represents the data source entity type.
 	DataSource
 	PossibleValuesPrefix        = "The possible value"
+	EnumPrefix                  = "Enum: "
 	LimitedAvailabilityMarker   = "limited availability stage and may change without notice"
 	LimitedAvailabilityMessage  = "To enable this feature, contact the [sales team](http://aiven.io/contact)."
 	LimitedAvailabilityText     = "This %[1]s is in the " + LimitedAvailabilityMarker + ". " + LimitedAvailabilityMessage
@@ -262,7 +263,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 		} else {
 			builder.WriteString("s are ")
 		}
-		builder.WriteString(listOfCodes("and", db.withPossibleValues...))
+		builder.WriteString(ListOfCodes("and", db.withPossibleValues...))
 		builder.WriteRune('.')
 	}
 
@@ -286,7 +287,7 @@ func (db *DescriptionBuilder) build(page bool) string {
 		if len(v) > 0 {
 			builder.WriteRune(' ')
 			builder.WriteString(validatorTitles[i])
-			builder.WriteString(listOfCodes(validatorConjunctions[i], v...))
+			builder.WriteString(ListOfCodes(validatorConjunctions[i], v...))
 			builder.WriteRune('.')
 		}
 	}
@@ -296,13 +297,13 @@ func (db *DescriptionBuilder) build(page bool) string {
 		switch len(db.withLookupComposedOf) {
 		case 1:
 			builder.WriteString("Exactly one of the fields must be specified: ")
-			builder.WriteString(listOfCodes("or", db.withLookupID, db.withLookupComposedOf[0]))
+			builder.WriteString(ListOfCodes("or", db.withLookupID, db.withLookupComposedOf[0]))
 			builder.WriteRune('.')
 		default:
 			builder.WriteString("Provide either ")
 			builder.WriteString(fmt.Sprintf("`%s`", db.withLookupID))
 			builder.WriteString(", or all of ")
-			builder.WriteString(listOfCodes("and", db.withLookupComposedOf...))
+			builder.WriteString(ListOfCodes("and", db.withLookupComposedOf...))
 			builder.WriteString(" together.")
 		}
 	}
@@ -427,8 +428,8 @@ func (db *DescriptionBuilder) availabilityCallout() (title, text string) {
 	return "", ""
 }
 
-// listOfCodes turns ["a", "b", "c"] into "`a`, `b` and `c`"
-func listOfCodes(conj string, source ...string) string {
+// ListOfCodes turns ["a", "b", "c"] into "`a`, `b` and `c`".
+func ListOfCodes(conj string, source ...string) string {
 	lastOne := len(source) - 1
 	items := make([]string, len(source))
 	for i, v := range source {

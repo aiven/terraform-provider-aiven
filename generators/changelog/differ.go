@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -10,10 +11,12 @@ import (
 	"github.com/ettle/strcase"
 	"github.com/google/go-cmp/cmp"
 	"github.com/samber/lo"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	cl "github.com/aiven/terraform-provider-aiven/tools/changelog"
 )
 
 func diffItems(was, have *Item) (*Diff, error) {
-	// Added or removed
 	if was == nil || have == nil {
 		action := AddDiffAction
 		if have == nil {
@@ -22,18 +25,15 @@ func diffItems(was, have *Item) (*Diff, error) {
 		}
 
 		return &Diff{
-			Action:      action,
-			Description: removeEnum(have.Description), // Some fields have enums in the spec description
-			Item:        have,
+			Action: action,
+			Item:   have,
 		}, nil
 	}
 
-	// Equal items
 	if cmp.Equal(was, have) {
 		return nil, nil
 	}
 
-	// Compare all the fields
 	wasMap, err := toMap(was)
 	if err != nil {
 		return nil, err
@@ -44,45 +44,31 @@ func diffItems(was, have *Item) (*Diff, error) {
 		return nil, err
 	}
 
-	entries := make([]string, 0)
-	for k, wasValue := range wasMap {
-		haveValue := haveMap[k]
+	union := make(map[string]any)
+	maps.Copy(union, wasMap)
+	maps.Copy(union, haveMap)
+	keys := slices.Sorted(maps.Keys(union))
+	entries := make([]string, 0, len(keys))
+	for _, k := range keys {
+		wasValue, wasOk := wasMap[k]
+		haveValue, haveOk := haveMap[k]
+		if !wasOk || !haveOk {
+			continue
+		}
 		if cmp.Equal(wasValue, haveValue) {
 			continue
 		}
 
-		var entry string
-		switch k {
-		case "deprecated":
-			entry = "remove deprecation"
-			if have.Deprecated != "" {
-				entry = fmt.Sprintf("deprecate: %s", strings.TrimRight(have.Deprecated, ". "))
-			}
-		case "beta":
-			entry = "marked as beta"
-			if !haveValue.(bool) {
-				entry = "no longer beta"
-			}
-		case "limited availability":
-			entry = "marked as limited availability"
-			if !haveValue.(bool) {
-				entry = "no longer limited availability"
-			}
-		case "enum":
-			entry = cmpList(wasValue.([]string), haveValue.([]string))
-		default:
-			// The rest of the fields will have diff-like entry
-			entry = fmt.Sprintf("%s ~~`%s`~~ → `%s`", k, strValue(wasValue), strValue(haveValue))
-
-			// Fixes formatting issues
-			entry = strings.ReplaceAll(entry, "``", "`")
+		entry, err := changeEntry(k, was, have, wasValue, haveValue)
+		if err != nil {
+			return nil, err
 		}
-
-		entries = append(entries, entry)
+		if entry != "" {
+			entries = append(entries, entry)
+		}
 	}
 
-	// Nothing has changed
-	description := strings.Join(entries, ", ")
+	description := strings.Join(entries, "; ")
 	if description == "" {
 		return nil, nil
 	}
@@ -94,7 +80,41 @@ func diffItems(was, have *Item) (*Diff, error) {
 	}, nil
 }
 
-func diffItemMaps(was, have ItemMap) ([]string, error) {
+func changeEntry(
+	key string,
+	was, have *Item,
+	wasValue, haveValue any,
+) (string, error) {
+	switch key {
+	case "deprecated":
+		if have.Deprecated != "" {
+			return "deprecated: " + strings.TrimRight(have.Deprecated, ". "), nil
+		}
+		return "no longer deprecated", nil
+	case "beta":
+		if haveValue.(bool) {
+			return "now beta", nil
+		}
+		return "no longer beta", nil
+	case "limited availability":
+		if haveValue.(bool) {
+			return "now limited availability", nil
+		}
+		return "no longer limited availability", nil
+	case "enum":
+		return cmpList(wasValue.([]string), haveValue.([]string)), nil
+	default:
+		entry := fmt.Sprintf(
+			"%s was `%s`, now `%s`",
+			key,
+			strValue(wasValue),
+			strValue(haveValue),
+		)
+		return strings.ReplaceAll(entry, "``", "`"), nil
+	}
+}
+
+func diffItemMaps(was, have ItemMap) ([]cl.GeneratedEntry, error) {
 	result := make([]*Diff, 0)
 	kinds := []RootKind{ResourceRootKind, DataSourceRootKind}
 	for _, kind := range kinds {
@@ -109,12 +129,8 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 			if seen[k] {
 				continue
 			}
-
-			// Skips duplicate keys
 			seen[k] = true
 
-			// When a resource added or removed, it skips all its fields until the next resource
-			// Otherwise, all its fields will appear as changes
 			if skipPrefix != "" && strings.HasPrefix(k, skipPrefix) {
 				continue
 			}
@@ -123,7 +139,6 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 			wasVal, wasOk := wasItems[k]
 			haveVal, haveOk := haveItems[k]
 			if wasOk != haveOk {
-				// Resource added or removed, must skip all its fields
 				skipPrefix = k
 			}
 
@@ -153,16 +168,15 @@ func toMap(item *Item) (map[string]any, error) {
 		return nil, err
 	}
 
-	m["enum"] = findEnums(item.Description)
+	values, _ := parseEnum(item.Description)
+	m["enum"] = values
 	m["beta"] = hasBeta(item.Description)
 	m["limitedAvailability"] = hasLimited(item.Description)
 	m["type"] = strValueType(item.Type)
 	m["elementType"] = strValueType(item.ElementType)
 
-	// Not needed to compare descriptions
 	delete(m, "description")
 
-	// Turns "maxItems" into "max items" for human readability
 	for k, v := range m {
 		delete(m, k)
 		m[strcase.ToCase(k, strcase.LowerCase, ' ')] = v
@@ -170,30 +184,25 @@ func toMap(item *Item) (map[string]any, error) {
 	return m, err
 }
 
-func serializeDiff(list []*Diff) []string {
+func serializeDiff(list []*Diff) []cl.GeneratedEntry {
 	sort.Slice(list, func(i, j int) bool {
 		a, b := list[i], list[j]
 
 		if a.Item.Root != b.Item.Root {
 			return a.Item.Root < b.Item.Root
 		}
-
 		if a.Action != b.Action {
 			return a.Action < b.Action
 		}
-
 		if a.Item.Path != b.Item.Path {
 			return a.Item.Path < b.Item.Path
 		}
-
 		if a.Item.Kind != b.Item.Kind {
 			return a.Item.Kind > b.Item.Kind
 		}
-
 		return false
 	})
 
-	// Removes duplicates
 	unique := make(map[string]*Diff)
 	for i := 0; i < len(list); i++ {
 		d := list[i]
@@ -208,14 +217,29 @@ func serializeDiff(list []*Diff) []string {
 		i--
 	}
 
-	strs := make([]string, len(list))
-	for i, r := range list {
-		strs[i] = r.String()
+	out := make([]cl.GeneratedEntry, 0, len(list))
+	seen := make(map[string]struct{})
+	for _, d := range list {
+		e := generatedEntry(d)
+		key := entryKey(e)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, e)
 	}
-	return strs
+
+	sort.Slice(out, func(i, j int) bool {
+		return entryKey(out[i]) < entryKey(out[j])
+	})
+	return out
 }
 
-func cmpList[T any](was, have []T) string {
+func entryKey(e cl.GeneratedEntry) string {
+	return e.Section + ":" + e.Group + ":" + e.Text
+}
+
+func cmpList(was, have []string) string {
 	const (
 		remove int = 1 << iota
 		add
@@ -223,11 +247,10 @@ func cmpList[T any](was, have []T) string {
 
 	seen := make(map[string]int)
 	for _, v := range was {
-		seen[fmt.Sprintf("`%v`", v)] = remove
+		seen[v] = remove
 	}
-
 	for _, v := range have {
-		seen[fmt.Sprintf("`%v`", v)] |= add
+		seen[v] |= add
 	}
 
 	var added, removed []string
@@ -239,20 +262,15 @@ func cmpList[T any](was, have []T) string {
 			removed = append(removed, k)
 		}
 	}
+	sort.Strings(added)
+	sort.Strings(removed)
 
-	result := make([]string, 0)
-	if s := joinSorted(added); s != "" {
-		result = append(result, "add "+s)
+	parts := make([]string, 0, 2)
+	if len(added) > 0 {
+		parts = append(parts, "add "+userconfig.ListOfCodes("and", added...))
 	}
-
-	if s := joinSorted(removed); s != "" {
-		result = append(result, "remove "+s)
+	if len(removed) > 0 {
+		parts = append(parts, "remove "+userconfig.ListOfCodes("and", removed...))
 	}
-
-	return joinSorted(result)
-}
-
-func joinSorted(args []string) string {
-	sort.Strings(args)
-	return strings.Join(args, ", ")
+	return strings.Join(parts, "; ")
 }

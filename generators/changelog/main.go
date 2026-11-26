@@ -14,6 +14,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
+	cl "github.com/aiven/terraform-provider-aiven/tools/changelog"
 )
 
 type flags struct {
@@ -21,8 +22,8 @@ type flags struct {
 	diff          bool
 	schemaFile    string
 	changelogFile string
+	summaryFile   string
 	format        bool
-	reformat      bool
 }
 
 func main() {
@@ -42,7 +43,7 @@ func exec() error {
 	}
 
 	if flags.format {
-		return writeChangelog(flags.changelogFile, flags.reformat, nil)
+		return writeChangelog(flags.changelogFile, nil)
 	}
 
 	sdkProvider, err := loadSDKProvider()
@@ -65,7 +66,6 @@ func exec() error {
 		return fmt.Errorf("failed to process Plugin Framework provider schema: %w", err)
 	}
 
-	// merge both providers
 	newMap := mergeItemMaps(sdkMap, pluginMap)
 
 	if flags.save {
@@ -88,7 +88,7 @@ func parseFlags() (*flags, error) {
 	flag.BoolVar(&f.diff, "diff", false, "compare current schema with imported schema")
 	flag.StringVar(&f.schemaFile, "schema", "", "schema file path (for save/diff)")
 	flag.StringVar(&f.changelogFile, "changelog", "", "changelog output file path")
-	flag.BoolVar(&f.reformat, "reformat", false, "reformat the whole changelog file")
+	flag.StringVar(&f.summaryFile, "summary", "", "summary output file path (with -diff)")
 	flag.BoolVar(&f.format, "format", false, "formats the unreleased section of the changelog")
 	flag.Parse()
 
@@ -133,7 +133,7 @@ func saveSchema(filePath string, schema ItemMap) error {
 	defer f.Close()
 
 	encoder := json.NewEncoder(f)
-	encoder.SetIndent("", "  ") // Pretty print the JSON
+	encoder.SetIndent("", "  ")
 	return encoder.Encode(&schema)
 }
 
@@ -148,11 +148,17 @@ func processDiff(flags *flags, newMap ItemMap) error {
 		return fmt.Errorf("failed to generate diff: %w", err)
 	}
 
+	if flags.summaryFile != "" {
+		if err := writeSummary(flags.summaryFile, entries); err != nil {
+			return err
+		}
+	}
+
 	if flags.changelogFile == "" {
 		return printChangelog(entries)
 	}
 
-	return writeChangelog(flags.changelogFile, flags.reformat, entries)
+	return writeChangelog(flags.changelogFile, entries)
 }
 
 func loadSchemaFile(path string) (ItemMap, error) {
@@ -170,20 +176,31 @@ func loadSchemaFile(path string) (ItemMap, error) {
 	return oldMap, nil
 }
 
-func printChangelog(entries []string) error {
-	for _, l := range entries {
-		fmt.Printf("- %s\n", l)
-	}
+func printChangelog(entries []cl.GeneratedEntry) error {
+	d := entriesToDraft(entries)
+	fmt.Println(cl.RenderSections(d))
 	return nil
 }
 
-func writeChangelog(filePath string, reformat bool, entries []string) error {
+func writeSummary(path string, entries []cl.GeneratedEntry) error {
+	d := entriesToDraft(entries)
+	text := cl.RenderSections(d)
+	return os.WriteFile(path, []byte(text), 0o644)
+}
+
+func entriesToDraft(entries []cl.GeneratedEntry) *cl.Draft {
+	d := &cl.Draft{}
+	cl.MergeGenerated(d, entries)
+	return d
+}
+
+func writeChangelog(filePath string, entries []cl.GeneratedEntry) error {
 	b, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read changelog file: %w", err)
 	}
 
-	s, err := updateChangelog(string(b), defaultLineMaxLength, reformat, entries...)
+	s, err := cl.FormatDraftSection(string(b), entries...)
 	if err != nil {
 		return fmt.Errorf("failed to format changelog: %w", err)
 	}
@@ -192,8 +209,6 @@ func writeChangelog(filePath string, reformat bool, entries []string) error {
 }
 
 func fromProvider(p *schema.Provider) (ItemMap, error) {
-	// Item names might clash between resources and data sources
-	// Splits into separate maps
 	sourceMaps := map[RootKind]map[string]*schema.Resource{
 		ResourceRootKind:   p.ResourcesMap,
 		DataSourceRootKind: p.DataSourcesMap,
@@ -257,7 +272,6 @@ func walkSchema(name string, this *schema.Schema, parent *Item) []*Item {
 
 	items := []*Item{item}
 
-	// Properties
 	switch elem := this.Elem.(type) {
 	case *schema.Schema:
 		item.ElementType = elem.Type
