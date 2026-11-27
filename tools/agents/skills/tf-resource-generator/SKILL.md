@@ -307,7 +307,7 @@ fails at generation time if either precondition is missing.
 Behavior:
 - Create, Read, and Update call `schemautil.CheckServiceReady` before issuing the resource's own
   API request.
-- Read (resource and data source) retries a 404 twice, 5s apart: right after creation, the API
+- Read (resource and data source) retries a 404 five times, 5s apart, and returns the last 404 if the read deadline ends the retries: right after creation, the API
   may not return the resource yet due to eventual consistency. Post-Create/Update refresh and
   delete polling are unaffected.
 - The precheck returns `schemautil.ErrServicePoweredOff` when the service is in `POWEROFF` state,
