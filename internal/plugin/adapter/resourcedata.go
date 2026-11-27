@@ -887,6 +887,20 @@ func WithPlan(plan tfsdk.Plan) ResourceDataOpt {
 	}
 }
 
+// WithPrivate uses the response's private state. A nil one isn't stored: the interface would be non-nil.
+func WithPrivate[T interface {
+	comparable
+	privateState
+}](private T) ResourceDataOpt {
+	return func(d *resourceData) error {
+		var zero T
+		if private != zero {
+			d.private = private
+		}
+		return nil
+	}
+}
+
 // WithState decodes the Terraform state into ResourceData.
 func WithState(state tfsdk.State) ResourceDataOpt {
 	return func(d *resourceData) error {
