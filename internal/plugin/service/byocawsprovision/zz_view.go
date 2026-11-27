@@ -15,23 +15,24 @@ import (
 const typeName = "aiven_byoc_aws_provision"
 
 var ResourceOptions = adapter.ResourceOptions{
-	AdoptExisting: true,
-	Beta:          true,
-	Create:        createView,
-	Delete:        deleteView,
-	DeleteState: &adapter.DeleteStateOptions{
-		Attribute: "state",
-		Desired:   []string{"deleted"},
-	},
+	AdoptExisting:  true,
+	Beta:           true,
+	Create:         createView,
+	Delete:         deleteView,
+	DeleteState:    &adapter.DeleteStateOptions{},
 	IdentityFields: []string{"organization_id", "custom_cloud_environment_id"},
+	ModifyPlan:     modifyPlan,
 	Read:           readView,
 	RefreshState: &adapter.RefreshStateCondition{
 		Attribute: "state",
 		Desired:   []string{"active"},
+		Failed:    []string{"creation_failed"},
 	},
+	RemoveMissing:  true,
 	Schema:         resourceSchema,
 	SchemaInternal: resourceSchemaInternal(),
 	TypeName:       typeName,
+	Update:         updateView,
 }
 
 func createView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
@@ -49,6 +50,19 @@ func createView(ctx context.Context, client avngen.Client, d adapter.ResourceDat
 
 func readView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
 	rsp, err := client.CustomCloudEnvironmentGet(ctx, d.Get("organization_id").(string), d.Get("custom_cloud_environment_id").(string))
+	if err != nil {
+		return err
+	}
+	return d.Flatten(rsp)
+}
+
+func updateView(ctx context.Context, client avngen.Client, d adapter.ResourceData) error {
+	req := new(byoc.CustomCloudEnvironmentUpdateIn)
+	err := d.Expand(req)
+	if err != nil {
+		return err
+	}
+	rsp, err := client.CustomCloudEnvironmentUpdate(ctx, d.Get("organization_id").(string), d.Get("custom_cloud_environment_id").(string), req)
 	if err != nil {
 		return err
 	}

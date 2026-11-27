@@ -16,11 +16,14 @@ nav_order: 1
 ### Action required
 
 - `aiven_gcp_privatelink_connection_approval`: changing an approved connection's IP now returns an error instead of being silently ignored. Approval also fails for connections accepted by GCP without an IP recorded in Aiven. To resolve either case, recreate the consumer forwarding rule and use its new `psc_connection_id`.
+- `aiven_byoc_aws_entity`: remove the fields `cloud_provider` and `aiven_object_storage_credentials_creator_user` from Terraform files. The resource always creates an AWS environment, and `aiven_object_storage_credentials_creator_user` holds a Google service account identifier. Removing them doesn't replace the resource.
 
 ### New
 
 - `aiven_organization_user_list` data source field `users.state` (enum): The possible values are `active`, `deactivated` and `deleted`.
 - `aiven_valkey_user` field `valkey_acl_databases`: Database ids the user can access. Requires Valkey 9.1 or later. Leave empty to grant all databases, or set the only item to `alldbs` to grant all databases or `resetdbs` to grant none.
+- `aiven_byoc_azure_entity` resource: creates and manages a BYOC custom cloud environment on Azure.
+- `aiven_byoc_azure_provision` resource: provisions a BYOC custom cloud environment on Azure.
 
 ### Improved
 
@@ -36,6 +39,9 @@ nav_order: 1
 - Plugin Framework resources: a create that fails after the API call, e.g., while waiting, leaves the resource in the state as tainted instead of losing it.
 - Plugin Framework resources: a pattern error on a sensitive field no longer shows the value, e.g., `aiven_service_integration_endpoint` field `datadog_user_config.datadog_api_key`.
 - `aiven_byoc_aws_provision`: a failed or timed-out create no longer taints the resource, whose replacement deleted the custom cloud environment. After a timeout, the next apply resumes waiting.
+- `aiven_byoc_aws_provision`: changing `aws_iam_role_arn` fails the plan. It used to replace the resource, which deleted the custom cloud environment and left `aiven_byoc_aws_entity` pointing at it. Replace the entity instead.
+- `aiven_byoc_aws_provision`: fails as soon as the custom cloud environment reaches `creation_failed` instead of waiting for the create timeout.
+- `aiven_byoc_aws_entity` and `aiven_byoc_aws_provision`: plan to recreate the resource when its custom cloud environment is gone instead of failing to read it.
 
 ### User configurations
 

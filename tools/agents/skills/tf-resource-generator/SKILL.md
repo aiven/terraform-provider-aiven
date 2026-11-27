@@ -406,6 +406,33 @@ rename: # Legacy SDKv2 names, hardcoded in adapter.userConfigBlock: never add mo
 - While SDKv2 still has a resource or a data source of the same name, the generator writes no docs or
   examples for it.
 
+### Polymorphic Endpoints
+
+A polymorphic endpoint serves several variants through one flattened schema, selected by a
+discriminator field: `CustomCloudEnvironmentCreate` takes `cloud_provider: aws|azure|google|oracle`
+and returns the `aws_*`, `azure_*`, `google_*` and `oracle_*` fields of every variant.
+
+Create one resource per variant, named after it (`aiven_byoc_aws_entity`, `aiven_byoc_azure_entity`), and:
+
+1. Remove the discriminator from the schema and set it with `fixedValues` on the create operation.
+   Don't ask the user for it with a one-value `enum`.
+2. Let cross-group pruning drop the other variants' fields, then remove by hand the ones it misses
+   (see [Removing Fields](#removing-fields)).
+3. Narrow shared enums with a definition `enum` when the variant supports fewer values
+   (`aiven_byoc_azure_entity.deployment_model`).
+
+```yaml
+operations:
+  - id: CustomCloudEnvironmentCreate
+    type: create
+    fixedValues:
+      cloud_provider: azure
+remove:
+  - cloud_provider # Polymorphic endpoint discriminator, set by the create operation's fixedValues
+```
+
+See **Fixed request values** in [Schema Customization](#schema-customization) for what the generator checks.
+
 ### Removing Fields
 
 `remove` drops attributes the resource should not expose. Entries are matched against the
@@ -426,6 +453,11 @@ comment. The first `task generate` writes the missing entries; subsequent runs a
 Group membership is defined by `serviceTypes` and `cloudTypes` in `generators/plugin/main.go`;
 see `definitions/aiven_byoc_aws_entity.yml` for the result. Prefer this over hand-rolled globs:
 the generator keeps the list exhaustive and self-updating as the API grows new fields.
+
+Auto-detection reads names only. A field that belongs to another group but has no group token in
+its name is kept, so remove it by hand: on the BYOC entities, `aiven_object_storage_credentials_creator_user`
+is a Google service account (same OpenAPI `title` and `maxLength` as the `google_*` account fields).
+Compare each kept field's `title`, `description` and `maxLength` with its siblings before trusting it.
 
 **Use globs for cases the group tables do not cover.** Entries are glob patterns, so `*` and `?`
 match within a single path segment, `**` matches across segments, and a pattern with no wildcards
@@ -1076,6 +1108,7 @@ Search the codebase for similar patterns:
 | `organizationalunit` | Alt data source lookup via `datasourceLookup` read op, expand/flatten for parent ID |
 | `service_integration_endpoint` | `oneOf` user config split by `userConfigDiscriminator`, `queryParams`, Read wrapped in `init()` |
 | `service_integration` | `userConfigDiscriminator`, renamed path parameter, Create/Update waiters wrapped in `init()` |
+| `byoc_azure_entity` | Polymorphic endpoint: discriminator set by `fixedValues`, other variants' fields removed |
 | `flinkjarapplicationversion` | Attributes the API doesn't have, `modifyPlan` computing a checksum that drives replacement, `RefreshStateCheck`, custom create that uploads a file |
 
 ## Testing Requirements
