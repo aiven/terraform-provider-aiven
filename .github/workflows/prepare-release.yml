@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 4.10.0)'
-        required: true
+        description: 'Release version, with or without v (e.g., 4.10.0). Leave empty for the next minor'
+        required: false
         type: string
       run_acceptance_tests:
         description: 'Run the acceptance tests? (Uncheck to skip, only if you are sure)'
@@ -25,6 +25,7 @@ jobs:
       pull-requests: write
       statuses: write
     outputs:
+      version: ${{ steps.version.outputs.version }}
       pr_head_sha: ${{ steps.create-pr.outputs.pull-request-head-sha }}
       pr_created: ${{ steps.create-pr.outputs.pull-request-number != '' }}
 
@@ -46,21 +47,27 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release version
-        run: task ci:verify-version VERSION=${{ inputs.version }}
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION=$(task -s ci:verify-version VERSION="$INPUT_VERSION")
+          echo "Release version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup release branch
         run: |
-          BRANCH_NAME="release-v${{ inputs.version }}"
+          BRANCH_NAME="release-v${{ steps.version.outputs.version }}"
           echo "RELEASE_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update CHANGELOG.md
         run: |
-          task ci:changelog-update VERSION="${{ inputs.version }}"
+          task ci:changelog-update VERSION="${{ steps.version.outputs.version }}"
 
       - name: Extract changelog content for PR
         id: changelog
         run: |
-          CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ inputs.version }}")
+          CHANGELOG_CONTENT=$(task -s ci:changelog-extract VERSION="${{ steps.version.outputs.version }}")
 
           # Store in GitHub env for PR body; a random delimiter can't clash with the notes.
           DELIMITER="CHANGELOG_$(openssl rand -hex 16)"
@@ -71,33 +78,55 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Commit changes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          RUN_ACCEPTANCE_TESTS: ${{ inputs.run_acceptance_tests }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add CHANGELOG.md
-          git commit -m "chore(release): v${{ inputs.version }}"
+          # The PR's opened event does not see the labels, which are added after the PR is created.
+          # The trailer is in the commit, so the acceptance workflow can read it from the head SHA.
+          if [ "$RUN_ACCEPTANCE_TESTS" != "true" ]; then
+            git commit -m "chore(release): v$VERSION" -m "Skip-Acc-Tests: true"
+          else
+            git commit -m "chore(release): v$VERSION"
+          fi
 
       - name: Create Pull Request
         id: create-pr
-        uses: peter-evans/create-pull-request@v8
-        with:
-          author: GitHub <noreply@github.com>
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.RELEASE_BRANCH }}
-          base: main
-          title: "chore(release): v${{ inputs.version }}"
-          body: |
-            ## Release v${{ inputs.version }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ACCEPTANCE_TESTS: ${{ inputs.run_acceptance_tests }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          url=$(gh pr list --head "$RELEASE_BRANCH" --state open --json url --jq '.[0].url')
+          # A rerun must drop a skip label left by an earlier run before the push: the push's
+          # synchronize run reads the labels at that moment.
+          if [ -n "$url" ] && [ "$RUN_ACCEPTANCE_TESTS" = "true" ] \
+            && gh pr view "$url" --json labels --jq '[.labels[].name][]' | grep -qx skip-acc-tests; then
+            gh pr edit "$url" --remove-label skip-acc-tests
+          fi
 
-            ${{ env.CHANGELOG_CONTENT }}
+          # The acceptance workflow reads the commit trailer, not the labels: gh adds labels after creating the PR.
+          git push --force origin "HEAD:refs/heads/$RELEASE_BRANCH"
+          printf '%s\n' "## Release v$VERSION" "" "$CHANGELOG_CONTENT" "" "---" "" \
+            "*This PR was created automatically by the release preparation workflow.*" > pr-body.md
 
-            ---
+          if [ -z "$url" ]; then
+            labels=(--label release)
+            if [ "$RUN_ACCEPTANCE_TESTS" != "true" ]; then labels+=(--label skip-acc-tests); fi
+            url=$(gh pr create --base main --head "$RELEASE_BRANCH" --title "chore(release): v$VERSION" \
+              --body-file pr-body.md "${labels[@]}")
+          else
+            edit=(--add-label release)
+            if [ "$RUN_ACCEPTANCE_TESTS" != "true" ]; then edit+=(--add-label skip-acc-tests); fi
+            gh pr edit "$url" --body-file pr-body.md "${edit[@]}"
+          fi
 
-            *This PR was created automatically by the release preparation workflow.*
-          labels: |
-            release
-            ${{ !inputs.run_acceptance_tests && 'skip-acc-tests' || '' }}
-          draft: false
+          echo "pull-request-number=$(gh pr view "$url" --json number --jq .number)" >> "$GITHUB_OUTPUT"
+          echo "pull-request-head-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   # Run all linting-related checks
   run_lint_checks:
@@ -124,23 +153,12 @@ jobs:
       head_ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
       base_ref: main
 
-  # Run acceptance tests.
-  run_acceptance_tests:
-    needs: create_release_pr
-    if: needs.create_release_pr.outputs.pr_created == 'true' && inputs.run_acceptance_tests
-    uses: ./.github/workflows/reusable-acceptance-tests.yml
-    with:
-      ref: ${{ needs.create_release_pr.outputs.pr_head_sha }}
-    secrets: inherit
-
-
   report_all_statuses:
     needs:
       - create_release_pr
       - run_lint_checks
       - run_unit_tests
       - run_dependency_review
-      - run_acceptance_tests
     runs-on: ubuntu-latest
     if: always() && needs.create_release_pr.outputs.pr_created == 'true'
     permissions:
@@ -187,7 +205,6 @@ jobs:
 
             await postStatus('go_test', '${{ needs.run_unit_tests.result }}', 'Unit tests failed');
             await postStatus('dependency-review', '${{ needs.run_dependency_review.result }}', 'Dependency review failed');
-            await postStatus('Acceptance Tests', '${{ needs.run_acceptance_tests.result }}', 'Acceptance tests failed');
 
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
@@ -205,13 +222,12 @@ jobs:
       - run_lint_checks
       - run_unit_tests
       - run_dependency_review
-      - run_acceptance_tests
     if: success() && needs.create_release_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/slack-notify.yml
     with:
       status: 'success'
       workflow_name: 'Prepare Release'
-      custom_message: 'Release v${{ inputs.version }} preparation completed successfully'
+      custom_message: 'Release v${{ needs.create_release_pr.outputs.version }} preparation completed successfully'
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
@@ -222,13 +238,12 @@ jobs:
       - run_lint_checks
       - run_unit_tests
       - run_dependency_review
-      - run_acceptance_tests
     if: failure() && needs.create_release_pr.outputs.pr_created == 'true'
     uses: ./.github/workflows/slack-notify.yml
     with:
       status: 'failure'
       workflow_name: 'Prepare Release'
-      custom_message: 'Release v${{ inputs.version }} preparation failed'
+      custom_message: 'Release v${{ needs.create_release_pr.outputs.version }} preparation failed'
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

@@ -28,6 +28,11 @@ jobs:
     steps:
       - id: check
         name: Check if tests should run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             echo "Scheduled run. Testing main branch."
@@ -43,15 +48,22 @@ jobs:
             if ${{ contains(github.event.pull_request.labels.*.name, 'skip-acc-tests') }}; then
               echo "Pull request has 'skip-acc-tests' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT
-            # We check pull_request.user.login (PR author) rather than sender.login so the check
-            # stays correct across labeled/synchronize/reopened events triggered by humans.
-            elif ${{ contains(github.event.pull_request.labels.*.name, 'release') && github.event.pull_request.user.login == 'github-actions[bot]' }}; then
-              echo "Release PR authored by the Prepare Release workflow, which runs the acceptance tests itself. Skipping."
-              echo "should_run=false" >> $GITHUB_OUTPUT
+            elif [[ "$HEAD_REF" == release-v* ]]; then
+              # Release PRs are created by GITHUB_TOKEN, which adds the labels after the PR exists,
+              # so this run cannot rely on them. The commit message is already on the head SHA.
+              message=$(gh api "repos/$GH_REPO/commits/$HEAD_SHA" --jq .commit.message)
+              if grep -qx 'Skip-Acc-Tests: true' <<< "$message"; then
+                echo "Release commit skips the acceptance tests."
+                echo "should_run=false" >> $GITHUB_OUTPUT
+              else
+                echo "Release branch $HEAD_REF. Testing PR commit."
+                echo "should_run=true" >> $GITHUB_OUTPUT
+                echo "ref_to_test=$HEAD_SHA" >> $GITHUB_OUTPUT
+              fi
             elif ${{ contains(github.event.pull_request.labels.*.name, 'release') }}; then
               echo "Pull request has 'release' label. Testing PR commit."
               echo "should_run=true" >> $GITHUB_OUTPUT
-              echo "ref_to_test=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+              echo "ref_to_test=$HEAD_SHA" >> $GITHUB_OUTPUT
             else
               echo "Pull request does not have 'release' label. Skipping."
               echo "should_run=false" >> $GITHUB_OUTPUT

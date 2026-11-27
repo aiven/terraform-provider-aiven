@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // mockGitRunner simulates git command outputs for testing.
@@ -27,277 +28,176 @@ func (m *mockGitRunner) Run(args ...string) (string, error) {
 	return "", fmt.Errorf("mock command not found: git %s", cmd)
 }
 
+const listTags = "tag -l v*.*.* --sort=-version:refname"
+
+// gitWithTags returns a git mock with the given tags, biggest first, where tag is not found.
+func gitWithTags(tags string, notFound ...string) *mockGitRunner {
+	m := &mockGitRunner{
+		outputs: map[string]string{
+			"fetch --all --tags": "",
+			listTags:             tags,
+		},
+		errors: make(map[string]error),
+	}
+	for _, tag := range notFound {
+		m.errors["rev-parse "+tag] = errors.New("tag not found")
+	}
+
+	return m
+}
+
+type verifyCase struct {
+	name      string
+	input     string
+	mockGit   GitRunner
+	expected  string
+	expectErr bool
+}
+
 func TestVerify(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
-		name       string
-		newVersion string
-		mockGit    GitRunner
-		expectErr  bool
-	}{
+	testCases := []verifyCase{
 		{
-			name:       "valid patch bump",
-			newVersion: "1.2.4",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.4": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
+			name:     "valid patch bump",
+			input:    "1.2.4",
+			mockGit:  gitWithTags("v1.2.3\nv1.2.2", "v1.2.4"),
+			expected: "1.2.4",
 		},
 		{
-			name:       "valid minor bump",
-			newVersion: "1.3.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v1.3.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
+			name:     "valid minor bump",
+			input:    "1.3.0",
+			mockGit:  gitWithTags("v1.2.3\nv1.2.2", "v1.3.0"),
+			expected: "1.3.0",
 		},
 		{
-			name:       "valid major bump",
-			newVersion: "2.0.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v2.0.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
+			name:     "valid major bump",
+			input:    "2.0.0",
+			mockGit:  gitWithTags("v1.2.3\nv1.2.2", "v2.0.0"),
+			expected: "2.0.0",
 		},
 		{
-			name:       "tag already exists",
-			newVersion: "1.2.3",
+			name:     "v prefix is stripped",
+			input:    "v1.3.0",
+			mockGit:  gitWithTags("v1.2.3", "v1.3.0"),
+			expected: "1.3.0",
+		},
+		{
+			name:     "spaces are trimmed",
+			input:    " v1.3.0\n",
+			mockGit:  gitWithTags("v1.2.3", "v1.3.0"),
+			expected: "1.3.0",
+		},
+		{
+			name:     "first release",
+			input:    "0.1.0",
+			mockGit:  gitWithTags("", "v0.1.0"),
+			expected: "0.1.0",
+		},
+		{
+			name:      "tag already exists",
+			input:     "1.2.3",
+			mockGit:   &mockGitRunner{outputs: map[string]string{"fetch --all --tags": "", listTags: "v1.2.3", "rev-parse v1.2.3": "commit-hash"}},
+			expectErr: true,
+		},
+		{
+			name:      "invalid gap - patch too high",
+			input:     "1.2.5",
+			mockGit:   gitWithTags("v1.2.3", "v1.2.5"),
+			expectErr: true,
+		},
+		{
+			name:      "invalid gap - minor too high",
+			input:     "1.4.0",
+			mockGit:   gitWithTags("v1.2.3", "v1.4.0"),
+			expectErr: true,
+		},
+		{
+			name:      "invalid gap - version regression",
+			input:     "1.2.2",
+			mockGit:   gitWithTags("v1.2.3", "v1.2.2"),
+			expectErr: true,
+		},
+		{
+			name:     "empty bumps the minor of the biggest tag",
+			input:    "",
+			mockGit:  gitWithTags("v4.55.0\nv4.54.2", "v4.56.0"),
+			expected: "4.56.0",
+		},
+		{
+			name:     "empty after a patch release",
+			input:    "",
+			mockGit:  gitWithTags("v4.55.3\nv4.55.2", "v4.56.0"),
+			expected: "4.56.0",
+		},
+		{
+			name:      "empty without tags",
+			input:     "",
+			mockGit:   gitWithTags(""),
+			expectErr: true,
+		},
+		{
+			name:      "git fetch fails",
+			input:     "1.2.4",
+			mockGit:   &mockGitRunner{errors: map[string]error{"fetch --all --tags": errors.New("network error")}},
+			expectErr: true,
+		},
+		{
+			name:      "empty when git fetch fails",
+			input:     "",
+			mockGit:   &mockGitRunner{errors: map[string]error{"fetch --all --tags": errors.New("network error")}},
+			expectErr: true,
+		},
+		{
+			name:  "git tag list fails",
+			input: "1.2.4",
 			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags": "",
-					"rev-parse v1.2.3":   "commit-hash",
-				},
+				outputs: map[string]string{"fetch --all --tags": ""},
+				errors:  map[string]error{listTags: errors.New("git command failed")},
 			},
 			expectErr: true,
 		},
 		{
-			name:       "invalid gap - patch too high",
-			newVersion: "1.2.5",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.5": errors.New("tag not found"),
-				},
-			},
+			name:      "latest tag is not valid semver",
+			input:     "1.2.4",
+			mockGit:   gitWithTags("v-is-for-invalid", "v1.2.4"),
 			expectErr: true,
 		},
-		{
-			name:       "invalid format",
-			newVersion: "not-a-version",
-			mockGit:    &mockGitRunner{},
-			expectErr:  true,
-		},
-		{
-			name:       "first release",
-			newVersion: "0.1.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "",
-				},
-				errors: map[string]error{
-					"rev-parse v0.1.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
-		},
-		{
-			name:       "valid patch bump",
-			newVersion: "1.2.4",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.4": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
-		},
-		{
-			name:       "valid minor bump",
-			newVersion: "1.3.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v1.3.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
-		},
-		{
-			name:       "valid major bump",
-			newVersion: "2.0.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3\nv1.2.2",
-				},
-				errors: map[string]error{
-					"rev-parse v2.0.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
-		},
-		{
-			name:       "tag already exists",
-			newVersion: "1.2.3",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags": "",
-					"rev-parse v1.2.3":   "commit-hash", // command succeeds, meaning tag exists
-				},
-			},
+	}
+
+	// Each would be a valid bump of v4.66.0 under a lenient parser, so only the input check rejects them.
+	for name, input := range map[string]string{
+		"not a version":  "not-a-version",
+		"two v prefixes": "vv4.67.0",
+		"upper case V":   "V4.67.0",
+		"no patch":       "4.67",
+		"major only":     "4",
+		"leading zero":   "04.67.0",
+		"pre-release":    "4.67.0-rc1",
+		"build metadata": "4.67.0+build",
+		"trailing text":  "4.67.0 final",
+		"four parts":     "4.67.0.1",
+	} {
+		testCases = append(testCases, verifyCase{
+			name:      "invalid: " + name,
+			input:     input,
+			mockGit:   gitWithTags("v4.66.0", "v4.67.0"),
 			expectErr: true,
-		},
-		{
-			name:       "invalid gap - patch too high",
-			newVersion: "1.2.5",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.5": errors.New("tag not found"),
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "invalid format for new version",
-			newVersion: "not-a-version",
-			mockGit:    &mockGitRunner{},
-			expectErr:  true,
-		},
-		{
-			name:       "first release",
-			newVersion: "0.1.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "",
-				},
-				errors: map[string]error{
-					"rev-parse v0.1.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: false,
-		},
-		{
-			name:       "invalid gap - minor too high",
-			newVersion: "1.4.0",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3",
-				},
-				errors: map[string]error{
-					"rev-parse v1.4.0": errors.New("tag not found"),
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "invalid gap - version regression",
-			newVersion: "1.2.2",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.2": errors.New("tag not found"), // It shouldn't get this far
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "pre-release version is invalid bump",
-			newVersion: "1.2.4-rc1",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v1.2.3",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.4-rc1": errors.New("tag not found"),
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "git fetch fails",
-			newVersion: "1.2.4",
-			mockGit: &mockGitRunner{
-				errors: map[string]error{
-					"fetch --all --tags": errors.New("network error"),
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "git tag list fails",
-			newVersion: "1.2.4",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags": "",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.4":                      errors.New("tag not found"),
-					"tag -l v*.*.* --sort=-version:refname": errors.New("git command failed"),
-				},
-			},
-			expectErr: true,
-		},
-		{
-			name:       "latest tag is not valid semver",
-			newVersion: "1.2.4",
-			mockGit: &mockGitRunner{
-				outputs: map[string]string{
-					"fetch --all --tags":                    "",
-					"tag -l v*.*.* --sort=-version:refname": "v-is-for-invalid",
-				},
-				errors: map[string]error{
-					"rev-parse v1.2.4": errors.New("tag not found"),
-				},
-			},
-			expectErr: true,
-		},
+		})
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := Verify(tc.mockGit, tc.newVersion)
-			assert.Equal(t, tc.expectErr, err != nil, "expected error: %v, got: %v", tc.expectErr, err)
+			got, err := Verify(tc.mockGit, tc.input)
+			if tc.expectErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, got)
 		})
 	}
 }
